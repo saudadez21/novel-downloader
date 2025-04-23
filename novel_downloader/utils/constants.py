@@ -1,0 +1,33 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+novel_downloader.utils.constants
+--------------------------------
+
+Constants and default paths used throughout the NovelDownloader project.
+"""
+
+from pathlib import Path
+
+from platformdirs import user_config_dir
+
+# Basic identity
+PACKAGE_NAME = "novel_downloader"  # Python package name
+APP_NAME = "NovelDownloader"  # Display name (used in logs, help text, etc.)
+APP_DIR_NAME = "novel_downloader"  # Directory name for platformdirs
+LOGGER_NAME = PACKAGE_NAME  # Root logger name
+
+# Base config directory (e.g. ~/AppData/Local/novel_downloader/)
+BASE_CONFIG_DIR = Path(user_config_dir(APP_DIR_NAME, appauthor=False))
+
+STATE_FILE = BASE_CONFIG_DIR / "state.json"
+DEFAULT_USER_DATA_DIR = BASE_CONFIG_DIR / "browser_data"
+DEFAULT_PROFILE_NAME = "Profile_1"
+
+DEFAULT_USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/134.0.0.0 Safari/537.36"
+)
+
+DEFAULT_HEADERS = {"User-Agent": DEFAULT_USER_AGENT}

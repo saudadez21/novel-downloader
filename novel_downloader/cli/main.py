@@ -12,6 +12,7 @@ Supports:
 - interactive mode via --interactive
 """
 
+
 def cli_main() -> None:
     return
 
