@@ -1,0 +1,36 @@
+# Enable automatic end-of-line normalization
+* text=auto
+
+# === Source files with Unix-style line endings ===
+*.py     text eol=lf diff=python
+*.js     text eol=lf
+*.ts     text eol=lf
+*.json   text eol=lf
+*.md     text eol=lf
+*.txt    text eol=lf
+*.sh     text eol=lf
+*.yml    text eol=lf
+*.yaml   text eol=lf
+
+# === Python-specific extensions (like Cython) ===
+*.pyi    text diff=python
+*.pyx    text diff=python
+*.pyz    text diff=python
+*.pyw    text diff=python
+*.py3    text diff=python
+*.pxd    text diff=python
+
+# === Jupyter Notebooks ===
+*.ipynb  text eol=lf
+
+# === Binary files ===
+*.pyc    binary export-ignore
+*.pyo    binary export-ignore
+*.pyd    binary
+*.pkl    binary
+*.pickle binary
+*.p      binary
+*.db     binary
+
+# === Treat JS in resources as vendored (for GitHub) ===
+resources/js/** linguist-vendored

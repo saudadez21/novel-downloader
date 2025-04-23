@@ -1,0 +1,83 @@
+[project]
+name = "novel_downloader"
+description = "A novel downloader with CLI and future GUI support"
+authors = [
+    { name = "Peter Z", email = "bowzhu721@gmail.com" }
+]
+license = {file = "LICENSE"}
+readme = "README.md"
+requires-python = ">=3.8"
+keywords = ["novel", "download", "parser", "archive"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11"
+]
+dynamic = ["version"]
+dependencies = [
+    "requests",
+    "beautifulsoup4",
+    "DrissionPage",
+    "pyyaml",
+    "lxml",
+    "platformdirs"
+]
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "mypy",
+    "ruff",
+    "pytest",
+    "pre-commit"
+]
+
+font = [
+    "imagehash",
+    "numpy",
+    "cssutils",
+    "fonttools",
+    "pillow",
+    "scikit-learn",
+    "brotli"
+]
+
+[project.scripts]
+novel-cli = "novel_downloader.cli.main:cli_main"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["novel_downloader", "novel_downloader.*"]
+
+[tool.setuptools.package-data]
+"novel_downloader.defaults" = ["base.yaml"]
+"novel_downloader.resources.text" = ["*.txt"]
+
+[tool.setuptools.dynamic]
+version = {attr = "novel_downloader.__version__"}
+
+[tool.black]
+line-length = 88
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+strict = true
+
+[tool.pytest.ini_options]
+minversion = "7.1"
+addopts = "--strict-markers"
+testpaths = ["tests"]

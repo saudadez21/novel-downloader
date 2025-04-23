@@ -1,0 +1,48 @@
+# Top-most EditorConfig file
+root = true
+
+# === Default settings ===
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+# === Python files ===
+[*.py]
+indent_size = 4
+
+# === JavaScript / TypeScript ===
+[*.js]
+indent_size = 2
+
+[*.ts]
+indent_size = 2
+
+# === JSON / YAML ===
+[*.json]
+indent_size = 2
+
+[*.yml]
+indent_size = 2
+
+[*.yaml]
+indent_size = 2
+
+# === Markdown / Text files ===
+[*.md]
+trim_trailing_whitespace = false  # Allow trailing spaces in Markdown for line breaks
+
+[*.txt]
+indent_size = 2
+
+# === Shell scripts ===
+[*.sh]
+indent_size = 2
+
+# === Jupyter Notebooks ===
+[*.ipynb]
+trim_trailing_whitespace = false
+insert_final_newline = false

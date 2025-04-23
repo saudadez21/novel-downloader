@@ -1,0 +1,58 @@
+# 网络请求层设置
+requests:
+  wait_time: 5                      # 每次请求等待时间 (秒)
+  retry_times: 3                    # 请求失败重试次数
+  retry_interval: 5
+  timeout: 30                       # 页面加载超时时间 (秒)
+  # DrissionPage 专用设置
+  headless: false                   # 是否以无头模式启动浏览器
+  user_data_folder: "./user_data"   # 浏览器用户数据目录
+  profile_name: "Profile_1"         # 使用的用户配置名称
+  auto_close: true                  # 页面抓取完是否自动关闭浏览器
+  disable_images: true              # 是否禁用图片加载 (加速)
+  mute_audio: true                  # 是否静音
+
+# 全局通用设置
+general:
+  request_interval: 5               # 同一本书各章节请求间隔 (秒)
+  raw_data_dir: "./raw_data"        # 原始章节 HTML/JSON 存放目录
+  output_dir: "./downloads"         # 最终输出文件存放目录
+  cache_dir: "./cache"              # 本地缓存目录 (cookies / 字体 / 图片等)
+  max_threads: 4                    # 最大并发下载线程数 (未实现)
+  skip_existing: true               # 是否跳过已存在章节
+  debug:
+    save_html: false                # 是否将抓取到的原始 HTML 保留到磁盘
+    log_level: "INFO"               # 日志级别: DEBUG, INFO, WARNING, ERROR
+
+# 各站点的特定配置
+sites:
+  qidian:
+    book_ids:
+      - "1234567890"
+      - "0987654321"
+    login_required: true            # 是否需要登录才能访问
+    decode_font: false              # 是否尝试本地解码混淆字体
+    use_freq: true                  # 是否使用频率分析
+    use_ocr: false                  # 是否使用 OCR 辅助识别文本
+    save_font_debug: false          # 是否保存字体解码调试数据
+    #
+  sample_site:
+    book_ids:
+      - "ABCDEF"
+    api_key: "your_api_key"
+    special_flag: 42
+
+# 输出文件格式及相关选项
+output:
+  clean_text: true                  # 是否对章节文本做清理
+  formats:
+    make_txt: true                  # 是否生成完整 TXT 文件
+    make_epub: false                # 是否生成 EPUB
+    make_md: false                  # 是否生成 Markdown (未实现)
+    make_pdf: false                 # 可能支持 PDF 输出 (未实现)
+  naming:
+    append_timestamp: true          # 在文件名中追加时间戳
+    filename_template: "{title}_{author}" # 文件命名规则
+  epub:
+    include_cover: true             # 是否在 EPUB 中包含封面
+    include_toc: true               # 是否自动生成目录
