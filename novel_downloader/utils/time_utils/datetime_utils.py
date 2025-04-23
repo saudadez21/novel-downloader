@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.utils.time_utilsdatetime_utils
+novel_downloader.utils.time_utils.datetime_utils
+------------------------------------------------
 
 Time utility functions for timezone-aware date calculations.
 
