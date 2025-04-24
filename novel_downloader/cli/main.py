@@ -15,10 +15,12 @@ Supports:
 import argparse
 
 from novel_downloader.cli.lang import get_text
+from novel_downloader.utils.logger import setup_logging
 from novel_downloader.utils.state import StateManager
 
 
 def cli_main() -> None:
+    setup_logging()
     state_mgr = StateManager()
 
     lang = state_mgr.get_language()
