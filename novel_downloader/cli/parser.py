@@ -15,6 +15,7 @@ from typing import Any
 
 from novel_downloader.cli.lang import get_text
 from novel_downloader.config import ConfigAdapter, load_config
+from novel_downloader.core import get_requester
 
 
 def print_config(title: str, config_obj: Any) -> None:
@@ -70,5 +71,10 @@ def run_parser_mode(args: Namespace, lang: str = "zh") -> None:
         return
 
     print(f"Starting download for {len(valid_book_ids)} book(s): {valid_book_ids}")
+
+    curr_requester = get_requester(args.site, requester_cfg)
+
+    success = curr_requester.login()
+    _ = success
 
     return

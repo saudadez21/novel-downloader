@@ -22,7 +22,7 @@ BASE_CONFIG_DIR = Path(user_config_dir(APP_DIR_NAME, appauthor=False))
 
 STATE_FILE = BASE_CONFIG_DIR / "state.json"
 DEFAULT_USER_DATA_DIR = BASE_CONFIG_DIR / "browser_data"
-DEFAULT_PROFILE_NAME = "Profile_1"
+DEFAULT_USER_PROFILE_NAME = "Profile_1"
 
 DEFAULT_USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -31,3 +31,12 @@ DEFAULT_USER_AGENT = (
 )
 
 DEFAULT_HEADERS = {"User-Agent": DEFAULT_USER_AGENT}
+DEFAULT_ACCEPT = (
+    "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+)
+
+DEFAULT_USER_HEADERS = {
+    "User-Agent": DEFAULT_USER_AGENT,
+    "Accept": DEFAULT_ACCEPT,
+    "Connection": "keep-alive",
+}

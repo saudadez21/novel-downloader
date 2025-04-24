@@ -20,6 +20,12 @@ class RequesterProtocol(Protocol):
       - a specific chapter page.
     """
 
+    def login(self, max_retries: int = 3, manual_login: bool = False) -> bool:
+        """
+        Attempt to log in
+        """
+        ...
+
     def get_book_info(self, book_id: str, wait_time: Optional[int] = None) -> str:
         """
         Fetch the raw HTML (or JSON) of the book info page.
