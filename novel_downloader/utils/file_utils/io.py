@@ -17,7 +17,7 @@ import logging
 import tempfile
 from importlib.resources import files
 from pathlib import Path
-from typing import Any, Literal, Optional, Set, Union
+from typing import Any, Dict, List, Literal, Optional, Set, Union
 
 from ..constants import LOGGER_NAME
 from .sanitize import sanitize_filename
@@ -42,7 +42,7 @@ def _get_non_conflicting_path(path: Path) -> Path:
 
 
 def _write_file(
-    content: Union[str, bytes, dict[Any, Any], list[Any], Any],
+    content: Union[str, bytes, Dict[Any, Any], List[Any], Any],
     filepath: Union[str, Path],
     mode: Optional[str] = None,
     *,
@@ -51,13 +51,15 @@ def _write_file(
     encoding: str = "utf-8",
 ) -> bool:
     """
-    Write content to a file safely with optional atomic behavior and JSON serialization.
+    Write content to a file safely with optional atomic behavior
+    and JSON serialization.
 
-    :param content: The content to write.
-                    Can be a string or any JSON-serializable object.
+    :param content: The content to write; can be text, bytes, or a
+        JSON-serializable object.
     :param filepath: Destination path (str or Path).
-    :param mode: File mode ('w', 'wb'). If None, auto-determined.
-    :param on_exist: Behavior if file exists: 'overwrite', 'skip', or 'rename'.
+    :param mode: File mode ('w', 'wb'). Auto-determined if None.
+    :param on_exist: Behavior if file exists: 'overwrite', 'skip',
+        or 'rename'.
     :param dump_json: If True, serialize content as JSON.
     :param encoding: Text encoding for writing.
     :return: True if writing succeeds, False otherwise.
@@ -70,29 +72,36 @@ def _write_file(
         if on_exist == "skip":
             logger.info("[file] '%s' exists, skipping", path)
             return False
-        elif on_exist == "rename":
+        if on_exist == "rename":
             path = _get_non_conflicting_path(path)
             logger.info("[file] Renaming target to avoid conflict: %s", path)
         else:
             logger.info("[file] '%s' exists, will overwrite", path)
 
+    # Prepare content and write mode
+    content_to_write: Union[str, bytes]
     if dump_json:
-        content = json.dumps(content, ensure_ascii=False, indent=2)
-        if len(content.encode(encoding)) > _JSON_INDENT_THRESHOLD:
-            content = json.dumps(content, ensure_ascii=False, separators=(",", ":"))
-        mode = "w"
-
-    if mode is None:
-        mode = "wb" if isinstance(content, bytes) else "w"
+        # Serialize original object to JSON string
+        json_str = json.dumps(content, ensure_ascii=False, indent=2)
+        if len(json_str.encode(encoding)) > _JSON_INDENT_THRESHOLD:
+            json_str = json.dumps(content, ensure_ascii=False, separators=(",", ":"))
+        content_to_write = json_str
+        write_mode = "w"
+    else:
+        if isinstance(content, (str, bytes)):
+            content_to_write = content
+        else:
+            raise TypeError("Non-JSON content must be str or bytes.")
+        write_mode = "wb" if isinstance(content, bytes) else "w"
 
     try:
         with tempfile.NamedTemporaryFile(
-            mode=mode,
-            encoding=encoding if "b" not in mode else None,
+            mode=write_mode,
+            encoding=(encoding if "b" not in write_mode else None),
             delete=False,
             dir=path.parent,
         ) as tmp:
-            tmp.write(content)
+            tmp.write(content_to_write)
             tmp_path = Path(tmp.name)
         tmp_path.replace(path)
         logger.info("[file] '%s' written successfully", path)

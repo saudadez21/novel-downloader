@@ -12,6 +12,7 @@ Tests for file I/O utilities in novel_downloader.utils.file_utils.io:
 
 import json
 import logging
+import re
 
 import pytest
 
@@ -85,6 +86,26 @@ def test_save_as_json_behaviors(tmp_path):
     # 3. overwrite existing
     assert save_as_json({"b": 2}, p, on_exist="overwrite") is True
     assert json.loads(p.read_text(encoding="utf-8")) == {"b": 2}
+
+
+def test_large_json_forces_compact_format(tmp_path, monkeypatch):
+    # Patch threshold to trigger compact mode even for small input
+    monkeypatch.setattr(io_module, "_JSON_INDENT_THRESHOLD", 10)
+
+    # Simulate a large-enough JSON string
+    large_data = {"key": "A" * 100}
+    file_path = tmp_path / "compact.json"
+
+    success = save_as_json(large_data, file_path)
+    assert success is True
+
+    raw = file_path.read_text(encoding="utf-8")
+
+    # Optional: could also check len(line) == 1
+    assert re.search(r"\{\s*\n", raw) is None, "Should use compact JSON format"
+
+    # Confirm it's valid JSON and equals original
+    assert json.loads(raw) == large_data
 
 
 @pytest.mark.parametrize(
