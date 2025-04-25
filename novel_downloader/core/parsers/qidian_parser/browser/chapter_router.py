@@ -15,7 +15,6 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-# is_vip,
 from novel_downloader.utils.constants import LOGGER_NAME
 
 from ..shared import (

@@ -1,0 +1,142 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+novel_downloader.core.savers.qidian_saver.qidian_txt
+----------------------------------------------------
+
+Contains the logic for exporting Qidian novel content as a single `.txt` file.
+
+This module defines the `qd_save_as_txt` function, which assembles and formats
+a novel based on metadata and chapter files found in the raw data directory.
+It is intended to be used by `QidianSaver` as part of the save/export process.
+"""
+
+from __future__ import annotations
+
+import json
+import logging
+from typing import TYPE_CHECKING
+
+from novel_downloader.utils.constants import LOGGER_NAME
+from novel_downloader.utils.file_utils import save_as_txt
+from novel_downloader.utils.text_utils import clean_chapter_title
+
+if TYPE_CHECKING:
+    from .main_saver import QidianSaver
+
+logger = logging.getLogger(LOGGER_NAME)
+
+
+def qd_save_as_txt(
+    saver: QidianSaver,
+    book_id: str,
+) -> None:
+    """
+    将 save_path 文件夹中该小说的所有章节 txt 文件合并保存为一个完整的 txt 文件,
+    并保存到 out_path 下
+    假设章节文件名格式为 `{chapterId}.txt`
+
+    处理流程：
+      1. 从 book_info.json 中加载书籍信息 (包含书名、作者、简介及卷章节列表)
+      2. 遍历各卷, 每个卷先追加卷标题, 然后依次追加该卷下各章节的标题和内容,
+         同时记录最后一个章节标题作为“原文截至”
+      3. 将书籍元信息 (书名、作者、原文截至、内容简介) 与所有章节内容拼接,
+         构成最终完整文本
+      4. 将最终结果保存到 out_path 下 (例如：`{book_name}.txt`)
+
+    :param book_id: Identifier of the novel (used as subdirectory name).
+    """
+    TAG = "[saver]"
+    # --- Paths & options ---
+    raw_base = saver.raw_data_dir / "qidian" / book_id
+    chapters_dir = raw_base / "chapters"
+    out_dir = saver.output_dir
+
+    # Ensure output directory exists
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    # --- Load book_info.json ---
+    info_path = raw_base / "book_info.json"
+    try:
+        info_text = info_path.read_text(encoding="utf-8")
+        book_info = json.loads(info_text)
+    except Exception as e:
+        logger.error("%s Failed to load %s: %s", TAG, info_path, e)
+        return
+
+    # --- Compile chapters ---
+    parts: list[str] = []
+    latest_chapter: str = ""
+    volumes = book_info.get("volumes", [])
+
+    for vol in volumes:
+        vol_name = vol.get("volume_name", "").strip()
+        if vol_name:
+            volume_header = f"\n\n{'=' * 6} {vol_name} {'=' * 6}\n\n"
+            parts.append(volume_header)
+            logger.info("%s Processing volume: %s", TAG, vol_name)
+        for chap in vol.get("chapters", []):
+            chap_id = chap.get("chapterId")
+            chap_title = chap.get("title", "")
+            if not chap_id:
+                logger.warning("%s Missing chapterId, skipping: %s", TAG, chap)
+                continue
+            txt_path = chapters_dir / f"{chap_id}.txt"
+            if not txt_path.exists():
+                logger.warning(
+                    "%s Missing chapter file: %s (%s), skipping.",
+                    TAG,
+                    chap_title,
+                    chap_id,
+                )
+                continue
+            try:
+                content = txt_path.read_text(encoding="utf-8")
+            except Exception as e:
+                logger.error("%s Error reading %s: %s", TAG, txt_path, e)
+                continue
+
+            # Clean the chapter title in content
+            clean_title = clean_chapter_title(chap_title)
+            lines = content.strip().splitlines()
+            if lines and lines[0].strip() == chap_title.strip():
+                lines = lines[1:]  # Remove first line if it's the title
+            content_cleaned = "\n".join(lines).strip()
+
+            parts.append(f"{clean_title}\n\n{content_cleaned}\n\n")
+            latest_chapter = clean_title
+
+    # --- Build header ---
+    name = book_info.get("book_name", "未知")
+    author = book_info.get("author", "未知")
+    words = book_info.get("word_count", "")
+    updated = book_info.get("update_time", "")
+    summary = book_info.get("summary", "")
+
+    header_lines = [
+        f"书名: {name}",
+        f"作者: {author}",
+        f"总字数: {words}",
+        f"更新日期: {updated}",
+        f"原文截至: {latest_chapter}",
+        "内容简介:",
+        f"{summary}",
+        "",
+        "-" * 10,
+        "",
+    ]
+    header = "\n".join(header_lines)
+
+    final_text = header + "\n\n" + "".join(parts).strip()
+
+    # --- Determine output file path ---
+    out_name = saver.get_filename(title=name, author=author, ext="txt")
+    out_path = out_dir / out_name
+
+    # --- Save final text ---
+    try:
+        save_as_txt(content=final_text, filepath=out_path)
+        logger.info("%s Novel saved to: %s", TAG, out_path)
+    except Exception as e:
+        logger.error("%s Failed to save file: %s", TAG, e)
+    return
