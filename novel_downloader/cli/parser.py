@@ -76,5 +76,7 @@ def run_parser_mode(args: Namespace, lang: str = "zh") -> None:
 
     success = curr_requester.login()
     _ = success
+    input("Parse...")
+    curr_requester.shutdown()
 
     return

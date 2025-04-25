@@ -13,8 +13,8 @@ Subpackages:
 - qidian_requester: Handles all Qidian-related requesting logic.
 """
 
-from .qidian_requester import QidianRequester
+from .qidian_requester import QidianBrowser
 
 __all__ = [
-    "QidianRequester",
+    "QidianBrowser",
 ]

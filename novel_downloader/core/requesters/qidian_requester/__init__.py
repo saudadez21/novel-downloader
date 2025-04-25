@@ -12,8 +12,8 @@ Modules:
 - qidian_browser: Implements the QidianBrowser class for automated browser control.
 """
 
-from .qidian_broswer import QidianBrowser as QidianRequester
+from .qidian_broswer import QidianBrowser
 
 __all__ = [
-    "QidianRequester",
+    "QidianBrowser",
 ]

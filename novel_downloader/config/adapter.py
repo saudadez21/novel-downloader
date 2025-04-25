@@ -50,6 +50,7 @@ class ConfigAdapter:
         返回 RequesterConfig 实例
         """
         req = self._config.get("requests", {})
+        site_cfg = self._config.get("sites", {}).get(self._site, {})
         return RequesterConfig(
             wait_time=req.get("wait_time", 5),
             retry_times=req.get("retry_times", 3),
@@ -61,6 +62,7 @@ class ConfigAdapter:
             auto_close=req.get("auto_close", True),
             disable_images=req.get("disable_images", True),
             mute_audio=req.get("mute_audio", True),
+            mode=site_cfg.get("mode", "session"),
         )
 
     def get_downloader_config(self) -> DownloaderConfig:
@@ -94,6 +96,7 @@ class ConfigAdapter:
             use_freq=site_cfg.get("use_freq", False),
             use_ocr=site_cfg.get("use_ocr", False),
             save_font_debug=site_cfg.get("save_font_debug", False),
+            mode=site_cfg.get("mode", "session"),
         )
 
     def get_saver_config(self) -> SaverConfig:

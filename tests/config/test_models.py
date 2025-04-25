@@ -33,6 +33,7 @@ EXPECTED_FIELDS = {
         "auto_close": bool,
         "disable_images": bool,
         "mute_audio": bool,
+        "mode": str,
     },
     DownloaderConfig: {
         "request_interval": int,
@@ -49,6 +50,7 @@ EXPECTED_FIELDS = {
         "use_freq": bool,
         "use_ocr": bool,
         "save_font_debug": bool,
+        "mode": str,
     },
     SaverConfig: {
         "raw_data_dir": str,

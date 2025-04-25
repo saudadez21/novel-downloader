@@ -14,12 +14,15 @@ allowing clients to obtain the appropriate implementation by passing in a site n
 from novel_downloader.config import RequesterConfig
 from novel_downloader.core.interfaces import RequesterProtocol
 from novel_downloader.core.requesters import (
-    QidianRequester,
+    QidianBrowser,
 )
 
 _site_map = {
-    "qidian": QidianRequester,
-    # "biquge": BiqugeRequester,
+    "qidian": {
+        "browser": QidianBrowser,
+        # "session": QidianSession,
+    },
+    # "biquge": ...
 }
 
 
@@ -32,7 +35,15 @@ def get_requester(site: str, config: RequesterConfig) -> RequesterProtocol:
     :return: An instance of a requester class
     """
     site = site.lower()
-    requester_class = _site_map.get(site)
-    if not requester_class:
+    site_entry = _site_map.get(site)
+    if not site_entry:
         raise ValueError(f"Unsupported site: {site}")
+
+    if isinstance(site_entry, dict):
+        requester_class = site_entry.get(config.mode)
+        if not requester_class:
+            raise ValueError(f"Unsupported mode '{config.mode}' for site '{site}'")
+    else:
+        requester_class = site_entry
+
     return requester_class(config)

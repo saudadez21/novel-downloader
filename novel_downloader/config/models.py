@@ -33,6 +33,7 @@ class RequesterConfig:
     auto_close: bool = True
     disable_images: bool = True
     mute_audio: bool = True
+    mode: str = "session"  # browser / session
 
 
 # === Downloaders ===
@@ -55,6 +56,7 @@ class ParserConfig:
     use_freq: bool = False
     use_ocr: bool = False
     save_font_debug: bool = False
+    mode: str = "session"  # browser / session
 
 
 # === Savers ===
