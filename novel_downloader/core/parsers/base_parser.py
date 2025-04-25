@@ -85,3 +85,12 @@ class BaseParser(ParserProtocol, abc.ABC):
         :param value: Book identifier.
         """
         self._book_id = value
+        self._on_book_id_set()
+
+    def _on_book_id_set(self) -> None:
+        """
+        Hook called when a new book ID is set.
+        Subclasses can override this to initialize
+        book-related folders or states.
+        """
+        pass
