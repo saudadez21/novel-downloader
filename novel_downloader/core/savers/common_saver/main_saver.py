@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.savers.qidian_saver.main_saver
+novel_downloader.core.savers.common_saver.main_saver
 ----------------------------------------------------
 
 This module implements the `QidianSaver` class, a concrete saver for handling
@@ -10,16 +10,29 @@ and export novel content in plain text format based on the platform's metadata
 and chapter files.
 """
 
+from novel_downloader.config.models import SaverConfig
+
 from ..base_saver import BaseSaver
-from .qidian_txt import qd_save_as_txt
+from .common_txt import common_save_as_txt
 
 
-class QidianSaver(BaseSaver):
+class CommonSaver(BaseSaver):
     """
-    QidianSaver is a platform-specific saver that processes and exports novels
-    sourced from Qidian (起点). It extends the BaseSaver interface and provides
+    CommonSaver is a saver that processes and exports novels.
+    It extends the BaseSaver interface and provides
     logic for exporting full novels as plain text (.txt) files.
     """
+
+    def __init__(self, config: SaverConfig, site: str):
+        """
+        Initialize the common saver with site information.
+
+        :param config: A SaverConfig object that defines
+                        save paths, formats, and options.
+        :param site: Identifier for the site the saver is handling.
+        """
+        super().__init__(config)
+        self._site = site
 
     def save_as_txt(self, book_id: str) -> None:
         """
@@ -36,4 +49,22 @@ class QidianSaver(BaseSaver):
 
         :param book_id: The book identifier (used to locate raw data)
         """
-        return qd_save_as_txt(self, book_id)
+        return common_save_as_txt(self, book_id)
+
+    @property
+    def site(self) -> str:
+        """
+        Get the site identifier.
+
+        :return: The site string.
+        """
+        return self._site
+
+    @site.setter
+    def site(self, value: str) -> None:
+        """
+        Set the site identifier.
+
+        :param value: New site string to set.
+        """
+        self._site = value

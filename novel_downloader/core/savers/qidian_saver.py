@@ -9,6 +9,14 @@ of novels sourced from Qidian (起点中文网). It implements the platform-spec
 logic required to structure and export novel content into desired formats.
 """
 
-from .main_saver import QidianSaver
+from novel_downloader.config.models import SaverConfig
+
+from .common_saver import CommonSaver
+
+
+class QidianSaver(CommonSaver):
+    def __init__(self, config: SaverConfig):
+        super().__init__(config, site="qidian")
+
 
 __all__ = ["QidianSaver"]

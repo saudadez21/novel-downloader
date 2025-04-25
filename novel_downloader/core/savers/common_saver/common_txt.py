@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.savers.qidian_saver.qidian_txt
+novel_downloader.core.savers.common_saver.qidian_txt
 ----------------------------------------------------
 
-Contains the logic for exporting Qidian novel content as a single `.txt` file.
+Contains the logic for exporting novel content as a single `.txt` file.
 
-This module defines the `qd_save_as_txt` function, which assembles and formats
+This module defines `common_save_as_txt` function, which assembles and formats
 a novel based on metadata and chapter files found in the raw data directory.
-It is intended to be used by `QidianSaver` as part of the save/export process.
+It is intended to be used by `CommonSaver` as part of the save/export process.
 """
 
 from __future__ import annotations
@@ -22,13 +22,13 @@ from novel_downloader.utils.file_utils import save_as_txt
 from novel_downloader.utils.text_utils import clean_chapter_title
 
 if TYPE_CHECKING:
-    from .main_saver import QidianSaver
+    from .main_saver import CommonSaver
 
 logger = logging.getLogger(LOGGER_NAME)
 
 
-def qd_save_as_txt(
-    saver: QidianSaver,
+def common_save_as_txt(
+    saver: CommonSaver,
     book_id: str,
 ) -> None:
     """
@@ -47,8 +47,9 @@ def qd_save_as_txt(
     :param book_id: Identifier of the novel (used as subdirectory name).
     """
     TAG = "[saver]"
+    site = saver.site
     # --- Paths & options ---
-    raw_base = saver.raw_data_dir / "qidian" / book_id
+    raw_base = saver.raw_data_dir / site / book_id
     chapters_dir = raw_base / "chapters"
     out_dir = saver.output_dir
 
@@ -107,24 +108,36 @@ def qd_save_as_txt(
             latest_chapter = clean_title
 
     # --- Build header ---
-    name = book_info.get("book_name", "未知")
-    author = book_info.get("author", "未知")
-    words = book_info.get("word_count", "")
-    updated = book_info.get("update_time", "")
-    summary = book_info.get("summary", "")
+    name = book_info.get("book_name")
+    author = book_info.get("author")
+    words = book_info.get("word_count")
+    updated = book_info.get("update_time")
+    summary = book_info.get("summary")
 
-    header_lines = [
-        f"书名: {name}",
-        f"作者: {author}",
-        f"总字数: {words}",
-        f"更新日期: {updated}",
-        f"原文截至: {latest_chapter}",
-        "内容简介:",
-        f"{summary}",
-        "",
-        "-" * 10,
-        "",
-    ]
+    header_lines = []
+
+    if name:
+        header_lines.append(f"书名: {name}")
+
+    if author:
+        header_lines.append(f"作者: {author}")
+
+    if words:
+        header_lines.append(f"总字数: {words}")
+
+    if updated:
+        header_lines.append(f"更新日期: {updated}")
+
+    header_lines.append(f"原文截至: {latest_chapter}")
+
+    if summary:
+        header_lines.append("内容简介:")
+        header_lines.append(summary)
+
+    header_lines.append("")
+    header_lines.append("-" * 10)
+    header_lines.append("")
+
     header = "\n".join(header_lines)
 
     final_text = header + "\n\n" + "".join(parts).strip()
