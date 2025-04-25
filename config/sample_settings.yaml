@@ -6,8 +6,8 @@ requests:
   timeout: 30                       # 页面加载超时时间 (秒)
   # DrissionPage 专用设置
   headless: false                   # 是否以无头模式启动浏览器
-  user_data_folder: "./user_data"   # 浏览器用户数据目录
-  profile_name: "Profile_1"         # 使用的用户配置名称
+  user_data_folder: ""              # 浏览器用户数据目录: 为空则使用默认目录
+  profile_name: ""                  # 使用的用户配置名称: 为空则使用默认配置
   auto_close: true                  # 页面抓取完是否自动关闭浏览器
   disable_images: true              # 是否禁用图片加载 (加速)
   mute_audio: true                  # 是否静音
@@ -17,7 +17,7 @@ general:
   request_interval: 5               # 同一本书各章节请求间隔 (秒)
   raw_data_dir: "./raw_data"        # 原始章节 HTML/JSON 存放目录
   output_dir: "./downloads"         # 最终输出文件存放目录
-  cache_dir: "./novel_cache"        # 本地缓存目录 (cookies / 字体 / 图片等)
+  cache_dir: "./novel_cache"        # 本地缓存目录 (字体 / 图片等)
   max_threads: 4                    # 最大并发下载线程数 (未实现)
   skip_existing: true               # 是否跳过已存在章节
   debug:
@@ -27,9 +27,12 @@ general:
 # 各站点的特定配置
 sites:
   qidian:
+    # 小说 ID 列表
+    # 例如: 访问 https://www.qidian.com/book/1010868264/
+    # 该小说的 ID 就是 1010868264
     book_ids:
-      - "1234567890"
-      - "0987654321"
+      - "0000000000"
+      - "0000000000"
     mode: "browser"                 # browser / session
     login_required: true            # 是否需要登录才能访问
     decode_font: false              # 是否尝试本地解码混淆字体

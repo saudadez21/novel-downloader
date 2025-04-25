@@ -105,7 +105,7 @@ class QidianDownloader(BaseDownloader):
                 logger.info("%s Fetching chapter: %s (%s)", TAG, chap_title, cid)
                 chap_html = self.requester.get_book_chapter(book_id, cid, wait_time)
 
-                if save_html:
+                if save_html and not is_vip(chap_html):
                     folder = (
                         "html_encrypted"
                         if self.parser.is_encrypted(chap_html)  # type: ignore[attr-defined]
@@ -138,3 +138,13 @@ class QidianDownloader(BaseDownloader):
             book_info.get("book_name", "unknown"),
         )
         return
+
+
+def is_vip(html_str: str) -> bool:
+    """
+    Return True if page indicates VIP‐only content.
+
+    :param html_str: Raw HTML string.
+    """
+    markers = ["这是VIP章节", "需要订阅", "订阅后才能阅读"]
+    return any(m in html_str for m in markers)
