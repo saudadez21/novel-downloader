@@ -7,8 +7,13 @@ novel_downloader.core.factory.requester_factory
 This module implements a factory function for retrieving requester instances
 based on the target novel platform (site).
 
-It abstracts the instantiation logic for site-specific requester classes,
-allowing clients to obtain the appropriate implementation by passing in a site name.
+Currently supported:
+- Site: 'qidian'
+    - Modes:
+        - 'browser': QidianBrowser
+        - 'session': (Not implemented yet)
+
+To add support for new sites or modes, extend the `_site_map` accordingly.
 """
 
 from novel_downloader.config import RequesterConfig

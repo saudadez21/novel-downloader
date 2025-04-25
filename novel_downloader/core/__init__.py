@@ -6,8 +6,9 @@ novel_downloader.core
 
 """
 
-from .factory import get_requester
+from .factory import get_parser, get_requester
 
 __all__ = [
+    "get_parser",
     "get_requester",
 ]

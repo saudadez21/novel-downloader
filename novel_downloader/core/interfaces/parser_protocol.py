@@ -38,11 +38,3 @@ class ParserProtocol(Protocol):
         :return: The chapter’s text.
         """
         ...
-
-    def set_book_id(self, book_id: str) -> None:
-        """
-        Provide the parser with the current book’s ID (for context or URL building).
-
-        :param book_id: The book identifier.
-        """
-        ...
