@@ -18,7 +18,10 @@ from novel_downloader.config.models import ParserConfig
 from novel_downloader.core.parsers.base_parser import BaseParser
 from novel_downloader.utils.constants import LOGGER_NAME
 
-from ..shared import parse_book_info
+from ..shared import (
+    is_encrypted,
+    parse_book_info,
+)
 from .chapter_router import parse_chapter
 
 logger = logging.getLogger(LOGGER_NAME)
@@ -63,6 +66,14 @@ class QidianBrowserParser(BaseParser):
         :return: Cleaned chapter content as plain text.
         """
         return parse_chapter(self, html_str, chapter_id)
+
+    def is_encrypted(self, html_str: str) -> bool:
+        """
+        Return True if content is encrypted.
+
+        :param html: Raw HTML of the chapter page.
+        """
+        return is_encrypted(html_str)
 
     def _init_cache_folders(self) -> None:
         """

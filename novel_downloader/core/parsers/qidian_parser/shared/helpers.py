@@ -14,7 +14,7 @@ This module provides reusable helpers to:
 
 import json
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, Union
 
 from bs4 import BeautifulSoup
 
@@ -66,7 +66,7 @@ def can_view_chapter(soup: BeautifulSoup) -> bool:
     return not (vip_status == 1 and is_buy == 0)
 
 
-def is_encrypted(soup: BeautifulSoup) -> bool:
+def is_encrypted(content: Union[str, BeautifulSoup]) -> bool:
     """
     Return True if content is encrypted.
 
@@ -74,11 +74,14 @@ def is_encrypted(soup: BeautifulSoup) -> bool:
     - 0: 内容是'明文'
     - 2: 字体加密
 
-    :param soup: Parsed BeautifulSoup object of the HTML page.
+    :param content: HTML content, either as a raw string or a BeautifulSoup object.
     :return: True if encrypted marker is found, else False.
     """
     # main = soup.select_one("div#app div#reader-content main")
     # return bool(main and "r-font-encrypt" in main.get("class", []))
+    # Normalize to BeautifulSoup
+    soup = html_to_soup(content) if isinstance(content, str) else content
+
     ssr_data = find_ssr_page_context(soup)
     chapter_info = extract_chapter_info(ssr_data)
     return int(chapter_info.get("cES", 0)) == 2

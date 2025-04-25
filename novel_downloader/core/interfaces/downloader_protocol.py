@@ -35,13 +35,3 @@ class DownloaderProtocol(Protocol):
         :param book_id: The identifier of the book.
         """
         ...
-
-    def before_download(self, book_id: str) -> None:
-        """
-        Optional hook called before downloading each book.
-
-        Can be a no-op in implementing classes.
-
-        :param book_id: The book ID about to be processed.
-        """
-        ...

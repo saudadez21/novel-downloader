@@ -334,7 +334,7 @@ class QidianBrowser(BaseBrowser):
 
             # 2. Randomized human‑like delay
             base = wait_time if wait_time is not None else self._config.wait_time
-            sleep_with_random_delay(base, 3)
+            # sleep_with_random_delay(base, 3)
 
             # 3. Scroll down to load dynamic content
             presses = int(random.uniform(base, base + 5) * 2)

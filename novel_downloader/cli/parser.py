@@ -9,25 +9,15 @@ This is the traditional CLI entry point with --config, --book-id, etc.
 """
 
 from argparse import Namespace
-from dataclasses import asdict, is_dataclass
-from pprint import pprint
-from typing import Any
 
 from novel_downloader.cli.lang import get_text
 from novel_downloader.config import ConfigAdapter, load_config
-from novel_downloader.core import get_requester
-
-
-def print_config(title: str, config_obj: Any) -> None:
-    """
-    Print the content of a dataclass-style config object.
-    """
-    print(f"\n{title}")
-    if is_dataclass(config_obj) and not isinstance(config_obj, type):
-        pprint(asdict(config_obj), sort_dicts=False)
-    else:
-        pprint(vars(config_obj), sort_dicts=False)
-    return
+from novel_downloader.core import (
+    get_downloader,
+    get_parser,
+    get_requester,
+    get_saver,
+)
 
 
 def run_parser_mode(args: Namespace, lang: str = "zh") -> None:
@@ -43,11 +33,6 @@ def run_parser_mode(args: Namespace, lang: str = "zh") -> None:
     downloader_cfg = adapter.get_downloader_config()
     parser_cfg = adapter.get_parser_config()
     saver_cfg = adapter.get_saver_config()
-
-    print_config("RequesterConfig", requester_cfg)
-    print_config("DownloaderConfig", downloader_cfg)
-    print_config("ParserConfig", parser_cfg)
-    print_config("SaverConfig", saver_cfg)
 
     if args.book_id:
         book_ids = args.book_id
@@ -73,9 +58,18 @@ def run_parser_mode(args: Namespace, lang: str = "zh") -> None:
     print(f"Starting download for {len(valid_book_ids)} book(s): {valid_book_ids}")
 
     curr_requester = get_requester(args.site, requester_cfg)
+    curr_parser = get_parser(args.site, parser_cfg)
+    curr_saver = get_saver(args.site, saver_cfg)
+    curr_downloader = get_downloader(
+        requester=curr_requester,
+        parser=curr_parser,
+        saver=curr_saver,
+        site=args.site,
+        config=downloader_cfg,
+    )
 
-    success = curr_requester.login()
-    _ = success
+    curr_downloader.download(valid_book_ids)
+
     input("Parse...")
     curr_requester.shutdown()
 
