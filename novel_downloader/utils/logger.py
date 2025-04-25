@@ -14,7 +14,7 @@ from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 from typing import Literal, Optional, Union
 
-from .constants import LOGGER_NAME
+from .constants import LOGGER_DIR, LOGGER_NAME
 
 LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
 
@@ -53,7 +53,7 @@ def setup_logging(
         )
 
     # Resolve log file path
-    log_path = Path(log_dir) if log_dir else Path.cwd() / "logs"
+    log_path = Path(log_dir) if log_dir else LOGGER_DIR
     log_path.mkdir(parents=True, exist_ok=True)
 
     # Resolve log file name
@@ -95,5 +95,7 @@ def setup_logging(
     console_handler.setFormatter(console_formatter)
     console_handler.setLevel(console_level)
     logger.addHandler(console_handler)
+
+    logger.info(f"Logging to {log_path}")
 
     return logger

@@ -20,6 +20,7 @@ LOGGER_NAME = PACKAGE_NAME  # Root logger name
 # Base config directory (e.g. ~/AppData/Local/novel_downloader/)
 BASE_CONFIG_DIR = Path(user_config_dir(APP_DIR_NAME, appauthor=False))
 
+LOGGER_DIR = BASE_CONFIG_DIR / "logs"
 STATE_FILE = BASE_CONFIG_DIR / "state.json"
 DEFAULT_USER_DATA_DIR = BASE_CONFIG_DIR / "browser_data"
 DEFAULT_USER_PROFILE_NAME = "Profile_1"
