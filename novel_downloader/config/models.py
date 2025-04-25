@@ -44,16 +44,16 @@ class DownloaderConfig:
     max_threads: int = 4
     skip_existing: bool = True
     login_required: bool = False
+    save_html: bool = False
 
 
 # === Parsers ===
 @dataclass
 class ParserConfig:
-    cache_dir: str = "./cache"
+    cache_dir: str = "./novel_cache"
     decode_font: bool = False
     use_freq: bool = False
     use_ocr: bool = False
-    save_html: bool = False
     save_font_debug: bool = False
 
 

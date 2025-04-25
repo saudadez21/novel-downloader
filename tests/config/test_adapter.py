@@ -109,11 +109,16 @@ def test_downloader_config_defaults():
     assert cfg.request_interval == 5
     assert cfg.cache_dir == "./cache"
     assert cfg.login_required is False
+    assert cfg.save_html is False
 
 
 def test_downloader_config_combined():
     config = {
-        "general": {"request_interval": 3, "cache_dir": "/tmp/cache"},
+        "general": {
+            "request_interval": 3,
+            "cache_dir": "/tmp/cache",
+            "debug": {"save_html": True},
+        },
         "sites": {"qidian": {"login_required": True}},
     }
     adapter = ConfigAdapter(config, "qidian")
@@ -121,6 +126,7 @@ def test_downloader_config_combined():
     assert cfg.request_interval == 3
     assert cfg.login_required is True
     assert cfg.cache_dir == "/tmp/cache"
+    assert cfg.save_html is True
 
 
 # ---------- ParserConfig ----------
@@ -128,18 +134,16 @@ def test_parser_config_defaults():
     adapter = ConfigAdapter(config={}, site="qidian")
     cfg = adapter.get_parser_config()
     assert cfg.decode_font is False
-    assert cfg.save_html is False
 
 
 def test_parser_config_combined():
     config = {
-        "general": {"cache_dir": "./tmp", "debug": {"save_html": True}},
+        "general": {"cache_dir": "./tmp"},
         "sites": {"qidian": {"decode_font": True, "save_font_debug": True}},
     }
     adapter = ConfigAdapter(config, "qidian")
     cfg = adapter.get_parser_config()
     assert cfg.cache_dir == "./tmp"
-    assert cfg.save_html is True
     assert cfg.decode_font is True
     assert cfg.save_font_debug is True
 

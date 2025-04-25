@@ -41,13 +41,13 @@ EXPECTED_FIELDS = {
         "max_threads": int,
         "skip_existing": bool,
         "login_required": bool,
+        "save_html": bool,
     },
     ParserConfig: {
         "cache_dir": str,
         "decode_font": bool,
         "use_freq": bool,
         "use_ocr": bool,
-        "save_html": bool,
         "save_font_debug": bool,
     },
     SaverConfig: {

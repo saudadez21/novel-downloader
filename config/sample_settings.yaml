@@ -17,7 +17,7 @@ general:
   request_interval: 5               # 同一本书各章节请求间隔 (秒)
   raw_data_dir: "./raw_data"        # 原始章节 HTML/JSON 存放目录
   output_dir: "./downloads"         # 最终输出文件存放目录
-  cache_dir: "./cache"              # 本地缓存目录 (cookies / 字体 / 图片等)
+  cache_dir: "./novel_cache"        # 本地缓存目录 (cookies / 字体 / 图片等)
   max_threads: 4                    # 最大并发下载线程数 (未实现)
   skip_existing: true               # 是否跳过已存在章节
   debug:

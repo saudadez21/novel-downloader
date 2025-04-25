@@ -69,6 +69,7 @@ class ConfigAdapter:
         返回 DownloaderConfig 实例
         """
         gen = self._config.get("general", {})
+        debug = gen.get("debug", {})
         site_cfg = self._config.get("sites", {}).get(self._site, {})
         return DownloaderConfig(
             request_interval=gen.get("request_interval", 5),
@@ -77,6 +78,7 @@ class ConfigAdapter:
             max_threads=gen.get("max_threads", 4),
             skip_existing=gen.get("skip_existing", True),
             login_required=site_cfg.get("login_required", False),
+            save_html=debug.get("save_html", False),
         )
 
     def get_parser_config(self) -> ParserConfig:
@@ -85,14 +87,12 @@ class ConfigAdapter:
         config["sites"][site] 中读取解析器相关配置, 返回 ParserConfig 实例
         """
         gen = self._config.get("general", {})
-        debug = gen.get("debug", {})
         site_cfg = self._config.get("sites", {}).get(self._site, {})
         return ParserConfig(
             cache_dir=gen.get("cache_dir", "./cache"),
             decode_font=site_cfg.get("decode_font", False),
             use_freq=site_cfg.get("use_freq", False),
             use_ocr=site_cfg.get("use_ocr", False),
-            save_html=debug.get("save_html", False),
             save_font_debug=site_cfg.get("save_font_debug", False),
         )
 
