@@ -130,7 +130,7 @@ class QidianDownloader(BaseDownloader):
                 save_as_txt(chap_text, chap_path)
                 logger.info("%s Saved chapter: %s (%s)", TAG, chap_title, cid)
 
-        self.saver.save_as_txt(book_id)
+        self.saver.save(book_id)
 
         logger.info(
             "%s Novel '%s' download completed.",

@@ -19,6 +19,15 @@ class SaverProtocol(Protocol):
     It may also optionally implement an EPUB (or other format) saver.
     """
 
+    def save(self, book_id: str) -> None:
+        """
+        Save the book in the formats specified in config.
+        If a method is not implemented or fails, log the error and continue.
+
+        :param book_id: The book identifier (used for filename, lookup, etc.)
+        """
+        ...
+
     def save_as_txt(self, book_id: str) -> None:
         """
         Persist the assembled book as a .txt file.

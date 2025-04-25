@@ -10,12 +10,16 @@ into various output formats.
 """
 
 import abc
+import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional
 
 from novel_downloader.config.models import SaverConfig
 from novel_downloader.core.interfaces import SaverProtocol
+from novel_downloader.utils.constants import LOGGER_NAME
+
+logger = logging.getLogger(LOGGER_NAME)
 
 
 class SafeDict(dict[str, Any]):
@@ -45,6 +49,45 @@ class BaseSaver(SaverProtocol, abc.ABC):
         self._output_dir.mkdir(parents=True, exist_ok=True)
 
         self._filename_template = config.filename_template
+
+    def save(self, book_id: str) -> None:
+        """
+        Save the book in the formats specified in config.
+        If a method is not implemented or fails, log the error and continue.
+
+        :param book_id: The book identifier (used for filename, lookup, etc.)
+        """
+        TAG = "[Saver]"
+        actions = [
+            ("make_txt", self.save_as_txt),
+            ("make_epub", self.save_as_epub),
+            ("make_md", self.save_as_md),
+            ("make_pdf", self.save_as_pdf),
+        ]
+
+        for flag_name, save_method in actions:
+            if getattr(self._config, flag_name, False):
+                try:
+                    logger.info(
+                        "%s Attempting to save book_id '%s' as %s...",
+                        TAG,
+                        book_id,
+                        flag_name,
+                    )
+                    save_method(book_id)
+                    logger.info("%s Successfully saved as %s.", TAG, flag_name)
+                except NotImplementedError as e:
+                    logger.warning(
+                        "%s Save method for %s not implemented: %s",
+                        TAG,
+                        flag_name,
+                        str(e),
+                    )
+                except Exception as e:
+                    logger.error(
+                        "%s Error while saving as %s: %s", TAG, flag_name, str(e)
+                    )
+        return
 
     @abc.abstractmethod
     def save_as_txt(self, book_id: str) -> None:
