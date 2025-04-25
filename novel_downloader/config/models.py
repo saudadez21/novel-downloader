@@ -18,6 +18,7 @@ strongly typed Python objects for safer and cleaner access.
 """
 
 from dataclasses import dataclass
+from typing import Any, Dict, List, Literal, Optional, TypedDict
 
 
 # === Requesters ===
@@ -73,3 +74,75 @@ class SaverConfig:
     filename_template: str = "{title}_{author}"
     include_cover: bool = True
     include_toc: bool = False
+
+
+class RuleStep(TypedDict, total=False):
+    # —— 操作类型 —— #
+    type: Literal[
+        "attr",
+        "select_one",
+        "select",
+        "find",
+        "find_all",
+        "exclude",
+        "regex",
+        "text",
+        "strip",
+        "replace",
+        "split",
+        "join",
+    ]
+
+    # —— BeautifulSoup 相关 —— #
+    selector: Optional[str]  # CSS 选择器, 用于 select/select_one/exclude
+    name: Optional[str]  # 标签名称, 用于 find/find_all
+    attrs: Optional[dict[str, Any]]  # 属性过滤, 用于 find/find_all
+    limit: Optional[int]  # find_all 的最大匹配数
+    attr: Optional[str]  # 从元素获取属性值 (select/select_one/select_all)
+
+    # —— 正则相关 —— #
+    pattern: Optional[str]  # 正则表达式
+    flags: Optional[int]  # re.I, re.M 等
+    group: Optional[int]  # 匹配结果中的第几个分组 (默认 0)
+    template: Optional[str]  # 自定义组合, 比如 "$1$2字"
+
+    # —— 文本处理 —— #
+    chars: Optional[str]  # strip 要去除的字符集
+    old: Optional[str]  # replace 中要被替换的子串
+    new: Optional[str]  # replace 中新的子串
+    count: Optional[int]  # replace 中的最大替换次数
+    sep: Optional[str]  # split/join 的分隔符
+    index: Optional[int]  # split/select_all/select 之后取第几个元素
+
+
+class FieldRules(TypedDict):
+    steps: List[RuleStep]
+
+
+class BookInfoRules(TypedDict, total=False):
+    book_name: FieldRules
+    author: FieldRules
+    cover_url: FieldRules
+    update_time: FieldRules
+    serial_status: FieldRules
+    word_count: FieldRules
+    summary: FieldRules
+
+
+class ChapterRules(TypedDict, total=False):
+    title: FieldRules
+    content: FieldRules
+
+
+class MetadataRules(TypedDict):
+    book_info_url: str
+    chapter_url: str
+
+
+class SiteRules(TypedDict):
+    metadata: MetadataRules
+    book_info: BookInfoRules
+    chapter: ChapterRules
+
+
+SiteRulesDict = Dict[str, SiteRules]

@@ -22,6 +22,8 @@ BASE_CONFIG_DIR = Path(user_config_dir(APP_DIR_NAME, appauthor=False))
 
 LOGGER_DIR = BASE_CONFIG_DIR / "logs"
 STATE_FILE = BASE_CONFIG_DIR / "state.json"
+SETTING_FILE = BASE_CONFIG_DIR / "settings.yaml"
+SITE_RULES_FILE = BASE_CONFIG_DIR / "site_rules.json"
 DEFAULT_USER_DATA_DIR = BASE_CONFIG_DIR / "browser_data"
 DEFAULT_USER_PROFILE_NAME = "Profile_1"
 

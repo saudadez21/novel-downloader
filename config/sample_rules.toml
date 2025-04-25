@@ -1,0 +1,69 @@
+[qidian.metadata]
+book_info_url = "https://book.qidian.com/info/{book_id}/"
+chapter_url = "https://www.qidian.com/chapter/{book_id}/{chapter_id}/"
+
+[qidian.book_info.book_name]
+steps = [
+    { type = "select_one", selector = "em#bookName" },
+    { type = "text" },
+    { type = "strip" }
+]
+
+[qidian.book_info.author]
+steps = [
+    { type = "select_one", selector = "a.writer" },
+    { type = "text" },
+    { type = "strip" }
+]
+
+[qidian.book_info.cover_url]
+steps = [
+    { type = "select_one", selector = "div.book-img img" },
+    { type = "attr", attr = "src" },
+    { type = "strip" }
+]
+
+[qidian.book_info.update_time]
+steps = [
+    { type = "select_one", selector = "span.book-update-time" },
+    { type = "text" },
+    { type = "replace", old = "更新时间", new = "" },
+    { type = "strip" }
+]
+
+[qidian.book_info.serial_status]
+steps = [
+    { type = "select_one", selector = "span.blue" },
+    { type = "text" },
+    { type = "strip" }
+]
+
+[qidian.book_info.word_count]
+steps = [
+    { type = "regex", pattern = "<em>([\\d.]+)</em>\\s*<cite>(.*?)字</cite>", template = "$1$2字" }
+]
+
+[qidian.book_info.summary]
+steps = [
+    { type = "select_one", selector = "div.book-intro p" },
+    { type = "text" },
+    { type = "strip" }
+]
+
+[qidian.chapter.title] # 章节标题
+steps = [
+    { type = "select_one", selector = "div#app div.print h1.title" },
+    { type = "exclude", selector = "span.review" },
+    { type = "text" },
+    { type = "strip" }
+]
+
+[qidian.chapter.content] # 章节正文
+steps = [
+    { type = "select_one", selector = "div#app div#reader-content main" },
+    { type = "exclude", selector = "span.review" },
+    { type = "find_all", name = "p" },
+    { type = "text" },
+    { type = "strip" },
+    { type = "join", sep = "\n\n" }
+]

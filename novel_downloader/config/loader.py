@@ -11,25 +11,19 @@ This is typically used to load user-supplied or internal default config files.
 """
 
 import logging
-from functools import lru_cache, wraps
+import shutil
 from importlib.abc import Traversable
 from importlib.resources import files
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional, TypeVar, Union, cast
+from typing import Any, Dict, Optional, Union
 
 import yaml
 
-from ..utils.constants import LOGGER_NAME
+from novel_downloader.utils.cache import cached_load_config
+
+from ..utils.constants import LOGGER_NAME, SETTING_FILE
 
 logger = logging.getLogger(LOGGER_NAME)
-
-T = TypeVar("T", bound=Callable[..., Any])
-
-
-def cached_load_config(func: T) -> T:
-    cached = lru_cache(maxsize=1)(func)
-    wrapped = wraps(func)(cached)
-    return cast(T, wrapped)
 
 
 def resolve_config_path(
@@ -46,6 +40,9 @@ def resolve_config_path(
         if path.is_file():
             return path
         logger.warning("[config] Specified config file not found: %s", path)
+
+    if SETTING_FILE.is_file():
+        return SETTING_FILE
 
     # Fallback to internal base.yaml
     try:
@@ -93,6 +90,41 @@ def load_config(config_path: Optional[Union[str, Path]]) -> Dict[str, Any]:
         return {}
 
     return data
+
+
+def set_setting_file(
+    source_path: Union[str, Path], output_path: Union[str, Path] = SETTING_FILE
+) -> None:
+    """
+    Validate a YAML config file and copy it to the application's setting path.
+
+    :param source_path: The user-provided YAML file path.
+    :param output_path: Destination path to save the config (default: SETTING_FILE).
+    """
+    source = Path(source_path).expanduser().resolve()
+    output = Path(output_path).expanduser().resolve()
+
+    if not source.is_file():
+        raise FileNotFoundError(f"Source file not found: {source}")
+
+    if source.suffix.lower() not in {".yaml", ".yml"}:
+        raise ValueError(f"Source file must be a .yaml or .yml: {source}")
+
+    logger.info("[config] Checking YAML validity: %s", source)
+
+    try:
+        with source.open("r", encoding="utf-8") as f:
+            yaml.safe_load(f)
+    except Exception as e:
+        logger.error("[config] Invalid YAML format: %s", e)
+        raise ValueError(f"Invalid YAML file: {source}") from e
+
+    logger.info("[config] YAML validated, saving to %s", output)
+
+    output.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source, output)
+
+    logger.info("[config] Setting file successfully updated: %s", output)
 
 
 __all__ = ["load_config"]
