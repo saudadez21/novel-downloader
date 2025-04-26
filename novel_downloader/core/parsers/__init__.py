@@ -12,10 +12,13 @@ Currently supported:
 
 Modules:
 - qidian_parser
+- common_parser
 """
 
+from .common_parser import CommonParser
 from .qidian_parser import QidianBrowserParser
 
 __all__ = [
+    "CommonParser",
     "QidianBrowserParser",
 ]

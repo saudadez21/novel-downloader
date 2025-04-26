@@ -15,13 +15,16 @@ This module provides:
 from .adapter import ConfigAdapter
 from .loader import load_config, set_setting_file
 from .models import (
+    BookInfoRules,
     DownloaderConfig,
     FieldRules,
     ParserConfig,
     RequesterConfig,
     RuleStep,
     SaverConfig,
+    SiteRules,
     SiteRulesDict,
+    VolumesRules,
 )
 from .site_rules import (
     load_site_rules,
@@ -38,7 +41,10 @@ __all__ = [
     "SaverConfig",
     "FieldRules",
     "RuleStep",
+    "SiteRules",
     "SiteRulesDict",
+    "VolumesRules",
+    "BookInfoRules",
     "load_site_rules",
     "save_rules_as_json",
 ]

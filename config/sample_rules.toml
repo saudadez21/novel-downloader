@@ -50,6 +50,37 @@ steps = [
     { type = "strip" }
 ]
 
+[qidian.book_info.volumes]
+has_volume = true
+volume_selector = "div.volume-wrap div.volume"
+chapter_selector = "li"
+
+volume_name_steps = [
+    { type = "select_one", selector = "h3" },
+    { type = "text" },
+    { type = "split", sep = "·", index = 0 },
+    { type = "replace", old = "订阅本卷", new = "" },
+    { type = "strip" }
+]
+
+chapter_steps = [
+    { key = "title", steps = [
+        { type = "select_one", selector = "a" },
+        { type = "text" }
+    ] },
+
+    { key = "url", steps = [
+        { type = "select_one", selector = "a" },
+        { type = "attr", attr = "href" }
+    ] },
+
+    { key = "chapterId", steps = [
+        { type = "select_one", selector = "a" },
+        { type = "attr", attr = "href" },
+        { type = "regex", pattern = "/(\\d+)", group = 1 }
+    ] }
+]
+
 [qidian.chapter.title] # 章节标题
 steps = [
     { type = "select_one", selector = "div#app div.print h1.title" },
