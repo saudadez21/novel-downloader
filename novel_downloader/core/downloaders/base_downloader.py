@@ -20,9 +20,8 @@ from novel_downloader.core.interfaces import (
     RequesterProtocol,
     SaverProtocol,
 )
-from novel_downloader.utils.constants import LOGGER_NAME
 
-logger = logging.getLogger(LOGGER_NAME)
+logger = logging.getLogger(__name__)
 
 
 class BaseDownloader(DownloaderProtocol, abc.ABC):

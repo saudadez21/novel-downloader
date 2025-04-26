@@ -17,9 +17,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Tuple
 
-from ..constants import LOGGER_NAME
-
-logger = logging.getLogger(LOGGER_NAME)
+logger = logging.getLogger(__name__)
 
 
 def _parse_utc_offset(tz_str: str) -> timezone:

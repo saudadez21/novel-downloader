@@ -10,21 +10,17 @@ This module defines `QidianBrowserParser`, a parser implementation that supports
 content extracted from dynamically rendered Qidian HTML pages.
 """
 
-import logging
 from pathlib import Path
 from typing import Any, Dict, Optional
 
 from novel_downloader.config.models import ParserConfig
 from novel_downloader.core.parsers.base_parser import BaseParser
-from novel_downloader.utils.constants import LOGGER_NAME
 
 from ..shared import (
     is_encrypted,
     parse_book_info,
 )
 from .chapter_router import parse_chapter
-
-logger = logging.getLogger(LOGGER_NAME)
 
 
 class QidianBrowserParser(BaseParser):

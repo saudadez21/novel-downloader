@@ -21,10 +21,9 @@ from novel_downloader.utils.constants import (
     DEFAULT_USER_AGENT,
     DEFAULT_USER_DATA_DIR,
     DEFAULT_USER_PROFILE_NAME,
-    LOGGER_NAME,
 )
 
-logger = logging.getLogger(LOGGER_NAME)
+logger = logging.getLogger(__name__)
 
 
 def _is_valid(value: str) -> bool:

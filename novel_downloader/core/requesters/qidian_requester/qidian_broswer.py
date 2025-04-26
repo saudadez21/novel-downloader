@@ -19,10 +19,9 @@ from DrissionPage.common import Keys
 
 from novel_downloader.config.models import RequesterConfig
 from novel_downloader.core.requesters.base_browser import BaseBrowser
-from novel_downloader.utils.constants import LOGGER_NAME
 from novel_downloader.utils.time_utils import sleep_with_random_delay
 
-logger = logging.getLogger(LOGGER_NAME)
+logger = logging.getLogger(__name__)
 
 
 class QidianBrowser(BaseBrowser):

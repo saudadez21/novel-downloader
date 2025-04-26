@@ -16,9 +16,7 @@ import random
 import time
 from typing import Optional
 
-from ..constants import LOGGER_NAME
-
-logger = logging.getLogger(LOGGER_NAME)
+logger = logging.getLogger(__name__)
 
 
 def sleep_with_random_delay(

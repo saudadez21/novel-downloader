@@ -17,9 +17,8 @@ from typing import Any, Optional
 
 from novel_downloader.config.models import SaverConfig
 from novel_downloader.core.interfaces import SaverProtocol
-from novel_downloader.utils.constants import LOGGER_NAME
 
-logger = logging.getLogger(LOGGER_NAME)
+logger = logging.getLogger(__name__)
 
 
 class SafeDict(dict[str, Any]):

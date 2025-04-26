@@ -14,11 +14,9 @@ import logging
 import re
 from typing import Any, Dict
 
-from novel_downloader.utils.constants import LOGGER_NAME
-
 from .helpers import html_to_soup
 
-logger = logging.getLogger(LOGGER_NAME)
+logger = logging.getLogger(__name__)
 
 
 def _chapter_url_to_id(url: str) -> str:

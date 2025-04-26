@@ -12,14 +12,13 @@ import json
 import logging
 from typing import Any, Dict
 
-from novel_downloader.utils.constants import LOGGER_NAME
 from novel_downloader.utils.file_utils import save_as_json, save_as_txt
 from novel_downloader.utils.network import download_image_as_bytes
 from novel_downloader.utils.time_utils import calculate_time_difference
 
 from .base_downloader import BaseDownloader
 
-logger = logging.getLogger(LOGGER_NAME)
+logger = logging.getLogger(__name__)
 
 
 class QidianDownloader(BaseDownloader):

@@ -13,8 +13,6 @@ from typing import TYPE_CHECKING
 
 from bs4 import BeautifulSoup
 
-from novel_downloader.utils.constants import LOGGER_NAME
-
 from ..shared import (
     extract_chapter_info,
     find_ssr_page_context,
@@ -23,7 +21,7 @@ from ..shared import (
 if TYPE_CHECKING:
     from .main_parser import QidianBrowserParser
 
-logger = logging.getLogger(LOGGER_NAME)
+logger = logging.getLogger(__name__)
 
 
 def parse_encrypted_chapter(

@@ -17,14 +17,13 @@ import json
 import logging
 from typing import TYPE_CHECKING
 
-from novel_downloader.utils.constants import LOGGER_NAME
 from novel_downloader.utils.file_utils import save_as_txt
 from novel_downloader.utils.text_utils import clean_chapter_title
 
 if TYPE_CHECKING:
     from .main_saver import CommonSaver
 
-logger = logging.getLogger(LOGGER_NAME)
+logger = logging.getLogger(__name__)
 
 
 def common_save_as_txt(

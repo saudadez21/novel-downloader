@@ -34,7 +34,6 @@ def setup_logging(
     """
     Create and configure a logger for both console and rotating file output.
 
-    :param logger_name: Name of the logger.
     :param log_filename_prefix: Prefix for the log file name.
                                 If None, will use the last part of `logger_name`.
     :param log_level: Minimum log level to show in console:
@@ -63,7 +62,7 @@ def setup_logging(
     log_filename = log_path / f"{log_filename_prefix}_{date_str}.log"
 
     # Create or retrieve logger
-    logger = logging.getLogger(LOGGER_NAME)
+    logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)  # Capture everything, filter by handlers
 
     # Clear existing handlers to avoid duplicate logs

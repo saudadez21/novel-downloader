@@ -19,10 +19,9 @@ from importlib.resources import files
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional, Set, Union
 
-from ..constants import LOGGER_NAME
 from .sanitize import sanitize_filename
 
-logger = logging.getLogger(LOGGER_NAME)
+logger = logging.getLogger(__name__)
 
 _JSON_INDENT_THRESHOLD = 50 * 1024  # bytes
 
@@ -70,13 +69,13 @@ def _write_file(
 
     if path.exists():
         if on_exist == "skip":
-            logger.info("[file] '%s' exists, skipping", path)
+            logger.debug("[file] '%s' exists, skipping", path)
             return False
         if on_exist == "rename":
             path = _get_non_conflicting_path(path)
-            logger.info("[file] Renaming target to avoid conflict: %s", path)
+            logger.debug("[file] Renaming target to avoid conflict: %s", path)
         else:
-            logger.info("[file] '%s' exists, will overwrite", path)
+            logger.debug("[file] '%s' exists, will overwrite", path)
 
     # Prepare content and write mode
     content_to_write: Union[str, bytes]

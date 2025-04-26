@@ -17,9 +17,7 @@ import os
 import re
 from typing import Optional
 
-from ..constants import LOGGER_NAME
-
-logger = logging.getLogger(LOGGER_NAME)
+logger = logging.getLogger(__name__)
 
 # Windows 保留名称列表 (忽略大小写)
 _WIN_RESERVED_NAMES = {

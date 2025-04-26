@@ -15,8 +15,6 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from novel_downloader.utils.constants import LOGGER_NAME
-
 from ..shared import (
     can_view_chapter,
     html_to_soup,
@@ -28,7 +26,7 @@ from .chapter_normal import parse_normal_chapter
 if TYPE_CHECKING:
     from .main_parser import QidianBrowserParser
 
-logger = logging.getLogger(LOGGER_NAME)
+logger = logging.getLogger(__name__)
 
 
 def parse_chapter(

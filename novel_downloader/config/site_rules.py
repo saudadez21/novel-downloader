@@ -17,12 +17,12 @@ from pathlib import Path
 from typing import Union
 
 from novel_downloader.utils.cache import cached_load_config
-from novel_downloader.utils.constants import LOGGER_NAME, SITE_RULES_FILE
+from novel_downloader.utils.constants import SITE_RULES_FILE
 from novel_downloader.utils.file_utils import save_as_json
 
 from .models import SiteRulesDict
 
-logger = logging.getLogger(LOGGER_NAME)
+logger = logging.getLogger(__name__)
 
 
 def save_rules_as_json(
@@ -48,7 +48,7 @@ def save_rules_as_json(
 
     suffix = source_path.suffix.lower()
 
-    logger.info("%s Loading rules from %s (format: %s)", TAG, source_path, suffix)
+    logger.debug("%s Loading rules from %s (format: %s)", TAG, source_path, suffix)
 
     try:
         if suffix == ".toml":

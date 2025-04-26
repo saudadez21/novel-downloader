@@ -16,10 +16,10 @@ from urllib.parse import unquote, urlparse
 
 import requests
 
-from .constants import DEFAULT_HEADERS, LOGGER_NAME
+from .constants import DEFAULT_HEADERS
 from .file_utils.io import _get_non_conflicting_path, _write_file, read_binary_file
 
-logger = logging.getLogger(LOGGER_NAME)
+logger = logging.getLogger(__name__)
 
 _DEFAULT_CHUNK_SIZE = 8192  # 8KB per chunk for streaming downloads
 

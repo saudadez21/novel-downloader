@@ -14,9 +14,7 @@ import logging
 from pathlib import Path
 from typing import Union
 
-from ..constants import LOGGER_NAME
-
-logger = logging.getLogger(LOGGER_NAME)
+logger = logging.getLogger(__name__)
 
 
 def normalize_txt_line_endings(folder_path: Union[str, Path]) -> None:

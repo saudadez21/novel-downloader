@@ -21,9 +21,9 @@ import yaml
 
 from novel_downloader.utils.cache import cached_load_config
 
-from ..utils.constants import LOGGER_NAME, SETTING_FILE
+from ..utils.constants import SETTING_FILE
 
-logger = logging.getLogger(LOGGER_NAME)
+logger = logging.getLogger(__name__)
 
 
 def resolve_config_path(
@@ -47,7 +47,7 @@ def resolve_config_path(
     # Fallback to internal base.yaml
     try:
         base_yaml = files("novel_downloader.defaults").joinpath("base.yaml")
-        logger.info("[config] Using internal base.yaml fallback")
+        logger.debug("[config] Using internal base.yaml fallback")
         return base_yaml
     except Exception as e:
         logger.error("[config] Failed to resolve internal base.yaml: %s", e)
@@ -110,7 +110,7 @@ def set_setting_file(
     if source.suffix.lower() not in {".yaml", ".yml"}:
         raise ValueError(f"Source file must be a .yaml or .yml: {source}")
 
-    logger.info("[config] Checking YAML validity: %s", source)
+    logger.debug("[config] Checking YAML validity: %s", source)
 
     try:
         with source.open("r", encoding="utf-8") as f:
@@ -119,7 +119,7 @@ def set_setting_file(
         logger.error("[config] Invalid YAML format: %s", e)
         raise ValueError(f"Invalid YAML file: {source}") from e
 
-    logger.info("[config] YAML validated, saving to %s", output)
+    logger.debug("[config] YAML validated, saving to %s", output)
 
     output.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(source, output)

@@ -18,9 +18,7 @@ from typing import Any, Dict, Union
 
 from bs4 import BeautifulSoup
 
-from novel_downloader.utils.constants import LOGGER_NAME
-
-logger = logging.getLogger(LOGGER_NAME)
+logger = logging.getLogger(__name__)
 
 
 def html_to_soup(html_str: str) -> BeautifulSoup:
