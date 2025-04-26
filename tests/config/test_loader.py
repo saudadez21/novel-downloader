@@ -47,6 +47,8 @@ def test_load_non_dict_yaml(tmp_config_file):
 def test_load_missing_file_returns_fallback(fake_fallback_file, monkeypatch):
     """Missing user config should fallback to internal base.yaml contents."""
     monkeypatch.setattr(loader, "files", lambda _: fake_fallback_file)
+    fake_path = Path("fake_path.yaml")
+    monkeypatch.setattr(loader, "SETTING_FILE", fake_path)
     result = load_config("nonexistent.yaml")
     assert result.get("fallback_flag") is True
 
@@ -62,6 +64,8 @@ def test_resolve_config_path_valid(tmp_config_file):
 def test_resolve_config_path_fallback(fake_fallback_file, monkeypatch):
     """resolve_config_path falls back to internal base.yaml path."""
     monkeypatch.setattr(loader, "files", lambda _: fake_fallback_file)
+    fake_path = Path("fake_path.yaml")
+    monkeypatch.setattr(loader, "SETTING_FILE", fake_path)
     path = resolve_config_path(None)
     assert path.name == "base.yaml" or path.name == "base.yaml"
     text = path.read_text(encoding="utf-8").strip()
@@ -72,6 +76,8 @@ def test_resolve_config_path_logs(monkeypatch, fake_fallback_file, dummy_logger)
     """resolve_config_path logs warning on missing user file, then info on fallback."""
     # point loader.files to our fake fallback
     monkeypatch.setattr(loader, "files", lambda _: fake_fallback_file)
+    fake_path = Path("fake_path.yaml")
+    monkeypatch.setattr(loader, "SETTING_FILE", fake_path)
     bad_path = Path("does_not_exist.yaml")
     resolve_config_path(bad_path)
     # check that a warning was logged for missing file
@@ -86,3 +92,29 @@ def test_resolve_config_path_logs(monkeypatch, fake_fallback_file, dummy_logger)
         for level, msg in dummy_logger
         if level == "info"
     )
+
+
+def test_resolve_config_path_to_setting_file(monkeypatch, tmp_path):
+    """resolve_config_path returns SETTING_FILE if it exists."""
+    setting_file = tmp_path / "settings.yaml"
+    setting_file.write_text("fallback_flag: true", encoding="utf-8")
+
+    monkeypatch.setattr(loader, "SETTING_FILE", setting_file)
+
+    path = resolve_config_path(None)
+
+    assert path == setting_file
+    text = path.read_text(encoding="utf-8").strip()
+    assert "fallback_flag: true" in text
+
+
+def test_load_config_from_setting_file(monkeypatch, tmp_path):
+    """load_config uses SETTING_FILE if it exists."""
+    setting_file = tmp_path / "settings.yaml"
+    setting_file.write_text("fallback_flag: true", encoding="utf-8")
+
+    monkeypatch.setattr(loader, "SETTING_FILE", setting_file)
+
+    result = load_config(None)
+
+    assert result.get("fallback_flag") is True
