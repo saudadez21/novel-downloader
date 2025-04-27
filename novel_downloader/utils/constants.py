@@ -39,7 +39,9 @@ DEFAULT_ACCEPT = (
 )
 
 DEFAULT_USER_HEADERS = {
-    "User-Agent": DEFAULT_USER_AGENT,
     "Accept": DEFAULT_ACCEPT,
+    "Accept-Encoding": "gzip, deflate",
+    "Accept-Language": "en,zh;q=0.9,zh-CN;q=0.8",
+    "User-Agent": DEFAULT_USER_AGENT,
     "Connection": "keep-alive",
 }

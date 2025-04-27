@@ -1,4 +1,4 @@
-[qidian.metadata]
+[qidian.profile] # 起点
 book_info_url = "https://book.qidian.com/info/{book_id}/"
 chapter_url = "https://www.qidian.com/chapter/{book_id}/{chapter_id}/"
 
@@ -98,3 +98,7 @@ steps = [
     { type = "strip" },
     { type = "join", sep = "\n\n" }
 ]
+
+[biquge.profile] # 笔趣阁
+book_info_url = "http://www.b520.cc/{book_id}/"
+chapter_url = "http://www.b520.cc/{book_id}/{chapter_id}.html"

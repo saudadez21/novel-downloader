@@ -10,11 +10,14 @@ to perform network interactions, such as logging in, sending requests,
 or interacting with browser/session-based sources.
 
 Subpackages:
+- common_requester: Handles all common-site requesting logic.
 - qidian_requester: Handles all Qidian-related requesting logic.
 """
 
+from .common_requester import CommonSession
 from .qidian_requester import QidianBrowser
 
 __all__ = [
+    "CommonSession",
     "QidianBrowser",
 ]

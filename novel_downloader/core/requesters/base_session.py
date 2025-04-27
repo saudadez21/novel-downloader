@@ -158,12 +158,14 @@ class BaseSession(RequesterProtocol, abc.ABC):
         )
 
     @property
-    def session(self) -> Optional[Session]:
+    def session(self) -> Session:
         """
-        Expose the underlying requests.Session object.
+        Return the active requests.Session.
 
-        :return: The internal session instance.
+        :raises RuntimeError: If the session is uninitialized or has been shut down.
         """
+        if self._session is None:
+            raise RuntimeError("Session is not initialized or has been shut down.")
         return self._session
 
     @property

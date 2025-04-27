@@ -148,13 +148,13 @@ class ChapterRules(TypedDict, total=False):
     content: FieldRules
 
 
-class MetadataRules(TypedDict):
+class SiteProfile(TypedDict):
     book_info_url: str
     chapter_url: str
 
 
 class SiteRules(TypedDict):
-    metadata: MetadataRules
+    profile: SiteProfile
     book_info: BookInfoRules
     chapter: ChapterRules
 
