@@ -33,6 +33,7 @@ DEFAULT_USER_AGENT = (
     "Chrome/134.0.0.0 Safari/537.36"
 )
 
+DEFAULT_IMAGE_SUFFIX = ".jpg"
 DEFAULT_HEADERS = {"User-Agent": DEFAULT_USER_AGENT}
 DEFAULT_ACCEPT = (
     "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"

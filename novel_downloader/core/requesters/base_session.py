@@ -42,6 +42,8 @@ class BaseSession(RequesterProtocol, abc.ABC):
         """
         self._config = config
         self._timeout = config.timeout
+        self._retry_times = config.retry_times
+        self._retry_interval = config.retry_interval
         self._cookies = cookies or {}
         self._headers = DEFAULT_USER_HEADERS
         self._session: Optional[Session] = None
@@ -172,6 +174,16 @@ class BaseSession(RequesterProtocol, abc.ABC):
     def timeout(self) -> int:
         """Return the default timeout setting."""
         return self._timeout
+
+    @property
+    def retry_times(self) -> int:
+        """Return the maximum number of retry attempts."""
+        return self._retry_times
+
+    @property
+    def retry_interval(self) -> float:
+        """Return the base interval (in seconds) between retries."""
+        return self._retry_interval
 
     @property
     def headers(self) -> Dict[str, str]:

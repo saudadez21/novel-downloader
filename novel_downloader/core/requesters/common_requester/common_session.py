@@ -10,6 +10,7 @@ information pages and chapter contents using a flexible URL templating
 system defined by a site profile.
 """
 
+import time
 from typing import Dict, Optional
 
 from novel_downloader.config import RequesterConfig, SiteProfile
@@ -56,12 +57,22 @@ class CommonSession(BaseSession):
         :raises requests.HTTPError: If the request returns an unsuccessful status code.
         """
         url = self.book_info_url.format(book_id=book_id)
-        response = self.session.get(url)
-        response.raise_for_status()
-        content = response.text
         base = wait_time if wait_time is not None else self._config.wait_time
-        sleep_with_random_delay(base)
-        return content
+
+        for attempt in range(1, self.retry_times + 1):
+            try:
+                with self.session.get(url, timeout=self.timeout) as response:
+                    response.raise_for_status()
+                    content = response.text
+                sleep_with_random_delay(base)
+                return content
+            except Exception as e:
+                if attempt == self.retry_times:
+                    raise e  # 最后一次也失败了，抛出异常
+                else:
+                    time.sleep(self.retry_interval)
+                    continue
+        raise RuntimeError("Unexpected error: get_book_info failed without returning")
 
     def get_book_chapter(
         self, book_id: str, chapter_id: str, wait_time: Optional[int] = None
@@ -76,12 +87,24 @@ class CommonSession(BaseSession):
         :raises requests.HTTPError: If the request returns an unsuccessful status code.
         """
         url = self.chapter_url.format(book_id=book_id, chapter_id=chapter_id)
-        response = self.session.get(url)
-        response.raise_for_status()
-        content = response.text
         base = wait_time if wait_time is not None else self._config.wait_time
-        sleep_with_random_delay(base)
-        return content
+
+        for attempt in range(1, self.retry_times + 1):
+            try:
+                with self.session.get(url, timeout=self.timeout) as response:
+                    response.raise_for_status()
+                    content = response.text
+                sleep_with_random_delay(base)
+                return content
+            except Exception as e:
+                if attempt == self.retry_times:
+                    raise e  # 最后一次也失败了，抛出异常
+                else:
+                    time.sleep(self.retry_interval)
+                    continue
+        raise RuntimeError(
+            "Unexpected error: get_book_chapter failed without returning"
+        )
 
     @property
     def site(self) -> str:

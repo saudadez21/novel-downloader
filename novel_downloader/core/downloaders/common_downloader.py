@@ -129,22 +129,35 @@ class CommonDownloader(BaseDownloader):
 
                 chap_title = chap.get("title", "")
                 logger.info("%s Fetching chapter: %s (%s)", TAG, chap_title, cid)
-                chap_html = self.requester.get_book_chapter(book_id, cid, wait_time)
+                try:
+                    chap_html = self.requester.get_book_chapter(book_id, cid, wait_time)
 
-                if save_html:
-                    html_path = chapters_html_dir / f"{cid}.html"
-                    save_as_txt(chap_html, html_path, on_exist="skip")
-                    logger.debug(
-                        "%s Saved raw HTML for chapter %s to %s", TAG, cid, html_path
-                    )
+                    if save_html:
+                        html_path = chapters_html_dir / f"{cid}.html"
+                        save_as_txt(chap_html, html_path, on_exist="skip")
+                        logger.debug(
+                            "%s Saved raw HTML for chapter %s to %s",
+                            TAG,
+                            cid,
+                            html_path,
+                        )
 
-                chap_text = self.parser.parse_chapter(chap_html, cid)
-                if not chap_text:
+                    chap_text = self.parser.parse_chapter(chap_html, cid)
+                    if not chap_text:
+                        logger.warning(
+                            "%s Parsed chapter text is empty, skipping: %s (%s)",
+                            TAG,
+                            chap_title,
+                            cid,
+                        )
+                        continue
+                except Exception as e:
                     logger.warning(
-                        "%s Parsed chapter text is empty, skipping: %s (%s)",
+                        "%s Error while processing chapter %s (%s): %s",
                         TAG,
                         chap_title,
                         cid,
+                        str(e),
                     )
                     continue
 

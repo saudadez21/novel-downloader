@@ -71,6 +71,7 @@ def common_save_as_txt(
 
     for vol in volumes:
         vol_name = vol.get("volume_name", "").strip()
+        vol_name = clean_chapter_title(vol_name)
         if vol_name:
             volume_header = f"\n\n{'=' * 6} {vol_name} {'=' * 6}\n\n"
             parts.append(volume_header)

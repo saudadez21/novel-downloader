@@ -130,6 +130,8 @@ class VolumesRules(TypedDict, total=False):
     chapter_selector: str  # 选择 chapter 节点的 selector
     volume_name_steps: List[RuleStep]
     chapter_steps: List[ChapterFieldRules]  # 提取章节信息的步骤列表
+    volume_mode: str  # Optional: "normal" (default) or "mixed"
+    list_selector: str  # Optional: If "mixed" mode, parent container selector
 
 
 class BookInfoRules(TypedDict, total=False):

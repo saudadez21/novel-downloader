@@ -16,7 +16,7 @@ from urllib.parse import unquote, urlparse
 
 import requests
 
-from .constants import DEFAULT_HEADERS
+from .constants import DEFAULT_HEADERS, DEFAULT_IMAGE_SUFFIX
 from .file_utils.io import _get_non_conflicting_path, _write_file, read_binary_file
 
 logger = logging.getLogger(__name__)
@@ -64,6 +64,27 @@ def http_get_with_retry(
     return None
 
 
+def image_url_to_filename(url: str) -> str:
+    """
+    Parse and sanitize a image filename from a URL.
+    If no filename or suffix exists, fallback to default name and extension.
+
+    :param url: URL string
+    :return: Safe filename string
+    """
+    parsed_url = urlparse(url)
+    path = unquote(parsed_url.path)
+    filename = Path(path).name
+
+    if not filename:
+        filename = "image"
+
+    if not Path(filename).suffix:
+        filename += DEFAULT_IMAGE_SUFFIX
+
+    return filename
+
+
 def download_image_as_bytes(
     url: str,
     target_folder: Optional[Union[str, Path]] = None,
@@ -96,7 +117,7 @@ def download_image_as_bytes(
     save_path = None
     if target_folder:
         target_folder = Path(target_folder)
-        filename = url.split("/")[-1]
+        filename = image_url_to_filename(url)
         save_path = target_folder / filename
 
         if on_exist == "skip" and save_path.exists():

@@ -9,7 +9,7 @@ Shared utility functions for parsing Common pages.
 
 import logging
 import re
-from typing import Any, Dict, Iterable, Iterator, List, cast
+from typing import Any, Dict, Iterable, Iterator, List, Optional, cast
 
 from bs4 import BeautifulSoup, Tag
 
@@ -209,6 +209,53 @@ class HTMLExtractor:
             return str(current.get_text().strip())
         return str(current or "").strip()
 
+    def extract_mixed_volumes(self, volume_rule: VolumesRules) -> List[Dict[str, Any]]:
+        """
+        Special mode: mixed <volume> and <chapter> under same parent.
+        (e.g., dt / dd pattern in BiQuGe)
+        """
+        list_selector = volume_rule.get("list_selector")
+        volume_selector = volume_rule.get("volume_selector")
+        chapter_selector = volume_rule.get("chapter_selector")
+        volume_name_steps = volume_rule.get("volume_name_steps")
+        chapter_steps_list = volume_rule.get("chapter_steps")
+
+        if not (
+            list_selector and volume_selector and chapter_selector and volume_name_steps
+        ):
+            raise ValueError(
+                "volume_mode='mixed' 时, 必须提供 list_selector, volume_selector, "
+                "chapter_selector 和 volume_name_steps"
+            )
+
+        volumes: List[Dict[str, Any]] = []
+        current_volume: Optional[Dict[str, Any]] = None
+        if not chapter_steps_list:
+            chapter_steps_list = []
+        chapter_info_steps = {item["key"]: item["steps"] for item in chapter_steps_list}
+
+        list_area = self._soup.select_one(list_selector)
+        if not list_area:
+            raise ValueError(f"找不到 list_selector: {list_selector}")
+
+        for elem in list_area.find_all(
+            [volume_selector, chapter_selector], recursive=True
+        ):
+            if elem.name == volume_selector:
+                extractor = HTMLExtractor(str(elem))
+                volume_name = extractor.extract_field(volume_name_steps)
+                current_volume = {"volume_name": volume_name, "chapters": []}
+                volumes.append(current_volume)
+
+            elif elem.name == chapter_selector and current_volume is not None:
+                chap_extractor = HTMLExtractor(str(elem))
+                chapter_data = {}
+                for field, steps in chapter_info_steps.items():
+                    chapter_data[field] = chap_extractor.extract_field(steps)
+                current_volume["chapters"].append(chapter_data)
+
+        return volumes
+
     def extract_volume_blocks(self, volume_rule: VolumesRules) -> List[Dict[str, Any]]:
         volume_selector = volume_rule["volume_selector"]
         chapter_selector = volume_rule["chapter_selector"]
@@ -264,6 +311,10 @@ class HTMLExtractor:
     def extract_volumes_structure(
         self, volume_rule: VolumesRules
     ) -> List[Dict[str, Any]]:
+        volume_mode = volume_rule.get("volume_mode", "normal")
+        if volume_mode == "mixed":
+            return self.extract_mixed_volumes(volume_rule)
+
         if volume_rule.get("has_volume", True):
             return self.extract_volume_blocks(volume_rule)
         else:
