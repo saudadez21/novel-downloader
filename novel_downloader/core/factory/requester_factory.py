@@ -16,9 +16,10 @@ Currently supported:
 To add support for new sites or modes, extend the `_site_map` accordingly.
 """
 
-from novel_downloader.config import RequesterConfig
+from novel_downloader.config import RequesterConfig, load_site_rules
 from novel_downloader.core.interfaces import RequesterProtocol
 from novel_downloader.core.requesters import (
+    CommonSession,
     QidianBrowser,
 )
 
@@ -39,16 +40,22 @@ def get_requester(site: str, config: RequesterConfig) -> RequesterProtocol:
     :param config: Configuration for the requester
     :return: An instance of a requester class
     """
-    site = site.lower()
-    site_entry = _site_map.get(site)
-    if not site_entry:
+    site_key = site.lower()
+
+    site_entry = _site_map.get(site_key)
+    if site_entry:
+        requester_class = (
+            site_entry.get(config.mode) if isinstance(site_entry, dict) else site_entry
+        )
+        if requester_class:
+            return requester_class(config)
+        raise ValueError(f"Unsupported mode '{config.mode}' for site '{site}'")
+
+    # Fallback: Load site rules
+    site_rules = load_site_rules()
+    site_rule = site_rules.get(site_key)
+    if site_rule is None:
         raise ValueError(f"Unsupported site: {site}")
 
-    if isinstance(site_entry, dict):
-        requester_class = site_entry.get(config.mode)
-        if not requester_class:
-            raise ValueError(f"Unsupported mode '{config.mode}' for site '{site}'")
-    else:
-        requester_class = site_entry
-
-    return requester_class(config)
+    site_profile = site_rule["profile"]
+    return CommonSession(config, site_key, site_profile)

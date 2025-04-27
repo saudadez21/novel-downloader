@@ -14,8 +14,9 @@ Currently supported:
 To add support for new sites or modes, extend the `_site_map` accordingly.
 """
 
-from novel_downloader.config import DownloaderConfig
+from novel_downloader.config import DownloaderConfig, load_site_rules
 from novel_downloader.core.downloaders import (
+    CommonDownloader,
     QidianDownloader,
 )
 from novel_downloader.core.interfaces import (
@@ -48,9 +49,14 @@ def get_downloader(
     :param config: Downloader configuration
     :return: An instance of a downloader class
     """
-    site = site.lower()
-    downloader_class = _site_map.get(site)
-    if not downloader_class:
+    site_key = site.lower()
+
+    if site_key in _site_map:
+        downloader_class = _site_map[site_key]
+        return downloader_class(requester, parser, saver, config)
+
+    site_rules = load_site_rules()
+    if site_key not in site_rules:
         raise ValueError(f"Unsupported site: {site}")
 
-    return downloader_class(requester, parser, saver, config)
+    return CommonDownloader(requester, parser, saver, config, site_key)

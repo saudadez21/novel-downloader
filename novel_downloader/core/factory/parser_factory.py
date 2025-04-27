@@ -16,9 +16,10 @@ Currently supported:
 To add support for new sites or modes, extend the `_site_map` accordingly.
 """
 
-from novel_downloader.config import ParserConfig
+from novel_downloader.config import ParserConfig, load_site_rules
 from novel_downloader.core.interfaces import ParserProtocol
 from novel_downloader.core.parsers import (
+    CommonParser,
     QidianBrowserParser,
 )
 
@@ -39,16 +40,22 @@ def get_parser(site: str, config: ParserConfig) -> ParserProtocol:
     :param config: Configuration for the parser
     :return: An instance of a parser class
     """
-    site = site.lower()
-    site_entry = _site_map.get(site)
-    if not site_entry:
+    site_key = site.lower()
+
+    if site_key in _site_map:
+        site_entry = _site_map[site_key]
+        if isinstance(site_entry, dict):
+            parser_class = site_entry.get(config.mode)
+            if parser_class is None:
+                raise ValueError(f"Unsupported mode '{config.mode}' for site '{site}'")
+        else:
+            parser_class = site_entry
+        return parser_class(config)
+
+    # Fallback: site not mapped specially, try to load rule
+    site_rules = load_site_rules()
+    site_rule = site_rules.get(site_key)
+    if site_rule is None:
         raise ValueError(f"Unsupported site: {site}")
 
-    if isinstance(site_entry, dict):
-        parser_class = site_entry.get(config.mode)
-        if not parser_class:
-            raise ValueError(f"Unsupported mode '{config.mode}' for site '{site}'")
-    else:
-        parser_class = site_entry
-
-    return parser_class(config)
+    return CommonParser(config, site_key, site_rule)
