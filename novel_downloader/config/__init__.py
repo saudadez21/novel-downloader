@@ -13,7 +13,7 @@ This module provides:
 """
 
 from .adapter import ConfigAdapter
-from .loader import load_config, set_setting_file
+from .loader import load_config, save_config_file
 from .models import (
     BookInfoRules,
     DownloaderConfig,
@@ -34,7 +34,7 @@ from .site_rules import (
 
 __all__ = [
     "load_config",
-    "set_setting_file",
+    "save_config_file",
     "ConfigAdapter",
     "RequesterConfig",
     "DownloaderConfig",

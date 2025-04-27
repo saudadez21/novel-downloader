@@ -23,7 +23,8 @@ dependencies = [
     "DrissionPage",
     "pyyaml",
     "lxml",
-    "platformdirs"
+    "platformdirs",
+    "click"
 ]
 
 [project.optional-dependencies]
@@ -58,6 +59,7 @@ include = ["novel_downloader", "novel_downloader.*"]
 [tool.setuptools.package-data]
 "novel_downloader.defaults" = ["base.yaml"]
 "novel_downloader.resources.text" = ["*.txt"]
+"novel_downloader.locales" = ["*.json"]
 
 [tool.setuptools.dynamic]
 version = {attr = "novel_downloader.__version__"}

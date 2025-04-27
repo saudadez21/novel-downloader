@@ -61,18 +61,18 @@ cd novel-downloader
 pip install .
 ```
 
-安装后, 将在 PATH 中暴露 `novel-cli` 命令。
+安装完成后, 会在系统 `PATH` 中生成 `novel-cli` 可执行命令。
 
 ---
 
 ## 配置
 
-1. 复制并重命名配置文件：
+1. 复制示例配置到工作目录：
    ```bash
    cp config/sample_settings.yaml config/settings.yaml
    ```
 
-2. 编辑 `config/settings.yaml`, 示例：
+2. 编辑 `config/settings.yaml`, 示例内容：
    ```yaml
    sites:
      qidian:
@@ -80,42 +80,49 @@ pip install .
        book_ids:
          - "1234567890"
          - "0987654321"
-       # 抓取模式: requests 或 browser
+       # 抓取模式, 可选 "requests" 或 "browser"
        mode: "browser"
-       # 尝试登录后爬取
+       # 是否要登录后再爬取
        login_required: true
+   ```
+
+3. 将配置文件注册到 CLI：
+   ```bash
+   novel-cli settings set-config config/settings.yaml
+   ```
+
+4. 将自定义规则注册到 CLI:
+   ```bash
+   novel-cli settings update-rules config/sample_rules.toml
    ```
 
 ---
 
-## 使用说明
+## 使用示例
 
-`novel-cli` 支持在**任意目录**下运行, 只需通过 `--config` 参数指定配置文件路径即可。
+- **指定配置文件启动**
+  ```bash
+  novel-cli --config "/path/to/settings.yaml"
+  ```
 
-### 使用示例
+- **在项目根目录下使用默认 `config/settings.yaml`**
+  ```bash
+  novel-cli --config "config/settings.yaml"
+  ```
 
-```bash
-# 指定配置文件路径
-novel-cli --config "/path/to/settings.yaml"
+> `novel-cli` 可在**任意目录**下运行, 如果需要使用特点配置文件只需通过 `--config` 指定文件路径。
 
-# 示例：在当前目录下的 config 文件夹中指定配置文件
-novel-cli --config "config/settings.yaml"
-```
-
-无论你当前在哪个目录, 只要提供正确的配置文件路径, `novel-cli` 就能正常运行。
+例如在将配置文件注册到 CLI 后可以新建目录并在里面运行:
 
 ```bash
 # 创建一个新的工作目录
 mkdir my-novel-folder
 
-# 拷贝配置文件到该目录
-cp settings.yaml my-novel-folder/
-
 # 进入目录
 cd my-novel-folder
 
-# 运行 CLI 工具, 使用相对路径指定配置
-novel-cli --config "settings.yaml"
+# 运行 CLI 工具, 下载起点的 '123456' 和 '654321'
+novel-cli download 123456 654321
 ```
 
 ### Browser 模式登录提示
@@ -124,12 +131,97 @@ novel-cli --config "settings.yaml"
 
 ---
 
-## 命令参数
+## 全局选项
 
-查看所有参数和说明:
-```bash
-novel-cli -h
 ```
+novel-cli [OPTIONS] COMMAND [ARGS]...
+
+Options:
+  --config FILE   配置文件路径
+  -h, --help      显示此消息并退出
+```
+
+---
+
+## 子命令一览
+
+```
+Commands:
+  download     下载小说
+  interactive  小说下载与预览的交互式模式
+  settings     配置下载器设置
+```
+
+---
+
+### download
+
+按书籍 ID 下载完整小说, 支持从命令行或配置文件读取 ID：
+
+```
+novel-cli download [OPTIONS] [BOOK_IDS]...
+
+  按书籍 ID 下载完整小说。
+
+Arguments:
+  BOOK_IDS           要下载的书籍 ID 列表 (可省略, 从配置读取)
+
+Options:
+  --site [qidian]    网站来源, 默认为 'qidian'
+  -h, --help         显示此消息并退出
+```
+
+**示例：**
+
+```bash
+# 直接指定要下载的书籍 ID
+novel-cli download 1234567890 0987654321
+
+# 不带 ID, 则从配置文件中读取
+novel-cli download
+
+# 下载笔趣阁的书籍
+novel-cli download --site biquge 8_7654
+```
+
+---
+
+### settings
+
+配置和管理下载器相关设置：
+
+```
+novel-cli settings [OPTIONS] COMMAND [ARGS]...
+
+  配置下载器设置
+
+Options:
+  -h, --help      显示此消息并退出
+
+Commands:
+  set-lang LANG       在中文 (zh) 和英文 (en) 之间切换语言
+  set-config PATH     设置并保存自定义 YAML 配置文件
+  update-rules PATH   从 TOML/YAML/JSON 文件更新站点规则
+```
+
+**示例：**
+
+```bash
+# 切换界面语言为英文
+novel-cli settings set-lang en
+
+# 使用新的 settings.yaml
+novel-cli settings set-config config/settings.yaml
+
+# 更新站点解析规则
+novel-cli settings update-rules config/sample_rules.toml
+```
+
+---
+
+> **提示**：
+> - 所有子命令均支持 `--help` 查看本地化帮助文本
+> - 切换语言后, 帮助文本与运行时提示会同步变更为中文或英文
 
 ---
 
@@ -212,7 +304,7 @@ novel-cli -h
 ### 支持更多站点
 
 
-### 移除 Qidian 对 DrissionPage 的依赖，改为解析 JS 注入数据 (session 模式)
+### 移除 Qidian 对 DrissionPage 的依赖, 改为解析 JS 注入数据 (session 模式)
 
 
 ### 加密字体识别优化 (基于 PaddleOCR)

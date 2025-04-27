@@ -20,6 +20,10 @@ LOGGER_NAME = PACKAGE_NAME  # Root logger name
 # Base config directory (e.g. ~/AppData/Local/novel_downloader/)
 BASE_CONFIG_DIR = Path(user_config_dir(APP_DIR_NAME, appauthor=False))
 
+PACKAGE_ROOT: Path = Path(__file__).parent.parent
+
+LOCALES_DIR = PACKAGE_ROOT / "locales"
+
 LOGGER_DIR = BASE_CONFIG_DIR / "logs"
 STATE_FILE = BASE_CONFIG_DIR / "state.json"
 SETTING_FILE = BASE_CONFIG_DIR / "settings.yaml"

@@ -8,31 +8,49 @@ Interactive CLI mode for novel_downloader.
 Supports multilingual prompt, input validation, and quit control.
 """
 
-from novel_downloader.cli.lang import get_text
+import click
+from click import Context
+
+from novel_downloader.utils.i18n import t
 
 
-def interactive_main(lang: str = "zh") -> None:
-    print(get_text("welcome", lang))
-    print(get_text("quit_hint", lang))
+@click.group(  # type: ignore
+    name="interactive", help=t("interactive_help"), invoke_without_command=True
+)
+@click.pass_context  # type: ignore
+def interactive_cli(ctx: Context) -> None:
+    """Interactive mode for novel selection and preview."""
+    if ctx.invoked_subcommand is None:
+        click.echo(t("interactive_no_sub"))
 
-    sites = ["起点", "笔趣阁"]
+        options = [
+            t("interactive_option_browse"),
+            t("interactive_option_preview"),
+            t("interactive_option_exit"),
+        ]
+        for idx, opt in enumerate(options, 1):
+            click.echo(f"{idx}. {opt}")
 
-    while True:
-        print("\n" + get_text("site_list", lang))
-        for idx, site in enumerate(sites, 1):
-            print(f"{idx}. {site}")
+        choice = click.prompt(t("interactive_prompt_choice"), type=int)
 
-        choice = input(get_text("prompt_site", lang)).strip().lower()
+        if choice == 1:
+            ctx.invoke(browse)
+        elif choice == 2:
+            ctx.invoke(preview)
+        else:
+            click.echo(t("interactive_exit"))
+            return
 
-        if choice in ["q", "quit", "exit", ""]:
-            print(get_text("goodbye", lang))
-            break
 
-        if not choice.isdigit() or not (1 <= int(choice) <= len(sites)):
-            print(get_text("invalid_choice", lang))
-            continue
+@interactive_cli.command(help=t("interactive_browse_help"))  # type: ignore
+@click.pass_context  # type: ignore
+def browse(ctx: Context) -> None:
+    """Browse available novels interactively."""
+    click.echo(t("interactive_browse_start"))
 
-        site = sites[int(choice) - 1]
-        print(get_text("you_chose_site", lang).format(site=site))
-        # TODO: 接入后续搜索 / ID 输入 / 下载流程
-    return
+
+@interactive_cli.command(help=t("interactive_preview_help"))  # type: ignore
+@click.pass_context  # type: ignore
+def preview(ctx: Context) -> None:
+    """Preview chapters before downloading."""
+    click.echo(t("interactive_preview_start"))

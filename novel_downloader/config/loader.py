@@ -92,7 +92,7 @@ def load_config(config_path: Optional[Union[str, Path]]) -> Dict[str, Any]:
     return data
 
 
-def set_setting_file(
+def save_config_file(
     source_path: Union[str, Path], output_path: Union[str, Path] = SETTING_FILE
 ) -> None:
     """

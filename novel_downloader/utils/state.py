@@ -89,3 +89,6 @@ class StateManager:
         site_data = sites.setdefault(site, {})
         site_data["manual_login"] = flag
         self._save()
+
+
+state_mgr = StateManager()
