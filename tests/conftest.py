@@ -66,6 +66,9 @@ def dummy_logger(monkeypatch):
         def error(self, msg, *args, **kwargs):
             logs.append(("error", msg % args))
 
+        def debug(self, msg, *args, **kwargs):
+            logs.append(("debug", msg % args))
+
     # patch the logger in the loader module
     from novel_downloader.config import loader
 

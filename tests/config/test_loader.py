@@ -90,7 +90,7 @@ def test_resolve_config_path_logs(monkeypatch, fake_fallback_file, dummy_logger)
     assert any(
         "internal base.yaml fallback" in msg
         for level, msg in dummy_logger
-        if level == "info"
+        if level == "debug"
     )
 
 
