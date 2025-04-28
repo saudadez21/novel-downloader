@@ -14,10 +14,34 @@ Includes:
 """
 
 import logging
+import re
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Tuple
 
 logger = logging.getLogger(__name__)
+
+_DATETIME_FORMATS = [
+    # ISO 8601
+    (r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", "%Y-%m-%dT%H:%M:%SZ"),
+    (r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}", "%Y-%m-%dT%H:%M:%S%z"),
+    # 完整年月日+时分秒 空格格式
+    (r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}", "%Y-%m-%d %H:%M:%S"),
+    # 年月日 (无时间)
+    (r"\d{4}-\d{2}-\d{2}", "%Y-%m-%d"),
+    # Slashes 分隔
+    (r"\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}", "%Y/%m/%d %H:%M:%S"),
+    (r"\d{4}/\d{2}/\d{2} \d{2}:\d{2}", "%Y/%m/%d %H:%M"),
+    (r"\d{4}/\d{2}/\d{2}", "%Y/%m/%d"),
+    # 美式 MM/DD/YYYY [HH:MM[:SS] AM/PM]
+    (
+        r"\d{1,2}/\d{1,2}/\d{4} \d{1,2}:\d{2}(:\d{2})? ?[APMapm]{2}",
+        "%m/%d/%Y %I:%M:%S %p",
+    ),
+    (r"\d{1,2}/\d{1,2}/\d{4}", "%m/%d/%Y"),
+    # 欧式 DD.MM.YYYY [HH:MM]
+    (r"\d{2}\.\d{2}\.\d{4} \d{2}:\d{2}", "%d.%m.%Y %H:%M"),
+    (r"\d{2}\.\d{2}\.\d{4}", "%d.%m.%Y"),
+]
 
 
 def _parse_utc_offset(tz_str: str) -> timezone:
@@ -42,6 +66,37 @@ def _parse_utc_offset(tz_str: str) -> timezone:
     return timezone(timedelta(hours=hours))
 
 
+def _parse_datetime_flexible(dt_str: str) -> datetime:
+    """
+    Parse a date/time string in any of several common formats:
+
+      • ISO 8601:             'YYYY-MM-DDTHH:MM:SSZ'
+      • ISO w/ offset:        'YYYY-MM-DDTHH:MM:SS+HH:MM'
+      • 'YYYY-MM-DD HH:MM:SS'
+      • 'YYYY-MM-DD'          (time defaults to 00:00:00)
+      • 'YYYY/MM/DD HH:MM:SS'
+      • 'YYYY/MM/DD HH:MM'
+      • 'YYYY/MM/DD'
+      • 'MM/DD/YYYY HH:MM[:SS] AM/PM'
+      • 'MM/DD/YYYY'
+      • 'DD.MM.YYYY HH:MM'
+      • 'DD.MM.YYYY'
+
+    :param dt_str: Date/time string to parse.
+    :return:       A naive datetime object.
+    :raises ValueError: If dt_str does not match the expected formats.
+    """
+    s = dt_str.strip()
+    for pattern, fmt in _DATETIME_FORMATS:
+        if re.fullmatch(pattern, s):
+            return datetime.strptime(s, fmt)
+
+    supported = "\n".join(f"  • {fmt}" for _, fmt in _DATETIME_FORMATS)
+    raise ValueError(
+        f"Invalid date/time format: '{dt_str}'\n" f"Supported formats are:\n{supported}"
+    )
+
+
 def calculate_time_difference(
     from_time_str: str,
     tz_str: str = "UTC",
@@ -60,13 +115,13 @@ def calculate_time_difference(
     try:
         # parse start time
         tz_from = _parse_utc_offset(tz_str)
-        dt_from = datetime.strptime(from_time_str, "%Y-%m-%d %H:%M:%S")
+        dt_from = _parse_datetime_flexible(from_time_str)
         dt_from = dt_from.replace(tzinfo=tz_from).astimezone(timezone.utc)
 
         # parse end time or use now
         if to_time_str:
             tz_to = _parse_utc_offset(to_tz_str)
-            dt_to = datetime.strptime(to_time_str, "%Y-%m-%d %H:%M:%S")
+            dt_to = _parse_datetime_flexible(to_time_str)
             dt_to = dt_to.replace(tzinfo=tz_to).astimezone(timezone.utc)
         else:
             dt_to = datetime.now(timezone.utc)
