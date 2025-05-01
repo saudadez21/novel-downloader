@@ -61,6 +61,7 @@ include = ["novel_downloader", "novel_downloader.*"]
 [tool.setuptools.package-data]
 "novel_downloader.defaults" = ["base.yaml"]
 "novel_downloader.resources.text" = ["*.txt"]
+"novel_downloader.resources.js_scripts" = ["*.js"]
 "novel_downloader.locales" = ["*.json"]
 
 [tool.setuptools.dynamic]

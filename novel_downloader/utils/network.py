@@ -222,3 +222,66 @@ def download_font_file(
             logger.error("[font] Error writing font to disk: %s", e)
 
     return None
+
+
+def download_js_file(
+    url: str,
+    target_folder: Union[str, Path],
+    *,
+    timeout: int = 10,
+    retries: int = 3,
+    backoff: float = 0.5,
+    on_exist: Literal["overwrite", "skip", "rename"] = "skip",
+) -> Optional[Path]:
+    """
+    Download a JavaScript (.js) file from a URL and save it locally.
+
+    :param url: Fully-qualified JS file URL.
+    :param target_folder: Local folder to save the JS file.
+    :param timeout: Timeout for each request (in seconds).
+    :param retries: Number of retry attempts.
+    :param backoff: Base backoff time between retries (in seconds).
+    :param on_exist: File conflict strategy: 'overwrite', 'skip', or 'rename'.
+    :return: Path to the saved JS file, or None if failed.
+    """
+    parsed = urlparse(url)
+    if not parsed.scheme or not parsed.netloc:
+        logger.warning("[js] Invalid URL: %s", url)
+        return None
+
+    # Determine filename
+    filename = Path(unquote(parsed.path)).name
+    if not filename.endswith(".js"):
+        filename += ".js"
+
+    target_folder = Path(target_folder)
+    target_folder.mkdir(parents=True, exist_ok=True)
+    save_path = target_folder / filename
+
+    if on_exist == "skip" and save_path.exists():
+        logger.info("[js] File exists, skipping download: %s", save_path)
+        return save_path
+
+    response = http_get_with_retry(
+        url,
+        retries=retries,
+        timeout=timeout,
+        backoff=backoff,
+        headers=DEFAULT_HEADERS,
+        stream=False,
+    )
+
+    if response and response.ok:
+        content = response.content
+
+        if on_exist == "rename":
+            save_path = _get_non_conflicting_path(save_path)
+
+        try:
+            _write_file(content=content, filepath=save_path, mode="wb")
+            logger.info("[js] JS file saved to: %s", save_path)
+            return save_path
+        except Exception as e:
+            logger.error("[js] Error writing JS to disk: %s", e)
+
+    return None

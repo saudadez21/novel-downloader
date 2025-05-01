@@ -25,6 +25,7 @@ PACKAGE_ROOT: Path = Path(__file__).parent.parent
 LOCALES_DIR = PACKAGE_ROOT / "locales"
 
 LOGGER_DIR = BASE_CONFIG_DIR / "logs"
+JS_SCRIPT_DIR = BASE_CONFIG_DIR / "js_script"
 STATE_FILE = BASE_CONFIG_DIR / "state.json"
 SETTING_FILE = BASE_CONFIG_DIR / "settings.yaml"
 SITE_RULES_FILE = BASE_CONFIG_DIR / "site_rules.json"

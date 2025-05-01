@@ -16,9 +16,13 @@ Modules:
 """
 
 from .common_parser import CommonParser
-from .qidian_parser import QidianBrowserParser
+from .qidian_parser import (
+    QidianBrowserParser,
+    QidianSessionParser,
+)
 
 __all__ = [
     "CommonParser",
     "QidianBrowserParser",
+    "QidianSessionParser",
 ]

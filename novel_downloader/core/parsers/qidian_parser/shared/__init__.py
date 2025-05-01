@@ -23,6 +23,7 @@ from .helpers import (
     html_to_soup,
     is_encrypted,
     is_vip,
+    vip_status,
 )
 
 __all__ = [
@@ -31,6 +32,7 @@ __all__ = [
     "is_vip",
     "can_view_chapter",
     "is_encrypted",
+    "vip_status",
     "find_ssr_page_context",
     "extract_chapter_info",
 ]

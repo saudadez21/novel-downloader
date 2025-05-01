@@ -21,12 +21,13 @@ from novel_downloader.core.interfaces import ParserProtocol
 from novel_downloader.core.parsers import (
     CommonParser,
     QidianBrowserParser,
+    QidianSessionParser,
 )
 
 _site_map = {
     "qidian": {
         "browser": QidianBrowserParser,
-        # "session": QidianSessionParser,
+        "session": QidianSessionParser,
     },
     # "biquge": ...
 }

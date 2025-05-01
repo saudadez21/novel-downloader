@@ -45,6 +45,17 @@ def is_vip(html_str: str) -> bool:
     return any(m in html_str for m in markers)
 
 
+def vip_status(soup: BeautifulSoup) -> bool:
+    """
+    :param soup: Parsed BeautifulSoup object of the HTML page.
+    :return: True if VIP, False otherwise.
+    """
+    ssr_data = find_ssr_page_context(soup)
+    chapter_info = extract_chapter_info(ssr_data)
+    vip_flag = chapter_info.get("vipStatus", 0)
+    return bool(vip_flag == 1)
+
+
 def can_view_chapter(soup: BeautifulSoup) -> bool:
     """
     Return True if the chapter is viewable by the current user.
