@@ -50,3 +50,31 @@ def update_rules(path: str) -> None:
         click.echo(t("settings_update_rules", path=path))
     except Exception as e:
         raise click.ClickException(t("settings_update_rules_fail", err=e))
+
+
+@settings_cli.command(
+    name="set-cookies", help=t("settings_set_cookies_help")
+)  # type: ignore
+@click.argument("site", required=False)  # type: ignore
+@click.argument("cookies", required=False)  # type: ignore
+@click.pass_context  # type: ignore
+def set_cookies(ctx: Context, site: str, cookies: str) -> None:
+    """
+    Set or update cookies for a site.
+
+    :param site: Site identifier (e.g. 'qidian', 'bqg').
+                 If omitted, you will be prompted to enter it.
+    :param cookies: Cookie payload. Can be a JSON string (e.g. '{"k":"v"}')
+                    or a browser-style string 'k1=v1; k2=v2'.
+                    If omitted, you will be prompted to enter it.
+    """
+    if not site:
+        site = click.prompt(t("settings_set_cookies_prompt_site"), type=str)
+    if not cookies:
+        cookies = click.prompt(t("settings_set_cookies_prompt_payload"), type=str)
+
+    try:
+        state_mgr.set_cookies(site, cookies)
+        click.echo(t("settings_set_cookies_success", site=site))
+    except Exception as e:
+        raise click.ClickException(t("settings_set_cookies_fail", err=e))

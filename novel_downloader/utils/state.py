@@ -2,16 +2,16 @@
 # -*- coding: utf-8 -*-
 """
 novel_downloader.utils.state
----------------------------------
+----------------------------
 State management for user preferences and runtime flags.
 
 Supported sections:
 - general: global preferences (e.g. language)
-- sites: per-site flags (e.g. manual_login)
+- sites: per-site flags & data (e.g. manual_login, cookies)
 """
 import json
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Union
 
 from .constants import STATE_FILE
 
@@ -49,6 +49,26 @@ class StateManager:
         self._path.parent.mkdir(parents=True, exist_ok=True)
         content = json.dumps(self._data, ensure_ascii=False, indent=2)
         self._path.write_text(content, encoding="utf-8")
+
+    def _parse_cookie_string(self, cookie_str: str) -> Dict[str, str]:
+        """
+        Parse a Cookie header string into a dict.
+
+        :param cookie_str: e.g. 'k1=v1; k2=v2; k3'
+        :return: mapping cookie names to values (missing '=' yields empty string)
+        :rtype: dict[str, str]
+        """
+        cookies: Dict[str, str] = {}
+        for item in cookie_str.split(";"):
+            item = item.strip()
+            if not item:
+                continue
+            if "=" in item:
+                k, v = item.split("=", 1)
+                cookies[k.strip()] = v.strip()
+            else:
+                cookies[item] = ""
+        return cookies
 
     def get_language(self) -> str:
         """
@@ -88,6 +108,48 @@ class StateManager:
         sites = self._data.setdefault("sites", {})
         site_data = sites.setdefault(site, {})
         site_data["manual_login"] = flag
+        self._save()
+
+    def get_cookies(self, site: str) -> Dict[str, str]:
+        """
+        Retrieve the persisted cookies for a specific site.
+
+        :param site: Site identifier (e.g. 'qidian', 'bqg')
+        :return: A dict mapping cookie names to values. Returns empty dict if not set.
+        """
+        cookies = self._data.get("sites", {}).get(site, {}).get("cookies", {})
+        return {str(k): str(v) for k, v in cookies.items()}
+
+    def set_cookies(self, site: str, cookies: Union[str, Dict[str, str]]) -> None:
+        """
+        Persist (overwrite) the cookies for a specific site.
+
+        :param site: Site identifier (e.g. 'qidian', 'bqg')
+        :param cookies: Either a dict mapping cookie names to values,
+                        or a string (JSON or 'k=v; k2=v2') to be parsed.
+        :raises TypeError: if cookies is neither str nor dict
+        """
+        # 1) normalize to dict
+        if isinstance(cookies, dict):
+            cookies_dict = cookies
+        elif isinstance(cookies, str):
+            # try JSON first
+            try:
+                parsed = json.loads(cookies)
+                if isinstance(parsed, dict):
+                    cookies_dict = parsed  # OK!
+                else:
+                    raise ValueError
+            except Exception:
+                # fallback to "k=v; k2=v2" format
+                cookies_dict = self._parse_cookie_string(cookies)
+        else:
+            raise TypeError("`cookies` must be a dict or a str")
+
+        # 2) persist
+        sites = self._data.setdefault("sites", {})
+        site_data = sites.setdefault(site, {})
+        site_data["cookies"] = {str(k): str(v) for k, v in cookies_dict.items()}
         self._save()
 
 

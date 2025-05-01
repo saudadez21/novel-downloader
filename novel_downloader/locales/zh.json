@@ -13,6 +13,11 @@
   "settings_set_config_fail": "保存配置文件失败：{err}",
   "settings_update_rules": "已从 {path} 更新站点规则",
   "settings_update_rules_fail": "更新站点规则失败：{err}",
+  "settings_set_cookies_help": "为特定站点设置 Cookie",
+  "settings_set_cookies_prompt_site": "站点标识 (例如 'qidian')",
+  "settings_set_cookies_prompt_payload": "Cookie 内容 (JSON 或 'k=v; k2=v2')",
+  "settings_set_cookies_success": "已更新站点 '{site}' 的 Cookie",
+  "settings_set_cookies_fail": "设置 Cookie 失败：{err}",
 
   "interactive_help": "小说选择和预览的交互式模式。",
   "interactive_browse_help": "以交互方式浏览可用小说。",

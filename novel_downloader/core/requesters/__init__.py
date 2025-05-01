@@ -15,9 +15,13 @@ Subpackages:
 """
 
 from .common_requester import CommonSession
-from .qidian_requester import QidianBrowser
+from .qidian_requester import (
+    QidianBrowser,
+    QidianSession,
+)
 
 __all__ = [
     "CommonSession",
     "QidianBrowser",
+    "QidianSession",
 ]

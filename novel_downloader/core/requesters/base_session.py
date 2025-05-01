@@ -192,6 +192,25 @@ class BaseSession(RequesterProtocol, abc.ABC):
             return {}
         return {k: v for k, v in self._session.headers.items() if isinstance(v, str)}
 
+    def update_cookies(self, cookies: Dict[str, str], overwrite: bool = True) -> None:
+        """
+        Update cookies for the current session (if initialized) as well as for the
+        internal cache kept in ``self._cookies`` so that subsequent ``_setup`` calls
+        also see the latest values.
+        """
+        if not cookies:
+            return
+
+        if overwrite:
+            for k, v in cookies.items():
+                self._cookies[str(k)] = str(v)
+        else:
+            for k, v in cookies.items():
+                self._cookies.setdefault(str(k), str(v))
+
+        if self._session is not None:
+            self._session.cookies.update(self._cookies)
+
     def shutdown(self) -> None:
         """
         Shutdown and clean up the session.

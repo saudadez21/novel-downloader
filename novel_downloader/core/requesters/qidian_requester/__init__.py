@@ -10,10 +10,13 @@ page navigation, and data retrieval using a browser-based automation approach.
 
 Modules:
 - qidian_browser: Implements the QidianBrowser class for automated browser control.
+- qidian_session: Implements the QidianSession class.
 """
 
 from .qidian_broswer import QidianBrowser
+from .qidian_session import QidianSession
 
 __all__ = [
     "QidianBrowser",
+    "QidianSession",
 ]

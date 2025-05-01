@@ -13,6 +13,11 @@
   "settings_set_config_fail": "Failed to save config file: {err}",
   "settings_update_rules": "Site rules updated from {path}",
   "settings_update_rules_fail": "Failed to update site rules: {err}",
+  "settings_set_cookies_help": "Set cookies for a specific site.",
+  "settings_set_cookies_prompt_site": "Site identifier (e.g. 'qidian')",
+  "settings_set_cookies_prompt_payload": "Cookie payload (JSON or 'k=v; k2=v2')",
+  "settings_set_cookies_success": "Cookies for site '{site}' have been updated.",
+  "settings_set_cookies_fail": "Failed to set cookies: {err}",
 
   "interactive_help": "Interactive mode for novel selection and preview.",
   "interactive_browse_help": "Browse available novels interactively.",

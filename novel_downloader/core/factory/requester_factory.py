@@ -21,12 +21,13 @@ from novel_downloader.core.interfaces import RequesterProtocol
 from novel_downloader.core.requesters import (
     CommonSession,
     QidianBrowser,
+    QidianSession,
 )
 
 _site_map = {
     "qidian": {
         "browser": QidianBrowser,
-        # "session": QidianSession,
+        "session": QidianSession,
     },
     # "biquge": ...
 }
