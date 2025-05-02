@@ -9,12 +9,9 @@
 **novel-downloader** 是一个通用的小说下载库 / CLI 工具,
 - 大多数支持的站点仅依赖 [`requests`](https://github.com/psf/requests) 进行 HTTP 抓取
 - 对于起点中文网 (Qidian), 可在配置中选择:
-  - `mode: requests` : 纯 Requests 模式
+  - `mode: session` : 纯 Requests 模式
   - `mode: browser`  : 基于 DrissionPage 驱动 Chrome 的浏览器模式（可处理更复杂的 JS/加密）。
 - 如果在 `browser` 模式下且 `login_required: true`, 首次运行会自动打开浏览器, 请完成登录后继续。
-
-项目提供了完整的 Python 包结构（含 `pyproject.toml`）,
-可以通过 `pip install .` 或 `pip install git+https://github.com/BowenZ217/novel-downloader.git` 安装为库, 并使用 `novel-cli` CLI 入口。
 
 ---
 
@@ -29,28 +26,23 @@
 
 ---
 
-## 环境准备
-
-1. **浏览器依赖 (仅 Browser 模式)**
-   - 如使用 `mode: browser`, 需安装 **Google Chrome/Chromium**。
-   - 如果出现 “无法找到浏览器可执行文件路径, 请手动配置” 提示, 请参考 [DrissionPage 入门指南](https://www.drissionpage.cn/get_start/before_start/)。
-
-2. **Python 环境**
-   为避免包冲突, 建议创建独立环境：
-   推荐使用 Conda 或 `venv` 创建独立环境, 避免包冲突：
-   ```bash
-   conda create -n novel-downloader python=3.11 -y
-   conda activate novel-downloader
-   ```
-   或
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate
-   ```
-
----
-
 ## 安装
+
+**Python 环境**
+为避免包冲突, 建议创建独立环境：
+推荐使用 Conda 或 `venv` 创建独立环境, 避免包冲突：
+```bash
+conda create -n novel-downloader python=3.11 -y
+conda activate novel-downloader
+```
+或
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+项目提供了完整的 Python 包结构（含 `pyproject.toml`）,
+可以通过 `pip install .` 或 `pip install git+https://github.com/BowenZ217/novel-downloader.git` 安装为库, 并使用 `novel-cli` CLI 入口。
 
 ```bash
 # 克隆项目
@@ -65,9 +57,56 @@ pip install .
 
 ---
 
+## 环境准备
+
+### **浏览器依赖 (仅 Browser 模式)**
+   - 如使用 `mode: browser`, 需安装 **Google Chrome/Chromium**。
+   - 如果出现 “无法找到浏览器可执行文件路径, 请手动配置” 提示, 请参考 [DrissionPage 入门指南](https://www.drissionpage.cn/get_start/before_start/)。
+
+### Qidian 的 VIP 章节解析 (session 模式)
+
+**注**: 如果使用的是 `mode: browser` 模式, 无需进行以下步骤: 程序会自动打开浏览器提示登录并维持会话, 可直接解析 VIP 章节, 无需安装 Node.js 或设置 Cookie。
+
+起点的 VIP 章节采用了基于 JavaScript 的加密 (Fock 模块)。在 `mode: session` 模式下, 当遇到 VIP 章节时, 程序会调用本地 `Node.js` 脚本进行解密。
+
+此功能依赖系统已安装 [Node.js](https://nodejs.org/), 并确保 `node` 命令可在命令行中访问。
+
+未安装 `Node.js` 时, 程序将报错提示 `Node.js is not installed or not in PATH.`。
+建议安装稳定版本 (LTS) 即可: [https://nodejs.org](https://nodejs.org)
+
+**注意：VIP 章节访问需要登录 Cookie。**
+在使用 `session` 模式前, 请先通过以下命令设置自己的 cookie, 并确保包含以下关键字段：
+
+```
+ywguid, ywkey, ywopenid, w_tsfp, ...
+```
+
+这些字段通常会在登录状态下由浏览器自动生成。
+
+你可以在浏览器登录起点后, 通过浏览器开发者工具 (F12) 复制完整的 Cookie 字符串:
+
+1. 打开浏览器, 登录 [https://www.qidian.com](https://www.qidian.com)
+2. 按 `F12` 打开开发者工具
+3. 切到「Console」控制台
+4. 粘贴下面这行代码并回车:
+    ```js
+    copy(document.cookie)
+    ```
+5. 然后直接粘贴到终端使用：
+    ```bash
+    novel-cli settings set-cookies qidian "粘贴这里"
+    ```
+
+    或者直接运行命令后按提示交互输入:
+    ```bash
+    novel-cli settings set-cookies
+    ```
+
+---
+
 ## 配置
 
-1. 复制示例配置到工作目录：
+1. 复制示例配置：
    ```bash
    cp config/sample_settings.yaml config/settings.yaml
    ```
@@ -80,8 +119,8 @@ pip install .
        book_ids:
          - "1234567890"
          - "0987654321"
-       # 抓取模式, 可选 "requests" 或 "browser"
-       mode: "browser"
+       # 抓取模式, 可选 "session" 或 "browser"
+       mode: "session"
        # 是否要登录后再爬取
        login_required: true
    ```
@@ -202,6 +241,7 @@ Commands:
   set-lang LANG       在中文 (zh) 和英文 (en) 之间切换语言
   set-config PATH     设置并保存自定义 YAML 配置文件
   update-rules PATH   从 TOML/YAML/JSON 文件更新站点规则
+  set-cookies [SITE] [COOKIES]   为指定站点设置 Cookie, 可省略参数交互输入
 ```
 
 **示例：**
@@ -215,6 +255,12 @@ novel-cli settings set-config config/settings.yaml
 
 # 更新站点解析规则
 novel-cli settings update-rules config/sample_rules.toml
+
+# 为起点设置 Cookie (方式 1：一行输入)
+novel-cli settings set-cookies qidian '{"token": "abc123"}'
+
+# 为起点设置 Cookie (方式 2：交互输入)
+novel-cli settings set-cookies
 ```
 
 ---
@@ -302,9 +348,6 @@ novel-cli settings update-rules config/sample_rules.toml
 以下为计划中的特性及优化方向
 
 ### 支持更多站点
-
-
-### 移除 Qidian 对 DrissionPage 的依赖, 改为解析 JS 注入数据 (session 模式)
 
 
 ### 加密字体识别优化 (基于 PaddleOCR)
