@@ -55,7 +55,7 @@ class QidianBrowserParser(BaseParser):
         """
         return parse_book_info(html)
 
-    def parse_chapter(self, html_str: str, chapter_id: str) -> str:
+    def parse_chapter(self, html_str: str, chapter_id: str) -> Dict[str, Any]:
         """
         :param html: Raw HTML of the chapter page.
         :param chapter_id: Identifier of the chapter being parsed.

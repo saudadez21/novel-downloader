@@ -118,7 +118,7 @@ class CommonDownloader(BaseDownloader):
                     logger.warning("%s Skipping chapter without chapterId", TAG)
                     continue
 
-                chap_path = chapter_dir / f"{cid}.txt"
+                chap_path = chapter_dir / f"{cid}.json"
                 if chap_path.exists() and skip_existing:
                     logger.debug(
                         "%s Chapter already exists, skipping: %s",
@@ -142,10 +142,10 @@ class CommonDownloader(BaseDownloader):
                             html_path,
                         )
 
-                    chap_text = self.parser.parse_chapter(chap_html, cid)
-                    if not chap_text:
+                    chap_json = self.parser.parse_chapter(chap_html, cid)
+                    if not chap_json:
                         logger.warning(
-                            "%s Parsed chapter text is empty, skipping: %s (%s)",
+                            "%s Parsed chapter json is empty, skipping: %s (%s)",
                             TAG,
                             chap_title,
                             cid,
@@ -161,7 +161,7 @@ class CommonDownloader(BaseDownloader):
                     )
                     continue
 
-                save_as_txt(chap_text, chap_path)
+                save_as_json(chap_json, chap_path)
                 logger.info("%s Saved chapter: %s (%s)", TAG, chap_title, cid)
 
         self.saver.save(book_id)

@@ -9,7 +9,7 @@ novel_downloader.core.parsers.qidian_parser.browser.chapter_encrypted
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict
 
 from bs4 import BeautifulSoup
 
@@ -28,7 +28,7 @@ def parse_encrypted_chapter(
     parser: QidianBrowserParser,
     soup: BeautifulSoup,
     chapter_id: str,
-) -> str:
+) -> Dict[str, Any]:
     """
     Extract and return the formatted textual content of an encrypted chapter.
 
@@ -51,10 +51,10 @@ def parse_encrypted_chapter(
             logger.warning(
                 "[Parser] ssr_chapterInfo not found for chapter '%s'", chapter_id
             )
-            return ""
-        return ""
+            return {}
+        return {}
     except Exception as e:
         logger.warning(
             "[Parser] parse error for encrypted chapter '%s': %s", chapter_id, e
         )
-        return ""
+        return {}

@@ -123,7 +123,7 @@ class QidianSession(BaseSession):
             try:
                 resp = self.get(url)
                 resp.raise_for_status()
-                sleep_with_random_delay(base_delay)
+                sleep_with_random_delay(base_delay, base_delay * 0.2)
                 return resp.text
             except Exception as exc:
                 logger.warning(
@@ -157,7 +157,7 @@ class QidianSession(BaseSession):
             try:
                 resp = self.get(url)
                 resp.raise_for_status()
-                sleep_with_random_delay(base_delay)
+                sleep_with_random_delay(base_delay, base_delay * 0.2)
                 return resp.text
             except Exception as exc:
                 logger.warning(
@@ -186,7 +186,7 @@ class QidianSession(BaseSession):
             try:
                 resp = self.get(self.QIDIAN_BOOKCASE_URL, allow_redirects=True)
                 resp.raise_for_status()
-                sleep_with_random_delay(base_delay)
+                sleep_with_random_delay(base_delay, base_delay * 0.2)
                 return resp.text
             except Exception as exc:
                 logger.warning(

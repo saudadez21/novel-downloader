@@ -41,11 +41,13 @@ class QidianDownloader(BaseDownloader):
         cache_base = self.cache_dir / "qidian" / book_id
         info_path = raw_base / "book_info.json"
         chapter_dir = raw_base / "chapters"
+        encrypted_chapter_dir = raw_base / "encrypted_chapters"
         if save_html:
             chapters_html_dir = cache_base / "html"
 
         raw_base.mkdir(parents=True, exist_ok=True)
         chapter_dir.mkdir(parents=True, exist_ok=True)
+        encrypted_chapter_dir.mkdir(parents=True, exist_ok=True)
 
         book_info: Dict[str, Any]
 
@@ -91,7 +93,8 @@ class QidianDownloader(BaseDownloader):
                     logger.warning("%s Skipping chapter without chapterId", TAG)
                     continue
 
-                chap_path = chapter_dir / f"{cid}.txt"
+                chap_path = chapter_dir / f"{cid}.json"
+
                 if chap_path.exists() and skip_existing:
                     logger.debug(
                         "%s Chapter already exists, skipping: %s",
@@ -104,29 +107,40 @@ class QidianDownloader(BaseDownloader):
                 logger.info("%s Fetching chapter: %s (%s)", TAG, chap_title, cid)
                 chap_html = self.requester.get_book_chapter(book_id, cid, wait_time)
 
-                if save_html and not is_vip(chap_html):
-                    folder = (
-                        "html_encrypted"
-                        if self.parser.is_encrypted(chap_html)  # type: ignore[attr-defined]
-                        else "html_plain"
+                is_encrypted = self.parser.is_encrypted(chap_html)  # type: ignore[attr-defined]
+
+                folder = encrypted_chapter_dir if is_encrypted else chapter_dir
+                chap_path = folder / f"{cid}.json"
+
+                if chap_path.exists() and skip_existing:
+                    logger.debug(
+                        "%s Chapter already exists, skipping: %s",
+                        TAG,
+                        cid,
                     )
-                    html_path = chapters_html_dir / folder / f"{cid}.html"
+                    continue
+
+                if save_html and not is_vip(chap_html):
+                    folder = chapters_html_dir / (
+                        "html_encrypted" if is_encrypted else "html_plain"
+                    )
+                    html_path = folder / f"{cid}.html"
                     save_as_txt(chap_html, html_path, on_exist="skip")
                     logger.debug(
                         "%s Saved raw HTML for chapter %s to %s", TAG, cid, html_path
                     )
 
-                chap_text = self.parser.parse_chapter(chap_html, cid)
-                if not chap_text:
+                chap_json = self.parser.parse_chapter(chap_html, cid)
+                if not chap_json:
                     logger.warning(
-                        "%s Parsed chapter text is empty, skipping: %s (%s)",
+                        "%s Parsed chapter json is empty, skipping: %s (%s)",
                         TAG,
                         chap_title,
                         cid,
                     )
                     continue
 
-                save_as_txt(chap_text, chap_path)
+                save_as_json(chap_json, chap_path)
                 logger.info("%s Saved chapter: %s (%s)", TAG, chap_title, cid)
 
         self.saver.save(book_id)
@@ -141,7 +155,7 @@ class QidianDownloader(BaseDownloader):
 
 def is_vip(html_str: str) -> bool:
     """
-    Return True if page indicates VIP‐only content.
+    Return True if page indicates VIP-only content.
 
     :param html_str: Raw HTML string.
     """

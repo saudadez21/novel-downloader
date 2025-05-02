@@ -58,7 +58,7 @@ class BaseParser(ParserProtocol, abc.ABC):
         ...
 
     @abc.abstractmethod
-    def parse_chapter(self, html_str: str, chapter_id: str) -> str:
+    def parse_chapter(self, html_str: str, chapter_id: str) -> Dict[str, Any]:
         """
         Parse a single chapter page and extract clean text or simplified HTML.
 

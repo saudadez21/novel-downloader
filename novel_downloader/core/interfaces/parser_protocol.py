@@ -29,7 +29,7 @@ class ParserProtocol(Protocol):
         """
         ...
 
-    def parse_chapter(self, html_str: str, chapter_id: str) -> str:
+    def parse_chapter(self, html_str: str, chapter_id: str) -> Dict[str, Any]:
         """
         Parse and return the text content of one chapter.
 

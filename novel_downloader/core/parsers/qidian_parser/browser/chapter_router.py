@@ -13,7 +13,7 @@ routes the parsing task to either the encrypted or normal chapter parser.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict
 
 from ..shared import (
     can_view_chapter,
@@ -33,7 +33,7 @@ def parse_chapter(
     parser: QidianBrowserParser,
     html_str: str,
     chapter_id: str,
-) -> str:
+) -> Dict[str, Any]:
     """
     Extract and return the formatted textual content of chapter.
 
@@ -49,7 +49,7 @@ def parse_chapter(
             logger.warning(
                 "[Parser] Chapter '%s' is not purchased or inaccessible.", chapter_id
             )
-            return ""
+            return {}
 
         if is_encrypted(soup):
             return parse_encrypted_chapter(parser, soup, chapter_id)
@@ -57,4 +57,4 @@ def parse_chapter(
         return parse_normal_chapter(soup, chapter_id)
     except Exception as e:
         logger.warning("[Parser] parse error for chapter '%s': %s", chapter_id, e)
-        return ""
+        return {}

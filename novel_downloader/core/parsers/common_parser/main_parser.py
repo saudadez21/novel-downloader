@@ -46,7 +46,7 @@ class CommonParser(BaseParser):
         rules = self._site_rule["book_info"]
         return extractor.extract_book_info(rules)
 
-    def parse_chapter(self, html_str: str, chapter_id: str) -> str:
+    def parse_chapter(self, html_str: str, chapter_id: str) -> Dict[str, Any]:
         """
         Parse a single chapter page and extract clean text or simplified HTML.
 
@@ -65,8 +65,15 @@ class CommonParser(BaseParser):
         title_steps = chapter_rules.get("title")
         title = extractor.extract_field(title_steps["steps"]) if title_steps else ""
         content = extractor.extract_field(content_steps["steps"])
+        if not content:
+            return {}
 
-        return f"{title}\n\n{content}" if title else content
+        return {
+            "id": chapter_id,
+            "title": title or "Untitled",
+            "content": content,
+            "site": self._site,
+        }
 
     @property
     def site(self) -> str:

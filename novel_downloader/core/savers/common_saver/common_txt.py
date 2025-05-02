@@ -18,7 +18,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from novel_downloader.utils.file_utils import save_as_txt
-from novel_downloader.utils.text_utils import clean_chapter_title
+from novel_downloader.utils.text_utils import clean_chapter_title, format_chapter
 
 if TYPE_CHECKING:
     from .main_saver import CommonSaver
@@ -31,9 +31,9 @@ def common_save_as_txt(
     book_id: str,
 ) -> None:
     """
-    将 save_path 文件夹中该小说的所有章节 txt 文件合并保存为一个完整的 txt 文件,
+    将 save_path 文件夹中该小说的所有章节 json 文件合并保存为一个完整的 txt 文件,
     并保存到 out_path 下
-    假设章节文件名格式为 `{chapterId}.txt`
+    假设章节文件名格式为 `{chapterId}.json`
 
     处理流程：
       1. 从 book_info.json 中加载书籍信息 (包含书名、作者、简介及卷章节列表)
@@ -50,6 +50,7 @@ def common_save_as_txt(
     # --- Paths & options ---
     raw_base = saver.raw_data_dir / site / book_id
     chapters_dir = raw_base / "chapters"
+    encrypted_chapter_dir = raw_base / "encrypted_chapters"
     out_dir = saver.output_dir
 
     # Ensure output directory exists
@@ -82,8 +83,18 @@ def common_save_as_txt(
             if not chap_id:
                 logger.warning("%s Missing chapterId, skipping: %s", TAG, chap)
                 continue
-            txt_path = chapters_dir / f"{chap_id}.txt"
-            if not txt_path.exists():
+            json_path = chapters_dir / f"{chap_id}.json"
+            fallback_path = encrypted_chapter_dir / f"{chap_id}.json"
+
+            if not json_path.exists() and fallback_path.exists():
+                json_path = fallback_path
+                logger.info(
+                    "%s Using fallback encrypted chapter: %s (%s)",
+                    TAG,
+                    chap_title,
+                    chap_id,
+                )
+            elif not json_path.exists():
                 logger.warning(
                     "%s Missing chapter file: %s (%s), skipping.",
                     TAG,
@@ -92,19 +103,18 @@ def common_save_as_txt(
                 )
                 continue
             try:
-                content = txt_path.read_text(encoding="utf-8")
+                chapter_data = json.loads(json_path.read_text(encoding="utf-8"))
             except Exception as e:
-                logger.error("%s Error reading %s: %s", TAG, txt_path, e)
+                logger.error("%s Error reading %s: %s", TAG, json_path, e)
                 continue
 
-            # Clean the chapter title in content
-            clean_title = clean_chapter_title(chap_title)
-            lines = content.strip().splitlines()
-            if lines and lines[0].strip() == chap_title.strip():
-                lines = lines[1:]  # Remove first line if it's the title
-            content_cleaned = "\n".join(lines).strip()
+            # Extract structured fields
+            title = chapter_data.get("title", chap_title).strip()
+            content = chapter_data.get("content", "").strip()
+            author_say = chapter_data.get("author_say", "").strip()
+            clean_title = clean_chapter_title(title)
 
-            parts.append(f"{clean_title}\n\n{content_cleaned}\n\n")
+            parts.append(format_chapter(clean_title, content, author_say))
             latest_chapter = clean_title
 
     # --- Build header ---
@@ -140,7 +150,7 @@ def common_save_as_txt(
 
     header = "\n".join(header_lines)
 
-    final_text = header + "\n\n" + "".join(parts).strip()
+    final_text = header + "\n\n" + "\n\n".join(parts).strip()
 
     # --- Determine output file path ---
     out_name = saver.get_filename(title=name, author=author, ext="txt")
