@@ -10,7 +10,7 @@
 - 大多数支持的站点仅依赖 [`requests`](https://github.com/psf/requests) 进行 HTTP 抓取
 - 对于起点中文网 (Qidian), 可在配置中选择:
   - `mode: session` : 纯 Requests 模式
-  - `mode: browser`  : 基于 DrissionPage 驱动 Chrome 的浏览器模式（可处理更复杂的 JS/加密）。
+  - `mode: browser`  : 基于 DrissionPage 驱动 Chrome 的浏览器模式 (可处理更复杂的 JS/加密)。
 - 如果在 `browser` 模式下且 `login_required: true`, 首次运行会自动打开浏览器, 请完成登录后继续。
 
 ---
@@ -29,8 +29,8 @@
 ## 安装
 
 **Python 环境**
-为避免包冲突, 建议创建独立环境：
-推荐使用 Conda 或 `venv` 创建独立环境, 避免包冲突：
+为避免包冲突, 建议创建独立环境:
+推荐使用 Conda 或 `venv` 创建独立环境, 避免包冲突:
 ```bash
 conda create -n novel-downloader python=3.11 -y
 conda activate novel-downloader
@@ -41,7 +41,7 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-项目提供了完整的 Python 包结构（含 `pyproject.toml`）,
+项目提供了完整的 Python 包结构 (含 `pyproject.toml`),
 可以通过 `pip install .` 或 `pip install git+https://github.com/BowenZ217/novel-downloader.git` 安装为库, 并使用 `novel-cli` CLI 入口。
 
 ```bash
@@ -74,8 +74,8 @@ pip install .
 未安装 `Node.js` 时, 程序将报错提示 `Node.js is not installed or not in PATH.`。
 建议安装稳定版本 (LTS) 即可: [https://nodejs.org](https://nodejs.org)
 
-**注意：VIP 章节访问需要登录 Cookie。**
-在使用 `session` 模式前, 请先通过以下命令设置自己的 cookie, 并确保包含以下关键字段：
+**注意:VIP 章节访问需要登录 Cookie。**
+在使用 `session` 模式前, 请先通过以下命令设置自己的 cookie, 并确保包含以下关键字段:
 
 ```
 ywguid, ywkey, ywopenid, w_tsfp, ...
@@ -92,7 +92,7 @@ ywguid, ywkey, ywopenid, w_tsfp, ...
     ```js
     copy(document.cookie)
     ```
-5. 然后直接粘贴到终端使用：
+5. 然后直接粘贴到终端使用:
     ```bash
     novel-cli settings set-cookies qidian "粘贴这里"
     ```
@@ -106,12 +106,12 @@ ywguid, ywkey, ywopenid, w_tsfp, ...
 
 ## 配置
 
-1. 复制示例配置：
+1. 复制示例配置:
    ```bash
    cp config/sample_settings.yaml config/settings.yaml
    ```
 
-2. 编辑 `config/settings.yaml`, 示例内容：
+2. 编辑 `config/settings.yaml`, 示例内容:
    ```yaml
    sites:
      qidian:
@@ -125,7 +125,7 @@ ywguid, ywkey, ywopenid, w_tsfp, ...
        login_required: true
    ```
 
-3. 将配置文件注册到 CLI：
+3. 将配置文件注册到 CLI:
    ```bash
    novel-cli settings set-config config/settings.yaml
    ```
@@ -195,7 +195,7 @@ Commands:
 
 ### download
 
-按书籍 ID 下载完整小说, 支持从命令行或配置文件读取 ID：
+按书籍 ID 下载完整小说, 支持从命令行或配置文件读取 ID:
 
 ```
 novel-cli download [OPTIONS] [BOOK_IDS]...
@@ -210,7 +210,7 @@ Options:
   -h, --help         显示此消息并退出
 ```
 
-**示例：**
+**示例:**
 
 ```bash
 # 直接指定要下载的书籍 ID
@@ -227,7 +227,7 @@ novel-cli download --site biquge 8_7654
 
 ### settings
 
-配置和管理下载器相关设置：
+配置和管理下载器相关设置:
 
 ```
 novel-cli settings [OPTIONS] COMMAND [ARGS]...
@@ -244,7 +244,7 @@ Commands:
   set-cookies [SITE] [COOKIES]   为指定站点设置 Cookie, 可省略参数交互输入
 ```
 
-**示例：**
+**示例:**
 
 ```bash
 # 切换界面语言为英文
@@ -256,16 +256,63 @@ novel-cli settings set-config config/settings.yaml
 # 更新站点解析规则
 novel-cli settings update-rules config/sample_rules.toml
 
-# 为起点设置 Cookie (方式 1：一行输入)
+# 为起点设置 Cookie (方式 1:一行输入)
 novel-cli settings set-cookies qidian '{"token": "abc123"}'
 
-# 为起点设置 Cookie (方式 2：交互输入)
+# 为起点设置 Cookie (方式 2:交互输入)
 novel-cli settings set-cookies
 ```
 
 ---
 
-> **提示**：
+当然可以，下面是模仿 `settings` 的风格写的 `clean` 子命令说明，适合放进 README:
+
+---
+
+### clean
+
+清理下载器生成的本地缓存和配置文件:
+
+```
+novel-cli clean [OPTIONS]
+
+  清理缓存和配置文件
+```
+
+**Options:**
+
+| 选项             | 说明                                        |
+| -------------- | ----------------------------------------- |
+| `--logs`       | 清理日志目录 (logs/)                             |
+| `--cache`      | 清理脚本缓存与浏览器数据 (js\_script/, browser\_data/) |
+| `--state`      | 清理状态文件与 cookies (state.json)                        |
+| `--all`        | 清除所有配置、缓存、状态 (包括设置文件)                      |
+| `--yes`        | 跳过确认提示                                    |
+| `--help`       | 显示此消息并退出                                  |
+
+---
+
+**示例:**
+
+```bash
+# 清理缓存目录和浏览器数据
+novel-cli clean --cache
+
+# 清理日志和状态文件
+novel-cli clean --logs --state
+
+# 清理所有数据 (包括配置文件)，交互确认
+novel-cli clean --all
+
+# 无需确认直接清除所有数据 (适合脚本使用)
+novel-cli clean --all --yes
+```
+
+> 注意:`--all` 会清除包括设置文件在内的所有本地数据，使用时请谨慎！
+
+---
+
+> **提示**:
 > - 所有子命令均支持 `--help` 查看本地化帮助文本
 > - 切换语言后, 帮助文本与运行时提示会同步变更为中文或英文
 
@@ -309,8 +356,8 @@ novel-cli settings set-cookies
 
 | 参数名           | 类型             | 默认值    | 说明                                       |
 |-----------------|-----------------|---------|------------------------------------------|
-| `book_ids`        | array[string]    | —       | 小说 ID 列表（如 `1010868264`）               |
-| `mode`            | string           | `"browser"` | 请求方式：`browser` 或 `session`              |
+| `book_ids`        | array[string]    | —       | 小说 ID 列表 (如 `1010868264`)               |
+| `mode`            | string           | `"browser"` | 请求方式:`browser` 或 `session`              |
 | `login_required`  | bool             | false   | 是否需要登录才能访问                         |
 | `decode_font`     | bool             | false   | 是否尝试本地解码混淆字体                       |
 | `use_freq`        | bool             | false   | 是否使用字符频率分析                         |
@@ -332,7 +379,7 @@ novel-cli settings set-cookies
 | `epub.include_cover`          | bool    | true                          | EPUB 中是否包含封面                         |
 | `epub.include_toc`            | bool    | true                          | EPUB 中是否自动生成目录                     |
 
-> **提示**：你可以根据自己需求在 `settings.yaml` 中添加或删除字段, 未列出的配置项请参考源码注释或自行扩展。
+> **提示**:你可以根据自己需求在 `settings.yaml` 中添加或删除字段, 未列出的配置项请参考源码注释或自行扩展。
 
 ---
 

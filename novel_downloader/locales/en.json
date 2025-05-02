@@ -2,6 +2,7 @@
   "cli_help": "Novel Downloader CLI tool.",
   "help_config": "Path to config file",
   "help_download": "Download novels",
+  "help_clean": "Clean cache and configuration files",
   "main_no_command": "No command provided, entering interactive mode…",
 
   "settings_help": "Configure downloader settings.",
@@ -41,5 +42,16 @@
   "download_only_example": "Only example book IDs found (e.g. '{example}').",
   "download_edit_config": "Please edit your config and replace them with real book IDs.",
   "download_downloading": "Downloading book {book_id} from {site}...",
-  "download_prompt_parse": "Parse..."
+  "download_prompt_parse": "Parse...",
+
+  "clean_logs": "Clean log directory",
+  "clean_cache": "Clean script and browser cache",
+  "clean_state": "Clean state file (state.json)",
+  "clean_all": "Clean all configuration, cache, and state",
+  "clean_yes": "Skip confirmation prompt",
+  "clean_confirm": "Are you sure you want to delete all local data? (y/N)",
+  "clean_nothing": "No clean targets specified.",
+  "clean_deleted": "Deleted",
+  "clean_not_found": "Not found",
+  "clean_cancelled": "Clean operation cancelled"
 }

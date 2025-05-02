@@ -12,7 +12,7 @@ from typing import Optional
 import click
 from click import Context
 
-from novel_downloader.cli import download, interactive, settings
+from novel_downloader.cli import clean, download, interactive, settings
 from novel_downloader.utils.i18n import t
 from novel_downloader.utils.logger import setup_logging
 
@@ -27,7 +27,8 @@ from novel_downloader.utils.logger import setup_logging
 @click.pass_context  # type: ignore
 def cli_main(ctx: Context, config: Optional[str]) -> None:
     """Novel Downloader CLI."""
-    setup_logging()
+    if ctx.invoked_subcommand != "clean":
+        setup_logging()
     ctx.ensure_object(dict)
     ctx.obj["config_path"] = config
 
@@ -37,6 +38,7 @@ def cli_main(ctx: Context, config: Optional[str]) -> None:
 
 
 # Register subcommands
+cli_main.add_command(clean.clean_cli)
 cli_main.add_command(download.download_cli)
 cli_main.add_command(interactive.interactive_cli)
 cli_main.add_command(settings.settings_cli)
