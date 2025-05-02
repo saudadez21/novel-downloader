@@ -75,11 +75,7 @@ pip install .
 建议安装稳定版本 (LTS) 即可: [https://nodejs.org](https://nodejs.org)
 
 **注意:VIP 章节访问需要登录 Cookie。**
-在使用 `session` 模式前, 请先通过以下命令设置自己的 cookie, 并确保包含以下关键字段:
-
-```
-ywguid, ywkey, ywopenid, w_tsfp, ...
-```
+在使用 `session` 模式前, 请先通过以下命令设置自己的 cookie
 
 这些字段通常会在登录状态下由浏览器自动生成。
 

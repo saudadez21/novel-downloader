@@ -7,6 +7,7 @@ novel_downloader.utils.constants
 Constants and default paths used throughout the NovelDownloader project.
 """
 
+from importlib.resources import files
 from pathlib import Path
 
 from platformdirs import user_config_dir
@@ -51,3 +52,32 @@ DEFAULT_USER_HEADERS = {
     "User-Agent": DEFAULT_USER_AGENT,
     "Connection": "keep-alive",
 }
+
+BASE_CONFIG_PATH = files("novel_downloader.defaults").joinpath("base.yaml")
+
+# CSS Styles
+CSS_MAIN_PATH = files("novel_downloader.resources.css_styles").joinpath("main.css")
+CSS_VOLUME_INTRO_PATH = files("novel_downloader.resources.css_styles").joinpath(
+    "volume-intro.css"
+)
+
+# Images
+VOLUME_BORDER_IMAGE_PATH = files("novel_downloader.resources.images").joinpath(
+    "volume_border.png"
+)
+
+# JSON
+REPLACE_WORD_MAP_PATH = files("novel_downloader.resources.json").joinpath(
+    "replace_word_map.json"
+)
+
+# JavaScript
+QD_DECRYPT_SCRIPT_PATH = files("novel_downloader.resources.js_scripts").joinpath(
+    "qidian_decrypt_node.js"
+)
+
+# Text Files
+BLACKLIST_PATH = files("novel_downloader.resources.text").joinpath("blacklist.txt")
+
+EPUB_IMAGE_FOLDER = "Images"
+EPUB_TEXT_FOLDER = "Text"

@@ -17,7 +17,10 @@ import uuid
 from pathlib import Path
 from typing import Union
 
-from novel_downloader.utils.constants import JS_SCRIPT_DIR
+from novel_downloader.utils.constants import (
+    JS_SCRIPT_DIR,
+    QD_DECRYPT_SCRIPT_PATH,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -69,12 +72,8 @@ class QidianNodeDecryptor:
 
         # 2) Copy bundled decrypt script into place if missing
         if not self.QIDIAN_DECRYPT_SCRIPT_PATH.exists():
-            from importlib.resources import files
-
             try:
-                resource = files("novel_downloader.resources.js_scripts").joinpath(
-                    self.QIDIAN_DECRYPT_SCRIPT_FILE
-                )
+                resource = QD_DECRYPT_SCRIPT_PATH
                 shutil.copyfile(str(resource), str(self.QIDIAN_DECRYPT_SCRIPT_PATH))
                 logger.info(
                     "[decryptor] Copied decrypt script to %s",

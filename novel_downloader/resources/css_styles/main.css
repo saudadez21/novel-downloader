@@ -1,0 +1,104 @@
+html, body {
+    height: 95%;
+    padding: 0.5em;
+}
+
+.images img {
+    width:100%; /*自适应*/
+}
+.color .images {
+    margin:0 0 1.5em;
+}
+.article .images {
+    margin:1.0em 0;
+    border:1px solid #000
+}
+
+.new-page-after {
+    page-break-after:always;
+}
+
+.cover {
+    width:100%;
+    padding:0px;
+}
+.center {
+    text-align: center;
+    margin-left: 0%;
+    margin-right: 0%;
+}
+.left {
+    text-align: center;
+    margin-left: 0%;
+    margin-right: 0%;
+}
+.right {
+    text-align: right;
+    margin-left: 0%;
+    margin-right: 0%;
+}
+
+hr {
+    margin: 0;
+    border-style: dotted;
+    border-width: 1px 0 0 0;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+h1 {
+    text-indent: 0;
+    duokan-text-indent: 0;
+    line-height: 110%;
+    text-align: center;
+    font-size: 1.2em;
+    margin-top: 0.4em;
+    margin-bottom: 0.4em;
+}
+
+h2, h3, h4, h5, h6 {
+    text-indent: 0;
+    duokan-text-indent: 0;
+    line-height: 110%;
+    font-size: 1.1em;
+    margin-top: 0.4em;
+    margin-bottom: 0.4em;
+}
+
+p {
+    text-align: justify;  /* 让文本两端对齐 */
+    text-indent: 2em;
+    duokan-text-indent: 2em;
+    line-height: 100%;
+    margin-top: 0.4em;
+    margin-bottom: 0.4em;
+}
+
+div.list {
+    text-align: left;
+    font-size: 0.85em;
+    line-height: 130%;
+}
+
+span {
+    text-indent: 0;
+    duokan-text-indent: 0;
+    text-align: left;
+    font-size: 1em;
+}
+
+ol {
+    text-align: left;
+    margin-top: 1.2em;
+    margin-bottom: 1.2em;
+    margin-left: 0;
+    list-style-type: none;
+}
+
+li {
+    text-align: left;
+    margin-top: 0.4em;
+    margin-bottom: 0.4em;
+    margin-left: 0;
+    list-style-type: none;
+}

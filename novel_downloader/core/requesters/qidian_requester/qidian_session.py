@@ -12,6 +12,7 @@ retrieving book information.
 
 from __future__ import annotations
 
+import base64
 import logging
 import time
 from typing import Any, Dict, Optional
@@ -20,7 +21,7 @@ from requests import Response
 
 from novel_downloader.config.models import RequesterConfig
 from novel_downloader.core.requesters.base_session import BaseSession
-from novel_downloader.utils.crypto_utils import update_w_tsfp
+from novel_downloader.utils.crypto_utils import patch_qd_payload_token
 from novel_downloader.utils.state import state_mgr
 from novel_downloader.utils.time_utils import sleep_with_random_delay
 
@@ -60,8 +61,8 @@ class QidianSession(BaseSession):
         **kwargs: Any,
     ) -> Response:
         """
-        Same signature as :py:meth:`BaseSession.get`, but transparently keeps
-        Qidian’s ``w_tsfp`` cookie fresh.
+        Same as :py:meth:`BaseSession.get`, but transparently refreshes
+        a cookie-based token used for request validation.
 
         The method:
         1. Reads the existing cookie (if any);
@@ -72,13 +73,14 @@ class QidianSession(BaseSession):
         if self._session is None:  # defensive – mirrors BaseSession check
             raise RuntimeError("Session is not initialized or has been shut down.")
 
-        # ---- 1. refresh w_tsfp ---------------------------------------------------
-        old_w_tsfp = self._session.cookies.get("w_tsfp", "")
-        if old_w_tsfp:
-            new_w_tsfp = update_w_tsfp(old_w_tsfp, url)
-            self._session.cookies.set("w_tsfp", new_w_tsfp)
-            # keep internal cache in sync so `state_mgr` remains correct
-            self._cookies["w_tsfp"] = new_w_tsfp
+        # ---- 1. refresh token cookie --------------------------------------
+        cookie_key = base64.b64decode("d190c2Zw").decode()
+        old_token = self._session.cookies.get(cookie_key, "")
+
+        if old_token:
+            refreshed_token = patch_qd_payload_token(old_token, url)
+            self._session.cookies.set(cookie_key, refreshed_token)
+            self._cookies[cookie_key] = refreshed_token
 
         # ---- 2. perform the real GET --------------------------------------------
         resp: Response = super().get(url, params=params, **kwargs)

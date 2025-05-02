@@ -13,15 +13,16 @@ This is typically used to load user-supplied or internal default config files.
 import logging
 import shutil
 from importlib.abc import Traversable
-from importlib.resources import files
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
 import yaml
 
 from novel_downloader.utils.cache import cached_load_config
-
-from ..utils.constants import SETTING_FILE
+from novel_downloader.utils.constants import (
+    BASE_CONFIG_PATH,
+    SETTING_FILE,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +47,7 @@ def resolve_config_path(
 
     # Fallback to internal base.yaml
     try:
-        base_yaml = files("novel_downloader.defaults").joinpath("base.yaml")
+        base_yaml = BASE_CONFIG_PATH
         logger.debug("[config] Using internal base.yaml fallback")
         return base_yaml
     except Exception as e:

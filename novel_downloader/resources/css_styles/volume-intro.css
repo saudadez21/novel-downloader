@@ -1,0 +1,56 @@
+/*标题页*/
+
+h1.volume-title-line1 {
+    font-size: 1.25rem;              /* 第一行较大 */
+    font-weight: bold;
+    text-align: center;
+    text-indent: 0em;
+    duokan-text-indent: 0em;
+    color: #6e471c;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+    margin: 0;
+    display: block;
+}
+
+p.volume-title-line2 {
+    font-size: 1rem;            /* 第二行稍小 */
+    font-weight: bold;
+    text-align: center;
+    text-indent: 0em;
+    duokan-text-indent: 0em;
+    color: #6e471c;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+    margin: 0;
+    display: block;
+}
+
+div.border1 {
+    margin: 35% auto 0 auto;
+    text-align: center;
+    text-indent: 0em;
+    duokan-text-indent: 0em;
+}
+
+div.border2 {
+    margin: 0 auto 0 auto;
+    text-align: center;
+    text-indent: 0em;
+    duokan-text-indent: 0em;
+    transform: rotate(180deg);
+    -ms-transform: rotate(180deg);
+    /* IE 9 */
+    -moz-transform: rotate(180deg);
+    /* Firefox */
+    -webkit-transform: rotate(180deg);
+    /* Safari 和 Chrome */
+    -o-transform: rotate(180deg);
+    /* Opera */;
+}
+
+img.border1 {
+    width: 100%;
+}
+
+img.border2 {
+    width: 80%;
+}

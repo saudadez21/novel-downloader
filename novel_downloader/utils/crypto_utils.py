@@ -75,29 +75,41 @@ def rc4_crypt(
     raise ValueError("Mode must be 'encrypt' or 'decrypt'.")
 
 
-def update_w_tsfp(
-    old_w_tsfp: str,
+def _get_key() -> str:
+    encoded = "Lj1qYxMuaXBjMg=="
+    decoded = base64.b64decode(encoded)
+    key = "".join([chr(b ^ 0x5A) for b in decoded])
+    return key
+
+
+def _d(b64str: str) -> str:
+    return base64.b64decode(b64str).decode()
+
+
+def patch_qd_payload_token(
+    enc_token: str,
     new_uri: str,
     *,
-    key: str = "tg09It3*9h",
+    key: str = "",
 ) -> str:
     """
-    Patch Qidian's ``w_tsfp`` parameter with a fresh timestamp & checksum.
+    Patch a timestamp-bearing token with fresh timing and checksum info.
 
-    :param old_w_tsfp: Original encrypted ``w_tsfp`` value from a live request.
-    :type old_w_tsfp: str
-    :param new_uri: The URI that will accompany the updated ``w_tsfp``
-                    (used for checksum calculation).
+    :param enc_token: Encrypted token string from a live request.
+    :type enc_token: str
+    :param new_uri: URI used in checksum generation.
     :type new_uri: str
-    :param key: RC4 key extracted from Qidian's front-end JavaScript.
-                Defaults to 'tg09It3*9h'.
+    :param key: RC4 key extracted from front-end JavaScript (optional).
     :type key: str, optional
 
-    :return: Freshly encrypted ``w_tsfp`` value ready for new requests.
+    :return: Updated token with new timing and checksum values.
     :rtype: str
     """
+    if not key:
+        key = _get_key()
+
     # Step 1 – decrypt --------------------------------------------------
-    decrypted_json: str = rc4_crypt(key, old_w_tsfp, mode="decrypt")
+    decrypted_json: str = rc4_crypt(key, enc_token, mode="decrypt")
     payload: Dict[str, Any] = json.loads(decrypted_json)
 
     # Step 2 – rebuild timing fields -----------------------------------
@@ -106,18 +118,24 @@ def update_w_tsfp(
     duration = max(300, min(1000, int(random.normalvariate(600, 150))))
     timestamp = loadts + duration
 
-    # Step 3 – recalculate checksum ------------------------------------
-    fingerprint = payload.get("fingerprint", "")
-    abnormal = payload.get("abnormal", "0" * 32)
-    combined = f"{new_uri}{loadts}{fingerprint}"
-    checksum = hashlib.md5(combined.encode("utf-8")).hexdigest()
+    # Step 3 – recalculate ------------------------------------
+    fp_key = _d("ZmluZ2VycHJpbnQ=")
+    ab_key = _d("YWJub3JtYWw=")
+    ck_key = _d("Y2hlY2tzdW0=")
+    lt_key = _d("bG9hZHRz")
+    ts_key = _d("dGltZXN0YW1w")
+
+    fp_val = payload.get(fp_key, "")
+    ab_val = payload.get(ab_key, "0" * 32)
+    comb = f"{new_uri}{loadts}{fp_val}"
+    ck_val = hashlib.md5(comb.encode("utf-8")).hexdigest()
 
     new_payload = {
-        "loadts": loadts,
-        "timestamp": timestamp,
-        "fingerprint": fingerprint,
-        "abnormal": abnormal,
-        "checksum": checksum,
+        lt_key: loadts,
+        ts_key: timestamp,
+        fp_key: fp_val,
+        ab_key: ab_val,
+        ck_key: ck_val,
     }
 
     # Step 4 – encrypt and return --------------------------------------
