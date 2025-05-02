@@ -53,7 +53,8 @@ def vip_status(soup: BeautifulSoup) -> bool:
     ssr_data = find_ssr_page_context(soup)
     chapter_info = extract_chapter_info(ssr_data)
     vip_flag = chapter_info.get("vipStatus", 0)
-    return bool(vip_flag == 1)
+    fens_flag = chapter_info.get("fEnS", 0)
+    return bool(vip_flag == 1 and fens_flag != 0)
 
 
 def can_view_chapter(soup: BeautifulSoup) -> bool:
