@@ -261,10 +261,6 @@ novel-cli settings set-cookies
 
 ---
 
-当然可以，下面是模仿 `settings` 的风格写的 `clean` 子命令说明，适合放进 README:
-
----
-
 ### clean
 
 清理下载器生成的本地缓存和配置文件:
