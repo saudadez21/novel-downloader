@@ -21,7 +21,9 @@
   "settings_set_cookies_fail": "设置 Cookie 失败：{err}",
 
   "interactive_help": "小说选择和预览的交互式模式",
+  "interactive_option_download": "下载小说",
   "interactive_browse_help": "以交互方式浏览可用小说",
+  "interactive_prompt_book_ids": "请输入要下载的书籍 ID, 用空格分隔",
   "interactive_preview_help": "下载前预览章节",
   "interactive_no_sub": "未提供子命令请选择一项操作：",
   "interactive_option_browse": "浏览小说",

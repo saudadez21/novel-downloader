@@ -21,7 +21,9 @@
   "settings_set_cookies_fail": "Failed to set cookies: {err}",
 
   "interactive_help": "Interactive mode for novel selection and preview.",
+  "interactive_option_download": "Download novels",
   "interactive_browse_help": "Browse available novels interactively.",
+  "interactive_prompt_book_ids": "Enter book IDs to download, separated by spaces",
   "interactive_preview_help": "Preview chapters before downloading.",
   "interactive_no_sub": "No subcommand provided. Please select an action:",
   "interactive_option_browse": "Browse novels",
