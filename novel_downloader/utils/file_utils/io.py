@@ -96,8 +96,8 @@ def _write_file(
     try:
         with tempfile.NamedTemporaryFile(
             mode=write_mode,
-            encoding=(encoding if "b" not in write_mode else None),
-            newline="\n",
+            encoding=None if "b" in write_mode else encoding,
+            newline=None if "b" in write_mode else "\n",
             delete=False,
             dir=path.parent,
         ) as tmp:
