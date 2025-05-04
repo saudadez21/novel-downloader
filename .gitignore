@@ -174,4 +174,4 @@ cython_debug/
 .pypirc
 
 # Settings
-config/settings.yaml
+examples/settings.yaml
