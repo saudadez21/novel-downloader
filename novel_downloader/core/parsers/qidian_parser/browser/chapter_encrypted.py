@@ -104,7 +104,7 @@ def parse_encrypted_chapter(
             raise ValueError("fixed_path is None: failed to download font")
 
         # Extract and render paragraphs from HTML with CSS rules
-        main_paragraphs = extract_paragraphs_recursively(soup)
+        main_paragraphs = extract_paragraphs_recursively(soup, chapter_id)
         if debug_base_dir:
             main_paragraphs_path = debug_base_dir / "main_paragraphs_debug.json"
             main_paragraphs_path.write_text(
@@ -199,7 +199,7 @@ def parse_encrypted_chapter(
 
 
 def extract_paragraphs_recursively(
-    soup: BeautifulSoup, chapter_id: int = -1
+    soup: BeautifulSoup, chapter_id: str = ""
 ) -> List[Dict[str, Any]]:
     """
     Extracts paragraph elements under <main id="c-{chapter_id}"> from HTML
@@ -226,7 +226,7 @@ def extract_paragraphs_recursively(
                     result["data"].append(text)
         return result
 
-    if chapter_id > 0:
+    if chapter_id:
         main_id = f"c-{chapter_id}"
         main_tag = soup.find("main", id=main_id)
         if not main_tag:
