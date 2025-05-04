@@ -20,7 +20,7 @@ from ..shared import (
     html_to_soup,
     is_encrypted,
 )
-from .chapter_encrypted import parse_encrypted_chapter
+
 from .chapter_normal import parse_normal_chapter
 
 if TYPE_CHECKING:
@@ -52,6 +52,15 @@ def parse_chapter(
             return {}
 
         if is_encrypted(soup):
+            if not parser._decode_font:
+                return {}
+            try:
+                from .chapter_encrypted import parse_encrypted_chapter
+            except ImportError:
+                logger.warning(
+                    "[Parser] Encrypted chapter '%s' requires additional dependencies which are not installed.", chapter_id
+                )
+                return {}
             return parse_encrypted_chapter(parser, soup, chapter_id)
 
         return parse_normal_chapter(soup, chapter_id)
