@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 novel_downloader.utils.text_utils.font_mapping
----------------------------------
+----------------------------------------------
 
 Utility for decoding obfuscated text by applying character-level font mapping.
 

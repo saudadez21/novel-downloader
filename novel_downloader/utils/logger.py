@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 novel_downloader.utils.logger
----------------------------------
+-----------------------------
 
 Provides a configurable logging setup for Python applications.
 Log files are rotated daily and named with the given logger name and current date.

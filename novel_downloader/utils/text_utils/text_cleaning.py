@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 novel_downloader.utils.text_utils.text_cleaning
----------------------------------
+-----------------------------------------------
 
 Tools for detecting and removing promotional or ad-like content from text.
 """

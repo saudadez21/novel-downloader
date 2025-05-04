@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 """
 novel_downloader.utils.hash_store
---------------------------------
+---------------------------------
+
 Manage a small collection of image perceptual hashes and their labels.
 Supports loading/saving to .json or .npy, and basic CRUD + search.
 """

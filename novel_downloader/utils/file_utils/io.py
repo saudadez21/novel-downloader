@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 novel_downloader.utils.file_utils.io
----------------------------------
+------------------------------------
 
 File I/O utilities for reading and writing text, JSON, and binary data.
 

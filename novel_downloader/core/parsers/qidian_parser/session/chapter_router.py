@@ -52,12 +52,14 @@ def parse_chapter(
                 return {}
             try:
                 from .chapter_encrypted import parse_encrypted_chapter
+
+                return parse_encrypted_chapter(parser, soup, chapter_id)
             except ImportError:
                 logger.warning(
-                    "[Parser] Encrypted chapter '%s' requires additional dependencies which are not installed.", chapter_id
+                    "[Parser] Encrypted chapter '%s' requires extra dependencies.",
+                    chapter_id,
                 )
                 return {}
-            return parse_encrypted_chapter(parser, soup, chapter_id)
 
         return parse_normal_chapter(soup, chapter_id, parser._fuid)
     except Exception as e:

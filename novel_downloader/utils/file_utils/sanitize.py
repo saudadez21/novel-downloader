@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 novel_downloader.utils.file_utils.sanitize
----------------------------------
+------------------------------------------
 
 Utility functions for cleaning and validating filenames for safe use
 on different operating systems.

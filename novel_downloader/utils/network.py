@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 novel_downloader.utils.network
----------------------------------
+------------------------------
 
 Utilities for handling HTTP requests and downloading remote resources.
 """

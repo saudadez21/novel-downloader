@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 novel_downloader.utils.time_utils
+---------------------------------
 
 Utility functions for time and date-related operations.
 

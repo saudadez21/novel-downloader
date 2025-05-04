@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 novel_downloader.utils.file_utils.normalize
----------------------------------
+-------------------------------------------
 
 Utilities for normalizing the contents of text files for consistency
 across platforms or output formats.

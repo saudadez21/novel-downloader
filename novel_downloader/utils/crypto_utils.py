@@ -1,6 +1,6 @@
 """
 novel_downloader.utils.crypto_utils
-----------------------------------
+-----------------------------------
 
 Generic cryptographic utilities
 """

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 novel_downloader.utils.text_utils.chapter_formatting
----------------------------------
+----------------------------------------------------
 
 Format chapter content with title, paragraph blocks, and optional author notes.
 """

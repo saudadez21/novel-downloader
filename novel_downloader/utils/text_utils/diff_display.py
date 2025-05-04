@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 novel_downloader.utils.text_utils.diff_display
----------------------------------
+----------------------------------------------
 
 Generate inline character-level diff between two strings with visual markers.
 """

@@ -4,6 +4,14 @@
 novel_downloader.core.parsers.qidian_parser.browser.chapter_encrypted
 ---------------------------------------------------------------------
 
+Support for parsing encrypted chapters from Qidian using font OCR mapping,
+CSS rules, and custom rendering logic.
+
+Includes:
+- Font downloading and caching
+- Encrypted paragraph extraction
+- Custom CSS parsing and layout restoration
+- Font-based OCR decryption and mapping
 """
 
 from __future__ import annotations
