@@ -15,12 +15,14 @@ from click import Context
 
 from novel_downloader.config import save_config_file, save_rules_as_json
 from novel_downloader.utils.i18n import t
+from novel_downloader.utils.logger import setup_logging
 from novel_downloader.utils.state import state_mgr
 
 
 @click.group(name="settings", help=t("settings_help"))  # type: ignore
 def settings_cli() -> None:
     """Configure downloader settings."""
+    setup_logging()
     pass
 
 

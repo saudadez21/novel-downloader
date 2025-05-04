@@ -43,6 +43,10 @@ def setup_logging(
                     Defaults to "./logs" if not specified.
     :return: A fully configured logger instance.
     """
+    ft_logger = logging.getLogger("fontTools.ttLib.tables._p_o_s_t")
+    ft_logger.setLevel(logging.ERROR)
+    ft_logger.propagate = False
+
     # Determine console level (default INFO)
     level_str: LogLevel = log_level or "INFO"
     console_level = LOG_LEVELS.get(level_str)
@@ -95,6 +99,6 @@ def setup_logging(
     console_handler.setLevel(console_level)
     logger.addHandler(console_handler)
 
-    logger.info(f"Logging to {log_path}")
+    print(f"Logging to {log_path}")
 
     return logger

@@ -14,7 +14,6 @@ from click import Context
 
 from novel_downloader.cli import clean, download, interactive, settings
 from novel_downloader.utils.i18n import t
-from novel_downloader.utils.logger import setup_logging
 
 
 @click.group(help=t("cli_help"), invoke_without_command=True)  # type: ignore
@@ -27,8 +26,6 @@ from novel_downloader.utils.logger import setup_logging
 @click.pass_context  # type: ignore
 def cli_main(ctx: Context, config: Optional[str]) -> None:
     """Novel Downloader CLI."""
-    if ctx.invoked_subcommand != "clean":
-        setup_logging()
     ctx.ensure_object(dict)
     ctx.obj["config_path"] = config
 

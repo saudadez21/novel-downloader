@@ -19,6 +19,7 @@ from novel_downloader.core import (
     get_saver,
 )
 from novel_downloader.utils.i18n import t
+from novel_downloader.utils.logger import setup_logging
 
 
 @click.command(
@@ -82,6 +83,7 @@ def download_cli(ctx: Context, book_ids: list[str], site: str) -> None:
         site=site,
         config=downloader_cfg,
     )
+    setup_logging()
 
     # Perform the download for each valid book ID
     for book_id in book_ids:
