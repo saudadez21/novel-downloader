@@ -104,10 +104,10 @@ pip install .
 
 1. 复制示例配置:
    ```bash
-   cp config/sample_settings.yaml config/settings.yaml
+   cp examples/sample_settings.yaml examples/settings.yaml
    ```
 
-2. 编辑 `config/settings.yaml`, 示例内容:
+2. 编辑 `examples/settings.yaml`, 示例内容:
    ```yaml
    sites:
      qidian:
@@ -123,12 +123,12 @@ pip install .
 
 3. 将配置文件注册到 CLI:
    ```bash
-   novel-cli settings set-config config/settings.yaml
+   novel-cli settings set-config examples/settings.yaml
    ```
 
 4. 将自定义规则注册到 CLI:
    ```bash
-   novel-cli settings update-rules config/sample_rules.toml
+   novel-cli settings update-rules examples/sample_rules.toml
    ```
 
 ---
@@ -140,9 +140,9 @@ pip install .
   novel-cli --config "/path/to/settings.yaml"
   ```
 
-- **在项目根目录下使用默认 `config/settings.yaml`**
+- **在项目根目录下使用默认 `examples/settings.yaml`**
   ```bash
-  novel-cli --config "config/settings.yaml"
+  novel-cli --config "examples/settings.yaml"
   ```
 
 > `novel-cli` 可在**任意目录**下运行, 如果需要使用特点配置文件只需通过 `--config` 指定文件路径。
@@ -247,10 +247,10 @@ Commands:
 novel-cli settings set-lang en
 
 # 使用新的 settings.yaml
-novel-cli settings set-config config/settings.yaml
+novel-cli settings set-config examples/settings.yaml
 
 # 更新站点解析规则
-novel-cli settings update-rules config/sample_rules.toml
+novel-cli settings update-rules examples/sample_rules.toml
 
 # 为起点设置 Cookie (方式 1:一行输入)
 novel-cli settings set-cookies qidian '{"token": "abc123"}'

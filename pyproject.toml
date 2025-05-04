@@ -38,14 +38,13 @@ dev = [
     "pre-commit"
 ]
 
-font = [
-    "imagehash",
+font-recovery = [
+    "scipy",
     "numpy",
     "cssutils",
     "fonttools",
     "pillow",
-    "scikit-learn",
-    "brotli"
+    "huggingface_hub"
 ]
 
 [project.scripts]

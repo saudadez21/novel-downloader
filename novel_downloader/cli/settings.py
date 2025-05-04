@@ -7,6 +7,9 @@ novel_downloader.cli.settings
 Commands to configure novel downloader settings.
 """
 
+from pathlib import Path
+from typing import Optional
+
 import click
 from click import Context
 
@@ -78,3 +81,57 @@ def set_cookies(ctx: Context, site: str, cookies: str) -> None:
         click.echo(t("settings_set_cookies_success", site=site))
     except Exception as e:
         raise click.ClickException(t("settings_set_cookies_fail", err=e))
+
+
+@settings_cli.command(name="add-hash", help=t("settings_add_hash_help"))  # type: ignore
+@click.option(
+    "--path",
+    type=click.Path(exists=True, dir_okay=False),
+    help=t("settings_add_hash_path_help"),
+)  # type: ignore
+def add_image_hashes(path: Optional[str]) -> None:
+    """
+    Add image hashes to internal store for matching.
+    Can be run in interactive mode (no --path), or with a JSON file.
+    """
+    from novel_downloader.utils.hash_store import img_hash_store
+
+    if path:
+        try:
+            img_hash_store.add_from_map(path)
+            img_hash_store.save()
+            click.echo(t("settings_add_hash_loaded", path=path))
+        except Exception as e:
+            raise click.ClickException(t("settings_add_hash_load_fail", err=str(e)))
+    else:
+        click.echo(t("settings_add_hash_prompt_tip"))
+        while True:
+            img_path = click.prompt(
+                t("settings_add_hash_prompt_img"),
+                type=str,
+                default="",
+                show_default=False,
+            ).strip()
+            if not img_path or img_path.lower() in {"exit", "quit"}:
+                break
+            if not Path(img_path).exists():
+                click.echo(t("settings_add_hash_path_invalid"))
+                continue
+
+            label = click.prompt(
+                t("settings_add_hash_prompt_label"),
+                type=str,
+                default="",
+                show_default=False,
+            ).strip()
+            if not label or label.lower() in {"exit", "quit"}:
+                break
+
+            try:
+                img_hash_store.add_image(img_path, label)
+                click.echo(t("settings_add_hash_added", img=img_path, label=label))
+            except Exception as e:
+                click.echo(t("settings_add_hash_failed", err=str(e)))
+
+        img_hash_store.save()
+        click.echo(t("settings_add_hash_saved"))

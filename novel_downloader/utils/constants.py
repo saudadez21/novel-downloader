@@ -12,35 +12,54 @@ from pathlib import Path
 
 from platformdirs import user_config_dir
 
-# Basic identity
+# -----------------------------------------------------------------------------
+# Application identity
+# -----------------------------------------------------------------------------
 PACKAGE_NAME = "novel_downloader"  # Python package name
-APP_NAME = "NovelDownloader"  # Display name (used in logs, help text, etc.)
+APP_NAME = "NovelDownloader"  # Display name
 APP_DIR_NAME = "novel_downloader"  # Directory name for platformdirs
 LOGGER_NAME = PACKAGE_NAME  # Root logger name
 
+
+# -----------------------------------------------------------------------------
+# Base directories
+# -----------------------------------------------------------------------------
 # Base config directory (e.g. ~/AppData/Local/novel_downloader/)
 BASE_CONFIG_DIR = Path(user_config_dir(APP_DIR_NAME, appauthor=False))
-
 PACKAGE_ROOT: Path = Path(__file__).parent.parent
+LOCALES_DIR: Path = PACKAGE_ROOT / "locales"
 
-LOCALES_DIR = PACKAGE_ROOT / "locales"
-
+# Subdirectories under BASE_CONFIG_DIR
 LOGGER_DIR = BASE_CONFIG_DIR / "logs"
-JS_SCRIPT_DIR = BASE_CONFIG_DIR / "js_script"
-STATE_FILE = BASE_CONFIG_DIR / "state.json"
-SETTING_FILE = BASE_CONFIG_DIR / "settings.yaml"
-SITE_RULES_FILE = BASE_CONFIG_DIR / "site_rules.json"
-DEFAULT_USER_DATA_DIR = BASE_CONFIG_DIR / "browser_data"
+JS_SCRIPT_DIR = BASE_CONFIG_DIR / "scripts"
+STATE_DIR = BASE_CONFIG_DIR / "state"
+DATA_DIR = BASE_CONFIG_DIR / "data"
+CONFIG_DIR = BASE_CONFIG_DIR / "config"
+MODEL_CACHE_DIR = BASE_CONFIG_DIR / "models"
+
+# -----------------------------------------------------------------------------
+# Default file paths
+# -----------------------------------------------------------------------------
+STATE_FILE = STATE_DIR / "state.json"
+HASH_STORE_FILE = DATA_DIR / "image_hashes.json"
+SETTING_FILE = CONFIG_DIR / "settings.yaml"
+SITE_RULES_FILE = CONFIG_DIR / "site_rules.json"
+DEFAULT_USER_DATA_DIR = DATA_DIR / "browser_data"
+
+
+# -----------------------------------------------------------------------------
+# Default preferences & headers
+# -----------------------------------------------------------------------------
 DEFAULT_USER_PROFILE_NAME = "Profile_1"
+DEFAULT_IMAGE_SUFFIX = ".jpg"
 
 DEFAULT_USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
     "AppleWebKit/537.36 (KHTML, like Gecko) "
     "Chrome/134.0.0.0 Safari/537.36"
 )
-
-DEFAULT_IMAGE_SUFFIX = ".jpg"
 DEFAULT_HEADERS = {"User-Agent": DEFAULT_USER_AGENT}
+
 DEFAULT_ACCEPT = (
     "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
 )
@@ -53,6 +72,9 @@ DEFAULT_USER_HEADERS = {
     "Connection": "keep-alive",
 }
 
+# -----------------------------------------------------------------------------
+# Embedded resources (via importlib.resources)
+# -----------------------------------------------------------------------------
 BASE_CONFIG_PATH = files("novel_downloader.defaults").joinpath("base.yaml")
 
 # CSS Styles
@@ -70,6 +92,7 @@ VOLUME_BORDER_IMAGE_PATH = files("novel_downloader.resources.images").joinpath(
 REPLACE_WORD_MAP_PATH = files("novel_downloader.resources.json").joinpath(
     "replace_word_map.json"
 )
+CHAR_FREQ_MAP_PATH = files("novel_downloader.resources.json").joinpath("char_freq.json")
 
 # JavaScript
 QD_DECRYPT_SCRIPT_PATH = files("novel_downloader.resources.js_scripts").joinpath(
@@ -79,5 +102,25 @@ QD_DECRYPT_SCRIPT_PATH = files("novel_downloader.resources.js_scripts").joinpath
 # Text Files
 BLACKLIST_PATH = files("novel_downloader.resources.text").joinpath("blacklist.txt")
 
+# -----------------------------------------------------------------------------
+# EPUB defaults
+# -----------------------------------------------------------------------------
 EPUB_IMAGE_FOLDER = "Images"
 EPUB_TEXT_FOLDER = "Text"
+
+# ---------------------------------------------------------------------
+# Pretrained model registry (e.g. used in font recovery or OCR)
+# ---------------------------------------------------------------------
+
+# Hugging Face model repo for character recognition
+REC_CHAR_MODEL_REPO = "saudadez/rec_chinese_char"
+
+# Default revision tag for all files
+REC_CHAR_MODEL_REVISION = "v1.0"
+
+# Required files to be downloaded for the model
+REC_CHAR_MODEL_FILES = [
+    "inference.pdmodel",
+    "inference.pdiparams",
+    "rec_custom_keys.txt",
+]
