@@ -10,8 +10,10 @@ This module defines `QidianSessionParser`, a parser implementation that supports
 content extracted from dynamically rendered Qidian HTML pages.
 """
 
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from novel_downloader.config.models import ParserConfig
 from novel_downloader.core.parsers.base_parser import BaseParser
@@ -22,6 +24,9 @@ from ..shared import (
     parse_book_info,
 )
 from .chapter_router import parse_chapter
+
+if TYPE_CHECKING:
+    from novel_downloader.utils.fontocr import FontOCR
 
 
 class QidianSessionParser(BaseParser):
@@ -39,8 +44,8 @@ class QidianSessionParser(BaseParser):
 
         # Extract and store parser flags from config
         self._decode_font: bool = config.decode_font
-        self._use_freq: bool = config.use_freq
-        self._use_ocr: bool = config.use_ocr
+        # self._use_freq: bool = config.use_freq
+        # self._use_ocr: bool = config.use_ocr
         self._save_font_debug: bool = config.save_font_debug
 
         self._fixed_font_dir: Path = self._base_cache_dir / "fixed_fonts"
@@ -49,6 +54,18 @@ class QidianSessionParser(BaseParser):
 
         qd_cookies = state_mgr.get_cookies("qidian")
         self._fuid: str = qd_cookies.get("ywguid", "")
+
+        self._font_ocr: Optional[FontOCR] = None
+        if self._decode_font and config.use_ocr:
+            from novel_downloader.utils.fontocr import FontOCR
+
+            self._font_ocr = FontOCR(
+                cache_dir=self._base_cache_dir,
+                use_freq=config.use_freq,
+                font_debug=config.save_font_debug,
+            )
+            self._font_debug_dir = self._base_cache_dir / "font_debug"
+            self._font_debug_dir.mkdir(parents=True, exist_ok=True)
 
     def parse_book_info(self, html: str) -> Dict[str, Any]:
         """

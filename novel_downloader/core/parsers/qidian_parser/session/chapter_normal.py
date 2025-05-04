@@ -76,6 +76,7 @@ def parse_normal_chapter(
         volume = chapter_info.get("extra", {}).get("volumeName", "")
 
         if not raw_html:
+            logger.warning("[Parser] raw_html not found for chapter '%s'", chapter_id)
             return {}
 
         if vip_status(soup):

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.parsers.qidian_parser.browser.chapter_encrypted
+novel_downloader.core.parsers.qidian_parser.session.chapter_encrypted
 ---------------------------------------------------------------------
 
 """
@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 import tinycss2
 from bs4 import BeautifulSoup, Tag
@@ -25,14 +25,14 @@ from ..shared import (
 )
 
 if TYPE_CHECKING:
-    from .main_parser import QidianBrowserParser
+    from .main_parser import QidianSessionParser
 
 logger = logging.getLogger(__name__)
 IGNORED_CLASS_LISTS = {"title", "review"}
 
 
 def parse_encrypted_chapter(
-    parser: QidianBrowserParser,
+    parser: QidianSessionParser,
     soup: BeautifulSoup,
     chapter_id: str,
 ) -> Dict[str, Any]:
@@ -44,9 +44,8 @@ def parse_encrypted_chapter(
     3. Decode and save randomFont bytes; download fixedFont via download_font().
     4. Extract paragraph structures and save debug JSON.
     5. Parse CSS rules and save debug JSON.
-    6. Determine paragraph name prefixes and ending number; save debug text.
-    7. Render encrypted paragraphs, then run OCR font-mapping.
-    8. Extracts paragraph texts and formats them.
+    6. Render encrypted paragraphs, then run OCR font-mapping.
+    7. Extracts paragraph texts and formats them.
 
     :param html_str: Raw HTML content of the chapter page.
     :return: Formatted chapter text or empty string if not parsable.
@@ -112,24 +111,7 @@ def parse_encrypted_chapter(
                 encoding="utf-8",
             )
 
-        paragraph_names = parse_paragraph_names(paragraphs_rules)
-        end_number = parse_end_number(main_paragraphs, paragraph_names)
-        if debug_base_dir:
-            paragraphs_rules_path = debug_base_dir / "paragraph_names_debug.txt"
-            temp = f"names:\n{paragraph_names}\n\nend_number: {end_number}"
-            paragraphs_rules_path.write_text(
-                temp,
-                encoding="utf-8",
-            )
-        if not end_number:
-            logger.warning(
-                f"[Parser] No end_number found after parsing chapter '{chapter_id}'"
-            )
-            return {}
-
-        paragraphs_str, refl_list = render_paragraphs(
-            main_paragraphs, paragraphs_rules, end_number
-        )
+        paragraphs_str, refl_list = render_paragraphs(main_paragraphs, paragraphs_rules)
         if debug_base_dir:
             paragraphs_str_path = debug_base_dir / f"{chapter_id}_debug.txt"
             paragraphs_str_path.write_text(paragraphs_str, encoding="utf-8")
@@ -314,68 +296,8 @@ def parse_rule(css_str: str) -> Dict[str, Any]:
     return {"rules": rules, "orders": orders}
 
 
-def parse_paragraph_names(rules: Dict[str, Any]) -> Set[str]:
-    """
-    Extract all paragraph selector names from parsed rules, excluding "sy".
-    """
-    paragraph_names = set()
-    for group, group_rules in rules.get("rules", {}).items():
-        if group == "sy":
-            continue
-        paragraph_names.update(group_rules.keys())
-    return paragraph_names
-
-
-def parse_end_number(
-    main_paragraphs: List[Dict[str, Any]], paragraph_names: Set[str]
-) -> Optional[int]:
-    """
-    Find the most frequent numeric suffix from tag names
-    matched by given paragraph prefixes.
-    """
-    end_numbers: Dict[int, int] = {}
-    sorted_names = sorted(paragraph_names, key=len, reverse=True)
-
-    def rec_parse(item: Union[List[Any], Dict[str, Any]]) -> None:
-        if isinstance(item, list):
-            for element in item:
-                rec_parse(element)
-        elif isinstance(item, dict):
-            tag = item.get("tag")
-            if isinstance(tag, str):
-                for prefix in sorted_names:
-                    if tag.startswith(prefix):
-                        remain = tag[len(prefix) :]
-                        if remain.isdigit():
-                            num = int(remain)
-                            end_numbers[num] = end_numbers.get(num, 0) + 1
-                        break
-            for val in item.values():
-                if isinstance(val, (list, dict)):
-                    rec_parse(val)
-
-    rec_parse(main_paragraphs)
-
-    if not end_numbers:
-        logger.warning("[Parser] No valid ending numbers found")
-        return None
-
-    sorted_numbers = sorted(
-        end_numbers.items(), key=lambda x: (x[1], x[0]), reverse=True
-    )
-
-    logger.info(
-        "[Parser] Top 3 end numbers:\n"
-        + "\n".join(f"{n}: {c}" for n, c in sorted_numbers[:3])
-    )
-
-    return sorted_numbers[0][0]
-
-
 def render_paragraphs(
-    main_paragraphs: List[Dict[str, Any]],
-    rules: Dict[str, Any],
-    end_number: int,
+    main_paragraphs: List[Dict[str, Any]], rules: Dict[str, Any]
 ) -> Tuple[str, List[str]]:
     """
     Applies the parsed CSS rules to the paragraph structure and
@@ -389,7 +311,6 @@ def render_paragraphs(
     :param rules: A dictionary with keys 'orders' and 'rules', parsed from CSS.
                   - rules['orders']: List of (selector, id) tuples.
                   - rules['rules']: Nested dict containing transformation rules.
-    :param end_number: HTML tag suffix (e.g. span123 -> 123).
 
     :return:
         - A reconstructed paragraph string with line breaks.
@@ -419,15 +340,13 @@ def render_paragraphs(
 
         attr_name = rule.get("append-end-attr", "")
         if attr_name:
-            curr_str += data.get("attrs", {}).get(f"{attr_name}{end_number}", "")
+            curr_str += data.get("attrs", {}).get(attr_name, "")
 
         curr_str = rule.get("append-start-char", "") + curr_str
 
         attr_name = rule.get("append-start-attr", "")
         if attr_name:
-            curr_str = (
-                data.get("attrs", {}).get(f"{attr_name}{end_number}", "") + curr_str
-            )
+            curr_str = data.get("attrs", {}).get(attr_name, "") + curr_str
 
         if rule.get("transform-x_-1", False):
             refl_list.append(curr_str)
@@ -473,7 +392,7 @@ def render_paragraphs(
                     continue
                 # 普通标签处理，根据 orders 顺序匹配
                 for ord_selector, ord_id in orders:
-                    tag_name = f"{ord_selector}{end_number}"
+                    tag_name = f"{ord_selector}"
                     if data.get("tag") != tag_name:
                         continue
                     curr_rule = rules.get(p_class_str, {}).get(ord_selector)

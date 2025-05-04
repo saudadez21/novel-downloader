@@ -41,7 +41,7 @@ dev = [
 font-recovery = [
     "scipy",
     "numpy",
-    "cssutils",
+    "tinycss2",
     "fonttools",
     "pillow",
     "huggingface_hub"
