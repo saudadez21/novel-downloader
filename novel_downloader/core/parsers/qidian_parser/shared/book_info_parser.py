@@ -14,6 +14,8 @@ import logging
 import re
 from typing import Any, Dict
 
+from bs4.element import Tag
+
 from .helpers import html_to_soup
 
 logger = logging.getLogger(__name__)
@@ -24,6 +26,19 @@ def _chapter_url_to_id(url: str) -> str:
     Extract chapterId as the last non-empty segment of the URL.
     """
     return url.rstrip("/").split("/")[-1]
+
+
+def _get_volume_name(vol_div: Tag) -> str:
+    """
+    Extracts the volume title from a <div class="volume"> element
+    """
+    h3 = vol_div.select_one("h3")
+    if not h3:
+        return ""
+    for a in h3.find_all("a"):
+        a.decompose()
+    text: str = h3.get_text(strip=True)
+    return text.split(chr(183))[0].strip()
 
 
 def parse_book_info(html_str: str) -> Dict[str, Any]:
@@ -62,13 +77,7 @@ def parse_book_info(html_str: str) -> Dict[str, Any]:
         # volumes
         vols = []
         for vol_div in soup.select("div.volume-wrap div.volume"):
-            name = (
-                vol_div.select_one("h3")
-                .get_text(strip=True)
-                .split("·")[0]
-                .replace("订阅本卷", "")
-                .strip()
-            )
+            name = _get_volume_name(vol_div)
             chaps = []
             for li in vol_div.select("li"):
                 a = li.select_one("a")
