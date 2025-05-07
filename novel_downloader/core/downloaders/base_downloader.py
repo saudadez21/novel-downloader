@@ -56,9 +56,6 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
         self._raw_data_dir.mkdir(parents=True, exist_ok=True)
         self._cache_dir.mkdir(parents=True, exist_ok=True)
 
-        if config.login_required:
-            self._requester.login()
-
     @abc.abstractmethod
     def download_one(self, book_id: str) -> None:
         """

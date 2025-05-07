@@ -12,8 +12,15 @@ import json
 import logging
 from typing import Any, Dict
 
+from novel_downloader.config import DownloaderConfig
+from novel_downloader.core.interfaces import (
+    ParserProtocol,
+    RequesterProtocol,
+    SaverProtocol,
+)
 from novel_downloader.utils.file_utils import save_as_json, save_as_txt
 from novel_downloader.utils.network import download_image_as_bytes
+from novel_downloader.utils.state import state_mgr
 from novel_downloader.utils.time_utils import calculate_time_difference
 
 from .base_downloader import BaseDownloader
@@ -26,12 +33,50 @@ class QidianDownloader(BaseDownloader):
     Specialized downloader for Qidian novels.
     """
 
+    def __init__(
+        self,
+        requester: RequesterProtocol,
+        parser: ParserProtocol,
+        saver: SaverProtocol,
+        config: DownloaderConfig,
+    ):
+        super().__init__(requester, parser, saver, config)
+
+        self._site_key = "qidian"
+        self._is_logged_in = self._handle_login()
+        state_mgr.set_manual_login_flag(self._site_key, not self._is_logged_in)
+
+    def _handle_login(self) -> bool:
+        """
+        Perform login with automatic fallback to manual:
+
+        1. If manual_flag is False, try automatic login:
+           - On success, return True immediately.
+        2. Always attempt manual login if manual_flag is True.
+        3. Return True if manual login succeeds, False otherwise.
+        """
+        manual_flag = state_mgr.get_manual_login_flag(self._site_key)
+
+        # First try automatic login
+        if not manual_flag:
+            if self._requester.login(manual_login=False):
+                return True
+
+        # try manual login
+        return self._requester.login(manual_login=True)
+
     def download_one(self, book_id: str) -> None:
         """
         The full download logic for a single book.
 
         :param book_id: The identifier of the book to download.
         """
+        if not self._is_logged_in:
+            logger.warning(
+                f"[{self._site_key}] login failed, skipping download of {book_id}"
+            )
+            return
+
         TAG = "[Downloader]"
         save_html = self.config.save_html
         skip_existing = self.config.skip_existing

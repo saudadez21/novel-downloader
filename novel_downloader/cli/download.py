@@ -76,6 +76,7 @@ def download_cli(ctx: Context, book_ids: list[str], site: str) -> None:
     curr_requester = get_requester(site, requester_cfg)
     curr_parser = get_parser(site, parser_cfg)
     curr_saver = get_saver(site, saver_cfg)
+    setup_logging()
     curr_downloader = get_downloader(
         requester=curr_requester,
         parser=curr_parser,
@@ -83,7 +84,6 @@ def download_cli(ctx: Context, book_ids: list[str], site: str) -> None:
         site=site,
         config=downloader_cfg,
     )
-    setup_logging()
 
     # Perform the download for each valid book ID
     for book_id in book_ids:

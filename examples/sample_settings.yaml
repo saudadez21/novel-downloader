@@ -9,7 +9,7 @@ requests:
   user_data_folder: ""              # 浏览器用户数据目录: 为空则使用默认目录
   profile_name: ""                  # 使用的用户配置名称: 为空则使用默认配置
   auto_close: true                  # 页面抓取完是否自动关闭浏览器
-  disable_images: true              # 是否禁用图片加载 (加速)
+  disable_images: false             # 是否禁用图片加载 (加速)
   mute_audio: true                  # 是否静音
 
 # 全局通用设置

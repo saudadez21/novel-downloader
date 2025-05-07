@@ -115,7 +115,7 @@ class QidianBrowser(BaseBrowser):
 
     def _handle_overlay_mask(self) -> None:
         """
-        Detect and close any full‑page overlay mask that might block the login UI.
+        Detect and close any full-page overlay mask that might block the login UI.
         """
         try:
             mask = self._page.ele("@@tag()=div@@class=mask", timeout=2)
