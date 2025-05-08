@@ -15,7 +15,7 @@ including:
 
 from .css_builder import create_css_items
 from .initializer import init_epub
-from .text_to_html import chapter_txt_to_html
+from .text_to_html import chapter_txt_to_html, generate_book_intro_html
 from .volume_intro import create_volume_intro
 
 __all__ = [
@@ -23,4 +23,5 @@ __all__ = [
     "init_epub",
     "chapter_txt_to_html",
     "create_volume_intro",
+    "generate_book_intro_html",
 ]

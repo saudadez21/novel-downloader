@@ -15,7 +15,8 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING
+from pathlib import Path
+from typing import TYPE_CHECKING, Optional
 
 from novel_downloader.utils.file_utils import save_as_txt
 from novel_downloader.utils.text_utils import clean_chapter_title, format_chapter
@@ -24,6 +25,27 @@ if TYPE_CHECKING:
     from .main_saver import CommonSaver
 
 logger = logging.getLogger(__name__)
+
+CHAPTER_FOLDERS: list[str] = [
+    "chapters",
+    "encrypted_chapters",
+]
+
+
+def _find_chapter_file(
+    raw_base: Path,
+    chapter_id: str,
+) -> Optional[Path]:
+    """
+    Search for `<chapter_id>.json` under each folder in CHAPTER_FOLDERS
+    inside raw_data_dir/site/book_id. Return the first existing Path,
+    or None if not found.
+    """
+    for folder in CHAPTER_FOLDERS:
+        candidate = raw_base / folder / f"{chapter_id}.json"
+        if candidate.exists():
+            return candidate
+    return None
 
 
 def common_save_as_txt(
@@ -49,11 +71,7 @@ def common_save_as_txt(
     site = saver.site
     # --- Paths & options ---
     raw_base = saver.raw_data_dir / site / book_id
-    chapters_dir = raw_base / "chapters"
-    encrypted_chapter_dir = raw_base / "encrypted_chapters"
     out_dir = saver.output_dir
-
-    # Ensure output directory exists
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # --- Load book_info.json ---
@@ -83,25 +101,18 @@ def common_save_as_txt(
             if not chap_id:
                 logger.warning("%s Missing chapterId, skipping: %s", TAG, chap)
                 continue
-            json_path = chapters_dir / f"{chap_id}.json"
-            fallback_path = encrypted_chapter_dir / f"{chap_id}.json"
 
-            if not json_path.exists() and fallback_path.exists():
-                json_path = fallback_path
+            # Find the JSON file in one of the known subfolders
+            json_path = _find_chapter_file(raw_base, chap_id)
+            if json_path is None:
                 logger.info(
-                    "%s Using fallback encrypted chapter: %s (%s)",
-                    TAG,
-                    chap_title,
-                    chap_id,
-                )
-            elif not json_path.exists():
-                logger.warning(
-                    "%s Missing chapter file: %s (%s), skipping.",
+                    "%s Missing chapter file in: %s (%s), skipping.",
                     TAG,
                     chap_title,
                     chap_id,
                 )
                 continue
+
             try:
                 chapter_data = json.loads(json_path.read_text(encoding="utf-8"))
             except Exception as e:

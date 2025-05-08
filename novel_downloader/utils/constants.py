@@ -108,6 +108,25 @@ BLACKLIST_PATH = files("novel_downloader.resources.text").joinpath("blacklist.tx
 EPUB_IMAGE_FOLDER = "Images"
 EPUB_TEXT_FOLDER = "Text"
 
+EPUB_OPTIONS = {
+    # guide 是 EPUB 2 的一个部分, 包含封面, 目录, 索引等重要导航信息
+    "epub2_guide": True,
+    # landmark 是 EPUB 3 用来标识重要页面 (如目录, 封面, 起始页) 的 <nav> 结构
+    "epub3_landmark": True,
+    # EPUB 3 允许提供一个 page list, 让电子书在不同设备上仍然保持相对一致的分页结构
+    "epub3_pages": True,
+    # 这个名字会出现在 EPUB 阅读器的导航栏
+    "landmark_title": "Guide",
+    # 这个名字会显示在 EPUB 阅读器的分页导航栏
+    "pages_title": "Pages",
+    # 是否根据 book.spine 的排列顺序自动设置 EPUB 阅读器的 page-progression-direction
+    "spine_direction": True,
+    # 控制 EPUB 阅读器的默认翻页方向 (LTR 或 RTL)
+    "package_direction": False,
+    # 是否为 EPUB 书籍中的章节 添加播放顺序
+    "play_order": {"enabled": True, "start_from": 1},
+}
+
 # ---------------------------------------------------------------------
 # Pretrained model registry (e.g. used in font recovery or OCR)
 # ---------------------------------------------------------------------

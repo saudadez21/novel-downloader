@@ -9,7 +9,7 @@ requests:
   user_data_folder: ""              # 浏览器用户数据目录: 为空则使用默认目录
   profile_name: ""                  # 使用的用户配置名称: 为空则使用默认配置
   auto_close: true                  # 页面抓取完是否自动关闭浏览器
-  disable_images: true              # 是否禁用图片加载 (加速)
+  disable_images: false             # 是否禁用图片加载 (加速)
   mute_audio: true                  # 是否静音
 
 # 全局通用设置
@@ -36,7 +36,7 @@ sites:
     mode: "browser"                 # browser / session
     login_required: true            # 是否需要登录才能访问
     decode_font: false              # 是否尝试本地解码混淆字体
-    use_freq: true                  # 是否使用频率分析
+    use_freq: false                 # 是否使用频率分析
     use_ocr: false                  # 是否使用 OCR 辅助识别文本
     save_font_debug: false          # 是否保存字体解码调试数据
     #
@@ -45,6 +45,9 @@ sites:
       - "ABCDEF"
     api_key: "your_api_key"
     special_flag: 42
+  common:
+    mode: "session"                 # browser / session
+    login_required: false           # 是否需要登录才能访问
 
 # 输出文件格式及相关选项
 output:
@@ -55,8 +58,8 @@ output:
     make_md: false                  # 是否生成 Markdown (未实现)
     make_pdf: false                 # 可能支持 PDF 输出 (未实现)
   naming:
-    append_timestamp: true          # 在文件名中追加时间戳
+    append_timestamp: false         # 在文件名中追加时间戳
     filename_template: "{title}_{author}" # 文件命名规则
   epub:
     include_cover: true             # 是否在 EPUB 中包含封面
-    include_toc: true               # 是否自动生成目录
+    include_toc: false              # 是否自动生成目录

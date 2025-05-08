@@ -101,12 +101,12 @@ class BaseSaver(SaverProtocol, abc.ABC):
 
     def save_as_epub(self, book_id: str) -> None:
         """
-        Optional: Persist the assembled book as a Markdown (.md) file.
+        Optional: Persist the assembled book as a EPUB (.epub) file.
 
         :param book_id: The book identifier.
         :raises NotImplementedError: If the method is not overridden.
         """
-        raise NotImplementedError("Markdown export not supported by this saver.")
+        raise NotImplementedError("EPUB export not supported by this saver.")
 
     def save_as_md(self, book_id: str) -> None:
         """

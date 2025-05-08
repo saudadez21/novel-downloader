@@ -22,7 +22,8 @@ logger = logging.getLogger(__name__)
 
 
 def create_css_items(
-    include_main: bool = True, include_volume: bool = True
+    include_main: bool = True,
+    include_volume: bool = True,
 ) -> List[epub.EpubItem]:
     """
     :param include_main:   Whether to load the main stylesheet.

@@ -13,6 +13,7 @@ and chapter files.
 from novel_downloader.config.models import SaverConfig
 
 from ..base_saver import BaseSaver
+from .common_epub import common_save_as_epub
 from .common_txt import common_save_as_txt
 
 
@@ -50,6 +51,15 @@ class CommonSaver(BaseSaver):
         :param book_id: The book identifier (used to locate raw data)
         """
         return common_save_as_txt(self, book_id)
+
+    def save_as_epub(self, book_id: str) -> None:
+        """
+        Persist the assembled book as a EPUB (.epub) file.
+
+        :param book_id: The book identifier.
+        :raises NotImplementedError: If the method is not overridden.
+        """
+        return common_save_as_epub(self, book_id)
 
     @property
     def site(self) -> str:
