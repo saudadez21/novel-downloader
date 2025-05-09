@@ -43,8 +43,6 @@ class QidianBrowserParser(BaseParser):
 
         # Extract and store parser flags from config
         self._decode_font: bool = config.decode_font
-        self._use_freq: bool = config.use_freq
-        self._use_ocr: bool = config.use_ocr
         self._save_font_debug: bool = config.save_font_debug
 
         self._fixed_font_dir: Path = self._base_cache_dir / "fixed_fonts"
@@ -52,12 +50,18 @@ class QidianBrowserParser(BaseParser):
         self._font_debug_dir: Optional[Path] = None
 
         self._font_ocr: Optional[FontOCR] = None
-        if self._decode_font and config.use_ocr:
+        if self._decode_font:
             from novel_downloader.utils.fontocr import FontOCR
 
             self._font_ocr = FontOCR(
                 cache_dir=self._base_cache_dir,
                 use_freq=config.use_freq,
+                ocr_version=config.ocr_version,
+                use_ocr=config.use_ocr,
+                use_vec=config.use_vec,
+                batch_size=config.batch_size,
+                ocr_weight=config.ocr_weight,
+                vec_weight=config.vec_weight,
                 font_debug=config.save_font_debug,
             )
             self._font_debug_dir = self._base_cache_dir / "font_debug"

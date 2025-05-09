@@ -48,7 +48,7 @@ EXPECTED_FIELDS = {
         "cache_dir": str,
         "decode_font": bool,
         "use_freq": bool,
-        "use_ocr": bool,
+        "use_vec": bool,
         "save_font_debug": bool,
         "mode": str,
     },

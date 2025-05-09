@@ -12,7 +12,7 @@ on web pages (e.g., the Qidian website).
 import json
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 import paddle
@@ -21,7 +21,8 @@ from paddleocr import PaddleOCR
 from PIL import Image, ImageDraw, ImageFont
 
 from novel_downloader.utils.constants import (
-    CHAR_FREQ_MAP_PATH,
+    REC_CHAR_MODEL_FILES,
+    REC_IMAGE_SHAPE_MAP,
 )
 from novel_downloader.utils.hash_store import img_hash_store
 from novel_downloader.utils.model_loader import get_rec_chinese_char_model_dir
@@ -52,10 +53,13 @@ class FontOCRV1:
         self,
         cache_dir: Union[str, Path],
         use_freq: bool = False,
+        ocr_version: str = "v1.0",
         threshold: float = 0.0,
         font_debug: bool = False,
+        **kwargs: Any,
     ) -> None:
         self.use_freq = use_freq
+        self.ocr_version = ocr_version
         self.threshold = threshold
         self.font_debug = font_debug
         self._max_freq = 5
@@ -82,28 +86,23 @@ class FontOCRV1:
             return
 
         gpu_available = paddle.device.is_compiled_with_cuda()
-        char_model_dir = get_rec_chinese_char_model_dir()
+        self._char_model_dir = get_rec_chinese_char_model_dir(self.ocr_version)
 
-        required_files = [
-            "inference.pdmodel",
-            "inference.pdiparams",
-            "rec_custom_keys.txt",
-        ]
-        for fname in required_files:
-            full_path = char_model_dir / fname
+        for fname in REC_CHAR_MODEL_FILES:
+            full_path = self._char_model_dir / fname
             if not full_path.exists():
                 raise FileNotFoundError(f"[FontOCR] Required file missing: {full_path}")
 
-        char_dict_file = char_model_dir / "rec_custom_keys.txt"
+        char_dict_file = self._char_model_dir / "rec_custom_keys.txt"
         FontOCRV1._global_ocr = PaddleOCR(
             use_angle_cls=False,
             lang="ch",
             det=False,
             use_gpu=gpu_available,
             show_log=self.font_debug,
-            rec_model_dir=str(char_model_dir),
+            rec_model_dir=str(self._char_model_dir),
             rec_char_dict_path=str(char_dict_file),
-            rec_image_shape="3,32,32",
+            rec_image_shape=REC_IMAGE_SHAPE_MAP[self.ocr_version],
             max_text_length=1,
             use_space_char=False,
         )
@@ -116,7 +115,8 @@ class FontOCRV1:
         :return: True if successfully loaded, False otherwise.
         """
         try:
-            with CHAR_FREQ_MAP_PATH.open("r", encoding="utf-8") as f:
+            char_freq_map_file = self._char_model_dir / "char_freq.json"
+            with char_freq_map_file.open("r", encoding="utf-8") as f:
                 FontOCRV1._global_char_freq_db = json.load(f)
             self._max_freq = max(FontOCRV1._global_char_freq_db.values())
             return True
@@ -129,7 +129,7 @@ class FontOCRV1:
         char: str,
         render_font: ImageFont.FreeTypeFont,
         is_reflect: bool = False,
-    ) -> Image.Image:
+    ) -> Optional[Image.Image]:
         """
         Render a single character into a square image.
         If is_reflect is True, flip horizontally.
@@ -144,6 +144,11 @@ class FontOCRV1:
         draw.text((x, y), char, fill=0, font=render_font)
         if is_reflect:
             img = img.transpose(Image.FLIP_LEFT_RIGHT)
+
+        img_np = np.array(img)
+        if np.unique(img_np).size == 1:
+            return None
+
         return img
 
     def ocr_text(
@@ -249,12 +254,11 @@ class FontOCRV1:
                 try:
                     if ch in fixed_map:
                         mapping_result[ch] = fixed_map[ch]
-                        if self.font_debug:
-                            logger.debug(
-                                "[FontOCR] Using cached mapping: '%s' -> '%s'",
-                                ch,
-                                fixed_map[ch],
-                            )
+                        logger.debug(
+                            "[FontOCR] Using cached mapping: '%s' -> '%s'",
+                            ch,
+                            fixed_map[ch],
+                        )
                         continue
 
                     if ch in fixed_chars:
@@ -262,11 +266,14 @@ class FontOCRV1:
                     elif ch in random_chars:
                         font_to_use = random_font
                     else:
-                        if self.font_debug:
-                            logger.debug("[FontOCR] Skipping unknown char: '%s'", ch)
+                        logger.debug("[FontOCR] Skipping unknown char: '%s'", ch)
                         continue
 
                     img = self._generate_char_image(ch, font_to_use, is_reflect=reflect)
+                    if img is None:
+                        logger.debug("[FontOCR] Skipping unknown char: '%s'", ch)
+                        continue
+
                     real = self.query(img, top_k=1)
                     if real:
                         real_char = (
@@ -275,10 +282,9 @@ class FontOCRV1:
                         mapping_result[ch] = real_char
                         if ch in fixed_chars:
                             fixed_map[ch] = real_char
-                        if self.font_debug:
-                            logger.debug("[FontOCR] Mapped '%s' -> '%s'", ch, real_char)
+                        logger.debug("[FontOCR] Mapped '%s' -> '%s'", ch, real_char)
                     elif self.font_debug and chapter_id:
-                        dbg_path = self._debug_dir / f"{chapter_id}_{ord(ch):04X}.png"
+                        dbg_path = self._debug_dir / f"{ord(ch):05X}_{chapter_id}.png"
                         img.save(dbg_path)
                         logger.debug("[FontOCR] Saved debug image: %s", dbg_path)
                 except Exception as e:

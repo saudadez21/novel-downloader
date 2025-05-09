@@ -30,19 +30,34 @@ from novel_downloader.utils.text_utils import apply_font_mapping
 from ..shared import (
     extract_chapter_info,
     find_ssr_page_context,
+    html_to_soup,
+    vip_status,
 )
+from .node_decryptor import QidianNodeDecryptor
 
 if TYPE_CHECKING:
     from .main_parser import QidianSessionParser
 
 logger = logging.getLogger(__name__)
 IGNORED_CLASS_LISTS = {"title", "review"}
+_decryptor: Optional[QidianNodeDecryptor] = None
+
+
+def _get_decryptor() -> QidianNodeDecryptor:
+    """
+    Return the singleton QidianNodeDecryptor, initializing it on first use.
+    """
+    global _decryptor
+    if _decryptor is None:
+        _decryptor = QidianNodeDecryptor()
+    return _decryptor
 
 
 def parse_encrypted_chapter(
     parser: QidianSessionParser,
     soup: BeautifulSoup,
     chapter_id: str,
+    fuid: str,
 ) -> Dict[str, Any]:
     """
     Extract and return the formatted textual content of an encrypted chapter.
@@ -78,7 +93,9 @@ def parse_encrypted_chapter(
         fixedFontWoff2_url = chapter_info["fixedFontWoff2"]
 
         title = chapter_info.get("chapterName", "Untitled")
+        raw_html = chapter_info.get("content", "")
         chapter_id = chapter_info.get("chapterId", "")
+        fkp = chapter_info.get("fkp", "")
         author_say = chapter_info.get("authorSay", "")
         update_time = chapter_info.get("updateTime", "")
         update_timestamp = chapter_info.get("updateTimestamp", 0)
@@ -89,6 +106,10 @@ def parse_encrypted_chapter(
         seq = chapter_info.get("seq", None)
         order = chapter_info.get("chapterOrder", None)
         volume = chapter_info.get("extra", {}).get("volumeName", "")
+
+        if not raw_html:
+            logger.warning("[Parser] raw_html not found for chapter '%s'", chapter_id)
+            return {}
 
         # extract + save font
         rf = json.loads(randomFont_str)
@@ -103,7 +124,20 @@ def parse_encrypted_chapter(
             raise ValueError("fixed_path is None: failed to download font")
 
         # Extract and render paragraphs from HTML with CSS rules
-        main_paragraphs = extract_paragraphs_recursively(soup)
+
+        if vip_status(soup):
+            try:
+                decryptor = _get_decryptor()
+                raw_html = decryptor.decrypt(
+                    raw_html,
+                    chapter_id,
+                    fkp,
+                    fuid,
+                )
+            except Exception as e:
+                logger.error("[Parser] decryption failed for '%s': %s", chapter_id, e)
+                return {}
+        main_paragraphs = extract_paragraphs_recursively(html_to_soup(raw_html))
         if debug_base_dir:
             main_paragraphs_path = debug_base_dir / "main_paragraphs_debug.json"
             main_paragraphs_path.write_text(

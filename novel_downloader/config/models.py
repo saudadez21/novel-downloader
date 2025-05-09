@@ -55,7 +55,12 @@ class ParserConfig:
     cache_dir: str = "./novel_cache"
     decode_font: bool = False
     use_freq: bool = False
-    use_ocr: bool = False
+    use_ocr: bool = True
+    use_vec: bool = False
+    ocr_version: str = "v1.0"
+    batch_size: int = 32
+    ocr_weight: float = 0.6
+    vec_weight: float = 0.4
     save_font_debug: bool = False
     mode: str = "session"  # browser / session
 

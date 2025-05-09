@@ -372,9 +372,9 @@ def parse_end_number(
         end_numbers.items(), key=lambda x: (x[1], x[0]), reverse=True
     )
 
-    logger.info(
-        "[Parser] Top 3 end numbers:\n"
-        + "\n".join(f"{n}: {c}" for n, c in sorted_numbers[:3])
+    logger.debug(
+        "[Parser] Top 3 end numbers:\n%s",
+        "\n".join(f"{n}: {c}" for n, c in sorted_numbers[:3]),
     )
 
     return sorted_numbers[0][0]

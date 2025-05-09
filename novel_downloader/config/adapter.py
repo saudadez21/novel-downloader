@@ -94,8 +94,13 @@ class ConfigAdapter:
             cache_dir=gen.get("cache_dir", "./cache"),
             decode_font=site_cfg.get("decode_font", False),
             use_freq=site_cfg.get("use_freq", False),
-            use_ocr=site_cfg.get("use_ocr", False),
+            use_ocr=site_cfg.get("use_ocr", True),
+            use_vec=site_cfg.get("use_vec", False),
+            ocr_version=site_cfg.get("ocr_version", "v1.0"),
             save_font_debug=site_cfg.get("save_font_debug", False),
+            batch_size=site_cfg.get("batch_size", 32),
+            ocr_weight=site_cfg.get("ocr_weight", 0.6),
+            vec_weight=site_cfg.get("vec_weight", 0.4),
             mode=site_cfg.get("mode", "session"),
         )
 

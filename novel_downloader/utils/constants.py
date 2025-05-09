@@ -92,7 +92,6 @@ VOLUME_BORDER_IMAGE_PATH = files("novel_downloader.resources.images").joinpath(
 REPLACE_WORD_MAP_PATH = files("novel_downloader.resources.json").joinpath(
     "replace_word_map.json"
 )
-CHAR_FREQ_MAP_PATH = files("novel_downloader.resources.json").joinpath("char_freq.json")
 
 # JavaScript
 QD_DECRYPT_SCRIPT_PATH = files("novel_downloader.resources.js_scripts").joinpath(
@@ -134,12 +133,20 @@ EPUB_OPTIONS = {
 # Hugging Face model repo for character recognition
 REC_CHAR_MODEL_REPO = "saudadez/rec_chinese_char"
 
-# Default revision tag for all files
-REC_CHAR_MODEL_REVISION = "v1.0"
-
 # Required files to be downloaded for the model
 REC_CHAR_MODEL_FILES = [
     "inference.pdmodel",
     "inference.pdiparams",
     "rec_custom_keys.txt",
+    "char_freq.json",
 ]
+
+REC_CHAR_VECTOR_FILES = [
+    "char_vectors.npy",
+    "char_vectors.txt",
+]
+
+REC_IMAGE_SHAPE_MAP = {
+    "v1.0": "3,32,32",
+    "v2.0": "3,48,48",
+}

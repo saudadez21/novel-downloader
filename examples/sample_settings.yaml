@@ -37,8 +37,13 @@ sites:
     login_required: true            # 是否需要登录才能访问
     decode_font: false              # 是否尝试本地解码混淆字体
     use_freq: false                 # 是否使用频率分析
-    use_ocr: false                  # 是否使用 OCR 辅助识别文本
+    ocr_version: "v2.0"             # "v1.0" / "v2.0"
+    use_ocr: true                   # 是否使用 OCR 辅助识别文本
+    use_vec: false                  # 是否使用 Vector 辅助识别文本
     save_font_debug: false          # 是否保存字体解码调试数据
+    batch_size: 32
+    ocr_weight: 0.6
+    vec_weight: 0.4
     #
   sample_site:
     book_ids:
