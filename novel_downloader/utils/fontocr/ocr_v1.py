@@ -71,7 +71,7 @@ class FontOCRV1:
 
         if font_debug:
             self._debug_dir = self._cache_dir / "font_debug" / "badcase"
-            self._debug_dir.mkdir(exist_ok=True)
+            self._debug_dir.mkdir(parents=True, exist_ok=True)
 
         # load shared NLP/OCR + frequency DB once
         self._load_ocr_model()

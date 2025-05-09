@@ -242,11 +242,11 @@ class FontOCRV2:
         self._cache_dir = Path(cache_dir)
         self._cache_dir.mkdir(parents=True, exist_ok=True)
         self._fixed_map_dir = self._cache_dir / "fixed_font_map"
-        self._fixed_map_dir.mkdir(exist_ok=True)
+        self._fixed_map_dir.mkdir(parents=True, exist_ok=True)
 
         if font_debug:
             self._debug_dir = self._cache_dir / "font_debug" / "badcase"
-            self._debug_dir.mkdir(exist_ok=True)
+            self._debug_dir.mkdir(parents=True, exist_ok=True)
 
         # load shared OCR + frequency DB
         if self.use_ocr:
