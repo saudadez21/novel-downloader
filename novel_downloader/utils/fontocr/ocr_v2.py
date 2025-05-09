@@ -497,15 +497,24 @@ class FontOCRV2:
             if ocr_preds:
                 ch, s = ocr_preds
                 scores[ch] = scores.get(ch, 0.0) + self.ocr_weight * s
+                logger.debug(
+                    "[FontOCR] OCR with weight: scores[%s] = %s", ch, scores[ch]
+                )
             # Vec weight
             for ch, s in vec_preds:
                 scores[ch] = scores.get(ch, 0.0) + self.vec_weight * s
+                logger.debug(
+                    "[FontOCR] Vec with weight: scores[%s] = %s", ch, scores[ch]
+                )
             # Optional frequency
             if self.use_freq:
                 for ch in list(scores):
                     level = self._global_char_freq_db.get(ch, self._max_freq)
                     freq_score = (self._max_freq - level) / max(1, self._max_freq)
                     scores[ch] += self._freq_weight * freq_score
+                    logger.debug(
+                        "[FontOCR] After Freq weight: scores[%s] = %s", ch, scores[ch]
+                    )
 
             # Threshold + sort + top_k
             filtered = [(ch, sc) for ch, sc in scores.items() if sc >= self.threshold]
@@ -611,6 +620,11 @@ class FontOCRV2:
                 for (ch, img), preds in zip(rendered, fused):
                     if ch in fixed_map:
                         mapping_result[ch] = fixed_map[ch]
+                        logger.debug(
+                            "[FontOCR] Using cached mapping: '%s' -> '%s'",
+                            ch,
+                            fixed_map[ch],
+                        )
                         continue
                     if not preds:
                         if self.font_debug and chapter_id:
@@ -626,6 +640,13 @@ class FontOCRV2:
                     real_char, _ = preds[0]
                     mapping_result[ch] = real_char
                     fixed_map[ch] = real_char
+                    if self.font_debug:
+                        logger.debug(
+                            "[FontOCR] Prediction for char '%s': top_pred='%s'",
+                            ch,
+                            real_char,
+                        )
+                        logger.debug("[FontOCR] All predictions: %s", preds)
 
         # persist updated fixed_map
         try:
