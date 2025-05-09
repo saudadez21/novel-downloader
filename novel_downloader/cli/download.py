@@ -91,5 +91,6 @@ def download_cli(ctx: Context, book_ids: list[str], site: str) -> None:
         curr_downloader.download_one(book_id)
 
     # Prompt for parsing and wait for user input before shutting down
-    input(t("download_prompt_parse"))
-    curr_requester.shutdown()
+    if requester_cfg.auto_close:
+        input(t("download_prompt_parse"))
+        curr_requester.shutdown()
