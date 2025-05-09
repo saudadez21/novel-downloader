@@ -13,7 +13,6 @@ and chapter files.
 from novel_downloader.config.models import SaverConfig
 
 from ..base_saver import BaseSaver
-from .common_epub import common_save_as_epub
 from .common_txt import common_save_as_txt
 
 
@@ -59,6 +58,13 @@ class CommonSaver(BaseSaver):
         :param book_id: The book identifier.
         :raises NotImplementedError: If the method is not overridden.
         """
+        try:
+            from .common_epub import common_save_as_epub
+        except ImportError:
+            raise NotImplementedError(
+                "EPUB export not supported. Please install 'ebooklib'"
+            )
+
         return common_save_as_epub(self, book_id)
 
     @property
