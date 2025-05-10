@@ -8,6 +8,8 @@ Download full novels by book IDs
 (supports config files, site switching, and localization prompts).
 """
 
+from typing import List
+
 import click
 from click import Context
 
@@ -35,7 +37,7 @@ from novel_downloader.utils.logger import setup_logging
     help=t("download_option_site", default="qidian"),
 )  # type: ignore
 @click.pass_context  # type: ignore
-def download_cli(ctx: Context, book_ids: list[str], site: str) -> None:
+def download_cli(ctx: Context, book_ids: List[str], site: str) -> None:
     """Download full novels by book IDs."""
     config_path = ctx.obj.get("config_path")
 

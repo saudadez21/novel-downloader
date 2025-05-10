@@ -11,7 +11,7 @@ import logging
 import random
 import time
 from pathlib import Path
-from typing import Literal, Optional, Union
+from typing import Dict, Literal, Optional, Union
 from urllib.parse import unquote, urlparse
 
 import requests
@@ -30,7 +30,7 @@ def http_get_with_retry(
     retries: int = 3,
     timeout: int = 10,
     backoff: float = 0.5,
-    headers: Optional[dict[str, str]] = None,
+    headers: Optional[Dict[str, str]] = None,
     stream: bool = False,
 ) -> Optional[requests.Response]:
     """

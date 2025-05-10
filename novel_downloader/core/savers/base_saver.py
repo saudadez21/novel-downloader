@@ -13,7 +13,7 @@ import abc
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 
 from novel_downloader.config.models import SaverConfig
 from novel_downloader.core.interfaces import SaverProtocol
@@ -21,7 +21,7 @@ from novel_downloader.core.interfaces import SaverProtocol
 logger = logging.getLogger(__name__)
 
 
-class SafeDict(dict[str, Any]):
+class SafeDict(Dict[str, Any]):
     def __missing__(self, key: str) -> str:
         return "{{{}}}".format(key)
 

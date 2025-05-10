@@ -56,7 +56,7 @@ class StateManager:
 
         :param cookie_str: e.g. 'k1=v1; k2=v2; k3'
         :return: mapping cookie names to values (missing '=' yields empty string)
-        :rtype: dict[str, str]
+        :rtype: Dict[str, str]
         """
         cookies: Dict[str, str] = {}
         for item in cookie_str.split(";"):

@@ -16,7 +16,7 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from novel_downloader.utils.file_utils import save_as_txt
 from novel_downloader.utils.text_utils import clean_chapter_title, format_chapter
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-CHAPTER_FOLDERS: list[str] = [
+CHAPTER_FOLDERS: List[str] = [
     "chapters",
     "encrypted_chapters",
 ]
@@ -84,7 +84,7 @@ def common_save_as_txt(
         return
 
     # --- Compile chapters ---
-    parts: list[str] = []
+    parts: List[str] = []
     latest_chapter: str = ""
     volumes = book_info.get("volumes", [])
 

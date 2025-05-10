@@ -101,7 +101,7 @@ class RuleStep(TypedDict, total=False):
     # —— BeautifulSoup 相关 —— #
     selector: Optional[str]  # CSS 选择器, 用于 select/select_one/exclude
     name: Optional[str]  # 标签名称, 用于 find/find_all
-    attrs: Optional[dict[str, Any]]  # 属性过滤, 用于 find/find_all
+    attrs: Optional[Dict[str, Any]]  # 属性过滤, 用于 find/find_all
     limit: Optional[int]  # find_all 的最大匹配数
     attr: Optional[str]  # 从元素获取属性值 (select/select_one/select_all)
 

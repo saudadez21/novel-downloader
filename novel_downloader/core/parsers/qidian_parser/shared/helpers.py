@@ -111,7 +111,7 @@ def find_ssr_page_context(soup: BeautifulSoup) -> Dict[str, Any]:
     return {}
 
 
-def extract_chapter_info(ssr_data: dict[str, Any]) -> dict[str, Any]:
+def extract_chapter_info(ssr_data: Dict[str, Any]) -> Dict[str, Any]:
     """
     Extract the 'chapterInfo' dictionary from the SSR page context.
 

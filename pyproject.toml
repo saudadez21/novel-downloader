@@ -5,16 +5,19 @@ authors = [
     { name = "Peter Z", email = "bowzhu721@gmail.com" }
 ]
 license = {file = "LICENSE"}
-readme = "README.md"
+readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">=3.8"
-keywords = ["novel", "download", "parser", "archive"]
+keywords = ["novel", "download", "parser", "archive", "fiction", "qidian", "biquge"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Environment :: Console",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11"
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12"
 ]
 dynamic = ["version"]
 dependencies = [

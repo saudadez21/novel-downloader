@@ -8,12 +8,12 @@ Multilingual text dictionary and utility for CLI and interactive mode.
 """
 
 import json
-from typing import Any
+from typing import Any, Dict
 
 from novel_downloader.utils.constants import LOCALES_DIR
 from novel_downloader.utils.state import state_mgr
 
-_TRANSLATIONS: dict[str, dict[str, str]] = {}
+_TRANSLATIONS: Dict[str, Dict[str, str]] = {}
 
 for locale_path in LOCALES_DIR.glob("*.json"):
     lang = locale_path.stem

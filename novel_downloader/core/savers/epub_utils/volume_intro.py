@@ -7,10 +7,12 @@ Responsible for generating HTML code for volume introduction pages,
 including two style variants and a unified entry point.
 """
 
+from typing import Tuple
+
 from novel_downloader.utils.constants import EPUB_IMAGE_FOLDER
 
 
-def split_volume_title(volume_title: str) -> tuple[str, str]:
+def split_volume_title(volume_title: str) -> Tuple[str, str]:
     """
     Split volume title into two parts for better display.
 

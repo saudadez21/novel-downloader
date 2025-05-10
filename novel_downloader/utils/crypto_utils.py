@@ -12,7 +12,7 @@ import hashlib
 import json
 import random
 import time
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 
 def rc4_crypt(
@@ -50,7 +50,7 @@ def rc4_crypt(
 
         # Pseudo-Random Generation Algorithm (PRGA)
         i = j = 0
-        out: list[int] = []
+        out: List[int] = []
         for char in data_bytes:
             i = (i + 1) % 256
             j = (j + S[i]) % 256

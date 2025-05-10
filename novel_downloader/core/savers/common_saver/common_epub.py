@@ -12,7 +12,7 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, List, Optional
 from urllib.parse import unquote, urlparse
 
 from ebooklib import epub
@@ -37,7 +37,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-CHAPTER_FOLDERS: list[str] = [
+CHAPTER_FOLDERS: List[str] = [
     "chapters",
     "encrypted_chapters",
 ]
@@ -165,7 +165,7 @@ def common_save_as_epub(
         spine.append(vol_intro)
 
         section = epub.Section(vol_name, vol_intro.file_name)
-        chapter_items: list[epub.EpubHtml] = []
+        chapter_items: List[epub.EpubHtml] = []
 
         for chap in vol.get("chapters", []):
             chap_id = chap.get("chapterId")
