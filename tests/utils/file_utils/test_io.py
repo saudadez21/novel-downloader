@@ -19,6 +19,7 @@ import pytest
 import novel_downloader.utils.file_utils.io as io_module
 from novel_downloader.utils.file_utils.io import (
     _get_non_conflicting_path,
+    _write_file,
     read_binary_file,
     read_json_file,
     read_text_file,
@@ -29,7 +30,7 @@ from novel_downloader.utils.file_utils.io import (
 
 def test_get_non_conflicting_path_no_conflict(tmp_path):
     p = tmp_path / "file.txt"
-    # no existing file → same path
+    # no existing file -> same path
     assert _get_non_conflicting_path(p) == p
 
 
@@ -183,3 +184,38 @@ def test_load_blacklisted_words(monkeypatch):
 
     result = io_module.load_blacklisted_words()
     assert result == {"求票", "月票", "投票"}
+
+
+def test_write_file_type_error(tmp_path):
+    """
+    _write_file should raise TypeError when given non-str/bytes and dump_json=False.
+    """
+    p = tmp_path / "foo.bin"
+    with pytest.raises(TypeError) as excinfo:
+        _write_file(content=12345, filepath=p, dump_json=False)
+    assert "Non-JSON content must be str or bytes." in str(excinfo.value)
+
+
+def test_write_file_exception_caught(monkeypatch, tmp_path, caplog):
+    """
+    If writing raises any Exception (e.g. NamedTemporaryFile fails),
+    _write_file logs a warning and returns False.
+    """
+    caplog.set_level(logging.WARNING)
+    p = tmp_path / "out.txt"
+
+    # Monkeypatch NamedTemporaryFile to raise IOError immediately
+    def fake_ntf(*args, **kwargs):
+        raise IOError("disk full")
+
+    monkeypatch.setattr(io_module.tempfile, "NamedTemporaryFile", fake_ntf)
+
+    result = _write_file(content="hello", filepath=p, dump_json=False)
+    assert result is False
+    # Should have logged a warning including the path and exception message
+    assert any(
+        record.levelno == logging.WARNING
+        and "[file] Error writing" in record.getMessage()
+        and "disk full" in record.getMessage()
+        for record in caplog.records
+    )

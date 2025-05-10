@@ -50,7 +50,7 @@ def normalize_txt_line_endings(folder_path: Union[str, Path]) -> None:
 
 __all__ = ["normalize_txt_line_endings"]
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     import argparse
 
     logging.basicConfig(

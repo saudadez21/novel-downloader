@@ -26,7 +26,11 @@ pip install -e .[dev,font-recovery]
 pre-commit install
 ```
 
-此后每次提交前将自动触发检查。
+此后每次提交前将自动触发检查, 或使用:
+
+```bash
+pre-commit run --all-files
+```
 
 ---
 

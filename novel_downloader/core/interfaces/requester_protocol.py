@@ -6,7 +6,7 @@ novel_downloader.core.interfaces.requester_protocol
 
 Defines the RequesterProtocol interface for fetching raw HTML or JSON
 for book info pages, individual chapters, managing request lifecycle,
-and optionally retrieving a user’s authenticated bookcase.
+and optionally retrieving a user's authenticated bookcase.
 """
 
 from typing import Optional, Protocol, runtime_checkable
@@ -16,7 +16,7 @@ from typing import Optional, Protocol, runtime_checkable
 class RequesterProtocol(Protocol):
     """
     A requester must be able to fetch raw HTML/data for:
-      - a book’s info page,
+      - a book's info page,
       - a specific chapter page.
     """
 
@@ -57,7 +57,7 @@ class RequesterProtocol(Protocol):
 
     def get_bookcase(self, wait_time: Optional[int] = None) -> str:
         """
-        Optional: Retrieve the HTML content of the authenticated user’s bookcase page.
+        Optional: Retrieve the HTML content of the authenticated user's bookcase page.
 
         :param wait_time: Base number of seconds to wait before returning content.
         :return: The HTML markup of the bookcase page.

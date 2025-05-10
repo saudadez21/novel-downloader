@@ -69,3 +69,39 @@ def test_diff_inline_display_replace():
 
     assert len(marker1) == len(old)
     assert len(marker2) == len(new)
+
+
+def test_diff_inline_display_delete():
+    """Test that deletions in old string are marked correctly."""
+    old = "abcd"
+    new = "abd"  # 'c' is deleted
+    output = diff_inline_display(old, new)
+    lines = output.splitlines()
+
+    assert lines[0] == "-abcd"
+    assert lines[2] == "+abd"
+
+    marker1 = lines[1][1:]
+    marker2 = lines[3][1:]
+
+    # Should mark 'c' in marker1 with '^'
+    assert marker1[2] == "^"
+    assert marker2 == "   "  # No marker for deleted char
+
+
+def test_diff_inline_display_insert():
+    """Test that insertions in new string are marked correctly."""
+    old = "abd"
+    new = "abcd"  # 'c' is inserted
+    output = diff_inline_display(old, new)
+    lines = output.splitlines()
+
+    assert lines[0] == "-abd"
+    assert lines[2] == "+abcd"
+
+    marker1 = lines[1][1:]
+    marker2 = lines[3][1:]
+
+    # Should mark 'c' in marker2 with '^'
+    assert marker1 == "   "  # No marker for inserted char
+    assert marker2[2] == "^"

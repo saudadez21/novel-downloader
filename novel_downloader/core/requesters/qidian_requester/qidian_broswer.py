@@ -241,7 +241,7 @@ class QidianBrowser(BaseBrowser):
 
     def _build_book_info_url(self, book_id: str) -> str:
         """
-        Construct the URL for fetching a book’s info page.
+        Construct the URL for fetching a book's info page.
 
         :param book_id: The identifier of the book.
         :return: Fully qualified URL for the book info page.
@@ -271,7 +271,7 @@ class QidianBrowser(BaseBrowser):
         Retrieve the HTML of a Qidian book info page.
 
         This method enforces that the user is logged in, navigates to the
-        book’s info URL, waits a randomized delay to mimic human browsing,
+        book's info URL, waits a randomized delay to mimic human browsing,
         and returns the page HTML.
 
         :param book_id: The identifier of the book to fetch.
@@ -349,7 +349,7 @@ class QidianBrowser(BaseBrowser):
 
     def get_bookcase(self, wait_time: Optional[int] = None) -> str:
         """
-        Retrieve the HTML content of the logged‑in user’s Qidian bookcase page.
+        Retrieve the HTML content of the logged‑in user's Qidian bookcase page.
 
         :param wait_time: Base number of seconds to wait before returning content.
                           If None, falls back to `self._config.wait_time`.

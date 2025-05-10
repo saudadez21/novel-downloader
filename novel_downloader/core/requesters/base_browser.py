@@ -137,7 +137,7 @@ class BaseBrowser(RequesterProtocol, abc.ABC):
 
     def get_bookcase(self, wait_time: Optional[int] = None) -> str:
         """
-        Optional: Retrieve the HTML content of the authenticated user’s bookcase page.
+        Optional: Retrieve the HTML content of the authenticated user's bookcase page.
 
         Subclasses that support login+bookcase retrieval should override this.
 

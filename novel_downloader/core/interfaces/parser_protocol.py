@@ -16,7 +16,7 @@ class ParserProtocol(Protocol):
     """
     A parser must be able to:
       - extract book metadata from an HTML string,
-      - extract a single chapter’s text from an HTML string,
+      - extract a single chapter's text from an HTML string,
       - accept a book_id context for multi-step workflows.
     """
 
@@ -24,7 +24,7 @@ class ParserProtocol(Protocol):
         """
         Parse and return a dictionary of book information from the raw HTML.
 
-        :param html_str: The HTML of a book’s info page.
+        :param html_str: The HTML of a book's info page.
         :return: A dict containing metadata like title, author, chapters list, etc.
         """
         ...
@@ -35,6 +35,6 @@ class ParserProtocol(Protocol):
 
         :param html_str: The HTML of the chapter page.
         :param chapter_id: Identifier of the chapter being parsed.
-        :return: The chapter’s text.
+        :return: The chapter's text.
         """
         ...

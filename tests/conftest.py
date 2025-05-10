@@ -37,10 +37,18 @@ def fake_fallback_file(tmp_path):
 # -----------------------------------------------------------------------------
 @pytest.fixture
 def tmp_config_file(tmp_path):
-    def _make(config_dict, filename="config.yaml"):
-        p = tmp_path / filename
-        p.write_text(yaml.dump(config_dict), encoding="utf-8")
-        return p
+    """
+    Return a function that creates a YAML file under tmp_path and returns its Path.
+    If config_dict is given, write its contents; otherwise create an empty file.
+    """
+
+    def _make(config_dict=None, filename="settings.yaml"):
+        path = tmp_path / filename
+        if config_dict is not None:
+            path.write_text(yaml.safe_dump(config_dict), encoding="utf-8")
+        else:
+            path.write_text("", encoding="utf-8")
+        return path
 
     return _make
 

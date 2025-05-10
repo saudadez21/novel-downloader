@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 class QidianNodeDecryptor:
     """
-    A decryptor that uses Node.js plus Qidian’s Fock JavaScript module
+    A decryptor that uses Node.js plus Qidian's Fock JavaScript module
     to decrypt encrypted chapter payloads.
 
     On initialization, this class will:

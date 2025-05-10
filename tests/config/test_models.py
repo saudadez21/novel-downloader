@@ -48,7 +48,12 @@ EXPECTED_FIELDS = {
         "cache_dir": str,
         "decode_font": bool,
         "use_freq": bool,
+        "use_ocr": bool,
         "use_vec": bool,
+        "ocr_version": str,
+        "batch_size": int,
+        "ocr_weight": float,
+        "vec_weight": float,
         "save_font_debug": bool,
         "mode": str,
     },
@@ -78,7 +83,6 @@ def test_dataclass_has_all_fields(cls):
     expected = EXPECTED_FIELDS[cls]
     assert declared_fields == expected, f"{cls.__name__} fields mismatch"
 
-    # 类型检查（默认值是否符合注解）
     for name, expected_type in expected.items():
         value = getattr(instance, name)
         assert isinstance(value, expected_type), (
