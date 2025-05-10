@@ -31,27 +31,41 @@ def resolve_config_path(
     config_path: Optional[Union[str, Path]]
 ) -> Optional[Union[Path, Traversable]]:
     """
-    Determine which config file path to use.
-    Priority:
-    1. User-specified path (if valid)
-    2. Internal base.yaml fallback
+    Resolve which configuration file to use, in this priority order:
+
+    1. User-specified path (the `config_path` argument).
+    2. `./settings.yaml` in the current working directory.
+    3. The global settings file (`SETTING_FILE`).
+    4. The internal default (`BASE_CONFIG_PATH`).
+
+    Returns a Path to the first existing file, or None if none is found.
     """
+    # 1. Try the user-provided path
     if config_path:
         path = Path(config_path).expanduser().resolve()
         if path.is_file():
             return path
         logger.warning("[config] Specified config file not found: %s", path)
 
+    # 2. Try ./settings.yaml in the current working directory
+    local_path = Path.cwd() / "settings.yaml"
+    if local_path.is_file():
+        logger.debug("[config] Using local settings.yaml at %s", local_path)
+        return local_path
+
+    # 3. Try the globally registered settings file
     if SETTING_FILE.is_file():
+        logger.debug("[config] Using global settings file at %s", SETTING_FILE)
         return SETTING_FILE
 
-    # Fallback to internal base.yaml
+    # 4. Fallback to the internal default configuration
     try:
-        base_yaml = BASE_CONFIG_PATH
-        logger.debug("[config] Using internal base.yaml fallback")
-        return base_yaml
+        logger.debug(
+            "[config] Falling back to internal base config at %s", BASE_CONFIG_PATH
+        )
+        return BASE_CONFIG_PATH
     except Exception as e:
-        logger.error("[config] Failed to resolve internal base.yaml: %s", e)
+        logger.error("[config] Failed to load internal base config: %s", e)
         return None
 
 

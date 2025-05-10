@@ -7,6 +7,8 @@ novel_downloader.cli.settings
 Commands to configure novel downloader settings.
 """
 
+import shutil
+from importlib.resources import as_file
 from pathlib import Path
 from typing import Optional
 
@@ -14,6 +16,7 @@ import click
 from click import Context
 
 from novel_downloader.config import save_config_file, save_rules_as_json
+from novel_downloader.utils.constants import DEFAULT_SETTINGS_PATHS
 from novel_downloader.utils.i18n import t
 from novel_downloader.utils.logger import setup_logging
 from novel_downloader.utils.state import state_mgr
@@ -24,6 +27,41 @@ def settings_cli() -> None:
     """Configure downloader settings."""
     setup_logging()
     pass
+
+
+@settings_cli.command(name="init", help=t("settings_init_help"))  # type: ignore
+@click.option("--force", is_flag=True, help=t("settings_init_force_help"))  # type: ignore
+def init_settings(force: bool) -> None:
+    """Initialize default settings and rules in the current directory."""
+    cwd = Path.cwd()
+
+    for resource in DEFAULT_SETTINGS_PATHS:
+        target_path = cwd / resource.name
+        should_copy = True
+
+        if target_path.exists():
+            if force:
+                should_copy = True
+                click.echo(t("settings_init_overwrite", filename=resource.name))
+            else:
+                click.echo(t("settings_init_exists", filename=resource.name))
+                should_copy = click.confirm(
+                    t("settings_init_confirm_overwrite", filename=resource.name),
+                    default=False,
+                )
+
+        if not should_copy:
+            click.echo(t("settings_init_skip", filename=resource.name))
+            continue
+
+        try:
+            with as_file(resource) as actual_path:
+                shutil.copy(actual_path, target_path)
+                click.echo(t("settings_init_copy", filename=resource.name))
+        except Exception as e:
+            raise click.ClickException(
+                t("settings_init_error", filename=resource.name, err=e)
+            )
 
 
 @settings_cli.command(name="set-lang", help=t("settings_set_lang_help"))  # type: ignore

@@ -75,7 +75,13 @@ DEFAULT_USER_HEADERS = {
 # -----------------------------------------------------------------------------
 # Embedded resources (via importlib.resources)
 # -----------------------------------------------------------------------------
-BASE_CONFIG_PATH = files("novel_downloader.defaults").joinpath("base.yaml")
+BASE_CONFIG_PATH = files("novel_downloader.resources.config").joinpath("settings.yaml")
+BASE_RULE_PATH = files("novel_downloader.resources.config").joinpath("rules.toml")
+
+DEFAULT_SETTINGS_PATHS = [
+    BASE_CONFIG_PATH,
+    BASE_RULE_PATH,
+]
 
 # CSS Styles
 CSS_MAIN_PATH = files("novel_downloader.resources.css_styles").joinpath("main.css")
