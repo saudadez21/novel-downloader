@@ -24,3 +24,9 @@ repos:
       - id: mypy
         files: ^novel_downloader/
         args: ["--install-types", "--non-interactive", "--ignore-missing-imports"]
+
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v4.6.3
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]

@@ -27,7 +27,8 @@ dependencies = [
     "pyyaml",
     "lxml",
     "platformdirs",
-    "click"
+    "click",
+    "ebooklib"
 ]
 
 [project.optional-dependencies]
@@ -39,7 +40,7 @@ dev = [
     "pytest-cov",
     "pytest-mock",
     "pre-commit",
-    "ebooklib"
+    "commitizen"
 ]
 
 font-recovery = [
@@ -53,6 +54,10 @@ font-recovery = [
 
 [project.scripts]
 novel-cli = "novel_downloader.cli.main:cli_main"
+
+[project.urls]
+Homepage = "https://github.com/BowenZ217/novel-downloader"
+Source = "https://github.com/BowenZ217/novel-downloader"
 
 [build-system]
 requires = ["setuptools>=61.0"]
@@ -92,3 +97,15 @@ strict = true
 minversion = "7.1"
 addopts = "--strict-markers"
 testpaths = ["tests"]
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "1.1.0"
+version_files = [
+    "novel_downloader/__init__.py"
+]
+update_changelog_on_bump = true
+changelog_file = "CHANGELOG.md"
+changelog_incremental = true
+tag_format = "v$version"
+bump_message = "chore(release): bump version to $new_version"
