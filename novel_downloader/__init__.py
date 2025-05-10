@@ -9,6 +9,6 @@ Core package for the Novel Downloader project.
 
 __version__ = "1.1.0"
 
-__author__ = "Peter Z"
-__email__ = "bowzhu721@gmail.com"
+__author__ = "Saudade Z"
+__email__ = "saudadez217@gmail.com"
 __license__ = "MIT"

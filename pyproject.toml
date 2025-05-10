@@ -1,17 +1,19 @@
 [project]
-name = "novel_downloader"
-description = "A novel downloader with CLI and future GUI support"
+name = "novel-downloader"
+description = "A command-line tool for downloading Chinese web novels from Qidian and similar platforms."
 authors = [
-    { name = "Peter Z", email = "bowzhu721@gmail.com" }
+    { name = "Saudade Z", email = "saudadez217@gmail.com" }
 ]
 license = {file = "LICENSE"}
 readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">=3.8"
-keywords = ["novel", "download", "parser", "archive", "fiction", "qidian", "biquge"]
+keywords = ["novel", "web novel", "qidian", "biquge", "downloader", "parser", "fiction", "cli", "automation", "ebook"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Environment :: Console",
     "License :: OSI Approved :: MIT License",
+    "Natural Language :: Chinese (Simplified)",
+    "Topic :: Utilities",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
@@ -60,7 +62,7 @@ Homepage = "https://github.com/BowenZ217/novel-downloader"
 Source = "https://github.com/BowenZ217/novel-downloader"
 
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]

@@ -1,0 +1,36 @@
+name: Publish Python Package
+
+on:
+  push:
+    tags:
+      - 'v*'  # such as v1.0.0
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade build twine
+
+      - name: Fix README.md links for PyPI
+        run: |
+          sed -i 's#](docs/#](https://github.com/BowenZ217/novel-downloader/blob/main/docs/#g' README.md
+
+      - name: Build package
+        run: |
+          python -m build
+
+      - name: Publish to PyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          twine upload dist/*
