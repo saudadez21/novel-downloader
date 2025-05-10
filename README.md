@@ -55,6 +55,7 @@ novel-cli download 123456
 - [使用示例](docs/5-usage-examples.md)
 - [文件保存](docs/file-saving.md)
 - [TODO](docs/todo.md)
+- [开发](docs/develop.md)
 - [项目说明](#项目说明)
 
 ---
