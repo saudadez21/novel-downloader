@@ -42,7 +42,7 @@ MODEL_CACHE_DIR = BASE_CONFIG_DIR / "models"
 # -----------------------------------------------------------------------------
 STATE_FILE = STATE_DIR / "state.json"
 HASH_STORE_FILE = DATA_DIR / "image_hashes.json"
-SETTING_FILE = CONFIG_DIR / "settings.yaml"
+SETTING_FILE = CONFIG_DIR / "settings.json"
 SITE_RULES_FILE = CONFIG_DIR / "site_rules.json"
 DEFAULT_USER_DATA_DIR = DATA_DIR / "browser_data"
 
