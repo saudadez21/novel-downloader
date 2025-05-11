@@ -43,6 +43,7 @@ EXPECTED_FIELDS = {
         "skip_existing": bool,
         "login_required": bool,
         "save_html": bool,
+        "mode": str,
     },
     ParserConfig: {
         "cache_dir": str,

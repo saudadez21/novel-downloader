@@ -81,6 +81,7 @@ class ConfigAdapter:
             skip_existing=gen.get("skip_existing", True),
             login_required=site_cfg.get("login_required", False),
             save_html=debug.get("save_html", False),
+            mode=site_cfg.get("mode", "session"),
         )
 
     def get_parser_config(self) -> ParserConfig:

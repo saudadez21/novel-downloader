@@ -51,7 +51,7 @@ sites:
     api_key: "your_api_key"
     special_flag: 42
   common:
-    mode: "session"                 # browser / session
+    mode: "session"                 # async / session
     login_required: false           # 是否需要登录才能访问
 
 # 输出文件格式及相关选项

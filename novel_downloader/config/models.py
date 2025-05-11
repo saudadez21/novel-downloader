@@ -34,7 +34,7 @@ class RequesterConfig:
     auto_close: bool = True
     disable_images: bool = True
     mute_audio: bool = True
-    mode: str = "session"  # browser / session
+    mode: str = "session"  # browser / session / async
 
 
 # === Downloaders ===
@@ -47,6 +47,7 @@ class DownloaderConfig:
     skip_existing: bool = True
     login_required: bool = False
     save_html: bool = False
+    mode: str = "session"  # browser / session / async
 
 
 # === Parsers ===
