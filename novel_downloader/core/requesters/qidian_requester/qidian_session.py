@@ -70,7 +70,7 @@ class QidianSession(BaseSession):
         3. Updates both the live ``requests.Session`` and the internal cache;
         4. Delegates the actual request to ``super().get``.
         """
-        if self._session is None:  # defensive – mirrors BaseSession check
+        if self._session is None:  # defensive - mirrors BaseSession check
             raise RuntimeError("Session is not initialized or has been shut down.")
 
         # ---- 1. refresh token cookie --------------------------------------

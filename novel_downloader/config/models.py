@@ -35,6 +35,7 @@ class RequesterConfig:
     disable_images: bool = True
     mute_audio: bool = True
     mode: str = "session"  # browser / session / async
+    max_rps: Optional[float] = None  # Maximum requests per second
 
 
 # === Downloaders ===

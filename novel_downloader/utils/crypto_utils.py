@@ -108,17 +108,17 @@ def patch_qd_payload_token(
     if not key:
         key = _get_key()
 
-    # Step 1 – decrypt --------------------------------------------------
+    # Step 1 - decrypt --------------------------------------------------
     decrypted_json: str = rc4_crypt(key, enc_token, mode="decrypt")
     payload: Dict[str, Any] = json.loads(decrypted_json)
 
-    # Step 2 – rebuild timing fields -----------------------------------
+    # Step 2 - rebuild timing fields -----------------------------------
     loadts = int(time.time() * 1000)  # ms since epoch
     # Simulate the JS duration: N(600, 150)  pushed into [300, 1000]
     duration = max(300, min(1000, int(random.normalvariate(600, 150))))
     timestamp = loadts + duration
 
-    # Step 3 – recalculate ------------------------------------
+    # Step 3 - recalculate ------------------------------------
     fp_key = _d("ZmluZ2VycHJpbnQ=")
     ab_key = _d("YWJub3JtYWw=")
     ck_key = _d("Y2hlY2tzdW0=")
@@ -138,7 +138,7 @@ def patch_qd_payload_token(
         ck_key: ck_val,
     }
 
-    # Step 4 – encrypt and return --------------------------------------
+    # Step 4 - encrypt and return --------------------------------------
     return rc4_crypt(
         key, json.dumps(new_payload, separators=(",", ":")), mode="encrypt"
     )

@@ -4,6 +4,7 @@ requests:
   retry_times: 3                    # 请求失败重试次数
   retry_interval: 5
   timeout: 30                       # 页面加载超时时间 (秒)
+  max_rps: null                     # 最大请求速率 (requests per second), 为 null 则不限制
   # DrissionPage 专用设置
   headless: false                   # 是否以无头模式启动浏览器
   user_data_folder: ""              # 浏览器用户数据目录: 为空则使用默认目录

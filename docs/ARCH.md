@@ -28,7 +28,7 @@ In both `browser` and `session` modes, the crawling process is executed **sequen
 2. Parse HTML to extract structured book metadata
 3. Save metadata as JSON (`book.json`)
 
-### Phase 2–3: Volume and Chapter Iteration
+### Phase 2-3: Volume and Chapter Iteration
 
 1. Loop through the volume list from `book.json`
 2. For each volume:
@@ -56,7 +56,7 @@ In both `browser` and `session` modes, the crawling process is executed **sequen
 
 ## Async Mode Architecture
 
-The `async` mode is designed for **maximum performance** when downloading and parsing large amounts of chapter content. It uses a producer–consumer pattern with queues.
+The `async` mode is designed for **maximum performance** when downloading and parsing large amounts of chapter content. It uses a producer-consumer pattern with queues.
 
 ```
 [URLs]

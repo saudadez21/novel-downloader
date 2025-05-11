@@ -63,6 +63,7 @@ class ConfigAdapter:
             disable_images=req.get("disable_images", True),
             mute_audio=req.get("mute_audio", True),
             mode=site_cfg.get("mode", "session"),
+            max_rps=site_cfg.get("max_rps", None),
         )
 
     def get_downloader_config(self) -> DownloaderConfig:
