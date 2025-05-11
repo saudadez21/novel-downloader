@@ -27,33 +27,35 @@ pip install .
 
 安装完成后, 会在系统 `PATH` 中生成 `novel-cli` 可执行命令。
 
-## 额外依赖
+## 可选功能及依赖
 
-> 起点一个月内更新的章节可能有字体加密
->
-> 如果开启尝试解密字体功能 (`decode_font` 参数), 需要安装额外库 (注意: 解密字体准确率大约 $99.x%$, 并且 cpu 状态下一章约需要一分钟):
->
-> ```bash
-> pip install .[font-recovery]
-> ```
->
-> 如果启用 `use_ocr` 参数, 则需安装 [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) 及相关依赖 (请根据 PaddleOCR [文档](https://paddlepaddle.github.io/PaddleOCR/latest/quick_start.html) 选择合适版本和 CUDA 支持) :
->
-> ```bash
-> python -m pip install paddlepaddle==3.0.0rc1 -i https://www.paddlepaddle.org.cn/packages/stable/cpu/
-> pip install paddleocr
-> ```
->
-> 当前使用版本示例:
->
-> ```bash
-> paddleocr==2.10.0
-> paddlepaddle==3.0.0rc1
-> ```
->
-> 如果不启用 OCR (即不使用 `use_ocr` 参数) , 则无需安装 PaddleOCR 及 paddle 相关。
+### 字体解密 (`decode_font` 参数)
 
-### OCR 速度基准 (随机中文图片, 512 张)
+起点一个月内更新的章节可能有字体加密
+
+如果开启尝试解密字体功能 (`decode_font` 参数), 需要安装额外库 (注意: 解密字体准确率大约 $99.x\%$, 并且 cpu 状态下一章约需要一分钟):
+
+```bash
+pip install .[font-recovery]
+```
+
+如果启用 `use_ocr` 参数, 则需安装 [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) 及相关依赖 (请根据 PaddleOCR [文档](https://paddlepaddle.github.io/PaddleOCR/latest/quick_start.html) 选择合适版本和 CUDA 支持) :
+
+```bash
+python -m pip install paddlepaddle==3.0.0rc1 -i https://www.paddlepaddle.org.cn/packages/stable/cpu/
+pip install paddleocr
+```
+
+当前使用版本示例:
+
+```bash
+paddleocr==2.10.0
+paddlepaddle==3.0.0rc1
+```
+
+如果不启用 OCR (即不使用 `use_ocr` 参数) , 则无需安装 PaddleOCR 及 paddle 相关。
+
+#### OCR 速度基准 (随机中文图片, 512 张)
 
 > **测试设备**: NVIDIA GeForce RTX 3070 (8GB 显存)
 > **提示**: 实际使用时, 请根据你自己的 GPU/CPU 内存情况调整 `batch_size`, 过大可能会因内存不足导致程序崩溃
@@ -74,3 +76,21 @@ pip install .
 | 128        | No      | 50.704         | 99.03                   |
 | 256        | Yes     | 0.293          | 0.57                    |
 | 256        | No      | 45.108         | 88.10                   |
+
+### 异步抓取模式 (`mode=async`)
+
+基于 `aiohttp` 的异步抓取模式 (`mode=async`), 用于提升抓取性能
+
+如需使用 async 模式, 请额外安装 `aiohttp`:
+
+```bash
+pip install .[async]
+```
+
+或手动安装：
+
+```bash
+pip install aiohttp
+```
+
+该模式使用 `asyncio + aiohttp` 进行并发网页抓取, 适合抓取大量章节时提高效率

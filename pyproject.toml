@@ -54,6 +54,8 @@ font-recovery = [
     "huggingface_hub"
 ]
 
+async = ["aiohttp"]
+
 [project.scripts]
 novel-cli = "novel_downloader.cli.main:cli_main"
 

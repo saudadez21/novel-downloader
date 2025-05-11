@@ -34,15 +34,20 @@
 
 针对不同网站的专属配置, 通过站点名称区分 (如 `qidian`、`xxxxx` 等)
 
-| 参数名           | 类型             | 默认值    | 说明                                       |
-|-----------------|-----------------|---------|------------------------------------------|
-| `book_ids`        | array[string]    | —       | 小说 ID 列表 (如 `1010868264`)               |
-| `mode`            | string           | `"browser"` | 请求方式:`browser` 或 `session`              |
-| `login_required`  | bool             | false   | 是否需要登录才能访问                         |
-| `decode_font`     | bool             | false   | 是否尝试本地解码混淆字体                       |
-| `use_freq`        | bool             | false   | 是否使用字符频率分析                         |
-| `use_ocr`         | bool             | false   | 是否使用 OCR 辅助识别文本                    |
-| `save_font_debug` | bool             | false   | 是否保存字体解码调试数据                     |
+| 参数名           | 类型             | 默认值        | 说明                                                           |
+|------------------|------------------|---------------|----------------------------------------------------------------|
+| `book_ids`        | array[string]     | —             | 小说 ID 列表（如 `1010868264`）                                 |
+| `mode`            | string            | `"browser"`   | 请求方式：`browser` / `session` / `async`                       |
+| `login_required`  | bool              | false         | 是否需要登录才能访问                                           |
+| `decode_font`     | bool              | false         | 是否尝试本地解码混淆字体                                        |
+| `use_freq`        | bool              | false         | 是否使用字符频率分析                                           |
+| `use_ocr`         | bool              | false         | 是否使用 OCR 辅助识别文本                                      |
+| `ocr_version`     | string            | `"v2.0"`      | OCR 使用的模型版本：`v1.0` / `v2.0`                             |
+| `use_vec`         | bool              | false         | 是否使用向量相似度辅助识别文本                                  |
+| `batch_size`      | int               | 32            | OCR 批处理数量，影响识别速度和内存消耗                         |
+| `ocr_weight`      | float             | 0.6           | 最终结果中 OCR 部分的权重 (与 `vec_weight` 搭配使用)           |
+| `vec_weight`      | float             | 0.4           | 最终结果中向量识别部分的权重 (与 `ocr_weight` 搭配使用)        |
+| `save_font_debug` | bool              | false         | 是否保存字体解码的调试数据（调试用）                           |
 
 
 ### output 配置
