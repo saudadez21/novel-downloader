@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+
 jobs:
   tag:
     if: "${{ startsWith(github.event.head_commit.message, 'chore(release): bump version to') }}"
