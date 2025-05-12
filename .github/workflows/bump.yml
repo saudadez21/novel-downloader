@@ -26,16 +26,22 @@ jobs:
           python -m pip install --upgrade pip
           pip install commitizen
 
-      - name: Bump version (no tag)
+      - name: Bump version
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          cz bump --yes --no-tag --increment ${{ github.event.inputs.bump_type }}
+          # Perform version bump
+          cz bump --yes --increment ${{ github.event.inputs.bump_type }}
 
+          # Get version from project
           VERSION=$(cz version --project)
           BRANCH="chore/bump/v$VERSION"
 
+          # Delete local tag to avoid accidental push
+          git tag -d "v$VERSION" || true
+
+          # Create and push a branch
           git checkout -b "$BRANCH"
           git push origin "$BRANCH"
 
