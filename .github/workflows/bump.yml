@@ -8,6 +8,9 @@ on:
         required: true
         default: 'patch'
 
+permissions:
+  contents: write
+
 jobs:
   bump:
     runs-on: ubuntu-latest
