@@ -1,0 +1,27 @@
+name: Tag After Bump
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  tag:
+    if: "${{ startsWith(github.event.head_commit.message, 'chore(release): bump version to') }}"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Extract version from commit message
+        id: extract
+        run: |
+          VERSION=$(echo "${{ github.event.head_commit.message }}" | grep -oP 'bump version to \K[0-9]+\.[0-9]+\.[0-9]+')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create and push tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "v${{ steps.extract.outputs.version }}"
+          git push origin "v${{ steps.extract.outputs.version }}"
