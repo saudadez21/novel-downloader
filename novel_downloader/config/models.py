@@ -35,6 +35,7 @@ class RequesterConfig:
     disable_images: bool = True
     mute_audio: bool = True
     mode: str = "session"  # browser / session / async
+    max_rps: Optional[float] = None  # Maximum requests per second
 
 
 # === Downloaders ===
@@ -43,7 +44,9 @@ class DownloaderConfig:
     request_interval: int = 5
     raw_data_dir: str = "./raw_data"
     cache_dir: str = "./novel_cache"
-    max_threads: int = 4
+    download_workers: int = 4
+    parser_workers: int = 4
+    use_process_pool: bool = False
     skip_existing: bool = True
     login_required: bool = False
     save_html: bool = False

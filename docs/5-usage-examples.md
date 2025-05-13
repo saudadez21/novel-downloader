@@ -92,6 +92,32 @@ novel-cli download
 novel-cli download --site biquge 8_7654
 ```
 
+#### 下载笔趣阁等通用站点小说
+
+在首次使用前, 请确保已注册站点规则 (仅需执行一次):
+
+```bash
+# 将笔趣阁等站点的规则文件注册到配置中
+novel-cli settings update-rules ./rules.toml
+```
+
+例如访问站点 [笔趣阁](http://www.b520.cc), 小说页面地址如下:
+
+* 示例链接: `http://www.b520.cc/8_8187/`
+* 则书籍 ID 为: `8_8187`
+
+使用以下命令开始下载:
+
+```bash
+novel-cli download --site biquge 8_8187
+```
+
+> **注意：**
+> `./rules.toml` 中配置的站点名称 (如 `biquge`) 需与命令中的 `--site` 参数保持一致, 否则无法匹配到对应规则。
+
+> 默认提供的 `./rules.toml` 暂仅包含「笔趣阁」的规则。
+> 其他站点可根据需要自行补充, 或等待后续支持。
+
 ---
 
 ### 5. settings 子命令

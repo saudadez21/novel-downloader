@@ -14,11 +14,15 @@ import click
 from click import Context
 
 from novel_downloader.config import ConfigAdapter, load_config
-from novel_downloader.core import (
-    get_downloader,
+from novel_downloader.core.factory import (
+    get_async_downloader,
+    get_async_requester,
+    # get_downloader,
     get_parser,
-    get_requester,
+    # get_requester,
     get_saver,
+    get_sync_downloader,
+    get_sync_requester,
 )
 from novel_downloader.utils.i18n import t
 from novel_downloader.utils.logger import setup_logging
@@ -75,24 +79,54 @@ def download_cli(ctx: Context, book_ids: List[str], site: str) -> None:
         return
 
     # Initialize the requester, parser, saver, and downloader components
-    curr_requester = get_requester(site, requester_cfg)
-    curr_parser = get_parser(site, parser_cfg)
-    curr_saver = get_saver(site, saver_cfg)
-    setup_logging()
-    curr_downloader = get_downloader(
-        requester=curr_requester,
-        parser=curr_parser,
-        saver=curr_saver,
-        site=site,
-        config=downloader_cfg,
-    )
+    if downloader_cfg.mode == "async":
+        import asyncio
 
-    # Perform the download for each valid book ID
-    for book_id in book_ids:
-        click.echo(t("download_downloading", book_id=book_id, site=site))
-        curr_downloader.download_one(book_id)
+        async_requester = get_async_requester(site, requester_cfg)
+        async_parser = get_parser(site, parser_cfg)
+        async_saver = get_saver(site, saver_cfg)
+        setup_logging()
+        async_downloader = get_async_downloader(
+            requester=async_requester,
+            parser=async_parser,
+            saver=async_saver,
+            site=site,
+            config=downloader_cfg,
+        )
 
-    # Prompt for parsing and wait for user input before shutting down
-    if requester_cfg.auto_close:
-        input(t("download_prompt_parse"))
-        curr_requester.shutdown()
+        async def async_download_all() -> None:
+            prepare = getattr(async_downloader, "prepare", None)
+            if prepare and asyncio.iscoroutinefunction(prepare):
+                await prepare()
+
+            for book_id in valid_book_ids:
+                click.echo(t("download_downloading", book_id=book_id, site=site))
+                await async_downloader.download_one(book_id)
+
+            if requester_cfg.auto_close:
+                input(t("download_prompt_parse"))
+                await async_requester.shutdown()
+
+        asyncio.run(async_download_all())
+    else:
+        sync_requester = get_sync_requester(site, requester_cfg)
+        sync_parser = get_parser(site, parser_cfg)
+        sync_saver = get_saver(site, saver_cfg)
+        setup_logging()
+        sync_downloader = get_sync_downloader(
+            requester=sync_requester,
+            parser=sync_parser,
+            saver=sync_saver,
+            site=site,
+            config=downloader_cfg,
+        )
+
+        for book_id in book_ids:
+            click.echo(t("download_downloading", book_id=book_id, site=site))
+            sync_downloader.download_one(book_id)
+
+        if requester_cfg.auto_close:
+            input(t("download_prompt_parse"))
+            sync_requester.shutdown()
+
+    return

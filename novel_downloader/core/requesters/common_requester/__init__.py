@@ -9,6 +9,10 @@ request operations to novel websites. It serves as a unified access
 point to import `CommonSession` without exposing lower-level modules.
 """
 
+from .common_async_session import CommonAsyncSession
 from .common_session import CommonSession
 
-__all__ = ["CommonSession"]
+__all__ = [
+    "CommonAsyncSession",
+    "CommonSession",
+]
