@@ -8,6 +8,7 @@
 | `retry_times`      | int    | 3             | 请求失败重试次数                          |
 | `retry_interval`   | int    | 5             | 重试间隔 (秒)                           |
 | `timeout`          | int    | 30            | 页面加载超时时间 (秒)                     |
+| `max_rps`           | int \| null | null  | 最大请求速率（requests per second），为 `null` 则不限制 |
 | `headless`         | bool   | false         | 是否以无头模式启动浏览器                   |
 | `user_data_folder` | string | `""`          | 浏览器用户数据目录, 为空则使用默认目录      |
 | `profile_name`     | string | `""`          | 使用的浏览器配置名称, 为空则使用默认配置        |
@@ -24,7 +25,9 @@
 | `raw_data_dir`       | string | `"./raw_data"`    | 原始章节 HTML/JSON 存放目录             |
 | `output_dir`         | string | `"./downloads"`   | 最终输出文件存放目录                   |
 | `cache_dir`          | string | `"./novel_cache"` | 本地缓存目录 (字体 / 图片等)       |
-| `max_threads`        | int    | 4                 | 最大并发下载线程数 (未实现)               |
+| `download_workers`   | int    | 4                 | 并发下载协程数                               |
+| `parser_workers`     | int    | 4                 | 并发解析协程数                               |
+| `use_process_pool`   | bool   | false             | 是否使用多进程池来处理任务                         |
 | `skip_existing`      | bool   | true              | 是否跳过已存在的章节                     |
 | `debug.save_html`    | bool   | false             | 是否保存抓取到的原始 HTML 到磁盘         |
 | `debug.log_level`    | string | `"INFO"`          | 日志级别: DEBUG, INFO, WARNING, ERROR |
@@ -64,4 +67,4 @@
 | `epub.include_cover`          | bool    | true                          | EPUB 中是否包含封面                         |
 | `epub.include_toc`            | bool    | true                          | EPUB 中是否自动生成目录                     |
 
-> **提示**:你可以根据自己需求在 `settings.yaml` 中添加或删除字段, 未列出的配置项请参考源码注释或自行扩展。
+> **提示**: 可以根据自己需求在 `settings.yaml` 中添加或删除字段, 未列出的配置项请参考源码注释或自行扩展。

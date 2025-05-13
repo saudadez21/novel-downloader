@@ -43,7 +43,7 @@ novel-cli settings set-config ./settings.yaml
 ### 4. (可选) 注册自定义规则到 CLI
 
 ```bash
-novel-cli settings update-rules ./sample_rules.toml
+novel-cli settings update-rules ./rules.toml
 ```
 
 ### 内置默认配置
@@ -59,4 +59,4 @@ CLI 启动时会按以下优先级依次查找并加载配置 (越靠前优先�
 3. 已注册 (全局保存) 的配置文件
 4. 包内资源目录中的内置默认文件
 
-> 注：使用 `novel-cli settings init` 会在当前目录生成 `settings.yaml` 和 `rules.toml`, 便于作为第 2 步的起始模板。
+> 注: 使用 `novel-cli settings init` 会在当前目录生成 `settings.yaml` 和 `rules.toml`, 便于作为第 2 步的起始模板。

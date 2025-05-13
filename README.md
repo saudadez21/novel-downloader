@@ -17,17 +17,35 @@
 
 ```bash
 # 克隆 + 安装
+pip install novel-downloader
+
+# 如需支持字体解密功能 (decode_font), 请使用:
+# pip install novel-downloader[font-recovery]
+
+# 如需启用异步抓取模式 (mode=async), 请使用:
+# pip install novel-downloader[async]
+
+# 初始化默认配置 (生成 settings.yaml)
+novel-cli settings init
+
+# 编辑 ./settings.yaml 完成 site/book_ids 等
+# 可查看 docs/4-settings-schema.md
+
+# 运行下载
+novel-cli download 123456
+```
+
+**从 GitHub 安装 (开发版)**
+
+如需体验开发中的最新功能, 可通过 GitHub 安装:
+
+```bash
 git clone https://github.com/BowenZ217/novel-downloader.git
 cd novel-downloader
 pip install .
-# 或 pip install .[font-recovery]
-
-# 初始化默认配置
-novel-cli settings init
-
-# 编辑 ./settings.yaml 完成 site/book_ids 等, 可查看 docs/4-settings-schema.md
-# 运行下载
-novel-cli download 123456
+# 或安装带可选功能:
+# pip install .[font-recovery]
+# pip install .[async]
 ```
 
 更多使用方法, 查看 [使用示例](docs/5-usage-examples.md)
