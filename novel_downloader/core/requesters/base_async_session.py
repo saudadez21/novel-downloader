@@ -51,7 +51,7 @@ class BaseAsyncSession(AsyncRequesterProtocol, abc.ABC):
 
     Attributes:
         _session (ClientSession): The persistent aiohttp client session.
-        _timeout (int): Timeout for each request in seconds.
+        _timeout (float): Timeout for each request in seconds.
         _retry_times (int): Number of retry attempts on failure.
         _retry_interval (float): Delay (in seconds) between retries.
         _headers (Dict[str, str]): Default HTTP headers to send.
@@ -111,7 +111,9 @@ class BaseAsyncSession(AsyncRequesterProtocol, abc.ABC):
         )
 
     @abc.abstractmethod
-    async def get_book_info(self, book_id: str, wait_time: Optional[int] = None) -> str:
+    async def get_book_info(
+        self, book_id: str, wait_time: Optional[float] = None
+    ) -> str:
         """
         Fetch the raw HTML (or JSON) of the book info page asynchronously.
 
@@ -123,7 +125,7 @@ class BaseAsyncSession(AsyncRequesterProtocol, abc.ABC):
 
     @abc.abstractmethod
     async def get_book_chapter(
-        self, book_id: str, chapter_id: str, wait_time: Optional[int] = None
+        self, book_id: str, chapter_id: str, wait_time: Optional[float] = None
     ) -> str:
         """
         Fetch the raw HTML (or JSON) of a single chapter asynchronously.
@@ -135,7 +137,7 @@ class BaseAsyncSession(AsyncRequesterProtocol, abc.ABC):
         """
         ...
 
-    async def get_bookcase(self, wait_time: Optional[int] = None) -> str:
+    async def get_bookcase(self, wait_time: Optional[float] = None) -> str:
         """
         Optional: Retrieve the HTML content of the authenticated user's bookcase page.
         Subclasses that support user login/bookcase should override this.
@@ -238,7 +240,7 @@ class BaseAsyncSession(AsyncRequesterProtocol, abc.ABC):
         return self._session
 
     @property
-    def timeout(self) -> int:
+    def timeout(self) -> float:
         """Return the default timeout setting."""
         return self._timeout
 

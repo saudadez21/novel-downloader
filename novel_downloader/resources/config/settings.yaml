@@ -1,9 +1,9 @@
 # 网络请求层设置
 requests:
-  wait_time: 5                      # 每次请求等待时间 (秒)
+  wait_time: 5.0                    # 每次请求等待时间 (秒)
   retry_times: 3                    # 请求失败重试次数
-  retry_interval: 5
-  timeout: 30                       # 页面加载超时时间 (秒)
+  retry_interval: 5.0
+  timeout: 30.0                     # 页面加载超时时间 (秒)
   max_rps: null                     # 最大请求速率 (requests per second), 为 null 则不限制
   # DrissionPage 专用设置
   headless: false                   # 是否以无头模式启动浏览器
@@ -15,7 +15,7 @@ requests:
 
 # 全局通用设置
 general:
-  request_interval: 5               # 同一本书各章节请求间隔 (秒)
+  request_interval: 5.0             # 同一本书各章节请求间隔 (秒)
   raw_data_dir: "./raw_data"        # 原始章节 HTML/JSON 存放目录
   output_dir: "./downloads"         # 最终输出文件存放目录
   cache_dir: "./novel_cache"        # 本地缓存目录 (字体 / 图片等)

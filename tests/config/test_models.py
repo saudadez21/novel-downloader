@@ -23,10 +23,10 @@ from novel_downloader.config.models import (
 
 EXPECTED_FIELDS = {
     RequesterConfig: {
-        "wait_time": int,
+        "wait_time": float,
         "retry_times": int,
-        "retry_interval": int,
-        "timeout": int,
+        "retry_interval": float,
+        "timeout": float,
         "headless": bool,
         "user_data_folder": str,
         "profile_name": str,
@@ -36,7 +36,7 @@ EXPECTED_FIELDS = {
         "mode": str,
     },
     DownloaderConfig: {
-        "request_interval": int,
+        "request_interval": float,
         "raw_data_dir": str,
         "cache_dir": str,
         "parser_workers": int,

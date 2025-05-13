@@ -28,7 +28,9 @@ class AsyncRequesterProtocol(Protocol):
         """
         ...
 
-    async def get_book_info(self, book_id: str, wait_time: Optional[int] = None) -> str:
+    async def get_book_info(
+        self, book_id: str, wait_time: Optional[float] = None
+    ) -> str:
         """
         Fetch the raw HTML (or JSON) of the book info page asynchronously.
 
@@ -39,7 +41,7 @@ class AsyncRequesterProtocol(Protocol):
         ...
 
     async def get_book_chapter(
-        self, book_id: str, chapter_id: str, wait_time: Optional[int] = None
+        self, book_id: str, chapter_id: str, wait_time: Optional[float] = None
     ) -> str:
         """
         Fetch the raw HTML (or JSON) of a single chapter asynchronously.
@@ -51,7 +53,7 @@ class AsyncRequesterProtocol(Protocol):
         """
         ...
 
-    async def get_bookcase(self, wait_time: Optional[int] = None) -> str:
+    async def get_bookcase(self, wait_time: Optional[float] = None) -> str:
         """
         Optional: Retrieve the HTML content of the authenticated
         user's bookcase page asynchronously.

@@ -108,7 +108,7 @@ class QidianSession(BaseSession):
         self.get("https://www.qidian.com")
         return True
 
-    def get_book_info(self, book_id: str, wait_time: Optional[int] = None) -> str:
+    def get_book_info(self, book_id: str, wait_time: Optional[float] = None) -> str:
         """
         Fetch the raw HTML of the book info page.
 
@@ -140,7 +140,7 @@ class QidianSession(BaseSession):
         raise RuntimeError("Unexpected fall-through in get_book_info")
 
     def get_book_chapter(
-        self, book_id: str, chapter_id: str, wait_time: Optional[int] = None
+        self, book_id: str, chapter_id: str, wait_time: Optional[float] = None
     ) -> str:
         """
         Fetch the HTML of a single chapter.
@@ -174,7 +174,7 @@ class QidianSession(BaseSession):
 
         raise RuntimeError("Unexpected fall-through in get_book_chapter")
 
-    def get_bookcase(self, wait_time: Optional[int] = None) -> str:
+    def get_bookcase(self, wait_time: Optional[float] = None) -> str:
         """
         Retrieve the user's *bookcase* page.
 

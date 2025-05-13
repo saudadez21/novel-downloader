@@ -94,7 +94,7 @@ class BaseAsyncDownloader(AsyncDownloaderProtocol, abc.ABC):
         return self._config.login_required
 
     @property
-    def request_interval(self) -> int:
+    def request_interval(self) -> float:
         return self._config.request_interval
 
     async def prepare(self) -> None:

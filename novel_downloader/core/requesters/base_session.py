@@ -28,7 +28,7 @@ class BaseSession(RequesterProtocol, abc.ABC):
 
     Attributes:
         _session (requests.Session): The persistent HTTP session.
-        _timeout (int): Timeout for each request in seconds.
+        _timeout (float): Timeout for each request in seconds.
     """
 
     def _init_session(
@@ -81,7 +81,7 @@ class BaseSession(RequesterProtocol, abc.ABC):
         )
 
     @abc.abstractmethod
-    def get_book_info(self, book_id: str, wait_time: Optional[int] = None) -> str:
+    def get_book_info(self, book_id: str, wait_time: Optional[float] = None) -> str:
         """
         Fetch the raw HTML (or JSON) of the book info page.
 
@@ -93,7 +93,7 @@ class BaseSession(RequesterProtocol, abc.ABC):
 
     @abc.abstractmethod
     def get_book_chapter(
-        self, book_id: str, chapter_id: str, wait_time: Optional[int] = None
+        self, book_id: str, chapter_id: str, wait_time: Optional[float] = None
     ) -> str:
         """
         Fetch the raw HTML (or JSON) of a single chapter.
@@ -105,7 +105,7 @@ class BaseSession(RequesterProtocol, abc.ABC):
         """
         ...
 
-    def get_bookcase(self, wait_time: Optional[int] = None) -> str:
+    def get_bookcase(self, wait_time: Optional[float] = None) -> str:
         """
         Optional: Retrieve the HTML content of the authenticated user's bookcase page.
 
@@ -171,7 +171,7 @@ class BaseSession(RequesterProtocol, abc.ABC):
         return self._session
 
     @property
-    def timeout(self) -> int:
+    def timeout(self) -> float:
         """Return the default timeout setting."""
         return self._timeout
 
