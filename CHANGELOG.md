@@ -1,3 +1,18 @@
+## v1.2.0 (2025-05-13)
+
+### Feat
+
+- **async**: full async download mode via aiohttp (#9)
+
+### Fix
+
+- **bump**: grant permissions to allow push
+- **gitattributes**: mark non-code resources as linguist-vendored to improve language stats
+
+### Refactor
+
+- **config**: support loading and saving config as JSON (#3)
+
 ## v1.1.0 (2025-05-10)
 
 ### Feat
