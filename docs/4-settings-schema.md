@@ -4,11 +4,11 @@
 
 | 参数名            | 类型    | 默认值          | 说明                                   |
 |------------------|--------|---------------|--------------------------------------|
-| `wait_time`        | int    | 5             | 每次请求等待时间 (秒)                     |
-| `retry_times`      | int    | 3             | 请求失败重试次数                          |
-| `retry_interval`   | int    | 5             | 重试间隔 (秒)                           |
-| `timeout`          | int    | 30            | 页面加载超时时间 (秒)                     |
-| `max_rps`           | int \| null | null  | 最大请求速率（requests per second），为 `null` 则不限制 |
+| `wait_time`        | float  | 5.0           | 每次请求等待时间 (秒)                    |
+| `retry_times`      | int    | 3             | 请求失败重试次数                         |
+| `retry_interval`   | float  | 5.0           | 重试间隔 (秒)                           |
+| `timeout`          | float  | 30.0          | 页面加载超时时间 (秒)                    |
+| `max_rps`           | int \| null | null  | 最大请求速率 (requests per second), 为 `null` 则不限制 |
 | `headless`         | bool   | false         | 是否以无头模式启动浏览器                   |
 | `user_data_folder` | string | `""`          | 浏览器用户数据目录, 为空则使用默认目录      |
 | `profile_name`     | string | `""`          | 使用的浏览器配置名称, 为空则使用默认配置        |
@@ -21,7 +21,7 @@
 
 | 参数名               | 类型    | 默认值              | 说明                                   |
 |---------------------|--------|-------------------|--------------------------------------|
-| `request_interval`   | int    | 5                 | 同一本书各章节请求间隔 (秒)               |
+| `request_interval`   | float  | 5.0               | 同一本书各章节请求间隔 (秒)                   |
 | `raw_data_dir`       | string | `"./raw_data"`    | 原始章节 HTML/JSON 存放目录             |
 | `output_dir`         | string | `"./downloads"`   | 最终输出文件存放目录                   |
 | `cache_dir`          | string | `"./novel_cache"` | 本地缓存目录 (字体 / 图片等)       |
@@ -32,6 +32,21 @@
 | `debug.save_html`    | bool   | false             | 是否保存抓取到的原始 HTML 到磁盘         |
 | `debug.log_level`    | string | `"INFO"`          | 日志级别: DEBUG, INFO, WARNING, ERROR |
 
+#### general.font_ocr 配置
+
+| 参数名            | 类型         | 默认值     | 说明                                                   |
+|------------------|--------------|------------|--------------------------------------------------------|
+| `decode_font`     | bool         | false      | 是否尝试本地解码混淆字体                                |
+| `use_freq`        | bool         | false      | 是否使用频率分析辅助识别                                 |
+| `ocr_version`     | string       | `"v2.0"`   | OCR 使用的模型版本: `v1.0` / `v2.0`                      |
+| `use_ocr`         | bool         | true       | 是否启用 OCR 辅助识别                                   |
+| `use_vec`         | bool         | false      | 是否使用向量相似度辅助识别文本                            |
+| `save_font_debug` | bool         | false      | 是否保存字体调试数据                                     |
+| `batch_size`      | int          | 32         | OCR 批处理数量, 影响识别速度和内存使用                   |
+| `gpu_mem`         | int          | 500        | GPU 显存限制 (MB)                                       |
+| `gpu_id`          | int/null     | null       | 使用哪个 GPU, null 表示自动选择                         |
+| `ocr_weight`      | float        | 0.6        | 最终结果中 OCR 部分的权重                                |
+| `vec_weight`      | float        | 0.4        | 最终结果中向量识别部分的权重                             |
 
 ### sites 配置
 
@@ -39,19 +54,9 @@
 
 | 参数名           | 类型             | 默认值        | 说明                                                           |
 |------------------|------------------|---------------|----------------------------------------------------------------|
-| `book_ids`        | array[string]     | —             | 小说 ID 列表（如 `1010868264`）                                 |
-| `mode`            | string            | `"browser"`   | 请求方式：`browser` / `session` / `async`                       |
+| `book_ids`        | array[string]     | —             | 小说 ID 列表 (如 `1010868264`)                                 |
+| `mode`            | string            | `"browser"`   | 请求方式: `browser` / `session` / `async`                       |
 | `login_required`  | bool              | false         | 是否需要登录才能访问                                           |
-| `decode_font`     | bool              | false         | 是否尝试本地解码混淆字体                                        |
-| `use_freq`        | bool              | false         | 是否使用字符频率分析                                           |
-| `use_ocr`         | bool              | false         | 是否使用 OCR 辅助识别文本                                      |
-| `ocr_version`     | string            | `"v2.0"`      | OCR 使用的模型版本：`v1.0` / `v2.0`                             |
-| `use_vec`         | bool              | false         | 是否使用向量相似度辅助识别文本                                  |
-| `batch_size`      | int               | 32            | OCR 批处理数量，影响识别速度和内存消耗                         |
-| `ocr_weight`      | float             | 0.6           | 最终结果中 OCR 部分的权重 (与 `vec_weight` 搭配使用)           |
-| `vec_weight`      | float             | 0.4           | 最终结果中向量识别部分的权重 (与 `ocr_weight` 搭配使用)        |
-| `save_font_debug` | bool              | false         | 是否保存字体解码的调试数据（调试用）                           |
-
 
 ### output 配置
 
