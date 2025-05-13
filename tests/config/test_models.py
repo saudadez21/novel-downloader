@@ -11,6 +11,7 @@ Test that all config dataclasses:
 """
 
 from dataclasses import fields, is_dataclass
+from typing import Optional
 
 import pytest
 
@@ -23,10 +24,11 @@ from novel_downloader.config.models import (
 
 EXPECTED_FIELDS = {
     RequesterConfig: {
-        "wait_time": int,
+        "wait_time": float,
         "retry_times": int,
-        "retry_interval": int,
-        "timeout": int,
+        "retry_interval": float,
+        "timeout": float,
+        "max_rps": Optional[float],
         "headless": bool,
         "user_data_folder": str,
         "profile_name": str,
@@ -36,7 +38,7 @@ EXPECTED_FIELDS = {
         "mode": str,
     },
     DownloaderConfig: {
-        "request_interval": int,
+        "request_interval": float,
         "raw_data_dir": str,
         "cache_dir": str,
         "parser_workers": int,
@@ -55,6 +57,8 @@ EXPECTED_FIELDS = {
         "use_vec": bool,
         "ocr_version": str,
         "batch_size": int,
+        "gpu_mem": int,
+        "gpu_id": Optional[int],
         "ocr_weight": float,
         "vec_weight": float,
         "save_font_debug": bool,

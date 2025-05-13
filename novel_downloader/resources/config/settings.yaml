@@ -1,9 +1,9 @@
 # 网络请求层设置
 requests:
-  wait_time: 5                      # 每次请求等待时间 (秒)
+  wait_time: 5.0                    # 每次请求等待时间 (秒)
   retry_times: 3                    # 请求失败重试次数
-  retry_interval: 5
-  timeout: 30                       # 页面加载超时时间 (秒)
+  retry_interval: 5.0
+  timeout: 30.0                     # 页面加载超时时间 (秒)
   max_rps: null                     # 最大请求速率 (requests per second), 为 null 则不限制
   # DrissionPage 专用设置
   headless: false                   # 是否以无头模式启动浏览器
@@ -15,7 +15,7 @@ requests:
 
 # 全局通用设置
 general:
-  request_interval: 5               # 同一本书各章节请求间隔 (秒)
+  request_interval: 5.0             # 同一本书各章节请求间隔 (秒)
   raw_data_dir: "./raw_data"        # 原始章节 HTML/JSON 存放目录
   output_dir: "./downloads"         # 最终输出文件存放目录
   cache_dir: "./novel_cache"        # 本地缓存目录 (字体 / 图片等)
@@ -26,6 +26,18 @@ general:
   debug:
     save_html: false                # 是否将抓取到的原始 HTML 保留到磁盘
     log_level: "INFO"               # 日志级别: DEBUG, INFO, WARNING, ERROR
+  font_ocr:
+    decode_font: false              # 是否尝试本地解码混淆字体
+    use_freq: false                 # 是否使用频率分析
+    ocr_version: "v2.0"             # "v1.0" / "v2.0"
+    use_ocr: true                   # 是否使用 OCR 辅助识别文本
+    use_vec: false                  # 是否使用 Vector 辅助识别文本
+    save_font_debug: false          # 是否保存字体解码调试数据
+    batch_size: 32
+    gpu_mem: 500                    # GPU 显存限制 (MB)
+    gpu_id: null                    # 使用哪个 GPU
+    ocr_weight: 0.6
+    vec_weight: 0.4
 
 # 各站点的特定配置
 sites:
@@ -38,15 +50,6 @@ sites:
       - "0000000000"
     mode: "browser"                 # browser / session
     login_required: true            # 是否需要登录才能访问
-    decode_font: false              # 是否尝试本地解码混淆字体
-    use_freq: false                 # 是否使用频率分析
-    ocr_version: "v2.0"             # "v1.0" / "v2.0"
-    use_ocr: true                   # 是否使用 OCR 辅助识别文本
-    use_vec: false                  # 是否使用 Vector 辅助识别文本
-    save_font_debug: false          # 是否保存字体解码调试数据
-    batch_size: 32
-    ocr_weight: 0.6
-    vec_weight: 0.4
     #
   sample_site:
     book_ids:

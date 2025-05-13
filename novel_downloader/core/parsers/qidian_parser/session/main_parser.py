@@ -63,6 +63,8 @@ class QidianSessionParser(BaseParser):
                 use_ocr=config.use_ocr,
                 use_vec=config.use_vec,
                 batch_size=config.batch_size,
+                gpu_mem=config.gpu_mem,
+                gpu_id=config.gpu_id,
                 ocr_weight=config.ocr_weight,
                 vec_weight=config.vec_weight,
                 font_debug=config.save_font_debug,

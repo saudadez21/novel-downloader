@@ -45,7 +45,9 @@ class CommonAsyncSession(BaseAsyncSession):
         self._site = site
         self._profile = profile
 
-    async def get_book_info(self, book_id: str, wait_time: Optional[int] = None) -> str:
+    async def get_book_info(
+        self, book_id: str, wait_time: Optional[float] = None
+    ) -> str:
         """
         Fetch the raw HTML of the book info page asynchronously.
 
@@ -62,7 +64,7 @@ class CommonAsyncSession(BaseAsyncSession):
         return html
 
     async def get_book_chapter(
-        self, book_id: str, chapter_id: str, wait_time: Optional[int] = None
+        self, book_id: str, chapter_id: str, wait_time: Optional[float] = None
     ) -> str:
         """
         Fetch the raw HTML of a single chapter asynchronously.

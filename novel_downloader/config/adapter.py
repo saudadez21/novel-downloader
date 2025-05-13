@@ -93,18 +93,21 @@ class ConfigAdapter:
         config["sites"][site] 中读取解析器相关配置, 返回 ParserConfig 实例
         """
         gen = self._config.get("general", {})
+        font_ocr = gen.get("font_ocr", {})
         site_cfg = self._config.get("sites", {}).get(self._site, {})
         return ParserConfig(
             cache_dir=gen.get("cache_dir", "./cache"),
-            decode_font=site_cfg.get("decode_font", False),
-            use_freq=site_cfg.get("use_freq", False),
-            use_ocr=site_cfg.get("use_ocr", True),
-            use_vec=site_cfg.get("use_vec", False),
-            ocr_version=site_cfg.get("ocr_version", "v1.0"),
-            save_font_debug=site_cfg.get("save_font_debug", False),
-            batch_size=site_cfg.get("batch_size", 32),
-            ocr_weight=site_cfg.get("ocr_weight", 0.6),
-            vec_weight=site_cfg.get("vec_weight", 0.4),
+            decode_font=font_ocr.get("decode_font", False),
+            use_freq=font_ocr.get("use_freq", False),
+            use_ocr=font_ocr.get("use_ocr", True),
+            use_vec=font_ocr.get("use_vec", False),
+            ocr_version=font_ocr.get("ocr_version", "v1.0"),
+            save_font_debug=font_ocr.get("save_font_debug", False),
+            batch_size=font_ocr.get("batch_size", 32),
+            gpu_mem=font_ocr.get("gpu_mem", 500),
+            gpu_id=font_ocr.get("gpu_id", None),
+            ocr_weight=font_ocr.get("ocr_weight", 0.6),
+            vec_weight=font_ocr.get("vec_weight", 0.4),
             mode=site_cfg.get("mode", "session"),
         )
 

@@ -266,7 +266,7 @@ class QidianBrowser(BaseBrowser):
         """
         return self.QIDIAN_BOOKCASE_URL
 
-    def get_book_info(self, book_id: str, wait_time: Optional[int] = None) -> str:
+    def get_book_info(self, book_id: str, wait_time: Optional[float] = None) -> str:
         """
         Retrieve the HTML of a Qidian book info page.
 
@@ -311,7 +311,7 @@ class QidianBrowser(BaseBrowser):
             time.sleep(pause)
 
     def get_book_chapter(
-        self, book_id: str, chapter_id: str, wait_time: Optional[int] = None
+        self, book_id: str, chapter_id: str, wait_time: Optional[float] = None
     ) -> str:
         """
         Retrieve the HTML content of a specific chapter.
@@ -347,7 +347,7 @@ class QidianBrowser(BaseBrowser):
             logger.warning("[fetch] Error fetching chapter from '%s': %s", url, e)
             return ""
 
-    def get_bookcase(self, wait_time: Optional[int] = None) -> str:
+    def get_bookcase(self, wait_time: Optional[float] = None) -> str:
         """
         Retrieve the HTML content of the logged‑in user's Qidian bookcase page.
 

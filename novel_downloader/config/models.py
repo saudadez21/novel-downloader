@@ -24,10 +24,10 @@ from typing import Any, Dict, List, Literal, Optional, TypedDict
 # === Requesters ===
 @dataclass
 class RequesterConfig:
-    wait_time: int = 5
+    wait_time: float = 5.0
     retry_times: int = 3
-    retry_interval: int = 5
-    timeout: int = 30
+    retry_interval: float = 5.0
+    timeout: float = 30.0
     headless: bool = True
     user_data_folder: str = ""
     profile_name: str = ""
@@ -41,7 +41,7 @@ class RequesterConfig:
 # === Downloaders ===
 @dataclass
 class DownloaderConfig:
-    request_interval: int = 5
+    request_interval: float = 5.0
     raw_data_dir: str = "./raw_data"
     cache_dir: str = "./novel_cache"
     download_workers: int = 4
@@ -63,6 +63,8 @@ class ParserConfig:
     use_vec: bool = False
     ocr_version: str = "v1.0"
     batch_size: int = 32
+    gpu_mem: int = 500
+    gpu_id: Optional[int] = None
     ocr_weight: float = 0.6
     vec_weight: float = 0.4
     save_font_debug: bool = False

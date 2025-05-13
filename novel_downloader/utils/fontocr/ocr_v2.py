@@ -221,6 +221,8 @@ class FontOCRV2:
         use_ocr: bool = True,
         use_vec: bool = False,
         batch_size: int = 32,
+        gpu_mem: int = 500,
+        gpu_id: Optional[int] = None,
         ocr_weight: float = 0.6,
         vec_weight: float = 0.4,
         ocr_version: str = "v1.0",
@@ -232,6 +234,8 @@ class FontOCRV2:
         self.use_ocr = use_ocr
         self.use_vec = use_vec
         self.batch_size = batch_size
+        self.gpu_mem = gpu_mem
+        self.gpu_id = gpu_id
         self.ocr_weight = ocr_weight
         self.vec_weight = vec_weight
         self.ocr_version = ocr_version
@@ -279,6 +283,8 @@ class FontOCRV2:
             rec_batch_num=self.batch_size,
             use_space_char=False,
             use_gpu=gpu_available,
+            gpu_mem=self.gpu_mem,
+            gpu_id=self.gpu_id,
         )
 
     def _load_char_freq_db(self) -> bool:
