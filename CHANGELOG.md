@@ -1,3 +1,9 @@
+## v1.2.1 (2025-05-13)
+
+### Refactor
+
+- **config**: unify time fields as float + centralize font OCR config (#11)
+
 ## v1.2.0 (2025-05-13)
 
 ### Feat
