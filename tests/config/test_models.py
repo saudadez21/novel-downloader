@@ -11,6 +11,7 @@ Test that all config dataclasses:
 """
 
 from dataclasses import fields, is_dataclass
+from typing import Optional
 
 import pytest
 
@@ -27,6 +28,7 @@ EXPECTED_FIELDS = {
         "retry_times": int,
         "retry_interval": float,
         "timeout": float,
+        "max_rps": Optional[float],
         "headless": bool,
         "user_data_folder": str,
         "profile_name": str,
@@ -55,6 +57,8 @@ EXPECTED_FIELDS = {
         "use_vec": bool,
         "ocr_version": str,
         "batch_size": int,
+        "gpu_mem": int,
+        "gpu_id": Optional[int],
         "ocr_weight": float,
         "vec_weight": float,
         "save_font_debug": bool,

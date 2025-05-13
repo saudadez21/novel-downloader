@@ -26,6 +26,18 @@ general:
   debug:
     save_html: false                # 是否将抓取到的原始 HTML 保留到磁盘
     log_level: "INFO"               # 日志级别: DEBUG, INFO, WARNING, ERROR
+  font_ocr:
+    decode_font: false              # 是否尝试本地解码混淆字体
+    use_freq: false                 # 是否使用频率分析
+    ocr_version: "v2.0"             # "v1.0" / "v2.0"
+    use_ocr: true                   # 是否使用 OCR 辅助识别文本
+    use_vec: false                  # 是否使用 Vector 辅助识别文本
+    save_font_debug: false          # 是否保存字体解码调试数据
+    batch_size: 32
+    gpu_mem: 500                    # GPU 显存限制 (MB)
+    gpu_id: null                    # 使用哪个 GPU
+    ocr_weight: 0.6
+    vec_weight: 0.4
 
 # 各站点的特定配置
 sites:
@@ -38,15 +50,6 @@ sites:
       - "0000000000"
     mode: "browser"                 # browser / session
     login_required: true            # 是否需要登录才能访问
-    decode_font: false              # 是否尝试本地解码混淆字体
-    use_freq: false                 # 是否使用频率分析
-    ocr_version: "v2.0"             # "v1.0" / "v2.0"
-    use_ocr: true                   # 是否使用 OCR 辅助识别文本
-    use_vec: false                  # 是否使用 Vector 辅助识别文本
-    save_font_debug: false          # 是否保存字体解码调试数据
-    batch_size: 32
-    ocr_weight: 0.6
-    vec_weight: 0.4
     #
   sample_site:
     book_ids:

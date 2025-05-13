@@ -138,8 +138,14 @@ def test_parser_config_defaults():
 
 def test_parser_config_combined():
     config = {
-        "general": {"cache_dir": "./tmp"},
-        "sites": {"qidian": {"decode_font": True, "save_font_debug": True}},
+        "general": {
+            "cache_dir": "./tmp",
+            "font_ocr": {
+                "decode_font": True,
+                "save_font_debug": True,
+            },
+        },
+        "sites": {"qidian": {"mode": "session"}},
     }
     adapter = ConfigAdapter(config, "qidian")
     cfg = adapter.get_parser_config()

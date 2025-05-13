@@ -63,6 +63,8 @@ class ParserConfig:
     use_vec: bool = False
     ocr_version: str = "v1.0"
     batch_size: int = 32
+    gpu_mem: int = 500
+    gpu_id: Optional[int] = None
     ocr_weight: float = 0.6
     vec_weight: float = 0.4
     save_font_debug: bool = False
