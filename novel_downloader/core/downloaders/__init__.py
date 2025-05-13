@@ -11,10 +11,12 @@ Each downloader is responsible for orchestrating the full lifecycle
 of retrieving, parsing, and saving novel content for a given source.
 """
 
+from .common_asynb_downloader import CommonAsyncDownloader
 from .common_downloader import CommonDownloader
 from .qidian_downloader import QidianDownloader
 
 __all__ = [
+    "CommonAsyncDownloader",
     "CommonDownloader",
     "QidianDownloader",
 ]

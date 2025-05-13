@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.downloaders.qidian_downloader
+novel_downloader.core.downloaders.common_downloader
 ---------------------------------------------------
 
-This module defines `QidianDownloader`, a platform-specific downloader
-implementation for retrieving novels from Qidian (起点中文网).
+This module defines `CommonDownloader`.
 """
 
 import json

@@ -14,13 +14,17 @@ Subpackages:
 - qidian_requester: Handles all Qidian-related requesting logic.
 """
 
-from .common_requester import CommonSession
+from .common_requester import (
+    CommonAsyncSession,
+    CommonSession,
+)
 from .qidian_requester import (
     QidianBrowser,
     QidianSession,
 )
 
 __all__ = [
+    "CommonAsyncSession",
     "CommonSession",
     "QidianBrowser",
     "QidianSession",
