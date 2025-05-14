@@ -26,11 +26,12 @@ LOGGER_NAME = PACKAGE_NAME  # Root logger name
 # -----------------------------------------------------------------------------
 # Base config directory (e.g. ~/AppData/Local/novel_downloader/)
 BASE_CONFIG_DIR = Path(user_config_dir(APP_DIR_NAME, appauthor=False))
+WORK_DIR = Path.cwd()
 PACKAGE_ROOT: Path = Path(__file__).parent.parent
 LOCALES_DIR: Path = PACKAGE_ROOT / "locales"
 
 # Subdirectories under BASE_CONFIG_DIR
-LOGGER_DIR = BASE_CONFIG_DIR / "logs"
+LOGGER_DIR = WORK_DIR / "logs"
 JS_SCRIPT_DIR = BASE_CONFIG_DIR / "scripts"
 STATE_DIR = BASE_CONFIG_DIR / "state"
 DATA_DIR = BASE_CONFIG_DIR / "data"
