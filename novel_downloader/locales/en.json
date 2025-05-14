@@ -58,6 +58,7 @@
   "download_option_site": "Website source, default is '{default}'.",
   "download_using_config": "Using config: {path}",
   "download_site_info": "Site: {site}",
+  "download_site_mode": "Mode: {mode}",
   "download_no_ids": "No book IDs provided. Exiting.",
   "download_fail_get_ids": "Failed to get book IDs from config: {err}",
   "download_only_example": "Only example book IDs found (e.g. '{example}').",

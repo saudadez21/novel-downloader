@@ -23,6 +23,7 @@ from .models import (
     RequesterConfig,
     SaverConfig,
 )
+from .site_rules import load_site_rules
 
 
 class ConfigAdapter:
@@ -38,11 +39,35 @@ class ConfigAdapter:
         self._config = config
         self._site = site
 
+        site_rules = load_site_rules()  # -> Dict[str, SiteRules]
+        self._supported_sites = set(site_rules.keys())
+
     def set_site(self, site: str) -> None:
         """
         切换当前适配的站点
         """
         self._site = site
+
+    def _get_site_cfg(self) -> Dict[str, Any]:
+        """
+        统一获取站点配置:
+
+        1. 先尝试从 self._config["sites"][self._site] 取配置
+        2. 如果没有配置, 且 self._site 在 self._supported_sites 中, 则取 sites["common"]
+        3. 否则返回空 dict
+        """
+        sites_cfg = self._config.get("sites", {}) or {}
+
+        # 1. site-specific config
+        if self._site in sites_cfg:
+            return sites_cfg[self._site] or {}
+
+        # 2. fallback to "common" only if site is supported
+        if self._site in self._supported_sites:
+            return sites_cfg.get("common", {}) or {}
+
+        # 3. completely unsupported site
+        return {}
 
     def get_requester_config(self) -> RequesterConfig:
         """
@@ -50,7 +75,7 @@ class ConfigAdapter:
         返回 RequesterConfig 实例
         """
         req = self._config.get("requests", {})
-        site_cfg = self._config.get("sites", {}).get(self._site, {})
+        site_cfg = self._get_site_cfg()
         return RequesterConfig(
             wait_time=req.get("wait_time", 5),
             retry_times=req.get("retry_times", 3),
@@ -73,7 +98,7 @@ class ConfigAdapter:
         """
         gen = self._config.get("general", {})
         debug = gen.get("debug", {})
-        site_cfg = self._config.get("sites", {}).get(self._site, {})
+        site_cfg = self._get_site_cfg()
         return DownloaderConfig(
             request_interval=gen.get("request_interval", 5),
             raw_data_dir=gen.get("raw_data_dir", "./raw_data"),
@@ -94,7 +119,7 @@ class ConfigAdapter:
         """
         gen = self._config.get("general", {})
         font_ocr = gen.get("font_ocr", {})
-        site_cfg = self._config.get("sites", {}).get(self._site, {})
+        site_cfg = self._get_site_cfg()
         return ParserConfig(
             cache_dir=gen.get("cache_dir", "./cache"),
             decode_font=font_ocr.get("decode_font", False),
@@ -139,7 +164,7 @@ class ConfigAdapter:
         """
         从 config["sites"][site]["book_ids"] 中提取目标书籍列表
         """
-        site_cfg = self._config.get("sites", {}).get(self._site, {})
+        site_cfg = self._get_site_cfg()
         raw_ids = site_cfg.get("book_ids", [])
 
         if isinstance(raw_ids, str):

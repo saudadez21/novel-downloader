@@ -57,6 +57,8 @@ def download_cli(ctx: Context, book_ids: List[str], site: str) -> None:
     parser_cfg = adapter.get_parser_config()
     saver_cfg = adapter.get_saver_config()
 
+    click.echo(t("download_site_mode", mode=downloader_cfg.mode))
+
     # If no book_ids provided on the command line, try to load them from config
     if not book_ids:
         try:

@@ -58,6 +58,7 @@
   "download_option_site": "网站来源, 默认为 '{default}'",
   "download_using_config": "使用配置: {path}",
   "download_site_info": "站点: {site}",
+  "download_site_mode": "使用模式: {mode}",
   "download_no_ids": "未提供书籍 ID, 正在退出",
   "download_fail_get_ids": "从配置获取书籍 ID 失败: {err}",
   "download_only_example": "只发现示例书籍 ID (例如 '{example}')",
