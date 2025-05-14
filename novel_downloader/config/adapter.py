@@ -51,16 +51,23 @@ class ConfigAdapter:
     def _get_site_cfg(self) -> Dict[str, Any]:
         """
         统一获取站点配置:
-        1. 如果当前 site 在 site_rules 的 keys 中, 则尝试取 sites[site]
-           如果没配置, 再 fallback 到 sites["common"]
-        2. 如果当前 site 不在 keys 中, 直接取 sites["common"]
-        3. 最后都没, 则返回空 dict
+
+        1. 先尝试从 self._config["sites"][self._site] 取配置
+        2. 如果没有配置, 且 self._site 在 self._supported_sites 中, 则取 sites["common"]
+        3. 否则返回空 dict
         """
         sites_cfg = self._config.get("sites", {}) or {}
+
+        # 1. site-specific config
+        if self._site in sites_cfg:
+            return sites_cfg[self._site] or {}
+
+        # 2. fallback to "common" only if site is supported
         if self._site in self._supported_sites:
-            return sites_cfg.get(self._site) or sites_cfg.get("common", {}) or {}
-        else:
             return sites_cfg.get("common", {}) or {}
+
+        # 3. completely unsupported site
+        return {}
 
     def get_requester_config(self) -> RequesterConfig:
         """
