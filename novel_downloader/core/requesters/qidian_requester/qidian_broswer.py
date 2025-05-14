@@ -286,7 +286,7 @@ class QidianBrowser(BaseBrowser):
 
             # Randomized human‑like delay
             base = wait_time if wait_time is not None else self._config.wait_time
-            sleep_with_random_delay(base, base * 0.2)
+            sleep_with_random_delay(base, mul_spread=1.2)
 
             html = str(self._page.html)
             logger.debug("[fetch] Fetched book info for ID %s from %s", book_id, url)
@@ -333,7 +333,7 @@ class QidianBrowser(BaseBrowser):
 
             # 2. Randomized human‑like delay
             base = wait_time if wait_time is not None else self._config.wait_time
-            # sleep_with_random_delay(base, base*0.2)
+            # sleep_with_random_delay(base, mul_spread=1.2)
 
             # 3. Scroll down to load dynamic content
             presses = int(random.uniform(base, base + 5) * 2)
@@ -366,7 +366,7 @@ class QidianBrowser(BaseBrowser):
 
             # Randomized human‑like delay
             base = wait_time if wait_time is not None else self._config.wait_time
-            sleep_with_random_delay(base, base * 0.2)
+            sleep_with_random_delay(base, mul_spread=1.2)
 
             html = str(self._page.html)
             logger.debug("[fetch] Fetched bookcase HTML from %s", url)

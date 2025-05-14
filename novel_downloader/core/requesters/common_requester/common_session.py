@@ -64,7 +64,7 @@ class CommonSession(BaseSession):
                 with self.session.get(url, timeout=self.timeout) as response:
                     response.raise_for_status()
                     content = response.text
-                sleep_with_random_delay(base)
+                sleep_with_random_delay(base, add_spread=1.0)
                 return content
             except Exception as e:
                 if attempt == self.retry_times:
@@ -94,7 +94,7 @@ class CommonSession(BaseSession):
                 with self.session.get(url, timeout=self.timeout) as response:
                     response.raise_for_status()
                     content = response.text
-                sleep_with_random_delay(base)
+                sleep_with_random_delay(base, add_spread=1.0)
                 return content
             except Exception as e:
                 if attempt == self.retry_times:
