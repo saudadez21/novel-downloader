@@ -1,3 +1,13 @@
+## v1.2.2 (2025-05-16)
+
+### Feat
+
+- **i18n**: add bilingual manual login prompts and improve UX messaging
+
+### Refactor
+
+- **typing**: update type annotations and fix Pylance issues (#14)
+
 ## v1.2.1 (2025-05-13)
 
 ### Refactor
