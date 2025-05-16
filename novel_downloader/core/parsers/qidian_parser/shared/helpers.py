@@ -16,7 +16,7 @@ import json
 import logging
 from typing import Any, Dict, Union
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 
 logger = logging.getLogger(__name__)
 
@@ -103,7 +103,7 @@ def find_ssr_page_context(soup: BeautifulSoup) -> Dict[str, Any]:
     """
     try:
         tag = soup.find("script", id="vite-plugin-ssr_pageContext")
-        if tag and tag.string:
+        if isinstance(tag, Tag) and tag.string:
             data: Dict[str, Any] = json.loads(tag.string.strip())
             return data
     except Exception as e:

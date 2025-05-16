@@ -135,14 +135,17 @@ class ChapterFieldRules(TypedDict):
     steps: List[RuleStep]
 
 
-class VolumesRules(TypedDict, total=False):
-    has_volume: bool  # 是否存在卷，false=未分卷
+class VolumesRulesOptional(TypedDict, total=False):
     volume_selector: str  # 有卷时选择 volume 块的 selector
-    chapter_selector: str  # 选择 chapter 节点的 selector
     volume_name_steps: List[RuleStep]
-    chapter_steps: List[ChapterFieldRules]  # 提取章节信息的步骤列表
     volume_mode: str  # Optional: "normal" (default) or "mixed"
     list_selector: str  # Optional: If "mixed" mode, parent container selector
+
+
+class VolumesRules(VolumesRulesOptional):
+    has_volume: bool  # 是否存在卷，false=未分卷
+    chapter_selector: str  # 选择 chapter 节点的 selector
+    chapter_steps: List[ChapterFieldRules]  # 提取章节信息的步骤列表
 
 
 class BookInfoRules(TypedDict, total=False):

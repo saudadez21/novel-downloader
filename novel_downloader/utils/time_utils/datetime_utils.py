@@ -106,7 +106,7 @@ def calculate_time_difference(
     """
     Calculate the difference between two datetime values.
 
-    :param from_time_str: Date‐time string "YYYY‑MM‑DD HH:MM:SS" for the start.
+    :param from_time_str: Date‐time string "YYYY-MM-DD HH:MM:SS" for the start.
     :param tz_str:        Timezone of from_time_str, e.g. 'UTC+8'. Defaults to 'UTC'.
     :param to_time_str:   Optional date‐time string for the end; if None, uses now().
     :param to_tz_str:     Timezone of to_time_str. Defaults to 'UTC'.

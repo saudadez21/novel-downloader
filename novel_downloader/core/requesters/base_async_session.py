@@ -13,7 +13,7 @@ cookie handling, and defines abstract methods for subclasses.
 import abc
 import asyncio
 import time
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Literal, Optional, Union
 
 import aiohttp
 from aiohttp import ClientResponse, ClientSession, ClientTimeout, TCPConnector
@@ -57,6 +57,9 @@ class BaseAsyncSession(AsyncRequesterProtocol, abc.ABC):
         _headers (Dict[str, str]): Default HTTP headers to send.
         _cookies (Dict[str, str]): Optional cookie jar for the session.
     """
+
+    def is_async(self) -> Literal[True]:
+        return True
 
     def _init_session(
         self,

@@ -15,6 +15,7 @@ import random
 import time
 from typing import Optional
 
+from DrissionPage._elements.chromium_element import ChromiumElement
 from DrissionPage.common import Keys
 
 from novel_downloader.config.models import RequesterConfig
@@ -56,6 +57,8 @@ class QidianBrowser(BaseBrowser):
 
         :return: True if the user appears to be logged in, False otherwise.
         """
+        if self._page is None:
+            raise RuntimeError("Browser page not initialized.")
         try:
             self._handle_overlay_mask()
             sign_in_elem = self._page.ele("@class=sign-in")
@@ -83,6 +86,8 @@ class QidianBrowser(BaseBrowser):
         :param max_retries: Maximum number of times to try clicking the login button.
         :return: True if login succeeds or is already in place; False otherwise.
         """
+        if self._page is None:
+            raise RuntimeError("Browser page not initialized.")
         original_url = self._page.url
         try:
             self._page.get("https://www.qidian.com/")
@@ -107,7 +112,8 @@ class QidianBrowser(BaseBrowser):
 
         # return to original page
         try:
-            self._page.get(original_url)
+            if original_url:
+                self._page.get(original_url)
         except Exception as e:
             logger.debug("[auth] Failed to restore page URL: %s", e)
 
@@ -117,6 +123,8 @@ class QidianBrowser(BaseBrowser):
         """
         Detect and close any full-page overlay mask that might block the login UI.
         """
+        if self._page is None:
+            raise RuntimeError("Browser page not initialized.")
         try:
             mask = self._page.ele("@@tag()=div@@class=mask", timeout=2)
             if not mask:
@@ -143,10 +151,12 @@ class QidianBrowser(BaseBrowser):
 
         :param attempt: The current attempt number (for logging).
         """
+        if self._page is None:
+            raise RuntimeError("Browser page not initialized.")
         try:
             logger.debug("[auth] Attempting login click (#%s).", attempt)
             login_btn = self._page.ele("@id=login-btn", timeout=5)
-            if login_btn:
+            if isinstance(login_btn, ChromiumElement):
                 login_btn.click()
                 logger.debug("[auth] Login button clicked.")
             else:
@@ -170,6 +180,8 @@ class QidianBrowser(BaseBrowser):
         :param max_retries: Number of times to check for login success.
         :return: True if login was detected, False otherwise.
         """
+        if self._page is None:
+            raise RuntimeError("Browser page not initialized.")
         original_headless = self._headless
 
         # 1. Switch to headful mode if needed
@@ -279,12 +291,14 @@ class QidianBrowser(BaseBrowser):
                           If None, uses `self._config.wait_time`.
         :return: The HTML content of the book info page, or an empty string on error.
         """
+        if self._page is None:
+            raise RuntimeError("Browser page not initialized.")
         url = self._build_book_info_url(book_id)
         try:
             # Navigate and fetch
             self._page.get(url)
 
-            # Randomized human‑like delay
+            # Randomized human-like delay
             base = wait_time if wait_time is not None else self._config.wait_time
             sleep_with_random_delay(base, mul_spread=1.2)
 
@@ -303,6 +317,8 @@ class QidianBrowser(BaseBrowser):
         :param presses: Number of DOWN key presses.
         :param pause: Seconds to wait between each press.
         """
+        if self._page is None:
+            raise RuntimeError("Browser page not initialized.")
         for _ in range(presses):
             try:
                 self._page.actions.key_down(Keys.DOWN)
@@ -318,7 +334,7 @@ class QidianBrowser(BaseBrowser):
 
         Ensures the user is logged in, navigates to the chapter page,
         waits a randomized delay to mimic human reading, then scrolls
-        to trigger any lazy‑loaded content.
+        to trigger any lazy-loaded content.
 
         :param book_id: The identifier of the book.
         :param chapter_id: The identifier of the chapter.
@@ -326,12 +342,14 @@ class QidianBrowser(BaseBrowser):
                           falls back to `self._config.wait_time`.
         :return: The HTML content of the chapter page, or empty string on error.
         """
+        if self._page is None:
+            raise RuntimeError("Browser page not initialized.")
         url = self._build_chapter_url(book_id, chapter_id)
         try:
             # 1. Navigate to chapter URL
             self._page.get(url)
 
-            # 2. Randomized human‑like delay
+            # 2. Randomized human-like delay
             base = wait_time if wait_time is not None else self._config.wait_time
             # sleep_with_random_delay(base, mul_spread=1.2)
 
@@ -349,13 +367,15 @@ class QidianBrowser(BaseBrowser):
 
     def get_bookcase(self, wait_time: Optional[float] = None) -> str:
         """
-        Retrieve the HTML content of the logged‑in user's Qidian bookcase page.
+        Retrieve the HTML content of the logged-in user's Qidian bookcase page.
 
         :param wait_time: Base number of seconds to wait before returning content.
                           If None, falls back to `self._config.wait_time`.
         :return: The HTML markup of the bookcase page, or empty string on error.
         :raises RuntimeError: If the user is not logged in.
         """
+        if self._page is None:
+            raise RuntimeError("Browser page not initialized.")
         if not self._logged_in:
             raise RuntimeError("User not logged in. Please call login() first.")
 
@@ -364,7 +384,7 @@ class QidianBrowser(BaseBrowser):
             # Navigate to the bookcase page
             self._page.get(url)
 
-            # Randomized human‑like delay
+            # Randomized human-like delay
             base = wait_time if wait_time is not None else self._config.wait_time
             sleep_with_random_delay(base, mul_spread=1.2)
 

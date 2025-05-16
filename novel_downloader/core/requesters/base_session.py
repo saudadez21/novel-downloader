@@ -10,7 +10,7 @@ persistent session and supports retries, headers, and timeout configurations.
 """
 
 import abc
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Literal, Optional, Union
 
 import requests
 from requests import Response, Session
@@ -30,6 +30,9 @@ class BaseSession(RequesterProtocol, abc.ABC):
         _session (requests.Session): The persistent HTTP session.
         _timeout (float): Timeout for each request in seconds.
     """
+
+    def is_async(self) -> Literal[False]:
+        return False
 
     def _init_session(
         self, config: RequesterConfig, cookies: Optional[Dict[str, str]] = None

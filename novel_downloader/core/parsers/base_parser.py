@@ -45,14 +45,14 @@ class BaseParser(ParserProtocol, abc.ABC):
         self._base_cache_dir = Path(config.cache_dir)
 
     @abc.abstractmethod
-    def parse_book_info(self, html: str) -> Dict[str, Any]:
+    def parse_book_info(self, html_str: str) -> Dict[str, Any]:
         """
         Parse a book info page and extract metadata and chapter structure.
 
         Depending on the site structure, the return dict may include a
         flat `chapters` list or nested `volumes` with chapter groups.
 
-        :param html: Raw HTML of the book info page.
+        :param html_str: Raw HTML of the book info page.
         :return: Parsed metadata and chapter structure as a dictionary.
         """
         ...
@@ -62,7 +62,7 @@ class BaseParser(ParserProtocol, abc.ABC):
         """
         Parse a single chapter page and extract clean text or simplified HTML.
 
-        :param html: Raw HTML of the chapter page.
+        :param html_str: Raw HTML of the chapter page.
         :param chapter_id: Identifier of the chapter being parsed.
         :return: Cleaned chapter content as plain text or minimal HTML.
         """

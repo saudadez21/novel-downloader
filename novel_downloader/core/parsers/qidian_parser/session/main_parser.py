@@ -72,14 +72,14 @@ class QidianSessionParser(BaseParser):
             self._font_debug_dir = self._base_cache_dir / "font_debug"
             self._font_debug_dir.mkdir(parents=True, exist_ok=True)
 
-    def parse_book_info(self, html: str) -> Dict[str, Any]:
+    def parse_book_info(self, html_str: str) -> Dict[str, Any]:
         """
         Parse a book info page and extract metadata and chapter structure.
 
-        :param html: Raw HTML of the book info page.
+        :param html_str: Raw HTML of the book info page.
         :return: Parsed metadata and chapter structure as a dictionary.
         """
-        return parse_book_info(html)
+        return parse_book_info(html_str)
 
     def parse_chapter(self, html_str: str, chapter_id: str) -> Dict[str, Any]:
         """

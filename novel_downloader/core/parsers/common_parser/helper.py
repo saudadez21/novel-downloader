@@ -188,7 +188,7 @@ class HTMLExtractor:
                     current = sep.join(current)
 
             elif t == "attr":
-                name = step.get("attr")
+                name = step.get("attr") or ""
                 if isinstance(current, list):
                     current = [elem.get(name, "") for elem in current]
                 elif isinstance(current, Tag):
@@ -216,9 +216,9 @@ class HTMLExtractor:
         """
         list_selector = volume_rule.get("list_selector")
         volume_selector = volume_rule.get("volume_selector")
-        chapter_selector = volume_rule.get("chapter_selector")
         volume_name_steps = volume_rule.get("volume_name_steps")
-        chapter_steps_list = volume_rule.get("chapter_steps")
+        chapter_selector = volume_rule["chapter_selector"]
+        chapter_steps_list = volume_rule["chapter_steps"]
 
         if not (
             list_selector and volume_selector and chapter_selector and volume_name_steps
@@ -241,6 +241,8 @@ class HTMLExtractor:
         for elem in list_area.find_all(
             [volume_selector, chapter_selector], recursive=True
         ):
+            if not isinstance(elem, Tag):
+                continue
             if elem.name == volume_selector:
                 extractor = HTMLExtractor(str(elem))
                 volume_name = extractor.extract_field(volume_name_steps)
@@ -257,9 +259,9 @@ class HTMLExtractor:
         return volumes
 
     def extract_volume_blocks(self, volume_rule: VolumesRules) -> List[Dict[str, Any]]:
-        volume_selector = volume_rule["volume_selector"]
+        volume_selector = volume_rule.get("volume_selector")
+        volume_name_steps = volume_rule.get("volume_name_steps")
         chapter_selector = volume_rule["chapter_selector"]
-        volume_name_steps = volume_rule["volume_name_steps"]
         chapter_steps_list = volume_rule["chapter_steps"]
         if not (volume_selector and volume_name_steps):
             raise ValueError(
