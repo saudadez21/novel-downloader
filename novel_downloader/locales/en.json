@@ -66,6 +66,9 @@
   "download_downloading": "Downloading book {book_id} from {site}...",
   "download_prompt_parse": "Parse...",
 
+  "login_prompt_intro": "Manual login is required. Please switch to the browser and log in.",
+  "login_prompt_press_enter": "Attempt {attempt}/{max_retries}: Press Enter after completing login in the browser...",
+
   "clean_logs": "Clean log directory",
   "clean_cache": "Clean scripts and browser cache",
   "clean_state": "Clean state files (state.json)",

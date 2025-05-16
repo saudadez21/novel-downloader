@@ -20,6 +20,7 @@ from DrissionPage.common import Keys
 
 from novel_downloader.config.models import RequesterConfig
 from novel_downloader.core.requesters.base_browser import BaseBrowser
+from novel_downloader.utils.i18n import t
 from novel_downloader.utils.time_utils import sleep_with_random_delay
 
 logger = logging.getLogger(__name__)
@@ -205,13 +206,11 @@ class QidianBrowser(BaseBrowser):
                 logger.info("[auth] Detected successful login.")
                 self._logged_in = True
                 break
-
-            logger.info(
-                "[auth] Attempt %d/%d: Press Enter after completing login...",
-                attempt,
-                max_retries,
+            if attempt == 1:
+                print(t("login_prompt_intro"))
+            input(
+                t("login_prompt_press_enter", attempt=attempt, max_retries=max_retries)
             )
-            input()
         else:
             logger.warning("[auth] Manual login failed after %d attempts.", max_retries)
             self._logged_in = False

@@ -66,6 +66,9 @@
   "download_downloading": "正在从 {site} 下载书籍 {book_id}...",
   "download_prompt_parse": "结束...",
 
+  "login_prompt_intro": "需要手动登录, 请切换到浏览器窗口完成登录",
+  "login_prompt_press_enter": "第 {attempt}/{max_retries} 次尝试: 请在浏览器中完成登录后按回车键...",
+
   "clean_logs": "清理日志目录",
   "clean_cache": "清理脚本和浏览器缓存",
   "clean_state": "清理状态文件 (state.json)",
