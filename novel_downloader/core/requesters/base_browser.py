@@ -11,9 +11,10 @@ specialized purposes.
 
 import abc
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Literal, Optional, cast
 
-from DrissionPage import Chromium, ChromiumOptions, ChromiumPage
+from DrissionPage import Chromium, ChromiumOptions
+from DrissionPage._pages.mix_tab import MixTab
 
 from novel_downloader.config.models import RequesterConfig
 from novel_downloader.core.interfaces import RequesterProtocol
@@ -41,6 +42,9 @@ class BaseBrowser(RequesterProtocol, abc.ABC):
         _browser (Chromium): Chromium instance.
         _page (ChromiumPage): The active browser tab.
     """
+
+    def is_async(self) -> Literal[False]:
+        return False
 
     def _init_browser(self, config: RequesterConfig) -> None:
         """
@@ -99,7 +103,7 @@ class BaseBrowser(RequesterProtocol, abc.ABC):
         Set up the browser instance and open the default tab.
         """
         self._browser = Chromium(self._options)
-        self._page = self._browser.get_tab()
+        self._page = cast(MixTab, self._browser.get_tab())
 
     def login(self, max_retries: int = 3, manual_login: bool = False) -> bool:
         """
@@ -151,7 +155,7 @@ class BaseBrowser(RequesterProtocol, abc.ABC):
         )
 
     @property
-    def page(self) -> ChromiumPage:
+    def page(self) -> Optional[MixTab]:
         """
         Return the current Chromium page object.
 
@@ -160,7 +164,7 @@ class BaseBrowser(RequesterProtocol, abc.ABC):
         return self._page
 
     @property
-    def browser(self) -> Chromium:
+    def browser(self) -> Optional[Chromium]:
         """
         Return the Chromium browser instance.
 

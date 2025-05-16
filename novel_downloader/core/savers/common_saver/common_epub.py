@@ -212,7 +212,7 @@ def common_save_as_epub(
 
     # --- 5. Finalize EPUB ---
     logger.info("%s Building TOC and spine...", TAG)
-    book.toc = tuple(toc_list)
+    book.toc = toc_list
     book.spine = spine
     book.add_item(epub.EpubNcx())
     book.add_item(epub.EpubNav())

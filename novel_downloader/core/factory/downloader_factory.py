@@ -14,7 +14,7 @@ based on the site name and parser mode specified in the configuration.
 To add support for new sites or modes, extend the `_site_map` accordingly.
 """
 
-from typing import Union
+from typing import Union, cast
 
 from novel_downloader.config import DownloaderConfig, load_site_rules
 from novel_downloader.core.downloaders import (
@@ -137,13 +137,15 @@ def get_downloader(
     :raises TypeError: If the provided requester does not match the required protocol
                     for the chosen mode (sync vs async).
     """
-    mode = config.mode.lower()
-    if mode == "async":
-        if not isinstance(requester, AsyncRequesterProtocol):
-            raise TypeError("Async mode requires an AsyncRequesterProtocol")
-        return get_async_downloader(requester, parser, saver, site, config)
-    if mode in ("browser", "session"):
-        if not isinstance(requester, RequesterProtocol):
-            raise TypeError("Sync mode requires a RequesterProtocol")
-        return get_sync_downloader(requester, parser, saver, site, config)
-    raise ValueError(f"Unknown mode '{config.mode}' for site '{site}'")
+    if requester.is_async():
+        if config.mode.lower() != "async":
+            raise TypeError("Requester is async, but config.mode is not 'async'")
+        async_requester = cast(AsyncRequesterProtocol, requester)
+        return get_async_downloader(async_requester, parser, saver, site, config)
+    else:
+        if config.mode.lower() not in ("browser", "session"):
+            raise TypeError(
+                "Requester is sync, but config.mode is not 'browser' or 'session'"
+            )
+        sync_requester = cast(RequesterProtocol, requester)
+        return get_sync_downloader(sync_requester, parser, saver, site, config)

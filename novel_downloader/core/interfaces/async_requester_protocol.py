@@ -9,7 +9,7 @@ for book info pages, individual chapters, managing request lifecycle,
 and optionally retrieving a user's authenticated bookcase — all in async style.
 """
 
-from typing import Optional, Protocol, runtime_checkable
+from typing import Literal, Optional, Protocol, runtime_checkable
 
 
 @runtime_checkable
@@ -20,6 +20,9 @@ class AsyncRequesterProtocol(Protocol):
       - a specific chapter page,
     and manage login/shutdown asynchronously.
     """
+
+    def is_async(self) -> Literal[True]:
+        ...
 
     async def login(self, max_retries: int = 3, manual_login: bool = False) -> bool:
         """

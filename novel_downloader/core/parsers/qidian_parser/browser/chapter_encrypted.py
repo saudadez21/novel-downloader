@@ -229,7 +229,7 @@ def extract_paragraphs_recursively(
     if chapter_id:
         main_id = f"c-{chapter_id}"
         main_tag = soup.find("main", id=main_id)
-        if not main_tag:
+        if not isinstance(main_tag, Tag):
             return []
     else:
         main_tag = soup

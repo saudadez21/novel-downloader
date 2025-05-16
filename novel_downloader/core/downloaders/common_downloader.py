@@ -67,8 +67,7 @@ class CommonDownloader(BaseDownloader):
         cache_base = self.cache_dir / site / book_id
         info_path = raw_base / "book_info.json"
         chapter_dir = raw_base / "chapters"
-        if save_html:
-            chapters_html_dir = cache_base / "html"
+        chapters_html_dir = cache_base / "html"
 
         raw_base.mkdir(parents=True, exist_ok=True)
         chapter_dir.mkdir(parents=True, exist_ok=True)
