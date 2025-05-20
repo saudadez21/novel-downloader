@@ -11,8 +11,8 @@ Currently supported platforms:
 - CommonSaver (通用)
 """
 
-from .common_saver import CommonSaver
-from .qidian_saver import QidianSaver
+from .common import CommonSaver
+from .qidian import QidianSaver
 
 __all__ = [
     "CommonSaver",

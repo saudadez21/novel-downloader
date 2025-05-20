@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.parsers.qidian_parser.session.main_parser
+novel_downloader.core.parsers.qidian_parser.browser.main_parser
 ---------------------------------------------------------------
 
-Main parser class for handling Qidian chapters rendered via a session.
+Main parser class for handling Qidian chapters rendered via a browser environment.
 
-This module defines `QidianSessionParser`, a parser implementation that supports
+This module defines `QidianBrowserParser`, a parser implementation that supports
 content extracted from dynamically rendered Qidian HTML pages.
 """
 
@@ -16,8 +16,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from novel_downloader.config.models import ParserConfig
-from novel_downloader.core.parsers.base_parser import BaseParser
-from novel_downloader.utils.state import state_mgr
+from novel_downloader.core.parsers.base import BaseParser
 
 from ..shared import (
     is_encrypted,
@@ -29,9 +28,9 @@ if TYPE_CHECKING:
     from novel_downloader.utils.fontocr import FontOCR
 
 
-class QidianSessionParser(BaseParser):
+class QidianBrowserParser(BaseParser):
     """
-    Parser for Qidian site using a session HTML workflow.
+    Parser for Qidian site using a browser-rendered HTML workflow.
     """
 
     def __init__(self, config: ParserConfig):
@@ -50,9 +49,6 @@ class QidianSessionParser(BaseParser):
         self._fixed_font_dir.mkdir(parents=True, exist_ok=True)
         self._font_debug_dir: Optional[Path] = None
 
-        qd_cookies = state_mgr.get_cookies("qidian")
-        self._fuid: str = qd_cookies.get("ywguid", "")
-
         self._font_ocr: Optional[FontOCR] = None
         if self._decode_font:
             from novel_downloader.utils.fontocr import FontOCR
@@ -60,6 +56,7 @@ class QidianSessionParser(BaseParser):
             self._font_ocr = FontOCR(
                 cache_dir=self._base_cache_dir,
                 use_freq=config.use_freq,
+                ocr_version=config.ocr_version,
                 use_ocr=config.use_ocr,
                 use_vec=config.use_vec,
                 batch_size=config.batch_size,

@@ -12,7 +12,7 @@ from typing import Any, Dict
 
 from novel_downloader.config import ParserConfig, SiteRules
 
-from ..base_parser import BaseParser
+from ..base import BaseParser
 from .helper import HTMLExtractor
 
 

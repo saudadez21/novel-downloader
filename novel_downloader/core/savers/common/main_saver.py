@@ -12,7 +12,7 @@ and chapter files.
 
 from novel_downloader.config.models import SaverConfig
 
-from ..base_saver import BaseSaver
+from ..base import BaseSaver
 from .common_txt import common_save_as_txt
 
 

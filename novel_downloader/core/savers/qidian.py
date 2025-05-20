@@ -11,7 +11,7 @@ logic required to structure and export novel content into desired formats.
 
 from novel_downloader.config.models import SaverConfig
 
-from .common_saver import CommonSaver
+from .common import CommonSaver
 
 
 class QidianSaver(CommonSaver):

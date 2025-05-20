@@ -23,7 +23,7 @@ from novel_downloader.utils.file_utils import save_as_json, save_as_txt
 from novel_downloader.utils.network import download_image_as_bytes
 from novel_downloader.utils.time_utils import calculate_time_difference
 
-from .base_async_downloader import BaseAsyncDownloader
+from .base_async import BaseAsyncDownloader
 
 logger = logging.getLogger(__name__)
 

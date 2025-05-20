@@ -15,8 +15,8 @@ Modules:
 - common_parser
 """
 
-from .common_parser import CommonParser
-from .qidian_parser import (
+from .common import CommonParser
+from .qidian import (
     QidianBrowserParser,
     QidianSessionParser,
 )

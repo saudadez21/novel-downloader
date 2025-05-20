@@ -23,7 +23,7 @@ from novel_downloader.utils.network import download_image_as_bytes
 from novel_downloader.utils.state import state_mgr
 from novel_downloader.utils.time_utils import calculate_time_difference
 
-from .base_downloader import BaseDownloader
+from .base import BaseDownloader
 
 logger = logging.getLogger(__name__)
 
