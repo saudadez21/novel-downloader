@@ -20,7 +20,7 @@ from typing import Any, Dict, Optional
 from requests import Response
 
 from novel_downloader.config.models import RequesterConfig
-from novel_downloader.core.requesters.base_session import BaseSession
+from novel_downloader.core.requesters.base import BaseSession
 from novel_downloader.utils.crypto_utils import patch_qd_payload_token
 from novel_downloader.utils.state import state_mgr
 from novel_downloader.utils.time_utils import sleep_with_random_delay

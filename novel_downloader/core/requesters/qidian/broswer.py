@@ -19,7 +19,7 @@ from DrissionPage._elements.chromium_element import ChromiumElement
 from DrissionPage.common import Keys
 
 from novel_downloader.config.models import RequesterConfig
-from novel_downloader.core.requesters.base_browser import BaseBrowser
+from novel_downloader.core.requesters.base import BaseBrowser
 from novel_downloader.utils.i18n import t
 from novel_downloader.utils.time_utils import sleep_with_random_delay
 

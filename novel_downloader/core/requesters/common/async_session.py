@@ -15,7 +15,7 @@ import random
 from typing import Dict, Optional
 
 from novel_downloader.config import RequesterConfig, SiteProfile
-from novel_downloader.core.requesters.base_async_session import BaseAsyncSession
+from novel_downloader.core.requesters.base import BaseAsyncSession
 
 
 class CommonAsyncSession(BaseAsyncSession):

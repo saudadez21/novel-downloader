@@ -1,50 +1,39 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.requesters.common.session
+novel_downloader.core.requesters.biquge.session
 -----------------------------------------------
 
-This module defines a `CommonSession` class for handling HTTP requests
-to common novel sites. It provides methods to retrieve raw book
-information pages and chapter contents using a flexible URL templating
-system defined by a site profile.
 """
 
 import time
 from typing import Dict, Optional
 
-from novel_downloader.config import RequesterConfig, SiteProfile
+from novel_downloader.config import RequesterConfig
 from novel_downloader.core.requesters.base import BaseSession
 from novel_downloader.utils.time_utils import sleep_with_random_delay
 
 
-class CommonSession(BaseSession):
+class BiqugeSession(BaseSession):
     """
-    A common session for handling site-specific HTTP requests.
+    A session class for interacting with the Biquge (www.b520.cc) novel website.
+    """
 
-    :ivar _site: The unique identifier or name of the site.
-    :ivar _profile: Metadata and URL templates related to the site.
-    :ivar session: The HTTP session used to make requests.
-    """
+    BOOK_INFO_URL = "http://www.b520.cc/{book_id}/"
+    CHAPTER_URL = "http://www.b520.cc/{book_id}/{chapter_id}.html"
 
     def __init__(
         self,
         config: RequesterConfig,
-        site: str,
-        profile: SiteProfile,
         cookies: Optional[Dict[str, str]] = None,
     ):
         """
-        Initialize a CommonSession instance.
+        Initialize the Biquge session with configuration and optional cookies.
 
-        :param config: The RequesterConfig instance containing settings.
-        :param site: The identifier or domain of the target site.
-        :param profile: The site's metadata and URL templates.
-        :param cookies: Optional cookies to preload into the session.
+        :param config: The requester configuration.
+        :param cookies: Optional dictionary of cookies to be used in the session.
         """
         self._init_session(config=config, cookies=cookies)
-        self._site = site
-        self._profile = profile
 
     def get_book_info(self, book_id: str, wait_time: Optional[float] = None) -> str:
         """
@@ -55,7 +44,7 @@ class CommonSession(BaseSession):
         :return: The page content as a string.
         :raises requests.HTTPError: If the request returns an unsuccessful status code.
         """
-        url = self.book_info_url.format(book_id=book_id)
+        url = self.book_info_url(book_id=book_id)
         base = wait_time if wait_time is not None else self._config.wait_time
 
         for attempt in range(1, self.retry_times + 1):
@@ -67,7 +56,7 @@ class CommonSession(BaseSession):
                 return content
             except Exception as e:
                 if attempt == self.retry_times:
-                    raise e  # 最后一次也失败了，抛出异常
+                    raise e
                 else:
                     time.sleep(self.retry_interval)
                     continue
@@ -85,7 +74,7 @@ class CommonSession(BaseSession):
         :return: The chapter content as a string.
         :raises requests.HTTPError: If the request returns an unsuccessful status code.
         """
-        url = self.chapter_url.format(book_id=book_id, chapter_id=chapter_id)
+        url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
         base = wait_time if wait_time is not None else self._config.wait_time
 
         for attempt in range(1, self.retry_times + 1):
@@ -97,7 +86,7 @@ class CommonSession(BaseSession):
                 return content
             except Exception as e:
                 if attempt == self.retry_times:
-                    raise e  # 最后一次也失败了，抛出异常
+                    raise e
                 else:
                     time.sleep(self.retry_interval)
                     continue
@@ -105,21 +94,23 @@ class CommonSession(BaseSession):
             "Unexpected error: get_book_chapter failed without returning"
         )
 
-    @property
-    def site(self) -> str:
-        """Return the site name."""
-        return self._site
+    @classmethod
+    def book_info_url(cls, book_id: str) -> str:
+        """
+        Construct the URL for the book's main information page.
 
-    @property
-    def book_info_url(self) -> str:
+        :param book_id: The unique identifier of the book.
+        :return: Fully formatted URL string pointing to the book info page.
         """
-        Return the URL template for fetching book information.
-        """
-        return self._profile["book_info_url"]
+        return cls.BOOK_INFO_URL.format(book_id=book_id)
 
-    @property
-    def chapter_url(self) -> str:
+    @classmethod
+    def chapter_url(cls, book_id: str, chapter_id: str) -> str:
         """
-        Return the URL template for fetching chapter information.
+        Construct the URL for a specific chapter of a book.
+
+        :param book_id: The unique identifier of the book.
+        :param chapter_id: The identifier of the chapter within the book.
+        :return: Fully formatted URL string pointing to the chapter page.
         """
-        return self._profile["chapter_url"]
+        return cls.CHAPTER_URL.format(book_id=book_id, chapter_id=chapter_id)

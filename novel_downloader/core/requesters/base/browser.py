@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.requesters.base_browser
+novel_downloader.core.requesters.base.browser
 ---------------------------------------------
 
 This module defines the BaseBrowser class, which provides common functionalities

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.requesters.base_async_session
+novel_downloader.core.requesters.base.async_session
 ---------------------------------------------------
 
 This module defines the BaseAsyncSession class, which provides asynchronous

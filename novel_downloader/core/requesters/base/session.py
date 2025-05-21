@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.requesters.base_session
+novel_downloader.core.requesters.base.session
 ---------------------------------------------
 
 This module defines the BaseSession class, which provides basic HTTP
