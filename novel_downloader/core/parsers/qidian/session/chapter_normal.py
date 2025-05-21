@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.parsers.qidian_parser.session.chapter_normal
-------------------------------------------------------------------
+novel_downloader.core.parsers.qidian.session.chapter_normal
+-----------------------------------------------------------
 
 Provides `parse_normal_chapter`, which will:
 

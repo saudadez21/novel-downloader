@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.parsers.common_parser.main_parser
--------------------------------------------------------
+novel_downloader.core.parsers.common.main_parser
+------------------------------------------------
 
 This package provides parsing components for handling
 Common pages.

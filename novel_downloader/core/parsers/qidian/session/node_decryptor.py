@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.parsers.qidian_parser.session.node_decryptor
-------------------------------------------------------------------
+novel_downloader.core.parsers.qidian.session.node_decryptor
+-----------------------------------------------------------
 
 Provides QidianNodeDecryptor, which ensures a Node.js environment,
 downloads or installs the required JS modules (Fock + decrypt script),

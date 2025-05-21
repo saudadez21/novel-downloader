@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.requesters.common_requester.common_session
-------------------------------------------------------------------
+novel_downloader.core.requesters.common.session
+-----------------------------------------------
 
 This module defines a `CommonSession` class for handling HTTP requests
 to common novel sites. It provides methods to retrieve raw book

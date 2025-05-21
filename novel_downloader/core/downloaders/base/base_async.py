@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.downloaders.base_async_downloader
--------------------------------------------------------
+novel_downloader.core.downloaders.base.base_async
+-------------------------------------------------
 
 Defines the abstract base class `BaseAsyncDownloader`, which provides a
 common interface and reusable logic for all downloader implementations.

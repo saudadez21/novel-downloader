@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.parsers.base_parser
------------------------------------------
+novel_downloader.core.parsers.base
+----------------------------------
 
 This module defines the BaseParser abstract class, which implements the
 ParserProtocol interface and provides a structured foundation for

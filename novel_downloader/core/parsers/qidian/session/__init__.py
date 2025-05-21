@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.parsers.qidian_parser.session
----------------------------------------------------------------
+novel_downloader.core.parsers.qidian.session
+--------------------------------------------
 
 This package provides parsing components for handling Qidian
 pages that have been rendered by a session.

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.parsers.qidian_parser.browser.main_parser
----------------------------------------------------------------
+novel_downloader.core.parsers.qidian.browser.main_parser
+--------------------------------------------------------
 
 Main parser class for handling Qidian chapters rendered via a browser environment.
 

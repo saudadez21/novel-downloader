@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.requesters.qidian_requester.qidian_broswer
-----------------------------------------------------------------
+novel_downloader.core.requesters.qidian.broswer
+-----------------------------------------------
 
 This module defines the QidianRequester class for interacting with
 the Qidian website.

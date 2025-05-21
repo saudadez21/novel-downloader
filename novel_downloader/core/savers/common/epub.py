@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.savers.common_saver.common_epub
------------------------------------------------------
+novel_downloader.core.savers.common.epub
+----------------------------------------
 
 Contains the logic for exporting novel content as a single `.epub` file.
 """

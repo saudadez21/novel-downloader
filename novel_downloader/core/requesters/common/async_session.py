@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.requesters.common_requester.common_async_session
-----------------------------------------------------------------------
+novel_downloader.core.requesters.common.async_session
+-----------------------------------------------------
 
 This module defines a `CommonAsyncSession` class for handling HTTP requests
 to common novel sites **asynchronously**. It provides methods to retrieve

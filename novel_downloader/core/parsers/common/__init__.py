@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.parsers.common_parser
--------------------------------------------
+novel_downloader.core.parsers.common
+------------------------------------
 
 This module provides a CommonParser class that implements
 general-purpose parsing logic for extracting novel metadata

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.parsers.qidian_parser.shared.book_info_parser
--------------------------------------------------------------------
+novel_downloader.core.parsers.qidian.shared.book_info_parser
+------------------------------------------------------------
 
 This module provides parsing of Qidian book info pages.
 

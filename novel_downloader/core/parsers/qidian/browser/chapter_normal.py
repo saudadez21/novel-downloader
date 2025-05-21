@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.parsers.qidian_parser.browser.chapter_normal
-------------------------------------------------------------------
+novel_downloader.core.parsers.qidian.browser.chapter_normal
+-----------------------------------------------------------
 
 Parser logic for extracting readable text from Qidian chapters
 that use plain (non-encrypted) browser-rendered HTML.

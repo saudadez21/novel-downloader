@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.parsers.qidian_parser.session.chapter_encrypted
----------------------------------------------------------------------
+novel_downloader.core.parsers.qidian.session.chapter_encrypted
+--------------------------------------------------------------
 
 Support for parsing encrypted chapters from Qidian using font OCR mapping,
 CSS rules, and custom rendering logic.

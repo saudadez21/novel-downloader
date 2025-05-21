@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.downloaders.common_asynb_downloader
----------------------------------------------------------
+novel_downloader.core.downloaders.common.common_async
+-----------------------------------------------------
 
 This module defines `CommonAsynbDownloader`.
 """
@@ -14,6 +14,7 @@ from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from typing import Any, Dict, Tuple
 
 from novel_downloader.config import DownloaderConfig
+from novel_downloader.core.downloaders.base import BaseAsyncDownloader
 from novel_downloader.core.interfaces import (
     AsyncRequesterProtocol,
     ParserProtocol,
@@ -22,8 +23,6 @@ from novel_downloader.core.interfaces import (
 from novel_downloader.utils.file_utils import save_as_json, save_as_txt
 from novel_downloader.utils.network import download_image_as_bytes
 from novel_downloader.utils.time_utils import calculate_time_difference
-
-from .base_async import BaseAsyncDownloader
 
 logger = logging.getLogger(__name__)
 

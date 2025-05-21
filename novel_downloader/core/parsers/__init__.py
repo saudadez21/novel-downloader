@@ -8,7 +8,7 @@ This package defines all site-specific parsing modules
 for the novel_downloader framework.
 
 Currently supported:
-- Qidian (起点中文网) via browser-rendered page parsing.
+- Qidian (起点中文网)
 
 Modules:
 - qidian_parser

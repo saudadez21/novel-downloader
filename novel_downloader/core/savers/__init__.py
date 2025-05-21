@@ -11,10 +11,12 @@ Currently supported platforms:
 - CommonSaver (通用)
 """
 
+from .biquge import BiqugeSaver
 from .common import CommonSaver
 from .qidian import QidianSaver
 
 __all__ = [
+    "BiqugeSaver",
     "CommonSaver",
     "QidianSaver",
 ]

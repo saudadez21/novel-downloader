@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.savers.common_saver.main_saver
-----------------------------------------------------
+novel_downloader.core.savers.common.main_saver
+----------------------------------------------
 
 This module implements the `QidianSaver` class, a concrete saver for handling
 novel data from Qidian (起点中文网). It defines the logic to compile, structure,
@@ -13,7 +13,7 @@ and chapter files.
 from novel_downloader.config.models import SaverConfig
 
 from ..base import BaseSaver
-from .common_txt import common_save_as_txt
+from .txt import common_save_as_txt
 
 
 class CommonSaver(BaseSaver):
@@ -59,7 +59,7 @@ class CommonSaver(BaseSaver):
         :raises NotImplementedError: If the method is not overridden.
         """
         try:
-            from .common_epub import common_save_as_epub
+            from .epub import common_save_as_epub
         except ImportError:
             raise NotImplementedError(
                 "EPUB export not supported. Please install 'ebooklib'"

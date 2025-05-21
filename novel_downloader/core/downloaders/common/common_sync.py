@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.downloaders.qidian_downloader
----------------------------------------------------
+novel_downloader.core.downloaders.common.common_sync
+----------------------------------------------------
 
-This module defines `QidianDownloader`, a platform-specific downloader
-implementation for retrieving novels from Qidian (起点中文网).
+This module defines `CommonDownloader`.
 """
 
 import json
@@ -13,6 +12,7 @@ import logging
 from typing import Any, Dict
 
 from novel_downloader.config import DownloaderConfig
+from novel_downloader.core.downloaders.base import BaseDownloader
 from novel_downloader.core.interfaces import (
     ParserProtocol,
     RequesterProtocol,
@@ -20,17 +20,14 @@ from novel_downloader.core.interfaces import (
 )
 from novel_downloader.utils.file_utils import save_as_json, save_as_txt
 from novel_downloader.utils.network import download_image_as_bytes
-from novel_downloader.utils.state import state_mgr
 from novel_downloader.utils.time_utils import calculate_time_difference
-
-from .base import BaseDownloader
 
 logger = logging.getLogger(__name__)
 
 
-class QidianDownloader(BaseDownloader):
+class CommonDownloader(BaseDownloader):
     """
-    Specialized downloader for Qidian novels.
+    Specialized downloader for common novels.
     """
 
     def __init__(
@@ -39,31 +36,19 @@ class QidianDownloader(BaseDownloader):
         parser: ParserProtocol,
         saver: SaverProtocol,
         config: DownloaderConfig,
+        site: str,
     ):
+        """
+        Initialize the common novel downloader with site information.
+
+        :param requester: Object implementing RequesterProtocol, used to fetch raw data.
+        :param parser: Object implementing ParserProtocol, used to parse page content.
+        :param saver: Object implementing SaverProtocol, used to save final output.
+        :param config: Downloader configuration object.
+        :param site: Identifier for the site the downloader is targeting.
+        """
         super().__init__(requester, parser, saver, config)
-
-        self._site_key = "qidian"
-        self._is_logged_in = self._handle_login()
-        state_mgr.set_manual_login_flag(self._site_key, not self._is_logged_in)
-
-    def _handle_login(self) -> bool:
-        """
-        Perform login with automatic fallback to manual:
-
-        1. If manual_flag is False, try automatic login:
-           - On success, return True immediately.
-        2. Always attempt manual login if manual_flag is True.
-        3. Return True if manual login succeeds, False otherwise.
-        """
-        manual_flag = state_mgr.get_manual_login_flag(self._site_key)
-
-        # First try automatic login
-        if not manual_flag:
-            if self._requester.login(manual_login=False):
-                return True
-
-        # try manual login
-        return self._requester.login(manual_login=True)
+        self._site = site
 
     def download_one(self, book_id: str) -> None:
         """
@@ -71,27 +56,20 @@ class QidianDownloader(BaseDownloader):
 
         :param book_id: The identifier of the book to download.
         """
-        if not self._is_logged_in:
-            logger.warning(
-                f"[{self._site_key}] login failed, skipping download of {book_id}"
-            )
-            return
-
         TAG = "[Downloader]"
         save_html = self.config.save_html
         skip_existing = self.config.skip_existing
+        site = self.site
         wait_time = self.config.request_interval
 
-        raw_base = self.raw_data_dir / "qidian" / book_id
-        cache_base = self.cache_dir / "qidian" / book_id
+        raw_base = self.raw_data_dir / site / book_id
+        cache_base = self.cache_dir / site / book_id
         info_path = raw_base / "book_info.json"
         chapter_dir = raw_base / "chapters"
-        encrypted_chapter_dir = raw_base / "encrypted_chapters"
         chapters_html_dir = cache_base / "html"
 
         raw_base.mkdir(parents=True, exist_ok=True)
         chapter_dir.mkdir(parents=True, exist_ok=True)
-        encrypted_chapter_dir.mkdir(parents=True, exist_ok=True)
 
         book_info: Dict[str, Any]
 
@@ -138,7 +116,6 @@ class QidianDownloader(BaseDownloader):
                     continue
 
                 chap_path = chapter_dir / f"{cid}.json"
-
                 if chap_path.exists() and skip_existing:
                     logger.debug(
                         "%s Chapter already exists, skipping: %s",
@@ -149,38 +126,35 @@ class QidianDownloader(BaseDownloader):
 
                 chap_title = chap.get("title", "")
                 logger.info("%s Fetching chapter: %s (%s)", TAG, chap_title, cid)
-                chap_html = self.requester.get_book_chapter(book_id, cid, wait_time)
+                try:
+                    chap_html = self.requester.get_book_chapter(book_id, cid, wait_time)
 
-                is_encrypted = self.parser.is_encrypted(chap_html)  # type: ignore[attr-defined]
+                    if save_html:
+                        html_path = chapters_html_dir / f"{cid}.html"
+                        save_as_txt(chap_html, html_path, on_exist="skip")
+                        logger.debug(
+                            "%s Saved raw HTML for chapter %s to %s",
+                            TAG,
+                            cid,
+                            html_path,
+                        )
 
-                folder = encrypted_chapter_dir if is_encrypted else chapter_dir
-                chap_path = folder / f"{cid}.json"
-
-                if chap_path.exists() and skip_existing:
-                    logger.debug(
-                        "%s Chapter already exists, skipping: %s",
-                        TAG,
-                        cid,
-                    )
-                    continue
-
-                if save_html and not is_vip(chap_html):
-                    folder = chapters_html_dir / (
-                        "html_encrypted" if is_encrypted else "html_plain"
-                    )
-                    html_path = folder / f"{cid}.html"
-                    save_as_txt(chap_html, html_path, on_exist="skip")
-                    logger.debug(
-                        "%s Saved raw HTML for chapter %s to %s", TAG, cid, html_path
-                    )
-
-                chap_json = self.parser.parse_chapter(chap_html, cid)
-                if not chap_json:
+                    chap_json = self.parser.parse_chapter(chap_html, cid)
+                    if not chap_json:
+                        logger.warning(
+                            "%s Parsed chapter json is empty, skipping: %s (%s)",
+                            TAG,
+                            chap_title,
+                            cid,
+                        )
+                        continue
+                except Exception as e:
                     logger.warning(
-                        "%s Parsed chapter json is empty, skipping: %s (%s)",
+                        "%s Error while processing chapter %s (%s): %s",
                         TAG,
                         chap_title,
                         cid,
+                        str(e),
                     )
                     continue
 
@@ -196,12 +170,20 @@ class QidianDownloader(BaseDownloader):
         )
         return
 
+    @property
+    def site(self) -> str:
+        """
+        Get the site identifier.
 
-def is_vip(html_str: str) -> bool:
-    """
-    Return True if page indicates VIP-only content.
+        :return: The site string.
+        """
+        return self._site
 
-    :param html_str: Raw HTML string.
-    """
-    markers = ["这是VIP章节", "需要订阅", "订阅后才能阅读"]
-    return any(m in html_str for m in markers)
+    @site.setter
+    def site(self, value: str) -> None:
+        """
+        Set the site identifier.
+
+        :param value: New site string to set.
+        """
+        self._site = value

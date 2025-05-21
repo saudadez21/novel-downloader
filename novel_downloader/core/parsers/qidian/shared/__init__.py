@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.parsers.qidian_parser.shared
---------------------------------------------------
+novel_downloader.core.parsers.qidian.shared
+-------------------------------------------
 
 Shared parsing utilities for Qidian parser components.
 

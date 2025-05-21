@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.parsers.qidian_parser.browser.chapter_router
-------------------------------------------------------------------
+novel_downloader.core.parsers.qidian.browser.chapter_router
+-----------------------------------------------------------
 
 Routing logic for selecting the correct chapter parser for Qidian browser pages.
 

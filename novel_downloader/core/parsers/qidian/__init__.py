@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.parsers.qidian_parser
--------------------------------------------
+novel_downloader.core.parsers.qidian
+------------------------------------
 
 This package provides parsing implementations for the Qidian platform.
 

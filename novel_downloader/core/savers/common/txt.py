@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.savers.common_saver.qidian_txt
-----------------------------------------------------
+novel_downloader.core.savers.common.txt
+---------------------------------------
 
 Contains the logic for exporting novel content as a single `.txt` file.
 

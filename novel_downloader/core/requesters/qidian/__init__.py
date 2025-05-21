@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.requesters.qidian_requester
--------------------------------------------------
+novel_downloader.core.requesters.qidian
+---------------------------------------
 
 This package provides the implementation of the Qidian-specific requester logic.
 It contains modules for interacting with Qidian's website, including login,
@@ -13,8 +13,8 @@ Modules:
 - qidian_session: Implements the QidianSession class.
 """
 
-from .qidian_broswer import QidianBrowser
-from .qidian_session import QidianSession
+from .broswer import QidianBrowser
+from .session import QidianSession
 
 __all__ = [
     "QidianBrowser",

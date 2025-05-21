@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.downloaders.base_downloader
--------------------------------------------------
+novel_downloader.core.downloaders.base.base_sync
+------------------------------------------------
 
 Defines the abstract base class `BaseDownloader`, which provides a
 common interface and reusable logic for all downloader implementations.

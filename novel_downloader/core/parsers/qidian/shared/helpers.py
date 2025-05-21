@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-novel_downloader.core.parsers.qidian_parser.shared.helpers
-----------------------------------------------------------
+novel_downloader.core.parsers.qidian.shared.helpers
+---------------------------------------------------
 
 Shared utility functions for parsing Qidian browser-rendered pages.
 
