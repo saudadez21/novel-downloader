@@ -4,7 +4,7 @@
 为避免包冲突, 建议创建独立环境:
 推荐使用 Conda 或 `venv` 创建独立环境, 避免包冲突:
 ```bash
-conda create -n novel-downloader python=3.11 -y
+conda create -n novel-downloader python=3.12 -y
 conda activate novel-downloader
 ```
 或
@@ -46,25 +46,29 @@ source .venv/bin/activate
 pip install novel-downloader[font-recovery]
 ```
 
-如果启用 `use_ocr` 参数, 则需安装 [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) 及相关依赖 (请根据 PaddleOCR [文档](https://paddlepaddle.github.io/PaddleOCR/latest/quick_start.html) 选择合适版本和 CUDA 支持) :
+如果启用 `use_ocr` 参数, 则需安装 [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) 及相关依赖 (请根据 paddlepaddle [文档](https://www.paddlepaddle.org.cn/install/quick?docurl=/documentation/docs/zh/develop/install/pip/windows-pip.html) 选择合适版本和 CUDA 支持) :
 
 - CPU 版:
     ```bash
-    python -m pip install paddlepaddle==3.0.0rc1 -i https://www.paddlepaddle.org.cn/packages/stable/cpu/
-    pip install paddleocr
+    python -m pip install paddlepaddle==3.0.0 -i https://www.paddlepaddle.org.cn/packages/stable/cpu/
     ```
 
 - GPU 版 (请根据 CUDA 版本选用对应 paddlepaddle-gpu):
     ```bash
-    python -m pip install paddlepaddle-gpu==3.0.0rc1 -i https://www.paddlepaddle.org.cn/packages/stable/cu118/
-    pip install paddleocr
+    python -m pip install paddlepaddle-gpu==3.0.0 -i https://www.paddlepaddle.org.cn/packages/stable/cu118/
     ```
+
+当配置里选择 `ocr_version: "v1.0"` 时需要安装:
+
+```bash
+pip install paddleocr
+```
 
 当前使用版本示例:
 
 ```bash
 paddleocr==2.10.0
-paddlepaddle==3.0.0rc1
+paddlepaddle==3.0.0
 ```
 
 > 提示: 仅在启用 `use_ocr` 时才需要上述依赖。
@@ -127,7 +131,6 @@ max_rps: null           # 最大请求速率 (requests per second), 为 null 则
 ```yaml
 # 网络请求层设置
 requests:
-  wait_time: 5                      # 每次请求等待时间 (秒)
   retry_times: 3                    # 请求失败重试次数
   retry_interval: 5
   timeout: 30                       # 页面加载超时时间 (秒)

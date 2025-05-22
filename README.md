@@ -22,9 +22,6 @@ pip install novel-downloader
 # 如需支持字体解密功能 (decode_font), 请使用:
 # pip install novel-downloader[font-recovery]
 
-# 如需启用异步抓取模式 (mode=async), 请使用:
-# pip install novel-downloader[async]
-
 # 初始化默认配置 (生成 settings.yaml)
 novel-cli settings init
 

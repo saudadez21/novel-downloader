@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.utils.fontocr.ocr_v2
 -------------------------------------
@@ -13,8 +12,9 @@ import json
 import logging
 import math
 import os
+from collections.abc import Generator
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Optional, Set, Tuple, TypeVar, Union
+from typing import Any, TypeVar
 
 import cv2
 import numpy as np
@@ -22,8 +22,8 @@ import paddle
 from fontTools.ttLib import TTFont
 from paddle.inference import Config
 from paddle.inference import create_predictor as _create_predictor
-from paddleocr.ppocr.postprocess.rec_postprocess import CTCLabelDecode
 from PIL import Image, ImageDraw, ImageFont
+from PIL.Image import Transpose
 
 try:
     # pip install cupy-cuda11x
@@ -45,23 +45,116 @@ T = TypeVar("T")
 logger = logging.getLogger(__name__)
 
 
-class TextRecognizer(object):
+class CTCLabelDecode:
+    """
+    Convert between text-index and text-label for CTC-based models.
+
+    :param character_dict_path: Path to the file containing characters, one per line.
+    :param beg_str: Token representing the start of sequence.
+    :param end_str: Token representing the end of sequence.
+    """
+
+    __slots__ = ("idx_to_char", "char_to_idx", "blank_id", "beg_str", "end_str")
+
+    def __init__(
+        self,
+        character_dict_path: str | Path,
+        beg_str: str = "sos",
+        end_str: str = "eos",
+    ):
+        # Store special tokens
+        self.beg_str = beg_str
+        self.end_str = end_str
+
+        # Read and clean character list (skip empty lines)
+        path = Path(character_dict_path)
+        chars = [
+            line.strip()
+            for line in path.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+
+        # Reserve index 0 for the CTC blank token, then actual characters
+        self.idx_to_char: list[str] = ["blank"] + chars
+        self.blank_id: int = 0
+
+        # Build reverse mapping from character to index
+        self.char_to_idx = {ch: i for i, ch in enumerate(self.idx_to_char)}
+
+    def decode(
+        self,
+        text_indices: np.ndarray,
+        text_probs: np.ndarray | None = None,
+    ) -> list[tuple[str, float]]:
+        """
+        Decode index sequences to strings and compute average confidence.
+
+        :param text_indices: (batch_size, seq_len) class indices.
+        :param text_probs: Optional per-step probabilities, same shape.
+        :return: List of (string, avg_confidence) per sample.
+        """
+        results: list[tuple[str, float]] = []
+        batch_size = text_indices.shape[0]
+
+        for i in range(batch_size):
+            seq = text_indices[i]
+            # Collapse repeated tokens: keep first of any run
+            mask = np.concatenate(([True], seq[1:] != seq[:-1]))
+            # Remove blanks
+            mask &= seq != self.blank_id
+
+            # Map indices to characters
+            chars = [self.idx_to_char[idx] for idx in seq[mask]]
+
+            # Compute average confidence, or default to 1.0 if no probs provided
+            if text_probs is not None:
+                probs = text_probs[i][mask]
+                avg_conf = float(probs.mean()) if probs.size else 0.0
+            else:
+                avg_conf = 1.0
+
+            results.append(("".join(chars), avg_conf))
+
+        return results
+
+    def __call__(self, preds: Any) -> list[tuple[str, float]]:
+        """
+        Decode raw model outputs to final text labels and confidences.
+
+        :param preds: Model output array/tensor of shape (batch, seq_len, num_classes),
+                      or a tuple/list whose last element is that array.
+        :returns: A list of (decoded_string, average_confidence).
+        """
+        # If passed as (logits, ...), take the last element
+        if isinstance(preds, (tuple | list)):
+            preds = preds[-1]
+
+        # Convert framework tensor to numpy if needed
+        if hasattr(preds, "numpy"):
+            preds = preds.numpy()
+
+        # Get the most likely class index and its probability
+        text_idx = preds.argmax(axis=2)
+        text_prob = preds.max(axis=2)
+
+        return self.decode(text_idx, text_prob)
+
+
+class TextRecognizer:
     def __init__(
         self,
         rec_model_dir: str,
         rec_image_shape: str,
         rec_batch_num: int,
         rec_char_dict_path: str,
-        use_space_char: bool = False,
         use_gpu: bool = False,
         gpu_mem: int = 500,
-        gpu_id: Optional[int] = None,
+        gpu_id: int | None = None,
     ):
         self.rec_batch_num = int(rec_batch_num)
         self.rec_image_shape = tuple(map(int, rec_image_shape.split(",")))  # (C, H, W)
         self.postprocess_op = CTCLabelDecode(
             character_dict_path=rec_char_dict_path,
-            use_space_char=use_space_char,
         )
 
         self._create_predictor(
@@ -92,7 +185,7 @@ class TextRecognizer(object):
         model_dir: str,
         use_gpu: bool,
         gpu_mem: int,
-        gpu_id: Optional[int] = None,
+        gpu_id: int | None = None,
     ) -> None:
         """
         Internal helper to build the Paddle predictor + I/O handles
@@ -126,12 +219,12 @@ class TextRecognizer(object):
         selected = [preferred] if preferred in out_names else out_names
         self.output_tensors = [self.predictor.get_output_handle(n) for n in selected]
 
-    def __call__(self, img_list: List[np.ndarray]) -> List[Tuple[str, float]]:
+    def __call__(self, img_list: list[np.ndarray]) -> list[tuple[str, float]]:
         """
         Perform batch OCR on a list of images and return (text, confidence) tuples.
         """
         img_num = len(img_list)
-        results: List[Tuple[str, float]] = []
+        results: list[tuple[str, float]] = []
 
         C, H, W0 = self.rec_image_shape
 
@@ -161,12 +254,7 @@ class TextRecognizer(object):
             outputs = [t.copy_to_cpu() for t in self.output_tensors]
             preds = outputs[0] if len(outputs) == 1 else outputs
 
-            rec_batch = self.postprocess_op(
-                preds,
-                return_word_box=False,
-                wh_ratio_list=wh_ratios,
-                max_wh_ratio=max_wh,
-            )
+            rec_batch = self.postprocess_op(preds)
             results.extend(rec_batch)
 
         return results
@@ -208,21 +296,21 @@ class FontOCRV2:
     _freq_weight = 0.05
 
     # shared resources
-    _global_char_freq_db: Dict[str, int] = {}
-    _global_ocr: Optional[TextRecognizer] = None
-    _global_vec_db: Optional[np.ndarray] = None
-    _global_vec_label: Tuple[str, ...] = ()
-    _global_vec_shape: Tuple[int, int] = (32, 32)
+    _global_char_freq_db: dict[str, int] = {}
+    _global_ocr: TextRecognizer | None = None
+    _global_vec_db: np.ndarray | None = None
+    _global_vec_label: tuple[str, ...] = ()
+    _global_vec_shape: tuple[int, int] = (32, 32)
 
     def __init__(
         self,
-        cache_dir: Union[str, Path],
+        cache_dir: str | Path,
         use_freq: bool = False,
         use_ocr: bool = True,
         use_vec: bool = False,
         batch_size: int = 32,
         gpu_mem: int = 500,
-        gpu_id: Optional[int] = None,
+        gpu_id: int | None = None,
         ocr_weight: float = 0.6,
         vec_weight: float = 0.4,
         ocr_version: str = "v1.0",
@@ -281,7 +369,6 @@ class FontOCRV2:
             rec_char_dict_path=str(char_dict_file),
             rec_image_shape=REC_IMAGE_SHAPE_MAP[self.ocr_version],
             rec_batch_num=self.batch_size,
-            use_space_char=False,
             use_gpu=gpu_available,
             gpu_mem=self.gpu_mem,
             gpu_id=self.gpu_id,
@@ -328,7 +415,7 @@ class FontOCRV2:
         FontOCRV2._global_vec_db = vec_db / norm
 
         # Load corresponding labels
-        with open(char_vec_label_file, "r", encoding="utf-8") as f:
+        with open(char_vec_label_file, encoding="utf-8") as f:
             FontOCRV2._global_vec_label = tuple(line.strip() for line in f)
 
     @staticmethod
@@ -336,7 +423,7 @@ class FontOCRV2:
         char: str,
         render_font: ImageFont.FreeTypeFont,
         is_reflect: bool = False,
-    ) -> Optional[Image.Image]:
+    ) -> Image.Image | None:
         """
         Render a single character into a square image.
         If is_reflect is True, flip horizontally.
@@ -350,7 +437,7 @@ class FontOCRV2:
         y = (size - h) // 2 - bbox[1]
         draw.text((x, y), char, fill=0, font=render_font)
         if is_reflect:
-            img = img.transpose(Image.FLIP_LEFT_RIGHT)
+            img = img.transpose(Transpose.FLIP_LEFT_RIGHT)
 
         img_np = np.array(img)
         if np.unique(img_np).size == 1:
@@ -360,9 +447,9 @@ class FontOCRV2:
 
     def match_text_by_embedding(
         self,
-        images: Union[Image.Image, List[Image.Image]],
+        images: Image.Image | list[Image.Image],
         top_k: int = 1,
-    ) -> Union[List[Tuple[str, float]], List[List[Tuple[str, float]]]]:
+    ) -> list[tuple[str, float]] | list[list[tuple[str, float]]]:
         """
         Match input image to precomputed character embeddings using cosine similarity.
 
@@ -378,7 +465,7 @@ class FontOCRV2:
         if self._global_vec_db is None:
             return []
         try:
-            imgs: List[Image.Image] = (
+            imgs: list[Image.Image] = (
                 [images] if isinstance(images, Image.Image) else images
             )
 
@@ -395,7 +482,7 @@ class FontOCRV2:
             # Compute all cosine similarities in one batch:
             sims_batch = batch.dot(self._global_vec_db.T)  # (N, num_chars)
 
-            all_results: List[List[Tuple[str, float]]] = []
+            all_results: list[list[tuple[str, float]]] = []
             for sims in sims_batch:
                 k = min(top_k, sims.shape[0])
                 top_unsorted = array_backend.argpartition(-sims, k - 1)[:k]
@@ -418,8 +505,8 @@ class FontOCRV2:
 
     def run_ocr_on_images(
         self,
-        images: Union[Image.Image, List[Image.Image]],
-    ) -> Union[Tuple[str, float], List[Tuple[str, float]]]:
+        images: Image.Image | list[Image.Image],
+    ) -> tuple[str, float] | list[tuple[str, float]]:
         """
         Run OCR on one or more PIL.Image(s) and return recognized text with confidence
 
@@ -434,7 +521,7 @@ class FontOCRV2:
         try:
             # Normalize input to a list of numpy arrays (RGB)
             img_list = [images] if isinstance(images, Image.Image) else images
-            np_imgs: List[np.ndarray] = [
+            np_imgs: list[np.ndarray] = [
                 np.array(img.convert("RGB")) for img in img_list
             ]
 
@@ -455,16 +542,16 @@ class FontOCRV2:
 
     def query(
         self,
-        images: Union[Image.Image, List[Image.Image]],
+        images: Image.Image | list[Image.Image],
         top_k: int = 3,
-    ) -> Union[List[Tuple[str, float]], List[List[Tuple[str, float]]]]:
+    ) -> list[tuple[str, float]] | list[list[tuple[str, float]]]:
         """
         For each input image, run OCR + embedding match, fuse scores,
         and return a sorted list of (char, score) above self.threshold.
         """
         # normalize to list
         single = isinstance(images, Image.Image)
-        imgs: List[Image.Image] = [images] if single else images
+        imgs: list[Image.Image] = [images] if single else images
 
         # try the hash store
         hash_batch = [img_hash_store.query(img, k=top_k) or [] for img in imgs]
@@ -473,31 +560,31 @@ class FontOCRV2:
         fallback_imgs = [imgs[i] for i in fallback_indices]
 
         # OCR scores
-        raw_ocr: Union[Tuple[str, float], List[Tuple[str, float]]] = (
+        raw_ocr: tuple[str, float] | list[tuple[str, float]] = (
             self.run_ocr_on_images(fallback_imgs)
             if (self.use_ocr and fallback_imgs)
             else []
         )
         if isinstance(raw_ocr, tuple):
-            ocr_fallback: List[Tuple[str, float]] = [raw_ocr]
+            ocr_fallback: list[tuple[str, float]] = [raw_ocr]
         else:
             ocr_fallback = raw_ocr
 
         # Vec‐embedding scores
-        raw_vec: Union[List[Tuple[str, float]], List[List[Tuple[str, float]]]] = (
+        raw_vec: list[tuple[str, float]] | list[list[tuple[str, float]]] = (
             self.match_text_by_embedding(fallback_imgs, top_k=top_k)
             if (self.use_vec and fallback_imgs)
             else []
         )
         if raw_vec and isinstance(raw_vec[0], tuple):
-            vec_fallback: List[List[Tuple[str, float]]] = [raw_vec]  # type: ignore
+            vec_fallback: list[list[tuple[str, float]]] = [raw_vec]  # type: ignore
         else:
             vec_fallback = raw_vec  # type: ignore
 
         # Fuse OCR+vector for the fallback set
-        fused_fallback: List[List[Tuple[str, float]]] = []
-        for ocr_preds, vec_preds in zip(ocr_fallback, vec_fallback):
-            scores: Dict[str, float] = {}
+        fused_fallback: list[list[tuple[str, float]]] = []
+        for ocr_preds, vec_preds in zip(ocr_fallback, vec_fallback, strict=False):
+            scores: dict[str, float] = {}
 
             # OCR weight
             if ocr_preds:
@@ -529,7 +616,7 @@ class FontOCRV2:
             fused_fallback.append(filtered[:top_k])
 
         # Recombine hash hits + fallback in original order
-        fused_batch: List[List[Tuple[str, float]]] = []
+        fused_batch: list[list[tuple[str, float]]] = []
         fallback_iter = iter(fused_fallback)
         for h_preds in hash_batch:
             if h_preds:
@@ -540,19 +627,19 @@ class FontOCRV2:
         # Unwrap single‐image case
         return fused_batch[0] if single else fused_batch
 
-    def _chunked(self, seq: List[T], size: int) -> Generator[List[T], None, None]:
+    def _chunked(self, seq: list[T], size: int) -> Generator[list[T], None, None]:
         """Yield successive chunks of `seq` of length `size`."""
         for i in range(0, len(seq), size):
             yield seq[i : i + size]
 
     def generate_font_map(
         self,
-        fixed_font_path: Union[str, Path],
-        random_font_path: Union[str, Path],
-        char_set: Set[str],
-        refl_set: Set[str],
-        chapter_id: Optional[str] = None,
-    ) -> Dict[str, str]:
+        fixed_font_path: str | Path,
+        random_font_path: str | Path,
+        char_set: set[str],
+        refl_set: set[str],
+        chapter_id: str | None = None,
+    ) -> dict[str, str]:
         """
         Generates a mapping from encrypted (randomized) font characters to
         their real recognized characters by rendering and OCR-based matching.
@@ -565,12 +652,12 @@ class FontOCRV2:
 
         :returns mapping_result: { obf_char: real_char, ... }
         """
-        mapping_result: Dict[str, str] = {}
+        mapping_result: dict[str, str] = {}
         fixed_map_file = self._fixed_map_dir / f"{Path(fixed_font_path).stem}.json"
 
         # load existing cache
         try:
-            with open(fixed_map_file, "r", encoding="utf-8") as f:
+            with open(fixed_map_file, encoding="utf-8") as f:
                 fixed_map = json.load(f)
         except Exception:
             fixed_map = {}
@@ -578,19 +665,19 @@ class FontOCRV2:
         # prepare font renderers and cmap sets
         try:
             fixed_ttf = TTFont(fixed_font_path)
-            fixed_chars = set(chr(c) for c in fixed_ttf.getBestCmap().keys())
+            fixed_chars = {chr(c) for c in fixed_ttf.getBestCmap()}
             fixed_font = ImageFont.truetype(str(fixed_font_path), self.CHAR_FONT_SIZE)
 
             random_ttf = TTFont(random_font_path)
-            random_chars = set(chr(c) for c in random_ttf.getBestCmap().keys())
+            random_chars = {chr(c) for c in random_ttf.getBestCmap()}
             random_font = ImageFont.truetype(str(random_font_path), self.CHAR_FONT_SIZE)
         except Exception as e:
             logger.error("[FontOCR] Failed to load TTF fonts: %s", e)
             return mapping_result
 
         def _render_batch(
-            chars: List[Tuple[str, bool]]
-        ) -> List[Tuple[str, Image.Image]]:
+            chars: list[tuple[str, bool]]
+        ) -> list[tuple[str, Image.Image]]:
             out = []
             for ch, reflect in chars:
                 if ch in fixed_chars:
@@ -618,12 +705,12 @@ class FontOCRV2:
                 imgs_to_query = [img for (ch, img) in rendered]
                 fused_raw = self.query(imgs_to_query, top_k=3)
                 if isinstance(fused_raw[0], tuple):
-                    fused: List[List[Tuple[str, float]]] = [fused_raw]  # type: ignore
+                    fused: list[list[tuple[str, float]]] = [fused_raw]  # type: ignore
                 else:
                     fused = fused_raw  # type: ignore
 
                 # pick best per char, apply threshold + cache
-                for (ch, img), preds in zip(rendered, fused):
+                for (ch, img), preds in zip(rendered, fused, strict=False):
                     if ch in fixed_map:
                         mapping_result[ch] = fixed_map[ch]
                         logger.debug(

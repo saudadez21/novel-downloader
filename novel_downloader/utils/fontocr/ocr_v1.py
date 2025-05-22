@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.utils.fontocr.ocr_v1
 -------------------------------------
@@ -12,7 +11,7 @@ on web pages (e.g., the Qidian website).
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any
 
 import numpy as np
 import paddle
@@ -46,12 +45,12 @@ class FontOCRV1:
     _freq_weight = 0.05
 
     # shared resources
-    _global_char_freq_db: Dict[str, int] = {}
-    _global_ocr: Optional[PaddleOCR] = None
+    _global_char_freq_db: dict[str, int] = {}
+    _global_ocr: PaddleOCR | None = None
 
     def __init__(
         self,
-        cache_dir: Union[str, Path],
+        cache_dir: str | Path,
         use_freq: bool = False,
         ocr_version: str = "v1.0",
         threshold: float = 0.0,
@@ -129,7 +128,7 @@ class FontOCRV1:
         char: str,
         render_font: ImageFont.FreeTypeFont,
         is_reflect: bool = False,
-    ) -> Optional[Image.Image]:
+    ) -> Image.Image | None:
         """
         Render a single character into a square image.
         If is_reflect is True, flip horizontally.
@@ -153,7 +152,7 @@ class FontOCRV1:
 
     def ocr_text(
         self, img: Image.Image, top_k: int = 1
-    ) -> Union[str, List[Tuple[str, float]]]:
+    ) -> str | list[tuple[str, float]]:
         """
         Run PaddleOCR on a single-image, return best match(es).
         If use_freq, adjust score by frequency bonus.
@@ -186,9 +185,7 @@ class FontOCRV1:
             logger.error("[FontOCR] OCR failure: %s", e)
             return "" if top_k == 1 else []
 
-    def query(
-        self, img: Image.Image, top_k: int = 1
-    ) -> Union[str, List[Tuple[str, float]]]:
+    def query(self, img: Image.Image, top_k: int = 1) -> str | list[tuple[str, float]]:
         """
         First try hash-based lookup via img_hash_store;
         if no hit, fall back to ocr_text().
@@ -204,12 +201,12 @@ class FontOCRV1:
 
     def generate_font_map(
         self,
-        fixed_font_path: Union[str, Path],
-        random_font_path: Union[str, Path],
-        char_set: Set[str],
-        refl_set: Set[str],
-        chapter_id: Optional[str] = None,
-    ) -> Dict[str, str]:
+        fixed_font_path: str | Path,
+        random_font_path: str | Path,
+        char_set: set[str],
+        refl_set: set[str],
+        chapter_id: str | None = None,
+    ) -> dict[str, str]:
         """
         Generates a mapping from encrypted (randomized) font characters to
         their real recognized characters by rendering and OCR-based matching.
@@ -222,13 +219,13 @@ class FontOCRV1:
 
         :returns mapping_result: { obf_char: real_char, ... }
         """
-        mapping_result: Dict[str, str] = {}
+        mapping_result: dict[str, str] = {}
         fixed_map_file = self._fixed_map_dir / f"{Path(fixed_font_path).stem}.json"
 
         # 1) load or init fixed_font_map
         if fixed_map_file.exists():
             try:
-                with open(fixed_map_file, "r", encoding="utf-8") as f:
+                with open(fixed_map_file, encoding="utf-8") as f:
                     fixed_map = json.load(f)
             except Exception as e:
                 logger.debug("[FontOCR] Failed to load fixed map file: %s", e)
@@ -239,17 +236,17 @@ class FontOCRV1:
         # prepare font renderers and cmap sets
         try:
             fixed_ttf = TTFont(fixed_font_path)
-            fixed_chars = set(chr(c) for c in fixed_ttf.getBestCmap().keys())
+            fixed_chars = {chr(c) for c in fixed_ttf.getBestCmap()}
             fixed_font = ImageFont.truetype(str(fixed_font_path), self.CHAR_FONT_SIZE)
 
             random_ttf = TTFont(random_font_path)
-            random_chars = set(chr(c) for c in random_ttf.getBestCmap().keys())
+            random_chars = {chr(c) for c in random_ttf.getBestCmap()}
             random_font = ImageFont.truetype(str(random_font_path), self.CHAR_FONT_SIZE)
         except Exception as e:
             logger.error("[FontOCR] Failed to load TTF fonts: %s", e)
             return mapping_result
 
-        def _process(chars: Set[str], reflect: bool = False) -> None:
+        def _process(chars: set[str], reflect: bool = False) -> None:
             for ch in chars:
                 try:
                     if ch in fixed_map:
@@ -277,7 +274,7 @@ class FontOCRV1:
                     real = self.query(img, top_k=1)
                     if real:
                         real_char = (
-                            str(real[0]) if isinstance(real, (list, tuple)) else real
+                            str(real[0]) if isinstance(real, (list | tuple)) else real
                         )
                         mapping_result[ch] = real_char
                         if ch in fixed_chars:
