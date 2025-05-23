@@ -11,6 +11,7 @@ from typing import cast
 
 from novel_downloader.config import DownloaderConfig, load_site_rules
 from novel_downloader.core.downloaders import (
+    BiqugeAsyncDownloader,
     BiqugeDownloader,
     CommonAsyncDownloader,
     CommonDownloader,
@@ -25,9 +26,9 @@ from novel_downloader.core.interfaces import (
     SyncRequesterProtocol,
 )
 
-# _async_site_map = {
-#     # "biquge": ...
-# }
+_async_site_map = {
+    "biquge": BiqugeAsyncDownloader,
+}
 _sync_site_map = {
     "qidian": QidianDownloader,
     "biquge": BiqugeDownloader,
@@ -61,8 +62,8 @@ def get_async_downloader(
         raise TypeError("Async mode requires an AsyncRequesterProtocol")
 
     # site-specific
-    # if site_key in _async_site_map:
-    #     return _async_site_map[site_key](requester, parser, saver, config)
+    if site_key in _async_site_map:
+        return _async_site_map[site_key](requester, parser, saver, config)
 
     # fallback
     site_rules = load_site_rules()

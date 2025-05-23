@@ -15,6 +15,7 @@ Subpackages:
 """
 
 from .biquge import (
+    BiqugeAsyncSession,
     BiqugeSession,
 )
 from .common import (
@@ -27,6 +28,7 @@ from .qidian import (
 )
 
 __all__ = [
+    "BiqugeAsyncSession",
     "BiqugeSession",
     "CommonAsyncSession",
     "CommonSession",
