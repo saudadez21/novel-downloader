@@ -56,6 +56,14 @@ book_ids = [
 mode = "browser"                   # browser / session
 login_required = true              # 是否需要登录才能访问
 
+[sites.biquge]
+book_ids = [
+  "0000000000",
+  "0000000000"
+]
+mode = "session"                   # async / session
+login_required = false             # 是否需要登录才能访问
+
 [sites.common]
 mode = "session"                   # async / session
 login_required = false             # 是否需要登录才能访问

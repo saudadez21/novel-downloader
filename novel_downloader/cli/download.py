@@ -67,7 +67,7 @@ def download_cli(ctx: Context, book_ids: list[str], site: str) -> None:
 
     # Filter out placeholder/example IDs
     invalid_ids = {"0000000000"}
-    valid_book_ids = [bid for bid in book_ids if bid not in invalid_ids]
+    valid_book_ids = set(book_ids) - invalid_ids
 
     if not book_ids:
         click.echo(t("download_no_ids"))
@@ -103,9 +103,7 @@ def download_cli(ctx: Context, book_ids: list[str], site: str) -> None:
                 click.echo(t("download_downloading", book_id=book_id, site=site))
                 await async_downloader.download_one(book_id)
 
-            if requester_cfg.auto_close:
-                input(t("download_prompt_parse"))
-                await async_requester.close()
+            await async_requester.close()
 
         asyncio.run(async_download_all())
     else:
@@ -125,8 +123,6 @@ def download_cli(ctx: Context, book_ids: list[str], site: str) -> None:
             click.echo(t("download_downloading", book_id=book_id, site=site))
             sync_downloader.download_one(book_id)
 
-        if requester_cfg.auto_close:
-            input(t("download_prompt_parse"))
-            sync_requester.close()
+        sync_requester.close()
 
     return

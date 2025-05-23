@@ -11,6 +11,7 @@ from typing import cast
 
 from novel_downloader.config import DownloaderConfig, load_site_rules
 from novel_downloader.core.downloaders import (
+    BiqugeDownloader,
     CommonAsyncDownloader,
     CommonDownloader,
     QidianDownloader,
@@ -29,7 +30,7 @@ from novel_downloader.core.interfaces import (
 # }
 _sync_site_map = {
     "qidian": QidianDownloader,
-    # "biquge": ...
+    "biquge": BiqugeDownloader,
 }
 
 

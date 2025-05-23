@@ -10,13 +10,14 @@ based on the site name and parser mode specified in the configuration.
 from novel_downloader.config import SaverConfig, load_site_rules
 from novel_downloader.core.interfaces import SaverProtocol
 from novel_downloader.core.savers import (
+    BiqugeSaver,
     CommonSaver,
     QidianSaver,
 )
 
 _site_map = {
     "qidian": QidianSaver,
-    # "biquge": ...
+    "biquge": BiqugeSaver,
 }
 
 

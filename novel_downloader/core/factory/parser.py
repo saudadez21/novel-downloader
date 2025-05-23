@@ -7,20 +7,27 @@ This module implements a factory function for creating parser instances
 based on the site name and parser mode specified in the configuration.
 """
 
+from collections.abc import Callable
+
 from novel_downloader.config import ParserConfig, load_site_rules
 from novel_downloader.core.interfaces import ParserProtocol
 from novel_downloader.core.parsers import (
+    BiqugeParser,
     CommonParser,
     QidianBrowserParser,
     QidianSessionParser,
 )
 
-_site_map = {
+ParserBuilder = Callable[[ParserConfig], ParserProtocol]
+
+_site_map: dict[str, dict[str, ParserBuilder]] = {
     "qidian": {
         "browser": QidianBrowserParser,
         "session": QidianSessionParser,
     },
-    # "biquge": ...
+    "biquge": {
+        "session": BiqugeParser,
+    },
 }
 
 

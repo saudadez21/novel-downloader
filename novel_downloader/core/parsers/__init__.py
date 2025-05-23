@@ -14,6 +14,7 @@ Modules:
 - common_parser
 """
 
+from .biquge import BiqugeParser
 from .common import CommonParser
 from .qidian import (
     QidianBrowserParser,
@@ -21,6 +22,7 @@ from .qidian import (
 )
 
 __all__ = [
+    "BiqugeParser",
     "CommonParser",
     "QidianBrowserParser",
     "QidianSessionParser",

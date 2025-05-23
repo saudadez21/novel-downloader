@@ -7,6 +7,7 @@ This module implements a factory function for retrieving requester instances
 based on the target novel platform (site).
 """
 
+from collections.abc import Callable
 
 from novel_downloader.config import RequesterConfig, load_site_rules
 from novel_downloader.core.interfaces import (
@@ -14,21 +15,31 @@ from novel_downloader.core.interfaces import (
     SyncRequesterProtocol,
 )
 from novel_downloader.core.requesters import (
+    BiqugeSession,
     CommonAsyncSession,
     CommonSession,
     QidianBrowser,
     QidianSession,
 )
 
-# _async_site_map = {
+AsyncRequesterBuilder = Callable[[RequesterConfig], AsyncRequesterProtocol]
+SyncRequesterBuilder = Callable[[RequesterConfig], SyncRequesterProtocol]
+
+
+# _async_site_map: dict[str, AsyncRequesterBuilder] = {
 #     # "biquge": ...
 # }
-_sync_site_map = {
+_sync_site_map: dict[
+    str,
+    dict[str, SyncRequesterBuilder],
+] = {
     "qidian": {
         "session": QidianSession,
         "browser": QidianBrowser,
     },
-    # "biquge": ...
+    "biquge": {
+        "session": BiqugeSession,
+    },
 }
 
 

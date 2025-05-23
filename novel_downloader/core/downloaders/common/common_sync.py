@@ -62,11 +62,10 @@ class CommonDownloader(BaseDownloader):
         TAG = "[Downloader]"
         save_html = self.config.save_html
         skip_existing = self.config.skip_existing
-        site = self.site
         wait_time = self.config.request_interval
 
-        raw_base = self.raw_data_dir / site / book_id
-        cache_base = self.cache_dir / site / book_id
+        raw_base = self.raw_data_dir / book_id
+        cache_base = self.cache_dir / book_id
         info_path = raw_base / "book_info.json"
         chapters_html_dir = cache_base / "html"
 
