@@ -42,7 +42,6 @@ cd novel-downloader
 pip install .
 # 或安装带可选功能:
 # pip install .[font-recovery]
-# pip install .[async]
 ```
 
 更多使用方法, 查看 [使用示例](docs/5-usage-examples.md)
@@ -52,7 +51,10 @@ pip install .
 ## 功能特性
 
 - 爬取起点中文网的小说章节内容 (支持免费与已订阅章节)
-- 自动整合所有章节并输出为完整的 TXT 文件
+- 断点续爬
+- 自动整合所有章节并导出为
+  - TXT
+  - EPUB
 - 支持活动广告过滤:
   - [x] 章节标题
   - [ ] 章节正文

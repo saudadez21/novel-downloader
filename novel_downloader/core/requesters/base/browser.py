@@ -184,13 +184,7 @@ class BaseBrowser(SyncRequesterProtocol, abc.ABC):
         :param presses: Number of DOWN key presses.
         :param pause: Seconds to wait between each press.
         """
-        try:
-            presses = max(0, int(float(presses)))
-        except Exception as e:
-            self.logger.error("[page] Invalid 'presses' value: %s", e)
-            return
-
-        for _ in range(presses):
+        for _ in range(int(presses)):
             try:
                 self.page.actions.key_down(Keys.DOWN)
             except Exception as e:

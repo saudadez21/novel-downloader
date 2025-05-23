@@ -41,8 +41,8 @@ save_font_debug = false            # 是否保存字体解码调试数据
 batch_size = 32
 gpu_mem = 500                      # GPU 显存限制 (MB)
 # gpu_id =                         # 使用哪个 GPU
-ocr_weight = 0.6
-vec_weight = 0.4
+ocr_weight = 0.5
+vec_weight = 0.5
 
 # 各站点的特定配置
 [sites.qidian]

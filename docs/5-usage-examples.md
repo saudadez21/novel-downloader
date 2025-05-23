@@ -2,17 +2,19 @@
 
 ### 1. 下载小说
 
-#### 1.1 强制指定配置文件 (最高优先)
+支持的站点列表详见: [站点支持文档](./6-supported-sites.md)
+
+#### 1.1 显式指定配置文件 (优先级最高)
 
 ```bash
-# 运行 CLI 工具, 指定自定义配置, 下载起点小说 '123456' 和 '654321'
+# 使用自定义配置文件, 下载起点小说 '123456' 和 '654321'
 novel-cli --config "/path/to/custom.toml" download 123456 654321
-````
+```
 
-#### 1.2 默认读取当前目录 `settings.toml`
+#### 1.2 使用当前目录下的 `settings.toml`
 
 ```bash
-# 在包含 ./settings.toml 的目录下, 直接运行即可
+# 在包含 ./settings.toml 的目录中运行 CLI 即可
 cd novel-folder
 novel-cli download 123456 654321
 ```
@@ -20,23 +22,18 @@ novel-cli download 123456 654321
 #### 1.3 使用已注册的全局配置
 
 ```bash
-# 当当前目录没有 settings.toml, 且之前已通过
-# `novel-cli settings set-config ./path/to/settings.toml`
-# 注册过配置, CLI 会自动加载该全局配置
+# 如果当前目录下没有 settings.toml, CLI 会尝试使用已注册的全局配置
+# 注册命令示例:
+# novel-cli settings set-config ./path/to/settings.toml
 novel-cli download 123456 654321
 ```
 
-#### 1.4 使用内置默认配置
-
-```bash
-# 全新环境中, 既未执行 init, 也未指定 --config,
-# 则会加载包内默认 settings.toml
-novel-cli download 123456 654321
-```
-
-> **Browser 模式登录提示**
-> 如果 `mode: browser` 且 `login_required: true`, 程序会在浏览器中弹出登录窗口,
-> 请按提示完成登录, 以便获取需要的章节内容。
+> **登录提示说明**
+> 若针对当前下载站点的配置中 `mode: browser` 且启用了 `login_required: true`, 程序将自动弹出浏览器窗口引导登录,
+> 请根据提示完成操作, 以便访问受限章节内容。
+>
+> 如果是其他模式 (如 `session`) 并启用了 `login_required: true`, CLI 将检测当前是否已登录;
+> 若未登录, 将提示你在命令行中手动输入当前站点的有效 Cookie 信息
 
 ---
 
