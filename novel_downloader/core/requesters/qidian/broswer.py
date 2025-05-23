@@ -236,6 +236,7 @@ class QidianBrowser(BaseBrowser):
         for attempt in range(1, self._retry_times + 1):
             if self._check_login_status():
                 self.logger.debug("[auth] Already logged in.")
+                self._logged_in = True
                 break
             if attempt == 1:
                 print(t("login_prompt_intro"))
@@ -258,7 +259,7 @@ class QidianBrowser(BaseBrowser):
             self.logger.debug("[auth] Restoring browser settings after manual login...")
             self._options.no_imgs(self._disable_images_orig)
             self.restart_browser(headless=original_headless)
-            self._login_auto()
+            self._logged_in = self._login_auto()
             if self._logged_in:
                 self.logger.info(
                     "[auth] Login session successfully carried over after restart."
