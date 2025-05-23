@@ -1,3 +1,9 @@
+## v1.3.1 (2025-05-23)
+
+### Fix
+
+- **site**: assign missing _logged_in flag for Qidian
+
 ## v1.3.0 (2025-05-23)
 
 ### Refactor
