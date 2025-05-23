@@ -15,6 +15,7 @@ from novel_downloader.core.interfaces import (
     SyncRequesterProtocol,
 )
 from novel_downloader.core.requesters import (
+    BiqugeAsyncSession,
     BiqugeSession,
     CommonAsyncSession,
     CommonSession,
@@ -26,9 +27,9 @@ AsyncRequesterBuilder = Callable[[RequesterConfig], AsyncRequesterProtocol]
 SyncRequesterBuilder = Callable[[RequesterConfig], SyncRequesterProtocol]
 
 
-# _async_site_map: dict[str, AsyncRequesterBuilder] = {
-#     # "biquge": ...
-# }
+_async_site_map: dict[str, AsyncRequesterBuilder] = {
+    "biquge": BiqugeAsyncSession,
+}
 _sync_site_map: dict[
     str,
     dict[str, SyncRequesterBuilder],
@@ -57,8 +58,8 @@ def get_async_requester(
     site_key = site.lower()
 
     # site-specific
-    # if site_key in _async_site_map:
-    #     return _async_site_map[site_key](config)
+    if site_key in _async_site_map:
+        return _async_site_map[site_key](config)
 
     # fallback
     site_rules = load_site_rules()

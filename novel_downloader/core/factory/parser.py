@@ -27,6 +27,7 @@ _site_map: dict[str, dict[str, ParserBuilder]] = {
     },
     "biquge": {
         "session": BiqugeParser,
+        "async": BiqugeParser,
     },
 }
 

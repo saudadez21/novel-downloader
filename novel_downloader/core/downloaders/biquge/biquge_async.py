@@ -1,25 +1,25 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.downloaders.biquge.biquge_sync
-----------------------------------------------------
+novel_downloader.core.downloaders.biquge.biquge_async
+-----------------------------------------------------
 
 """
 
 from novel_downloader.config.models import DownloaderConfig
-from novel_downloader.core.downloaders.common import CommonDownloader
+from novel_downloader.core.downloaders.common import CommonAsyncDownloader
 from novel_downloader.core.interfaces import (
+    AsyncRequesterProtocol,
     ParserProtocol,
     SaverProtocol,
-    SyncRequesterProtocol,
 )
 
 
-class BiqugeDownloader(CommonDownloader):
+class BiqugeAsyncDownloader(CommonAsyncDownloader):
     """"""
 
     def __init__(
         self,
-        requester: SyncRequesterProtocol,
+        requester: AsyncRequesterProtocol,
         parser: ParserProtocol,
         saver: SaverProtocol,
         config: DownloaderConfig,
