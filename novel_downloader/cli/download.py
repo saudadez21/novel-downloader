@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.cli.download
 -----------------------------
@@ -8,7 +7,7 @@ Download full novels by book IDs
 (supports config files, site switching, and localization prompts).
 """
 
-from typing import List
+import asyncio
 
 import click
 from click import Context
@@ -41,7 +40,7 @@ from novel_downloader.utils.logger import setup_logging
     help=t("download_option_site", default="qidian"),
 )  # type: ignore
 @click.pass_context  # type: ignore
-def download_cli(ctx: Context, book_ids: List[str], site: str) -> None:
+def download_cli(ctx: Context, book_ids: list[str], site: str) -> None:
     """Download full novels by book IDs."""
     config_path = ctx.obj.get("config_path")
 
@@ -69,7 +68,7 @@ def download_cli(ctx: Context, book_ids: List[str], site: str) -> None:
 
     # Filter out placeholder/example IDs
     invalid_ids = {"0000000000"}
-    valid_book_ids = [bid for bid in book_ids if bid not in invalid_ids]
+    valid_book_ids = set(book_ids) - invalid_ids
 
     if not book_ids:
         click.echo(t("download_no_ids"))
@@ -82,21 +81,20 @@ def download_cli(ctx: Context, book_ids: List[str], site: str) -> None:
 
     # Initialize the requester, parser, saver, and downloader components
     if downloader_cfg.mode == "async":
-        import asyncio
-
-        async_requester = get_async_requester(site, requester_cfg)
-        async_parser = get_parser(site, parser_cfg)
-        async_saver = get_saver(site, saver_cfg)
         setup_logging()
-        async_downloader = get_async_downloader(
-            requester=async_requester,
-            parser=async_parser,
-            saver=async_saver,
-            site=site,
-            config=downloader_cfg,
-        )
 
         async def async_download_all() -> None:
+            async_requester = get_async_requester(site, requester_cfg)
+            async_parser = get_parser(site, parser_cfg)
+            async_saver = get_saver(site, saver_cfg)
+            async_downloader = get_async_downloader(
+                requester=async_requester,
+                parser=async_parser,
+                saver=async_saver,
+                site=site,
+                config=downloader_cfg,
+            )
+
             prepare = getattr(async_downloader, "prepare", None)
             if prepare and asyncio.iscoroutinefunction(prepare):
                 await prepare()
@@ -105,9 +103,7 @@ def download_cli(ctx: Context, book_ids: List[str], site: str) -> None:
                 click.echo(t("download_downloading", book_id=book_id, site=site))
                 await async_downloader.download_one(book_id)
 
-            if requester_cfg.auto_close:
-                input(t("download_prompt_parse"))
-                await async_requester.shutdown()
+            await async_requester.close()
 
         asyncio.run(async_download_all())
     else:
@@ -127,8 +123,6 @@ def download_cli(ctx: Context, book_ids: List[str], site: str) -> None:
             click.echo(t("download_downloading", book_id=book_id, site=site))
             sync_downloader.download_one(book_id)
 
-        if requester_cfg.auto_close:
-            input(t("download_prompt_parse"))
-            sync_requester.shutdown()
+        sync_requester.close()
 
     return

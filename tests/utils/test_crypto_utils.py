@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 tests.utils.test_crypto_utils
 -----------------------------
@@ -105,7 +104,7 @@ def test_patch_qd_payload_token(monkeypatch):
 
     # 5. Compute expected values
     loadts = int(1_000.0 * 1000)
-    duration = max(300, min(1000, int(600)))
+    duration = max(300, min(1000, 600))
     timestamp = loadts + duration
     comb = f"{new_uri}{loadts}{initial[fp_key]}"
     expected_ck = hashlib.md5(comb.encode("utf-8")).hexdigest()

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.utils.file_utils.sanitize
 ------------------------------------------
@@ -15,7 +14,6 @@ lengths, and avoids reserved names on Windows systems.
 import logging
 import os
 import re
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +31,7 @@ _SANITIZE_PATTERN_WIN = re.compile(r'[<>:"/\\|?*\x00-\x1F]')
 _SANITIZE_PATTERN_POSIX = re.compile(r"[/\x00]")
 
 
-def sanitize_filename(filename: str, max_length: Optional[int] = 255) -> str:
+def sanitize_filename(filename: str, max_length: int | None = 255) -> str:
     """
     Sanitize the given filename by replacing characters
     that are invalid in file paths with '_'.
@@ -47,12 +45,7 @@ def sanitize_filename(filename: str, max_length: Optional[int] = 255) -> str:
     :param max_length: Optional maximum length of the output filename. Defaults to 255.
     :return: The sanitized filename as a string.
     """
-    if os.name == "nt":
-        # Windows: invalid characters in filenames are: <>:"/\\|?*
-        pattern = _SANITIZE_PATTERN_WIN
-    else:
-        # POSIX systems: the forward slash is not allowed
-        pattern = _SANITIZE_PATTERN_POSIX
+    pattern = _SANITIZE_PATTERN_WIN if os.name == "nt" else _SANITIZE_PATTERN_POSIX
 
     name = pattern.sub("_", filename).strip(" .")
 

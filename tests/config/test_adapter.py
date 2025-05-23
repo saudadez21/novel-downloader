@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 tests.config.test_adapter
 --------------------------
@@ -62,7 +61,7 @@ def test_set_site_switches_target():
     adapter = ConfigAdapter(config, site="qidian")
     assert adapter.get_book_ids() == ["111", "222"]
 
-    adapter.set_site("bqg")
+    adapter.site = "bqg"
     assert adapter.get_book_ids() == ["999"]
 
 
@@ -72,7 +71,7 @@ def test_set_site_to_empty():
     adapter = ConfigAdapter(config, site="qidian")
     assert adapter.get_book_ids() == ["123"]
 
-    adapter.set_site("fake_site")
+    adapter.site = "fake_site"
     assert adapter.get_book_ids() == []
 
 
@@ -80,7 +79,6 @@ def test_set_site_to_empty():
 def test_requester_config_defaults():
     adapter = ConfigAdapter(config={}, site="qidian")
     cfg = adapter.get_requester_config()
-    assert cfg.wait_time == 5
     assert cfg.headless is True
     assert cfg.user_data_folder == "./user_data"
 
@@ -88,7 +86,6 @@ def test_requester_config_defaults():
 def test_requester_config_custom():
     config = {
         "requests": {
-            "wait_time": 2,
             "retry_times": 1,
             "headless": False,
             "user_data_folder": "/custom",
@@ -96,7 +93,6 @@ def test_requester_config_custom():
     }
     adapter = ConfigAdapter(config, "qidian")
     cfg = adapter.get_requester_config()
-    assert cfg.wait_time == 2
     assert cfg.retry_times == 1
     assert cfg.headless is False
     assert cfg.user_data_folder == "/custom"
@@ -107,7 +103,7 @@ def test_downloader_config_defaults():
     adapter = ConfigAdapter(config={}, site="qidian")
     cfg = adapter.get_downloader_config()
     assert cfg.request_interval == 5
-    assert cfg.cache_dir == "./cache"
+    assert cfg.cache_dir == "./novel_cache"
     assert cfg.login_required is False
     assert cfg.save_html is False
 

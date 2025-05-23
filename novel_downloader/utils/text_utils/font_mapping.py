@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.utils.text_utils.font_mapping
 ----------------------------------------------
@@ -11,10 +10,8 @@ where characters are visually disguised via custom font glyphs but can be
 recovered using a known mapping.
 """
 
-from typing import Dict
 
-
-def apply_font_mapping(text: str, font_map: Dict[str, str]) -> str:
+def apply_font_mapping(text: str, font_map: dict[str, str]) -> str:
     """
     Replace each character in `text` using `font_map`,
     leaving unmapped characters unchanged.

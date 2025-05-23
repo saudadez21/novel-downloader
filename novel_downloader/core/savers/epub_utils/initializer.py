@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.savers.epub_utils.initializer
 
@@ -10,7 +9,7 @@ adds a cover, and prepares the initial spine and TOC entries.
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from ebooklib import epub
 
@@ -24,12 +23,12 @@ logger = logging.getLogger(__name__)
 
 
 def init_epub(
-    book_info: Dict[str, Any],
+    book_info: dict[str, Any],
     book_id: str,
     intro_html: str,
-    book_cover_path: Optional[Path] = None,
+    book_cover_path: Path | None = None,
     include_toc: bool = False,
-) -> Tuple[epub.EpubBook, List[Any], List[Any]]:
+) -> tuple[epub.EpubBook, list[Any], list[Any]]:
     """
     Initialize an EPUB book with metadata, optional cover, and intro page.
 

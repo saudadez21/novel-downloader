@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.utils.text_utils.text_cleaning
 -----------------------------------------------

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 tests.config.test_models
 -------------------------
@@ -10,8 +9,9 @@ Test that all config dataclasses:
 - Can be constructed without arguments
 """
 
+import types
 from dataclasses import fields, is_dataclass
-from typing import Optional
+from typing import Literal, Union, get_args, get_origin
 
 import pytest
 
@@ -22,20 +22,23 @@ from novel_downloader.config.models import (
     SaverConfig,
 )
 
+ModeType = Literal["browser", "session", "async"]
+StorageBackend = Literal["json", "sqlite"]
+
 EXPECTED_FIELDS = {
     RequesterConfig: {
-        "wait_time": float,
         "retry_times": int,
-        "retry_interval": float,
+        "backoff_factor": float,
         "timeout": float,
-        "max_rps": Optional[float],
         "headless": bool,
         "user_data_folder": str,
         "profile_name": str,
         "auto_close": bool,
         "disable_images": bool,
         "mute_audio": bool,
-        "mode": str,
+        "mode": ModeType,
+        "max_connections": int,
+        "max_rps": float | None,
     },
     DownloaderConfig: {
         "request_interval": float,
@@ -47,7 +50,9 @@ EXPECTED_FIELDS = {
         "skip_existing": bool,
         "login_required": bool,
         "save_html": bool,
-        "mode": str,
+        "mode": ModeType,
+        "storage_backend": StorageBackend,
+        "storage_batch_size": int,
     },
     ParserConfig: {
         "cache_dir": str,
@@ -58,16 +63,17 @@ EXPECTED_FIELDS = {
         "ocr_version": str,
         "batch_size": int,
         "gpu_mem": int,
-        "gpu_id": Optional[int],
+        "gpu_id": int | None,
         "ocr_weight": float,
         "vec_weight": float,
         "save_font_debug": bool,
-        "mode": str,
+        "mode": ModeType,
     },
     SaverConfig: {
         "raw_data_dir": str,
         "output_dir": str,
         "clean_text": bool,
+        "storage_backend": StorageBackend,
         "make_txt": bool,
         "make_epub": bool,
         "make_md": bool,
@@ -76,8 +82,25 @@ EXPECTED_FIELDS = {
         "filename_template": str,
         "include_cover": bool,
         "include_toc": bool,
+        "include_picture": bool,
     },
 }
+
+
+def matches_type(value: object, expected_type: type) -> bool:
+    origin = get_origin(expected_type)
+    args = get_args(expected_type)
+
+    if origin in {Union, types.UnionType}:
+        return any(matches_type(value, arg) for arg in args)
+
+    elif origin is Literal:
+        return value in args
+
+    elif isinstance(expected_type, type):
+        return isinstance(value, expected_type)
+
+    return False
 
 
 @pytest.mark.parametrize("cls", list(EXPECTED_FIELDS.keys()))
@@ -92,7 +115,7 @@ def test_dataclass_has_all_fields(cls):
 
     for name, expected_type in expected.items():
         value = getattr(instance, name)
-        assert isinstance(value, expected_type), (
+        assert matches_type(value, expected_type), (
             f"{cls.__name__}.{name} default value "
-            f"has type {type(value).__name__}, expected {expected_type.__name__}"
+            f"has type {type(value).__name__}, expected {expected_type}"
         )

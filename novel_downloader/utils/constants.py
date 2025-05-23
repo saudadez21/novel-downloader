@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.utils.constants
 --------------------------------
@@ -20,6 +19,10 @@ APP_NAME = "NovelDownloader"  # Display name
 APP_DIR_NAME = "novel_downloader"  # Directory name for platformdirs
 LOGGER_NAME = PACKAGE_NAME  # Root logger name
 
+SUPPORTED_SITES = {
+    "qidian",
+    "biquge",
+}
 
 # -----------------------------------------------------------------------------
 # Base directories
@@ -33,7 +36,6 @@ LOCALES_DIR: Path = PACKAGE_ROOT / "locales"
 # Subdirectories under BASE_CONFIG_DIR
 LOGGER_DIR = WORK_DIR / "logs"
 JS_SCRIPT_DIR = BASE_CONFIG_DIR / "scripts"
-STATE_DIR = BASE_CONFIG_DIR / "state"
 DATA_DIR = BASE_CONFIG_DIR / "data"
 CONFIG_DIR = BASE_CONFIG_DIR / "config"
 MODEL_CACHE_DIR = BASE_CONFIG_DIR / "models"
@@ -41,7 +43,7 @@ MODEL_CACHE_DIR = BASE_CONFIG_DIR / "models"
 # -----------------------------------------------------------------------------
 # Default file paths
 # -----------------------------------------------------------------------------
-STATE_FILE = STATE_DIR / "state.json"
+STATE_FILE = DATA_DIR / "state.json"
 HASH_STORE_FILE = DATA_DIR / "image_hashes.json"
 SETTING_FILE = CONFIG_DIR / "settings.json"
 SITE_RULES_FILE = CONFIG_DIR / "site_rules.json"
@@ -76,7 +78,7 @@ DEFAULT_USER_HEADERS = {
 # -----------------------------------------------------------------------------
 # Embedded resources (via importlib.resources)
 # -----------------------------------------------------------------------------
-BASE_CONFIG_PATH = files("novel_downloader.resources.config").joinpath("settings.yaml")
+BASE_CONFIG_PATH = files("novel_downloader.resources.config").joinpath("settings.toml")
 BASE_RULE_PATH = files("novel_downloader.resources.config").joinpath("rules.toml")
 
 DEFAULT_SETTINGS_PATHS = [

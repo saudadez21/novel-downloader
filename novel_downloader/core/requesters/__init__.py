@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.requesters
 --------------------------------
@@ -10,20 +9,25 @@ to perform network interactions, such as logging in, sending requests,
 or interacting with browser/session-based sources.
 
 Subpackages:
-- common_requester: Handles all common-site requesting logic.
-- qidian_requester: Handles all Qidian-related requesting logic.
+- common
+- biquge
+- qidian
 """
 
-from .common_requester import (
+from .biquge import (
+    BiqugeSession,
+)
+from .common import (
     CommonAsyncSession,
     CommonSession,
 )
-from .qidian_requester import (
+from .qidian import (
     QidianBrowser,
     QidianSession,
 )
 
 __all__ = [
+    "BiqugeSession",
     "CommonAsyncSession",
     "CommonSession",
     "QidianBrowser",

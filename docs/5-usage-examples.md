@@ -2,17 +2,19 @@
 
 ### 1. 下载小说
 
-#### 1.1 强制指定配置文件 (最高优先)
+支持的站点列表详见: [站点支持文档](./6-supported-sites.md)
+
+#### 1.1 显式指定配置文件 (优先级最高)
 
 ```bash
-# 运行 CLI 工具, 指定自定义配置, 下载起点小说 '123456' 和 '654321'
-novel-cli --config "/path/to/custom.yaml" download 123456 654321
-````
+# 使用自定义配置文件, 下载起点小说 '123456' 和 '654321'
+novel-cli --config "/path/to/custom.toml" download 123456 654321
+```
 
-#### 1.2 默认读取当前目录 `settings.yaml`
+#### 1.2 使用当前目录下的 `settings.toml`
 
 ```bash
-# 在包含 ./settings.yaml 的目录下, 直接运行即可
+# 在包含 ./settings.toml 的目录中运行 CLI 即可
 cd novel-folder
 novel-cli download 123456 654321
 ```
@@ -20,23 +22,18 @@ novel-cli download 123456 654321
 #### 1.3 使用已注册的全局配置
 
 ```bash
-# 当当前目录没有 settings.yaml, 且之前已通过
-# `novel-cli settings set-config ./path/to/settings.yaml`
-# 注册过配置, CLI 会自动加载该全局配置
+# 如果当前目录下没有 settings.toml, CLI 会尝试使用已注册的全局配置
+# 注册命令示例:
+# novel-cli settings set-config ./path/to/settings.toml
 novel-cli download 123456 654321
 ```
 
-#### 1.4 使用内置默认配置
-
-```bash
-# 全新环境中, 既未执行 init, 也未指定 --config,
-# 则会加载包内默认 settings.yaml
-novel-cli download 123456 654321
-```
-
-> **Browser 模式登录提示**
-> 如果 `mode: browser` 且 `login_required: true`, 程序会在浏览器中弹出登录窗口,
-> 请按提示完成登录, 以便获取需要的章节内容。
+> **登录提示说明**
+> 若针对当前下载站点的配置中 `mode: browser` 且启用了 `login_required: true`, 程序将自动弹出浏览器窗口引导登录,
+> 请根据提示完成操作, 以便访问受限章节内容。
+>
+> 如果是其他模式 (如 `session`) 并启用了 `login_required: true`, CLI 将检测当前是否已登录;
+> 若未登录, 将提示你在命令行中手动输入当前站点的有效 Cookie 信息
 
 ---
 
@@ -72,51 +69,26 @@ Commands:
 novel-cli download [OPTIONS] [BOOK_IDS]...
 ```
 
-* **Arguments**
-  `BOOK_IDS`: 要下载的书籍 ID 列表 (可省略, CLI 会从配置中读取)
+**参数说明**:
 
-* **Options**
-  `--site [qidian]`: 网站来源, 默认为 `qidian`
-  `--help`: 显示帮助信息并退出
+* `BOOK_IDS`: 要下载的书籍 ID (可选, 省略时将从配置文件读取)
+* `--site [qidian|biquge|...]`: 站点名称缩写, 默认 `qidian`
+* `--help`: 显示帮助信息
 
-**示例:**
-
-```bash
-# 直接指定要下载的书籍 ID
-novel-cli download 1234567890 0987654321
-
-# 不带 ID, 则从配置文件读取
-novel-cli download
-
-# 下载笔趣阁的书籍
-novel-cli download --site biquge 8_7654
-```
-
-#### 下载笔趣阁等通用站点小说
-
-在首次使用前, 请确保已注册站点规则 (仅需执行一次):
+**示例**:
 
 ```bash
-# 将笔趣阁等站点的规则文件注册到配置中
-novel-cli settings update-rules ./rules.toml
-```
+# 下载指定书籍 (默认 起点)
+novel-cli download 1234567890
 
-例如访问站点 [笔趣阁](http://www.b520.cc), 小说页面地址如下:
-
-* 示例链接: `http://www.b520.cc/8_8187/`
-* 则书籍 ID 为: `8_8187`
-
-使用以下命令开始下载:
-
-```bash
+# 指定站点 (如 biquge)
 novel-cli download --site biquge 8_8187
+
+# 从配置文件中读取 ID
+novel-cli download
 ```
 
-> **注意：**
-> `./rules.toml` 中配置的站点名称 (如 `biquge`) 需与命令中的 `--site` 参数保持一致, 否则无法匹配到对应规则。
-
-> 默认提供的 `./rules.toml` 暂仅包含「笔趣阁」的规则。
-> 其他站点可根据需要自行补充, 或等待后续支持。
+查看完整支持站点列表: [`supported-sites.md`](./6-supported-sites.md)
 
 ---
 
@@ -127,6 +99,8 @@ novel-cli download --site biquge 8_8187
 ```bash
 novel-cli settings [OPTIONS] COMMAND [ARGS]...
 ```
+
+**参数说明**:
 
 * `set-lang LANG`: 在中文 (zh) 和英文 (en) 之间切换界面语言
 * `set-config PATH`: 设置并保存自定义 YAML 配置文件
@@ -140,8 +114,8 @@ novel-cli settings [OPTIONS] COMMAND [ARGS]...
 # 切换界面语言为英文
 novel-cli settings set-lang en
 
-# 使用新的 settings.yaml
-novel-cli settings set-config ./settings.yaml
+# 使用新的 settings.toml
+novel-cli settings set-config ./settings.toml
 
 # 更新站点解析规则
 novel-cli settings update-rules ./rules.toml
@@ -168,6 +142,8 @@ novel-cli settings init --force
 ```bash
 novel-cli clean [OPTIONS]
 ```
+
+**参数说明**:
 
 * `--logs`: 清理日志目录 (`logs/`)
 * `--cache`: 清理脚本缓存与浏览器数据 (`js_script/`、`browser_data/`)

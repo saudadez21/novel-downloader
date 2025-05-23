@@ -29,7 +29,7 @@
     ```js
     copy(document.cookie)
     ```
-5. 然后直接粘贴到终端使用:
+5. 然后直接粘贴到终端使用 (或在运行下载任务开始时根据提示输入):
     ```bash
     novel-cli settings set-cookies qidian "粘贴这里"
     ```

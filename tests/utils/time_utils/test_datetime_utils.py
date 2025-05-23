@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 tests.utils.time_utils.test_datetime_utils
 -------------------------------------------
@@ -11,7 +10,7 @@ Covers:
 """
 
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
@@ -129,7 +128,7 @@ def test_calculate_time_difference_default_to_time(monkeypatch):
     When `to_time_str` is None, uses `datetime.now(timezone.utc)` internally.
     """
     # Freeze "now" at 2025-04-23 12:00:00 UTC
-    fixed_now = datetime(2025, 4, 23, 12, 0, 0, tzinfo=timezone.utc)
+    fixed_now = datetime(2025, 4, 23, 12, 0, 0, tzinfo=UTC)
 
     class FixedDatetime(datetime):
         @classmethod

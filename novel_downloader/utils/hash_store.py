@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.utils.hash_store
 ---------------------------------
@@ -11,8 +10,8 @@ Supports loading/saving to .json or .npy, and basic CRUD + search.
 import heapq
 import json
 import logging
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 from PIL import Image
@@ -33,7 +32,7 @@ class _BKNode:
 
     def __init__(self, value: int):
         self.value = value
-        self.children: Dict[int, _BKNode] = {}
+        self.children: dict[int, _BKNode] = {}
 
     def add(self, h: int, dist_fn: Callable[[int, int], int]) -> None:
         d = dist_fn(h, self.value)
@@ -48,12 +47,12 @@ class _BKNode:
         target: int,
         threshold: int,
         dist_fn: Callable[[int, int], int],
-    ) -> List[Tuple[int, int]]:
+    ) -> list[tuple[int, int]]:
         """
         Recursively collect (value, dist) pairs within threshold.
         """
         d0 = dist_fn(target, self.value)
-        matches: List[Tuple[int, int]] = []
+        matches: list[tuple[int, int]] = []
         if d0 <= threshold:
             matches.append((self.value, d0))
         # Only children whose edge-dist \in [d0-threshold, d0+threshold]
@@ -76,7 +75,7 @@ class ImageHashStore:
 
     def __init__(
         self,
-        path: Union[str, Path] = HASH_STORE_FILE,
+        path: str | Path = HASH_STORE_FILE,
         auto_save: bool = False,
         hash_func: Callable[[Image.Image], int] = phash,
         ham_dist: Callable[[int, int], int] = fast_hamming_distance,
@@ -89,11 +88,11 @@ class ImageHashStore:
         self._th = threshold
 
         # label -> set of hashes
-        self._hash: Dict[str, Set[int]] = {}
+        self._hash: dict[str, set[int]] = {}
         # hash -> list of labels (for reverse lookup)
-        self._hash_to_labels: Dict[int, List[str]] = {}
+        self._hash_to_labels: dict[int, list[str]] = {}
         # root of BK-Tree (or None if empty)
-        self._bk_root: Optional[_BKNode] = None
+        self._bk_root: _BKNode | None = None
 
         self.load()
 
@@ -155,7 +154,7 @@ class ImageHashStore:
         if self._auto:
             self.save()
 
-    def add_image(self, img_path: Union[str, Path], label: str) -> int:
+    def add_image(self, img_path: str | Path, label: str) -> int:
         """
         Compute hash for the given image and add it under `label`.
         Updates BK-Tree index incrementally.
@@ -173,7 +172,7 @@ class ImageHashStore:
         self._maybe_save()
         return h
 
-    def add_from_map(self, map_path: Union[str, Path]) -> None:
+    def add_from_map(self, map_path: str | Path) -> None:
         """
         Load a JSON file of the form { "image_path": "label", ... }
         and add each entry.
@@ -191,11 +190,11 @@ class ImageHashStore:
                 )
                 continue
 
-    def labels(self) -> List[str]:
+    def labels(self) -> list[str]:
         """Return a sorted list of all labels in the store."""
         return sorted(self._hash.keys())
 
-    def hashes(self, label: str) -> Set[int]:
+    def hashes(self, label: str) -> set[int]:
         """Return the set of hashes for a given `label` (empty set if none)."""
         return set(self._hash.get(label, ()))
 
@@ -206,7 +205,7 @@ class ImageHashStore:
             logger.debug("[ImageHashStore] Removed label '%s'", label)
             self._maybe_save()
 
-    def remove_hash(self, label: str, this: Union[int, str, Path]) -> bool:
+    def remove_hash(self, label: str, this: int | str | Path) -> bool:
         """
         Remove a specific hash under `label`.
         `this` can be:
@@ -218,7 +217,7 @@ class ImageHashStore:
             return False
 
         h = None
-        if isinstance(this, (str, Path)):
+        if isinstance(this, (str | Path)):
             try:
                 img = Image.open(this).convert("L")
                 h = self._hf(img)
@@ -239,10 +238,10 @@ class ImageHashStore:
 
     def query(
         self,
-        target: Union[int, str, Path, Image.Image],
+        target: int | str | Path | Image.Image,
         k: int = 1,
-        threshold: Optional[int] = None,
-    ) -> List[Tuple[str, float]]:
+        threshold: int | None = None,
+    ) -> list[tuple[str, float]]:
         """
         Find up to `k` distinct labels whose stored hashes are most similar
         to `target` within `threshold`. Returns a list of (label, score),
@@ -259,7 +258,7 @@ class ImageHashStore:
         if isinstance(target, Image.Image):
             img = target.convert("L")
             thash = self._hf(img)
-        elif isinstance(target, (str, Path)):
+        elif isinstance(target, (str | Path)):
             img = Image.open(target).convert("L")
             thash = self._hf(img)
         else:
@@ -272,7 +271,7 @@ class ImageHashStore:
         matches = self._bk_root.query(thash, threshold, self._hd)
 
         # collapse to one best dist per label
-        best_per_label: Dict[str, float] = {}
+        best_per_label: dict[str, float] = {}
         h2l = self._hash_to_labels
         for h, dist in matches:
             for lbl in h2l.get(h, ()):

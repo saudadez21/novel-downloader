@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.utils.time_utils.sleep_utils
 ---------------------------------------------
@@ -14,7 +13,6 @@ Includes:
 import logging
 import random
 import time
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +22,7 @@ def sleep_with_random_delay(
     add_spread: float = 0.0,
     mul_spread: float = 1.0,
     *,
-    max_sleep: Optional[float] = None,
+    max_sleep: float | None = None,
 ) -> None:
     """
     Sleep for a random duration by combining multiplicative and additive jitter.

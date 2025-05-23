@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.utils.time_utils.datetime_utils
 ------------------------------------------------
@@ -15,8 +14,7 @@ Includes:
 
 import logging
 import re
-from datetime import datetime, timedelta, timezone
-from typing import Optional, Tuple
+from datetime import UTC, datetime, timedelta, timezone
 
 logger = logging.getLogger(__name__)
 
@@ -61,8 +59,8 @@ def _parse_utc_offset(tz_str: str) -> timezone:
     else:
         try:
             hours = int(offset_part)
-        except ValueError:
-            raise ValueError(f"Invalid UTC offset hours: '{offset_part}'")
+        except ValueError as err:
+            raise ValueError(f"Invalid UTC offset hours: '{offset_part}'") from err
     return timezone(timedelta(hours=hours))
 
 
@@ -100,9 +98,9 @@ def _parse_datetime_flexible(dt_str: str) -> datetime:
 def calculate_time_difference(
     from_time_str: str,
     tz_str: str = "UTC",
-    to_time_str: Optional[str] = None,
+    to_time_str: str | None = None,
     to_tz_str: str = "UTC",
-) -> Tuple[int, int, int, int]:
+) -> tuple[int, int, int, int]:
     """
     Calculate the difference between two datetime values.
 
@@ -116,15 +114,15 @@ def calculate_time_difference(
         # parse start time
         tz_from = _parse_utc_offset(tz_str)
         dt_from = _parse_datetime_flexible(from_time_str)
-        dt_from = dt_from.replace(tzinfo=tz_from).astimezone(timezone.utc)
+        dt_from = dt_from.replace(tzinfo=tz_from).astimezone(UTC)
 
         # parse end time or use now
         if to_time_str:
             tz_to = _parse_utc_offset(to_tz_str)
             dt_to = _parse_datetime_flexible(to_time_str)
-            dt_to = dt_to.replace(tzinfo=tz_to).astimezone(timezone.utc)
+            dt_to = dt_to.replace(tzinfo=tz_to).astimezone(UTC)
         else:
-            dt_to = datetime.now(timezone.utc)
+            dt_to = datetime.now(UTC)
 
         delta = dt_to - dt_from
 

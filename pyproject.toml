@@ -6,7 +6,7 @@ authors = [
 ]
 license = {file = "LICENSE"}
 readme = {file = "README.md", content-type = "text/markdown"}
-requires-python = ">=3.8"
+requires-python = ">=3.12"
 keywords = ["novel", "web novel", "qidian", "biquge", "downloader", "parser", "fiction", "cli", "automation", "ebook"]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -15,18 +15,16 @@ classifiers = [
     "Natural Language :: Chinese (Simplified)",
     "Topic :: Utilities",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12"
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13"
 ]
 dynamic = ["version"]
 dependencies = [
     "requests",
+    "aiohttp",
     "beautifulsoup4",
     "DrissionPage",
-    "pyyaml",
+    "opencv-python",
     "lxml",
     "platformdirs",
     "click",
@@ -50,11 +48,10 @@ font-recovery = [
     "numpy",
     "tinycss2",
     "fonttools",
+    "brotli",
     "pillow",
     "huggingface_hub"
 ]
-
-async = ["aiohttp"]
 
 [project.scripts]
 novel-cli = "novel_downloader.cli.main:cli_main"
@@ -71,7 +68,7 @@ build-backend = "setuptools.build_meta"
 include = ["novel_downloader", "novel_downloader.*"]
 
 [tool.setuptools.package-data]
-"novel_downloader.resources.config" = ["settings.yaml", "rules.toml"]
+"novel_downloader.resources.config" = ["settings.toml", "rules.toml"]
 "novel_downloader.resources.text" = ["*.txt"]
 "novel_downloader.resources.js_scripts" = ["*.js"]
 "novel_downloader.resources.json" = ["*.json"]
@@ -84,16 +81,25 @@ version = {attr = "novel_downloader.__version__"}
 
 [tool.black]
 line-length = 88
-target-version = ["py311"]
+target-version = ["py312"]
 
 [tool.ruff]
 line-length = 88
+target-version = "py312"
 
 [tool.ruff.lint]
-select = ["E", "F", "I"]
+select = [
+    "E",  # pycodestyle (error)
+    "F",  # pyflakes
+    "B",  # bugbear
+    "C4", # flake8-comprehensions
+    "I",  # isort
+    "UP", # pyupgrade
+    "SIM" # flake8-simplify
+]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12"
 ignore_missing_imports = true
 strict = true
 

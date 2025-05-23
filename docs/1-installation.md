@@ -4,7 +4,7 @@
 为避免包冲突, 建议创建独立环境:
 推荐使用 Conda 或 `venv` 创建独立环境, 避免包冲突:
 ```bash
-conda create -n novel-downloader python=3.11 -y
+conda create -n novel-downloader python=3.12 -y
 conda activate novel-downloader
 ```
 或
@@ -46,25 +46,29 @@ source .venv/bin/activate
 pip install novel-downloader[font-recovery]
 ```
 
-如果启用 `use_ocr` 参数, 则需安装 [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) 及相关依赖 (请根据 PaddleOCR [文档](https://paddlepaddle.github.io/PaddleOCR/latest/quick_start.html) 选择合适版本和 CUDA 支持) :
+如果启用 `use_ocr` 参数, 则需安装 [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) 及相关依赖 (请根据 paddlepaddle [文档](https://www.paddlepaddle.org.cn/install/quick?docurl=/documentation/docs/zh/develop/install/pip/windows-pip.html) 选择合适版本和 CUDA 支持) :
 
 - CPU 版:
     ```bash
-    python -m pip install paddlepaddle==3.0.0rc1 -i https://www.paddlepaddle.org.cn/packages/stable/cpu/
-    pip install paddleocr
+    python -m pip install paddlepaddle==3.0.0 -i https://www.paddlepaddle.org.cn/packages/stable/cpu/
     ```
 
 - GPU 版 (请根据 CUDA 版本选用对应 paddlepaddle-gpu):
     ```bash
-    python -m pip install paddlepaddle-gpu==3.0.0rc1 -i https://www.paddlepaddle.org.cn/packages/stable/cu118/
-    pip install paddleocr
+    python -m pip install paddlepaddle-gpu==3.0.0 -i https://www.paddlepaddle.org.cn/packages/stable/cu118/
     ```
+
+当配置里选择 `novel_downloader.utils.fontocr.ocr_v1` 时需要安装:
+
+```bash
+pip install paddleocr
+```
 
 当前使用版本示例:
 
 ```bash
 paddleocr==2.10.0
-paddlepaddle==3.0.0rc1
+paddlepaddle==3.0.0
 ```
 
 > 提示: 仅在启用 `use_ocr` 时才需要上述依赖。
@@ -96,27 +100,15 @@ paddlepaddle==3.0.0rc1
 
 基于 `aiohttp` 的异步抓取模式 (`mode=async`), 用于提升抓取性能, 适用于笔趣阁等无需登录的通用站点。
 
-如需使用 async 模式, 请额外安装 `aiohttp`:
-
-```bash
-pip install novel-downloader[async]
-```
-
-或手动安装:
-
-```bash
-pip install aiohttp
-```
-
 该模式使用 `asyncio + aiohttp` 进行并发网页抓取, 适合抓取大量章节时提高效率
 
 #### 自定义限速
 
-在 `settings.yaml` 中, 可以通过以下两个字段精细控制请求速率
+在 `settings.toml` 中, 可以通过以下两个字段精细控制请求速率
 
-```yaml
-request_interval: 0     # 默认为请求之间的最小间隔 (秒), 设置为 0 表示不强制等待
-max_rps: null           # 最大请求速率 (requests per second), 为 null 则不限制
+```toml
+request_interval = 0     # 默认为请求之间的最小间隔 (秒), 设置为 0 表示不强制等待
+max_rps = 10             # 最大请求速率 (requests per second), 为 空 则不限制
 ```
 
 * **`request_interval`**: 每次请求后的等待时间 (秒), 将其设为 `0` 可以让抓取更连续。
@@ -124,31 +116,32 @@ max_rps: null           # 最大请求速率 (requests per second), 为 null 则
 
 #### 示例配置
 
-```yaml
+```toml
 # 网络请求层设置
-requests:
-  wait_time: 5                      # 每次请求等待时间 (秒)
-  retry_times: 3                    # 请求失败重试次数
-  retry_interval: 5
-  timeout: 30                       # 页面加载超时时间 (秒)
-  max_rps: 10                       # 最大请求速率 (requests per second), 为 null 则不限制
+[requests]
+retry_times = 3                    # 请求失败重试次数
+backoff_factor = 2.0
+timeout = 30.0                     # 页面加载超时时间 (秒)
+max_connections = 10               # 并发连接的最大数 (async)
+max_rps = 10                       # 最大请求速率 (requests per second)
 
 # 全局通用设置
-general:
-  request_interval: 0               # 同一本书各章节请求间隔 (秒)
-  raw_data_dir: "./raw_data"        # 原始章节 HTML/JSON 存放目录
-  output_dir: "./downloads"         # 最终输出文件存放目录
-  cache_dir: "./novel_cache"        # 本地缓存目录 (字体 / 图片等)
-  download_workers: 4               # 并发下载线程数
-  parser_workers: 4                 # 并发解析线程数
-  use_process_pool: false           # 是否使用多进程池来处理任务
-  skip_existing: true               # 是否跳过已存在章节
+[general]
+request_interval = 0.0             # 同一本书各章节请求间隔 (秒)
+raw_data_dir = "./raw_data"        # 原始章节 JSON/DB 存放目录
+output_dir = "./downloads"         # 最终输出文件存放目录
+cache_dir = "./novel_cache"        # 本地缓存目录 (字体 / 图片等)
+download_workers = 4               # 并发下载线程数 (async)
+parser_workers = 4                 # 并发解析线程数
+use_process_pool = false           # 是否使用多进程池来处理任务
+skip_existing = true               # 是否跳过已存在章节
+storage_backend = "sqlite"         # 章节储存方法: json / sqlite
+storage_batch_size = 30            # SQLite 批量提交的章节数量
 
 # 各站点的特定配置
-sites:
-  common:
-    mode: "async"
-    login_required: false
+[sites.common]
+mode = "async"                     # async / session
+login_required = false             # 是否需要登录才能访问
 ```
 
 上述配置下, Downloader 在异步模式下不会在请求间强制等待, 但会保证整体速率不超过 10 rps。

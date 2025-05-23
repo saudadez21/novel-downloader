@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.cli.clean
 -----------------------------
@@ -8,7 +7,6 @@ novel_downloader.cli.clean
 
 import shutil
 from pathlib import Path
-from typing import List, Optional
 
 import click
 
@@ -19,7 +17,6 @@ from novel_downloader.utils.constants import (
     LOGGER_DIR,
     MODEL_CACHE_DIR,
     REC_CHAR_MODEL_REPO,
-    STATE_DIR,
 )
 from novel_downloader.utils.i18n import t
 
@@ -35,7 +32,7 @@ def delete_path(p: Path) -> None:
         click.echo(f"[clean] {t('clean_not_found')}: {p}")
 
 
-def clean_model_repo_cache(repo_id: Optional[str] = None, all: bool = False) -> bool:
+def clean_model_repo_cache(repo_id: str | None = None, all: bool = False) -> bool:
     """
     Delete Hugging Face cache for a specific repo.
     """
@@ -61,7 +58,6 @@ def clean_model_repo_cache(repo_id: Optional[str] = None, all: bool = False) -> 
 @click.command(name="clean", help=t("help_clean"))  # type: ignore
 @click.option("--logs", is_flag=True, help=t("clean_logs"))  # type: ignore
 @click.option("--cache", is_flag=True, help=t("clean_cache"))  # type: ignore
-@click.option("--state", is_flag=True, help=t("clean_state"))  # type: ignore
 @click.option("--data", is_flag=True, help=t("clean_data"))  # type: ignore
 @click.option("--config", is_flag=True, help=t("clean_config"))  # type: ignore
 @click.option("--models", is_flag=True, help=t("clean_models"))  # type: ignore
@@ -72,7 +68,6 @@ def clean_model_repo_cache(repo_id: Optional[str] = None, all: bool = False) -> 
 def clean_cli(
     logs: bool,
     cache: bool,
-    state: bool,
     data: bool,
     config: bool,
     models: bool,
@@ -81,7 +76,7 @@ def clean_cli(
     all: bool,
     yes: bool,
 ) -> None:
-    targets: List[Path] = []
+    targets: list[Path] = []
 
     if all:
         if not yes:
@@ -92,7 +87,6 @@ def clean_cli(
         targets = [
             LOGGER_DIR,
             JS_SCRIPT_DIR,
-            STATE_DIR,
             DATA_DIR,
             CONFIG_DIR,
             MODEL_CACHE_DIR,
@@ -102,8 +96,6 @@ def clean_cli(
             targets.append(LOGGER_DIR)
         if cache:
             targets.append(JS_SCRIPT_DIR)
-        if state:
-            targets.append(STATE_DIR)
         if data:
             targets.append(DATA_DIR)
         if config:

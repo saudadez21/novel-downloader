@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.downloaders
 ---------------------------------
@@ -11,11 +10,12 @@ Each downloader is responsible for orchestrating the full lifecycle
 of retrieving, parsing, and saving novel content for a given source.
 """
 
-from .common_asynb_downloader import CommonAsyncDownloader
-from .common_downloader import CommonDownloader
-from .qidian_downloader import QidianDownloader
+from .biquge import BiqugeDownloader
+from .common import CommonAsyncDownloader, CommonDownloader
+from .qidian import QidianDownloader
 
 __all__ = [
+    "BiqugeDownloader",
     "CommonAsyncDownloader",
     "CommonDownloader",
     "QidianDownloader",

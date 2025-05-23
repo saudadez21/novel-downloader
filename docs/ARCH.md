@@ -45,7 +45,7 @@ In both `browser` and `session` modes, the crawling process is executed **sequen
 
 ```
 
-[Book Info] -> [Volumes] -> [Chapters] -> [Parsed JSON]
+[Book Info] -> [Volumes] -> [Chapters] -> [Parsed JSON/DB]
   ↓
 [Merged Output]
 (.txt / .epub / ...)

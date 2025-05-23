@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 tests.utils.test_network
 ------------------------
@@ -38,8 +37,7 @@ class DummyResponse:
             raise requests.HTTPError("status error")
 
     def iter_content(self, chunk_size=_DEFAULT_CHUNK_SIZE):
-        for chunk in self._chunks:
-            yield chunk
+        yield from self._chunks
 
 
 # ---------- image_url_to_filename tests ----------
@@ -313,7 +311,7 @@ def test_download_js_file_rename_and_write_error(monkeypatch, tmp_path, caplog):
     )
     monkeypatch.setattr(
         "novel_downloader.utils.network._write_file",
-        lambda *args, **kwargs: (_ for _ in ()).throw(IOError("disk error")),
+        lambda *args, **kwargs: (_ for _ in ()).throw(OSError("disk error")),
     )
 
     result = download_js_file("https://example.com/a.js", tmp_path, on_exist="rename")

@@ -22,13 +22,10 @@ pip install novel-downloader
 # 如需支持字体解密功能 (decode_font), 请使用:
 # pip install novel-downloader[font-recovery]
 
-# 如需启用异步抓取模式 (mode=async), 请使用:
-# pip install novel-downloader[async]
-
-# 初始化默认配置 (生成 settings.yaml)
+# 初始化默认配置 (生成 settings.toml)
 novel-cli settings init
 
-# 编辑 ./settings.yaml 完成 site/book_ids 等
+# 编辑 ./settings.toml 完成 site/book_ids 等
 # 可查看 docs/4-settings-schema.md
 
 # 运行下载
@@ -45,7 +42,6 @@ cd novel-downloader
 pip install .
 # 或安装带可选功能:
 # pip install .[font-recovery]
-# pip install .[async]
 ```
 
 更多使用方法, 查看 [使用示例](docs/5-usage-examples.md)
@@ -55,7 +51,10 @@ pip install .
 ## 功能特性
 
 - 爬取起点中文网的小说章节内容 (支持免费与已订阅章节)
-- 自动整合所有章节并输出为完整的 TXT 文件
+- 断点续爬
+- 自动整合所有章节并导出为
+  - TXT
+  - EPUB
 - 支持活动广告过滤:
   - [x] 章节标题
   - [ ] 章节正文
@@ -69,8 +68,9 @@ pip install .
 - [安装](docs/1-installation.md)
 - [环境准备](docs/2-environment-setup.md)
 - [配置](docs/3-configuration.md)
-- [settings.yaml 配置说明](docs/4-settings-schema.md)
+- [settings.toml 配置说明](docs/4-settings-schema.md)
 - [使用示例](docs/5-usage-examples.md)
+- [支持站点列表](docs/6-supported-sites.md)
 - [文件保存](docs/file-saving.md)
 - [TODO](docs/todo.md)
 - [开发](docs/develop.md)

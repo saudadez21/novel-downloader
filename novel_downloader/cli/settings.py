@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.cli.settings
 -----------------------------
@@ -10,7 +9,6 @@ Commands to configure novel downloader settings.
 import shutil
 from importlib.resources import as_file
 from pathlib import Path
-from typing import Optional
 
 import click
 from click import Context
@@ -61,7 +59,7 @@ def init_settings(force: bool) -> None:
         except Exception as e:
             raise click.ClickException(
                 t("settings_init_error", filename=resource.name, err=e)
-            )
+            ) from e
 
 
 @settings_cli.command(name="set-lang", help=t("settings_set_lang_help"))  # type: ignore
@@ -81,7 +79,7 @@ def set_config(path: str) -> None:
         save_config_file(path)
         click.echo(t("settings_set_config", path=path))
     except Exception as e:
-        raise click.ClickException(t("settings_set_config_fail", err=e))
+        raise click.ClickException(t("settings_set_config_fail", err=e)) from e
 
 
 @settings_cli.command(name="update-rules", help=t("settings_update_rules_help"))  # type: ignore
@@ -92,7 +90,7 @@ def update_rules(path: str) -> None:
         save_rules_as_json(path)
         click.echo(t("settings_update_rules", path=path))
     except Exception as e:
-        raise click.ClickException(t("settings_update_rules_fail", err=e))
+        raise click.ClickException(t("settings_update_rules_fail", err=e)) from e
 
 
 @settings_cli.command(
@@ -120,7 +118,7 @@ def set_cookies(ctx: Context, site: str, cookies: str) -> None:
         state_mgr.set_cookies(site, cookies)
         click.echo(t("settings_set_cookies_success", site=site))
     except Exception as e:
-        raise click.ClickException(t("settings_set_cookies_fail", err=e))
+        raise click.ClickException(t("settings_set_cookies_fail", err=e)) from e
 
 
 @settings_cli.command(name="add-hash", help=t("settings_add_hash_help"))  # type: ignore
@@ -129,7 +127,7 @@ def set_cookies(ctx: Context, site: str, cookies: str) -> None:
     type=click.Path(exists=True, dir_okay=False),
     help=t("settings_add_hash_path_help"),
 )  # type: ignore
-def add_image_hashes(path: Optional[str]) -> None:
+def add_image_hashes(path: str | None) -> None:
     """
     Add image hashes to internal store for matching.
     Can be run in interactive mode (no --path), or with a JSON file.
@@ -142,7 +140,9 @@ def add_image_hashes(path: Optional[str]) -> None:
             img_hash_store.save()
             click.echo(t("settings_add_hash_loaded", path=path))
         except Exception as e:
-            raise click.ClickException(t("settings_add_hash_load_fail", err=str(e)))
+            raise click.ClickException(
+                t("settings_add_hash_load_fail", err=str(e))
+            ) from e
     else:
         click.echo(t("settings_add_hash_prompt_tip"))
         while True:

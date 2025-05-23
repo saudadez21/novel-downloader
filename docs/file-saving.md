@@ -1,6 +1,6 @@
 ## 文件保存
 
-运行时会根据配置文件 (如 `./settings.yaml`) 在项目根目录下自动创建三个文件夹:
+运行时会根据配置文件 (如 `./settings.toml`) 在项目根目录下自动创建三个文件夹:
 
 - `downloads`
 - `novel_cache`
@@ -71,27 +71,34 @@
 
 - **普通章节内容**
 
+  1. JSON 文件模式
+
   ```text
   raw_data/{site_name}/{book_id}/chapters/{chapter_id}.json
   ```
 
-  示例结构:
+  2. SQLite 数据库模式
+
+  ```text
+  raw_data/{site_name}/{book_id}/chapters.sqlite
+  ```
+
+  示例章节结构:
 
   ```json
   {
     "id": "1",
     "title": "第一章 示例章节",
     "content": "这里是章节正文内容的示例。",
-    "author_say": "作者的话示例。",
-    "updated_at": "2025-05-09 12:00",
-    "update_timestamp": 1744180800,
-    "modify_time": 1744184400,
-    "word_count": 1024,
-    "vip": false,
-    "purchased": false,
-    "order": 1,
-    "seq": 1,
-    "volume": "示例卷"
+    "extra": {
+        "author_say": "作者的话示例。",
+        "updated_at": "2025-05-09 12:00",
+        "update_timestamp": 1744180800,
+        "modify_time": 1744184400,
+        "word_count": 1024,
+        "seq": 1,
+        "volume": "示例卷"
+    }
   }
   ```
 

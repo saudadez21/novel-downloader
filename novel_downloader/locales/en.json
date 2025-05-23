@@ -3,7 +3,7 @@
   "help_config": "Path to config file",
   "help_download": "Download novels",
   "help_clean": "Clean cache and configuration files",
-  "main_no_command": "No command provided, entering interactive mode…",
+  "main_no_command": "No command provided, entering interactive mode...",
 
   "settings_help": "Configure downloader settings.",
   "settings_set_lang_help": "Switch language between Chinese and English.",
@@ -49,8 +49,8 @@
   "interactive_option_preview": "Preview chapters",
   "interactive_option_exit": "Exit",
   "interactive_prompt_choice": "Enter your choice",
-  "interactive_browse_start": "Starting interactive browser…",
-  "interactive_preview_start": "Previewing chapters…",
+  "interactive_browse_start": "Starting interactive browser...",
+  "interactive_preview_start": "Previewing chapters...",
   "interactive_exit": "Exiting.",
 
   "download_help": "Download full novels by book IDs.",
@@ -69,11 +69,15 @@
   "login_prompt_intro": "Manual login is required. Please switch to the browser and log in.",
   "login_prompt_press_enter": "Attempt {attempt}/{max_retries}: Press Enter after completing login in the browser...",
 
+  "session_login_prompt_intro": "Failed to restore login from saved cookies. Please log in via browser, then paste the cookie string below.",
+  "session_login_prompt_paste_cookie": "Attempt {attempt}/{max_retries}: Paste your browser cookie string and press Enter:",
+  "session_login_prompt_invalid_cookie": "Invalid cookie. Please copy and paste again.",
+
   "clean_logs": "Clean log directory",
   "clean_cache": "Clean scripts and browser cache",
   "clean_state": "Clean state files (state.json)",
   "clean_data": "Clean data files (e.g. image hashes, browser data)",
-  "clean_config": "Clean config files (e.g. settings.yaml, site rules)",
+  "clean_config": "Clean config files (e.g. settings.toml, site rules)",
   "clean_models": "Clean downloaded model cache",
   "clean_hf_cache": "Clear Hugging Face model cache",
   "clean_hf_cache_done": "Hugging Face cache cleared",

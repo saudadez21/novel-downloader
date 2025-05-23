@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.utils.network
 ------------------------------
@@ -11,7 +10,7 @@ import logging
 import random
 import time
 from pathlib import Path
-from typing import Dict, Literal, Optional, Union
+from typing import Literal
 from urllib.parse import unquote, urlparse
 
 import requests
@@ -30,9 +29,9 @@ def http_get_with_retry(
     retries: int = 3,
     timeout: int = 10,
     backoff: float = 0.5,
-    headers: Optional[Dict[str, str]] = None,
+    headers: dict[str, str] | None = None,
     stream: bool = False,
-) -> Optional[requests.Response]:
+) -> requests.Response | None:
     """
     Perform a GET request with retry support.
 
@@ -87,13 +86,13 @@ def image_url_to_filename(url: str) -> str:
 
 def download_image_as_bytes(
     url: str,
-    target_folder: Optional[Union[str, Path]] = None,
+    target_folder: str | Path | None = None,
     *,
     timeout: int = 10,
     retries: int = 3,
     backoff: float = 0.5,
     on_exist: Literal["overwrite", "skip", "rename"] = "overwrite",
-) -> Optional[bytes]:
+) -> bytes | None:
     """
     Download an image from a given URL and return its content as bytes.
 
@@ -155,13 +154,13 @@ def download_image_as_bytes(
 
 def download_font_file(
     url: str,
-    target_folder: Union[str, Path],
+    target_folder: str | Path,
     *,
     timeout: int = 10,
     retries: int = 3,
     backoff: float = 0.5,
     on_exist: Literal["overwrite", "skip", "rename"] = "skip",
-) -> Optional[Path]:
+) -> Path | None:
     """
     Download a font file from a URL and save it locally with retry and overwrite control
 
@@ -226,13 +225,13 @@ def download_font_file(
 
 def download_js_file(
     url: str,
-    target_folder: Union[str, Path],
+    target_folder: str | Path,
     *,
     timeout: int = 10,
     retries: int = 3,
     backoff: float = 0.5,
     on_exist: Literal["overwrite", "skip", "rename"] = "skip",
-) -> Optional[Path]:
+) -> Path | None:
     """
     Download a JavaScript (.js) file from a URL and save it locally.
 

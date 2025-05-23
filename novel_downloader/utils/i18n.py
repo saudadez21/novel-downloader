@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.utils.i18n
 ---------------------------
@@ -8,17 +7,17 @@ Multilingual text dictionary and utility for CLI and interactive mode.
 """
 
 import json
-from typing import Any, Dict
+from typing import Any
 
 from novel_downloader.utils.constants import LOCALES_DIR
 from novel_downloader.utils.state import state_mgr
 
-_TRANSLATIONS: Dict[str, Dict[str, str]] = {}
+_TRANSLATIONS: dict[str, dict[str, str]] = {}
 
 for locale_path in LOCALES_DIR.glob("*.json"):
     lang = locale_path.stem
     try:
-        with open(locale_path, "r", encoding="utf-8") as f:
+        with open(locale_path, encoding="utf-8") as f:
             _TRANSLATIONS[lang] = json.load(f)
     except Exception:
         continue

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.savers.epub_utils.css_builder
 
@@ -9,7 +8,7 @@ returning a list ready to be added to the EPUB.
 
 import logging
 from importlib.abc import Traversable
-from typing import Dict, List, Union
+from typing import TypedDict
 
 from ebooklib import epub
 
@@ -21,16 +20,23 @@ from novel_downloader.utils.constants import (
 logger = logging.getLogger(__name__)
 
 
+class CssConfig(TypedDict):
+    include: bool
+    path: Traversable
+    uid: str
+    file_name: str
+
+
 def create_css_items(
     include_main: bool = True,
     include_volume: bool = True,
-) -> List[epub.EpubItem]:
+) -> list[epub.EpubItem]:
     """
     :param include_main:   Whether to load the main stylesheet.
     :param include_volume: Whether to load the “volume intro” stylesheet.
     :returns: A list of epub.EpubItem ready to add to the book.
     """
-    css_config: List[Dict[str, Union[str, bool, Traversable]]] = [
+    css_config: list[CssConfig] = [
         {
             "include": include_main,
             "path": CSS_MAIN_PATH,
@@ -44,20 +50,20 @@ def create_css_items(
             "file_name": "Styles/volume-intro.css",
         },
     ]
-    css_items: List[epub.EpubItem] = []
+    css_items: list[epub.EpubItem] = []
 
     for css in css_config:
         if css["include"]:
             path = css["path"]
-            assert isinstance(path, Traversable)
             try:
                 content: str = path.read_text(encoding="utf-8")
+                content_bytes: bytes = content.encode("utf-8")
                 css_items.append(
                     epub.EpubItem(
                         uid=css["uid"],
                         file_name=css["file_name"],
                         media_type="text/css",
-                        content=content,
+                        content=content_bytes,
                     )
                 )
             except FileNotFoundError:

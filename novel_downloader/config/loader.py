@@ -1,133 +1,160 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.config.loader
 --------------------------------
 
-Provides functionality to load YAML configuration files into Python
+Provides functionality to load Toml configuration files into Python
 dictionaries, with robust error handling and fallback support.
-
-This is typically used to load user-supplied or internal default config files.
 """
 
 import json
 import logging
-from importlib.abc import Traversable
-from importlib.resources import as_file
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
-
-import yaml
+from typing import Any
 
 from novel_downloader.utils.cache import cached_load_config
-from novel_downloader.utils.constants import (
-    BASE_CONFIG_PATH,
-    SETTING_FILE,
-)
+from novel_downloader.utils.constants import SETTING_FILE
 
 logger = logging.getLogger(__name__)
 
 
-def resolve_config_path(
-    config_path: Optional[Union[str, Path]]
-) -> Optional[Union[Path, Traversable]]:
+def resolve_file_path(
+    user_path: str | Path | None,
+    local_filename: str | list[str],
+    fallback_path: Path,
+) -> Path | None:
     """
-    Resolve which configuration file to use, in this priority order:
+    Resolve the file path to use based on a prioritized lookup order.
 
-    1. User-specified path (the `config_path` argument).
-    2. `./settings.yaml` in the current working directory.
-    3. The global settings file (`SETTING_FILE`).
-    4. The internal default (`BASE_CONFIG_PATH`).
+    Priority:
+        1. A user-specified path (if provided and exists)
+        2. A file in the current working directory with the given name
+        3. A globally registered fallback path
 
-    Returns a Path to the first existing file, or None if none is found.
+    :param user_path: Optional user-specified file path.
+    :param local_filename: File name to check in the current working directory.
+    :param fallback_path: Fallback path used if other options are not available.
+    :return: A valid Path object if found, otherwise None.
     """
-    # 1. Try the user-provided path
-    if config_path:
-        path = Path(config_path).expanduser().resolve()
+    if user_path:
+        path = Path(user_path).expanduser().resolve()
         if path.is_file():
             return path
-        logger.warning("[config] Specified config file not found: %s", path)
+        logger.warning("[config] Specified file not found: %s", path)
 
-    # 2. Try ./settings.yaml in the current working directory
-    local_path = Path.cwd() / "settings.yaml"
-    if local_path.is_file():
-        logger.debug("[config] Using local settings.yaml at %s", local_path)
-        return local_path
+    filenames = [local_filename] if isinstance(local_filename, str) else local_filename
+    for name in filenames:
+        local_path = Path.cwd() / name
+        if local_path.is_file():
+            logger.debug("[config] Using local file: %s", local_path)
+            return local_path
 
-    # 3. Try the globally registered settings file
-    if SETTING_FILE.is_file():
-        logger.debug("[config] Using global settings file at %s", SETTING_FILE)
-        return SETTING_FILE
+    if fallback_path.is_file():
+        logger.debug("[config] Using fallback file: %s", fallback_path)
+        return fallback_path
 
-    # 4. Fallback to the internal default configuration
-    try:
-        logger.debug(
-            "[config] Falling back to internal base config at %s", BASE_CONFIG_PATH
+    logger.warning("[config] No file found at any location for: %s", local_filename)
+    return None
+
+
+def _validate_dict(data: Any, path: Path, format: str) -> dict[str, Any]:
+    """
+    Validate that the parsed config is a dictionary.
+
+    :param data: The loaded content to validate.
+    :param path: Path to the original config file (used for logging).
+    :param format: Format name ('json', 'toml', etc.) for log context.
+    :return: The original data if valid, otherwise an empty dict.
+    """
+    if not isinstance(data, dict):
+        logger.warning(
+            "[config] %s content is not a dictionary: %s",
+            format.upper(),
+            path,
         )
-        return BASE_CONFIG_PATH
-    except Exception as e:
-        logger.error("[config] Failed to load internal base config: %s", e)
-        return None
+        return {}
+    return data
+
+
+def _load_by_extension(path: Path) -> dict[str, Any]:
+    """
+    Load a configuration file by its file extension.
+
+    Supports `.toml`, `.json`, and `.yaml`/`.yml` formats.
+
+    :param path: Path to the configuration file.
+    :return: Parsed configuration as a dictionary.
+    :raises ValueError: If the file extension is unsupported.
+    """
+    ext = path.suffix.lower()
+    if ext == ".json":
+        with path.open("r", encoding="utf-8") as f:
+            data = json.load(f)
+            return _validate_dict(data, path, "json")
+
+    elif ext == ".toml":
+        import tomllib
+
+        with path.open("rb") as f:
+            data = tomllib.load(f)
+            return _validate_dict(data, path, "toml")
+
+    elif ext in {".yaml", ".yml"}:
+        try:
+            import yaml
+        except ImportError as err:
+            raise ImportError(
+                "YAML config support requires PyYAML. "
+                "Install it via: pip install PyYAML"
+            ) from err
+        with path.open("r", encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+            return _validate_dict(data, path, "yaml")
+
+    else:
+        raise ValueError(f"Unsupported config file extension: {ext}")
 
 
 @cached_load_config
-def load_config(config_path: Optional[Union[str, Path]]) -> Dict[str, Any]:
+def load_config(
+    config_path: str | Path | None = None,
+) -> dict[str, Any]:
     """
     Load configuration data from a YAML file.
 
     :param config_path: Optional path to the YAML configuration file.
     :return:            Parsed configuration as a dict.
     """
-    path = resolve_config_path(config_path)
+    path = resolve_file_path(
+        user_path=config_path,
+        local_filename=[
+            "settings.toml",
+            "settings.yaml",
+            "settings.yml",
+            "settings.json",
+        ],
+        fallback_path=SETTING_FILE,
+    )
+
     if not path or not path.is_file():
-        logger.warning("[config] No valid config file found, using empty config.")
-        return {}
+        raise FileNotFoundError("No valid config file found.")
 
-    with as_file(path) as real_path:
-        try:
-            content = real_path.read_text(encoding="utf-8")
-            ext = real_path.suffix.lower()
-        except Exception as e:
-            logger.error("[config] Failed to read config file '%s': %s", path, e)
-            return {}
-
-    data: Any = None
-
-    if ext == ".json":
-        try:
-            data = json.loads(content)
-        except json.JSONDecodeError as e:
-            logger.error("[config] JSON parse error in '%s': %s", path, e)
-            return {}
-    else:
-        try:
-            data = yaml.safe_load(content)
-        except yaml.YAMLError as e:
-            logger.error("[config] YAML parse error in '%s': %s", path, e)
-            return {}
-
-    if data is None:
-        return {}
-    if not isinstance(data, dict):
-        logger.warning(
-            "[config] Expected dict in config file '%s', got %s",
-            path,
-            type(data).__name__,
-        )
-        return {}
-
-    return data
+    try:
+        return _load_by_extension(path)
+    except Exception as e:
+        logger.warning("[config] Failed to load config file: %s", e)
+    return {}
 
 
 def save_config_file(
-    source_path: Union[str, Path],
-    output_path: Union[str, Path] = SETTING_FILE,
+    source_path: str | Path,
+    output_path: str | Path = SETTING_FILE,
 ) -> None:
     """
-    Validate a YAML/JSON config file, load it into a dict,
+    Validate a TOML/YAML/JSON config file, load it into a dict,
     and then dump it as JSON to the internal SETTING_FILE.
 
-    :param source_path: The user-provided YAML file path.
+    :param source_path: The user-provided TOML file path.
     :param output_path: Destination path to save the config (default: SETTING_FILE).
     """
     source = Path(source_path).expanduser().resolve()
@@ -136,33 +163,14 @@ def save_config_file(
     if not source.is_file():
         raise FileNotFoundError(f"Source file not found: {source}")
 
-    ext = source.suffix.lower()
-
-    if ext in {".yaml", ".yml"}:
-        logger.debug("[config] Loading YAML for conversion: %s", source)
-        try:
-            with source.open("r", encoding="utf-8") as f:
-                data = yaml.safe_load(f)
-        except yaml.YAMLError as e:
-            logger.error("[config] Invalid YAML format: %s", e)
-            raise ValueError(f"Invalid YAML file: {source}") from e
-
-    elif ext == ".json":
-        logger.debug("[config] Loading JSON for saving: %s", source)
-        try:
-            with source.open("r", encoding="utf-8") as f:
-                data = json.load(f)
-        except json.JSONDecodeError as e:
-            logger.error("[config] Invalid JSON format: %s", e)
-            raise ValueError(f"Invalid JSON file: {source}") from e
-
-    else:
-        raise ValueError(f"Source file must be .yaml, .yml, or .json: {source}")
-
-    if not isinstance(data, dict):
-        raise ValueError(f"Config root must be a JSON/YAML object: {source}")
+    try:
+        data = _load_by_extension(source)
+    except (ValueError, ImportError) as e:
+        logger.error("[config] Failed to load config file: %s", e)
+        raise ValueError(f"Invalid config file: {source}") from e
 
     output.parent.mkdir(parents=True, exist_ok=True)
+
     try:
         with output.open("w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
