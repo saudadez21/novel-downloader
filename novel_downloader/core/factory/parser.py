@@ -45,11 +45,11 @@ def get_parser(site: str, config: ParserConfig) -> ParserProtocol:
         site_entry = _site_map[site_key]
         if isinstance(site_entry, dict):
             parser_class = site_entry.get(config.mode)
-            if parser_class is None:
-                raise ValueError(f"Unsupported mode '{config.mode}' for site '{site}'")
         else:
             parser_class = site_entry
-        return parser_class(config)
+
+        if parser_class:
+            return parser_class(config)
 
     # Fallback: site not mapped specially, try to load rule
     site_rules = load_site_rules()

@@ -7,6 +7,7 @@ Download full novels by book IDs
 (supports config files, site switching, and localization prompts).
 """
 
+import asyncio
 
 import click
 from click import Context
@@ -80,21 +81,20 @@ def download_cli(ctx: Context, book_ids: list[str], site: str) -> None:
 
     # Initialize the requester, parser, saver, and downloader components
     if downloader_cfg.mode == "async":
-        import asyncio
-
-        async_requester = get_async_requester(site, requester_cfg)
-        async_parser = get_parser(site, parser_cfg)
-        async_saver = get_saver(site, saver_cfg)
         setup_logging()
-        async_downloader = get_async_downloader(
-            requester=async_requester,
-            parser=async_parser,
-            saver=async_saver,
-            site=site,
-            config=downloader_cfg,
-        )
 
         async def async_download_all() -> None:
+            async_requester = get_async_requester(site, requester_cfg)
+            async_parser = get_parser(site, parser_cfg)
+            async_saver = get_saver(site, saver_cfg)
+            async_downloader = get_async_downloader(
+                requester=async_requester,
+                parser=async_parser,
+                saver=async_saver,
+                site=site,
+                config=downloader_cfg,
+            )
+
             prepare = getattr(async_downloader, "prepare", None)
             if prepare and asyncio.iscoroutinefunction(prepare):
                 await prepare()
