@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.downloaders.common.common_sync
 ----------------------------------------------------
@@ -9,18 +8,22 @@ This module defines `CommonDownloader`.
 
 import json
 import logging
-from typing import Any, Dict
+from typing import Any
 
 from novel_downloader.config import DownloaderConfig
 from novel_downloader.core.downloaders.base import BaseDownloader
 from novel_downloader.core.interfaces import (
     ParserProtocol,
-    RequesterProtocol,
     SaverProtocol,
+    SyncRequesterProtocol,
 )
+from novel_downloader.utils.chapter_storage import ChapterStorage
 from novel_downloader.utils.file_utils import save_as_json, save_as_txt
 from novel_downloader.utils.network import download_image_as_bytes
-from novel_downloader.utils.time_utils import calculate_time_difference
+from novel_downloader.utils.time_utils import (
+    calculate_time_difference,
+    sleep_with_random_delay,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +35,7 @@ class CommonDownloader(BaseDownloader):
 
     def __init__(
         self,
-        requester: RequesterProtocol,
+        requester: SyncRequesterProtocol,
         parser: ParserProtocol,
         saver: SaverProtocol,
         config: DownloaderConfig,
@@ -47,7 +50,7 @@ class CommonDownloader(BaseDownloader):
         :param config: Downloader configuration object.
         :param site: Identifier for the site the downloader is targeting.
         """
-        super().__init__(requester, parser, saver, config)
+        super().__init__(requester, parser, saver, config, site)
         self._site = site
 
     def download_one(self, book_id: str) -> None:
@@ -65,13 +68,19 @@ class CommonDownloader(BaseDownloader):
         raw_base = self.raw_data_dir / site / book_id
         cache_base = self.cache_dir / site / book_id
         info_path = raw_base / "book_info.json"
-        chapter_dir = raw_base / "chapters"
         chapters_html_dir = cache_base / "html"
 
         raw_base.mkdir(parents=True, exist_ok=True)
-        chapter_dir.mkdir(parents=True, exist_ok=True)
+        if self.save_html:
+            chapters_html_dir.mkdir(parents=True, exist_ok=True)
+        normal_cs = ChapterStorage(
+            raw_base=raw_base,
+            namespace="chapters",
+            backend_type=self._config.storage_backend,
+            batch_size=self._config.storage_batch_size,
+        )
 
-        book_info: Dict[str, Any]
+        book_info: dict[str, Any]
 
         try:
             if not info_path.exists():
@@ -86,7 +95,7 @@ class CommonDownloader(BaseDownloader):
             if days > 1:
                 raise FileNotFoundError  # trigger re-fetch
         except Exception:
-            info_html = self.requester.get_book_info(book_id, wait_time)
+            info_html = self.requester.get_book_info(book_id)
             if save_html:
                 info_html_path = chapters_html_dir / "info.html"
                 save_as_txt(info_html, info_html_path)
@@ -96,6 +105,7 @@ class CommonDownloader(BaseDownloader):
                 and book_info.get("update_time", "") != "未找到更新时间"
             ):
                 save_as_json(book_info, info_path)
+            sleep_with_random_delay(wait_time, mul_spread=1.1, max_sleep=wait_time + 2)
 
         # download cover
         cover_url = book_info.get("cover_url", "")
@@ -115,8 +125,7 @@ class CommonDownloader(BaseDownloader):
                     logger.warning("%s Skipping chapter without chapterId", TAG)
                     continue
 
-                chap_path = chapter_dir / f"{cid}.json"
-                if chap_path.exists() and skip_existing:
+                if normal_cs.exists(cid) and skip_existing:
                     logger.debug(
                         "%s Chapter already exists, skipping: %s",
                         TAG,
@@ -127,7 +136,7 @@ class CommonDownloader(BaseDownloader):
                 chap_title = chap.get("title", "")
                 logger.info("%s Fetching chapter: %s (%s)", TAG, chap_title, cid)
                 try:
-                    chap_html = self.requester.get_book_chapter(book_id, cid, wait_time)
+                    chap_html = self.requester.get_book_chapter(book_id, cid)
 
                     if save_html:
                         html_path = chapters_html_dir / f"{cid}.html"
@@ -140,6 +149,10 @@ class CommonDownloader(BaseDownloader):
                         )
 
                     chap_json = self.parser.parse_chapter(chap_html, cid)
+
+                    sleep_with_random_delay(
+                        wait_time, mul_spread=1.1, max_sleep=wait_time + 2
+                    )
                     if not chap_json:
                         logger.warning(
                             "%s Parsed chapter json is empty, skipping: %s (%s)",
@@ -158,9 +171,10 @@ class CommonDownloader(BaseDownloader):
                     )
                     continue
 
-                save_as_json(chap_json, chap_path)
+                normal_cs.save(chap_json)
                 logger.info("%s Saved chapter: %s (%s)", TAG, chap_title, cid)
 
+        normal_cs.close()
         self.saver.save(book_id)
 
         logger.info(

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.parsers.qidian.shared.book_info_parser
 ------------------------------------------------------------
@@ -12,7 +11,7 @@ time, status, word count, summary, and volume-chapter structure.
 
 import logging
 import re
-from typing import Any, Dict
+from typing import Any
 
 from bs4.element import Tag
 
@@ -93,7 +92,7 @@ def safe_select_attr(
     return default
 
 
-def parse_book_info(html_str: str) -> Dict[str, Any]:
+def parse_book_info(html_str: str) -> dict[str, Any]:
     """
     Extract metadata: title, author, cover_url, update_time, status,
     word_count, summary, and volumes with chapters.
@@ -101,7 +100,7 @@ def parse_book_info(html_str: str) -> Dict[str, Any]:
     :param html_str: Raw HTML of the book info page.
     :return: A dict containing book metadata.
     """
-    info: Dict[str, Any] = {}
+    info: dict[str, Any] = {}
     try:
         soup = html_to_soup(html_str)
         info["book_name"] = safe_select_text(soup, "em#bookName", strip=True)

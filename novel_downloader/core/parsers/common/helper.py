@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.parsers.common.helpers
 --------------------------------------------
@@ -9,7 +8,8 @@ Shared utility functions for parsing Common pages.
 
 import logging
 import re
-from typing import Any, Dict, Iterable, Iterator, List, Optional, cast
+from collections.abc import Iterable, Iterator
+from typing import Any, cast
 
 from bs4 import BeautifulSoup, Tag
 
@@ -47,7 +47,7 @@ class HTMLExtractor:
         self._html = html
         self._soup = html_to_soup(html)
 
-    def extract_book_info(self, rules: BookInfoRules) -> Dict[str, Any]:
+    def extract_book_info(self, rules: BookInfoRules) -> dict[str, Any]:
         """
         Extract structured book information from HTML according to the given rules.
 
@@ -56,7 +56,7 @@ class HTMLExtractor:
         :param rules: Extraction configuration specifying how to extract.
         :return: A dictionary containing extracted book information.
         """
-        book_info: Dict[str, Any] = {}
+        book_info: dict[str, Any] = {}
 
         for field_name, field_rules in rules.items():
             if field_rules is None:
@@ -72,7 +72,7 @@ class HTMLExtractor:
 
         return book_info
 
-    def extract_field(self, steps: List[RuleStep]) -> str:
+    def extract_field(self, steps: list[RuleStep]) -> str:
         """
         Execute a list of extraction steps on the given HTML.
 
@@ -209,7 +209,7 @@ class HTMLExtractor:
             return str(current.get_text().strip())
         return str(current or "").strip()
 
-    def extract_mixed_volumes(self, volume_rule: VolumesRules) -> List[Dict[str, Any]]:
+    def extract_mixed_volumes(self, volume_rule: VolumesRules) -> list[dict[str, Any]]:
         """
         Special mode: mixed <volume> and <chapter> under same parent.
         (e.g., dt / dd pattern in BiQuGe)
@@ -228,8 +228,8 @@ class HTMLExtractor:
                 "chapter_selector 和 volume_name_steps"
             )
 
-        volumes: List[Dict[str, Any]] = []
-        current_volume: Optional[Dict[str, Any]] = None
+        volumes: list[dict[str, Any]] = []
+        current_volume: dict[str, Any] | None = None
         if not chapter_steps_list:
             chapter_steps_list = []
         chapter_info_steps = {item["key"]: item["steps"] for item in chapter_steps_list}
@@ -258,7 +258,7 @@ class HTMLExtractor:
 
         return volumes
 
-    def extract_volume_blocks(self, volume_rule: VolumesRules) -> List[Dict[str, Any]]:
+    def extract_volume_blocks(self, volume_rule: VolumesRules) -> list[dict[str, Any]]:
         volume_selector = volume_rule.get("volume_selector")
         volume_name_steps = volume_rule.get("volume_name_steps")
         chapter_selector = volume_rule["chapter_selector"]
@@ -285,7 +285,7 @@ class HTMLExtractor:
 
         return volumes
 
-    def extract_flat_chapters(self, volume_rule: VolumesRules) -> List[Dict[str, Any]]:
+    def extract_flat_chapters(self, volume_rule: VolumesRules) -> list[dict[str, Any]]:
         chapter_selector = volume_rule["chapter_selector"]
         chapter_steps_list = volume_rule["chapter_steps"]
         volume_selector = volume_rule.get("volume_selector")
@@ -312,7 +312,7 @@ class HTMLExtractor:
 
     def extract_volumes_structure(
         self, volume_rule: VolumesRules
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         volume_mode = volume_rule.get("volume_mode", "normal")
         if volume_mode == "mixed":
             return self.extract_mixed_volumes(volume_rule)

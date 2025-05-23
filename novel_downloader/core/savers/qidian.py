@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-novel_downloader.core.savers.qidian_saver
------------------------------------------
+novel_downloader.core.savers.qidian
+-----------------------------------
 
 This module provides the `QidianSaver` class for handling the saving process
 of novels sourced from Qidian (起点中文网). It implements the platform-specific
@@ -15,8 +14,15 @@ from .common import CommonSaver
 
 
 class QidianSaver(CommonSaver):
-    def __init__(self, config: SaverConfig):
-        super().__init__(config, site="qidian")
+    def __init__(
+        self,
+        config: SaverConfig,
+    ):
+        super().__init__(
+            config,
+            site="qidian",
+            chap_folders=["chapters", "encrypted_chapters"],
+        )
 
 
 __all__ = ["QidianSaver"]

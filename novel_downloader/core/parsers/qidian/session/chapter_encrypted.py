@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.parsers.qidian.session.chapter_encrypted
 --------------------------------------------------------------
@@ -19,11 +18,12 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any
 
 import tinycss2
 from bs4 import BeautifulSoup, Tag
 
+from novel_downloader.utils.chapter_storage import ChapterDict
 from novel_downloader.utils.network import download_font_file
 from novel_downloader.utils.text_utils import apply_font_mapping
 
@@ -40,7 +40,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 IGNORED_CLASS_LISTS = {"title", "review"}
-_decryptor: Optional[QidianNodeDecryptor] = None
+_decryptor: QidianNodeDecryptor | None = None
 
 
 def _get_decryptor() -> QidianNodeDecryptor:
@@ -58,7 +58,7 @@ def parse_encrypted_chapter(
     soup: BeautifulSoup,
     chapter_id: str,
     fuid: str,
-) -> Dict[str, Any]:
+) -> ChapterDict | None:
     """
     Extract and return the formatted textual content of an encrypted chapter.
 
@@ -75,15 +75,15 @@ def parse_encrypted_chapter(
     """
     try:
         if not (parser._decode_font and parser._font_ocr):
-            return {}
+            return None
         ssr_data = find_ssr_page_context(soup)
         chapter_info = extract_chapter_info(ssr_data)
         if not chapter_info:
             logger.warning(
                 "[Parser] ssr_chapterInfo not found for chapter '%s'", chapter_id
             )
-            return {}
-        debug_base_dir: Optional[Path] = None
+            return None
+        debug_base_dir: Path | None = None
         if parser._font_debug_dir:
             debug_base_dir = parser._font_debug_dir / chapter_id
             debug_base_dir.mkdir(parents=True, exist_ok=True)
@@ -101,15 +101,12 @@ def parse_encrypted_chapter(
         update_timestamp = chapter_info.get("updateTimestamp", 0)
         modify_time = chapter_info.get("modifyTime", 0)
         word_count = chapter_info.get("wordsCount", 0)
-        vip = bool(chapter_info.get("vipStatus", 0))
-        is_buy = bool(chapter_info.get("isBuy", 0))
         seq = chapter_info.get("seq", None)
-        order = chapter_info.get("chapterOrder", None)
         volume = chapter_info.get("extra", {}).get("volumeName", "")
 
         if not raw_html:
             logger.warning("[Parser] raw_html not found for chapter '%s'", chapter_id)
-            return {}
+            return None
 
         # extract + save font
         rf = json.loads(randomFont_str)
@@ -136,7 +133,7 @@ def parse_encrypted_chapter(
                 )
             except Exception as e:
                 logger.error("[Parser] decryption failed for '%s': %s", chapter_id, e)
-                return {}
+                return None
         main_paragraphs = extract_paragraphs_recursively(html_to_soup(raw_html))
         if debug_base_dir:
             main_paragraphs_path = debug_base_dir / "main_paragraphs_debug.json"
@@ -159,7 +156,7 @@ def parse_encrypted_chapter(
             paragraphs_str_path.write_text(paragraphs_str, encoding="utf-8")
 
         # Run OCR + fallback mapping
-        char_set = set(c for c in paragraphs_str if c not in {" ", "\n", "\u3000"})
+        char_set = {c for c in paragraphs_str if c not in {" ", "\n", "\u3000"}}
         refl_set = set(refl_list)
         char_set = char_set - refl_set
         if debug_base_dir:
@@ -190,33 +187,31 @@ def parse_encrypted_chapter(
         final_paragraphs_str = "\n\n".join(
             line.strip() for line in original_text.splitlines() if line.strip()
         )
-        chapter_info = {
+        return {
             "id": str(chapter_id),
-            "title": title,
+            "title": str(title),
             "content": final_paragraphs_str,
-            "author_say": author_say.strip() if author_say else "",
-            "updated_at": update_time,
-            "update_timestamp": update_timestamp,
-            "modify_time": modify_time,
-            "word_count": word_count,
-            "vip": vip,
-            "purchased": is_buy,
-            "order": order,
-            "seq": seq,
-            "volume": volume,
+            "extra": {
+                "author_say": author_say.strip() if author_say else "",
+                "updated_at": update_time,
+                "update_timestamp": update_timestamp,
+                "modify_time": modify_time,
+                "word_count": word_count,
+                "seq": seq,
+                "volume": volume,
+            },
         }
-        return chapter_info
 
     except Exception as e:
         logger.warning(
             "[Parser] parse error for encrypted chapter '%s': %s", chapter_id, e
         )
-    return {}
+    return None
 
 
 def extract_paragraphs_recursively(
     soup: BeautifulSoup, chapter_id: int = -1
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """
     Extracts paragraph elements under <main id="c-{chapter_id}"> from HTML
     and converts them to a nested data structure for further processing.
@@ -227,7 +222,7 @@ def extract_paragraphs_recursively(
     :return list: List of parsed <p> paragraph data.
     """
 
-    def parse_element(elem: Any) -> Union[Dict[str, Any], None]:
+    def parse_element(elem: Any) -> dict[str, Any] | None:
         if not isinstance(elem, Tag):
             return None
         result = {"tag": elem.name, "attrs": dict(elem.attrs), "data": []}
@@ -259,7 +254,7 @@ def extract_paragraphs_recursively(
     return result
 
 
-def parse_rule(css_str: str) -> Dict[str, Any]:
+def parse_rule(css_str: str) -> dict[str, Any]:
     """
     Parse a CSS string and extract style rules for rendering.
 
@@ -274,7 +269,7 @@ def parse_rule(css_str: str) -> Dict[str, Any]:
     :return: Dict with "rules" and "orders" for rendering.
     """
 
-    rules: Dict[str, Any] = {}
+    rules: dict[str, Any] = {}
     orders = []
 
     stylesheet = tinycss2.parse_stylesheet(
@@ -339,8 +334,8 @@ def parse_rule(css_str: str) -> Dict[str, Any]:
 
 
 def render_paragraphs(
-    main_paragraphs: List[Dict[str, Any]], rules: Dict[str, Any]
-) -> Tuple[str, List[str]]:
+    main_paragraphs: list[dict[str, Any]], rules: dict[str, Any]
+) -> tuple[str, list[str]]:
     """
     Applies the parsed CSS rules to the paragraph structure and
     reconstructs the visible text.
@@ -358,11 +353,11 @@ def render_paragraphs(
         - A reconstructed paragraph string with line breaks.
         - A list of mirrored (reflected) characters for later OCR processing.
     """
-    orders: List[Tuple[str, str]] = rules.get("orders", [])
+    orders: list[tuple[str, str]] = rules.get("orders", [])
     rules = rules.get("rules", {})
-    refl_list: List[str] = []
+    refl_list: list[str] = []
 
-    def apply_rule(data: Dict[str, Any], rule: Dict[str, Any]) -> str:
+    def apply_rule(data: dict[str, Any], rule: dict[str, Any]) -> str:
         if rule.get("delete-all", False):
             return ""
 
@@ -373,10 +368,7 @@ def render_paragraphs(
                 curr_str += first_data
 
         if rule.get("delete-first", False):
-            if len(curr_str) <= 1:
-                curr_str = ""
-            else:
-                curr_str = curr_str[1:]
+            curr_str = "" if len(curr_str) <= 1 else curr_str[1:]
 
         curr_str += rule.get("append-end-char", "")
 
@@ -433,7 +425,7 @@ def render_paragraphs(
                     logger.debug(f"[parser] not find p_class_str: {class_list}")
                     continue
                 # 普通标签处理，根据 orders 顺序匹配
-                for ord_selector, ord_id in orders:
+                for ord_selector, _ in orders:
                     tag_name = f"{ord_selector}"
                     if data.get("tag") != tag_name:
                         continue
@@ -442,7 +434,7 @@ def render_paragraphs(
                     ordered_cache[ord_selector] = apply_rule(data, curr_rule)
                     break
         # 最后按 orders 顺序拼接
-        for ord_selector, ord_id in orders:
+        for ord_selector, _ in orders:
             if ord_selector in ordered_cache:
                 paragraphs_str += ordered_cache[ord_selector]
 

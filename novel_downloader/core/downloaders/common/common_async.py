@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.downloaders.common.common_async
 -----------------------------------------------------
 
-This module defines `CommonAsynbDownloader`.
 """
 
 import asyncio
 import json
 import logging
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
-from typing import Any, Dict, Tuple
+from typing import Any
 
 from novel_downloader.config import DownloaderConfig
 from novel_downloader.core.downloaders.base import BaseAsyncDownloader
@@ -20,6 +18,7 @@ from novel_downloader.core.interfaces import (
     ParserProtocol,
     SaverProtocol,
 )
+from novel_downloader.utils.chapter_storage import ChapterDict, ChapterStorage
 from novel_downloader.utils.file_utils import save_as_json, save_as_txt
 from novel_downloader.utils.network import download_image_as_bytes
 from novel_downloader.utils.time_utils import calculate_time_difference
@@ -63,19 +62,25 @@ class CommonAsyncDownloader(BaseAsyncDownloader):
         assert isinstance(self.requester, AsyncRequesterProtocol)
 
         TAG = "[AsyncDownloader]"
+        wait_time = self.config.request_interval
+
         raw_base = self.raw_data_dir / book_id
         cache_base = self.cache_dir / book_id
         info_path = raw_base / "book_info.json"
         chapters_html_dir = cache_base / "html"
-        chapter_dir = raw_base / "chapters"
 
         raw_base.mkdir(parents=True, exist_ok=True)
-        chapter_dir.mkdir(parents=True, exist_ok=True)
         if self.save_html:
             chapters_html_dir.mkdir(parents=True, exist_ok=True)
+        normal_cs = ChapterStorage(
+            raw_base=raw_base,
+            namespace="chapters",
+            backend_type=self._config.storage_backend,
+            batch_size=self._config.storage_batch_size,
+        )
 
         # load or fetch book_info
-        book_info: Dict[str, Any]
+        book_info: dict[str, Any]
         re_fetch = True
         if info_path.exists():
             try:
@@ -88,9 +93,7 @@ class CommonAsyncDownloader(BaseAsyncDownloader):
                 re_fetch = True
 
         if re_fetch:
-            info_html = await self.requester.get_book_info(
-                book_id, self.request_interval
-            )
+            info_html = await self.requester.get_book_info(book_id)
             if self.save_html:
                 save_as_txt(info_html, chapters_html_dir / "info.html")
             book_info = self.parser.parse_book_info(info_html)
@@ -98,6 +101,7 @@ class CommonAsyncDownloader(BaseAsyncDownloader):
                 save_as_json(book_info, info_path)
             else:
                 logger.warning("%s 书籍信息未找到, book_id = %s", TAG, book_id)
+            await asyncio.sleep(wait_time)
         else:
             book_info = json.loads(info_path.read_text("utf-8"))
 
@@ -110,7 +114,8 @@ class CommonAsyncDownloader(BaseAsyncDownloader):
 
         # setup queue, semaphore, executor
         semaphore = asyncio.Semaphore(self.download_workers)
-        queue: asyncio.Queue[Tuple[str, str]] = asyncio.Queue()
+        queue: asyncio.Queue[tuple[str, str]] = asyncio.Queue()
+        save_queue: asyncio.Queue[ChapterDict] = asyncio.Queue()
         loop = asyncio.get_running_loop()
         executor = (
             ProcessPoolExecutor() if self.use_process_pool else ThreadPoolExecutor()
@@ -124,12 +129,7 @@ class CommonAsyncDownloader(BaseAsyncDownloader):
                         executor, self.parser.parse_chapter, html, cid
                     )
                     if chap_json:
-                        await loop.run_in_executor(
-                            executor,
-                            save_as_json,
-                            chap_json,
-                            chapter_dir / f"{cid}.json",
-                        )
+                        await save_queue.put(chap_json)
                         logger.info(
                             "%s [Parser-%d] saved chapter %s", TAG, worker_id, cid
                         )
@@ -140,27 +140,34 @@ class CommonAsyncDownloader(BaseAsyncDownloader):
                 finally:
                     queue.task_done()
 
-        async def download_worker(chap: Dict[str, Any]) -> None:
+        async def saver_loop(
+            cs: ChapterStorage,
+            queue: asyncio.Queue[ChapterDict],
+        ) -> None:
+            while True:
+                data = await queue.get()
+                try:
+                    cs.save(data)
+                except Exception as e:
+                    logger.error(
+                        "[saver] Error saving chapter %s: %s",
+                        data.get("id"),
+                        e,
+                    )
+                finally:
+                    queue.task_done()
+
+        async def download_worker(chap: dict[str, Any]) -> None:
             cid = str(chap.get("chapterId") or "")
             if not cid:
                 return
-            target = chapter_dir / f"{cid}.json"
-            if target.exists() and self.skip_existing:
+            if normal_cs.exists(cid) and self.skip_existing:
                 logger.info("%s skipping existing chapter %s", TAG, cid)
                 return
 
             try:
                 async with semaphore:
-                    html = await self.requester.get_book_chapter(
-                        book_id, cid, self.request_interval
-                    )
-                if self.save_html:
-                    await loop.run_in_executor(
-                        executor,
-                        save_as_txt,
-                        html,
-                        chapters_html_dir / f"{cid}.html",
-                    )
+                    html = await self.requester.get_book_chapter(book_id, cid)
                 await queue.put((cid, html))
                 logger.info("%s downloaded chapter %s", TAG, cid)
             except Exception as e:
@@ -170,6 +177,7 @@ class CommonAsyncDownloader(BaseAsyncDownloader):
         parsers = [
             asyncio.create_task(parser_worker(i)) for i in range(self.parser_workers)
         ]
+        chapter_saver = asyncio.create_task(saver_loop(normal_cs, save_queue))
 
         # enqueue + run downloads
         download_tasks = []
@@ -179,8 +187,10 @@ class CommonAsyncDownloader(BaseAsyncDownloader):
 
         await asyncio.gather(*download_tasks)
         await queue.join()  # wait until all parsed
+        await save_queue.join()
         for p in parsers:
             p.cancel()  # stop parser loops
+        chapter_saver.cancel()
 
         # final save
         await loop.run_in_executor(executor, self.saver.save, book_id)

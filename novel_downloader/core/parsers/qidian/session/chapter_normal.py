@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.parsers.qidian.session.chapter_normal
 -----------------------------------------------------------
@@ -12,9 +11,10 @@ Provides `parse_normal_chapter`, which will:
 """
 
 import logging
-from typing import Any, Dict, Optional
 
 from bs4 import BeautifulSoup
+
+from novel_downloader.utils.chapter_storage import ChapterDict
 
 from ..shared import (
     extract_chapter_info,
@@ -25,7 +25,7 @@ from ..shared import (
 from .node_decryptor import QidianNodeDecryptor
 
 logger = logging.getLogger(__name__)
-_decryptor: Optional[QidianNodeDecryptor] = None
+_decryptor: QidianNodeDecryptor | None = None
 
 
 def _get_decryptor() -> QidianNodeDecryptor:
@@ -42,7 +42,7 @@ def parse_normal_chapter(
     soup: BeautifulSoup,
     chapter_id: str,
     fuid: str,
-) -> Dict[str, Any]:
+) -> ChapterDict | None:
     """
     Extract structured chapter info from a normal Qidian page.
 
@@ -58,7 +58,7 @@ def parse_normal_chapter(
             logger.warning(
                 "[Parser] ssr_chapterInfo not found for chapter '%s'", chapter_id
             )
-            return {}
+            return None
 
         title = chapter_info.get("chapterName", "Untitled")
         raw_html = chapter_info.get("content", "")
@@ -69,15 +69,12 @@ def parse_normal_chapter(
         update_timestamp = chapter_info.get("updateTimestamp", 0)
         modify_time = chapter_info.get("modifyTime", 0)
         word_count = chapter_info.get("wordsCount", 0)
-        vip = bool(chapter_info.get("vipStatus", 0))
-        is_buy = bool(chapter_info.get("isBuy", 0))
         seq = chapter_info.get("seq", None)
-        order = chapter_info.get("chapterOrder", None)
         volume = chapter_info.get("extra", {}).get("volumeName", "")
 
         if not raw_html:
             logger.warning("[Parser] raw_html not found for chapter '%s'", chapter_id)
-            return {}
+            return None
 
         if vip_status(soup):
             try:
@@ -90,7 +87,7 @@ def parse_normal_chapter(
                 )
             except Exception as e:
                 logger.error("[Parser] decryption failed for '%s': %s", chapter_id, e)
-                return {}
+                return None
 
         paras_soup = html_to_soup(raw_html)
         paras = [p.get_text(strip=True) for p in paras_soup.find_all("p")]
@@ -100,20 +97,19 @@ def parse_normal_chapter(
             "id": str(chapter_id),
             "title": title,
             "content": chapter_text,
-            "author_say": author_say.strip() if author_say else "",
-            "updated_at": update_time,
-            "update_timestamp": update_timestamp,
-            "modify_time": modify_time,
-            "word_count": word_count,
-            "vip": vip,
-            "purchased": is_buy,
-            "order": order,
-            "seq": seq,
-            "volume": volume,
+            "extra": {
+                "author_say": author_say.strip() if author_say else "",
+                "updated_at": update_time,
+                "update_timestamp": update_timestamp,
+                "modify_time": modify_time,
+                "word_count": word_count,
+                "seq": seq,
+                "volume": volume,
+            },
         }
 
     except Exception as e:
         logger.warning(
             "[Parser] parse error for normal chapter '%s': %s", chapter_id, e
         )
-        return {}
+    return None

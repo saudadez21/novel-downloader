@@ -1,6 +1,6 @@
 ## 文件保存
 
-运行时会根据配置文件 (如 `./settings.yaml`) 在项目根目录下自动创建三个文件夹:
+运行时会根据配置文件 (如 `./settings.toml`) 在项目根目录下自动创建三个文件夹:
 
 - `downloads`
 - `novel_cache`

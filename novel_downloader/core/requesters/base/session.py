@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.requesters.base.session
 ---------------------------------------------
@@ -10,71 +9,83 @@ persistent session and supports retries, headers, and timeout configurations.
 """
 
 import abc
-from typing import Any, Dict, Literal, Optional, Union
+import logging
+import types
+from collections.abc import Mapping
+from typing import Any, Literal, Self
 
 import requests
 from requests import Response, Session
 from requests.adapters import HTTPAdapter, Retry
 
 from novel_downloader.config.models import RequesterConfig
-from novel_downloader.core.interfaces import RequesterProtocol
+from novel_downloader.core.interfaces import SyncRequesterProtocol
 from novel_downloader.utils.constants import DEFAULT_USER_HEADERS
 
 
-class BaseSession(RequesterProtocol, abc.ABC):
+class BaseSession(SyncRequesterProtocol, abc.ABC):
     """
     BaseSession wraps basic HTTP operations using requests.Session,
     supporting retry logic, timeout, and persistent connections.
 
     Attributes:
         _session (requests.Session): The persistent HTTP session.
-        _timeout (float): Timeout for each request in seconds.
     """
 
     def is_async(self) -> Literal[False]:
         return False
 
-    def _init_session(
-        self, config: RequesterConfig, cookies: Optional[Dict[str, str]] = None
+    def __init__(
+        self,
+        config: RequesterConfig,
+        cookies: dict[str, str] | None = None,
     ) -> None:
         """
-        Initialize the requests.Session with default headers and retry strategy.
+        Initialize a Session instance.
 
-        :param config: Configuration object for session behavior
-                        (timeouts, retries, headers, etc.)
+        :param config: The RequesterConfig instance containing settings.
+        :param cookies: Optional cookies to preload into the session.
         """
+        super().__init__()
         self._config = config
-        self._timeout = config.timeout
-        self._retry_times = config.retry_times
-        self._retry_interval = config.retry_interval
         self._cookies = cookies or {}
-        self._headers = DEFAULT_USER_HEADERS
-        self._session: Optional[Session] = None
-
-        self._setup()
-
-    def _setup(self) -> None:
-        """
-        Set up the session with retry strategy and apply default headers.
-        """
-        self._session = requests.Session()
+        self._headers = DEFAULT_USER_HEADERS.copy()
+        self._session: Session | None = None
 
         retry_strategy = Retry(
-            total=self._config.retry_times,
-            backoff_factor=self._config.retry_interval,
-            status_forcelist=[429, 500, 502, 503, 504],
+            total=config.retry_times,
+            backoff_factor=config.backoff_factor,
+            status_forcelist=[408, 429, 500, 502, 503, 504],
             allowed_methods=["HEAD", "GET", "OPTIONS"],
         )
 
-        adapter = HTTPAdapter(max_retries=retry_strategy)
-        self._session.mount("http://", adapter)
-        self._session.mount("https://", adapter)
+        self._adapter = HTTPAdapter(max_retries=retry_strategy)
+        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
+
+        self._init_session()
+
+    def _init_session(self) -> None:
+        """
+        Set up the session with retry strategy and apply default headers.
+        """
+        if self._session:
+            return
+
+        self._session = requests.Session()
+        self._session.mount("http://", self._adapter)
+        self._session.mount("https://", self._adapter)
         self._session.headers.update(self._headers)
 
         if self._cookies:
             self._session.cookies.update(self._cookies)
 
-    def login(self, max_retries: int = 3, manual_login: bool = False) -> bool:
+    def login(
+        self,
+        username: str = "",
+        password: str = "",
+        manual_login: bool = False,
+        **kwargs: Any,
+    ) -> bool:
         """
         Attempt to log in
         """
@@ -84,37 +95,46 @@ class BaseSession(RequesterProtocol, abc.ABC):
         )
 
     @abc.abstractmethod
-    def get_book_info(self, book_id: str, wait_time: Optional[float] = None) -> str:
+    def get_book_info(
+        self,
+        book_id: str,
+        **kwargs: Any,
+    ) -> str:
         """
         Fetch the raw HTML (or JSON) of the book info page.
 
         :param book_id: The book identifier.
-        :param wait_time: Base number of seconds to wait before returning content.
         :return: The page content as a string.
         """
         ...
 
     @abc.abstractmethod
     def get_book_chapter(
-        self, book_id: str, chapter_id: str, wait_time: Optional[float] = None
+        self,
+        book_id: str,
+        chapter_id: str,
+        **kwargs: Any,
     ) -> str:
         """
         Fetch the raw HTML (or JSON) of a single chapter.
 
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :param wait_time: Base number of seconds to wait before returning content.
         :return: The chapter content as a string.
         """
         ...
 
-    def get_bookcase(self, wait_time: Optional[float] = None) -> str:
+    def get_bookcase(
+        self,
+        page: int = 1,
+        **kwargs: Any,
+    ) -> str:
         """
         Optional: Retrieve the HTML content of the authenticated user's bookcase page.
 
         Subclasses that support user login and bookcase retrieval should override this.
 
-        :param wait_time: Base number of seconds to wait before returning content.
+        :param page: Page idx
         :return: The HTML markup of the bookcase page.
         :raises NotImplementedError: If the subclass does not implement.
         """
@@ -124,7 +144,10 @@ class BaseSession(RequesterProtocol, abc.ABC):
         )
 
     def get(
-        self, url: str, params: Optional[Dict[str, Any]] = None, **kwargs: Any
+        self,
+        url: str,
+        params: dict[str, Any] | None = None,
+        **kwargs: Any,
     ) -> Response:
         """
         Send a GET request.
@@ -135,15 +158,13 @@ class BaseSession(RequesterProtocol, abc.ABC):
         :return: Response object from the GET request.
         :raises RuntimeError: If the session is not initialized.
         """
-        if not self._session:
-            raise RuntimeError("Session is not initialized or has been shut down.")
-        return self._session.get(url, params=params, timeout=self._timeout, **kwargs)
+        return self.session.get(url, params=params, **kwargs)
 
     def post(
         self,
         url: str,
-        data: Optional[Union[Dict[str, Any], bytes]] = None,
-        json: Optional[Dict[str, Any]] = None,
+        data: dict[str, Any] | bytes | None = None,
+        json: dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> Response:
         """
@@ -156,11 +177,41 @@ class BaseSession(RequesterProtocol, abc.ABC):
         :return: Response object from the POST request.
         :raises RuntimeError: If the session is not initialized.
         """
-        if not self._session:
-            raise RuntimeError("Session is not initialized or has been shut down.")
-        return self._session.post(
-            url, data=data, json=json, timeout=self._timeout, **kwargs
-        )
+        return self.session.post(url, data=data, json=json, **kwargs)
+
+    def put(
+        self,
+        url: str,
+        data: dict[str, Any] | bytes | None = None,
+        json: dict[str, Any] | None = None,
+        **kwargs: Any,
+    ) -> Response:
+        """
+        Send a PUT request with retry logic.
+        """
+        return self.session.put(url, data=data, json=json, **kwargs)
+
+    def patch(
+        self,
+        url: str,
+        data: dict[str, Any] | bytes | None = None,
+        json: dict[str, Any] | None = None,
+        **kwargs: Any,
+    ) -> Response:
+        """
+        Send a PATCH request with retry logic.
+        """
+        return self.session.patch(url, data=data, json=json, **kwargs)
+
+    def delete(
+        self,
+        url: str,
+        **kwargs: Any,
+    ) -> Response:
+        """
+        Send a DELETE request with retry logic.
+        """
+        return self.session.delete(url, **kwargs)
 
     @property
     def session(self) -> Session:
@@ -170,51 +221,101 @@ class BaseSession(RequesterProtocol, abc.ABC):
         :raises RuntimeError: If the session is uninitialized or has been shut down.
         """
         if self._session is None:
+            # self._init_session()
             raise RuntimeError("Session is not initialized or has been shut down.")
         return self._session
 
     @property
-    def timeout(self) -> float:
-        """Return the default timeout setting."""
-        return self._timeout
-
-    @property
-    def retry_times(self) -> int:
-        """Return the maximum number of retry attempts."""
-        return self._retry_times
-
-    @property
-    def retry_interval(self) -> float:
-        """Return the base interval (in seconds) between retries."""
-        return self._retry_interval
-
-    @property
-    def headers(self) -> Dict[str, str]:
-        """Return the default headers."""
-        if not self._session:
-            return {}
-        return {k: v for k, v in self._session.headers.items() if isinstance(v, str)}
-
-    def update_cookies(self, cookies: Dict[str, str], overwrite: bool = True) -> None:
+    def cookies(self) -> dict[str, str]:
         """
-        Update cookies for the current session (if initialized) as well as for the
-        internal cache kept in ``self._cookies`` so that subsequent ``_setup`` calls
-        also see the latest values.
-        """
-        if not cookies:
-            return
+        Get the current session cookies.
 
-        if overwrite:
-            for k, v in cookies.items():
-                self._cookies[str(k)] = str(v)
+        :return: A dict mapping cookie names to their values.
+        """
+        if self._session:
+            return self._session.cookies.get_dict()
         else:
-            for k, v in cookies.items():
-                self._cookies.setdefault(str(k), str(v))
+            return self._cookies
 
-        if self._session is not None:
-            self._session.cookies.update(self._cookies)
+    @property
+    def headers(self) -> Mapping[str, str | bytes]:
+        """
+        Get the current session headers.
 
-    def shutdown(self) -> None:
+        :return: A dict mapping header names to their values.
+        """
+        if self._session:
+            return self._session.headers
+        else:
+            return self._headers
+
+    def get_header(self, key: str, default: Any = None) -> Any:
+        """
+        Retrieve a specific header value by name.
+
+        :param key: The header name to look up.
+        :param default: The value to return if the header is not present.
+        :return: The header value if present, else default.
+        """
+        if self._session:
+            return self._session.headers.get(key, default)
+        else:
+            return self._headers.get(key, default)
+
+    def update_header(self, key: str, value: str) -> None:
+        """
+        Update or add a single header in the session.
+
+        :param key: The name of the header.
+        :param value: The value of the header.
+        """
+        self._headers[key] = value
+        if self._session:
+            self._session.headers[key] = value
+
+    def update_headers(self, headers: dict[str, str]) -> None:
+        """
+        Update or add multiple headers in the session.
+
+        :param headers: A dictionary of header key-value pairs.
+        """
+        self._headers.update(headers)
+        if self._session:
+            self._session.headers.update(headers)
+
+    def update_cookie(self, key: str, value: str) -> None:
+        """
+        Update or add a single cookie in the session.
+
+        :param key: The name of the cookie.
+        :param value: The value of the cookie.
+        """
+        self._cookies[key] = value
+        if self._session:
+            self._session.cookies.set(key, value)
+
+    def update_cookies(
+        self,
+        cookies: dict[str, str],
+    ) -> None:
+        """
+        Update or add multiple cookies in the session.
+
+        :param cookies: A dictionary of cookie key-value pairs.
+        """
+        self._cookies.update(cookies)
+        if self._session:
+            self._session.cookies.update(cookies)
+
+    def clear_cookies(self) -> None:
+        """
+        Clear cookies from the session.
+        """
+        self._cookies = {}
+        if self._session:
+            self._session.cookies.clear()
+
+    def close(self) -> None:
         """
         Shutdown and clean up the session.
 
@@ -224,7 +325,23 @@ class BaseSession(RequesterProtocol, abc.ABC):
             self._session.close()
             self._session = None
 
-    def __getstate__(self) -> Dict[str, Any]:
+    def __enter__(self) -> Self:
+        if self._session is None:
+            self._init_session()
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        tb: types.TracebackType | None,
+    ) -> None:
+        self.close()
+
+    def __del__(self) -> None:
+        self.close()
+
+    def __getstate__(self) -> dict[str, Any]:
         """
         Prepare object state for serialization.
 
@@ -232,15 +349,16 @@ class BaseSession(RequesterProtocol, abc.ABC):
 
         :return: Serializable dict of the object state.
         """
+        self.close()
         state = self.__dict__.copy()
         state.pop("_session", None)
         return state
 
-    def __setstate__(self, state: Dict[str, Any]) -> None:
+    def __setstate__(self, state: dict[str, Any]) -> None:
         """
         Restore object state and reinitialize session.
 
         :param state: Saved state dictionary.
         """
         self.__dict__.update(state)
-        self._setup()
+        self._init_session()

@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-novel_downloader.core.interfaces.parser_protocol
-------------------------------------------------
+novel_downloader.core.interfaces.parser
+---------------------------------------
 
 Defines the ParserProtocol interface for extracting book metadata,
 parsing individual chapter content, and setting parser context via book_id.
 """
 
-from typing import Any, Dict, Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
+
+from novel_downloader.utils.chapter_storage import ChapterDict
 
 
 @runtime_checkable
@@ -20,7 +21,7 @@ class ParserProtocol(Protocol):
       - accept a book_id context for multi-step workflows.
     """
 
-    def parse_book_info(self, html_str: str) -> Dict[str, Any]:
+    def parse_book_info(self, html_str: str) -> dict[str, Any]:
         """
         Parse and return a dictionary of book information from the raw HTML.
 
@@ -29,7 +30,11 @@ class ParserProtocol(Protocol):
         """
         ...
 
-    def parse_chapter(self, html_str: str, chapter_id: str) -> Dict[str, Any]:
+    def parse_chapter(
+        self,
+        html_str: str,
+        chapter_id: str,
+    ) -> ChapterDict | None:
         """
         Parse and return the text content of one chapter.
 

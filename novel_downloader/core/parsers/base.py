@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.parsers.base
 ----------------------------------
@@ -16,10 +15,11 @@ a standard parsing interface for:
 
 import abc
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 from novel_downloader.config import ParserConfig
 from novel_downloader.core.interfaces import ParserProtocol
+from novel_downloader.utils.chapter_storage import ChapterDict
 
 
 class BaseParser(ParserProtocol, abc.ABC):
@@ -33,19 +33,23 @@ class BaseParser(ParserProtocol, abc.ABC):
     Subclasses must implement actual parsing logic for specific sites.
     """
 
-    def __init__(self, config: ParserConfig):
+    def __init__(
+        self,
+        config: ParserConfig,
+    ):
         """
         Initialize the parser with a configuration object.
 
         :param config: ParserConfig object controlling parsing behavior.
         """
         self._config = config
-        self._book_id: Optional[str] = None
+        self._book_id: str | None = None
 
         self._base_cache_dir = Path(config.cache_dir)
+        self._cache_dir = self._base_cache_dir
 
     @abc.abstractmethod
-    def parse_book_info(self, html_str: str) -> Dict[str, Any]:
+    def parse_book_info(self, html_str: str) -> dict[str, Any]:
         """
         Parse a book info page and extract metadata and chapter structure.
 
@@ -58,7 +62,11 @@ class BaseParser(ParserProtocol, abc.ABC):
         ...
 
     @abc.abstractmethod
-    def parse_chapter(self, html_str: str, chapter_id: str) -> Dict[str, Any]:
+    def parse_chapter(
+        self,
+        html_str: str,
+        chapter_id: str,
+    ) -> ChapterDict | None:
         """
         Parse a single chapter page and extract clean text or simplified HTML.
 
@@ -69,7 +77,7 @@ class BaseParser(ParserProtocol, abc.ABC):
         ...
 
     @property
-    def book_id(self) -> Optional[str]:
+    def book_id(self) -> str | None:
         """
         Current book ID in context.
 
@@ -85,6 +93,7 @@ class BaseParser(ParserProtocol, abc.ABC):
         :param value: Book identifier.
         """
         self._book_id = value
+        self._cache_dir = self._base_cache_dir / value
         self._on_book_id_set()
 
     def _on_book_id_set(self) -> None:

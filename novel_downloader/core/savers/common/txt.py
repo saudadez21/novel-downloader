@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.savers.common.txt
 ---------------------------------------
@@ -14,38 +13,16 @@ It is intended to be used by `CommonSaver` as part of the save/export process.
 from __future__ import annotations
 
 import json
-import logging
-from pathlib import Path
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING
 
 from novel_downloader.utils.file_utils import save_as_txt
-from novel_downloader.utils.text_utils import clean_chapter_title, format_chapter
+from novel_downloader.utils.text_utils import (
+    clean_chapter_title,
+    format_chapter,
+)
 
 if TYPE_CHECKING:
     from .main_saver import CommonSaver
-
-logger = logging.getLogger(__name__)
-
-CHAPTER_FOLDERS: List[str] = [
-    "chapters",
-    "encrypted_chapters",
-]
-
-
-def _find_chapter_file(
-    raw_base: Path,
-    chapter_id: str,
-) -> Optional[Path]:
-    """
-    Search for `<chapter_id>.json` under each folder in CHAPTER_FOLDERS
-    inside raw_data_dir/site/book_id. Return the first existing Path,
-    or None if not found.
-    """
-    for folder in CHAPTER_FOLDERS:
-        candidate = raw_base / folder / f"{chapter_id}.json"
-        if candidate.exists():
-            return candidate
-    return None
 
 
 def common_save_as_txt(
@@ -80,11 +57,11 @@ def common_save_as_txt(
         info_text = info_path.read_text(encoding="utf-8")
         book_info = json.loads(info_text)
     except Exception as e:
-        logger.error("%s Failed to load %s: %s", TAG, info_path, e)
+        saver.logger.error("%s Failed to load %s: %s", TAG, info_path, e)
         return
 
     # --- Compile chapters ---
-    parts: List[str] = []
+    parts: list[str] = []
     latest_chapter: str = ""
     volumes = book_info.get("volumes", [])
 
@@ -94,29 +71,22 @@ def common_save_as_txt(
         if vol_name:
             volume_header = f"\n\n{'=' * 6} {vol_name} {'=' * 6}\n\n"
             parts.append(volume_header)
-            logger.info("%s Processing volume: %s", TAG, vol_name)
+            saver.logger.info("%s Processing volume: %s", TAG, vol_name)
         for chap in vol.get("chapters", []):
             chap_id = chap.get("chapterId")
             chap_title = chap.get("title", "")
             if not chap_id:
-                logger.warning("%s Missing chapterId, skipping: %s", TAG, chap)
+                saver.logger.warning("%s Missing chapterId, skipping: %s", TAG, chap)
                 continue
 
-            # Find the JSON file in one of the known subfolders
-            json_path = _find_chapter_file(raw_base, chap_id)
-            if json_path is None:
-                logger.info(
+            chapter_data = saver._get_chapter(book_id, chap_id)
+            if not chapter_data:
+                saver.logger.info(
                     "%s Missing chapter file in: %s (%s), skipping.",
                     TAG,
                     chap_title,
                     chap_id,
                 )
-                continue
-
-            try:
-                chapter_data = json.loads(json_path.read_text(encoding="utf-8"))
-            except Exception as e:
-                logger.error("%s Error reading %s: %s", TAG, json_path, e)
                 continue
 
             # Extract structured fields
@@ -170,7 +140,7 @@ def common_save_as_txt(
     # --- Save final text ---
     try:
         save_as_txt(content=final_text, filepath=out_path)
-        logger.info("%s Novel saved to: %s", TAG, out_path)
+        saver.logger.info("%s Novel saved to: %s", TAG, out_path)
     except Exception as e:
-        logger.error("%s Failed to save file: %s", TAG, e)
+        saver.logger.error("%s Failed to save file: %s", TAG, e)
     return

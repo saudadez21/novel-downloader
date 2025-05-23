@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.savers.common.main_saver
 ----------------------------------------------
@@ -10,7 +9,11 @@ and export novel content in plain text format based on the platform's metadata
 and chapter files.
 """
 
+from collections.abc import Mapping
+from typing import Any
+
 from novel_downloader.config.models import SaverConfig
+from novel_downloader.utils.chapter_storage import ChapterStorage
 
 from ..base import BaseSaver
 from .txt import common_save_as_txt
@@ -23,7 +26,12 @@ class CommonSaver(BaseSaver):
     logic for exporting full novels as plain text (.txt) files.
     """
 
-    def __init__(self, config: SaverConfig, site: str):
+    def __init__(
+        self,
+        config: SaverConfig,
+        site: str,
+        chap_folders: list[str] | None = None,
+    ):
         """
         Initialize the common saver with site information.
 
@@ -33,6 +41,8 @@ class CommonSaver(BaseSaver):
         """
         super().__init__(config)
         self._site = site
+        self._chapter_storage_cache: dict[str, list[ChapterStorage]] = {}
+        self._chap_folders: list[str] = chap_folders or ["chapters"]
 
     def save_as_txt(self, book_id: str) -> None:
         """
@@ -49,6 +59,7 @@ class CommonSaver(BaseSaver):
 
         :param book_id: The book identifier (used to locate raw data)
         """
+        self._init_chapter_storages(book_id)
         return common_save_as_txt(self, book_id)
 
     def save_as_epub(self, book_id: str) -> None:
@@ -60,11 +71,12 @@ class CommonSaver(BaseSaver):
         """
         try:
             from .epub import common_save_as_epub
-        except ImportError:
+        except ImportError as err:
             raise NotImplementedError(
                 "EPUB export not supported. Please install 'ebooklib'"
-            )
+            ) from err
 
+        self._init_chapter_storages(book_id)
         return common_save_as_epub(self, book_id)
 
     @property
@@ -84,3 +96,25 @@ class CommonSaver(BaseSaver):
         :param value: New site string to set.
         """
         self._site = value
+
+    def _get_chapter(
+        self,
+        book_id: str,
+        chap_id: str,
+    ) -> Mapping[str, Any]:
+        for storage in self._chapter_storage_cache[book_id]:
+            data = storage.get(chap_id)
+            if data:
+                return data
+        return {}
+
+    def _init_chapter_storages(self, book_id: str) -> None:
+        raw_base = self.raw_data_dir / self._site / book_id
+        self._chapter_storage_cache[book_id] = [
+            ChapterStorage(
+                raw_base=raw_base,
+                namespace=ns,
+                backend_type=self._config.storage_backend,
+            )
+            for ns in self._chap_folders
+        ]

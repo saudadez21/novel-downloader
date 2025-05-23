@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.utils.state
 ----------------------------
@@ -11,7 +10,7 @@ Supported sections:
 """
 import json
 from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Any
 
 from .constants import STATE_FILE
 
@@ -26,7 +25,7 @@ class StateManager:
         self._path = path
         self._data = self._load()
 
-    def _load(self) -> Dict[str, Any]:
+    def _load(self) -> dict[str, Any]:
         """
         Load the configuration file into a Python dictionary.
 
@@ -50,7 +49,7 @@ class StateManager:
         content = json.dumps(self._data, ensure_ascii=False, indent=2)
         self._path.write_text(content, encoding="utf-8")
 
-    def _parse_cookie_string(self, cookie_str: str) -> Dict[str, str]:
+    def _parse_cookie_string(self, cookie_str: str) -> dict[str, str]:
         """
         Parse a Cookie header string into a dict.
 
@@ -58,7 +57,7 @@ class StateManager:
         :return: mapping cookie names to values (missing '=' yields empty string)
         :rtype: Dict[str, str]
         """
-        cookies: Dict[str, str] = {}
+        cookies: dict[str, str] = {}
         for item in cookie_str.split(";"):
             item = item.strip()
             if not item:
@@ -110,7 +109,7 @@ class StateManager:
         site_data["manual_login"] = flag
         self._save()
 
-    def get_cookies(self, site: str) -> Dict[str, str]:
+    def get_cookies(self, site: str) -> dict[str, str]:
         """
         Retrieve the persisted cookies for a specific site.
 
@@ -120,7 +119,7 @@ class StateManager:
         cookies = self._data.get("sites", {}).get(site, {}).get("cookies", {})
         return {str(k): str(v) for k, v in cookies.items()}
 
-    def set_cookies(self, site: str, cookies: Union[str, Dict[str, str]]) -> None:
+    def set_cookies(self, site: str, cookies: str | dict[str, str]) -> None:
         """
         Persist (overwrite) the cookies for a specific site.
 

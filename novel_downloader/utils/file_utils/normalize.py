@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.utils.file_utils.normalize
 -------------------------------------------
@@ -12,12 +11,11 @@ Currently includes line-ending normalization for .txt files.
 
 import logging
 from pathlib import Path
-from typing import Union
 
 logger = logging.getLogger(__name__)
 
 
-def normalize_txt_line_endings(folder_path: Union[str, Path]) -> None:
+def normalize_txt_line_endings(folder_path: str | Path) -> None:
     """
     Convert all .txt files in the given folder (recursively)
     to use Unix-style LF (\\n) line endings.

@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-novel_downloader.core.interfaces.async_requester_protocol
+novel_downloader.core.interfaces.async_requester
 --------------------------------------------------------
 
 Defines the AsyncRequesterProtocol interface for fetching raw HTML or JSON
 for book info pages, individual chapters, managing request lifecycle,
-and optionally retrieving a user's authenticated bookcase — all in async style.
+and optionally retrieving a user's authenticated bookcase.
 """
 
-from typing import Literal, Optional, Protocol, runtime_checkable
+from typing import Any, Literal, Protocol, runtime_checkable
 
 
 @runtime_checkable
@@ -24,7 +23,13 @@ class AsyncRequesterProtocol(Protocol):
     def is_async(self) -> Literal[True]:
         ...
 
-    async def login(self, max_retries: int = 3, manual_login: bool = False) -> bool:
+    async def login(
+        self,
+        username: str = "",
+        password: str = "",
+        manual_login: bool = False,
+        **kwargs: Any,
+    ) -> bool:
         """
         Attempt to log in asynchronously.
         :returns: True if login succeeded.
@@ -32,41 +37,47 @@ class AsyncRequesterProtocol(Protocol):
         ...
 
     async def get_book_info(
-        self, book_id: str, wait_time: Optional[float] = None
+        self,
+        book_id: str,
+        **kwargs: Any,
     ) -> str:
         """
         Fetch the raw HTML (or JSON) of the book info page asynchronously.
 
         :param book_id: The book identifier.
-        :param wait_time: Base number of seconds to wait before returning content.
         :return: The page content as a string.
         """
         ...
 
     async def get_book_chapter(
-        self, book_id: str, chapter_id: str, wait_time: Optional[float] = None
+        self,
+        book_id: str,
+        chapter_id: str,
+        **kwargs: Any,
     ) -> str:
         """
         Fetch the raw HTML (or JSON) of a single chapter asynchronously.
 
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :param wait_time: Base number of seconds to wait before returning content.
         :return: The chapter content as a string.
         """
         ...
 
-    async def get_bookcase(self, wait_time: Optional[float] = None) -> str:
+    async def get_bookcase(
+        self,
+        page: int = 1,
+        **kwargs: Any,
+    ) -> str:
         """
         Optional: Retrieve the HTML content of the authenticated
         user's bookcase page asynchronously.
 
-        :param wait_time: Base number of seconds to wait before returning content.
         :return: The HTML markup of the bookcase page.
         """
         ...
 
-    async def shutdown(self) -> None:
+    async def close(self) -> None:
         """
         Shutdown and clean up any resources (e.g., close aiohttp session).
         """

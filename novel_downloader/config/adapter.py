@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.config.adapter
 -------------------------------
@@ -15,7 +14,9 @@ Supported mappings:
 - sites[site]       -> book_ids list
 """
 
-from typing import Any, Dict, List
+from typing import Any
+
+from novel_downloader.utils.constants import SUPPORTED_SITES
 
 from .models import (
     DownloaderConfig,
@@ -31,7 +32,7 @@ class ConfigAdapter:
     Adapter to map a raw config dict + site name into structured dataclass configs.
     """
 
-    def __init__(self, config: Dict[str, Any], site: str):
+    def __init__(self, config: dict[str, Any], site: str):
         """
         :param config: 完整加载的配置 dict
         :param site:   当前站点名称 (e.g. "qidian")
@@ -40,33 +41,33 @@ class ConfigAdapter:
         self._site = site
 
         site_rules = load_site_rules()  # -> Dict[str, SiteRules]
-        self._supported_sites = set(site_rules.keys())
+        self._supported_sites = set(site_rules.keys()) | SUPPORTED_SITES
 
-    def set_site(self, site: str) -> None:
-        """
-        切换当前适配的站点
-        """
-        self._site = site
+    @property
+    def site(self) -> str:
+        return self._site
 
-    def _get_site_cfg(self) -> Dict[str, Any]:
-        """
-        统一获取站点配置:
+    @site.setter
+    def site(self, value: str) -> None:
+        self._site = value
 
-        1. 先尝试从 self._config["sites"][self._site] 取配置
-        2. 如果没有配置, 且 self._site 在 self._supported_sites 中, 则取 sites["common"]
+    def _get_site_cfg(self, site: str | None = None) -> dict[str, Any]:
+        """
+        获取指定站点的配置 (默认为当前适配站点)
+
+        1. 如果有 site-specific 配置, 优先返回它
+        2. 否则, 如果该站点在支持站点中, 尝试返回 'common' 配置
         3. 否则返回空 dict
         """
+        site = site or self._site
         sites_cfg = self._config.get("sites", {}) or {}
 
-        # 1. site-specific config
-        if self._site in sites_cfg:
-            return sites_cfg[self._site] or {}
+        if site in sites_cfg:
+            return sites_cfg[site] or {}
 
-        # 2. fallback to "common" only if site is supported
-        if self._site in self._supported_sites:
+        if site in self._supported_sites:
             return sites_cfg.get("common", {}) or {}
 
-        # 3. completely unsupported site
         return {}
 
     def get_requester_config(self) -> RequesterConfig:
@@ -77,10 +78,11 @@ class ConfigAdapter:
         req = self._config.get("requests", {})
         site_cfg = self._get_site_cfg()
         return RequesterConfig(
-            wait_time=req.get("wait_time", 5),
             retry_times=req.get("retry_times", 3),
-            retry_interval=req.get("retry_interval", 5),
-            timeout=req.get("timeout", 30),
+            backoff_factor=req.get("backoff_factor", 2.0),
+            timeout=req.get("timeout", 30.0),
+            max_connections=req.get("max_connections", 10),
+            max_rps=req.get("max_rps", None),
             headless=req.get("headless", True),
             user_data_folder=req.get("user_data_folder", "./user_data"),
             profile_name=req.get("profile_name", "Profile_1"),
@@ -88,7 +90,6 @@ class ConfigAdapter:
             disable_images=req.get("disable_images", True),
             mute_audio=req.get("mute_audio", True),
             mode=site_cfg.get("mode", "session"),
-            max_rps=site_cfg.get("max_rps", None),
         )
 
     def get_downloader_config(self) -> DownloaderConfig:
@@ -100,9 +101,9 @@ class ConfigAdapter:
         debug = gen.get("debug", {})
         site_cfg = self._get_site_cfg()
         return DownloaderConfig(
-            request_interval=gen.get("request_interval", 5),
+            request_interval=gen.get("request_interval", 5.0),
             raw_data_dir=gen.get("raw_data_dir", "./raw_data"),
-            cache_dir=gen.get("cache_dir", "./cache"),
+            cache_dir=gen.get("cache_dir", "./novel_cache"),
             download_workers=gen.get("download_workers", 4),
             parser_workers=gen.get("parser_workers", 4),
             use_process_pool=gen.get("use_process_pool", True),
@@ -110,6 +111,8 @@ class ConfigAdapter:
             login_required=site_cfg.get("login_required", False),
             save_html=debug.get("save_html", False),
             mode=site_cfg.get("mode", "session"),
+            storage_backend=gen.get("storage_backend", "json"),
+            storage_batch_size=gen.get("storage_batch_size", 1),
         )
 
     def get_parser_config(self) -> ParserConfig:
@@ -121,7 +124,7 @@ class ConfigAdapter:
         font_ocr = gen.get("font_ocr", {})
         site_cfg = self._get_site_cfg()
         return ParserConfig(
-            cache_dir=gen.get("cache_dir", "./cache"),
+            cache_dir=gen.get("cache_dir", "./novel_cache"),
             decode_font=font_ocr.get("decode_font", False),
             use_freq=font_ocr.get("use_freq", False),
             use_ocr=font_ocr.get("use_ocr", True),
@@ -149,6 +152,7 @@ class ConfigAdapter:
         return SaverConfig(
             raw_data_dir=gen.get("raw_data_dir", "./raw_data"),
             output_dir=gen.get("output_dir", "./downloads"),
+            storage_backend=gen.get("storage_backend", "json"),
             clean_text=out.get("clean_text", True),
             make_txt=fmt.get("make_txt", True),
             make_epub=fmt.get("make_epub", False),
@@ -158,9 +162,10 @@ class ConfigAdapter:
             filename_template=naming.get("filename_template", "{title}_{author}"),
             include_cover=epub_opts.get("include_cover", True),
             include_toc=epub_opts.get("include_toc", False),
+            include_picture=epub_opts.get("include_picture", False),
         )
 
-    def get_book_ids(self) -> List[str]:
+    def get_book_ids(self) -> list[str]:
         """
         从 config["sites"][site]["book_ids"] 中提取目标书籍列表
         """

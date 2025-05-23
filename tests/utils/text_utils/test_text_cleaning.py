@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 tests.utils.text_utils.test_text_cleaning
 ----------------------------------------------

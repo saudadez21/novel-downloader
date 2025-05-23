@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.savers.common.epub
 ----------------------------------------
@@ -10,9 +9,8 @@ Contains the logic for exporting novel content as a single `.epub` file.
 from __future__ import annotations
 
 import json
-import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING
 from urllib.parse import unquote, urlparse
 
 from ebooklib import epub
@@ -34,29 +32,6 @@ from novel_downloader.utils.text_utils import clean_chapter_title
 
 if TYPE_CHECKING:
     from .main_saver import CommonSaver
-
-logger = logging.getLogger(__name__)
-
-CHAPTER_FOLDERS: List[str] = [
-    "chapters",
-    "encrypted_chapters",
-]
-
-
-def _find_chapter_file(
-    raw_base: Path,
-    chapter_id: str,
-) -> Optional[Path]:
-    """
-    Search for `<chapter_id>.json` under each folder in CHAPTER_FOLDERS
-    inside raw_data_dir/site/book_id. Return the first existing Path,
-    or None if not found.
-    """
-    for folder in CHAPTER_FOLDERS:
-        candidate = raw_base / folder / f"{chapter_id}.json"
-        if candidate.exists():
-            return candidate
-    return None
 
 
 def _image_url_to_filename(url: str) -> str:
@@ -114,15 +89,17 @@ def common_save_as_epub(
         info_text = info_path.read_text(encoding="utf-8")
         book_info = json.loads(info_text)
     except Exception as e:
-        logger.error("%s Failed to load %s: %s", TAG, info_path, e)
+        saver.logger.error("%s Failed to load %s: %s", TAG, info_path, e)
         return
 
     book_name = book_info.get("book_name", book_id)
-    logger.info("%s Starting EPUB generation: %s (ID: %s)", TAG, book_name, book_id)
+    saver.logger.info(
+        "%s Starting EPUB generation: %s (ID: %s)", TAG, book_name, book_id
+    )
 
     # --- Generate intro + cover ---
     intro_html = generate_book_intro_html(book_info)
-    cover_path: Optional[Path] = None
+    cover_path: Path | None = None
     if config.include_cover:
         cover_filename = _image_url_to_filename(book_info.get("cover_url", ""))
         if cover_filename:
@@ -147,7 +124,7 @@ def common_save_as_epub(
     for vol_index, vol in enumerate(volumes, start=1):
         raw_vol_name = vol.get("volume_name", "").strip()
         vol_name = clean_chapter_title(raw_vol_name) or f"Unknown Volume {vol_index}"
-        logger.info("Processing volume %d: %s", vol_index, vol_name)
+        saver.logger.info("Processing volume %d: %s", vol_index, vol_name)
 
         # Volume intro
         vol_intro = epub.EpubHtml(
@@ -165,18 +142,18 @@ def common_save_as_epub(
         spine.append(vol_intro)
 
         section = epub.Section(vol_name, vol_intro.file_name)
-        chapter_items: List[epub.EpubHtml] = []
+        chapter_items: list[epub.EpubHtml] = []
 
         for chap in vol.get("chapters", []):
             chap_id = chap.get("chapterId")
             chap_title = chap.get("title", "")
             if not chap_id:
-                logger.warning("%s Missing chapterId, skipping: %s", TAG, chap)
+                saver.logger.warning("%s Missing chapterId, skipping: %s", TAG, chap)
                 continue
 
-            json_path = _find_chapter_file(raw_base, chap_id)
-            if json_path is None:
-                logger.info(
+            chapter_data = saver._get_chapter(book_id, chap_id)
+            if not chapter_data:
+                saver.logger.info(
                     "%s Missing chapter file: %s (%s), skipping.",
                     TAG,
                     chap_title,
@@ -184,17 +161,12 @@ def common_save_as_epub(
                 )
                 continue
 
-            try:
-                data = json.loads(json_path.read_text(encoding="utf-8"))
-                title = clean_chapter_title(data.get("title", "")) or chap_id
-                chap_html = chapter_txt_to_html(
-                    chapter_title=title,
-                    chapter_text=data.get("content", ""),
-                    author_say=data.get("author_say", ""),
-                )
-            except Exception as e:
-                logger.error("%s Error parsing chapter %s: %s", TAG, json_path, e)
-                continue
+            title = clean_chapter_title(chapter_data.get("title", "")) or chap_id
+            chap_html = chapter_txt_to_html(
+                chapter_title=title,
+                chapter_text=chapter_data.get("content", ""),
+                author_say=chapter_data.get("author_say", ""),
+            )
 
             chap_path = f"{EPUB_TEXT_FOLDER}/{chap_id}.xhtml"
             item = epub.EpubHtml(title=chap_title, file_name=chap_path, lang="zh")
@@ -211,7 +183,7 @@ def common_save_as_epub(
         toc_list.append((section, chapter_items))
 
     # --- 5. Finalize EPUB ---
-    logger.info("%s Building TOC and spine...", TAG)
+    saver.logger.info("%s Building TOC and spine...", TAG)
     book.toc = toc_list
     book.spine = spine
     book.add_item(epub.EpubNcx())
@@ -226,7 +198,7 @@ def common_save_as_epub(
 
     try:
         epub.write_epub(out_path, book, EPUB_OPTIONS)
-        logger.info("%s EPUB successfully written to %s", TAG, out_path)
+        saver.logger.info("%s EPUB successfully written to %s", TAG, out_path)
     except Exception as e:
-        logger.error("%s Failed to write EPUB to %s: %s", TAG, out_path, e)
+        saver.logger.error("%s Failed to write EPUB to %s: %s", TAG, out_path, e)
     return

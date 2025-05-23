@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-novel_downloader.core.savers.base_saver
----------------------------------------
+novel_downloader.core.savers.base
+---------------------------------
 
 This module provides an abstract base class `BaseSaver` that defines the
 common interface and reusable logic for saving assembled novel content
@@ -13,17 +12,15 @@ import abc
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 from novel_downloader.config.models import SaverConfig
 from novel_downloader.core.interfaces import SaverProtocol
 
-logger = logging.getLogger(__name__)
 
-
-class SafeDict(Dict[str, Any]):
+class SafeDict(dict[str, Any]):
     def __missing__(self, key: str) -> str:
-        return "{{{}}}".format(key)
+        return f"{{{key}}}"
 
 
 class BaseSaver(SaverProtocol, abc.ABC):
@@ -49,6 +46,8 @@ class BaseSaver(SaverProtocol, abc.ABC):
 
         self._filename_template = config.filename_template
 
+        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
+
     def save(self, book_id: str) -> None:
         """
         Save the book in the formats specified in config.
@@ -67,23 +66,23 @@ class BaseSaver(SaverProtocol, abc.ABC):
         for flag_name, save_method in actions:
             if getattr(self._config, flag_name, False):
                 try:
-                    logger.info(
+                    self.logger.info(
                         "%s Attempting to save book_id '%s' as %s...",
                         TAG,
                         book_id,
                         flag_name,
                     )
                     save_method(book_id)
-                    logger.info("%s Successfully saved as %s.", TAG, flag_name)
+                    self.logger.info("%s Successfully saved as %s.", TAG, flag_name)
                 except NotImplementedError as e:
-                    logger.warning(
+                    self.logger.warning(
                         "%s Save method for %s not implemented: %s",
                         TAG,
                         flag_name,
                         str(e),
                     )
                 except Exception as e:
-                    logger.error(
+                    self.logger.error(
                         "%s Error while saving as %s: %s", TAG, flag_name, str(e)
                     )
         return
@@ -130,7 +129,7 @@ class BaseSaver(SaverProtocol, abc.ABC):
         self,
         *,
         title: str,
-        author: Optional[str] = None,
+        author: str | None = None,
         ext: str = "txt",
         **extra_fields: str,
     ) -> str:

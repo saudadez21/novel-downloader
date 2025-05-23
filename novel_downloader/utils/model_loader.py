@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.utils.model_loader
 -----------------------------------
@@ -13,7 +12,7 @@ Currently supports:
 from pathlib import Path
 
 from huggingface_hub import hf_hub_download
-from huggingface_hub.utils import LocalEntryNotFoundError
+from huggingface_hub.errors import LocalEntryNotFoundError
 
 from novel_downloader.utils.constants import (
     MODEL_CACHE_DIR,
@@ -38,12 +37,11 @@ def get_rec_chinese_char_model_dir(version: str = "v1.0") -> Path:
                 filename=fname,
                 revision=version,
                 local_dir=model_dir,
-                local_dir_use_symlinks=False,
             )
-        except LocalEntryNotFoundError:
+        except LocalEntryNotFoundError as err:
             raise RuntimeError(
                 f"[model] Missing model file '{fname}' and no internet connection."
-            )
+            ) from err
     return model_dir
 
 
@@ -62,11 +60,10 @@ def get_rec_char_vector_dir(version: str = "v1.0") -> Path:
                 filename=fname,
                 revision=version,
                 local_dir=vector_dir,
-                local_dir_use_symlinks=False,
             )
-        except LocalEntryNotFoundError:
+        except LocalEntryNotFoundError as err:
             raise RuntimeError(
                 f"[vector] Missing vector file '{fname}' and no internet connection."
-            )
+            ) from err
 
     return vector_dir

@@ -12,7 +12,7 @@ import hashlib
 import json
 import random
 import time
-from typing import Any, Dict, List
+from typing import Any
 
 
 def rc4_crypt(
@@ -50,7 +50,7 @@ def rc4_crypt(
 
         # Pseudo-Random Generation Algorithm (PRGA)
         i = j = 0
-        out: List[int] = []
+        out: list[int] = []
         for char in data_bytes:
             i = (i + 1) % 256
             j = (j + S[i]) % 256
@@ -110,7 +110,7 @@ def patch_qd_payload_token(
 
     # Step 1 - decrypt --------------------------------------------------
     decrypted_json: str = rc4_crypt(key, enc_token, mode="decrypt")
-    payload: Dict[str, Any] = json.loads(decrypted_json)
+    payload: dict[str, Any] = json.loads(decrypted_json)
 
     # Step 2 - rebuild timing fields -----------------------------------
     loadts = int(time.time() * 1000)  # ms since epoch

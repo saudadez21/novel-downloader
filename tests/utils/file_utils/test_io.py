@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 tests.utils.file_utils.test_io
 ------------------------------
@@ -206,7 +205,7 @@ def test_write_file_exception_caught(monkeypatch, tmp_path, caplog):
 
     # Monkeypatch NamedTemporaryFile to raise IOError immediately
     def fake_ntf(*args, **kwargs):
-        raise IOError("disk full")
+        raise OSError("disk full")
 
     monkeypatch.setattr(io_module.tempfile, "NamedTemporaryFile", fake_ntf)
 

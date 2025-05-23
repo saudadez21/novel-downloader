@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.parsers.qidian.session.main_parser
 --------------------------------------------------------
@@ -13,10 +12,11 @@ content extracted from dynamically rendered Qidian HTML pages.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Any
 
 from novel_downloader.config.models import ParserConfig
 from novel_downloader.core.parsers.base import BaseParser
+from novel_downloader.utils.chapter_storage import ChapterDict
 from novel_downloader.utils.state import state_mgr
 
 from ..shared import (
@@ -48,12 +48,12 @@ class QidianSessionParser(BaseParser):
 
         self._fixed_font_dir: Path = self._base_cache_dir / "fixed_fonts"
         self._fixed_font_dir.mkdir(parents=True, exist_ok=True)
-        self._font_debug_dir: Optional[Path] = None
+        self._font_debug_dir: Path | None = None
 
         qd_cookies = state_mgr.get_cookies("qidian")
         self._fuid: str = qd_cookies.get("ywguid", "")
 
-        self._font_ocr: Optional[FontOCR] = None
+        self._font_ocr: FontOCR | None = None
         if self._decode_font:
             from novel_downloader.utils.fontocr import FontOCR
 
@@ -69,10 +69,10 @@ class QidianSessionParser(BaseParser):
                 vec_weight=config.vec_weight,
                 font_debug=config.save_font_debug,
             )
-            self._font_debug_dir = self._base_cache_dir / "font_debug"
+            self._font_debug_dir = self._base_cache_dir / "qidian" / "font_debug"
             self._font_debug_dir.mkdir(parents=True, exist_ok=True)
 
-    def parse_book_info(self, html_str: str) -> Dict[str, Any]:
+    def parse_book_info(self, html_str: str) -> dict[str, Any]:
         """
         Parse a book info page and extract metadata and chapter structure.
 
@@ -81,7 +81,11 @@ class QidianSessionParser(BaseParser):
         """
         return parse_book_info(html_str)
 
-    def parse_chapter(self, html_str: str, chapter_id: str) -> Dict[str, Any]:
+    def parse_chapter(
+        self,
+        html_str: str,
+        chapter_id: str,
+    ) -> ChapterDict | None:
         """
         :param html: Raw HTML of the chapter page.
         :param chapter_id: Identifier of the chapter being parsed.

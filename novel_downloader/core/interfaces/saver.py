@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-novel_downloader.core.interfaces.saver_protocol
-------------------------------------------------
+novel_downloader.core.interfaces.saver
+--------------------------------------
 
 Defines the SaverProtocol interface for persisting completed books in
 TXT, EPUB, Markdown, and PDF formats.

@@ -1,20 +1,13 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.factory.downloader_factory
 ------------------------------------------------
 
 This module implements a factory function for creating downloader instances
 based on the site name and parser mode specified in the configuration.
-
-- get_async_downloader -> always returns a CommonAsyncDownloader
-- get_sync_downloader  -> returns a site-specific downloader or CommonDownloader
-- get_downloader       -> dispatches to one of the above based on config.mode
-
-To add support for new sites or modes, extend the `_site_map` accordingly.
 """
 
-from typing import Union, cast
+from typing import cast
 
 from novel_downloader.config import DownloaderConfig, load_site_rules
 from novel_downloader.core.downloaders import (
@@ -25,13 +18,16 @@ from novel_downloader.core.downloaders import (
 from novel_downloader.core.interfaces import (
     AsyncDownloaderProtocol,
     AsyncRequesterProtocol,
-    DownloaderProtocol,
     ParserProtocol,
-    RequesterProtocol,
     SaverProtocol,
+    SyncDownloaderProtocol,
+    SyncRequesterProtocol,
 )
 
-_site_map = {
+# _async_site_map = {
+#     # "biquge": ...
+# }
+_sync_site_map = {
     "qidian": QidianDownloader,
     # "biquge": ...
 }
@@ -56,14 +52,18 @@ def get_async_downloader(
     :return: An instance of a downloader class
 
     :raises ValueError: If a site-specific downloader does not support async mode.
-    :raises TypeError: If the provided requester does not match the required protocol
-                    for the chosen mode (sync vs async).
+    :raises TypeError: If the provided requester does not match the required protocol.
     """
     site_key = site.lower()
 
     if not isinstance(requester, AsyncRequesterProtocol):
         raise TypeError("Async mode requires an AsyncRequesterProtocol")
 
+    # site-specific
+    # if site_key in _async_site_map:
+    #     return _async_site_map[site_key](requester, parser, saver, config)
+
+    # fallback
     site_rules = load_site_rules()
     site_rule = site_rules.get(site_key)
     if site_rule is None:
@@ -73,12 +73,12 @@ def get_async_downloader(
 
 
 def get_sync_downloader(
-    requester: RequesterProtocol,
+    requester: SyncRequesterProtocol,
     parser: ParserProtocol,
     saver: SaverProtocol,
     site: str,
     config: DownloaderConfig,
-) -> DownloaderProtocol:
+) -> SyncDownloaderProtocol:
     """
     Returns a DownloaderProtocol for the given site.
     First tries a site-specific downloader (e.g. QidianDownloader),
@@ -93,17 +93,16 @@ def get_sync_downloader(
     :return: An instance of a downloader class
 
     :raises ValueError: If a site-specific downloader does not support async mode.
-    :raises TypeError: If the provided requester does not match the required protocol
-                    for the chosen mode (sync vs async).
+    :raises TypeError: If the provided requester does not match the required protocol.
     """
     site_key = site.lower()
 
-    if not isinstance(requester, RequesterProtocol):
+    if not isinstance(requester, SyncRequesterProtocol):
         raise TypeError("Sync mode requires a RequesterProtocol")
 
     # site-specific
-    if site_key in _site_map:
-        return _site_map[site_key](requester, parser, saver, config)
+    if site_key in _sync_site_map:
+        return _sync_site_map[site_key](requester, parser, saver, config)
 
     # fallback
     site_rules = load_site_rules()
@@ -115,12 +114,12 @@ def get_sync_downloader(
 
 
 def get_downloader(
-    requester: Union[AsyncRequesterProtocol, RequesterProtocol],
+    requester: AsyncRequesterProtocol | SyncRequesterProtocol,
     parser: ParserProtocol,
     saver: SaverProtocol,
     site: str,
     config: DownloaderConfig,
-) -> Union[AsyncDownloaderProtocol, DownloaderProtocol]:
+) -> AsyncDownloaderProtocol | SyncDownloaderProtocol:
     """
     Dispatches to get_async_downloader if config.mode == 'async',
     otherwise to get_sync_downloader.
@@ -134,8 +133,7 @@ def get_downloader(
     :return: An instance of a downloader class
 
     :raises ValueError: If a site-specific downloader does not support async mode.
-    :raises TypeError: If the provided requester does not match the required protocol
-                    for the chosen mode (sync vs async).
+    :raises TypeError: If the provided requester does not match the required protocol.
     """
     if requester.is_async():
         if config.mode.lower() != "async":
@@ -147,5 +145,5 @@ def get_downloader(
             raise TypeError(
                 "Requester is sync, but config.mode is not 'browser' or 'session'"
             )
-        sync_requester = cast(RequesterProtocol, requester)
+        sync_requester = cast(SyncRequesterProtocol, requester)
         return get_sync_downloader(sync_requester, parser, saver, site, config)

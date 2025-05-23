@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.downloaders.base.base_sync
 ------------------------------------------------
@@ -11,20 +10,17 @@ common interface and reusable logic for all downloader implementations.
 import abc
 import logging
 from pathlib import Path
-from typing import List
 
 from novel_downloader.config import DownloaderConfig
 from novel_downloader.core.interfaces import (
-    DownloaderProtocol,
     ParserProtocol,
-    RequesterProtocol,
     SaverProtocol,
+    SyncDownloaderProtocol,
+    SyncRequesterProtocol,
 )
 
-logger = logging.getLogger(__name__)
 
-
-class BaseDownloader(DownloaderProtocol, abc.ABC):
+class BaseDownloader(SyncDownloaderProtocol, abc.ABC):
     """
     Abstract downloader that defines the initialization interface
     and the general batch download flow.
@@ -34,10 +30,11 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
 
     def __init__(
         self,
-        requester: RequesterProtocol,
+        requester: SyncRequesterProtocol,
         parser: ParserProtocol,
         saver: SaverProtocol,
         config: DownloaderConfig,
+        site: str,
     ):
         """
         Initialize the downloader with its components.
@@ -51,10 +48,36 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
         self._parser = parser
         self._saver = saver
         self._config = config
-        self._raw_data_dir = Path(config.raw_data_dir)
-        self._cache_dir = Path(config.cache_dir)
+        self._site = site
+
+        self._raw_data_dir = Path(config.raw_data_dir) / site
+        self._cache_dir = Path(config.cache_dir) / site
         self._raw_data_dir.mkdir(parents=True, exist_ok=True)
         self._cache_dir.mkdir(parents=True, exist_ok=True)
+
+        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
+
+    def download(self, book_ids: list[str]) -> None:
+        """
+        The general batch download process:
+          1. Iterate over all book IDs
+          2. For each ID, call `download_one()`
+
+        :param book_ids: A list of book identifiers to download.
+        """
+        self.prepare()
+
+        for idx, book_id in enumerate(book_ids, start=1):
+            self.logger.debug(
+                "[downloader] Starting download for book_id: %s (%s/%s)",
+                book_id,
+                idx,
+                len(book_ids),
+            )
+            try:
+                self.download_one(book_id)
+            except Exception as e:
+                self._handle_download_exception(book_id, e)
 
     @abc.abstractmethod
     def download_one(self, book_id: str) -> None:
@@ -67,49 +90,16 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
         """
         ...
 
-    def download(self, book_ids: List[str]) -> None:
-        """
-        The general batch download process:
-          1. Iterate over all book IDs
-          2. For each ID, call `download_one()`
-
-        :param book_ids: A list of book identifiers to download.
-        """
-        for idx, book_id in enumerate(book_ids, start=1):
-            try:
-                logger.debug(
-                    "[downloader] Starting download for book_id: %s (%s/%s)",
-                    book_id,
-                    idx,
-                    len(book_ids),
-                )
-                self.download_one(book_id)
-            except Exception as e:
-                self._handle_download_exception(book_id, e)
-
-    def before_download(self, book_id: str) -> None:
+    def prepare(self) -> None:
         """
         Optional hook called before downloading each book.
 
         Subclasses can override this method to perform pre-download setup.
-
-        :param book_id: The book ID about to be processed.
         """
-        pass
-
-    def _handle_download_exception(self, book_id: str, error: Exception) -> None:
-        """
-        Handle download errors in a consistent way.
-
-        This method can be overridden or extended to implement retry logic, etc.
-
-        :param book_id: The ID of the book that failed.
-        :param error: The exception raised during download.
-        """
-        logger.warning("[downloader] Failed to download %s: %s", book_id, error)
+        return
 
     @property
-    def requester(self) -> RequesterProtocol:
+    def requester(self) -> SyncRequesterProtocol:
         """
         Access the current requester.
 
@@ -162,7 +152,27 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
         """
         return self._cache_dir
 
-    def set_requester(self, requester: RequesterProtocol) -> None:
+    @property
+    def site(self) -> str:
+        return self._site
+
+    @property
+    def save_html(self) -> bool:
+        return self._config.save_html
+
+    @property
+    def skip_existing(self) -> bool:
+        return self._config.skip_existing
+
+    @property
+    def login_required(self) -> bool:
+        return self._config.login_required
+
+    @property
+    def request_interval(self) -> float:
+        return self._config.request_interval
+
+    def set_requester(self, requester: SyncRequesterProtocol) -> None:
         """
         Replace the requester instance with a new one.
 
@@ -185,3 +195,14 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
         :param saver: The new saver to be used.
         """
         self._saver = saver
+
+    def _handle_download_exception(self, book_id: str, error: Exception) -> None:
+        """
+        Handle download errors in a consistent way.
+
+        This method can be overridden or extended to implement retry logic, etc.
+
+        :param book_id: The ID of the book that failed.
+        :param error: The exception raised during download.
+        """
+        self.logger.warning("[downloader] Failed to download %s: %s", book_id, error)

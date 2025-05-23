@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.config.site_rules
 ----------------------------------
@@ -14,7 +13,6 @@ This module provides functionality to:
 import json
 import logging
 from pathlib import Path
-from typing import Union
 
 from novel_downloader.utils.cache import cached_load_config
 from novel_downloader.utils.constants import SITE_RULES_FILE
@@ -26,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 def save_rules_as_json(
-    source_path: Union[str, Path], output_path: Union[str, Path] = SITE_RULES_FILE
+    source_path: str | Path, output_path: str | Path = SITE_RULES_FILE
 ) -> None:
     """
     Load rules from source_path (toml, yaml, or json) and save as JSON.
@@ -78,7 +76,7 @@ def save_rules_as_json(
 
 
 @cached_load_config
-def load_site_rules(json_path: Union[str, Path] = SITE_RULES_FILE) -> SiteRulesDict:
+def load_site_rules(json_path: str | Path = SITE_RULES_FILE) -> SiteRulesDict:
     """
     Loads site scraping rules from a JSON file and caches the result for future access.
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 tests.utils.time_utils.test_sleep_utils
 ---------------------------------------
@@ -81,7 +80,7 @@ def test_default_spreads(monkeypatch, caplog):
             return 1.0
         if (a, b) == (0, 0.0):
             return 0.0
-        pytest.skip("Unexpected uniform args: %r, %r" % (a, b))
+        pytest.skip(f"Unexpected uniform args: {a!r}, {b!r}")
 
     monkeypatch.setattr(random, "uniform", fake_uniform)
 

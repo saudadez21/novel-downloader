@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.parsers.qidian.shared.helpers
 ---------------------------------------------------
@@ -14,7 +13,7 @@ This module provides reusable helpers to:
 
 import json
 import logging
-from typing import Any, Dict, Union
+from typing import Any
 
 from bs4 import BeautifulSoup, Tag
 
@@ -76,7 +75,7 @@ def can_view_chapter(soup: BeautifulSoup) -> bool:
     return not (vip_status == 1 and is_buy == 0)
 
 
-def is_encrypted(content: Union[str, BeautifulSoup]) -> bool:
+def is_encrypted(content: str | BeautifulSoup) -> bool:
     """
     Return True if content is encrypted.
 
@@ -97,21 +96,21 @@ def is_encrypted(content: Union[str, BeautifulSoup]) -> bool:
     return int(chapter_info.get("cES", 0)) == 2
 
 
-def find_ssr_page_context(soup: BeautifulSoup) -> Dict[str, Any]:
+def find_ssr_page_context(soup: BeautifulSoup) -> dict[str, Any]:
     """
     Extract SSR JSON from <script id="vite-plugin-ssr_pageContext">.
     """
     try:
         tag = soup.find("script", id="vite-plugin-ssr_pageContext")
         if isinstance(tag, Tag) and tag.string:
-            data: Dict[str, Any] = json.loads(tag.string.strip())
+            data: dict[str, Any] = json.loads(tag.string.strip())
             return data
     except Exception as e:
         logger.warning("[Parser] SSR JSON parse error: %s", e)
     return {}
 
 
-def extract_chapter_info(ssr_data: Dict[str, Any]) -> Dict[str, Any]:
+def extract_chapter_info(ssr_data: dict[str, Any]) -> dict[str, Any]:
     """
     Extract the 'chapterInfo' dictionary from the SSR page context.
 

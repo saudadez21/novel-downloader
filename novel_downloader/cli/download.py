@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.cli.download
 -----------------------------
@@ -8,7 +7,6 @@ Download full novels by book IDs
 (supports config files, site switching, and localization prompts).
 """
 
-from typing import List
 
 import click
 from click import Context
@@ -41,7 +39,7 @@ from novel_downloader.utils.logger import setup_logging
     help=t("download_option_site", default="qidian"),
 )  # type: ignore
 @click.pass_context  # type: ignore
-def download_cli(ctx: Context, book_ids: List[str], site: str) -> None:
+def download_cli(ctx: Context, book_ids: list[str], site: str) -> None:
     """Download full novels by book IDs."""
     config_path = ctx.obj.get("config_path")
 
@@ -107,7 +105,7 @@ def download_cli(ctx: Context, book_ids: List[str], site: str) -> None:
 
             if requester_cfg.auto_close:
                 input(t("download_prompt_parse"))
-                await async_requester.shutdown()
+                await async_requester.close()
 
         asyncio.run(async_download_all())
     else:
@@ -129,6 +127,6 @@ def download_cli(ctx: Context, book_ids: List[str], site: str) -> None:
 
         if requester_cfg.auto_close:
             input(t("download_prompt_parse"))
-            sync_requester.shutdown()
+            sync_requester.close()
 
     return

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.savers.epub_utils.text_to_html
 
@@ -9,7 +8,7 @@ with automatic word correction and optional image/tag support.
 
 import json
 import logging
-from typing import Any, Dict
+from typing import Any
 
 from novel_downloader.utils.constants import REPLACE_WORD_MAP_PATH
 from novel_downloader.utils.text_utils import diff_inline_display
@@ -88,7 +87,7 @@ def chapter_txt_to_html(
     return "\n".join(html_parts)
 
 
-def generate_book_intro_html(book_info: Dict[str, Any]) -> str:
+def generate_book_intro_html(book_info: dict[str, Any]) -> str:
     """
     Generate HTML string for a book's information and summary.
 

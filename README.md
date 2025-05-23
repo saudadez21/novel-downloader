@@ -22,10 +22,10 @@ pip install novel-downloader
 # 如需支持字体解密功能 (decode_font), 请使用:
 # pip install novel-downloader[font-recovery]
 
-# 初始化默认配置 (生成 settings.yaml)
+# 初始化默认配置 (生成 settings.toml)
 novel-cli settings init
 
-# 编辑 ./settings.yaml 完成 site/book_ids 等
+# 编辑 ./settings.toml 完成 site/book_ids 等
 # 可查看 docs/4-settings-schema.md
 
 # 运行下载
@@ -66,8 +66,9 @@ pip install .
 - [安装](docs/1-installation.md)
 - [环境准备](docs/2-environment-setup.md)
 - [配置](docs/3-configuration.md)
-- [settings.yaml 配置说明](docs/4-settings-schema.md)
+- [settings.toml 配置说明](docs/4-settings-schema.md)
 - [使用示例](docs/5-usage-examples.md)
+- [支持站点列表](docs/6-supported-sites.md)
 - [文件保存](docs/file-saving.md)
 - [TODO](docs/todo.md)
 - [开发](docs/develop.md)

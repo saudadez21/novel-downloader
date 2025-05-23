@@ -21,6 +21,7 @@ classifiers = [
 dynamic = ["version"]
 dependencies = [
     "requests",
+    "aiohttp",
     "beautifulsoup4",
     "DrissionPage",
     "opencv-python",
@@ -52,8 +53,6 @@ font-recovery = [
     "huggingface_hub"
 ]
 
-async = ["aiohttp"]
-
 [project.scripts]
 novel-cli = "novel_downloader.cli.main:cli_main"
 
@@ -69,7 +68,7 @@ build-backend = "setuptools.build_meta"
 include = ["novel_downloader", "novel_downloader.*"]
 
 [tool.setuptools.package-data]
-"novel_downloader.resources.config" = ["settings.yaml", "rules.toml"]
+"novel_downloader.resources.config" = ["settings.toml", "rules.toml"]
 "novel_downloader.resources.text" = ["*.txt"]
 "novel_downloader.resources.js_scripts" = ["*.js"]
 "novel_downloader.resources.json" = ["*.json"]

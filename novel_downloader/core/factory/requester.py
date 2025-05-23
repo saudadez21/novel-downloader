@@ -1,23 +1,18 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.factory.requester_factory
 -----------------------------------------------
 
 This module implements a factory function for retrieving requester instances
 based on the target novel platform (site).
-
-- get_async_requester -> returns AsyncRequesterProtocol
-- get_sync_requester  -> returns RequesterProtocol
-- get_requester       -> dispatches to one of the above based on config.mode
-
-To add support for new sites or modes, extend the `_site_map` accordingly.
 """
 
-from typing import Callable, Union
 
 from novel_downloader.config import RequesterConfig, load_site_rules
-from novel_downloader.core.interfaces import AsyncRequesterProtocol, RequesterProtocol
+from novel_downloader.core.interfaces import (
+    AsyncRequesterProtocol,
+    SyncRequesterProtocol,
+)
 from novel_downloader.core.requesters import (
     CommonAsyncSession,
     CommonSession,
@@ -25,14 +20,15 @@ from novel_downloader.core.requesters import (
     QidianSession,
 )
 
-_site_map: dict[
-    str,
-    dict[str, Callable[[RequesterConfig], RequesterProtocol]],
-] = {
+# _async_site_map = {
+#     # "biquge": ...
+# }
+_sync_site_map = {
     "qidian": {
         "session": QidianSession,
         "browser": QidianBrowser,
     },
+    # "biquge": ...
 }
 
 
@@ -48,6 +44,12 @@ def get_async_requester(
     :return: An instance of a requester class
     """
     site_key = site.lower()
+
+    # site-specific
+    # if site_key in _async_site_map:
+    #     return _async_site_map[site_key](config)
+
+    # fallback
     site_rules = load_site_rules()
     site_rule = site_rules.get(site_key)
     if site_rule is None:
@@ -59,7 +61,7 @@ def get_async_requester(
 def get_sync_requester(
     site: str,
     config: RequesterConfig,
-) -> RequesterProtocol:
+) -> SyncRequesterProtocol:
     """
     Returns a RequesterProtocol for the given site.
 
@@ -68,15 +70,15 @@ def get_sync_requester(
     :return: An instance of a requester class
     """
     site_key = site.lower()
-    site_entry = _site_map.get(site_key)
+    site_entry = _sync_site_map.get(site_key)
 
-    # site-specific implementation for this mode
+    # site-specific
     if site_entry:
         cls = site_entry.get(config.mode)
         if cls:
             return cls(config)
 
-    # fallback to CommonSession
+    # fallback
     site_rules = load_site_rules()
     site_rule = site_rules.get(site_key)
     if site_rule is None:
@@ -88,7 +90,7 @@ def get_sync_requester(
 def get_requester(
     site: str,
     config: RequesterConfig,
-) -> Union[AsyncRequesterProtocol, RequesterProtocol]:
+) -> AsyncRequesterProtocol | SyncRequesterProtocol:
     """
     Dispatches to either get_async_requester or get_sync_requester
     based on config.mode. Treats 'browser' and 'async' as async modes,

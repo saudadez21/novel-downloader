@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.parsers.qidian.session.node_decryptor
 -----------------------------------------------------------
@@ -15,7 +14,6 @@ import shutil
 import subprocess
 import uuid
 from pathlib import Path
-from typing import Union
 
 from novel_downloader.utils.constants import (
     JS_SCRIPT_DIR,
@@ -68,7 +66,7 @@ class QidianNodeDecryptor:
         """
         # 1) Check Node.js
         if not shutil.which("node"):
-            raise EnvironmentError("Node.js is not installed or not in PATH.")
+            raise OSError("Node.js is not installed or not in PATH.")
 
         # 2) Copy bundled decrypt script into place if missing
         if not self.QIDIAN_DECRYPT_SCRIPT_PATH.exists():
@@ -102,8 +100,8 @@ class QidianNodeDecryptor:
 
     def decrypt(
         self,
-        ciphertext: Union[str, bytes],
-        chapter_id: Union[str, int],
+        ciphertext: str | bytes,
+        chapter_id: str | int,
         fkp: str,
         fuid: str,
     ) -> str:
@@ -120,7 +118,7 @@ class QidianNodeDecryptor:
         # Normalize inputs
         cipher_str = (
             ciphertext.decode("utf-8")
-            if isinstance(ciphertext, (bytes, bytearray))
+            if isinstance(ciphertext, (bytes | bytearray))
             else str(ciphertext)
         )
         chapter_str = str(chapter_id)
@@ -146,8 +144,7 @@ class QidianNodeDecryptor:
 
             proc = subprocess.run(
                 ["node", self.script_path.name, input_path.name, output_path.name],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                capture_output=True,
                 text=True,
                 cwd=str(self.script_dir),
             )

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 tests.utils.test_model_loader
 -----------------------------
@@ -8,7 +7,7 @@ tests.utils.test_model_loader
 from pathlib import Path
 
 import pytest
-from huggingface_hub.utils import LocalEntryNotFoundError
+from huggingface_hub.errors import LocalEntryNotFoundError
 
 import novel_downloader.utils.model_loader as model_loader
 from novel_downloader.utils.constants import (
@@ -27,9 +26,7 @@ def test_get_rec_chinese_char_model_dir_success(monkeypatch, tmp_path):
     # Capture calls and simulate file creation
     calls = []
 
-    def fake_hf_download(
-        repo_id, filename, revision, local_dir, local_dir_use_symlinks
-    ):
+    def fake_hf_download(repo_id, filename, revision, local_dir):
         calls.append((repo_id, filename, revision, Path(local_dir)))
         # simulate writing the file
         (Path(local_dir) / filename).write_text("dummy")
@@ -58,9 +55,7 @@ def test_get_rec_chinese_char_model_dir_success(monkeypatch, tmp_path):
 def test_get_rec_chinese_char_model_dir_missing(monkeypatch, tmp_path):
     """If a model file is missing, RuntimeError is raised."""
 
-    def fake_hf_download(
-        repo_id, filename, revision, local_dir, local_dir_use_symlinks
-    ):
+    def fake_hf_download(repo_id, filename, revision, local_dir):
         raise LocalEntryNotFoundError("not found")
 
     monkeypatch.setattr(model_loader, "MODEL_CACHE_DIR", tmp_path / "cache")
@@ -78,9 +73,7 @@ def test_get_rec_char_vector_dir_success(monkeypatch, tmp_path):
     """Ensure get_rec_char_vector_dir downloads all vector files."""
     calls = []
 
-    def fake_hf_download(
-        repo_id, filename, revision, local_dir, local_dir_use_symlinks
-    ):
+    def fake_hf_download(repo_id, filename, revision, local_dir):
         calls.append((repo_id, filename, revision, Path(local_dir)))
         (Path(local_dir) / filename).write_text("vec")
 
@@ -104,9 +97,7 @@ def test_get_rec_char_vector_dir_success(monkeypatch, tmp_path):
 def test_get_rec_char_vector_dir_missing(monkeypatch, tmp_path):
     """If a vector file is missing, RuntimeError is raised."""
 
-    def fake_hf_download(
-        repo_id, filename, revision, local_dir, local_dir_use_symlinks
-    ):
+    def fake_hf_download(repo_id, filename, revision, local_dir):
         raise LocalEntryNotFoundError("no vec")
 
     monkeypatch.setattr(model_loader, "MODEL_CACHE_DIR", tmp_path / "cache")

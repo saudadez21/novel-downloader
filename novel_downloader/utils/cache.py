@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.utils.cache
 ----------------------------
@@ -8,8 +7,9 @@ Provides decorators for caching function results,
 specifically optimized for configuration loading functions.
 """
 
+from collections.abc import Callable
 from functools import lru_cache, wraps
-from typing import Any, Callable, TypeVar, cast
+from typing import Any, TypeVar, cast
 
 T = TypeVar("T", bound=Callable[..., Any])
 

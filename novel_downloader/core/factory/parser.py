@@ -1,19 +1,10 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.factory.parser_factory
 --------------------------------------------
 
 This module implements a factory function for creating parser instances
 based on the site name and parser mode specified in the configuration.
-
-Currently supported:
-- Site: 'qidian'
-    - Modes:
-        - 'browser': QidianBrowserParser
-        - 'session': (Not implemented yet)
-
-To add support for new sites or modes, extend the `_site_map` accordingly.
 """
 
 from novel_downloader.config import ParserConfig, load_site_rules

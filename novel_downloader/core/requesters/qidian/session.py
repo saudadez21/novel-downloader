@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.requesters.qidian.session
 -----------------------------------------------
@@ -13,51 +12,166 @@ retrieving book information.
 from __future__ import annotations
 
 import base64
-import logging
-import time
-from typing import Any, Dict, Optional
+from http.cookies import SimpleCookie
+from typing import Any, ClassVar
 
 from requests import Response
 
 from novel_downloader.config.models import RequesterConfig
 from novel_downloader.core.requesters.base import BaseSession
 from novel_downloader.utils.crypto_utils import patch_qd_payload_token
+from novel_downloader.utils.i18n import t
 from novel_downloader.utils.state import state_mgr
-from novel_downloader.utils.time_utils import sleep_with_random_delay
-
-logger = logging.getLogger(__name__)
 
 
 class QidianSession(BaseSession):
     """
-    A concrete :class:`BaseSession` for the Qidian site.  Besides the usual
-    ``get``/``post`` helpers provided by the base class, this subclass adds:
+    QidianRequester provides methods for interacting with Qidian.com,
+    including checking login status and preparing book-related URLs.
 
-    * URL builders for book info / chapter / bookcase pages
-    * High-level convenience wrappers that:
-        1. sleep a configurable (jittered) amount of time;
-        2. retry on failures;
-        3. automatically persist fresh cookies to :pydata:`state_mgr`
-           so that the next run can reuse them.
+    Inherits base session setup from BaseSession.
     """
 
-    DEFAULT_SCHEME = "https:"
-    QIDIAN_BASE_URL = "www.qidian.com"
-    QIDIAN_BOOKCASE_URL = f"{DEFAULT_SCHEME}//my.qidian.com/bookcase/"
-    QIDIAN_BOOK_INFO_URL_1 = f"{DEFAULT_SCHEME}//www.qidian.com/book"
-    QIDIAN_BOOK_INFO_URL_2 = f"{DEFAULT_SCHEME}//book.qidian.com/info"
-    QIDIAN_CHAPTER_URL = f"{DEFAULT_SCHEME}//www.qidian.com/chapter"
+    BOOKCASE_URL = "https://my.qidian.com/bookcase/"
+    BOOK_INFO_URL = "https://book.qidian.com/info/{book_id}/"
+    CHAPTER_URL = "https://www.qidian.com/chapter/{book_id}/{chapter_id}/"
 
-    def __init__(self, config: RequesterConfig):
+    _cookie_keys: ClassVar[list[str]] = [
+        "X2NzcmZUb2tlbg==",
+        "eXdndWlk",
+        "eXdvcGVuaWQ=",
+        "eXdrZXk=",
+        "d190c2Zw",
+    ]
+
+    def __init__(
+        self,
+        config: RequesterConfig,
+    ):
         """
-        Initialise the underlying :class:`requests.Session`.
+        Initialize the QidianSession with a session configuration.
+
+        :param config: The RequesterConfig instance containing request settings.
         """
-        self._init_session(config=config)
+        super().__init__(config)
+        self._logged_in: bool = False
+        self._retry_times = config.retry_times
+        self._retry_interval = config.backoff_factor
+        self._timeout = config.timeout
+
+    def login(
+        self,
+        username: str = "",
+        password: str = "",
+        manual_login: bool = False,
+        **kwargs: Any,
+    ) -> bool:
+        """
+        Restore cookies persisted by the browser-based workflow.
+        """
+        cookies: dict[str, str] = state_mgr.get_cookies("qidian")
+
+        # Merge cookies into both the internal cache and the live session
+        self.update_cookies(cookies)
+        for attempt in range(1, self._retry_times + 1):
+            if self._check_login_status():
+                self.logger.debug("[auth] Already logged in.")
+                return True
+
+            if attempt == 1:
+                print(t("session_login_prompt_intro"))
+            cookie_str = input(
+                t(
+                    "session_login_prompt_paste_cookie",
+                    attempt=attempt,
+                    max_retries=self._retry_times,
+                )
+            ).strip()
+
+            cookies = self._parse_cookie_input(cookie_str)
+            if not self._check_cookies(cookies):
+                print(t("session_login_prompt_invalid_cookie"))
+                continue
+
+            self.update_cookies(cookies)
+        return self._check_login_status()
+
+    def get_book_info(
+        self,
+        book_id: str,
+        **kwargs: Any,
+    ) -> str:
+        """
+        Fetch the raw HTML of the book info page.
+
+        :param book_id: The book identifier.
+        :return: The page content as a string.
+        """
+        url = self.book_info_url(book_id=book_id)
+        try:
+            resp = self.get(url, **kwargs)
+            resp.raise_for_status()
+            return resp.text
+        except Exception as exc:
+            self.logger.warning(
+                "[session] get_book_info(%s) failed: %s",
+                book_id,
+                exc,
+            )
+        return ""
+
+    def get_book_chapter(
+        self,
+        book_id: str,
+        chapter_id: str,
+        **kwargs: Any,
+    ) -> str:
+        """
+        Fetch the HTML of a single chapter.
+
+        :param book_id: The book identifier.
+        :param chapter_id: The chapter identifier.
+        :return: The chapter content as a string.
+        """
+        url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
+        try:
+            resp = self.get(url, **kwargs)
+            resp.raise_for_status()
+            return resp.text
+        except Exception as exc:
+            self.logger.warning(
+                "[session] get_book_chapter(%s) failed: %s",
+                book_id,
+                exc,
+            )
+        return ""
+
+    def get_bookcase(
+        self,
+        page: int = 1,
+        **kwargs: Any,
+    ) -> str:
+        """
+        Retrieve the user's *bookcase* page.
+
+        :return: The HTML markup of the bookcase page.
+        """
+        url = self.bookcase_url()
+        try:
+            resp = self.get(url, **kwargs)
+            resp.raise_for_status()
+            return resp.text
+        except Exception as exc:
+            self.logger.warning(
+                "[session] get_bookcase failed: %s",
+                exc,
+            )
+        return ""
 
     def get(
         self,
         url: str,
-        params: Optional[Dict[str, Any]] = None,
+        params: dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> Response:
         """
@@ -70,11 +184,11 @@ class QidianSession(BaseSession):
         3. Updates both the live ``requests.Session`` and the internal cache;
         4. Delegates the actual request to ``super().get``.
         """
-        if self._session is None:  # defensive - mirrors BaseSession check
+        if self._session is None:
             raise RuntimeError("Session is not initialized or has been shut down.")
 
         # ---- 1. refresh token cookie --------------------------------------
-        cookie_key = base64.b64decode("d190c2Zw").decode()
+        cookie_key = self._d("d190c2Zw")
         old_token = self._session.cookies.get(cookie_key, "")
 
         if old_token:
@@ -86,117 +200,88 @@ class QidianSession(BaseSession):
         resp: Response = super().get(url, params=params, **kwargs)
 
         # ---- 3. persist any server-set cookies (optional) --------------
-        self.update_cookies(self._session.cookies.get_dict(), overwrite=True)
+        self.update_cookies(self._session.cookies.get_dict())
         state_mgr.set_cookies("qidian", self._cookies)
 
         return resp
 
-    def login(self, max_retries: int = 3, manual_login: bool = False) -> bool:
+    @classmethod
+    def book_info_url(cls, book_id: str) -> str:
         """
-        Restore cookies persisted by the browser-based workflow.
+        Construct the URL for fetching a book's info page.
+
+        :param book_id: The identifier of the book.
+        :return: Fully qualified URL for the book info page.
         """
-        cookies: Dict[str, str] = state_mgr.get_cookies("qidian")
-        if not cookies:
-            logger.info(
-                "[session] No stored cookies found: session remains unauthenticated."
-            )
-            return False
+        return cls.BOOK_INFO_URL.format(book_id=book_id)
 
-        # Merge cookies into both the internal cache and the live session
-        self.update_cookies(cookies, overwrite=True)
-        logger.info("[session] Loaded %d cookie(s) from state.", len(cookies))
-        self.get("https://www.qidian.com")
-        return True
-
-    def get_book_info(self, book_id: str, wait_time: Optional[float] = None) -> str:
+    @classmethod
+    def chapter_url(cls, book_id: str, chapter_id: str) -> str:
         """
-        Fetch the raw HTML of the book info page.
+        Construct the URL for fetching a specific chapter.
 
-        :param book_id: The book identifier.
-        :param wait_time: Base number of seconds to wait before returning content.
-        :return: The page content as a string.
+        :param book_id: The identifier of the book.
+        :param chapter_id: The identifier of the chapter.
+        :return: Fully qualified chapter URL.
         """
-        url = f"{self.QIDIAN_BOOK_INFO_URL_2}/{book_id}/"
-        base_delay = wait_time or self._config.wait_time
+        return cls.CHAPTER_URL.format(book_id=book_id, chapter_id=chapter_id)
 
-        for attempt in range(1, self.retry_times + 1):
-            try:
-                resp = self.get(url)
-                resp.raise_for_status()
-                sleep_with_random_delay(base_delay, mul_spread=1.2)
-                return resp.text
-            except Exception as exc:
-                logger.warning(
-                    "[session] get_book_info(%s) attempt %s/%s failed: %s",
-                    book_id,
-                    attempt,
-                    self.retry_times,
-                    exc,
-                )
-                if attempt == self.retry_times:
-                    raise
-                time.sleep(self.retry_interval)
-
-        raise RuntimeError("Unexpected fall-through in get_book_info")
-
-    def get_book_chapter(
-        self, book_id: str, chapter_id: str, wait_time: Optional[float] = None
-    ) -> str:
+    @classmethod
+    def bookcase_url(cls) -> str:
         """
-        Fetch the HTML of a single chapter.
+        Construct the URL for the user's bookcase page.
 
-        :param book_id: The book identifier.
-        :param chapter_id: The chapter identifier.
-        :param wait_time: Base number of seconds to wait before returning content.
-        :return: The chapter content as a string.
+        :return: Fully qualified URL of the bookcase.
         """
-        url = f"{self.QIDIAN_CHAPTER_URL}/{book_id}/{chapter_id}/"
-        base_delay = wait_time or self._config.wait_time
+        return cls.BOOKCASE_URL
 
-        for attempt in range(1, self.retry_times + 1):
-            try:
-                resp = self.get(url)
-                resp.raise_for_status()
-                sleep_with_random_delay(base_delay, mul_spread=1.2)
-                return resp.text
-            except Exception as exc:
-                logger.warning(
-                    "[session] get_book_chapter(%s, %s) attempt %s/%s failed: %s",
-                    book_id,
-                    chapter_id,
-                    attempt,
-                    self.retry_times,
-                    exc,
-                )
-                if attempt == self.retry_times:
-                    raise
-                time.sleep(self.retry_interval)
-
-        raise RuntimeError("Unexpected fall-through in get_book_chapter")
-
-    def get_bookcase(self, wait_time: Optional[float] = None) -> str:
+    def _check_login_status(self) -> bool:
         """
-        Retrieve the user's *bookcase* page.
+        Check whether the user is currently logged in by
+        inspecting the bookcase page content.
 
-        :param wait_time: Base number of seconds to wait before returning content.
-        :return: The HTML markup of the bookcase page.
+        :return: True if the user appears to be logged in, False otherwise.
         """
-        base_delay = wait_time or self._config.wait_time
-        for attempt in range(1, self.retry_times + 1):
-            try:
-                resp = self.get(self.QIDIAN_BOOKCASE_URL, allow_redirects=True)
-                resp.raise_for_status()
-                sleep_with_random_delay(base_delay, mul_spread=1.2)
-                return resp.text
-            except Exception as exc:
-                logger.warning(
-                    "[session] get_bookcase attempt %s/%s failed: %s",
-                    attempt,
-                    self.retry_times,
-                    exc,
-                )
-                if attempt == self.retry_times:
-                    raise
-                time.sleep(self.retry_interval)
+        keywords = [
+            'var buid = "fffffffffffffffffff"',
+            "C2WF946J0/probe.js",
+        ]
+        resp_text = self.get_bookcase()
+        return not any(kw in resp_text for kw in keywords)
 
-        raise RuntimeError("Unexpected fall-through in get_bookcase")
+    @staticmethod
+    def _parse_cookie_input(cookie_str: str) -> dict[str, str]:
+        """
+        Parse a raw cookie string (e.g. from browser dev tools) into a dict.
+        Returns an empty dict if parsing fails.
+
+        :param cookie_str: The raw cookie header string.
+        :return: Parsed cookie dict.
+        """
+        filtered = "; ".join(pair for pair in cookie_str.split(";") if "=" in pair)
+        parsed = SimpleCookie()
+        try:
+            parsed.load(filtered)
+            return {k: v.value for k, v in parsed.items()}
+        except Exception:
+            return {}
+
+    def _check_cookies(self, cookies: dict[str, str]) -> bool:
+        """
+        Check if the provided cookies contain all required keys.
+
+        Logs any missing keys as warnings.
+
+        :param cookies: The cookie dictionary to validate.
+        :return: True if all required keys are present, False otherwise.
+        """
+        required = {self._d(k) for k in self._cookie_keys}
+        actual = set(cookies)
+        missing = required - actual
+        if missing:
+            self.logger.warning("Missing required cookies: %s", ", ".join(missing))
+        return not missing
+
+    @staticmethod
+    def _d(b: str) -> str:
+        return base64.b64decode(b).decode()

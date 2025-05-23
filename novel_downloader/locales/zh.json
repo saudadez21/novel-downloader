@@ -69,11 +69,15 @@
   "login_prompt_intro": "需要手动登录, 请切换到浏览器窗口完成登录",
   "login_prompt_press_enter": "第 {attempt}/{max_retries} 次尝试: 请在浏览器中完成登录后按回车键...",
 
+  "session_login_prompt_intro": "尝试使用历史 Cookie 恢复登录失败, 请在浏览器登录后从开发者工具复制 Cookie 粘贴至下方",
+  "session_login_prompt_paste_cookie": "第 {attempt}/{max_retries} 次尝试, 请粘贴 Cookie 字符串并回车:",
+  "session_login_prompt_invalid_cookie": "Cookie 格式不正确, 请重新复制粘贴",
+
   "clean_logs": "清理日志目录",
   "clean_cache": "清理脚本和浏览器缓存",
   "clean_state": "清理状态文件 (state.json)",
   "clean_data": "清理数据文件 (如 image hashes, 浏览器数据)",
-  "clean_config": "清理配置文件 (如 settings.yaml 和规则)",
+  "clean_config": "清理配置文件 (如 settings.toml 和规则)",
   "clean_models": "清理模型缓存目录",
   "clean_hf_cache": "清理 Hugging Face 下载缓存",
   "clean_hf_cache_done": "已清除 Hugging Face 本地缓存",

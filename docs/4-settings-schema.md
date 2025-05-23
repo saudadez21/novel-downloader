@@ -1,4 +1,4 @@
-## `settings.yaml` 配置说明
+## `settings.toml` 配置说明
 
 ### requests 配置
 
@@ -72,4 +72,4 @@
 | `epub.include_cover`          | bool    | true                          | EPUB 中是否包含封面                         |
 | `epub.include_toc`            | bool    | true                          | EPUB 中是否自动生成目录                     |
 
-> **提示**: 可以根据自己需求在 `settings.yaml` 中添加或删除字段, 未列出的配置项请参考源码注释或自行扩展。
+> **提示**: 可以根据自己需求在 `settings.toml` 中添加或删除字段, 未列出的配置项请参考源码注释或自行扩展。

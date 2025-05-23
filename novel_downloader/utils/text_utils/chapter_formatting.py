@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.utils.text_utils.chapter_formatting
 ----------------------------------------------------
@@ -7,12 +6,8 @@ novel_downloader.utils.text_utils.chapter_formatting
 Format chapter content with title, paragraph blocks, and optional author notes.
 """
 
-from typing import List, Optional
 
-
-def format_chapter(
-    title: str, paragraphs: str, author_say: Optional[str] = None
-) -> str:
+def format_chapter(title: str, paragraphs: str, author_say: str | None = None) -> str:
     """
     Build a formatted chapter string with title, paragraphs, and optional author note.
 
@@ -22,7 +17,7 @@ def format_chapter(
     :return:            A single string where title, paragraphs, and author note
                         are separated by blank lines.
     """
-    parts: List[str] = [title.strip()]
+    parts: list[str] = [title.strip()]
 
     # add each nonempty paragraph line
     for ln in paragraphs.splitlines():

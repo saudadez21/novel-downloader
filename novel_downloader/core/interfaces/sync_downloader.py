@@ -1,26 +1,25 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-novel_downloader.core.interfaces.async_downloader_protocol
-----------------------------------------------------------
+novel_downloader.core.interfaces.sync_downloader
+------------------------------------------------
 
-This module defines the AsyncDownloaderProtocol, a structural interface
+This module defines the SyncDownloaderProtocol, a structural interface
 that outlines the expected behavior of any downloader class.
 """
 
-from typing import List, Protocol
+from typing import Protocol
 
 
-class AsyncDownloaderProtocol(Protocol):
+class SyncDownloaderProtocol(Protocol):
     """
-    Protocol for fully‐asynchronous downloader classes.
+    Protocol for downloader classes.
 
     Defines the expected interface for any downloader implementation,
     including both batch and single book downloads,
     as well as optional pre-download hooks.
     """
 
-    async def download(self, book_ids: List[str]) -> None:
+    def download(self, book_ids: list[str]) -> None:
         """
         Batch download entry point.
 
@@ -28,7 +27,7 @@ class AsyncDownloaderProtocol(Protocol):
         """
         ...
 
-    async def download_one(self, book_id: str) -> None:
+    def download_one(self, book_id: str) -> None:
         """
         Download logic for a single book.
 

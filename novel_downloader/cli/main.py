@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.cli.main
 --------------------------
@@ -7,7 +6,6 @@ novel_downloader.cli.main
 Unified CLI entry point. Parses arguments and delegates to parser or interactive.
 """
 
-from typing import Optional
 
 import click
 from click import Context
@@ -24,7 +22,7 @@ from novel_downloader.utils.i18n import t
     help=t("help_config"),
 )  # type: ignore
 @click.pass_context  # type: ignore
-def cli_main(ctx: Context, config: Optional[str]) -> None:
+def cli_main(ctx: Context, config: str | None) -> None:
     """Novel Downloader CLI."""
     ctx.ensure_object(dict)
     ctx.obj["config_path"] = config

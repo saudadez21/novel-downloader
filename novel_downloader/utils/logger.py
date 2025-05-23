@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.utils.logger
 -----------------------------
@@ -12,13 +11,13 @@ import logging
 from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
-from typing import Dict, Literal, Optional, Union
+from typing import Literal
 
 from .constants import LOGGER_DIR, LOGGER_NAME
 
 LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
 
-LOG_LEVELS: Dict[LogLevel, int] = {
+LOG_LEVELS: dict[LogLevel, int] = {
     "DEBUG": logging.DEBUG,
     "INFO": logging.INFO,
     "WARNING": logging.WARNING,
@@ -27,9 +26,9 @@ LOG_LEVELS: Dict[LogLevel, int] = {
 
 
 def setup_logging(
-    log_filename_prefix: Optional[str] = None,
-    log_level: Optional[LogLevel] = None,
-    log_dir: Optional[Union[str, Path]] = None,
+    log_filename_prefix: str | None = None,
+    log_level: LogLevel | None = None,
+    log_dir: str | Path | None = None,
 ) -> logging.Logger:
     """
     Create and configure a logger for both console and rotating file output.

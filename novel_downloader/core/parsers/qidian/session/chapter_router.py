@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.parsers.qidian.session.chapter_router
 -----------------------------------------------------------
@@ -10,7 +9,9 @@ Routing logic for selecting the correct chapter parser for Qidian session pages.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING
+
+from novel_downloader.utils.chapter_storage import ChapterDict
 
 from ..shared import (
     can_view_chapter,
@@ -29,7 +30,7 @@ def parse_chapter(
     parser: QidianSessionParser,
     html_str: str,
     chapter_id: str,
-) -> Dict[str, Any]:
+) -> ChapterDict | None:
     """
     Extract and return the formatted textual content of chapter.
 
@@ -45,11 +46,11 @@ def parse_chapter(
             logger.warning(
                 "[Parser] Chapter '%s' is not purchased or inaccessible.", chapter_id
             )
-            return {}
+            return None
 
         if is_encrypted(soup):
             if not parser._decode_font:
-                return {}
+                return None
             try:
                 from .chapter_encrypted import parse_encrypted_chapter
 
@@ -59,9 +60,9 @@ def parse_chapter(
                     "[Parser] Encrypted chapter '%s' requires extra dependencies.",
                     chapter_id,
                 )
-                return {}
+                return None
 
         return parse_normal_chapter(soup, chapter_id, parser._fuid)
     except Exception as e:
         logger.warning("[Parser] parse error for chapter '%s': %s", chapter_id, e)
-        return {}
+    return None

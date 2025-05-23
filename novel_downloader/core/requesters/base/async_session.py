@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.requesters.base.async_session
 ---------------------------------------------------
@@ -12,8 +11,11 @@ cookie handling, and defines abstract methods for subclasses.
 
 import abc
 import asyncio
+import logging
+import random
 import time
-from typing import Any, Dict, Literal, Optional, Union
+import types
+from typing import Any, Literal, Self
 
 import aiohttp
 from aiohttp import ClientResponse, ClientSession, ClientTimeout, TCPConnector
@@ -25,7 +27,8 @@ from novel_downloader.utils.constants import DEFAULT_USER_HEADERS
 
 class RateLimiter:
     """
-    Simple async token-bucket rate limiter: ensures no more than rate_per_sec
+    Simple async token-bucket rate limiter:
+    ensures no more than rate_per_sec
     requests are started per second, across all coroutines.
     """
 
@@ -40,7 +43,8 @@ class RateLimiter:
             elapsed = now - self._last
             delay = self._interval - elapsed
             if delay > 0:
-                await asyncio.sleep(delay)
+                jitter = random.uniform(0, 0.3)
+                await asyncio.sleep(delay + jitter)
             self._last = time.monotonic()
 
 
@@ -61,10 +65,10 @@ class BaseAsyncSession(AsyncRequesterProtocol, abc.ABC):
     def is_async(self) -> Literal[True]:
         return True
 
-    def _init_session(
+    def __init__(
         self,
         config: RequesterConfig,
-        cookies: Optional[Dict[str, str]] = None,
+        cookies: dict[str, str] | None = None,
     ) -> None:
         """
         Initialize the async session with configuration.
@@ -74,26 +78,30 @@ class BaseAsyncSession(AsyncRequesterProtocol, abc.ABC):
         :param cookies: Optional initial cookies to set on the session.
         """
         self._config = config
-        self._timeout = config.timeout
         self._retry_times = config.retry_times
-        self._retry_interval = config.retry_interval
+        self._retry_interval = config.backoff_factor
+        self._timeout = config.timeout
+        self._max_rps = config.max_rps
+        self._max_connections = config.max_connections
+
         self._cookies = cookies or {}
         self._headers = DEFAULT_USER_HEADERS.copy()
-        self._session: Optional[ClientSession] = None
-        self._rate_limiter: Optional[RateLimiter] = None
+        self._session: ClientSession | None = None
+        self._rate_limiter: RateLimiter | None = None
 
-    async def _setup(self) -> None:
+        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
+
+        self._init_session()
+
+    def _init_session(self) -> None:
         """
         Set up the aiohttp.ClientSession with timeout, connector, headers, and cookies.
         """
-        max_rps = getattr(self._config, "max_rps", None)
-        if max_rps is not None:
-            self._rate_limiter = RateLimiter(max_rps)
+        if self._max_rps is not None:
+            self._rate_limiter = RateLimiter(self._max_rps)
 
         timeout = ClientTimeout(total=self._timeout)
-        connector = TCPConnector(
-            limit_per_host=getattr(self._config, "max_connections", 10)
-        )
+        connector = TCPConnector(limit_per_host=self._max_connections)
         self._session = ClientSession(
             timeout=timeout,
             connector=connector,
@@ -101,7 +109,13 @@ class BaseAsyncSession(AsyncRequesterProtocol, abc.ABC):
             cookies=self._cookies,
         )
 
-    async def login(self, max_retries: int = 3, manual_login: bool = False) -> bool:
+    async def login(
+        self,
+        username: str = "",
+        password: str = "",
+        manual_login: bool = False,
+        **kwargs: Any,
+    ) -> bool:
         """
         Attempt to log in asynchronously.
         Override in subclasses that require authentication.
@@ -115,7 +129,9 @@ class BaseAsyncSession(AsyncRequesterProtocol, abc.ABC):
 
     @abc.abstractmethod
     async def get_book_info(
-        self, book_id: str, wait_time: Optional[float] = None
+        self,
+        book_id: str,
+        **kwargs: Any,
     ) -> str:
         """
         Fetch the raw HTML (or JSON) of the book info page asynchronously.
@@ -128,7 +144,10 @@ class BaseAsyncSession(AsyncRequesterProtocol, abc.ABC):
 
     @abc.abstractmethod
     async def get_book_chapter(
-        self, book_id: str, chapter_id: str, wait_time: Optional[float] = None
+        self,
+        book_id: str,
+        chapter_id: str,
+        **kwargs: Any,
     ) -> str:
         """
         Fetch the raw HTML (or JSON) of a single chapter asynchronously.
@@ -140,7 +159,11 @@ class BaseAsyncSession(AsyncRequesterProtocol, abc.ABC):
         """
         ...
 
-    async def get_bookcase(self, wait_time: Optional[float] = None) -> str:
+    async def get_bookcase(
+        self,
+        page: int = 1,
+        **kwargs: Any,
+    ) -> str:
         """
         Optional: Retrieve the HTML content of the authenticated user's bookcase page.
         Subclasses that support user login/bookcase should override this.
@@ -162,17 +185,12 @@ class BaseAsyncSession(AsyncRequesterProtocol, abc.ABC):
         :return: The response body as text.
         :raises: aiohttp.ClientError on final failure.
         """
-        if self._session is None:
-            await self._setup()
-        if self._session is None:
-            raise RuntimeError("Session not initialized after setup")
-
         if self._rate_limiter:
             await self._rate_limiter.wait()
 
         for attempt in range(self._retry_times + 1):
             try:
-                async with self._session.get(url, **kwargs) as resp:
+                async with self.session.get(url, **kwargs) as resp:
                     resp.raise_for_status()
                     text: str = await resp.text()
                     return text
@@ -185,7 +203,10 @@ class BaseAsyncSession(AsyncRequesterProtocol, abc.ABC):
         raise RuntimeError("Unreachable code reached in fetch()")
 
     async def get(
-        self, url: str, params: Optional[Dict[str, Any]] = None, **kwargs: Any
+        self,
+        url: str,
+        params: dict[str, Any] | None = None,
+        **kwargs: Any,
     ) -> ClientResponse:
         """
         Send an HTTP GET request asynchronously.
@@ -196,20 +217,13 @@ class BaseAsyncSession(AsyncRequesterProtocol, abc.ABC):
         :return: aiohttp.ClientResponse object.
         :raises RuntimeError: If the session is not initialized.
         """
-        if self._session is None:
-            await self._setup()
-        if self._session is None:
-            raise RuntimeError("Session not initialized after setup")
-
-        if self._rate_limiter:
-            await self._rate_limiter.wait()
-        return await self._session.get(url, params=params, **kwargs)
+        return await self._request("GET", url, params=params, **kwargs)
 
     async def post(
         self,
         url: str,
-        data: Optional[Union[Dict[str, Any], bytes]] = None,
-        json: Optional[Dict[str, Any]] = None,
+        data: dict[str, Any] | bytes | None = None,
+        json: dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> ClientResponse:
         """
@@ -222,14 +236,7 @@ class BaseAsyncSession(AsyncRequesterProtocol, abc.ABC):
         :return: aiohttp.ClientResponse object.
         :raises RuntimeError: If the session is not initialized.
         """
-        if self._session is None:
-            await self._setup()
-        if self._session is None:
-            raise RuntimeError("Session not initialized after setup")
-
-        if self._rate_limiter:
-            await self._rate_limiter.wait()
-        return await self._session.post(url, data=data, json=json, **kwargs)
+        return await self._request("POST", url, data=data, json=json, **kwargs)
 
     @property
     def session(self) -> ClientSession:
@@ -243,41 +250,106 @@ class BaseAsyncSession(AsyncRequesterProtocol, abc.ABC):
         return self._session
 
     @property
-    def timeout(self) -> float:
-        """Return the default timeout setting."""
-        return self._timeout
+    def cookies(self) -> dict[str, str]:
+        """
+        Get the current session cookies.
+
+        :return: A dict mapping cookie names to their values.
+        """
+        if self._session:
+            return {c.key: c.value for c in self._session.cookie_jar}
+        else:
+            return self._cookies
 
     @property
-    def retry_times(self) -> int:
-        """Return the maximum number of retry attempts."""
-        return self._retry_times
+    def headers(self) -> dict[str, str]:
+        """
+        Get the current session headers.
 
-    @property
-    def retry_interval(self) -> float:
-        """Return the base interval (in seconds) between retries."""
-        return self._retry_interval
+        :return: A dict mapping header names to their values.
+        """
+        if self._session:
+            return dict(self._session.headers)
+        else:
+            return self._headers
 
-    async def update_cookies(
-        self, cookies: Dict[str, str], overwrite: bool = True
+    def get_header(self, key: str, default: Any = None) -> Any:
+        """
+        Retrieve a specific header value by name.
+
+        :param key: The header name to look up.
+        :param default: The value to return if the header is not present.
+        :return: The header value if present, else default.
+        """
+        if self._session:
+            return self._session.headers.get(key, default)
+        else:
+            return self._headers.get(key, default)
+
+    def update_header(self, key: str, value: str) -> None:
+        """
+        Update or add a single header in the session.
+
+        :param key: The name of the header.
+        :param value: The value of the header.
+        """
+        self._headers[key] = value
+        if self._session:
+            self._session.headers[key] = value
+
+    def update_headers(self, headers: dict[str, str]) -> None:
+        """
+        Update or add multiple headers in the session.
+
+        :param headers: A dictionary of header key-value pairs.
+        """
+        self._headers.update(headers)
+        if self._session:
+            self._session.headers.update(headers)
+
+    def update_cookie(self, key: str, value: str) -> None:
+        """
+        Update or add a single cookie in the session.
+
+        :param key: The name of the cookie.
+        :param value: The value of the cookie.
+        """
+        self._cookies[key] = value
+        if self._session:
+            self._session.cookie_jar.update_cookies({key: value})
+
+    def update_cookies(
+        self,
+        cookies: dict[str, str],
     ) -> None:
         """
-        Update cookies for the current session and internal cache.
+        Update or add multiple cookies in the session.
 
-        :param cookies: New cookies to merge.
-        :param overwrite: If True, replace existing; else, only set missing.
+        :param cookies: A dictionary of cookie key-value pairs.
         """
-        # update internal cache
-        if overwrite:
-            self._cookies.update({str(k): str(v) for k, v in cookies.items()})
-        else:
-            for k, v in cookies.items():
-                self._cookies.setdefault(str(k), str(v))
-
-        # apply to live session
+        self._cookies.update(cookies)
         if self._session:
-            self._session.cookie_jar.update_cookies(self._cookies)
+            self._session.cookie_jar.update_cookies(cookies)
 
-    async def shutdown(self) -> None:
+    def clear_cookies(self) -> None:
+        """
+        Clear cookies from the session.
+        """
+        self._cookies = {}
+        if self._session:
+            self._session.cookie_jar.clear()
+
+    async def _request(
+        self,
+        method: str,
+        url: str,
+        **kwargs: Any,
+    ) -> ClientResponse:
+        if self._rate_limiter:
+            await self._rate_limiter.wait()
+        return await self.session.request(method, url, **kwargs)
+
+    async def close(self) -> None:
         """
         Shutdown and clean up the session. Closes connection pool.
         """
@@ -285,16 +357,48 @@ class BaseAsyncSession(AsyncRequesterProtocol, abc.ABC):
             await self._session.close()
             self._session = None
 
-    def __getstate__(self) -> Dict[str, Any]:
+    def sync_close(self) -> None:
+        """
+        Sync wrapper for closing the aiohttp session
+        when called from sync contexts.
+        """
+        if self._session:
+            try:
+                loop = asyncio.get_running_loop()
+                loop.create_task(self.close())
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                loop.run_until_complete(self.close())
+                loop.close()
+
+    async def __aenter__(self) -> Self:
+        if self._session is None:
+            self._init_session()
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        tb: types.TracebackType | None,
+    ) -> None:
+        await self.close()
+
+    def __del__(self) -> None:
+        self.sync_close()
+
+    def __getstate__(self) -> dict[str, Any]:
         """
         Prepare object state for serialization: remove unpickleable session.
         """
+        self.sync_close()
         state = self.__dict__.copy()
         state.pop("_session", None)
         state.pop("_rate_limiter", None)
         return state
 
-    def __setstate__(self, state: Dict[str, Any]) -> None:
+    def __setstate__(self, state: dict[str, Any]) -> None:
         """
         Restore object state. Session will be lazily reinitialized on next request.
         """

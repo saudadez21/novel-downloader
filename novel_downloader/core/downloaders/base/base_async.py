@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.downloaders.base.base_async
 -------------------------------------------------
@@ -11,19 +10,14 @@ common interface and reusable logic for all downloader implementations.
 import abc
 import logging
 from pathlib import Path
-from typing import List
 
 from novel_downloader.config import DownloaderConfig
 from novel_downloader.core.interfaces import (
+    AsyncDownloaderProtocol,
     AsyncRequesterProtocol,
     ParserProtocol,
     SaverProtocol,
 )
-from novel_downloader.core.interfaces.async_downloader_protocol import (
-    AsyncDownloaderProtocol,
-)
-
-logger = logging.getLogger(__name__)
 
 
 class BaseAsyncDownloader(AsyncDownloaderProtocol, abc.ABC):
@@ -52,6 +46,51 @@ class BaseAsyncDownloader(AsyncDownloaderProtocol, abc.ABC):
         self._cache_dir = Path(config.cache_dir) / site
         self._raw_data_dir.mkdir(parents=True, exist_ok=True)
         self._cache_dir.mkdir(parents=True, exist_ok=True)
+
+        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
+
+    async def download(self, book_ids: list[str]) -> None:
+        """
+        The general batch download process:
+          1. Iterate over all book IDs
+          2. For each ID, call `download_one()`
+
+        :param book_ids: A list of book identifiers to download.
+        """
+        await self.prepare()
+
+        # 2) batch download
+        for idx, book_id in enumerate(book_ids, start=1):
+            self.logger.debug(
+                "[%s] Starting download for %r (%s/%s)",
+                self.__class__.__name__,
+                book_id,
+                idx,
+                len(book_ids),
+            )
+            try:
+                await self.download_one(book_id)
+            except Exception as e:
+                self._handle_download_exception(book_id, e)
+
+    @abc.abstractmethod
+    async def download_one(self, book_id: str) -> None:
+        """
+        The full download logic for a single book.
+
+        Subclasses must implement this method.
+
+        :param book_id: The identifier of the book to download.
+        """
+        ...
+
+    async def prepare(self) -> None:
+        """
+        Optional hook called before downloading each book.
+
+        Subclasses can override this method to perform pre-download setup.
+        """
+        return
 
     @property
     def requester(self) -> AsyncRequesterProtocol:
@@ -97,49 +136,6 @@ class BaseAsyncDownloader(AsyncDownloaderProtocol, abc.ABC):
     def request_interval(self) -> float:
         return self._config.request_interval
 
-    async def prepare(self) -> None:
-        """
-        Optional hook called before downloading each book.
-
-        Subclasses can override this method to perform pre-download setup.
-        """
-        return
-
-    async def download(self, book_ids: List[str]) -> None:
-        """
-        The general batch download process:
-          1. Iterate over all book IDs
-          2. For each ID, call `download_one()`
-
-        :param book_ids: A list of book identifiers to download.
-        """
-        await self.prepare()
-
-        # 2) batch download
-        for idx, book_id in enumerate(book_ids, start=1):
-            logger.debug(
-                "[%s] Starting download for %r (%s/%s)",
-                self.__class__.__name__,
-                book_id,
-                idx,
-                len(book_ids),
-            )
-            try:
-                await self.download_one(book_id)
-            except Exception as e:
-                self._handle_download_exception(book_id, e)
-
-    @abc.abstractmethod
-    async def download_one(self, book_id: str) -> None:
-        """
-        The full download logic for a single book.
-
-        Subclasses must implement this method.
-
-        :param book_id: The identifier of the book to download.
-        """
-        ...
-
     def _handle_download_exception(self, book_id: str, error: Exception) -> None:
         """
         Handle download errors in a consistent way.
@@ -149,7 +145,7 @@ class BaseAsyncDownloader(AsyncDownloaderProtocol, abc.ABC):
         :param book_id: The ID of the book that failed.
         :param error: The exception raised during download.
         """
-        logger.warning(
+        self.logger.warning(
             "[%s] Failed to download %r: %s",
             self.__class__.__name__,
             book_id,

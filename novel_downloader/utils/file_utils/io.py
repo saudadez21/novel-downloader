@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.utils.file_utils.io
 ------------------------------------
@@ -17,7 +16,7 @@ import logging
 import tempfile
 from importlib.resources import files
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Optional, Set, Union
+from typing import Any, Literal
 
 from .sanitize import sanitize_filename
 
@@ -41,9 +40,9 @@ def _get_non_conflicting_path(path: Path) -> Path:
 
 
 def _write_file(
-    content: Union[str, bytes, Dict[Any, Any], List[Any], Any],
-    filepath: Union[str, Path],
-    mode: Optional[str] = None,
+    content: str | bytes | dict[Any, Any] | list[Any] | Any,
+    filepath: str | Path,
+    mode: str | None = None,
     *,
     on_exist: Literal["overwrite", "skip", "rename"] = "overwrite",
     dump_json: bool = False,
@@ -78,7 +77,7 @@ def _write_file(
             logger.debug("[file] '%s' exists, will overwrite", path)
 
     # Prepare content and write mode
-    content_to_write: Union[str, bytes]
+    content_to_write: str | bytes
     if dump_json:
         # Serialize original object to JSON string
         json_str = json.dumps(content, ensure_ascii=False, indent=2)
@@ -87,7 +86,7 @@ def _write_file(
         content_to_write = json_str
         write_mode = "w"
     else:
-        if isinstance(content, (str, bytes)):
+        if isinstance(content, (str | bytes)):
             content_to_write = content
         else:
             raise TypeError("Non-JSON content must be str or bytes.")
@@ -113,7 +112,7 @@ def _write_file(
 
 def save_as_txt(
     content: str,
-    filepath: Union[str, Path],
+    filepath: str | Path,
     *,
     encoding: str = "utf-8",
     on_exist: Literal["overwrite", "skip", "rename"] = "overwrite",
@@ -139,7 +138,7 @@ def save_as_txt(
 
 def save_as_json(
     content: Any,
-    filepath: Union[str, Path],
+    filepath: str | Path,
     *,
     encoding: str = "utf-8",
     on_exist: Literal["overwrite", "skip", "rename"] = "overwrite",
@@ -163,9 +162,7 @@ def save_as_json(
     )
 
 
-def read_text_file(
-    filepath: Union[str, Path], encoding: str = "utf-8"
-) -> Optional[str]:
+def read_text_file(filepath: str | Path, encoding: str = "utf-8") -> str | None:
     """
     Read a UTF-8 text file.
 
@@ -181,9 +178,7 @@ def read_text_file(
         return None
 
 
-def read_json_file(
-    filepath: Union[str, Path], encoding: str = "utf-8"
-) -> Optional[Any]:
+def read_json_file(filepath: str | Path, encoding: str = "utf-8") -> Any | None:
     """
     Read a JSON file and parse it into Python objects.
 
@@ -199,7 +194,7 @@ def read_json_file(
         return None
 
 
-def read_binary_file(filepath: Union[str, Path]) -> Optional[bytes]:
+def read_binary_file(filepath: str | Path) -> bytes | None:
     """
     Read a binary file and return its content as bytes.
 
@@ -231,7 +226,7 @@ def load_text_resource(
     return resource_path.read_text(encoding="utf-8")
 
 
-def load_blacklisted_words() -> Set[str]:
+def load_blacklisted_words() -> set[str]:
     """
     Convenience loader for the blacklist.txt in the text resources.
 

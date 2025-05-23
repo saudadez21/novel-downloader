@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.savers.biquge
 -----------------------------------
@@ -12,8 +11,15 @@ from .common import CommonSaver
 
 
 class BiqugeSaver(CommonSaver):
-    def __init__(self, config: SaverConfig):
-        super().__init__(config, site="biquge")
+    def __init__(
+        self,
+        config: SaverConfig,
+    ):
+        super().__init__(
+            config,
+            site="biquge",
+            chap_folders=["chapters"],
+        )
 
 
 __all__ = ["BiqugeSaver"]

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.config.models
 ------------------------------
@@ -18,15 +17,17 @@ strongly typed Python objects for safer and cleaner access.
 """
 
 from dataclasses import dataclass
-from typing import Any, Dict, List, Literal, Optional, TypedDict
+from typing import Any, Literal, TypedDict
+
+ModeType = Literal["browser", "session", "async"]
+StorageBackend = Literal["json", "sqlite"]
 
 
 # === Requesters ===
 @dataclass
 class RequesterConfig:
-    wait_time: float = 5.0
     retry_times: int = 3
-    retry_interval: float = 5.0
+    backoff_factor: float = 2.0
     timeout: float = 30.0
     headless: bool = True
     user_data_folder: str = ""
@@ -34,8 +35,9 @@ class RequesterConfig:
     auto_close: bool = True
     disable_images: bool = True
     mute_audio: bool = True
-    mode: str = "session"  # browser / session / async
-    max_rps: Optional[float] = None  # Maximum requests per second
+    mode: ModeType = "session"
+    max_connections: int = 10
+    max_rps: float | None = None  # Maximum requests per second
 
 
 # === Downloaders ===
@@ -50,7 +52,9 @@ class DownloaderConfig:
     skip_existing: bool = True
     login_required: bool = False
     save_html: bool = False
-    mode: str = "session"  # browser / session / async
+    mode: ModeType = "session"
+    storage_backend: StorageBackend = "json"
+    storage_batch_size: int = 1
 
 
 # === Parsers ===
@@ -64,11 +68,11 @@ class ParserConfig:
     ocr_version: str = "v1.0"
     batch_size: int = 32
     gpu_mem: int = 500
-    gpu_id: Optional[int] = None
+    gpu_id: int | None = None
     ocr_weight: float = 0.6
     vec_weight: float = 0.4
     save_font_debug: bool = False
-    mode: str = "session"  # browser / session
+    mode: ModeType = "session"
 
 
 # === Savers ===
@@ -76,6 +80,7 @@ class ParserConfig:
 class SaverConfig:
     raw_data_dir: str = "./raw_data"
     output_dir: str = "./downloads"
+    storage_backend: StorageBackend = "json"
     clean_text: bool = True
     make_txt: bool = True
     make_epub: bool = False
@@ -85,6 +90,7 @@ class SaverConfig:
     filename_template: str = "{title}_{author}"
     include_cover: bool = True
     include_toc: bool = False
+    include_picture: bool = False
 
 
 class RuleStep(TypedDict, total=False):
@@ -105,39 +111,39 @@ class RuleStep(TypedDict, total=False):
     ]
 
     # —— BeautifulSoup 相关 —— #
-    selector: Optional[str]  # CSS 选择器, 用于 select/select_one/exclude
-    name: Optional[str]  # 标签名称, 用于 find/find_all
-    attrs: Optional[Dict[str, Any]]  # 属性过滤, 用于 find/find_all
-    limit: Optional[int]  # find_all 的最大匹配数
-    attr: Optional[str]  # 从元素获取属性值 (select/select_one/select_all)
+    selector: str | None  # CSS 选择器, 用于 select/select_one/exclude
+    name: str | None  # 标签名称, 用于 find/find_all
+    attrs: dict[str, Any] | None  # 属性过滤, 用于 find/find_all
+    limit: int | None  # find_all 的最大匹配数
+    attr: str | None  # 从元素获取属性值 (select/select_one/select_all)
 
     # —— 正则相关 —— #
-    pattern: Optional[str]  # 正则表达式
-    flags: Optional[int]  # re.I, re.M 等
-    group: Optional[int]  # 匹配结果中的第几个分组 (默认 0)
-    template: Optional[str]  # 自定义组合, 比如 "$1$2字"
+    pattern: str | None  # 正则表达式
+    flags: int | None  # re.I, re.M 等
+    group: int | None  # 匹配结果中的第几个分组 (默认 0)
+    template: str | None  # 自定义组合, 比如 "$1$2字"
 
     # —— 文本处理 —— #
-    chars: Optional[str]  # strip 要去除的字符集
-    old: Optional[str]  # replace 中要被替换的子串
-    new: Optional[str]  # replace 中新的子串
-    count: Optional[int]  # replace 中的最大替换次数
-    sep: Optional[str]  # split/join 的分隔符
-    index: Optional[int]  # split/select_all/select 之后取第几个元素
+    chars: str | None  # strip 要去除的字符集
+    old: str | None  # replace 中要被替换的子串
+    new: str | None  # replace 中新的子串
+    count: int | None  # replace 中的最大替换次数
+    sep: str | None  # split/join 的分隔符
+    index: int | None  # split/select_all/select 之后取第几个元素
 
 
 class FieldRules(TypedDict):
-    steps: List[RuleStep]
+    steps: list[RuleStep]
 
 
 class ChapterFieldRules(TypedDict):
     key: str
-    steps: List[RuleStep]
+    steps: list[RuleStep]
 
 
 class VolumesRulesOptional(TypedDict, total=False):
     volume_selector: str  # 有卷时选择 volume 块的 selector
-    volume_name_steps: List[RuleStep]
+    volume_name_steps: list[RuleStep]
     volume_mode: str  # Optional: "normal" (default) or "mixed"
     list_selector: str  # Optional: If "mixed" mode, parent container selector
 
@@ -145,7 +151,7 @@ class VolumesRulesOptional(TypedDict, total=False):
 class VolumesRules(VolumesRulesOptional):
     has_volume: bool  # 是否存在卷，false=未分卷
     chapter_selector: str  # 选择 chapter 节点的 selector
-    chapter_steps: List[ChapterFieldRules]  # 提取章节信息的步骤列表
+    chapter_steps: list[ChapterFieldRules]  # 提取章节信息的步骤列表
 
 
 class BookInfoRules(TypedDict, total=False):
@@ -175,4 +181,4 @@ class SiteRules(TypedDict):
     chapter: ChapterRules
 
 
-SiteRulesDict = Dict[str, SiteRules]
+SiteRulesDict = dict[str, SiteRules]

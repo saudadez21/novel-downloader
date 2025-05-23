@@ -174,4 +174,9 @@ cython_debug/
 .pypirc
 
 # Settings
-examples/settings.yaml
+examples/settings.toml
+dev/
+downloads/
+novel_cache/
+raw_data/
+*.sqlite

@@ -1,17 +1,10 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.factory.parser_factory
 --------------------------------------------
 
 This module implements a factory function for creating saver instances
 based on the site name and parser mode specified in the configuration.
-
-Currently supported:
-- Site: 'qidian'
-    - QidianSaver
-
-To add support for new sites or modes, extend the `_site_map` accordingly.
 """
 
 from novel_downloader.config import SaverConfig, load_site_rules
@@ -37,11 +30,12 @@ def get_saver(site: str, config: SaverConfig) -> SaverProtocol:
     """
     site_key = site.lower()
 
+    # site-specific
     saver_class = _site_map.get(site_key)
     if saver_class:
         return saver_class(config)
 
-    # Fallback: check site_rules
+    # Fallback
     site_rules = load_site_rules()
     if site_key not in site_rules:
         raise ValueError(f"Unsupported site: {site}")

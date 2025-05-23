@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.parsers.common.main_parser
 ------------------------------------------------
@@ -8,11 +7,12 @@ This package provides parsing components for handling
 Common pages.
 """
 
-from typing import Any, Dict
+from typing import Any
 
 from novel_downloader.config import ParserConfig, SiteRules
+from novel_downloader.core.parsers.base import BaseParser
+from novel_downloader.utils.chapter_storage import ChapterDict
 
-from ..base import BaseParser
 from .helper import HTMLExtractor
 
 
@@ -35,7 +35,7 @@ class CommonParser(BaseParser):
         self._site = site
         self._site_rule = site_rule
 
-    def parse_book_info(self, html_str: str) -> Dict[str, Any]:
+    def parse_book_info(self, html_str: str) -> dict[str, Any]:
         """
         Parse a book info page and extract metadata and chapter structure.
 
@@ -46,7 +46,11 @@ class CommonParser(BaseParser):
         rules = self._site_rule["book_info"]
         return extractor.extract_book_info(rules)
 
-    def parse_chapter(self, html_str: str, chapter_id: str) -> Dict[str, Any]:
+    def parse_chapter(
+        self,
+        html_str: str,
+        chapter_id: str,
+    ) -> ChapterDict | None:
         """
         Parse a single chapter page and extract clean text or simplified HTML.
 
@@ -66,13 +70,15 @@ class CommonParser(BaseParser):
         title = extractor.extract_field(title_steps["steps"]) if title_steps else ""
         content = extractor.extract_field(content_steps["steps"])
         if not content:
-            return {}
+            return None
 
         return {
             "id": chapter_id,
             "title": title or "Untitled",
             "content": content,
-            "site": self._site,
+            "extra": {
+                "site": self._site,
+            },
         }
 
     @property

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 novel_downloader.core.interfaces
 --------------------------------
@@ -15,18 +14,18 @@ Included protocols:
 - SaverProtocol
 """
 
-from .async_downloader_protocol import AsyncDownloaderProtocol
-from .async_requester_protocol import AsyncRequesterProtocol
-from .downloader_protocol import DownloaderProtocol
-from .parser_protocol import ParserProtocol
-from .requester_protocol import RequesterProtocol
-from .saver_protocol import SaverProtocol
+from .async_downloader import AsyncDownloaderProtocol
+from .async_requester import AsyncRequesterProtocol
+from .parser import ParserProtocol
+from .saver import SaverProtocol
+from .sync_downloader import SyncDownloaderProtocol
+from .sync_requester import SyncRequesterProtocol
 
 __all__ = [
     "AsyncDownloaderProtocol",
     "AsyncRequesterProtocol",
-    "DownloaderProtocol",
     "ParserProtocol",
-    "RequesterProtocol",
     "SaverProtocol",
+    "SyncDownloaderProtocol",
+    "SyncRequesterProtocol",
 ]
