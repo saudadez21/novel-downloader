@@ -10,6 +10,7 @@ Modules:
 - biquge (笔趣阁)
 - qianbi (铅笔小说)
 - qidian (起点中文网)
+- sfacg (SF轻小说)
 - common (通用架构)
 """
 
@@ -20,6 +21,7 @@ from .qidian import (
     QidianBrowserParser,
     QidianSessionParser,
 )
+from .sfacg import SfacgParser
 
 __all__ = [
     "BiqugeParser",
@@ -27,4 +29,5 @@ __all__ = [
     "QianbiParser",
     "QidianBrowserParser",
     "QidianSessionParser",
+    "SfacgParser",
 ]

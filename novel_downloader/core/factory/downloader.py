@@ -7,6 +7,7 @@ This module implements a factory function for creating downloader instances
 based on the site name and parser mode specified in the configuration.
 """
 
+from collections.abc import Callable
 from typing import cast
 
 from novel_downloader.config import DownloaderConfig, load_site_rules
@@ -18,6 +19,8 @@ from novel_downloader.core.downloaders import (
     QianbiAsyncDownloader,
     QianbiDownloader,
     QidianDownloader,
+    SfacgAsyncDownloader,
+    SfacgDownloader,
 )
 from novel_downloader.core.interfaces import (
     AsyncDownloaderProtocol,
@@ -28,14 +31,26 @@ from novel_downloader.core.interfaces import (
     SyncRequesterProtocol,
 )
 
-_async_site_map = {
+AsyncDownloaderBuilder = Callable[
+    [AsyncRequesterProtocol, ParserProtocol, SaverProtocol, DownloaderConfig],
+    AsyncDownloaderProtocol,
+]
+
+SyncDownloaderBuilder = Callable[
+    [SyncRequesterProtocol, ParserProtocol, SaverProtocol, DownloaderConfig],
+    SyncDownloaderProtocol,
+]
+
+_async_site_map: dict[str, AsyncDownloaderBuilder] = {
     "biquge": BiqugeAsyncDownloader,
     "qianbi": QianbiAsyncDownloader,
+    "sfacg": SfacgAsyncDownloader,
 }
-_sync_site_map = {
+_sync_site_map: dict[str, SyncDownloaderBuilder] = {
     "biquge": BiqugeDownloader,
     "qianbi": QianbiDownloader,
     "qidian": QidianDownloader,
+    "sfacg": SfacgDownloader,
 }
 
 

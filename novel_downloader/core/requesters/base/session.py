@@ -89,10 +89,7 @@ class BaseSession(SyncRequesterProtocol, abc.ABC):
         """
         Attempt to log in
         """
-        raise NotImplementedError(
-            "Login is not supported by this session type. "
-            "Override login() in your subclass to enable it."
-        )
+        return True
 
     @abc.abstractmethod
     def get_book_info(
@@ -315,12 +312,20 @@ class BaseSession(SyncRequesterProtocol, abc.ABC):
         if self._session:
             self._session.cookies.clear()
 
+    def _on_close(self) -> None:
+        """
+        Hook method called at the beginning of close().
+        Override in subclass if needed.
+        """
+        pass
+
     def close(self) -> None:
         """
         Shutdown and clean up the session.
 
         This closes the underlying connection pool and removes the session.
         """
+        self._on_close()
         if self._session:
             self._session.close()
             self._session = None

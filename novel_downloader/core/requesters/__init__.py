@@ -12,6 +12,7 @@ Subpackages:
 - biquge (笔趣阁)
 - qianbi (铅笔小说)
 - qidian (起点中文网)
+- sfacg (SF轻小说)
 - common (通用架构)
 """
 
@@ -31,6 +32,10 @@ from .qidian import (
     QidianBrowser,
     QidianSession,
 )
+from .sfacg import (
+    SfacgAsyncSession,
+    SfacgSession,
+)
 
 __all__ = [
     "BiqugeAsyncSession",
@@ -41,4 +46,6 @@ __all__ = [
     "QianbiSession",
     "QidianBrowser",
     "QidianSession",
+    "SfacgAsyncSession",
+    "SfacgSession",
 ]

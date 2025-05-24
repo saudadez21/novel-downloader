@@ -39,6 +39,7 @@ class BaseSaver(SaverProtocol, abc.ABC):
         """
         self._config = config
 
+        self._base_cache_dir = Path(config.cache_dir)
         self._raw_data_dir = Path(config.raw_data_dir)
         self._output_dir = Path(config.output_dir)
         self._raw_data_dir.mkdir(parents=True, exist_ok=True)
