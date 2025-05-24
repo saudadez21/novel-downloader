@@ -35,21 +35,28 @@ class CommonParser(BaseParser):
         self._site = site
         self._site_rule = site_rule
 
-    def parse_book_info(self, html_str: str) -> dict[str, Any]:
+    def parse_book_info(
+        self,
+        html_str: list[str],
+        **kwargs: Any,
+    ) -> dict[str, Any]:
         """
         Parse a book info page and extract metadata and chapter structure.
 
         :param html: Raw HTML of the book info page.
         :return: Parsed metadata and chapter structure as a dictionary.
         """
-        extractor = HTMLExtractor(html_str)
+        if not html_str:
+            return {}
+        extractor = HTMLExtractor(html_str[0])
         rules = self._site_rule["book_info"]
         return extractor.extract_book_info(rules)
 
     def parse_chapter(
         self,
-        html_str: str,
+        html_str: list[str],
         chapter_id: str,
+        **kwargs: Any,
     ) -> ChapterDict | None:
         """
         Parse a single chapter page and extract clean text or simplified HTML.
@@ -58,7 +65,9 @@ class CommonParser(BaseParser):
         :param chapter_id: Identifier of the chapter being parsed.
         :return: Cleaned chapter content as plain text or minimal HTML.
         """
-        extractor = HTMLExtractor(html_str)
+        if not html_str:
+            return None
+        extractor = HTMLExtractor(html_str[0])
         chapter_rules = self._site_rule["chapter"]
 
         # 必须有正文内容

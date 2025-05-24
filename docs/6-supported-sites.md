@@ -12,6 +12,7 @@
 | ------------------------------------------------------------ | ---------- | -------- | -------- | -------- |
 | [起点中文网](https://www.qidian.com)                         | qidian     | ✅        | ❌        | ✅        |
 | [笔趣阁](http://www.b520.cc)                                 | biquge     | ❌        | ❌        | ❌        |
+| [铅笔小说](https://www.23qb.net), [备用](https://www.23qb.com/) | qianbi   | ✅        | ❌        | ❌        |
 
 使用示例:
 
@@ -21,9 +22,27 @@ novel-cli download 1234567890
 novel-cli download --site qidian 1234567890
 
 # 下载笔趣阁的小说
-novel-cli download --site biquge 1_234
+novel-cli download --site biquge 1_2345
+
+# 下载铅笔小说
+novel-cli download --site qianbi 12345
 ```
+
+### Book ID 说明
+
+根据不同站点, Book ID 通常来源于小说详情页 URL 中的路径段:
+
+* 起点中文网 (qidian)
+  `https://www.qidian.com/book/1010868264/` -> `1010868264`
+
+* 笔趣阁 (biquge)
+  `http://www.b520.cc/8_8187/` -> `8_8187`
+
+* 铅笔小说 (qianbi)
+  `https://www.23qb.net/book/12282/` -> `12282`
+
 
 ### 注意事项
 
-当站点页面结构发生变动时，可能导致抓取失败。若遇问题欢迎提 Issue 或 PR
+- 若站点结构更新或章节数据抓取异常, 欢迎提 Issue 或提交 PR
+- 登录支持受限于站点接口策略, 部分功能需人工 Cookie 配置或账号绑定

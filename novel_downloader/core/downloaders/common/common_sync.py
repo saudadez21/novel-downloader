@@ -96,8 +96,8 @@ class CommonDownloader(BaseDownloader):
         except Exception:
             info_html = self.requester.get_book_info(book_id)
             if save_html:
-                info_html_path = chapters_html_dir / "info.html"
-                save_as_txt(info_html, info_html_path)
+                for i, html in enumerate(info_html):
+                    save_as_txt(html, chapters_html_dir / f"info_{i}.html")
             book_info = self.parser.parse_book_info(info_html)
             if (
                 book_info.get("book_name", "") != "未找到书名"
@@ -138,14 +138,9 @@ class CommonDownloader(BaseDownloader):
                     chap_html = self.requester.get_book_chapter(book_id, cid)
 
                     if save_html:
-                        html_path = chapters_html_dir / f"{cid}.html"
-                        save_as_txt(chap_html, html_path, on_exist="skip")
-                        logger.debug(
-                            "%s Saved raw HTML for chapter %s to %s",
-                            TAG,
-                            cid,
-                            html_path,
-                        )
+                        for i, html in enumerate(chap_html):
+                            html_path = chapters_html_dir / f"{cid}_{i}.html"
+                            save_as_txt(html, html_path, on_exist="skip")
 
                     chap_json = self.parser.parse_chapter(chap_html, cid)
 

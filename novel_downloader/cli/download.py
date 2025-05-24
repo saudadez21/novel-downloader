@@ -119,7 +119,7 @@ def download_cli(ctx: Context, book_ids: list[str], site: str) -> None:
             config=downloader_cfg,
         )
 
-        for book_id in book_ids:
+        for book_id in valid_book_ids:
             click.echo(t("download_downloading", book_id=book_id, site=site))
             sync_downloader.download_one(book_id)
 

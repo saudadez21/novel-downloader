@@ -100,7 +100,7 @@ class QidianSession(BaseSession):
         self,
         book_id: str,
         **kwargs: Any,
-    ) -> str:
+    ) -> list[str]:
         """
         Fetch the raw HTML of the book info page.
 
@@ -111,21 +111,21 @@ class QidianSession(BaseSession):
         try:
             resp = self.get(url, **kwargs)
             resp.raise_for_status()
-            return resp.text
+            return [resp.text]
         except Exception as exc:
             self.logger.warning(
                 "[session] get_book_info(%s) failed: %s",
                 book_id,
                 exc,
             )
-        return ""
+        return []
 
     def get_book_chapter(
         self,
         book_id: str,
         chapter_id: str,
         **kwargs: Any,
-    ) -> str:
+    ) -> list[str]:
         """
         Fetch the HTML of a single chapter.
 
@@ -137,20 +137,20 @@ class QidianSession(BaseSession):
         try:
             resp = self.get(url, **kwargs)
             resp.raise_for_status()
-            return resp.text
+            return [resp.text]
         except Exception as exc:
             self.logger.warning(
                 "[session] get_book_chapter(%s) failed: %s",
                 book_id,
                 exc,
             )
-        return ""
+        return []
 
     def get_bookcase(
         self,
         page: int = 1,
         **kwargs: Any,
-    ) -> str:
+    ) -> list[str]:
         """
         Retrieve the user's *bookcase* page.
 
@@ -160,13 +160,13 @@ class QidianSession(BaseSession):
         try:
             resp = self.get(url, **kwargs)
             resp.raise_for_status()
-            return resp.text
+            return [resp.text]
         except Exception as exc:
             self.logger.warning(
                 "[session] get_bookcase failed: %s",
                 exc,
             )
-        return ""
+        return []
 
     def get(
         self,

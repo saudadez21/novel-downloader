@@ -100,9 +100,9 @@ class QidianDownloader(BaseDownloader):
                 raise FileNotFoundError  # trigger re-fetch
         except Exception:
             info_html = self.requester.get_book_info(book_id)
-            if save_html:
+            if save_html and info_html:
                 info_html_path = chapters_html_dir / "info.html"
-                save_as_txt(info_html, info_html_path)
+                save_as_txt(info_html[0], info_html_path)
             book_info = self.parser.parse_book_info(info_html)
             if (
                 book_info.get("book_name", "") != "未找到书名"
@@ -140,6 +140,9 @@ class QidianDownloader(BaseDownloader):
                 chap_title = chap.get("title", "")
                 self.logger.info("%s Fetching chapter: %s (%s)", TAG, chap_title, cid)
                 chap_html = self.requester.get_book_chapter(book_id, cid)
+                if not chap_html:
+                    continue
+
                 if scroll:
                     self.requester.scroll_page(wait_time * 2)  # type: ignore[attr-defined]
                 else:
@@ -147,7 +150,7 @@ class QidianDownloader(BaseDownloader):
                         wait_time, mul_spread=1.1, max_sleep=wait_time + 2
                     )
 
-                is_encrypted = self.parser.is_encrypted(chap_html)  # type: ignore[attr-defined]
+                is_encrypted = self.parser.is_encrypted(chap_html[0])  # type: ignore[attr-defined]
 
                 if is_encrypted and encrypted_cs.exists(cid) and skip_existing:
                     self.logger.debug(
@@ -157,18 +160,18 @@ class QidianDownloader(BaseDownloader):
                     )
                     continue
 
-                if save_html and not is_vip(chap_html):
+                if save_html and chap_html and not is_vip(chap_html[0]):
                     folder = chapters_html_dir / (
                         "html_encrypted" if is_encrypted else "html_plain"
                     )
                     html_path = folder / f"{cid}.html"
-                    save_as_txt(chap_html, html_path, on_exist="skip")
+                    save_as_txt(chap_html[0], html_path, on_exist="skip")
                     self.logger.debug(
                         "%s Saved raw HTML for chapter %s to %s", TAG, cid, html_path
                     )
 
                 chap_json = self.parser.parse_chapter(chap_html, cid)
-                if not chap_json:
+                if not chap_json or not chap_json.get("content"):
                     self.logger.warning(
                         "%s Parsed chapter json is empty, skipping: %s (%s)",
                         TAG,

@@ -15,6 +15,8 @@ from novel_downloader.core.downloaders import (
     BiqugeDownloader,
     CommonAsyncDownloader,
     CommonDownloader,
+    QianbiAsyncDownloader,
+    QianbiDownloader,
     QidianDownloader,
 )
 from novel_downloader.core.interfaces import (
@@ -28,10 +30,12 @@ from novel_downloader.core.interfaces import (
 
 _async_site_map = {
     "biquge": BiqugeAsyncDownloader,
+    "qianbi": QianbiAsyncDownloader,
 }
 _sync_site_map = {
-    "qidian": QidianDownloader,
     "biquge": BiqugeDownloader,
+    "qianbi": QianbiDownloader,
+    "qidian": QidianDownloader,
 }
 
 

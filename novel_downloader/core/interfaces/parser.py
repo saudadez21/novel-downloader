@@ -21,7 +21,11 @@ class ParserProtocol(Protocol):
       - accept a book_id context for multi-step workflows.
     """
 
-    def parse_book_info(self, html_str: str) -> dict[str, Any]:
+    def parse_book_info(
+        self,
+        html_str: list[str],
+        **kwargs: Any,
+    ) -> dict[str, Any]:
         """
         Parse and return a dictionary of book information from the raw HTML.
 
@@ -32,8 +36,9 @@ class ParserProtocol(Protocol):
 
     def parse_chapter(
         self,
-        html_str: str,
+        html_str: list[str],
         chapter_id: str,
+        **kwargs: Any,
     ) -> ChapterDict | None:
         """
         Parse and return the text content of one chapter.

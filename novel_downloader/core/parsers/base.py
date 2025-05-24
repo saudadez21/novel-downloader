@@ -49,7 +49,11 @@ class BaseParser(ParserProtocol, abc.ABC):
         self._cache_dir = self._base_cache_dir
 
     @abc.abstractmethod
-    def parse_book_info(self, html_str: str) -> dict[str, Any]:
+    def parse_book_info(
+        self,
+        html_str: list[str],
+        **kwargs: Any,
+    ) -> dict[str, Any]:
         """
         Parse a book info page and extract metadata and chapter structure.
 
@@ -64,8 +68,9 @@ class BaseParser(ParserProtocol, abc.ABC):
     @abc.abstractmethod
     def parse_chapter(
         self,
-        html_str: str,
+        html_str: list[str],
         chapter_id: str,
+        **kwargs: Any,
     ) -> ChapterDict | None:
         """
         Parse a single chapter page and extract clean text or simplified HTML.

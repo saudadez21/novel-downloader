@@ -69,26 +69,35 @@ class QidianBrowserParser(BaseParser):
             self._font_debug_dir = self._base_cache_dir / "qidian" / "font_debug"
             self._font_debug_dir.mkdir(parents=True, exist_ok=True)
 
-    def parse_book_info(self, html_str: str) -> dict[str, Any]:
+    def parse_book_info(
+        self,
+        html_str: list[str],
+        **kwargs: Any,
+    ) -> dict[str, Any]:
         """
         Parse a book info page and extract metadata and chapter structure.
 
         :param html_str: Raw HTML of the book info page.
         :return: Parsed metadata and chapter structure as a dictionary.
         """
-        return parse_book_info(html_str)
+        if not html_str:
+            return {}
+        return parse_book_info(html_str[0])
 
     def parse_chapter(
         self,
-        html_str: str,
+        html_str: list[str],
         chapter_id: str,
+        **kwargs: Any,
     ) -> ChapterDict | None:
         """
         :param html: Raw HTML of the chapter page.
         :param chapter_id: Identifier of the chapter being parsed.
         :return: Cleaned chapter content as plain text.
         """
-        return parse_chapter(self, html_str, chapter_id)
+        if not html_str:
+            return None
+        return parse_chapter(self, html_str[0], chapter_id)
 
     def is_encrypted(self, html_str: str) -> bool:
         """

@@ -1,23 +1,30 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.requesters.biquge.async_session
+novel_downloader.core.requesters.qianbi.async_session
 -----------------------------------------------------
 
 """
 
+import asyncio
 from typing import Any
 
 from novel_downloader.core.requesters.base import BaseAsyncSession
 
 
-class BiqugeAsyncSession(BaseAsyncSession):
+class QianbiAsyncSession(BaseAsyncSession):
     """
-    A async session class for interacting with
-    the Biquge (www.b520.cc) novel website.
+    A async session class for interacting with the
+    Qianbi (www.23qb.com) novel website.
     """
 
-    BOOK_INFO_URL = "http://www.b520.cc/{book_id}/"
-    CHAPTER_URL = "http://www.b520.cc/{book_id}/{chapter_id}.html"
+    BASE_URLS = [
+        "www.23qb.com",
+        "www.23qb.net",
+    ]
+
+    BOOK_INFO_URL = "https://www.23qb.com/book/{book_id}/"
+    BOOK_CATALOG_URL = "https://www.23qb.com/book/{book_id}/catalog"
+    CHAPTER_URL = "https://www.23qb.com/book/{book_id}/{chapter_id}.html"
 
     async def get_book_info(
         self,
@@ -27,11 +34,19 @@ class BiqugeAsyncSession(BaseAsyncSession):
         """
         Fetch the raw HTML of the book info page asynchronously.
 
+        Order: [info, catalog]
+
         :param book_id: The book identifier.
         :return: The page content as a string.
         """
-        url = self.book_info_url(book_id=book_id)
-        return [await self.fetch(url, **kwargs)]
+        info_url = self.book_info_url(book_id=book_id)
+        catalog_url = self.book_catalog_url(book_id=book_id)
+
+        info_html, catalog_html = await asyncio.gather(
+            self.fetch(info_url, **kwargs),
+            self.fetch(catalog_url, **kwargs),
+        )
+        return [info_html, catalog_html]
 
     async def get_book_chapter(
         self,
@@ -58,6 +73,16 @@ class BiqugeAsyncSession(BaseAsyncSession):
         :return: Fully qualified URL for the book info page.
         """
         return cls.BOOK_INFO_URL.format(book_id=book_id)
+
+    @classmethod
+    def book_catalog_url(cls, book_id: str) -> str:
+        """
+        Construct the URL for fetching a book's catalog page.
+
+        :param book_id: The identifier of the book.
+        :return: Fully qualified catalog page URL.
+        """
+        return cls.BOOK_CATALOG_URL.format(book_id=book_id)
 
     @classmethod
     def chapter_url(cls, book_id: str, chapter_id: str) -> str:

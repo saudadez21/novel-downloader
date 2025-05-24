@@ -63,7 +63,7 @@ class QidianBrowser(BaseBrowser):
         self,
         book_id: str,
         **kwargs: Any,
-    ) -> str:
+    ) -> list[str]:
         """
         Retrieve the HTML of a Qidian book info page.
 
@@ -78,19 +78,19 @@ class QidianBrowser(BaseBrowser):
             self.logger.debug(
                 "[fetch] Fetched book info for ID %s from %s", book_id, url
             )
-            return html
+            return [html]
         except Exception as e:
             self.logger.warning(
                 "[fetch] Error fetching book info from '%s': %s", url, e
             )
-        return ""
+        return []
 
     def get_book_chapter(
         self,
         book_id: str,
         chapter_id: str,
         **kwargs: Any,
-    ) -> str:
+    ) -> list[str]:
         """
         Retrieve the HTML content of a specific chapter.
 
@@ -108,16 +108,16 @@ class QidianBrowser(BaseBrowser):
             self.logger.debug(
                 "[fetch] Fetched chapter %s for book %s", chapter_id, book_id
             )
-            return html
+            return [html]
         except Exception as e:
             self.logger.warning("[fetch] Error fetching chapter from '%s': %s", url, e)
-        return ""
+        return []
 
     def get_bookcase(
         self,
         page: int = 1,
         **kwargs: Any,
-    ) -> str:
+    ) -> list[str]:
         """
         Retrieve the HTML content of the logged-in user's Qidian bookcase page.
 
@@ -133,10 +133,10 @@ class QidianBrowser(BaseBrowser):
             self.page.get(url)
             html = str(self.page.html)
             self.logger.debug("[fetch] Fetched bookcase HTML from %s", url)
-            return html
+            return [html]
         except Exception as e:
             self.logger.warning("[fetch] Error fetching bookcase from '%s': %s", url, e)
-        return ""
+        return []
 
     @classmethod
     def book_info_url(cls, book_id: str) -> str:

@@ -9,9 +9,10 @@ to perform network interactions, such as logging in, sending requests,
 or interacting with browser/session-based sources.
 
 Subpackages:
-- common
-- biquge
-- qidian
+- biquge (笔趣阁)
+- qianbi (铅笔小说)
+- qidian (起点中文网)
+- common (通用架构)
 """
 
 from .biquge import (
@@ -21,6 +22,10 @@ from .biquge import (
 from .common import (
     CommonAsyncSession,
     CommonSession,
+)
+from .qianbi import (
+    QianbiAsyncSession,
+    QianbiSession,
 )
 from .qidian import (
     QidianBrowser,
@@ -32,6 +37,8 @@ __all__ = [
     "BiqugeSession",
     "CommonAsyncSession",
     "CommonSession",
+    "QianbiAsyncSession",
+    "QianbiSession",
     "QidianBrowser",
     "QidianSession",
 ]

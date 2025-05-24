@@ -43,7 +43,7 @@ class CommonAsyncSession(BaseAsyncSession):
         self,
         book_id: str,
         **kwargs: Any,
-    ) -> str:
+    ) -> list[str]:
         """
         Fetch the raw HTML of the book info page asynchronously.
 
@@ -51,14 +51,14 @@ class CommonAsyncSession(BaseAsyncSession):
         :return: The page content as a string.
         """
         url = self.book_info_url(book_id=book_id)
-        return await self.fetch(url, **kwargs)
+        return [await self.fetch(url, **kwargs)]
 
     async def get_book_chapter(
         self,
         book_id: str,
         chapter_id: str,
         **kwargs: Any,
-    ) -> str:
+    ) -> list[str]:
         """
         Fetch the raw HTML of a single chapter asynchronously.
 
@@ -67,7 +67,7 @@ class CommonAsyncSession(BaseAsyncSession):
         :return: The chapter content as a string.
         """
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
-        return await self.fetch(url, **kwargs)
+        return [await self.fetch(url, **kwargs)]
 
     @property
     def site(self) -> str:

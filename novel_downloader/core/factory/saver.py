@@ -12,12 +12,14 @@ from novel_downloader.core.interfaces import SaverProtocol
 from novel_downloader.core.savers import (
     BiqugeSaver,
     CommonSaver,
+    QianbiSaver,
     QidianSaver,
 )
 
 _site_map = {
-    "qidian": QidianSaver,
     "biquge": BiqugeSaver,
+    "qianbi": QianbiSaver,
+    "qidian": QidianSaver,
 }
 
 

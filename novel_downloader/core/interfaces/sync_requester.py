@@ -38,7 +38,7 @@ class SyncRequesterProtocol(Protocol):
         self,
         book_id: str,
         **kwargs: Any,
-    ) -> str:
+    ) -> list[str]:
         """
         Fetch the raw HTML (or JSON) of the book info page.
 
@@ -52,7 +52,7 @@ class SyncRequesterProtocol(Protocol):
         book_id: str,
         chapter_id: str,
         **kwargs: Any,
-    ) -> str:
+    ) -> list[str]:
         """
         Fetch the raw HTML (or JSON) of a single chapter.
 
@@ -66,7 +66,7 @@ class SyncRequesterProtocol(Protocol):
         self,
         page: int = 1,
         **kwargs: Any,
-    ) -> str:
+    ) -> list[str]:
         """
         Optional: Retrieve the HTML content of the authenticated user's bookcase page.
 

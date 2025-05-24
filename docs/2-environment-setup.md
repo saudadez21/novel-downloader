@@ -16,27 +16,21 @@
 建议安装稳定版本 (LTS) 即可: [https://nodejs.org](https://nodejs.org)
 
 **注意:VIP 章节访问需要登录 Cookie。**
+
 在使用 `session` 模式前, 请先通过以下命令设置自己的 cookie
 
 这些字段通常会在登录状态下由浏览器自动生成。
 
-可以在浏览器登录起点后, 通过浏览器开发者工具 (F12) 复制完整的 Cookie 字符串:
+可以在浏览器登录起点后, 通过浏览器开发者工具 (F12) 复制完整的 Cookie 字符串, 请参考 [复制 Cookies](docs/copy-cookies.md)。
 
-1. 打开浏览器, 登录 [https://www.qidian.com](https://www.qidian.com)
-2. 按 `F12` 打开开发者工具
-3. 切到「Console」控制台
-4. 粘贴下面这行代码并回车:
-    ```js
-    copy(document.cookie)
-    ```
-5. 然后直接粘贴到终端使用 (或在运行下载任务开始时根据提示输入):
-    ```bash
-    novel-cli settings set-cookies qidian "粘贴这里"
-    ```
+然后直接粘贴到终端使用 (或在运行下载任务开始时根据提示输入):
+```bash
+novel-cli settings set-cookies qidian "粘贴这里"
+```
 
-    或者直接运行命令后按提示交互输入:
-    ```bash
-    novel-cli settings set-cookies
-    ```
+或者直接运行命令后按提示交互输入:
+```bash
+novel-cli settings set-cookies
+```
 
 p.s. 目前 session 登录方式的 cookie 还不支持自动续期, 可能每次运行前都需要手动重新设置一次 cookie, 后续会考虑优化这一流程
