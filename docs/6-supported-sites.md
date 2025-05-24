@@ -13,6 +13,7 @@
 | [起点中文网](https://www.qidian.com)                         | qidian     | ✅        | ❌        | ✅        |
 | [笔趣阁](http://www.b520.cc)                                 | biquge     | ❌        | ❌        | ❌        |
 | [铅笔小说](https://www.23qb.net), [备用](https://www.23qb.com/) | qianbi   | ✅        | ❌        | ❌        |
+| [SF轻小说](https://m.sfacg.com)                              | sfacg      | ✅        | ✅        | ✅        |
 
 使用示例:
 
@@ -26,6 +27,9 @@ novel-cli download --site biquge 1_2345
 
 # 下载铅笔小说
 novel-cli download --site qianbi 12345
+
+# 下载SF轻小说
+novel-cli download --site sfacg 456123
 ```
 
 ### Book ID 说明
@@ -40,6 +44,9 @@ novel-cli download --site qianbi 12345
 
 * 铅笔小说 (qianbi)
   `https://www.23qb.net/book/12282/` -> `12282`
+
+* SF轻小说 (sfacg)
+  `https://m.sfacg.com/b/456123/` -> `456123`
 
 
 ### 注意事项

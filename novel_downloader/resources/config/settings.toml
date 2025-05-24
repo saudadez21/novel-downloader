@@ -45,7 +45,7 @@ ocr_weight = 0.5
 vec_weight = 0.5
 
 # 各站点的特定配置
-[sites.qidian]
+[sites.qidian]  # 起点中文网
 # 小说 ID 列表
 # 例如: 访问 https://www.qidian.com/book/1010868264/
 # 该小说的 ID 就是 1010868264
@@ -56,17 +56,49 @@ book_ids = [
 mode = "browser"                   # browser / session
 login_required = true              # 是否需要登录才能访问
 
-[sites.biquge]
+[sites.biquge]  # 笔趣阁
 book_ids = [
   "0000000000",
   "0000000000"
 ]
 mode = "session"                   # async / session
-login_required = false             # 是否需要登录才能访问
+login_required = false
+
+[sites.qianbi]  # 铅笔小说
+book_ids = [
+  "0000000000",
+  "0000000000"
+]
+mode = "session"                   # async / session
+login_required = false
+
+[sites.sfacg]  # SF轻小说
+book_ids = [
+  "0000000000",
+  "0000000000"
+]
+mode = "session"                   # async / session
+login_required = false
+
+[sites.esjzone]  # ESJ Zone
+book_ids = [
+  "0000000000",
+  "0000000000"
+]
+mode = "session"                   # async / session
+login_required = false
+
+[sites.yamibo]  # 百合会
+book_ids = [
+  "0000000000",
+  "0000000000"
+]
+mode = "session"                   # async / session
+login_required = false
 
 [sites.common]
 mode = "session"                   # async / session
-login_required = false             # 是否需要登录才能访问
+login_required = false
 
 # 输出文件格式及相关选项
 [output]

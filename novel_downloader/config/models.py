@@ -78,6 +78,7 @@ class ParserConfig:
 # === Savers ===
 @dataclass
 class SaverConfig:
+    cache_dir: str = "./novel_cache"
     raw_data_dir: str = "./raw_data"
     output_dir: str = "./downloads"
     storage_backend: StorageBackend = "json"

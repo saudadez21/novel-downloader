@@ -150,6 +150,7 @@ class ConfigAdapter:
         naming = out.get("naming", {})
         epub_opts = out.get("epub", {})
         return SaverConfig(
+            cache_dir=gen.get("cache_dir", "./novel_cache"),
             raw_data_dir=gen.get("raw_data_dir", "./raw_data"),
             output_dir=gen.get("output_dir", "./downloads"),
             storage_backend=gen.get("storage_backend", "json"),

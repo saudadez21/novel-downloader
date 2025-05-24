@@ -70,6 +70,7 @@ EXPECTED_FIELDS = {
         "mode": ModeType,
     },
     SaverConfig: {
+        "cache_dir": str,
         "raw_data_dir": str,
         "output_dir": str,
         "clean_text": bool,

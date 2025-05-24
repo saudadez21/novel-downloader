@@ -17,6 +17,7 @@ from novel_downloader.core.parsers import (
     QianbiParser,
     QidianBrowserParser,
     QidianSessionParser,
+    SfacgParser,
 )
 
 ParserBuilder = Callable[[ParserConfig], ParserProtocol]
@@ -33,6 +34,10 @@ _site_map: dict[str, dict[str, ParserBuilder]] = {
     "qianbi": {
         "session": QianbiParser,
         "async": QianbiParser,
+    },
+    "sfacg": {
+        "session": SfacgParser,
+        "async": SfacgParser,
     },
 }
 

@@ -7,6 +7,8 @@ This module implements a factory function for creating saver instances
 based on the site name and parser mode specified in the configuration.
 """
 
+from collections.abc import Callable
+
 from novel_downloader.config import SaverConfig, load_site_rules
 from novel_downloader.core.interfaces import SaverProtocol
 from novel_downloader.core.savers import (
@@ -14,12 +16,16 @@ from novel_downloader.core.savers import (
     CommonSaver,
     QianbiSaver,
     QidianSaver,
+    SfacgSaver,
 )
 
-_site_map = {
+SaverBuilder = Callable[[SaverConfig], SaverProtocol]
+
+_site_map: dict[str, SaverBuilder] = {
     "biquge": BiqugeSaver,
     "qianbi": QianbiSaver,
     "qidian": QidianSaver,
+    "sfacg": SfacgSaver,
 }
 
 

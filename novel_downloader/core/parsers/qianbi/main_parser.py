@@ -121,7 +121,7 @@ class QianbiParser(BaseParser):
         tree = etree.HTML(html_str[0])
 
         paras = tree.xpath('//div[@class="article-content"]/p/text()')
-        content_text = "\n".join(p.strip() for p in paras if p.strip())
+        content_text = "\n\n".join(p.strip() for p in paras if p.strip())
         if not content_text:
             return None
 

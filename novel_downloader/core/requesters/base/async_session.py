@@ -122,10 +122,7 @@ class BaseAsyncSession(AsyncRequesterProtocol, abc.ABC):
 
         :returns: True if login succeeded, False otherwise.
         """
-        raise NotImplementedError(
-            "Login is not supported by this session type. "
-            "Override login() in your subclass to enable it."
-        )
+        return True
 
     @abc.abstractmethod
     async def get_book_info(
@@ -349,10 +346,18 @@ class BaseAsyncSession(AsyncRequesterProtocol, abc.ABC):
             await self._rate_limiter.wait()
         return await self.session.request(method, url, **kwargs)
 
+    async def _on_close(self) -> None:
+        """
+        Async hook method called before closing.
+        Override in subclass.
+        """
+        pass
+
     async def close(self) -> None:
         """
         Shutdown and clean up the session. Closes connection pool.
         """
+        await self._on_close()
         if self._session:
             await self._session.close()
             self._session = None

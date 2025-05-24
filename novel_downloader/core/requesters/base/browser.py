@@ -116,10 +116,7 @@ class BaseBrowser(SyncRequesterProtocol, abc.ABC):
         """
         Attempt to log in
         """
-        raise NotImplementedError(
-            "Login is not supported by this browser type. "
-            "Override login() in your subclass to enable it."
-        )
+        return True
 
     @abc.abstractmethod
     def get_book_info(

@@ -1,63 +1,36 @@
-#!/usr/bin/env python3
 """
-novel_downloader.core.requesters.qidian.session
------------------------------------------------
+novel_downloader.core.requesters.sfacg.session
+----------------------------------------------
 
-This module defines the QidianRequester class for interacting with
-the Qidian website.
-It extends the BaseSession by adding methods for logging in and
-retrieving book information.
 """
 
-from __future__ import annotations
-
-import base64
 from http.cookies import SimpleCookie
-from typing import Any, ClassVar
-
-from requests import Response
+from typing import Any
 
 from novel_downloader.config.models import RequesterConfig
 from novel_downloader.core.requesters.base import BaseSession
-from novel_downloader.utils.crypto_utils import patch_qd_payload_token
 from novel_downloader.utils.i18n import t
 from novel_downloader.utils.state import state_mgr
 
 
-class QidianSession(BaseSession):
+class SfacgSession(BaseSession):
     """
-    QidianRequester provides methods for interacting with Qidian.com,
-    including checking login status and preparing book-related URLs.
-
-    Inherits base session setup from BaseSession.
+    A session class for interacting with the
+    Sfacg (m.sfacg.com) novel website.
     """
 
-    BOOKCASE_URL = "https://my.qidian.com/bookcase/"
-    BOOK_INFO_URL = "https://book.qidian.com/info/{book_id}/"
-    CHAPTER_URL = "https://www.qidian.com/chapter/{book_id}/{chapter_id}/"
-
-    _cookie_keys: ClassVar[list[str]] = [
-        "X2NzcmZUb2tlbg==",
-        "eXdndWlk",
-        "eXdvcGVuaWQ=",
-        "eXdrZXk=",
-        "d190c2Zw",
-    ]
+    BOOKCASE_URL = "https://m.sfacg.com/sheets/"
+    BOOK_INFO_URL = "https://m.sfacg.com/b/{book_id}/"
+    BOOK_CATALOG_URL = "https://m.sfacg.com/i/{book_id}/"
+    CHAPTER_URL = "https://m.sfacg.com/c/{chapter_id}/"
 
     def __init__(
         self,
         config: RequesterConfig,
     ):
-        """
-        Initialize the QidianSession with a session configuration.
-
-        :param config: The RequesterConfig instance containing request settings.
-        """
         super().__init__(config)
         self._logged_in: bool = False
         self._retry_times = config.retry_times
-        self._retry_interval = config.backoff_factor
-        self._timeout = config.timeout
 
     def login(
         self,
@@ -69,9 +42,8 @@ class QidianSession(BaseSession):
         """
         Restore cookies persisted by the session-based workflow.
         """
-        cookies: dict[str, str] = state_mgr.get_cookies("qidian")
+        cookies: dict[str, str] = state_mgr.get_cookies("sfacg")
 
-        # Merge cookies into both the internal cache and the live session
         self.update_cookies(cookies)
         for attempt in range(1, self._retry_times + 1):
             if self._check_login_status():
@@ -89,12 +61,13 @@ class QidianSession(BaseSession):
             ).strip()
 
             cookies = self._parse_cookie_input(cookie_str)
-            if not self._check_cookies(cookies):
+            if not cookies:
                 print(t("session_login_prompt_invalid_cookie"))
                 continue
 
             self.update_cookies(cookies)
-        return self._check_login_status()
+        self._logged_in = self._check_login_status()
+        return self._logged_in
 
     def get_book_info(
         self,
@@ -102,23 +75,42 @@ class QidianSession(BaseSession):
         **kwargs: Any,
     ) -> list[str]:
         """
-        Fetch the raw HTML of the book info page.
+        Fetch the raw HTML of the book info and catalog pages.
+
+        Order: [info, catalog]
 
         :param book_id: The book identifier.
         :return: The page content as a string.
         """
-        url = self.book_info_url(book_id=book_id)
+        info_url = self.book_info_url(book_id=book_id)
+        catalog_url = self.book_catalog_url(book_id=book_id)
+
+        pages = []
         try:
-            resp = self.get(url, **kwargs)
+            resp = self.get(info_url, **kwargs)
             resp.raise_for_status()
-            return [resp.text]
+            pages.append(resp.text)
         except Exception as exc:
             self.logger.warning(
-                "[session] get_book_info(%s) failed: %s",
+                "[session] get_book_info(info:%s) failed: %s",
                 book_id,
                 exc,
             )
-        return []
+            pages.append("")
+
+        try:
+            resp = self.get(catalog_url, **kwargs)
+            resp.raise_for_status()
+            pages.append(resp.text)
+        except Exception as exc:
+            self.logger.warning(
+                "[session] get_book_info(catalog:%s) failed: %s",
+                book_id,
+                exc,
+            )
+            pages.append("")
+
+        return pages
 
     def get_book_chapter(
         self,
@@ -168,42 +160,14 @@ class QidianSession(BaseSession):
             )
         return []
 
-    def get(
-        self,
-        url: str,
-        params: dict[str, Any] | None = None,
-        **kwargs: Any,
-    ) -> Response:
+    @classmethod
+    def bookcase_url(cls) -> str:
         """
-        Same as :py:meth:`BaseSession.get`, but transparently refreshes
-        a cookie-based token used for request validation.
+        Construct the URL for the user's bookcase page.
 
-        The method:
-        1. Reads the existing cookie (if any);
-        2. Generates a new value tied to *url*;
-        3. Updates both the live ``requests.Session`` and the internal cache;
-        4. Delegates the actual request to ``super().get``.
+        :return: Fully qualified URL of the bookcase.
         """
-        if self._session is None:
-            raise RuntimeError("Session is not initialized or has been shut down.")
-
-        # ---- 1. refresh token cookie --------------------------------------
-        cookie_key = self._d("d190c2Zw")
-        old_token = self._session.cookies.get(cookie_key, "")
-
-        if old_token:
-            refreshed_token = patch_qd_payload_token(old_token, url)
-            self._session.cookies.set(cookie_key, refreshed_token)
-            self._cookies[cookie_key] = refreshed_token
-
-        # ---- 2. perform the real GET --------------------------------------------
-        resp: Response = super().get(url, params=params, **kwargs)
-
-        # ---- 3. persist any server-set cookies (optional) --------------
-        self.update_cookies(self._session.cookies.get_dict())
-        state_mgr.set_cookies("qidian", self._cookies)
-
-        return resp
+        return cls.BOOKCASE_URL
 
     @classmethod
     def book_info_url(cls, book_id: str) -> str:
@@ -216,6 +180,16 @@ class QidianSession(BaseSession):
         return cls.BOOK_INFO_URL.format(book_id=book_id)
 
     @classmethod
+    def book_catalog_url(cls, book_id: str) -> str:
+        """
+        Construct the URL for fetching a book's catalog page.
+
+        :param book_id: The identifier of the book.
+        :return: Fully qualified catalog page URL.
+        """
+        return cls.BOOK_CATALOG_URL.format(book_id=book_id)
+
+    @classmethod
     def chapter_url(cls, book_id: str, chapter_id: str) -> str:
         """
         Construct the URL for fetching a specific chapter.
@@ -224,27 +198,19 @@ class QidianSession(BaseSession):
         :param chapter_id: The identifier of the chapter.
         :return: Fully qualified chapter URL.
         """
-        return cls.CHAPTER_URL.format(book_id=book_id, chapter_id=chapter_id)
-
-    @classmethod
-    def bookcase_url(cls) -> str:
-        """
-        Construct the URL for the user's bookcase page.
-
-        :return: Fully qualified URL of the bookcase.
-        """
-        return cls.BOOKCASE_URL
+        return cls.CHAPTER_URL.format(chapter_id=chapter_id)
 
     def _check_login_status(self) -> bool:
         """
         Check whether the user is currently logged in by
         inspecting the bookcase page content.
 
-        :return: True if the user appears to be logged in, False otherwise.
+        :return: True if the user is logged in, False otherwise.
         """
         keywords = [
-            'var buid = "fffffffffffffffffff"',
-            "C2WF946J0/probe.js",
+            "请输入用户名和密码",
+            "用户未登录",
+            "可输入用户名",
         ]
         resp_text = self.get_bookcase()
         if not resp_text:
@@ -268,22 +234,8 @@ class QidianSession(BaseSession):
         except Exception:
             return {}
 
-    def _check_cookies(self, cookies: dict[str, str]) -> bool:
+    def _on_close(self) -> None:
         """
-        Check if the provided cookies contain all required keys.
-
-        Logs any missing keys as warnings.
-
-        :param cookies: The cookie dictionary to validate.
-        :return: True if all required keys are present, False otherwise.
+        Save cookies to the state manager before closing.
         """
-        required = {self._d(k) for k in self._cookie_keys}
-        actual = set(cookies)
-        missing = required - actual
-        if missing:
-            self.logger.warning("Missing required cookies: %s", ", ".join(missing))
-        return not missing
-
-    @staticmethod
-    def _d(b: str) -> str:
-        return base64.b64decode(b).decode()
+        state_mgr.set_cookies("sfacg", self.cookies)

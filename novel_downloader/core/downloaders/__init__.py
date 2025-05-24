@@ -13,6 +13,7 @@ Currently supported platforms:
 - biquge (笔趣阁)
 - qianbi (铅笔小说)
 - qidian (起点中文网)
+- sfacg (SF轻小说)
 - common (通用架构)
 """
 
@@ -20,6 +21,7 @@ from .biquge import BiqugeAsyncDownloader, BiqugeDownloader
 from .common import CommonAsyncDownloader, CommonDownloader
 from .qianbi import QianbiAsyncDownloader, QianbiDownloader
 from .qidian import QidianDownloader
+from .sfacg import SfacgAsyncDownloader, SfacgDownloader
 
 __all__ = [
     "BiqugeAsyncDownloader",
@@ -29,4 +31,6 @@ __all__ = [
     "QianbiAsyncDownloader",
     "QianbiDownloader",
     "QidianDownloader",
+    "SfacgAsyncDownloader",
+    "SfacgDownloader",
 ]
