@@ -40,7 +40,7 @@ class AsyncRequesterProtocol(Protocol):
         self,
         book_id: str,
         **kwargs: Any,
-    ) -> str:
+    ) -> list[str]:
         """
         Fetch the raw HTML (or JSON) of the book info page asynchronously.
 
@@ -54,7 +54,7 @@ class AsyncRequesterProtocol(Protocol):
         book_id: str,
         chapter_id: str,
         **kwargs: Any,
-    ) -> str:
+    ) -> list[str]:
         """
         Fetch the raw HTML (or JSON) of a single chapter asynchronously.
 
@@ -68,7 +68,7 @@ class AsyncRequesterProtocol(Protocol):
         self,
         page: int = 1,
         **kwargs: Any,
-    ) -> str:
+    ) -> list[str]:
         """
         Optional: Retrieve the HTML content of the authenticated
         user's bookcase page asynchronously.

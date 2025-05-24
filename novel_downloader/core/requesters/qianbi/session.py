@@ -1,6 +1,5 @@
-#!/usr/bin/env python3
 """
-novel_downloader.core.requesters.biquge.session
+novel_downloader.core.requesters.qianbi.session
 -----------------------------------------------
 
 """
@@ -10,13 +9,20 @@ from typing import Any
 from novel_downloader.core.requesters.base import BaseSession
 
 
-class BiqugeSession(BaseSession):
+class QianbiSession(BaseSession):
     """
-    A session class for interacting with the Biquge (www.b520.cc) novel website.
+    A session class for interacting with the
+    Qianbi (www.23qb.com) novel website.
     """
 
-    BOOK_INFO_URL = "http://www.b520.cc/{book_id}/"
-    CHAPTER_URL = "http://www.b520.cc/{book_id}/{chapter_id}.html"
+    BASE_URLS = [
+        "www.23qb.com",
+        "www.23qb.net",
+    ]
+
+    BOOK_INFO_URL = "https://www.23qb.com/book/{book_id}/"
+    BOOK_CATALOG_URL = "https://www.23qb.com/book/{book_id}/catalog"
+    CHAPTER_URL = "https://www.23qb.com/book/{book_id}/{chapter_id}.html"
 
     def get_book_info(
         self,
@@ -24,23 +30,42 @@ class BiqugeSession(BaseSession):
         **kwargs: Any,
     ) -> list[str]:
         """
-        Fetch the raw HTML of the book info page.
+        Fetch the raw HTML of the book info and catalog pages.
+
+        Order: [info, catalog]
 
         :param book_id: The book identifier.
         :return: The page content as a string.
         """
-        url = self.book_info_url(book_id=book_id)
+        info_url = self.book_info_url(book_id=book_id)
+        catalog_url = self.book_catalog_url(book_id=book_id)
+
+        pages = []
         try:
-            resp = self.get(url, **kwargs)
+            resp = self.get(info_url, **kwargs)
             resp.raise_for_status()
-            return [resp.text]
+            pages.append(resp.text)
         except Exception as exc:
             self.logger.warning(
-                "[session] get_book_info(%s) failed: %s",
+                "[session] get_book_info(info:%s) failed: %s",
                 book_id,
                 exc,
             )
-        return []
+            pages.append("")
+
+        try:
+            resp = self.get(catalog_url, **kwargs)
+            resp.raise_for_status()
+            pages.append(resp.text)
+        except Exception as exc:
+            self.logger.warning(
+                "[session] get_book_info(catalog:%s) failed: %s",
+                book_id,
+                exc,
+            )
+            pages.append("")
+
+        return pages
 
     def get_book_chapter(
         self,
@@ -77,6 +102,16 @@ class BiqugeSession(BaseSession):
         :return: Fully qualified URL for the book info page.
         """
         return cls.BOOK_INFO_URL.format(book_id=book_id)
+
+    @classmethod
+    def book_catalog_url(cls, book_id: str) -> str:
+        """
+        Construct the URL for fetching a book's catalog page.
+
+        :param book_id: The identifier of the book.
+        :return: Fully qualified catalog page URL.
+        """
+        return cls.BOOK_CATALOG_URL.format(book_id=book_id)
 
     @classmethod
     def chapter_url(cls, book_id: str, chapter_id: str) -> str:

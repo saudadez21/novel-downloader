@@ -43,7 +43,7 @@ class CommonSession(BaseSession):
         self,
         book_id: str,
         **kwargs: Any,
-    ) -> str:
+    ) -> list[str]:
         """
         Fetch the raw HTML of the book info page.
 
@@ -54,17 +54,17 @@ class CommonSession(BaseSession):
         try:
             resp = self.get(url, **kwargs)
             resp.raise_for_status()
-            return resp.text
+            return [resp.text]
         except Exception as e:
             self.logger.warning("Failed to fetch book info for %s: %s", book_id, e)
-        return ""
+        return []
 
     def get_book_chapter(
         self,
         book_id: str,
         chapter_id: str,
         **kwargs: Any,
-    ) -> str:
+    ) -> list[str]:
         """
         Fetch the raw HTML of a single chapter.
 
@@ -76,7 +76,7 @@ class CommonSession(BaseSession):
         try:
             resp = self.get(url, **kwargs)
             resp.raise_for_status()
-            return resp.text
+            return [resp.text]
         except Exception as e:
             self.logger.warning(
                 "Failed to fetch book chapter for %s(%s): %s",
@@ -84,7 +84,7 @@ class CommonSession(BaseSession):
                 chapter_id,
                 e,
             )
-        return ""
+        return []
 
     @property
     def site(self) -> str:

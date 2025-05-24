@@ -18,14 +18,20 @@ from novel_downloader.utils.chapter_storage import ChapterDict
 class BiqugeParser(BaseParser):
     """ """
 
-    def parse_book_info(self, html_str: str) -> dict[str, Any]:
+    def parse_book_info(
+        self,
+        html_str: list[str],
+        **kwargs: Any,
+    ) -> dict[str, Any]:
         """
         Parse a book info page and extract metadata and chapter structure.
 
         :param html: Raw HTML of the book info page.
         :return: Parsed metadata and chapter structure as a dictionary.
         """
-        tree = etree.HTML(html_str, parser=None)
+        if not html_str:
+            return {}
+        tree = etree.HTML(html_str[0])
         result: dict[str, Any] = {}
 
         def extract_text(elem: _Element | None) -> str:
@@ -90,8 +96,9 @@ class BiqugeParser(BaseParser):
 
     def parse_chapter(
         self,
-        html_str: str,
+        html_str: list[str],
         chapter_id: str,
+        **kwargs: Any,
     ) -> ChapterDict | None:
         """
         Parse a single chapter page and extract clean text or simplified HTML.
@@ -100,7 +107,9 @@ class BiqugeParser(BaseParser):
         :param chapter_id: Identifier of the chapter being parsed.
         :return: Cleaned chapter content as plain text or minimal HTML.
         """
-        tree = etree.HTML(html_str, parser=None)
+        if not html_str:
+            return None
+        tree = etree.HTML(html_str[0], parser=None)
 
         # 提取标题
         title_elem = tree.xpath('//div[@class="bookname"]/h1')

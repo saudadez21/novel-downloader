@@ -11,9 +11,26 @@
 - 对于起点中文网 (Qidian), 可在配置中选择:
   - `mode: session` : 纯 Requests 模式
   - `mode: browser`  : 基于 DrissionPage 驱动 Chrome 的浏览器模式 (可处理更复杂的 JS/加密)。
-- 如果在 `browser` 模式下且 `login_required: true`, 首次运行会自动打开浏览器, 请完成登录后继续。
+- 若配置 `login_required: true`, 程序会在运行时自动检查登录状态, 支持自动重用历史 Cookie, 仅在首次登录或 Cookie 失效时需要人工介入:
+  - 若使用 `browser` 模式, 请在程序打开的浏览器窗口登录, 登录后回车继续
+  - 若使用 `session` 模式, 请根据程序提示粘贴浏览器中登录成功后的 Cookie ([复制 Cookies](docs/copy-cookies.md))
 
-**快速开始**
+## 功能特性
+
+- 爬取起点中文网的小说章节内容 (支持免费与已订阅章节)
+- 爬取部分小说网站
+- 断点续爬
+- 自动整合所有章节并导出为
+  - TXT
+  - EPUB
+- 支持活动广告过滤:
+  - [x] 章节标题
+  - [ ] 章节正文
+  - [ ] 作者说
+
+---
+
+## 快速开始
 
 ```bash
 # 克隆 + 安装
@@ -32,7 +49,10 @@ novel-cli settings init
 novel-cli download 123456
 ```
 
-**从 GitHub 安装 (开发版)**
+- 详细可见: [支持站点列表](docs/6-supported-sites.md)
+- 更多使用方法, 查看 [使用示例](docs/5-usage-examples.md)
+
+## 从 GitHub 安装 (开发版)
 
 如需体验开发中的最新功能, 可通过 GitHub 安装:
 
@@ -43,22 +63,6 @@ pip install .
 # 或安装带可选功能:
 # pip install .[font-recovery]
 ```
-
-更多使用方法, 查看 [使用示例](docs/5-usage-examples.md)
-
----
-
-## 功能特性
-
-- 爬取起点中文网的小说章节内容 (支持免费与已订阅章节)
-- 断点续爬
-- 自动整合所有章节并导出为
-  - TXT
-  - EPUB
-- 支持活动广告过滤:
-  - [x] 章节标题
-  - [ ] 章节正文
-  - [ ] 作者说
 
 ---
 
@@ -71,6 +75,7 @@ pip install .
 - [settings.toml 配置说明](docs/4-settings-schema.md)
 - [使用示例](docs/5-usage-examples.md)
 - [支持站点列表](docs/6-supported-sites.md)
+- [复制 Cookies](docs/copy-cookies.md)
 - [文件保存](docs/file-saving.md)
 - [TODO](docs/todo.md)
 - [开发](docs/develop.md)

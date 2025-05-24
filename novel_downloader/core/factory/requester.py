@@ -19,6 +19,8 @@ from novel_downloader.core.requesters import (
     BiqugeSession,
     CommonAsyncSession,
     CommonSession,
+    QianbiAsyncSession,
+    QianbiSession,
     QidianBrowser,
     QidianSession,
 )
@@ -29,6 +31,7 @@ SyncRequesterBuilder = Callable[[RequesterConfig], SyncRequesterProtocol]
 
 _async_site_map: dict[str, AsyncRequesterBuilder] = {
     "biquge": BiqugeAsyncSession,
+    "qianbi": QianbiAsyncSession,
 }
 _sync_site_map: dict[
     str,
@@ -40,6 +43,9 @@ _sync_site_map: dict[
     },
     "biquge": {
         "session": BiqugeSession,
+    },
+    "qianbi": {
+        "session": QianbiSession,
     },
 }
 

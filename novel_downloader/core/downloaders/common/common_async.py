@@ -95,7 +95,8 @@ class CommonAsyncDownloader(BaseAsyncDownloader):
         if re_fetch:
             info_html = await self.requester.get_book_info(book_id)
             if self.save_html:
-                save_as_txt(info_html, chapters_html_dir / "info.html")
+                for i, html in enumerate(info_html):
+                    save_as_txt(html, chapters_html_dir / f"info_{i}.html")
             book_info = self.parser.parse_book_info(info_html)
             if book_info.get("book_name") != "未找到书名":
                 save_as_json(book_info, info_path)
@@ -114,7 +115,7 @@ class CommonAsyncDownloader(BaseAsyncDownloader):
 
         # setup queue, semaphore, executor
         semaphore = asyncio.Semaphore(self.download_workers)
-        queue: asyncio.Queue[tuple[str, str]] = asyncio.Queue()
+        queue: asyncio.Queue[tuple[str, list[str]]] = asyncio.Queue()
         save_queue: asyncio.Queue[ChapterDict] = asyncio.Queue()
         loop = asyncio.get_running_loop()
         executor = (
