@@ -14,6 +14,7 @@
 | [笔趣阁](http://www.b520.cc)                                 | biquge     | ❌        | ❌        | ❌        |
 | [铅笔小说](https://www.23qb.net), [备用](https://www.23qb.com/) | qianbi   | ✅        | ❌        | ❌        |
 | [SF轻小说](https://m.sfacg.com)                              | sfacg      | ✅        | ✅        | ✅        |
+| [ESJ Zone](https://www.esjzone.cc)                           | esjzone    | ✅        | ✅        | ✅        |
 
 使用示例:
 
@@ -30,6 +31,9 @@ novel-cli download --site qianbi 12345
 
 # 下载SF轻小说
 novel-cli download --site sfacg 456123
+
+# 下载 ESJ Zone 小说
+novel-cli download --site esjzone 1234567890
 ```
 
 ### Book ID 说明
@@ -37,17 +41,26 @@ novel-cli download --site sfacg 456123
 根据不同站点, Book ID 通常来源于小说详情页 URL 中的路径段:
 
 * 起点中文网 (qidian)
+
   `https://www.qidian.com/book/1010868264/` -> `1010868264`
 
 * 笔趣阁 (biquge)
+
   `http://www.b520.cc/8_8187/` -> `8_8187`
 
 * 铅笔小说 (qianbi)
+
   `https://www.23qb.net/book/12282/` -> `12282`
 
 * SF轻小说 (sfacg)
+
   `https://m.sfacg.com/b/456123/` -> `456123`
 
+* ESJ Zone (esjzone)
+
+  `https://www.esjzone.cc/detail/1660702902.html` -> `1660702902`
+
+  **注意**: 未登录状态下, 许多小说页面将无法访问, 浏览器会自动重定向到「論壇」页面
 
 ### 注意事项
 

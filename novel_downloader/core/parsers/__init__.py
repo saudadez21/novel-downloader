@@ -8,6 +8,7 @@ for the novel_downloader framework.
 
 Modules:
 - biquge (笔趣阁)
+- esjzone (ESJ Zone)
 - qianbi (铅笔小说)
 - qidian (起点中文网)
 - sfacg (SF轻小说)
@@ -16,6 +17,7 @@ Modules:
 
 from .biquge import BiqugeParser
 from .common import CommonParser
+from .esjzone import EsjzoneParser
 from .qianbi import QianbiParser
 from .qidian import (
     QidianBrowserParser,
@@ -26,6 +28,7 @@ from .sfacg import SfacgParser
 __all__ = [
     "BiqugeParser",
     "CommonParser",
+    "EsjzoneParser",
     "QianbiParser",
     "QidianBrowserParser",
     "QidianSessionParser",

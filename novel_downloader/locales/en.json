@@ -72,6 +72,7 @@
   "session_login_prompt_intro": "Failed to restore login from saved cookies. Please log in via browser, then paste the cookie string below.",
   "session_login_prompt_paste_cookie": "Attempt {attempt}/{max_retries}: Paste your browser cookie string and press Enter:",
   "session_login_prompt_invalid_cookie": "Invalid cookie. Please copy and paste again.",
+  "session_login_failed": "Login to {site} failed. Please check your credentials or try again later.",
 
   "clean_logs": "Clean log directory",
   "clean_cache": "Clean scripts and browser cache",

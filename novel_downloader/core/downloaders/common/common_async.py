@@ -48,7 +48,7 @@ class CommonAsyncDownloader(BaseAsyncDownloader):
         Perform login
         """
         if self.login_required and not self._is_logged_in:
-            success = await self.requester.login(max_retries=3)
+            success = await self.requester.login()
             if not success:
                 raise RuntimeError("Login failed")
             self._is_logged_in = True
@@ -60,6 +60,7 @@ class CommonAsyncDownloader(BaseAsyncDownloader):
         :param book_id: The identifier of the book to download.
         """
         assert isinstance(self.requester, AsyncRequesterProtocol)
+        await self.prepare()
 
         TAG = "[AsyncDownloader]"
         wait_time = self.config.request_interval

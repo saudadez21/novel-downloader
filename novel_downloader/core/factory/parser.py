@@ -14,6 +14,7 @@ from novel_downloader.core.interfaces import ParserProtocol
 from novel_downloader.core.parsers import (
     BiqugeParser,
     CommonParser,
+    EsjzoneParser,
     QianbiParser,
     QidianBrowserParser,
     QidianSessionParser,
@@ -23,17 +24,21 @@ from novel_downloader.core.parsers import (
 ParserBuilder = Callable[[ParserConfig], ParserProtocol]
 
 _site_map: dict[str, dict[str, ParserBuilder]] = {
-    "qidian": {
-        "browser": QidianBrowserParser,
-        "session": QidianSessionParser,
-    },
     "biquge": {
         "session": BiqugeParser,
         "async": BiqugeParser,
     },
+    "esjzone": {
+        "session": EsjzoneParser,
+        "async": EsjzoneParser,
+    },
     "qianbi": {
         "session": QianbiParser,
         "async": QianbiParser,
+    },
+    "qidian": {
+        "browser": QidianBrowserParser,
+        "session": QidianSessionParser,
     },
     "sfacg": {
         "session": SfacgParser,

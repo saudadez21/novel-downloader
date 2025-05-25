@@ -90,6 +90,8 @@ class ConfigAdapter:
             disable_images=req.get("disable_images", True),
             mute_audio=req.get("mute_audio", True),
             mode=site_cfg.get("mode", "session"),
+            username=site_cfg.get("username", ""),
+            password=site_cfg.get("password", ""),
         )
 
     def get_downloader_config(self) -> DownloaderConfig:

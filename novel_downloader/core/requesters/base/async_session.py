@@ -261,14 +261,13 @@ class BaseAsyncSession(AsyncRequesterProtocol, abc.ABC):
     @property
     def headers(self) -> dict[str, str]:
         """
-        Get the current session headers.
+        Get a copy of the current session headers for temporary use.
 
         :return: A dict mapping header names to their values.
         """
         if self._session:
             return dict(self._session.headers)
-        else:
-            return self._headers
+        return self._headers.copy()
 
     def get_header(self, key: str, default: Any = None) -> Any:
         """

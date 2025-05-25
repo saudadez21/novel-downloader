@@ -39,6 +39,8 @@ EXPECTED_FIELDS = {
         "mode": ModeType,
         "max_connections": int,
         "max_rps": float | None,
+        "username": str,
+        "password": str,
     },
     DownloaderConfig: {
         "request_interval": float,
