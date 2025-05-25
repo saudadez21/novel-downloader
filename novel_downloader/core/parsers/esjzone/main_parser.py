@@ -85,9 +85,10 @@ class EsjzoneParser(BaseParser):
 
         _start_volume("單卷")
 
-        nodes = tree.xpath('//div[@id="chapterList"]/details') + tree.xpath(
-            '//div[@id="chapterList"]/*[not(self::details)]'
-        )
+        # nodes = tree.xpath('//div[@id="chapterList"]/details') + tree.xpath(
+        #     '//div[@id="chapterList"]/*[not(self::details)]'
+        # )
+        nodes = tree.xpath('//div[@id="chapterList"]/*')
 
         for node in nodes:
             tag = node.tag.lower()
