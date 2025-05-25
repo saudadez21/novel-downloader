@@ -38,6 +38,8 @@ class RequesterConfig:
     mode: ModeType = "session"
     max_connections: int = 10
     max_rps: float | None = None  # Maximum requests per second
+    username: str = ""
+    password: str = ""
 
 
 # === Downloaders ===

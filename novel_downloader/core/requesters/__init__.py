@@ -10,6 +10,7 @@ or interacting with browser/session-based sources.
 
 Subpackages:
 - biquge (笔趣阁)
+- esjzone (ESJ Zone)
 - qianbi (铅笔小说)
 - qidian (起点中文网)
 - sfacg (SF轻小说)
@@ -23,6 +24,10 @@ from .biquge import (
 from .common import (
     CommonAsyncSession,
     CommonSession,
+)
+from .esjzone import (
+    EsjzoneAsyncSession,
+    EsjzoneSession,
 )
 from .qianbi import (
     QianbiAsyncSession,
@@ -42,6 +47,8 @@ __all__ = [
     "BiqugeSession",
     "CommonAsyncSession",
     "CommonSession",
+    "EsjzoneAsyncSession",
+    "EsjzoneSession",
     "QianbiAsyncSession",
     "QianbiSession",
     "QidianBrowser",

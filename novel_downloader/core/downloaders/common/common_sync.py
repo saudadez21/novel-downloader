@@ -52,6 +52,17 @@ class CommonDownloader(BaseDownloader):
         """
         super().__init__(requester, parser, saver, config, site)
         self._site = site
+        self._is_logged_in = False
+
+    def prepare(self) -> None:
+        """
+        Perform login
+        """
+        if self.login_required and not self._is_logged_in:
+            success = self.requester.login()
+            if not success:
+                raise RuntimeError("Login failed")
+            self._is_logged_in = True
 
     def download_one(self, book_id: str) -> None:
         """
@@ -59,6 +70,8 @@ class CommonDownloader(BaseDownloader):
 
         :param book_id: The identifier of the book to download.
         """
+        self.prepare()
+
         TAG = "[Downloader]"
         save_html = self.config.save_html
         skip_existing = self.config.skip_existing

@@ -138,7 +138,7 @@ def calculate_time_difference(
 
     except Exception as e:
         logger.warning("[time] Failed to calculate time difference: %s", e)
-        return 0, 0, 0, 0
+        return 999, 23, 59, 59
 
 
 __all__ = [

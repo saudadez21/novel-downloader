@@ -237,14 +237,13 @@ class BaseSession(SyncRequesterProtocol, abc.ABC):
     @property
     def headers(self) -> Mapping[str, str | bytes]:
         """
-        Get the current session headers.
+        Get a copy of the current session headers for temporary use.
 
         :return: A dict mapping header names to their values.
         """
         if self._session:
-            return self._session.headers
-        else:
-            return self._headers
+            return dict(self._session.headers)
+        return self._headers.copy()
 
     def get_header(self, key: str, default: Any = None) -> Any:
         """
@@ -279,6 +278,16 @@ class BaseSession(SyncRequesterProtocol, abc.ABC):
         self._headers.update(headers)
         if self._session:
             self._session.headers.update(headers)
+
+    def del_header(self, key: str) -> None:
+        """
+        Delete a header from the session if it exists.
+
+        :param key: The name of the header to remove.
+        """
+        self._headers.pop(key, None)
+        if self._session:
+            self._session.headers.pop(key, None)
 
     def update_cookie(self, key: str, value: str) -> None:
         """

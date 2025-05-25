@@ -86,7 +86,9 @@ book_ids = [
   "0000000000"
 ]
 mode = "session"                   # async / session
-login_required = false
+login_required = true
+username = "youremail@domain.com"  # 登录邮箱
+password = "yourpassword"          # 登录密码
 
 [sites.yamibo]  # 百合会
 book_ids = [
