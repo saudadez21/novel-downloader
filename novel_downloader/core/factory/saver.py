@@ -18,6 +18,7 @@ from novel_downloader.core.savers import (
     QianbiSaver,
     QidianSaver,
     SfacgSaver,
+    YamiboSaver,
 )
 
 SaverBuilder = Callable[[SaverConfig], SaverProtocol]
@@ -28,6 +29,7 @@ _site_map: dict[str, SaverBuilder] = {
     "qianbi": QianbiSaver,
     "qidian": QidianSaver,
     "sfacg": SfacgSaver,
+    "yamibo": YamiboSaver,
 }
 
 

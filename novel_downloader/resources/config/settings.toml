@@ -97,6 +97,8 @@ book_ids = [
 ]
 mode = "session"                   # async / session
 login_required = false
+username = "yourusername"          # 登录账户
+password = "yourpassword"          # 登录密码
 
 [sites.common]
 mode = "session"                   # async / session

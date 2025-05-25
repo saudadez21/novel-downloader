@@ -1,11 +1,12 @@
 """
-novel_downloader.core.requesters.esjzone.session
-----------------------------------------------
+novel_downloader.core.requesters.yamibo.session
+-----------------------------------------------
 
 """
 
-import re
 from typing import Any
+
+from lxml import etree
 
 from novel_downloader.config.models import RequesterConfig
 from novel_downloader.core.requesters.base import BaseSession
@@ -14,18 +15,18 @@ from novel_downloader.utils.state import state_mgr
 from novel_downloader.utils.time_utils import sleep_with_random_delay
 
 
-class EsjzoneSession(BaseSession):
+class YamiboSession(BaseSession):
     """
     A session class for interacting with the
-    esjzone (www.esjzone.cc) novel website.
+    yamibo (www.yamibo.com) novel website.
     """
 
-    BOOKCASE_URL = "https://www.esjzone.cc/my/favorite"
-    BOOK_INFO_URL = "https://www.esjzone.cc/detail/{book_id}.html"
-    CHAPTER_URL = "https://www.esjzone.cc/forum/{book_id}/{chapter_id}.html"
+    BASE_URL = "https://www.yamibo.com"
+    BOOKCASE_URL = "https://www.yamibo.com/my/fav"
+    BOOK_INFO_URL = "https://www.yamibo.com/novel/{book_id}"
+    CHAPTER_URL = "https://www.yamibo.com/novel/view-chapter?id={chapter_id}"
 
-    API_LOGIN_URL_1 = "https://www.esjzone.cc/my/login"
-    API_LOGIN_URL_2 = "https://www.esjzone.cc/inc/mem_login.php"
+    LOGIN_URL = "https://www.yamibo.com/user/login"
 
     def __init__(
         self,
@@ -48,7 +49,7 @@ class EsjzoneSession(BaseSession):
         """
         Restore cookies persisted by the session-based workflow.
         """
-        cookies: dict[str, str] = state_mgr.get_cookies("esjzone")
+        cookies: dict[str, str] = state_mgr.get_cookies("yamibo")
         username = username or self._username
         password = password or self._password
 
@@ -171,40 +172,44 @@ class EsjzoneSession(BaseSession):
         :param chapter_id: The identifier of the chapter.
         :return: Fully qualified chapter URL.
         """
-        return cls.CHAPTER_URL.format(book_id=book_id, chapter_id=chapter_id)
+        return cls.CHAPTER_URL.format(chapter_id=chapter_id)
 
     def _api_login(self, username: str, password: str) -> bool:
         """
         Login to the API using a 2-step token-based process.
 
-        Step 1: Get auth token.
+        Step 1: Get token `_csrf-frontend`.
         Step 2: Use token and credentials to perform login.
         Return True if login succeeds, False otherwise.
         """
-        data_1 = {
-            "plxf": "getAuthToken",
-        }
         try:
-            resp_1 = self.post(self.API_LOGIN_URL_1, data=data_1)
+            resp_1 = self.get(self.LOGIN_URL)
             resp_1.raise_for_status()
-            # Example response: <JinJing>token_here</JinJing>
-            token = self._extract_token(resp_1.text)
+            tree = etree.HTML(resp_1.text)
+            csrf_value = tree.xpath('//input[@name="_csrf-frontend"]/@value')
+            csrf_value = csrf_value[0] if csrf_value else ""
+            if not csrf_value:
+                self.logger.warning("[session] _api_login: CSRF token not found.")
+                return False
         except Exception as exc:
             self.logger.warning("[session] _api_login failed at step 1: %s", exc)
             return False
 
         data_2 = {
-            "email": username,
-            "pwd": password,
-            "remember_me": "on",
+            "_csrf-frontend": csrf_value,
+            "LoginForm[username]": username,
+            "LoginForm[password]": password,
+            # "LoginForm[rememberMe]": 0,
+            "LoginForm[rememberMe]": 1,
+            "login-button": "",
         }
         temp_headers = dict(self.headers)
-        temp_headers["Authorization"] = token
+        temp_headers["Origin"] = self.BASE_URL
+        temp_headers["Referer"] = self.LOGIN_URL
         try:
-            resp_2 = self.post(self.API_LOGIN_URL_2, data=data_2, headers=temp_headers)
+            resp_2 = self.post(self.LOGIN_URL, data=data_2, headers=temp_headers)
             resp_2.raise_for_status()
-            resp_code: int = resp_2.json().get("status", 301)
-            return resp_code == 200
+            return "登录成功" in resp_2.text
         except Exception as exc:
             self.logger.warning("[session] _api_login failed at step 2: %s", exc)
         return False
@@ -217,19 +222,16 @@ class EsjzoneSession(BaseSession):
         :return: True if the user is logged in, False otherwise.
         """
         keywords = [
-            "window.location.href='/my/login'",
+            "登录 - 百合会",
+            "用户名/邮箱",
         ]
         resp_text = self.get_bookcase()
         if not resp_text:
             return False
         return not any(kw in resp_text[0] for kw in keywords)
 
-    def _extract_token(self, text: str) -> str:
-        match = re.search(r"<JinJing>(.+?)</JinJing>", text)
-        return match.group(1) if match else ""
-
     def _on_close(self) -> None:
         """
         Save cookies to the state manager before closing.
         """
-        state_mgr.set_cookies("esjzone", self.cookies)
+        state_mgr.set_cookies("yamibo", self.cookies)

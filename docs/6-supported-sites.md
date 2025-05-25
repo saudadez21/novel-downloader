@@ -15,6 +15,7 @@
 | [铅笔小说](https://www.23qb.net), [备用](https://www.23qb.com/) | qianbi   | ✅        | ❌        | ❌        |
 | [SF轻小说](https://m.sfacg.com)                              | sfacg      | ✅        | ✅        | ✅        |
 | [ESJ Zone](https://www.esjzone.cc)                           | esjzone    | ✅        | ✅        | ✅        |
+| [百合会](https://www.yamibo.com/site/novel)                  | yamibo     | ✅        | ❌        | ✅        |
 
 使用示例:
 
@@ -34,6 +35,9 @@ novel-cli download --site sfacg 456123
 
 # 下载 ESJ Zone 小说
 novel-cli download --site esjzone 1234567890
+
+# 下载 百合会 小说
+novel-cli download --site yamibo 123456
 ```
 
 ### Book ID 说明
@@ -61,6 +65,10 @@ novel-cli download --site esjzone 1234567890
   `https://www.esjzone.cc/detail/1660702902.html` -> `1660702902`
 
   **注意**: 未登录状态下, 许多小说页面将无法访问, 浏览器会自动重定向到「論壇」页面
+
+* 百合会 (yamibo)
+
+  `https://www.yamibo.com/novel/262117` -> `262117`
 
 ### 注意事项
 

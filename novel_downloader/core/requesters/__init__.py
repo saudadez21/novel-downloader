@@ -14,6 +14,7 @@ Subpackages:
 - qianbi (铅笔小说)
 - qidian (起点中文网)
 - sfacg (SF轻小说)
+- yamibo (百合会)
 - common (通用架构)
 """
 
@@ -41,6 +42,10 @@ from .sfacg import (
     SfacgAsyncSession,
     SfacgSession,
 )
+from .yamibo import (
+    YamiboAsyncSession,
+    YamiboSession,
+)
 
 __all__ = [
     "BiqugeAsyncSession",
@@ -55,4 +60,6 @@ __all__ = [
     "QidianSession",
     "SfacgAsyncSession",
     "SfacgSession",
+    "YamiboAsyncSession",
+    "YamiboSession",
 ]

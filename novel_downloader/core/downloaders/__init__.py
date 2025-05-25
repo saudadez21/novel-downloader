@@ -15,6 +15,7 @@ Currently supported platforms:
 - qianbi (铅笔小说)
 - qidian (起点中文网)
 - sfacg (SF轻小说)
+- yamibo (百合会)
 - common (通用架构)
 """
 
@@ -24,6 +25,7 @@ from .esjzone import EsjzoneAsyncDownloader, EsjzoneDownloader
 from .qianbi import QianbiAsyncDownloader, QianbiDownloader
 from .qidian import QidianDownloader
 from .sfacg import SfacgAsyncDownloader, SfacgDownloader
+from .yamibo import YamiboAsyncDownloader, YamiboDownloader
 
 __all__ = [
     "BiqugeAsyncDownloader",
@@ -37,4 +39,6 @@ __all__ = [
     "QidianDownloader",
     "SfacgAsyncDownloader",
     "SfacgDownloader",
+    "YamiboAsyncDownloader",
+    "YamiboDownloader",
 ]
