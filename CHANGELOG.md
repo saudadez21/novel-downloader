@@ -1,3 +1,13 @@
+## v1.3.2 (2025-05-25)
+
+### Feat
+
+- **site**: add support for yamibo (#24)
+- **site**: add support for esjzone (#23)
+- **site**: add support for sfacg (#22)
+- **site**: add support for Qianbi (#21)
+- **site**: implement async version for biquge support (#20)
+
 ## v1.3.1 (2025-05-23)
 
 ### Fix
