@@ -1,31 +1,33 @@
+#!/usr/bin/env python3
 """
-novel_downloader.core.requesters.esjzone.session
-----------------------------------------------
+novel_downloader.core.requesters.yamibo.async_session
+-----------------------------------------------------
 
 """
 
-import re
 from typing import Any
 
+from lxml import etree
+
 from novel_downloader.config.models import RequesterConfig
-from novel_downloader.core.requesters.base import BaseSession
+from novel_downloader.core.requesters.base import BaseAsyncSession
 from novel_downloader.utils.i18n import t
 from novel_downloader.utils.state import state_mgr
-from novel_downloader.utils.time_utils import sleep_with_random_delay
+from novel_downloader.utils.time_utils import async_sleep_with_random_delay
 
 
-class EsjzoneSession(BaseSession):
+class YamiboAsyncSession(BaseAsyncSession):
     """
-    A session class for interacting with the
-    esjzone (www.esjzone.cc) novel website.
+    A async session class for interacting with the
+    yamibo (www.yamibo.com) novel website.
     """
 
-    BOOKCASE_URL = "https://www.esjzone.cc/my/favorite"
-    BOOK_INFO_URL = "https://www.esjzone.cc/detail/{book_id}.html"
-    CHAPTER_URL = "https://www.esjzone.cc/forum/{book_id}/{chapter_id}.html"
+    BASE_URL = "https://www.yamibo.com"
+    BOOKCASE_URL = "https://www.yamibo.com/my/fav"
+    BOOK_INFO_URL = "https://www.yamibo.com/novel/{book_id}"
+    CHAPTER_URL = "https://www.yamibo.com/novel/view-chapter?id={chapter_id}"
 
-    API_LOGIN_URL_1 = "https://www.esjzone.cc/my/login"
-    API_LOGIN_URL_2 = "https://www.esjzone.cc/inc/mem_login.php"
+    LOGIN_URL = "https://www.yamibo.com/user/login"
 
     def __init__(
         self,
@@ -38,7 +40,7 @@ class EsjzoneSession(BaseSession):
         self._username = config.username
         self._password = config.password
 
-    def login(
+    async def login(
         self,
         username: str = "",
         password: str = "",
@@ -48,34 +50,34 @@ class EsjzoneSession(BaseSession):
         """
         Restore cookies persisted by the session-based workflow.
         """
-        cookies: dict[str, str] = state_mgr.get_cookies("esjzone")
+        cookies: dict[str, str] = state_mgr.get_cookies("yamibo")
         username = username or self._username
         password = password or self._password
 
         self.update_cookies(cookies)
         for _ in range(self._retry_times):
-            if self._check_login_status():
+            if await self._check_login_status():
                 self.logger.debug("[auth] Already logged in.")
                 self._logged_in = True
                 return True
-            if username and password and not self._api_login(username, password):
+            if username and password and not await self._api_login(username, password):
                 print(t("session_login_failed", site="esjzone"))
-            sleep_with_random_delay(
+            await async_sleep_with_random_delay(
                 self._request_interval,
                 mul_spread=1.1,
                 max_sleep=self._request_interval + 2,
             )
 
-        self._logged_in = self._check_login_status()
+        self._logged_in = await self._check_login_status()
         return self._logged_in
 
-    def get_book_info(
+    async def get_book_info(
         self,
         book_id: str,
         **kwargs: Any,
     ) -> list[str]:
         """
-        Fetch the raw HTML of the book info and catalog pages.
+        Fetch the raw HTML of the book info page asynchronously.
 
         Order: [info, catalog]
 
@@ -83,45 +85,25 @@ class EsjzoneSession(BaseSession):
         :return: The page content as a string.
         """
         url = self.book_info_url(book_id=book_id)
-        try:
-            resp = self.get(url, **kwargs)
-            resp.raise_for_status()
-            return [resp.text]
-        except Exception as exc:
-            self.logger.warning(
-                "[session] get_book_info(%s) failed: %s",
-                book_id,
-                exc,
-            )
-        return []
+        return [await self.fetch(url, **kwargs)]
 
-    def get_book_chapter(
+    async def get_book_chapter(
         self,
         book_id: str,
         chapter_id: str,
         **kwargs: Any,
     ) -> list[str]:
         """
-        Fetch the HTML of a single chapter.
+        Fetch the raw HTML of a single chapter asynchronously.
 
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
         :return: The chapter content as a string.
         """
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
-        try:
-            resp = self.get(url, **kwargs)
-            resp.raise_for_status()
-            return [resp.text]
-        except Exception as exc:
-            self.logger.warning(
-                "[session] get_book_chapter(%s) failed: %s",
-                book_id,
-                exc,
-            )
-        return []
+        return [await self.fetch(url, **kwargs)]
 
-    def get_bookcase(
+    async def get_bookcase(
         self,
         page: int = 1,
         **kwargs: Any,
@@ -132,16 +114,7 @@ class EsjzoneSession(BaseSession):
         :return: The HTML markup of the bookcase page.
         """
         url = self.bookcase_url()
-        try:
-            resp = self.get(url, **kwargs)
-            resp.raise_for_status()
-            return [resp.text]
-        except Exception as exc:
-            self.logger.warning(
-                "[session] get_bookcase failed: %s",
-                exc,
-            )
-        return []
+        return [await self.fetch(url, **kwargs)]
 
     @classmethod
     def bookcase_url(cls) -> str:
@@ -171,45 +144,51 @@ class EsjzoneSession(BaseSession):
         :param chapter_id: The identifier of the chapter.
         :return: Fully qualified chapter URL.
         """
-        return cls.CHAPTER_URL.format(book_id=book_id, chapter_id=chapter_id)
+        return cls.CHAPTER_URL.format(chapter_id=chapter_id)
 
-    def _api_login(self, username: str, password: str) -> bool:
+    async def _api_login(self, username: str, password: str) -> bool:
         """
         Login to the API using a 2-step token-based process.
 
-        Step 1: Get auth token.
+        Step 1: Get token `_csrf-frontend`.
         Step 2: Use token and credentials to perform login.
         Return True if login succeeds, False otherwise.
         """
-        data_1 = {
-            "plxf": "getAuthToken",
-        }
         try:
-            resp_1 = self.post(self.API_LOGIN_URL_1, data=data_1)
+            resp_1 = await self.get(self.LOGIN_URL)
             resp_1.raise_for_status()
-            # Example response: <JinJing>token_here</JinJing>
-            token = self._extract_token(resp_1.text)
+            text_1 = await resp_1.text()
+            tree = etree.HTML(text_1)
+            csrf_value = tree.xpath('//input[@name="_csrf-frontend"]/@value')
+            csrf_value = csrf_value[0] if csrf_value else ""
+            if not csrf_value:
+                self.logger.warning("[session] _api_login: CSRF token not found.")
+                return False
         except Exception as exc:
             self.logger.warning("[session] _api_login failed at step 1: %s", exc)
             return False
 
         data_2 = {
-            "email": username,
-            "pwd": password,
-            "remember_me": "on",
+            "_csrf-frontend": csrf_value,
+            "LoginForm[username]": username,
+            "LoginForm[password]": password,
+            # "LoginForm[rememberMe]": 0,
+            "LoginForm[rememberMe]": 1,
+            "login-button": "",
         }
         temp_headers = dict(self.headers)
-        temp_headers["Authorization"] = token
+        temp_headers["Origin"] = self.BASE_URL
+        temp_headers["Referer"] = self.LOGIN_URL
         try:
-            resp_2 = self.post(self.API_LOGIN_URL_2, data=data_2, headers=temp_headers)
+            resp_2 = await self.post(self.LOGIN_URL, data=data_2, headers=temp_headers)
             resp_2.raise_for_status()
-            resp_code: int = resp_2.json().get("status", 301)
-            return resp_code == 200
+            text_2 = await resp_2.text()
+            return "登录成功" in text_2
         except Exception as exc:
             self.logger.warning("[session] _api_login failed at step 2: %s", exc)
         return False
 
-    def _check_login_status(self) -> bool:
+    async def _check_login_status(self) -> bool:
         """
         Check whether the user is currently logged in by
         inspecting the bookcase page content.
@@ -217,19 +196,16 @@ class EsjzoneSession(BaseSession):
         :return: True if the user is logged in, False otherwise.
         """
         keywords = [
-            "window.location.href='/my/login'",
+            "登录 - 百合会",
+            "用户名/邮箱",
         ]
-        resp_text = self.get_bookcase()
+        resp_text = await self.get_bookcase()
         if not resp_text:
             return False
         return not any(kw in resp_text[0] for kw in keywords)
 
-    def _extract_token(self, text: str) -> str:
-        match = re.search(r"<JinJing>(.+?)</JinJing>", text)
-        return match.group(1) if match else ""
-
-    def _on_close(self) -> None:
+    async def _on_close(self) -> None:
         """
         Save cookies to the state manager before closing.
         """
-        state_mgr.set_cookies("esjzone", self.cookies)
+        state_mgr.set_cookies("yamibo", self.cookies)

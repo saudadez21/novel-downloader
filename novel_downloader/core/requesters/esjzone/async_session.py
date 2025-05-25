@@ -57,6 +57,7 @@ class EsjzoneAsyncSession(BaseAsyncSession):
         for _ in range(self._retry_times):
             if await self._check_login_status():
                 self.logger.debug("[auth] Already logged in.")
+                self._logged_in = True
                 return True
             if username and password and not await self._api_login(username, password):
                 print(t("session_login_failed", site="esjzone"))

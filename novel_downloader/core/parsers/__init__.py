@@ -12,6 +12,7 @@ Modules:
 - qianbi (铅笔小说)
 - qidian (起点中文网)
 - sfacg (SF轻小说)
+- yamibo (百合会)
 - common (通用架构)
 """
 
@@ -24,6 +25,7 @@ from .qidian import (
     QidianSessionParser,
 )
 from .sfacg import SfacgParser
+from .yamibo import YamiboParser
 
 __all__ = [
     "BiqugeParser",
@@ -33,4 +35,5 @@ __all__ = [
     "QidianBrowserParser",
     "QidianSessionParser",
     "SfacgParser",
+    "YamiboParser",
 ]

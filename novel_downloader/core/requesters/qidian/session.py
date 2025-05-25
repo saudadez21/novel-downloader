@@ -76,6 +76,7 @@ class QidianSession(BaseSession):
         for attempt in range(1, self._retry_times + 1):
             if self._check_login_status():
                 self.logger.debug("[auth] Already logged in.")
+                self._logged_in = True
                 return True
 
             if attempt == 1:

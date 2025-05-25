@@ -23,6 +23,8 @@ from novel_downloader.core.downloaders import (
     QidianDownloader,
     SfacgAsyncDownloader,
     SfacgDownloader,
+    YamiboAsyncDownloader,
+    YamiboDownloader,
 )
 from novel_downloader.core.interfaces import (
     AsyncDownloaderProtocol,
@@ -48,6 +50,7 @@ _async_site_map: dict[str, AsyncDownloaderBuilder] = {
     "esjzone": EsjzoneAsyncDownloader,
     "qianbi": QianbiAsyncDownloader,
     "sfacg": SfacgAsyncDownloader,
+    "yamibo": YamiboAsyncDownloader,
 }
 _sync_site_map: dict[str, SyncDownloaderBuilder] = {
     "biquge": BiqugeDownloader,
@@ -55,6 +58,7 @@ _sync_site_map: dict[str, SyncDownloaderBuilder] = {
     "qianbi": QianbiDownloader,
     "qidian": QidianDownloader,
     "sfacg": SfacgDownloader,
+    "yamibo": YamiboDownloader,
 }
 
 
