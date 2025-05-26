@@ -75,9 +75,11 @@ class ConfigAdapter:
         从 config["requests"] 中读取通用请求配置 (含 DrissionPage 设置)
         返回 RequesterConfig 实例
         """
+        gen = self._config.get("general", {})
         req = self._config.get("requests", {})
         site_cfg = self._get_site_cfg()
         return RequesterConfig(
+            request_interval=gen.get("request_interval", 2.0),
             retry_times=req.get("retry_times", 3),
             backoff_factor=req.get("backoff_factor", 2.0),
             timeout=req.get("timeout", 30.0),
@@ -103,7 +105,7 @@ class ConfigAdapter:
         debug = gen.get("debug", {})
         site_cfg = self._get_site_cfg()
         return DownloaderConfig(
-            request_interval=gen.get("request_interval", 5.0),
+            request_interval=gen.get("request_interval", 2.0),
             raw_data_dir=gen.get("raw_data_dir", "./raw_data"),
             cache_dir=gen.get("cache_dir", "./novel_cache"),
             download_workers=gen.get("download_workers", 4),

@@ -26,6 +26,7 @@ StorageBackend = Literal["json", "sqlite"]
 # === Requesters ===
 @dataclass
 class RequesterConfig:
+    request_interval: float = 5.0
     retry_times: int = 3
     backoff_factor: float = 2.0
     timeout: float = 30.0

@@ -16,7 +16,7 @@ mute_audio = true                  # 是否静音
 
 # 全局通用设置
 [general]
-request_interval = 5.0             # 同一本书各章节请求间隔 (秒)
+request_interval = 2.0             # 同一本书各章节请求间隔 (秒)
 raw_data_dir = "./raw_data"        # 原始章节 JSON/DB 存放目录
 output_dir = "./downloads"         # 最终输出文件存放目录
 cache_dir = "./novel_cache"        # 本地缓存目录 (字体 / 图片等)
@@ -99,6 +99,14 @@ mode = "session"                   # async / session
 login_required = false
 username = "yourusername"          # 登录账户
 password = "yourpassword"          # 登录密码
+
+[sites.linovelib]  # 哔哩轻小说
+book_ids = [
+  "0000000000",
+  "0000000000"
+]
+mode = "session"                   # async / session
+login_required = false
 
 [sites.common]
 mode = "session"                   # async / session

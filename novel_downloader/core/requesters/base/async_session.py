@@ -78,6 +78,7 @@ class BaseAsyncSession(AsyncRequesterProtocol, abc.ABC):
         :param cookies: Optional initial cookies to set on the session.
         """
         self._config = config
+        self._request_interval = config.request_interval
         self._retry_times = config.retry_times
         self._retry_interval = config.backoff_factor
         self._timeout = config.timeout
