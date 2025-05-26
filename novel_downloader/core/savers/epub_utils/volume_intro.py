@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 novel_downloader.core.savers.epub_utils.volume_intro
+----------------------------------------------------
 
 Responsible for generating HTML code for volume introduction pages,
 including two style variants and a unified entry point.

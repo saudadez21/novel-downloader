@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 novel_downloader.core.savers.epub_utils.initializer
+---------------------------------------------------
 
 Initializes an epub.EpubBook object, sets metadata
 (identifier, title, author, language, description),

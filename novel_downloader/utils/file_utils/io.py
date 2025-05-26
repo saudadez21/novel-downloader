@@ -103,7 +103,7 @@ def _write_file(
             tmp.write(content_to_write)
             tmp_path = Path(tmp.name)
         tmp_path.replace(path)
-        logger.info("[file] '%s' written successfully", path)
+        logger.debug("[file] '%s' written successfully", path)
         return True
     except Exception as exc:
         logger.warning("[file] Error writing %r: %s", path, exc)

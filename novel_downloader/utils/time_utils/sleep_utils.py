@@ -56,7 +56,7 @@ def sleep_with_random_delay(
     if max_sleep is not None:
         duration = min(duration, max_sleep)
 
-    logger.info("[time] Sleeping for %.2f seconds", duration)
+    logger.debug("[time] Sleeping for %.2f seconds", duration)
     time.sleep(duration)
     return
 
@@ -98,7 +98,7 @@ async def async_sleep_with_random_delay(
     if max_sleep is not None:
         duration = min(duration, max_sleep)
 
-    logger.info("[async time] Sleeping for %.2f seconds", duration)
+    logger.debug("[async time] Sleeping for %.2f seconds", duration)
     await asyncio.sleep(duration)
 
 

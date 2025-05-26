@@ -41,6 +41,8 @@ class CommonSaver(BaseSaver):
         """
         super().__init__(config)
         self._site = site
+        self._raw_data_dir = self._base_raw_data_dir / site
+        self._cache_dir = self._base_cache_dir / site
         self._chapter_storage_cache: dict[str, list[ChapterStorage]] = {}
         self._chap_folders: list[str] = chap_folders or ["chapters"]
 
@@ -109,7 +111,7 @@ class CommonSaver(BaseSaver):
         return {}
 
     def _init_chapter_storages(self, book_id: str) -> None:
-        raw_base = self.raw_data_dir / self._site / book_id
+        raw_base = self._raw_data_dir / book_id
         self._chapter_storage_cache[book_id] = [
             ChapterStorage(
                 raw_base=raw_base,

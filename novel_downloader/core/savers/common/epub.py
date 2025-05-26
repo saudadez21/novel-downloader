@@ -11,51 +11,28 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from typing import TYPE_CHECKING
-from urllib.parse import unquote, urlparse
 
 from ebooklib import epub
 
 from novel_downloader.core.savers.epub_utils import (
+    add_images_from_dir,
     chapter_txt_to_html,
     create_css_items,
     create_volume_intro,
     generate_book_intro_html,
     init_epub,
+    inline_remote_images,
 )
 from novel_downloader.utils.constants import (
-    DEFAULT_IMAGE_SUFFIX,
     EPUB_OPTIONS,
     EPUB_TEXT_FOLDER,
 )
 from novel_downloader.utils.file_utils import sanitize_filename
+from novel_downloader.utils.network import download_image
 from novel_downloader.utils.text_utils import clean_chapter_title
 
 if TYPE_CHECKING:
     from .main_saver import CommonSaver
-
-
-def _image_url_to_filename(url: str) -> str:
-    """
-    Parse and sanitize a image filename from a URL.
-    If no filename or suffix exists, fallback to default name and extension.
-
-    :param url: URL string
-    :return: Safe filename string
-    """
-    if not url:
-        return ""
-
-    parsed_url = urlparse(url)
-    path = unquote(parsed_url.path)
-    filename = Path(path).name
-
-    if not filename:
-        filename = "image"
-
-    if not Path(filename).suffix:
-        filename += DEFAULT_IMAGE_SUFFIX
-
-    return filename
 
 
 def common_save_as_epub(
@@ -76,11 +53,12 @@ def common_save_as_epub(
     :param book_id: Identifier of the novel (used as subdirectory name).
     """
     TAG = "[saver]"
-    site = saver.site
     config = saver._config
     # --- Paths & options ---
-    raw_base = saver.raw_data_dir / site / book_id
+    raw_base = saver._raw_data_dir / book_id
+    img_dir = saver._cache_dir / book_id / "images"
     out_dir = saver.output_dir
+    img_dir.mkdir(parents=True, exist_ok=True)
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # --- Load book_info.json ---
@@ -100,10 +78,16 @@ def common_save_as_epub(
     # --- Generate intro + cover ---
     intro_html = generate_book_intro_html(book_info)
     cover_path: Path | None = None
-    if config.include_cover:
-        cover_filename = _image_url_to_filename(book_info.get("cover_url", ""))
-        if cover_filename:
-            cover_path = raw_base / cover_filename
+    cover_url = book_info.get("cover_url", "")
+    if config.include_cover and cover_url:
+        cover_path = download_image(
+            cover_url,
+            raw_base,
+            target_name="cover",
+            on_exist="overwrite",
+        )
+        if not cover_path:
+            saver.logger.warning("Failed to download cover from %s", cover_url)
 
     # --- Initialize EPUB ---
     book, spine, toc_list = init_epub(
@@ -162,9 +146,11 @@ def common_save_as_epub(
                 continue
 
             title = clean_chapter_title(chapter_data.get("title", "")) or chap_id
+            content: str = chapter_data.get("content", "")
+            content = inline_remote_images(content, img_dir)
             chap_html = chapter_txt_to_html(
                 chapter_title=title,
-                chapter_text=chapter_data.get("content", ""),
+                chapter_text=content,
                 author_say=chapter_data.get("author_say", ""),
             )
 
@@ -181,6 +167,8 @@ def common_save_as_epub(
             chapter_items.append(item)
 
         toc_list.append((section, chapter_items))
+
+    book = add_images_from_dir(book, img_dir)
 
     # --- 5. Finalize EPUB ---
     saver.logger.info("%s Building TOC and spine...", TAG)
