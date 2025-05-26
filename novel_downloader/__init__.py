@@ -6,7 +6,7 @@ novel_downloader
 Core package for the Novel Downloader project.
 """
 
-__version__ = "1.3.2"
+__version__ = "1.3.3"
 
 __author__ = "Saudade Z"
 __email__ = "saudadez217@gmail.com"

@@ -1,3 +1,13 @@
+## v1.3.3 (2025-05-26)
+
+### Feat
+
+- **epub**: add image support (#26)
+
+### Refactor
+
+- **esjzone**: simplify chapterList node selection in parser for volumes
+
 ## v1.3.2 (2025-05-25)
 
 ### Feat
