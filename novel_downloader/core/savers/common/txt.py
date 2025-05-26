@@ -45,9 +45,8 @@ def common_save_as_txt(
     :param book_id: Identifier of the novel (used as subdirectory name).
     """
     TAG = "[saver]"
-    site = saver.site
     # --- Paths & options ---
-    raw_base = saver.raw_data_dir / site / book_id
+    raw_base = saver._raw_data_dir / book_id
     out_dir = saver.output_dir
     out_dir.mkdir(parents=True, exist_ok=True)
 

@@ -40,9 +40,9 @@ class BaseSaver(SaverProtocol, abc.ABC):
         self._config = config
 
         self._base_cache_dir = Path(config.cache_dir)
-        self._raw_data_dir = Path(config.raw_data_dir)
+        self._base_raw_data_dir = Path(config.raw_data_dir)
         self._output_dir = Path(config.output_dir)
-        self._raw_data_dir.mkdir(parents=True, exist_ok=True)
+        self._base_cache_dir.mkdir(parents=True, exist_ok=True)
         self._output_dir.mkdir(parents=True, exist_ok=True)
 
         self._filename_template = config.filename_template
@@ -157,11 +157,6 @@ class BaseSaver(SaverProtocol, abc.ABC):
     def output_dir(self) -> Path:
         """Access the output directory for saving files."""
         return self._output_dir
-
-    @property
-    def raw_data_dir(self) -> Path:
-        """Access the raw data directory."""
-        return self._raw_data_dir
 
     @property
     def filename_template(self) -> str:

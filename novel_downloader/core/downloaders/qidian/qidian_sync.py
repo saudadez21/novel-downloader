@@ -19,7 +19,6 @@ from novel_downloader.core.interfaces import (
 )
 from novel_downloader.utils.chapter_storage import ChapterStorage
 from novel_downloader.utils.file_utils import save_as_json, save_as_txt
-from novel_downloader.utils.network import download_image_as_bytes
 from novel_downloader.utils.state import state_mgr
 from novel_downloader.utils.time_utils import (
     calculate_time_difference,
@@ -110,13 +109,6 @@ class QidianDownloader(BaseDownloader):
             ):
                 save_as_json(book_info, info_path)
             sleep_with_random_delay(wait_time, mul_spread=1.1, max_sleep=wait_time + 2)
-
-        # download cover
-        cover_url = book_info.get("cover_url", "")
-        if cover_url:
-            cover_bytes = download_image_as_bytes(cover_url, raw_base)
-            if not cover_bytes:
-                self.logger.warning("%s Failed to download cover: %s", TAG, cover_url)
 
         # enqueue chapters
         for vol in book_info.get("volumes", []):

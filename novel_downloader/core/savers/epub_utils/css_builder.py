@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 novel_downloader.core.savers.epub_utils.css_builder
+---------------------------------------------------
 
 Reads local CSS files and wraps them into epub.EpubItem objects,
 returning a list ready to be added to the EPUB.

@@ -116,6 +116,10 @@ BLACKLIST_PATH = files("novel_downloader.resources.text").joinpath("blacklist.tx
 EPUB_IMAGE_FOLDER = "Images"
 EPUB_TEXT_FOLDER = "Text"
 
+EPUB_IMAGE_WRAPPER = (
+    '<div class="duokan-image-single illus"><img src="../Images/{filename}" /></div>'
+)
+
 EPUB_OPTIONS = {
     # guide 是 EPUB 2 的一个部分, 包含封面, 目录, 索引等重要导航信息
     "epub2_guide": True,

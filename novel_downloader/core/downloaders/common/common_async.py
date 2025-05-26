@@ -20,7 +20,6 @@ from novel_downloader.core.interfaces import (
 )
 from novel_downloader.utils.chapter_storage import ChapterDict, ChapterStorage
 from novel_downloader.utils.file_utils import save_as_json, save_as_txt
-from novel_downloader.utils.network import download_image_as_bytes
 from novel_downloader.utils.time_utils import calculate_time_difference
 
 logger = logging.getLogger(__name__)
@@ -106,13 +105,6 @@ class CommonAsyncDownloader(BaseAsyncDownloader):
             await asyncio.sleep(wait_time)
         else:
             book_info = json.loads(info_path.read_text("utf-8"))
-
-        # download cover
-        cover_url = book_info.get("cover_url", "")
-        if cover_url:
-            await asyncio.get_running_loop().run_in_executor(
-                None, download_image_as_bytes, cover_url, raw_base
-            )
 
         # setup queue, semaphore, executor
         semaphore = asyncio.Semaphore(self.download_workers)

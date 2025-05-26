@@ -16,7 +16,7 @@ from urllib.parse import unquote, urlparse
 import requests
 
 from .constants import DEFAULT_HEADERS, DEFAULT_IMAGE_SUFFIX
-from .file_utils.io import _get_non_conflicting_path, _write_file, read_binary_file
+from .file_utils.io import _get_non_conflicting_path, _write_file
 
 logger = logging.getLogger(__name__)
 
@@ -84,28 +84,28 @@ def image_url_to_filename(url: str) -> str:
     return filename
 
 
-def download_image_as_bytes(
+def download_image(
     url: str,
     target_folder: str | Path | None = None,
+    target_name: str | None = None,
     *,
     timeout: int = 10,
     retries: int = 3,
     backoff: float = 0.5,
     on_exist: Literal["overwrite", "skip", "rename"] = "overwrite",
-) -> bytes | None:
+) -> Path | None:
     """
-    Download an image from a given URL and return its content as bytes.
-
-    If on_exist='skip' and the file already exists, it will be read from disk
-    instead of being downloaded again.
+    Download an image from `url` and save it to `target_folder`, returning the Path.
+    Can override the filename via `target_name`.
 
     :param url: Image URL. Can start with 'http', '//', or without protocol.
-    :param target_folder: Optional folder to save the image (str or Path).
+    :param target_folder: Directory to save into (defaults to cwd).
+    :param target_name: Optional filename (with or without extension).
     :param timeout: Request timeout in seconds.
     :param retries: Number of retry attempts.
     :param backoff: Base delay between retries (exponential backoff).
     :param on_exist: What to do if file exists: 'overwrite', 'skip', or 'rename'.
-    :return: Image content as bytes, or None if failed.
+    :return: Path to the saved image, or `None` on any failure.
     """
     # Normalize URL
     if url.startswith("//"):
@@ -113,21 +113,28 @@ def download_image_as_bytes(
     elif not url.startswith("http"):
         url = "https://" + url
 
-    save_path = None
-    if target_folder:
-        target_folder = Path(target_folder)
-        filename = image_url_to_filename(url)
-        save_path = target_folder / filename
+    folder = Path(target_folder) if target_folder else Path.cwd()
+    folder.mkdir(parents=True, exist_ok=True)
 
-        if on_exist == "skip" and save_path.exists():
-            logger.info(
-                "[image] '%s' exists, skipping download and reading from disk.",
-                save_path,
-            )
-            return read_binary_file(save_path)
+    if target_name:
+        name = target_name
+        if not Path(name).suffix:
+            # infer ext from URL-derived name
+            name += Path(image_url_to_filename(url)).suffix
+    else:
+        name = image_url_to_filename(url)
+    save_path = folder / name
+
+    # Handle existing file
+    if save_path.exists():
+        if on_exist == "skip":
+            logger.debug("Skipping download; file exists: %s", save_path)
+            return save_path
+        if on_exist == "rename":
+            save_path = _get_non_conflicting_path(save_path)
 
     # Proceed with download
-    response = http_get_with_retry(
+    resp = http_get_with_retry(
         url,
         retries=retries,
         timeout=timeout,
@@ -136,19 +143,25 @@ def download_image_as_bytes(
         stream=False,
     )
 
-    if response and response.ok:
-        content = response.content
+    if not (resp and resp.ok):
+        logger.warning(
+            "Failed to download %s (status=%s)",
+            url,
+            getattr(resp, "status_code", None),
+        )
+        return None
 
-        if save_path:
-            _write_file(
-                content=content,
-                filepath=save_path,
-                mode="wb",
-                on_exist=on_exist,
-            )
-
-        return content
-
+    # Write to disk
+    try:
+        _write_file(
+            content=resp.content,
+            filepath=save_path,
+            mode="wb",
+            on_exist=on_exist,
+        )
+        return save_path
+    except Exception:
+        logger.exception("Error saving image to %s", save_path)
     return None
 
 
@@ -191,7 +204,7 @@ def download_font_file(
 
     # If skip and file exists -> return immediately
     if on_exist == "skip" and font_path.exists():
-        logger.info("[font] File exists, skipping download: %s", font_path)
+        logger.debug("[font] File exists, skipping download: %s", font_path)
         return font_path
 
     # Retry download with exponential backoff
@@ -214,7 +227,7 @@ def download_font_file(
                     if chunk:
                         f.write(chunk)
 
-            logger.info("[font] Font saved to: %s", font_path)
+            logger.debug("[font] Font saved to: %s", font_path)
             return font_path
 
         except Exception as e:
@@ -258,7 +271,7 @@ def download_js_file(
     save_path = target_folder / filename
 
     if on_exist == "skip" and save_path.exists():
-        logger.info("[js] File exists, skipping download: %s", save_path)
+        logger.debug("[js] File exists, skipping download: %s", save_path)
         return save_path
 
     response = http_get_with_retry(
@@ -278,7 +291,7 @@ def download_js_file(
 
         try:
             _write_file(content=content, filepath=save_path, mode="wb")
-            logger.info("[js] JS file saved to: %s", save_path)
+            logger.debug("[js] JS file saved to: %s", save_path)
             return save_path
         except Exception as e:
             logger.error("[js] Error writing JS to disk: %s", e)
