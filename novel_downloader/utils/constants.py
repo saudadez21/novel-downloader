@@ -101,6 +101,9 @@ VOLUME_BORDER_IMAGE_PATH = files("novel_downloader.resources.images").joinpath(
 REPLACE_WORD_MAP_PATH = files("novel_downloader.resources.json").joinpath(
     "replace_word_map.json"
 )
+LINOVELIB_FONT_MAP_PATH = files("novel_downloader.resources.json").joinpath(
+    "linovelib_font_map.json"
+)
 
 # JavaScript
 QD_DECRYPT_SCRIPT_PATH = files("novel_downloader.resources.js_scripts").joinpath(
