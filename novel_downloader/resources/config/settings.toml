@@ -106,6 +106,7 @@ book_ids = [
   "0000000000"
 ]
 mode = "session"                   # async / session
+split_mode = "book"                # 导出方式: book / volume
 login_required = false
 
 [sites.common]

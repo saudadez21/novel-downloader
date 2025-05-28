@@ -92,6 +92,7 @@ def download_image(
     timeout: int = 10,
     retries: int = 3,
     backoff: float = 0.5,
+    headers: dict[str, str] | None = None,
     on_exist: Literal["overwrite", "skip", "rename"] = "overwrite",
 ) -> Path | None:
     """
@@ -139,7 +140,7 @@ def download_image(
         retries=retries,
         timeout=timeout,
         backoff=backoff,
-        headers=DEFAULT_HEADERS,
+        headers=headers or DEFAULT_HEADERS,
         stream=False,
     )
 

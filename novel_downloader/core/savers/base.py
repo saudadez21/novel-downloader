@@ -10,9 +10,10 @@ into various output formats.
 
 import abc
 import logging
+import types
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Self
 
 from novel_downloader.config.models import SaverConfig
 from novel_downloader.core.interfaces import SaverProtocol
@@ -162,3 +163,30 @@ class BaseSaver(SaverProtocol, abc.ABC):
     def filename_template(self) -> str:
         """Access the filename template."""
         return self._filename_template
+
+    def _on_close(self) -> None:
+        """
+        Hook method called at the beginning of close().
+        Override in subclass if needed.
+        """
+        pass
+
+    def close(self) -> None:
+        """
+        Shutdown and clean up the saver.
+        """
+        self._on_close()
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        tb: types.TracebackType | None,
+    ) -> None:
+        self.close()
+
+    def __del__(self) -> None:
+        self.close()

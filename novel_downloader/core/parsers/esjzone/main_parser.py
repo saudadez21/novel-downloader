@@ -94,7 +94,7 @@ class EsjzoneParser(BaseParser):
             tag = node.tag.lower()
 
             if tag == "details":
-                # ---- DETAILS‐based layout ----
+                # ---- DETAILS-based layout ----
                 summary = node.find("summary")
                 vol_name = summary.text if summary is not None else "未命名卷"
                 _start_volume(vol_name)

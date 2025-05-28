@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.savers.common.txt
----------------------------------------
+novel_downloader.core.savers.linovelib.txt
+------------------------------------------
 
 Contains the logic for exporting novel content as a single `.txt` file.
 
-This module defines `common_save_as_txt` function, which assembles and formats
+This module defines `linovelib_save_as_txt` function, which assembles and formats
 a novel based on metadata and chapter files found in the raw data directory.
-It is intended to be used by `CommonSaver` as part of the save/export process.
+It is intended to be used by `LinovelibSaver` as part of the save/export process.
 """
 
 from __future__ import annotations
@@ -17,16 +17,15 @@ from typing import TYPE_CHECKING
 
 from novel_downloader.utils.file_utils import save_as_txt
 from novel_downloader.utils.text_utils import (
-    clean_chapter_title,
     format_chapter,
 )
 
 if TYPE_CHECKING:
-    from .main_saver import CommonSaver
+    from .main_saver import LinovelibSaver
 
 
-def common_save_as_txt(
-    saver: CommonSaver,
+def linovelib_save_as_txt(
+    saver: LinovelibSaver,
     book_id: str,
 ) -> None:
     """
@@ -35,10 +34,8 @@ def common_save_as_txt(
 
     处理流程：
       1. 从 book_info.json 中加载书籍信息 (包含书名、作者、简介及卷章节列表)
-      2. 遍历各卷, 每个卷先追加卷标题, 然后依次追加该卷下各章节的标题和内容,
-         同时记录最后一个章节标题作为“原文截至”
-      3. 将书籍元信息 (书名、作者、原文截至、内容简介) 与所有章节内容拼接,
-         构成最终完整文本
+      2. 遍历各卷, 每个卷先追加卷标题, 然后依次追加该卷下各章节的标题和内容
+      3. 将书籍元信息 (书名、作者、原文截至、内容简介) 与所有章节内容拼接
       4. 将最终结果保存到 out_path 下 (例如：`{book_name}.txt`)
 
     :param book_id: Identifier of the novel (used as subdirectory name).
@@ -60,16 +57,17 @@ def common_save_as_txt(
 
     # --- Compile chapters ---
     parts: list[str] = []
-    latest_chapter: str = ""
     volumes = book_info.get("volumes", [])
 
     for vol in volumes:
         vol_name = vol.get("volume_name", "").strip()
-        vol_name = clean_chapter_title(vol_name)
+        vol_intro = vol.get("volume_intro", "").strip()
         if vol_name:
             volume_header = f"\n\n{'=' * 6} {vol_name} {'=' * 6}\n\n"
             parts.append(volume_header)
             saver.logger.info("%s Processing volume: %s", TAG, vol_name)
+        if vol_intro:
+            parts.append(f"{vol_intro}\n\n")
         for chap in vol.get("chapters", []):
             chap_id = chap.get("chapterId")
             chap_title = chap.get("title", "")
@@ -90,11 +88,8 @@ def common_save_as_txt(
             # Extract structured fields
             title = chapter_data.get("title", chap_title).strip()
             content = chapter_data.get("content", "").strip()
-            author_say = chapter_data.get("author_say", "").strip()
-            clean_title = clean_chapter_title(title)
 
-            parts.append(format_chapter(clean_title, content, author_say))
-            latest_chapter = clean_title
+            parts.append(format_chapter(title, content, ""))
 
     # --- Build header ---
     name = book_info.get("book_name")
@@ -103,29 +98,19 @@ def common_save_as_txt(
     updated = book_info.get("update_time")
     summary = book_info.get("summary")
 
-    header_lines = []
-
-    if name:
-        header_lines.append(f"书名: {name}")
-
-    if author:
-        header_lines.append(f"作者: {author}")
-
-    if words:
-        header_lines.append(f"总字数: {words}")
-
-    if updated:
-        header_lines.append(f"更新日期: {updated}")
-
-    header_lines.append(f"原文截至: {latest_chapter}")
+    fields = [
+        ("书名", name),
+        ("作者", author),
+        ("总字数", words),
+        ("更新日期", updated),
+    ]
+    header_lines = [f"{label}: {value}" for label, value in fields if value]
 
     if summary:
         header_lines.append("内容简介:")
         header_lines.append(summary)
 
-    header_lines.append("")
-    header_lines.append("-" * 10)
-    header_lines.append("")
+    header_lines += ["", "-" * 10, ""]
 
     header = "\n".join(header_lines)
 

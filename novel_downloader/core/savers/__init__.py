@@ -8,6 +8,7 @@ This module defines saver classes for different novel platforms.
 Currently supported platforms:
 - biquge (笔趣阁)
 - esjzone (ESJ Zone)
+- linovelib (哔哩轻小说)
 - qianbi (铅笔小说)
 - qidian (起点中文网)
 - sfacg (SF轻小说)
@@ -18,6 +19,7 @@ Currently supported platforms:
 from .biquge import BiqugeSaver
 from .common import CommonSaver
 from .esjzone import EsjzoneSaver
+from .linovelib import LinovelibSaver
 from .qianbi import QianbiSaver
 from .qidian import QidianSaver
 from .sfacg import SfacgSaver
@@ -27,6 +29,7 @@ __all__ = [
     "BiqugeSaver",
     "CommonSaver",
     "EsjzoneSaver",
+    "LinovelibSaver",
     "QianbiSaver",
     "QidianSaver",
     "SfacgSaver",

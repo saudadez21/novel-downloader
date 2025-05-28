@@ -23,14 +23,14 @@ def patch_locales_dir(tmp_path, monkeypatch):
     # 2) patch the module constant so i18n picks up our temp dir
     monkeypatch.setattr(const_mod, "LOCALES_DIR", locale_dir)
 
-    # 3) ensure we re‐import i18n from scratch in each test
+    # 3) ensure we re-import i18n from scratch in each test
     sys.modules.pop("novel_downloader.utils.i18n", None)
 
     return locale_dir
 
 
 def load_i18n_module():
-    # must invalidate caches so Python will re‐read the patched LOCALES_DIR
+    # must invalidate caches so Python will re-read the patched LOCALES_DIR
     importlib.invalidate_caches()
     return importlib.import_module("novel_downloader.utils.i18n")
 

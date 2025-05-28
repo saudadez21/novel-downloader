@@ -24,9 +24,11 @@ from novel_downloader.config.models import (
 
 ModeType = Literal["browser", "session", "async"]
 StorageBackend = Literal["json", "sqlite"]
+SplitMode = Literal["book", "volume"]
 
 EXPECTED_FIELDS = {
     RequesterConfig: {
+        "request_interval": float,
         "retry_times": int,
         "backoff_factor": float,
         "timeout": float,
@@ -86,6 +88,7 @@ EXPECTED_FIELDS = {
         "include_cover": bool,
         "include_toc": bool,
         "include_picture": bool,
+        "split_mode": SplitMode,
     },
 }
 

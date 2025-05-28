@@ -153,6 +153,7 @@ class ConfigAdapter:
         fmt = out.get("formats", {})
         naming = out.get("naming", {})
         epub_opts = out.get("epub", {})
+        site_cfg = self._get_site_cfg()
         return SaverConfig(
             cache_dir=gen.get("cache_dir", "./novel_cache"),
             raw_data_dir=gen.get("raw_data_dir", "./raw_data"),
@@ -168,6 +169,7 @@ class ConfigAdapter:
             include_cover=epub_opts.get("include_cover", True),
             include_toc=epub_opts.get("include_toc", False),
             include_picture=epub_opts.get("include_picture", False),
+            split_mode=site_cfg.get("split_mode", "book"),
         )
 
     def get_book_ids(self) -> list[str]:

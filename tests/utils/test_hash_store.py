@@ -236,7 +236,7 @@ def test_maybe_save_direct(monkeypatch, tmp_path):
     assert called == ["saved"]
 
 
-# ensure module‐level instance exists
+# ensure module-level instance exists
 def test_module_instance_present():
     """The module should define img_hash_store as an ImageHashStore."""
     assert isinstance(hs_mod.img_hash_store, ImageHashStore)

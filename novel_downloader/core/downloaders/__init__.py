@@ -12,6 +12,7 @@ of retrieving, parsing, and saving novel content for a given source.
 Currently supported platforms:
 - biquge (笔趣阁)
 - esjzone (ESJ Zone)
+- linovelib (哔哩轻小说)
 - qianbi (铅笔小说)
 - qidian (起点中文网)
 - sfacg (SF轻小说)
@@ -22,6 +23,7 @@ Currently supported platforms:
 from .biquge import BiqugeAsyncDownloader, BiqugeDownloader
 from .common import CommonAsyncDownloader, CommonDownloader
 from .esjzone import EsjzoneAsyncDownloader, EsjzoneDownloader
+from .linovelib import LinovelibAsyncDownloader, LinovelibDownloader
 from .qianbi import QianbiAsyncDownloader, QianbiDownloader
 from .qidian import QidianDownloader
 from .sfacg import SfacgAsyncDownloader, SfacgDownloader
@@ -34,6 +36,8 @@ __all__ = [
     "CommonDownloader",
     "EsjzoneAsyncDownloader",
     "EsjzoneDownloader",
+    "LinovelibAsyncDownloader",
+    "LinovelibDownloader",
     "QianbiAsyncDownloader",
     "QianbiDownloader",
     "QidianDownloader",

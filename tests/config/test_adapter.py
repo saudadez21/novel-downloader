@@ -102,7 +102,7 @@ def test_requester_config_custom():
 def test_downloader_config_defaults():
     adapter = ConfigAdapter(config={}, site="qidian")
     cfg = adapter.get_downloader_config()
-    assert cfg.request_interval == 5
+    assert cfg.request_interval == 2.0
     assert cfg.cache_dir == "./novel_cache"
     assert cfg.login_required is False
     assert cfg.save_html is False

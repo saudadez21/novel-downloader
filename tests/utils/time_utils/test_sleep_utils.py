@@ -69,7 +69,7 @@ def test_default_spreads(monkeypatch, caplog):
     With only `base` provided, `add_spread` defaults to 0.0 and
     `mul_spread` defaults to 1.0, so duration == base exactly.
     """
-    caplog.set_level(logging.INFO)
+    caplog.set_level(logging.DEBUG)
 
     slept = []
     monkeypatch.setattr(time, "sleep", lambda s: slept.append(s))
@@ -94,7 +94,7 @@ def test_additive_only_jitter(monkeypatch, caplog):
     When `add_spread` > 0 and `mul_spread` == 1.0,
     only the additive jitter contributes beyond base.
     """
-    caplog.set_level(logging.INFO)
+    caplog.set_level(logging.DEBUG)
 
     slept = []
     monkeypatch.setattr(time, "sleep", lambda s: slept.append(s))
@@ -124,7 +124,7 @@ def test_multiplicative_only_jitter(monkeypatch, caplog):
     When `mul_spread` > 1.0 and `add_spread` == 0.0,
     only the multiplicative jitter scales the base.
     """
-    caplog.set_level(logging.INFO)
+    caplog.set_level(logging.DEBUG)
 
     slept = []
     monkeypatch.setattr(time, "sleep", lambda s: slept.append(s))
@@ -150,7 +150,7 @@ def test_combined_jitter(monkeypatch, caplog):
     """
     When both `mul_spread` and `add_spread` > 1, duration uses both jitters.
     """
-    caplog.set_level(logging.INFO)
+    caplog.set_level(logging.DEBUG)
 
     slept = []
     monkeypatch.setattr(time, "sleep", lambda s: slept.append(s))
@@ -176,7 +176,7 @@ def test_max_sleep_cap(monkeypatch, caplog):
     """
     When computed duration exceeds `max_sleep`, the sleep time is capped.
     """
-    caplog.set_level(logging.INFO)
+    caplog.set_level(logging.DEBUG)
 
     slept = []
     monkeypatch.setattr(time, "sleep", lambda s: slept.append(s))
@@ -196,7 +196,7 @@ def test_max_sleep_no_cap(monkeypatch, caplog):
     """
     When computed duration is below `max_sleep`, no capping is applied.
     """
-    caplog.set_level(logging.INFO)
+    caplog.set_level(logging.DEBUG)
 
     slept = []
     monkeypatch.setattr(time, "sleep", lambda s: slept.append(s))

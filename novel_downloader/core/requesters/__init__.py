@@ -11,6 +11,7 @@ or interacting with browser/session-based sources.
 Subpackages:
 - biquge (笔趣阁)
 - esjzone (ESJ Zone)
+- linovelib (哔哩轻小说)
 - qianbi (铅笔小说)
 - qidian (起点中文网)
 - sfacg (SF轻小说)
@@ -29,6 +30,10 @@ from .common import (
 from .esjzone import (
     EsjzoneAsyncSession,
     EsjzoneSession,
+)
+from .linovelib import (
+    LinovelibAsyncSession,
+    LinovelibSession,
 )
 from .qianbi import (
     QianbiAsyncSession,
@@ -54,6 +59,8 @@ __all__ = [
     "CommonSession",
     "EsjzoneAsyncSession",
     "EsjzoneSession",
+    "LinovelibAsyncSession",
+    "LinovelibSession",
     "QianbiAsyncSession",
     "QianbiSession",
     "QidianBrowser",

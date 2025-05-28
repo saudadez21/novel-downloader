@@ -15,6 +15,7 @@ from novel_downloader.core.parsers import (
     BiqugeParser,
     CommonParser,
     EsjzoneParser,
+    LinovelibParser,
     QianbiParser,
     QidianBrowserParser,
     QidianSessionParser,
@@ -32,6 +33,10 @@ _site_map: dict[str, dict[str, ParserBuilder]] = {
     "esjzone": {
         "session": EsjzoneParser,
         "async": EsjzoneParser,
+    },
+    "linovelib": {
+        "session": LinovelibParser,
+        "async": LinovelibParser,
     },
     "qianbi": {
         "session": QianbiParser,
