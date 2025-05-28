@@ -92,8 +92,6 @@ class ConfigAdapter:
             disable_images=req.get("disable_images", True),
             mute_audio=req.get("mute_audio", True),
             mode=site_cfg.get("mode", "session"),
-            username=site_cfg.get("username", ""),
-            password=site_cfg.get("password", ""),
         )
 
     def get_downloader_config(self) -> DownloaderConfig:
@@ -117,6 +115,8 @@ class ConfigAdapter:
             mode=site_cfg.get("mode", "session"),
             storage_backend=gen.get("storage_backend", "json"),
             storage_batch_size=gen.get("storage_batch_size", 1),
+            username=site_cfg.get("username", ""),
+            password=site_cfg.get("password", ""),
         )
 
     def get_parser_config(self) -> ParserConfig:

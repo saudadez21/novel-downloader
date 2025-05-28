@@ -114,7 +114,8 @@ class BaseAsyncSession(AsyncRequesterProtocol, abc.ABC):
         self,
         username: str = "",
         password: str = "",
-        manual_login: bool = False,
+        cookies: dict[str, str] | None = None,
+        attempt: int = 1,
         **kwargs: Any,
     ) -> bool:
         """

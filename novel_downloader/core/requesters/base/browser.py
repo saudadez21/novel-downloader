@@ -61,6 +61,7 @@ class BaseBrowser(SyncRequesterProtocol, abc.ABC):
         self._browser: Chromium | None = None
         self._page: MixTab | None = None
         self._headless: bool = config.headless
+        self._headless_orig: bool = config.headless
 
         user_data_path = (
             config.user_data_folder
@@ -111,7 +112,8 @@ class BaseBrowser(SyncRequesterProtocol, abc.ABC):
         self,
         username: str = "",
         password: str = "",
-        manual_login: bool = False,
+        cookies: dict[str, str] | None = None,
+        attempt: int = 1,
         **kwargs: Any,
     ) -> bool:
         """

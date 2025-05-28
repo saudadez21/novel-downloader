@@ -40,8 +40,6 @@ class RequesterConfig:
     mode: ModeType = "session"
     max_connections: int = 10
     max_rps: float | None = None  # Maximum requests per second
-    username: str = ""
-    password: str = ""
 
 
 # === Downloaders ===
@@ -59,6 +57,8 @@ class DownloaderConfig:
     mode: ModeType = "session"
     storage_backend: StorageBackend = "json"
     storage_batch_size: int = 1
+    username: str = ""
+    password: str = ""
 
 
 # === Parsers ===

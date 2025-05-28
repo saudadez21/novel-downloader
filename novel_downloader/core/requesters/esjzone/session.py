@@ -9,7 +9,6 @@ from typing import Any
 
 from novel_downloader.config.models import RequesterConfig
 from novel_downloader.core.requesters.base import BaseSession
-from novel_downloader.utils.i18n import t
 from novel_downloader.utils.state import state_mgr
 from novel_downloader.utils.time_utils import sleep_with_random_delay
 
@@ -34,32 +33,36 @@ class EsjzoneSession(BaseSession):
         super().__init__(config)
         self._logged_in: bool = False
         self._request_interval = config.backoff_factor
-        self._retry_times = config.retry_times
-        self._username = config.username
-        self._password = config.password
 
     def login(
         self,
         username: str = "",
         password: str = "",
-        manual_login: bool = False,
+        cookies: dict[str, str] | None = None,
+        attempt: int = 1,
         **kwargs: Any,
     ) -> bool:
         """
         Restore cookies persisted by the session-based workflow.
         """
-        cookies: dict[str, str] = state_mgr.get_cookies("esjzone")
-        username = username or self._username
-        password = password or self._password
+        if cookies:
+            self.update_cookies(cookies)
 
-        self.update_cookies(cookies)
-        for _ in range(self._retry_times):
-            if self._check_login_status():
-                self.logger.debug("[auth] Already logged in.")
+        if self._check_login_status():
+            self._logged_in = True
+            self.logger.debug("[auth] Logged in via cookies.")
+            return True
+
+        if not (username and password):
+            self.logger.warning("[auth] No credentials provided.")
+            return False
+
+        for _ in range(attempt):
+            success = self._api_login(username, password)
+            if success and self._check_login_status():
                 self._logged_in = True
                 return True
-            if username and password and not self._api_login(username, password):
-                print(t("session_login_failed", site="esjzone"))
+
             sleep_with_random_delay(
                 self._request_interval,
                 mul_spread=1.1,

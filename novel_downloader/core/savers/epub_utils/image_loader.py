@@ -62,7 +62,7 @@ def add_images_from_list(
                 content=content,
             )
             book.add_item(item)
-            logger.info("Embedded image: %s", img_path.name)
+            logger.debug("Embedded image: %s", img_path.name)
         except Exception:
             logger.exception("Failed to embed image %s", img_path)
 
@@ -108,7 +108,7 @@ def add_images_from_dir(
                 content=content,
             )
             book.add_item(item)
-            logger.info("Embedded image: %s", img_path.name)
+            logger.debug("Embedded image: %s", img_path.name)
         except Exception:
             logger.exception("Failed to embed image %s", img_path)
 
