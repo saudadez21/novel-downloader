@@ -42,10 +42,12 @@ def init_epub(
     """
     book = epub.EpubBook()
     book.set_identifier(str(book_id))
-    book.set_title(book_info.get("book_name", "未找到书名"))
+    book_name = book_info.get("book_name") or book_info.get("volume_name", "未找到书名")
+    book.set_title(book_name)
     book.set_language("zh-CN")
     book.add_author(book_info.get("author", "未找到作者"))
-    book.add_metadata("DC", "description", book_info.get("summary", "未找到作品简介"))
+    desc = book_info.get("summary") or book_info.get("volume_intro", "未找到作品简介")
+    book.add_metadata("DC", "description", desc)
 
     spine = []
 

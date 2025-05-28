@@ -338,3 +338,10 @@ class ChapterStorage:
 
     def __del__(self) -> None:
         self.close()
+
+    def __repr__(self) -> str:
+        return (
+            f"<ChapterStorage ns='{self.namespace}' "
+            f"backend='{self.backend}' "
+            f"path='{self.raw_base}'>"
+        )

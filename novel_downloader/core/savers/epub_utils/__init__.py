@@ -14,7 +14,11 @@ including:
 """
 
 from .css_builder import create_css_items
-from .image_loader import add_images_from_dir, add_images_from_dirs
+from .image_loader import (
+    add_images_from_dir,
+    add_images_from_dirs,
+    add_images_from_list,
+)
 from .initializer import init_epub
 from .text_to_html import (
     chapter_txt_to_html,
@@ -27,6 +31,7 @@ __all__ = [
     "create_css_items",
     "add_images_from_dir",
     "add_images_from_dirs",
+    "add_images_from_list",
     "init_epub",
     "chapter_txt_to_html",
     "create_volume_intro",

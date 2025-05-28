@@ -56,6 +56,7 @@ class BaseBrowser(SyncRequesterProtocol, abc.ABC):
         """
         super().__init__()
         self._config = config
+        self._request_interval = config.request_interval
         self._options = ChromiumOptions()
         self._browser: Chromium | None = None
         self._page: MixTab | None = None

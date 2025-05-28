@@ -21,11 +21,13 @@ from typing import Any, Literal, TypedDict
 
 ModeType = Literal["browser", "session", "async"]
 StorageBackend = Literal["json", "sqlite"]
+SplitMode = Literal["book", "volume"]
 
 
 # === Requesters ===
 @dataclass
 class RequesterConfig:
+    request_interval: float = 2.0
     retry_times: int = 3
     backoff_factor: float = 2.0
     timeout: float = 30.0
@@ -45,7 +47,7 @@ class RequesterConfig:
 # === Downloaders ===
 @dataclass
 class DownloaderConfig:
-    request_interval: float = 5.0
+    request_interval: float = 2.0
     raw_data_dir: str = "./raw_data"
     cache_dir: str = "./novel_cache"
     download_workers: int = 4
@@ -94,6 +96,7 @@ class SaverConfig:
     include_cover: bool = True
     include_toc: bool = False
     include_picture: bool = False
+    split_mode: SplitMode = "book"
 
 
 class RuleStep(TypedDict, total=False):

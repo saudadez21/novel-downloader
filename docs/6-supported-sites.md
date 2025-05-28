@@ -16,6 +16,7 @@
 | [SF轻小说](https://m.sfacg.com)                              | sfacg      | ✅        | ✅        | ✅        |
 | [ESJ Zone](https://www.esjzone.cc)                           | esjzone    | ✅        | ✅        | ✅        |
 | [百合会](https://www.yamibo.com/site/novel)                  | yamibo     | ✅        | ❌        | ✅        |
+| [哔哩轻小说](https://www.linovelib.com/)                     | linovelib   | ✅        | ✅        | ❌        |
 
 使用示例:
 
@@ -38,6 +39,9 @@ novel-cli download --site esjzone 1234567890
 
 # 下载 百合会 小说
 novel-cli download --site yamibo 123456
+
+# 下载 哔哩轻小说
+novel-cli download --site yamibo 1234
 ```
 
 ### Book ID 说明
@@ -69,6 +73,10 @@ novel-cli download --site yamibo 123456
 * 百合会 (yamibo)
 
   `https://www.yamibo.com/novel/262117` -> `262117`
+
+* 哔哩轻小说 (linovelib)
+
+  `https://www.linovelib.com/novel/1234.html` -> `1234`
 
 ### 注意事项
 

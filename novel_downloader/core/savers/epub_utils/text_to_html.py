@@ -103,7 +103,7 @@ def inline_remote_images(
     image_dir: str | Path,
 ) -> str:
     """
-    Download every remote <img src="…"> in `content` into `image_dir`,
+    Download every remote `<img src="...">` in `content` into `image_dir`,
     and replace the original tag with EPUB_IMAGE_WRAPPER
     pointing to the local filename.
 

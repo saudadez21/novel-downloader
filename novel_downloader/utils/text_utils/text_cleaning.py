@@ -37,7 +37,7 @@ def clean_chapter_title(title: str) -> str:
 
 def is_promotional_line(line: str) -> bool:
     """
-    Check if a line of text likely contains promotional or ad‐like content.
+    Check if a line of text likely contains promotional or ad-like content.
 
     :param line: A single line of text.
     :return:     True if it contains promo keywords or a '###k' vote count pattern.

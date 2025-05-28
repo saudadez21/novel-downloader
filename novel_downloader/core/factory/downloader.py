@@ -18,6 +18,8 @@ from novel_downloader.core.downloaders import (
     CommonDownloader,
     EsjzoneAsyncDownloader,
     EsjzoneDownloader,
+    LinovelibAsyncDownloader,
+    LinovelibDownloader,
     QianbiAsyncDownloader,
     QianbiDownloader,
     QidianDownloader,
@@ -48,6 +50,7 @@ SyncDownloaderBuilder = Callable[
 _async_site_map: dict[str, AsyncDownloaderBuilder] = {
     "biquge": BiqugeAsyncDownloader,
     "esjzone": EsjzoneAsyncDownloader,
+    "linovelib": LinovelibAsyncDownloader,
     "qianbi": QianbiAsyncDownloader,
     "sfacg": SfacgAsyncDownloader,
     "yamibo": YamiboAsyncDownloader,
@@ -55,6 +58,7 @@ _async_site_map: dict[str, AsyncDownloaderBuilder] = {
 _sync_site_map: dict[str, SyncDownloaderBuilder] = {
     "biquge": BiqugeDownloader,
     "esjzone": EsjzoneDownloader,
+    "linovelib": LinovelibDownloader,
     "qianbi": QianbiDownloader,
     "qidian": QidianDownloader,
     "sfacg": SfacgDownloader,

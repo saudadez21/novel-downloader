@@ -15,6 +15,7 @@ from novel_downloader.core.savers import (
     BiqugeSaver,
     CommonSaver,
     EsjzoneSaver,
+    LinovelibSaver,
     QianbiSaver,
     QidianSaver,
     SfacgSaver,
@@ -26,6 +27,7 @@ SaverBuilder = Callable[[SaverConfig], SaverProtocol]
 _site_map: dict[str, SaverBuilder] = {
     "biquge": BiqugeSaver,
     "esjzone": EsjzoneSaver,
+    "linovelib": LinovelibSaver,
     "qianbi": QianbiSaver,
     "qidian": QidianSaver,
     "sfacg": SfacgSaver,

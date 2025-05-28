@@ -18,7 +18,7 @@ def apply_font_mapping(text: str, font_map: dict[str, str]) -> str:
 
     :param text:    The input string, possibly containing obfuscated font chars.
     :param font_map: A dict mapping obfuscated chars to real chars.
-    :return:        The de‐obfuscated text.
+    :return:        The de-obfuscated text.
     """
     return "".join(font_map.get(ch, ch) for ch in text)
 

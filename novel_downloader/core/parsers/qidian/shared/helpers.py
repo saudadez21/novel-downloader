@@ -36,7 +36,7 @@ def html_to_soup(html_str: str) -> BeautifulSoup:
 
 def is_vip(html_str: str) -> bool:
     """
-    Return True if page indicates VIP‐only content.
+    Return True if page indicates VIP-only content.
 
     :param html_str: Raw HTML string.
     """

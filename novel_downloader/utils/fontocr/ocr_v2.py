@@ -570,7 +570,7 @@ class FontOCRV2:
         else:
             ocr_fallback = raw_ocr
 
-        # Vec‐embedding scores
+        # Vec-embedding scores
         raw_vec: list[tuple[str, float]] | list[list[tuple[str, float]]] = (
             self.match_text_by_embedding(fallback_imgs, top_k=top_k)
             if (self.use_vec and fallback_imgs)
@@ -624,7 +624,7 @@ class FontOCRV2:
             else:
                 fused_batch.append(next(fallback_iter))
 
-        # Unwrap single‐image case
+        # Unwrap single-image case
         return fused_batch[0] if single else fused_batch
 
     def _chunked(self, seq: list[T], size: int) -> Generator[list[T], None, None]:

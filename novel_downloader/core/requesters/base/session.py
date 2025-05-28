@@ -48,6 +48,7 @@ class BaseSession(SyncRequesterProtocol, abc.ABC):
         """
         super().__init__()
         self._config = config
+        self._request_interval = config.request_interval
         self._cookies = cookies or {}
         self._headers = DEFAULT_USER_HEADERS.copy()
         self._session: Session | None = None

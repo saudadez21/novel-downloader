@@ -7,7 +7,7 @@ Utilities for embedding image files into an EpubBook.
 """
 
 import logging
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 from pathlib import Path
 
 from ebooklib import epub
@@ -25,6 +25,48 @@ _SUPPORTED_IMAGE_MEDIA_TYPES: dict[str, str] = {
     "webp": "image/webp",
 }
 _DEFAULT_IMAGE_MEDIA_TYPE = "image/jpeg"
+
+
+def add_images_from_list(
+    book: epub.EpubBook,
+    image_list: Sequence[str | Path],
+) -> epub.EpubBook:
+    """
+    Add a list of image files to the EPUB's image folder.
+
+    :param book: The EpubBook object to modify.
+    :param image_list: List of paths to image files.
+    :return: The same EpubBook instance, with images added.
+    """
+    for img_path in image_list:
+        img_path = Path(img_path)
+        if not img_path.is_file():
+            continue
+
+        suffix = img_path.suffix.lower().lstrip(".")
+        media_type = _SUPPORTED_IMAGE_MEDIA_TYPES.get(suffix)
+        if media_type is None:
+            media_type = _DEFAULT_IMAGE_MEDIA_TYPE
+            logger.warning(
+                "Unknown image suffix '%s' - defaulting media_type to %s",
+                suffix,
+                media_type,
+            )
+
+        try:
+            content = img_path.read_bytes()
+            item = epub.EpubItem(
+                uid=f"img_{img_path.stem}",
+                file_name=f"{EPUB_IMAGE_FOLDER}/{img_path.name}",
+                media_type=media_type,
+                content=content,
+            )
+            book.add_item(item)
+            logger.info("Embedded image: %s", img_path.name)
+        except Exception:
+            logger.exception("Failed to embed image %s", img_path)
+
+    return book
 
 
 def add_images_from_dir(

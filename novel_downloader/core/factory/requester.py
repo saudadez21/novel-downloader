@@ -21,6 +21,8 @@ from novel_downloader.core.requesters import (
     CommonSession,
     EsjzoneAsyncSession,
     EsjzoneSession,
+    LinovelibAsyncSession,
+    LinovelibSession,
     QianbiAsyncSession,
     QianbiSession,
     QidianBrowser,
@@ -38,6 +40,7 @@ SyncRequesterBuilder = Callable[[RequesterConfig], SyncRequesterProtocol]
 _async_site_map: dict[str, AsyncRequesterBuilder] = {
     "biquge": BiqugeAsyncSession,
     "esjzone": EsjzoneAsyncSession,
+    "linovelib": LinovelibAsyncSession,
     "qianbi": QianbiAsyncSession,
     "sfacg": SfacgAsyncSession,
     "yamibo": YamiboAsyncSession,
@@ -51,6 +54,9 @@ _sync_site_map: dict[
     },
     "esjzone": {
         "session": EsjzoneSession,
+    },
+    "linovelib": {
+        "session": LinovelibSession,
     },
     "qianbi": {
         "session": QianbiSession,
