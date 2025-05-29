@@ -7,7 +7,7 @@ novel_downloader.core.parsers.yamibo.main_parser
 
 from typing import Any
 
-from lxml import etree
+from lxml import html
 
 from novel_downloader.core.parsers.base import BaseParser
 from novel_downloader.utils.chapter_storage import ChapterDict
@@ -61,7 +61,7 @@ class YamiboParser(BaseParser):
         if not html_str:
             return {}
 
-        tree = etree.HTML(html_str[0])
+        tree = html.fromstring(html_str[0])
         result: dict[str, Any] = {}
 
         result["book_name"] = tree.xpath(self._BOOK_NAME_XPATH).strip()
@@ -164,7 +164,7 @@ class YamiboParser(BaseParser):
         """
         if not html_str:
             return None
-        tree = etree.HTML(html_str[0])
+        tree = html.fromstring(html_str[0])
 
         content_lines = tree.xpath(self._CHAPTER_CONTENT_XPATH)
         content = "\n\n".join(line.strip() for line in content_lines if line.strip())

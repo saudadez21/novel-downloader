@@ -8,8 +8,7 @@ novel_downloader.core.parsers.biquge.main_parser
 import re
 from typing import Any
 
-from lxml import etree
-from lxml.etree import _Element
+from lxml import html
 
 from novel_downloader.core.parsers.base import BaseParser
 from novel_downloader.utils.chapter_storage import ChapterDict
@@ -31,10 +30,10 @@ class BiqugeParser(BaseParser):
         """
         if not html_str:
             return {}
-        tree = etree.HTML(html_str[0])
+        tree = html.fromstring(html_str[0])
         result: dict[str, Any] = {}
 
-        def extract_text(elem: _Element | None) -> str:
+        def extract_text(elem: html.HtmlElement | None) -> str:
             if elem is None:
                 return ""
             return "".join(elem.itertext(tag=None)).strip()
@@ -79,7 +78,7 @@ class BiqugeParser(BaseParser):
                 text = "".join(elem.itertext()).strip()
                 in_main_volume = "正文" in text
             elif in_main_volume and elem.tag == "dd":
-                a: list[_Element] = elem.xpath("./a")
+                a: list[html.HtmlElement] = elem.xpath("./a")
                 if a:
                     title = "".join(a[0].itertext(tag=None)).strip()
                     url = a[0].get("href", "").strip()
@@ -109,7 +108,7 @@ class BiqugeParser(BaseParser):
         """
         if not html_str:
             return None
-        tree = etree.HTML(html_str[0], parser=None)
+        tree = html.fromstring(html_str[0], parser=None)
 
         # 提取标题
         title_elem = tree.xpath('//div[@class="bookname"]/h1')

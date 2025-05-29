@@ -7,8 +7,7 @@ novel_downloader.core.parsers.esjzone.main_parser
 
 from typing import Any
 
-from lxml import etree
-from lxml.etree import _Element
+from lxml import html
 
 from novel_downloader.core.parsers.base import BaseParser
 from novel_downloader.utils.chapter_storage import ChapterDict
@@ -54,7 +53,7 @@ class EsjzoneParser(BaseParser):
         """
         if not html_str or self._is_forum_page(html_str):
             return {}
-        tree = etree.HTML(html_str[0])
+        tree = html.fromstring(html_str[0])
         result: dict[str, Any] = {}
 
         result["book_name"] = self._get_text(tree, self._BOOK_NAME_XPATH)
@@ -147,7 +146,7 @@ class EsjzoneParser(BaseParser):
         """
         if not html_str or self._is_forum_page(html_str):
             return None
-        tree = etree.HTML(html_str[0], parser=None)
+        tree = html.fromstring(html_str[0], parser=None)
 
         content_lines: list[str] = []
         content_nodes = tree.xpath(self._CHAPTER_CONTENT_NODES_XPATH)
@@ -198,7 +197,7 @@ class EsjzoneParser(BaseParser):
         if not html_str:
             return False
 
-        tree = etree.HTML(html_str[0])
+        tree = html.fromstring(html_str[0])
         page_title = tree.xpath('string(//div[@class="page-title"]//h1)').strip()
         if page_title != "論壇":
             return False
@@ -208,7 +207,7 @@ class EsjzoneParser(BaseParser):
 
     @staticmethod
     def _get_text(
-        tree: _Element,
+        tree: html.HtmlElement,
         xpath: str,
         join: bool = False,
         clean_comma: bool = False,
