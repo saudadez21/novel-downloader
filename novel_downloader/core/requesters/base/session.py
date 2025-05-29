@@ -84,7 +84,8 @@ class BaseSession(SyncRequesterProtocol, abc.ABC):
         self,
         username: str = "",
         password: str = "",
-        manual_login: bool = False,
+        cookies: dict[str, str] | None = None,
+        attempt: int = 1,
         **kwargs: Any,
     ) -> bool:
         """
@@ -245,6 +246,10 @@ class BaseSession(SyncRequesterProtocol, abc.ABC):
         if self._session:
             return dict(self._session.headers)
         return self._headers.copy()
+
+    @property
+    def requester_type(self) -> str:
+        return "session"
 
     def get_header(self, key: str, default: Any = None) -> Any:
         """

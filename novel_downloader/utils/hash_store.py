@@ -100,7 +100,7 @@ class ImageHashStore:
         """Load store from disk and rebuild BK-Tree index."""
         if not self._path.exists():
             self._hash.clear()
-            logger.info(
+            logger.debug(
                 "[ImageHashStore] No file found at %s, starting empty.", self._path
             )
             return
@@ -118,7 +118,7 @@ class ImageHashStore:
         for lbl, hs in self._hash.items():
             for h in hs:
                 self._hash_to_labels.setdefault(h, []).append(lbl)
-        logger.info(
+        logger.debug(
             "[ImageHashStore] Loaded hash store from %s with %d hashes",
             self._path,
             sum(len(v) for v in self._hash.values()),
@@ -134,7 +134,7 @@ class ImageHashStore:
                 self._bk_root = _BKNode(h)
             else:
                 self._bk_root.add(h, self._hd)
-        logger.info(
+        logger.debug(
             "[ImageHashStore] BK-tree index built with %d unique hashes",
             len(self._hash_to_labels),
         )
@@ -148,7 +148,7 @@ class ImageHashStore:
         else:
             txt = json.dumps(data, ensure_ascii=False, indent=2)
             self._path.write_text(txt, encoding="utf-8")
-        logger.info("[ImageHashStore] Saved hash store to %s", self._path)
+        logger.debug("[ImageHashStore] Saved hash store to %s", self._path)
 
     def _maybe_save(self) -> None:
         if self._auto:

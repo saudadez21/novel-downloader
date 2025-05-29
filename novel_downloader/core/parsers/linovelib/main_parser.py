@@ -10,7 +10,7 @@ from itertools import islice
 from pathlib import PurePosixPath
 from typing import Any
 
-from lxml import etree
+from lxml import html
 
 from novel_downloader.core.parsers.base import BaseParser
 from novel_downloader.utils.chapter_storage import ChapterDict
@@ -55,7 +55,7 @@ class LinovelibParser(BaseParser):
         """
         if not html_str:
             return {}
-        info_tree = etree.HTML(html_str[0])
+        info_tree = html.fromstring(html_str[0])
         result: dict[str, Any] = {}
 
         result["book_name"] = self._safe_xpath(info_tree, self._BOOK_NAME_XPATH)
@@ -74,7 +74,7 @@ class LinovelibParser(BaseParser):
         vol_pages = html_str[1:]
         volumes: list[dict[str, Any]] = []
         for vol_page in vol_pages:
-            vol_tree = etree.HTML(vol_page)
+            vol_tree = html.fromstring(vol_page)
             volume_cover = self._safe_xpath(vol_tree, self._COVER_URL_XPATH)
             volume_name = self._safe_xpath(vol_tree, self._BOOK_NAME_XPATH)
             update_time = self._safe_xpath(
@@ -126,9 +126,9 @@ class LinovelibParser(BaseParser):
             return None
         title_text: str = ""
         contents: list[str] = []
-        for html in html_str:
-            is_encrypted = self._is_encrypted(html)
-            tree = etree.HTML(html)
+        for curr_html in html_str:
+            is_encrypted = self._is_encrypted(curr_html)
+            tree = html.fromstring(curr_html)
 
             if not title_text:
                 titles = tree.xpath(self._CHAPTER_TITLE_XPATH)
@@ -171,7 +171,7 @@ class LinovelibParser(BaseParser):
 
     def _safe_xpath(
         self,
-        tree: etree._Element,
+        tree: html.HtmlElement,
         path: str,
         replace: tuple[str, str] | None = None,
     ) -> str:
@@ -185,7 +185,7 @@ class LinovelibParser(BaseParser):
         return value
 
     @staticmethod
-    def _extract_intro(tree: etree._Element, xpath: str) -> str:
+    def _extract_intro(tree: html.HtmlElement, xpath: str) -> str:
         paragraphs = tree.xpath(xpath.replace("//text()", ""))
         lines = []
         for p in paragraphs:

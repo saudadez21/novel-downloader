@@ -8,7 +8,7 @@ novel_downloader.core.parsers.qianbi.main_parser
 from datetime import datetime
 from typing import Any
 
-from lxml import etree
+from lxml import html
 
 from novel_downloader.core.parsers.base import BaseParser
 from novel_downloader.utils.chapter_storage import ChapterDict
@@ -31,8 +31,8 @@ class QianbiParser(BaseParser):
         if len(html_str) < 2:
             return {}
 
-        info_tree = etree.HTML(html_str[0])
-        catalog_tree = etree.HTML(html_str[1])
+        info_tree = html.fromstring(html_str[0])
+        catalog_tree = html.fromstring(html_str[1])
         result: dict[str, Any] = {}
 
         title = info_tree.xpath('//h1[@class="page-title"]/text()')
@@ -56,9 +56,7 @@ class QianbiParser(BaseParser):
             '//div[@class="novel-info-item novel-info-content"]/span'
         )
         if summary_node and summary_node[0] is not None:
-            result["summary"] = etree.tostring(
-                summary_node[0], encoding="unicode", method="text"
-            ).strip()
+            result["summary"] = summary_node[0].text_content().strip()
         else:
             result["summary"] = ""
 
@@ -85,6 +83,8 @@ class QianbiParser(BaseParser):
                 if a_tag:
                     title = a_tag[0].xpath(".//span/text()")
                     href = a_tag[0].attrib.get("href", "")
+                    if href == "javascript:cid(0)":
+                        href = ""
                     chapter_id = (
                         href.split("/")[-1].replace(".html", "") if href else ""
                     )
@@ -118,7 +118,7 @@ class QianbiParser(BaseParser):
         """
         if not html_str:
             return None
-        tree = etree.HTML(html_str[0])
+        tree = html.fromstring(html_str[0])
 
         paras = tree.xpath('//div[@class="article-content"]/p/text()')
         content_text = "\n\n".join(p.strip() for p in paras if p.strip())
@@ -131,6 +131,11 @@ class QianbiParser(BaseParser):
         volume = tree.xpath('//h3[@class="text-muted"]/text()')
         volume_text = volume[0].strip() if volume else ""
 
+        next_href = tree.xpath('//div[@class="footer"]/a[@class="f-right"]/@href')
+        next_chapter_id = (
+            next_href[0].split("/")[-1].replace(".html", "") if next_href else ""
+        )
+
         return {
             "id": chapter_id,
             "title": title_text,
@@ -138,5 +143,6 @@ class QianbiParser(BaseParser):
             "extra": {
                 "site": "qianbi",
                 "volume": volume_text,
+                "next_chapter_id": next_chapter_id,
             },
         }

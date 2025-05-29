@@ -19,7 +19,7 @@ class SyncDownloaderProtocol(Protocol):
     as well as optional pre-download hooks.
     """
 
-    def download(self, book_ids: list[str]) -> None:
+    def download_many(self, book_ids: list[str]) -> None:
         """
         Batch download entry point.
 
@@ -27,7 +27,7 @@ class SyncDownloaderProtocol(Protocol):
         """
         ...
 
-    def download_one(self, book_id: str) -> None:
+    def download(self, book_id: str) -> None:
         """
         Download logic for a single book.
 

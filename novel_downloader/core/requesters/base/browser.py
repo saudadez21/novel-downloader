@@ -61,6 +61,7 @@ class BaseBrowser(SyncRequesterProtocol, abc.ABC):
         self._browser: Chromium | None = None
         self._page: MixTab | None = None
         self._headless: bool = config.headless
+        self._headless_orig: bool = config.headless
 
         user_data_path = (
             config.user_data_folder
@@ -111,7 +112,8 @@ class BaseBrowser(SyncRequesterProtocol, abc.ABC):
         self,
         username: str = "",
         password: str = "",
-        manual_login: bool = False,
+        cookies: dict[str, str] | None = None,
+        attempt: int = 1,
         **kwargs: Any,
     ) -> bool:
         """
@@ -282,6 +284,21 @@ class BaseBrowser(SyncRequesterProtocol, abc.ABC):
         if self._browser is None:
             raise RuntimeError("Browser is not initialized or has been shut down.")
         return self._browser
+
+    @property
+    def cookies(self) -> dict[str, str]:
+        """
+        Get the current session cookies.
+
+        :return: A dict mapping cookie names to their values.
+        """
+        if self._page is None:
+            return {}
+        return cast(dict[str, str], self._page.cookies().as_dict())
+
+    @property
+    def requester_type(self) -> str:
+        return "browser"
 
     @staticmethod
     def _is_valid(value: str) -> bool:

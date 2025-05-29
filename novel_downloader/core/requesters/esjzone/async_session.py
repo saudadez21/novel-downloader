@@ -10,8 +10,6 @@ from typing import Any
 
 from novel_downloader.config.models import RequesterConfig
 from novel_downloader.core.requesters.base import BaseAsyncSession
-from novel_downloader.utils.i18n import t
-from novel_downloader.utils.state import state_mgr
 from novel_downloader.utils.time_utils import async_sleep_with_random_delay
 
 
@@ -35,40 +33,45 @@ class EsjzoneAsyncSession(BaseAsyncSession):
         super().__init__(config)
         self._logged_in: bool = False
         self._request_interval = config.backoff_factor
-        self._retry_times = config.retry_times
-        self._username = config.username
-        self._password = config.password
 
     async def login(
         self,
         username: str = "",
         password: str = "",
-        manual_login: bool = False,
+        cookies: dict[str, str] | None = None,
+        attempt: int = 1,
         **kwargs: Any,
     ) -> bool:
         """
         Restore cookies persisted by the session-based workflow.
         """
-        cookies: dict[str, str] = state_mgr.get_cookies("esjzone")
-        username = username or self._username
-        password = password or self._password
+        if cookies:
+            self.update_cookies(cookies)
 
-        self.update_cookies(cookies)
-        for _ in range(self._retry_times):
-            if await self._check_login_status():
-                self.logger.debug("[auth] Already logged in.")
+        if await self._check_login_status():
+            self._logged_in = True
+            self.logger.debug("[auth] Logged in via cookies.")
+            return True
+
+        if not (username and password):
+            self.logger.warning("[auth] No credentials provided.")
+            return False
+
+        for _ in range(attempt):
+            if (
+                await self._api_login(username, password)
+                and await self._check_login_status()
+            ):
                 self._logged_in = True
                 return True
-            if username and password and not await self._api_login(username, password):
-                print(t("session_login_failed", site="esjzone"))
             await async_sleep_with_random_delay(
                 self._request_interval,
                 mul_spread=1.1,
                 max_sleep=self._request_interval + 2,
             )
 
-        self._logged_in = await self._check_login_status()
-        return self._logged_in
+        self._logged_in = False
+        return False
 
     async def get_book_info(
         self,
@@ -203,9 +206,3 @@ class EsjzoneAsyncSession(BaseAsyncSession):
     def _extract_token(self, text: str) -> str:
         match = re.search(r"<JinJing>(.+?)</JinJing>", text)
         return match.group(1) if match else ""
-
-    async def _on_close(self) -> None:
-        """
-        Save cookies to the state manager before closing.
-        """
-        state_mgr.set_cookies("esjzone", self.cookies)

@@ -68,7 +68,7 @@ novel-cli download --site yamibo 1234
 
   `https://www.esjzone.cc/detail/1660702902.html` -> `1660702902`
 
-  **注意**: 未登录状态下, 许多小说页面将无法访问, 浏览器会自动重定向到「論壇」页面
+  **注意**: 若用户未登录账号, 部分小说页面可能无法访问。此时, 浏览器将自动重定向至「論壇」页面, 导致内容加载失败。
 
 * 百合会 (yamibo)
 
@@ -77,6 +77,8 @@ novel-cli download --site yamibo 1234
 * 哔哩轻小说 (linovelib)
 
   `https://www.linovelib.com/novel/1234.html` -> `1234`
+
+  **注意**: 若请求间隔过短, 可能触发平台限制机制, 导致账号/设备在一段时间内被封禁或限制访问。
 
 ### 注意事项
 

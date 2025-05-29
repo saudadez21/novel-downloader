@@ -7,7 +7,7 @@ novel_downloader.core.parsers.sfacg.main_parser
 
 from typing import Any
 
-from lxml import etree
+from lxml import html
 
 from novel_downloader.core.parsers.base import BaseParser
 from novel_downloader.utils.chapter_storage import ChapterDict
@@ -52,8 +52,8 @@ class SfacgParser(BaseParser):
         if len(html_str) < 2:
             return {}
 
-        info_tree = etree.HTML(html_str[0])
-        catalog_tree = etree.HTML(html_str[1])
+        info_tree = html.fromstring(html_str[0])
+        catalog_tree = html.fromstring(html_str[1])
 
         result: dict[str, Any] = {}
 
@@ -131,7 +131,7 @@ class SfacgParser(BaseParser):
         ]
         if any(kw in html_str[0] for kw in keywords):
             return None
-        tree = etree.HTML(html_str[0])
+        tree = html.fromstring(html_str[0])
 
         content_lines: list[str] = []
         content_nodes = tree.xpath(self._CHAPTER_CONTENT_NODES_XPATH)

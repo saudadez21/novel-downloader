@@ -73,10 +73,6 @@ class QidianNodeDecryptor:
             try:
                 resource = QD_DECRYPT_SCRIPT_PATH
                 shutil.copyfile(str(resource), str(self.QIDIAN_DECRYPT_SCRIPT_PATH))
-                logger.info(
-                    "[decryptor] Copied decrypt script to %s",
-                    self.QIDIAN_DECRYPT_SCRIPT_PATH,
-                )
             except Exception as e:
                 logger.error("[decryptor] Failed to copy decrypt script: %s", e)
                 raise
@@ -90,9 +86,6 @@ class QidianNodeDecryptor:
                     self.QIDIAN_FOCK_JS_URL,
                     self.script_dir,
                     on_exist="overwrite",
-                )
-                logger.info(
-                    "[decryptor] Downloaded Fock module to %s", self.QIDIAN_FOCK_JS_PATH
                 )
             except Exception as e:
                 logger.error("[decryptor] Failed to download Fock JS module: %s", e)
@@ -133,13 +126,6 @@ class QidianNodeDecryptor:
             input_path.write_text(
                 json.dumps([cipher_str, chapter_str, fkp, fuid]),
                 encoding="utf-8",
-            )
-
-            logger.debug(
-                "[decryptor] Invoking Node.js: node %s %s %s",
-                self.script_path.name,
-                input_path.name,
-                output_path.name,
             )
 
             proc = subprocess.run(

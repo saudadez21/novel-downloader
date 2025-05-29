@@ -11,8 +11,6 @@ from typing import Any
 
 from novel_downloader.config.models import RequesterConfig
 from novel_downloader.core.requesters.base import BaseAsyncSession
-from novel_downloader.utils.i18n import t
-from novel_downloader.utils.state import state_mgr
 
 
 class SfacgAsyncSession(BaseAsyncSession):
@@ -38,37 +36,17 @@ class SfacgAsyncSession(BaseAsyncSession):
         self,
         username: str = "",
         password: str = "",
-        manual_login: bool = False,
+        cookies: dict[str, str] | None = None,
+        attempt: int = 1,
         **kwargs: Any,
     ) -> bool:
         """
         Restore cookies persisted by the session-based workflow.
         """
-        cookies: dict[str, str] = state_mgr.get_cookies("sfacg")
+        if not cookies:
+            return False
 
         self.update_cookies(cookies)
-        for attempt in range(1, self._retry_times + 1):
-            if await self._check_login_status():
-                self.logger.debug("[auth] Already logged in.")
-                self._logged_in = True
-                return True
-
-            if attempt == 1:
-                print(t("session_login_prompt_intro"))
-            cookie_str = input(
-                t(
-                    "session_login_prompt_paste_cookie",
-                    attempt=attempt,
-                    max_retries=self._retry_times,
-                )
-            ).strip()
-
-            cookies = self._parse_cookie_input(cookie_str)
-            if not cookies:
-                print(t("session_login_prompt_invalid_cookie"))
-                continue
-
-            self.update_cookies(cookies)
         self._logged_in = await self._check_login_status()
         return self._logged_in
 
@@ -196,9 +174,3 @@ class SfacgAsyncSession(BaseAsyncSession):
             return {k: v.value for k, v in parsed.items()}
         except Exception:
             return {}
-
-    async def _on_close(self) -> None:
-        """
-        Save cookies to the state manager before closing.
-        """
-        state_mgr.set_cookies("sfacg", self.cookies)

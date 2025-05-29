@@ -14,7 +14,6 @@ from typing import Any
 
 from novel_downloader.config.models import RequesterConfig
 from novel_downloader.core.requesters.base import BaseBrowser
-from novel_downloader.utils.i18n import t
 
 
 class QidianBrowser(BaseBrowser):
@@ -48,16 +47,29 @@ class QidianBrowser(BaseBrowser):
         self,
         username: str = "",
         password: str = "",
-        manual_login: bool = False,
+        cookies: dict[str, str] | None = None,
+        attempt: int = 1,
         **kwargs: Any,
     ) -> bool:
         """
-        Attempt to log in to Qidian
+        Attempt to log in to Qidian via auto interaction.
+
+        :param attempt: Number of login attempts.
+        :param retry_interval: Seconds to wait between retries.
+        :return: True if login succeeded, False otherwise.
         """
-        if manual_login:
-            return self._login_manual()
-        else:
-            return self._login_auto()
+        for i in range(attempt):
+            if self._login_auto():
+                self._logged_in = True
+                return True
+
+            self.logger.debug("[auth] Login attempt %d failed, retrying...", i + 1)
+            if i < attempt - 1:
+                time.sleep(self._retry_interval)
+
+        self._logged_in = False
+        self.logger.warning("[auth] Login failed after %d attempts.", attempt)
+        return False
 
     def get_book_info(
         self,
@@ -168,11 +180,43 @@ class QidianBrowser(BaseBrowser):
         """
         return cls.BOOKCASE_URL
 
+    def set_interactive_mode(self, enable: bool) -> bool:
+        """
+        Enable or disable interactive browser mode for manual login.
+
+        When enabled, restarts browser in headful mode with images.
+        When disabled, restores browser to original state and checks login.
+
+        :param enable: True to enable, False to disable interactive mode.
+        :return: True if operation or login check succeeded, False otherwise.
+        """
+        if enable:
+            if self._disable_images_orig:
+                self._options.no_imgs(False)
+            if self._headless_orig or self._disable_images_orig:
+                self.restart_browser(headless=False)
+            self.page.get("https://www.qidian.com/")
+            return True
+
+        # restore
+        if self._disable_images_orig or self._headless_orig:
+            self._options.no_imgs(self._disable_images_orig)
+            self.restart_browser(headless=self._headless_orig)
+
+            success = self._check_login_status()
+            self._logged_in = success
+
+            if success:
+                self._logged_in = self._login_auto()
+
+        return self._logged_in
+
     def _login_auto(self, timeout: float = 5.0) -> bool:
         """
-        Attempt to log in to Qidian by handling overlays and clicking the login button.
+        Attempt one automatic login interaction (click once and check).
 
-        :return: True if login succeeds or is already in place; False otherwise.
+        :param timeout: Seconds to wait for login box to appear.
+        :return: True if login successful or already logged in; False otherwise.
         """
         try:
             self.page.get("https://www.qidian.com/")
@@ -181,95 +225,14 @@ class QidianBrowser(BaseBrowser):
             self.logger.warning("[auth] Failed to load login box: %s", e)
             return False
 
-        for attempt in range(1, self._retry_times + 1):
-            if self._check_login_status():
-                self.logger.debug("[auth] Already logged in.")
-                break
-            self.logger.debug("[auth] Attempting login click (#%s).", attempt)
-            if self.click_button("@id=login-btn", timeout=timeout):
-                self.logger.debug("[auth] Login button clicked.")
-            else:
-                self.logger.debug("[auth] Login button not found.")
-            time.sleep(self._retry_interval)
+        if self._check_login_status():
+            self.logger.debug("[auth] Already logged in.")
+            return True
 
-        self._logged_in = self._check_login_status()
-        if self._logged_in:
-            self.logger.info("[auth] Login successful.")
-        else:
-            self.logger.warning("[auth] Login failed after max retries.")
+        self.logger.debug("[auth] Clicking login button once.")
+        self.click_button("@id=login-btn", timeout=timeout)
 
-        return self._logged_in
-
-    def _login_manual(self) -> bool:
-        """
-        Guide the user through an interactive manual login flow.
-
-        Steps:
-            1. If the browser is headless, shut it down and restart in headful mode.
-            2. Navigate to the Qidian homepage.
-            3. Prompt the user to complete login, retrying up to `max_retries` times.
-            4. Once logged in, restore original headless mode if needed.
-
-        :param max_retries: Number of times to check for login success.
-        :return: True if login was detected, False otherwise.
-        """
-        original_headless = self._headless
-
-        # 1. Switch to headful mode if needed
-        if self._disable_images_orig:
-            self.logger.debug("[auth] Temporarily enabling images for manual login.")
-            self._options.no_imgs(False)
-            self.restart_browser(headless=False)
-        elif original_headless:
-            self.restart_browser(headless=False)
-
-        # 2. Navigate to home page
-        try:
-            self.page.get("https://www.qidian.com/")
-        except Exception as e:
-            self.logger.warning(
-                "[auth] Failed to load homepage for manual login: %s", e
-            )
-            return False
-
-        # 3. Retry loop
-        for attempt in range(1, self._retry_times + 1):
-            if self._check_login_status():
-                self.logger.debug("[auth] Already logged in.")
-                self._logged_in = True
-                break
-            if attempt == 1:
-                print(t("login_prompt_intro"))
-            input(
-                t(
-                    "login_prompt_press_enter",
-                    attempt=attempt,
-                    max_retries=self._retry_times,
-                )
-            )
-        else:
-            self.logger.warning(
-                "[auth] Manual login failed after %d attempts.", self._retry_times
-            )
-            self._logged_in = False
-            return self._logged_in
-
-        # 4. Restore headless if changed, then re-establish session
-        if original_headless or self._disable_images_orig:
-            self.logger.debug("[auth] Restoring browser settings after manual login...")
-            self._options.no_imgs(self._disable_images_orig)
-            self.restart_browser(headless=original_headless)
-            self._logged_in = self._login_auto()
-            if self._logged_in:
-                self.logger.info(
-                    "[auth] Login session successfully carried over after restart."
-                )
-            else:
-                self.logger.warning(
-                    "[auth] Lost login session after restoring headless mode."
-                )
-
-        return self._logged_in
+        return self._check_login_status()
 
     def _check_login_status(self) -> bool:
         """

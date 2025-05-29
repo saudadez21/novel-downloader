@@ -28,7 +28,7 @@ def test_bknode_add_and_query_simple():
 def test_load_empty_store(tmp_path, caplog):
     """Loading when no file exists should start empty with info log."""
     store_path = tmp_path / "empty.json"
-    caplog.set_level(logging.INFO)
+    caplog.set_level(logging.DEBUG)
     store = ImageHashStore(
         path=store_path,
         auto_save=False,

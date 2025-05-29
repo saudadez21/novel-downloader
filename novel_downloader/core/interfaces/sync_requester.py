@@ -26,7 +26,8 @@ class SyncRequesterProtocol(Protocol):
         self,
         username: str = "",
         password: str = "",
-        manual_login: bool = False,
+        cookies: dict[str, str] | None = None,
+        attempt: int = 1,
         **kwargs: Any,
     ) -> bool:
         """
@@ -78,5 +79,18 @@ class SyncRequesterProtocol(Protocol):
     def close(self) -> None:
         """
         Shutdown and cleans up resources.
+        """
+        ...
+
+    @property
+    def requester_type(self) -> str:
+        ...
+
+    @property
+    def cookies(self) -> dict[str, str]:
+        """
+        Get the current session cookies.
+
+        :return: A dict mapping cookie names to their values.
         """
         ...

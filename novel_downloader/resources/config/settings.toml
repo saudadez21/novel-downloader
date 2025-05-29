@@ -4,7 +4,7 @@ retry_times = 3                    # 请求失败重试次数
 backoff_factor = 2.0
 timeout = 30.0                     # 页面加载超时时间 (秒)
 max_connections = 10               # 并发连接的最大数 (async)
-# max_rps =                        # 最大请求速率 (requests per second), 为空则不限制
+# max_rps =                        # 最大请求速率 (requests per second), 如不设置则请注释掉本行
 
 # DrissionPage 专用设置
 headless = false                   # 是否以无头模式启动浏览器
@@ -105,7 +105,7 @@ book_ids = [
   "0000000000",
   "0000000000"
 ]
-mode = "session"                   # async / session
+mode = "session"
 split_mode = "book"                # 导出方式: book / volume
 login_required = false
 

@@ -41,8 +41,6 @@ EXPECTED_FIELDS = {
         "mode": ModeType,
         "max_connections": int,
         "max_rps": float | None,
-        "username": str,
-        "password": str,
     },
     DownloaderConfig: {
         "request_interval": float,
@@ -57,6 +55,8 @@ EXPECTED_FIELDS = {
         "mode": ModeType,
         "storage_backend": StorageBackend,
         "storage_batch_size": int,
+        "username": str,
+        "password": str,
     },
     ParserConfig: {
         "cache_dir": str,
