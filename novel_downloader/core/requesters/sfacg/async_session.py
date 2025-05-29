@@ -11,7 +11,6 @@ from typing import Any
 
 from novel_downloader.config.models import RequesterConfig
 from novel_downloader.core.requesters.base import BaseAsyncSession
-from novel_downloader.utils.state import state_mgr
 
 
 class SfacgAsyncSession(BaseAsyncSession):
@@ -175,9 +174,3 @@ class SfacgAsyncSession(BaseAsyncSession):
             return {k: v.value for k, v in parsed.items()}
         except Exception:
             return {}
-
-    async def _on_close(self) -> None:
-        """
-        Save cookies to the state manager before closing.
-        """
-        state_mgr.set_cookies("sfacg", self.cookies)

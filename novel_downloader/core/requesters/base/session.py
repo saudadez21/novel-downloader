@@ -247,6 +247,10 @@ class BaseSession(SyncRequesterProtocol, abc.ABC):
             return dict(self._session.headers)
         return self._headers.copy()
 
+    @property
+    def requester_type(self) -> str:
+        return "session"
+
     def get_header(self, key: str, default: Any = None) -> Any:
         """
         Retrieve a specific header value by name.

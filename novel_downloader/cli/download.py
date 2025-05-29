@@ -101,7 +101,7 @@ def download_cli(ctx: Context, book_ids: list[str], site: str) -> None:
 
             for book_id in valid_book_ids:
                 click.echo(t("download_downloading", book_id=book_id, site=site))
-                await async_downloader.download_one(book_id)
+                await async_downloader.download(book_id)
 
             await async_requester.close()
 
@@ -121,7 +121,7 @@ def download_cli(ctx: Context, book_ids: list[str], site: str) -> None:
 
         for book_id in valid_book_ids:
             click.echo(t("download_downloading", book_id=book_id, site=site))
-            sync_downloader.download_one(book_id)
+            sync_downloader.download(book_id)
 
         sync_requester.close()
 

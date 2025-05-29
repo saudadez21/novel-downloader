@@ -10,13 +10,7 @@ import json
 import logging
 from typing import Any
 
-from novel_downloader.config import DownloaderConfig
 from novel_downloader.core.downloaders.base import BaseDownloader
-from novel_downloader.core.interfaces import (
-    ParserProtocol,
-    SaverProtocol,
-    SyncRequesterProtocol,
-)
 from novel_downloader.utils.chapter_storage import ChapterStorage
 from novel_downloader.utils.file_utils import save_as_json, save_as_txt
 from novel_downloader.utils.time_utils import (
@@ -32,45 +26,12 @@ class CommonDownloader(BaseDownloader):
     Specialized downloader for common novels.
     """
 
-    def __init__(
-        self,
-        requester: SyncRequesterProtocol,
-        parser: ParserProtocol,
-        saver: SaverProtocol,
-        config: DownloaderConfig,
-        site: str,
-    ):
-        """
-        Initialize the common novel downloader with site information.
-
-        :param requester: Object implementing RequesterProtocol, used to fetch raw data.
-        :param parser: Object implementing ParserProtocol, used to parse page content.
-        :param saver: Object implementing SaverProtocol, used to save final output.
-        :param config: Downloader configuration object.
-        :param site: Identifier for the site the downloader is targeting.
-        """
-        super().__init__(requester, parser, saver, config, site)
-        self._site = site
-        self._is_logged_in = False
-
-    def prepare(self) -> None:
-        """
-        Perform login
-        """
-        if self.login_required and not self._is_logged_in:
-            success = self.requester.login()
-            if not success:
-                raise RuntimeError("Login failed")
-            self._is_logged_in = True
-
-    def download_one(self, book_id: str) -> None:
+    def _download_one(self, book_id: str) -> None:
         """
         The full download logic for a single book.
 
         :param book_id: The identifier of the book to download.
         """
-        self.prepare()
-
         TAG = "[Downloader]"
         save_html = self.config.save_html
         skip_existing = self.config.skip_existing
@@ -119,15 +80,26 @@ class CommonDownloader(BaseDownloader):
             sleep_with_random_delay(wait_time, mul_spread=1.1, max_sleep=wait_time + 2)
 
         # enqueue chapters
+        last_cid = None
         for vol in book_info.get("volumes", []):
             vol_name = vol.get("volume_name", "")
             logger.info("%s Enqueuing volume: %s", TAG, vol_name)
 
             for chap in vol.get("chapters", []):
                 cid = chap.get("chapterId")
+                if not cid and last_cid:
+                    last_json = normal_cs.get(last_cid)
+                    cid = (
+                        last_json.get("extra", {}).get("next_chapter_id")
+                        if last_json
+                        else None
+                    )
+
                 if not cid:
                     logger.warning("%s Skipping chapter without chapterId", TAG)
                     continue
+                last_cid = cid
+                chap["chapterId"] = cid
 
                 if normal_cs.exists(cid) and skip_existing:
                     logger.debug(
@@ -173,6 +145,7 @@ class CommonDownloader(BaseDownloader):
                 normal_cs.save(chap_json)
                 logger.info("%s Saved chapter: %s (%s)", TAG, chap_title, cid)
 
+        save_as_json(book_info, info_path)
         normal_cs.close()
         self.saver.save(book_id)
 

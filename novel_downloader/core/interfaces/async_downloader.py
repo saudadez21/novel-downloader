@@ -19,7 +19,7 @@ class AsyncDownloaderProtocol(Protocol):
     as well as optional pre-download hooks.
     """
 
-    async def download(self, book_ids: list[str]) -> None:
+    async def download_many(self, book_ids: list[str]) -> None:
         """
         Batch download entry point.
 
@@ -27,7 +27,7 @@ class AsyncDownloaderProtocol(Protocol):
         """
         ...
 
-    async def download_one(self, book_id: str) -> None:
+    async def download(self, book_id: str) -> None:
         """
         Download logic for a single book.
 

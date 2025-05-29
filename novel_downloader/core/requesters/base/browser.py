@@ -285,6 +285,21 @@ class BaseBrowser(SyncRequesterProtocol, abc.ABC):
             raise RuntimeError("Browser is not initialized or has been shut down.")
         return self._browser
 
+    @property
+    def cookies(self) -> dict[str, str]:
+        """
+        Get the current session cookies.
+
+        :return: A dict mapping cookie names to their values.
+        """
+        if self._page is None:
+            return {}
+        return cast(dict[str, str], self._page.cookies().as_dict())
+
+    @property
+    def requester_type(self) -> str:
+        return "browser"
+
     @staticmethod
     def _is_valid(value: str) -> bool:
         return bool(value and value.strip())

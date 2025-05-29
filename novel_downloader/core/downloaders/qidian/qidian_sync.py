@@ -18,7 +18,9 @@ from novel_downloader.core.interfaces import (
     SyncRequesterProtocol,
 )
 from novel_downloader.utils.chapter_storage import ChapterStorage
+from novel_downloader.utils.cookies import resolve_cookies
 from novel_downloader.utils.file_utils import save_as_json, save_as_txt
+from novel_downloader.utils.i18n import t
 from novel_downloader.utils.state import state_mgr
 from novel_downloader.utils.time_utils import (
     calculate_time_difference,
@@ -40,24 +42,12 @@ class QidianDownloader(BaseDownloader):
     ):
         super().__init__(requester, parser, saver, config, "qidian")
 
-        self._site_key = "qidian"
-        self._is_logged_in = self._handle_login()
-        state_mgr.set_manual_login_flag(self._site_key, not self._is_logged_in)
-
-    def download_one(self, book_id: str) -> None:
+    def _download_one(self, book_id: str) -> None:
         """
         The full download logic for a single book.
 
         :param book_id: The identifier of the book to download.
         """
-        if not self._is_logged_in:
-            self.logger.warning(
-                "[%s] login failed, skipping download of %s",
-                self._site_key,
-                book_id,
-            )
-            return
-
         TAG = "[Downloader]"
         save_html = self.config.save_html
         skip_existing = self.config.skip_existing
@@ -190,23 +180,97 @@ class QidianDownloader(BaseDownloader):
         )
         return
 
-    def _handle_login(self) -> bool:
+    def _session_login(self) -> bool:
         """
-        Perform login with automatic fallback to manual:
+        Restore cookies persisted by the session-based workflow.
+        """
+        self._is_logged_in = False
+        cookies: dict[str, str] = state_mgr.get_cookies(self._site)
+
+        try:
+            if self._requester.login(cookies=cookies):
+                self._is_logged_in = True
+                return True
+        except Exception as e:
+            self.logger.warning("Cookie login failed for site %s: %s", self._site, e)
+
+        MAX_RETRIES = 3
+        print(t("session_login_prompt_intro"))
+        for attempt in range(1, MAX_RETRIES + 1):
+            cookie_str = input(
+                t(
+                    "session_login_prompt_paste_cookie",
+                    attempt=attempt,
+                    max_retries=MAX_RETRIES,
+                )
+            ).strip()
+            try:
+                cookies = resolve_cookies(cookie_str)
+                if self._requester.login(cookies=cookies):
+                    return True
+            except (ValueError, TypeError):
+                print(t("session_login_prompt_invalid_cookie"))
+        return False
+
+    def _browser_login(self) -> bool:
+        """
+        Restore cookies persisted by the browser-based workflow:
 
         1. If manual_flag is False, try automatic login:
            - On success, return True immediately.
         2. Always attempt manual login if manual_flag is True.
         3. Return True if manual login succeeds, False otherwise.
         """
-        manual_flag = state_mgr.get_manual_login_flag(self._site_key)
+        MAX_RETRIES = 3
+        wait_time = self.config.request_interval
+        self._is_logged_in = False
+        manual_flag = state_mgr.get_manual_login_flag(self._site)
 
-        # First try automatic login
-        if not manual_flag and self._requester.login(manual_login=False):
-            return True
+        # Step 1: Attempt automatic login
+        if not manual_flag:
+            for _ in range(MAX_RETRIES):
+                if self._requester.login():
+                    self._is_logged_in = True
+                    return True  # Auto-login success
 
-        # try manual login
-        return self._requester.login(manual_login=True)
+                sleep_with_random_delay(
+                    wait_time,
+                    mul_spread=1.1,
+                    max_sleep=wait_time + 2,
+                )
+
+        # Step 2: Manual login fallback
+        print(t("login_prompt_intro"))
+        self._requester.set_interactive_mode(enable=True)  # type: ignore[attr-defined]
+
+        for attempt in range(1, MAX_RETRIES + 1):
+            input(
+                t(
+                    "login_prompt_press_enter",
+                    attempt=attempt,
+                    max_retries=MAX_RETRIES,
+                )
+            )
+            if self._requester.login():
+                self._is_logged_in = True
+                break
+        else:
+            self.logger.warning(
+                "[auth] Manual login failed after %d attempts.", MAX_RETRIES
+            )
+
+        self._requester.set_interactive_mode(enable=False)  # type: ignore[attr-defined]
+        state_mgr.set_manual_login_flag(self._site, not self._is_logged_in)
+
+        return self._is_logged_in
+
+    def _finalize(self) -> None:
+        """
+        Save cookies to the state manager before closing.
+        """
+        if self._requester.requester_type == "session" and self._login_required:
+            state_mgr.set_cookies(self._site, self._requester.cookies)
+        return
 
 
 def is_vip(html_str: str) -> bool:

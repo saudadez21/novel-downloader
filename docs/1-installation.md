@@ -102,17 +102,17 @@ paddlepaddle==3.0.0
 
 该模式使用 `asyncio + aiohttp` 进行并发网页抓取, 适合抓取大量章节时提高效率
 
-#### 自定义限速
+#### 自定义请求限速策略
 
-在 `settings.toml` 中, 可以通过以下两个字段精细控制请求速率
+可在 `settings.toml` 配置文件中, 通过以下字段灵活控制请求速率, 以平衡性能与目标站点的可承受负载
 
 ```toml
-request_interval = 0     # 默认为请求之间的最小间隔 (秒), 设置为 0 表示不强制等待
-max_rps = 10             # 最大请求速率 (requests per second), 为 空 则不限制
+request_interval = 0.0   # 默认为请求之间的最小间隔 (秒), 设置为 0 表示不强制等待
+max_rps = 4              # 最大请求速率 (requests per second), 如不设置则请注释掉本行
 ```
 
-* **`request_interval`**: 每次请求后的等待时间 (秒), 将其设为 `0` 可以让抓取更连续。
-* **`max_rps`**: 每秒最多发起的请求数; 如果设置为具体数字 (如 `10`), 则最多每秒发送 10 个请求, 留空或 `null` 则不做限速。
+* **`request_interval`**: 控制每次请求之间的最小等待时间 (秒), 设置为 `0` 可实现更高的并发性和连续性, 适用于对请求频率容忍度较高的站点。
+* **`max_rps`**: 限制全局请求速率, 单位为每秒请求数(requests per second)。例如: 设为 4 则最多每秒发送 4 个请求; 若不希望启用此限制, 请注释掉该字段 (以 `#` 开头) 或将其移除。
 
 #### 示例配置
 
@@ -123,7 +123,7 @@ retry_times = 3                    # 请求失败重试次数
 backoff_factor = 2.0
 timeout = 30.0                     # 页面加载超时时间 (秒)
 max_connections = 10               # 并发连接的最大数 (async)
-max_rps = 10                       # 最大请求速率 (requests per second)
+max_rps = 4                        # 最大请求速率 (requests per second)
 
 # 全局通用设置
 [general]
@@ -144,4 +144,8 @@ mode = "async"                     # async / session
 login_required = false             # 是否需要登录才能访问
 ```
 
-上述配置下, Downloader 在异步模式下不会在请求间强制等待, 但会保证整体速率不超过 10 rps。
+上述配置下, Downloader 采用异步模式, 每次请求之间不强制等待 (`request_interval = 0.0`), 但将整体请求速率控制在每秒最多 4 次 (`max_rps = 4`)。
+
+> 注意: 部分站点在面对高频的访问频率时 (例如每秒 10 次), 可能因负载压力而返回 `503 Service Temporarily Unavailable` 错误。
+>
+> 建议根据具体站点的响应情况, 适当调低请求速率参数, 或稍后重新运行程序继续执行 (工具支持断点续爬, 已完成的数据不会被重复抓取)。

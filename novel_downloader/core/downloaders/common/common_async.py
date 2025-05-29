@@ -11,12 +11,9 @@ import logging
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from typing import Any
 
-from novel_downloader.config import DownloaderConfig
 from novel_downloader.core.downloaders.base import BaseAsyncDownloader
 from novel_downloader.core.interfaces import (
     AsyncRequesterProtocol,
-    ParserProtocol,
-    SaverProtocol,
 )
 from novel_downloader.utils.chapter_storage import ChapterDict, ChapterStorage
 from novel_downloader.utils.file_utils import save_as_json, save_as_txt
@@ -30,36 +27,13 @@ class CommonAsyncDownloader(BaseAsyncDownloader):
     Specialized Async downloader for common novels.
     """
 
-    def __init__(
-        self,
-        requester: AsyncRequesterProtocol,
-        parser: ParserProtocol,
-        saver: SaverProtocol,
-        config: DownloaderConfig,
-        site: str,
-    ):
-        """ """
-        super().__init__(requester, parser, saver, config, site)
-        self._is_logged_in = False
-
-    async def prepare(self) -> None:
-        """
-        Perform login
-        """
-        if self.login_required and not self._is_logged_in:
-            success = await self.requester.login()
-            if not success:
-                raise RuntimeError("Login failed")
-            self._is_logged_in = True
-
-    async def download_one(self, book_id: str) -> None:
+    async def _download_one(self, book_id: str) -> None:
         """
         The full download logic for a single book.
 
         :param book_id: The identifier of the book to download.
         """
         assert isinstance(self.requester, AsyncRequesterProtocol)
-        await self.prepare()
 
         TAG = "[AsyncDownloader]"
         wait_time = self.config.request_interval
@@ -175,13 +149,47 @@ class CommonAsyncDownloader(BaseAsyncDownloader):
 
         # enqueue + run downloads
         download_tasks = []
+        missing_chapters = []
         for vol in book_info.get("volumes", []):
-            for chap in vol.get("chapters", []):
-                download_tasks.append(asyncio.create_task(download_worker(chap)))
+            chapters = vol.get("chapters", [])
+            for idx, chap in enumerate(chapters):
+                cid = chap.get("chapterId")
+                if cid:
+                    task = asyncio.create_task(download_worker(chap))
+                    download_tasks.append(task)
+                else:
+                    missing_chapters.append((chap, vol, idx))
 
         await asyncio.gather(*download_tasks)
         await queue.join()  # wait until all parsed
         await save_queue.join()
+
+        recovery_tasks = []
+
+        for chap, vol, idx in missing_chapters:
+            prev_chap = vol.get("chapters", [])[idx - 1] if idx > 0 else None
+            prev_id = prev_chap.get("chapterId") if prev_chap else None
+
+            if not prev_id:
+                continue
+
+            prev_json = normal_cs.get(str(prev_id))
+            next_cid = (
+                prev_json.get("extra", {}).get("next_chapter_id") if prev_json else None
+            )
+            if next_cid:
+                chap["chapterId"] = next_cid
+                task = asyncio.create_task(download_worker(chap))
+                recovery_tasks.append(task)
+                logger.info("Recovered missing chapterId from previous: %s", next_cid)
+            else:
+                logger.warning("Could not recover missing chapterId at index %s", idx)
+
+        await asyncio.gather(*recovery_tasks)
+        await queue.join()
+        await save_queue.join()
+        save_as_json(book_info, info_path)
+
         for p in parsers:
             p.cancel()  # stop parser loops
         chapter_saver.cancel()

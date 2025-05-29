@@ -195,6 +195,7 @@ class QidianBrowser(BaseBrowser):
                 self._options.no_imgs(False)
             if self._headless_orig or self._disable_images_orig:
                 self.restart_browser(headless=False)
+            self.page.get("https://www.qidian.com/")
             return True
 
         # restore

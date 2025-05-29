@@ -9,7 +9,6 @@ from typing import Any
 
 from novel_downloader.config.models import RequesterConfig
 from novel_downloader.core.requesters.base import BaseSession
-from novel_downloader.utils.state import state_mgr
 
 
 class SfacgSession(BaseSession):
@@ -212,9 +211,3 @@ class SfacgSession(BaseSession):
             return {k: v.value for k, v in parsed.items()}
         except Exception:
             return {}
-
-    def _on_close(self) -> None:
-        """
-        Save cookies to the state manager before closing.
-        """
-        state_mgr.set_cookies("sfacg", self.cookies)

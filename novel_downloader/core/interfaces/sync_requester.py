@@ -81,3 +81,16 @@ class SyncRequesterProtocol(Protocol):
         Shutdown and cleans up resources.
         """
         ...
+
+    @property
+    def requester_type(self) -> str:
+        ...
+
+    @property
+    def cookies(self) -> dict[str, str]:
+        """
+        Get the current session cookies.
+
+        :return: A dict mapping cookie names to their values.
+        """
+        ...

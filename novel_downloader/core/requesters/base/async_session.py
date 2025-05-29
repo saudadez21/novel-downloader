@@ -23,6 +23,7 @@ from aiohttp import ClientResponse, ClientSession, ClientTimeout, TCPConnector
 from novel_downloader.config.models import RequesterConfig
 from novel_downloader.core.interfaces import AsyncRequesterProtocol
 from novel_downloader.utils.constants import DEFAULT_USER_HEADERS
+from novel_downloader.utils.time_utils import async_sleep_with_random_delay
 
 
 class RateLimiter:
@@ -195,7 +196,11 @@ class BaseAsyncSession(AsyncRequesterProtocol, abc.ABC):
                     return text
             except aiohttp.ClientError:
                 if attempt < self._retry_times:
-                    await asyncio.sleep(self._retry_interval)
+                    await async_sleep_with_random_delay(
+                        self._retry_interval,
+                        mul_spread=1.1,
+                        max_sleep=self._retry_interval + 2,
+                    )
                     continue
                 raise
 
@@ -270,6 +275,10 @@ class BaseAsyncSession(AsyncRequesterProtocol, abc.ABC):
         if self._session:
             return dict(self._session.headers)
         return self._headers.copy()
+
+    @property
+    def requester_type(self) -> str:
+        return "async"
 
     def get_header(self, key: str, default: Any = None) -> Any:
         """

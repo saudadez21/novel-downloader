@@ -9,7 +9,6 @@ from typing import Any
 
 from novel_downloader.config.models import RequesterConfig
 from novel_downloader.core.requesters.base import BaseSession
-from novel_downloader.utils.state import state_mgr
 from novel_downloader.utils.time_utils import sleep_with_random_delay
 
 
@@ -230,9 +229,3 @@ class EsjzoneSession(BaseSession):
     def _extract_token(self, text: str) -> str:
         match = re.search(r"<JinJing>(.+?)</JinJing>", text)
         return match.group(1) if match else ""
-
-    def _on_close(self) -> None:
-        """
-        Save cookies to the state manager before closing.
-        """
-        state_mgr.set_cookies("esjzone", self.cookies)

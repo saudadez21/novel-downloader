@@ -140,6 +140,7 @@ class QidianSession(BaseSession):
         try:
             resp = self.get(url, **kwargs)
             resp.raise_for_status()
+            resp.encoding = "UTF-8"
             return [resp.text]
         except Exception as exc:
             self.logger.warning(
@@ -225,6 +226,7 @@ class QidianSession(BaseSession):
         keywords = [
             'var buid = "fffffffffffffffffff"',
             "C2WF946J0/probe.js",
+            "login-area-wrap",
         ]
         resp_text = self.get_bookcase()
         if not resp_text:

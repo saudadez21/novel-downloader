@@ -7,11 +7,10 @@ novel_downloader.core.requesters.yamibo.async_session
 
 from typing import Any
 
-from lxml import etree
+from lxml import html
 
 from novel_downloader.config.models import RequesterConfig
 from novel_downloader.core.requesters.base import BaseAsyncSession
-from novel_downloader.utils.state import state_mgr
 from novel_downloader.utils.time_utils import async_sleep_with_random_delay
 
 
@@ -162,7 +161,7 @@ class YamiboAsyncSession(BaseAsyncSession):
             resp_1 = await self.get(self.LOGIN_URL)
             resp_1.raise_for_status()
             text_1 = await resp_1.text()
-            tree = etree.HTML(text_1)
+            tree = html.fromstring(text_1)
             csrf_value = tree.xpath('//input[@name="_csrf-frontend"]/@value')
             csrf_value = csrf_value[0] if csrf_value else ""
             if not csrf_value:
@@ -207,9 +206,3 @@ class YamiboAsyncSession(BaseAsyncSession):
         if not resp_text:
             return False
         return not any(kw in resp_text[0] for kw in keywords)
-
-    async def _on_close(self) -> None:
-        """
-        Save cookies to the state manager before closing.
-        """
-        state_mgr.set_cookies("yamibo", self.cookies)
