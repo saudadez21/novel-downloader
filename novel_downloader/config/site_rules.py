@@ -14,11 +14,10 @@ import json
 import logging
 from pathlib import Path
 
+from novel_downloader.models import SiteRulesDict
 from novel_downloader.utils.cache import cached_load_config
 from novel_downloader.utils.constants import SITE_RULES_FILE
 from novel_downloader.utils.file_utils import save_as_json
-
-from .models import SiteRulesDict
 
 logger = logging.getLogger(__name__)
 

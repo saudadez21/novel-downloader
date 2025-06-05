@@ -10,7 +10,7 @@ from typing import Any
 from lxml import html
 
 from novel_downloader.core.parsers.base import BaseParser
-from novel_downloader.utils.chapter_storage import ChapterDict
+from novel_downloader.models import ChapterDict
 
 
 class YamiboParser(BaseParser):
@@ -49,19 +49,19 @@ class YamiboParser(BaseParser):
 
     def parse_book_info(
         self,
-        html_str: list[str],
+        html_list: list[str],
         **kwargs: Any,
     ) -> dict[str, Any]:
         """
         Parse a book info page and extract metadata and chapter structure.
 
-        :param html: Raw HTML of the book info page.
+        :param html_list: Raw HTML of the book info page.
         :return: Parsed metadata and chapter structure as a dictionary.
         """
-        if not html_str:
+        if not html_list:
             return {}
 
-        tree = html.fromstring(html_str[0])
+        tree = html.fromstring(html_list[0])
         result: dict[str, Any] = {}
 
         result["book_name"] = tree.xpath(self._BOOK_NAME_XPATH).strip()
@@ -151,20 +151,20 @@ class YamiboParser(BaseParser):
 
     def parse_chapter(
         self,
-        html_str: list[str],
+        html_list: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
         """
         Parse a single chapter page and extract clean text or simplified HTML.
 
-        :param html: Raw HTML of the chapter page.
+        :param html_list: Raw HTML of the chapter page.
         :param chapter_id: Identifier of the chapter being parsed.
         :return: Cleaned chapter content as plain text or minimal HTML.
         """
-        if not html_str:
+        if not html_list:
             return None
-        tree = html.fromstring(html_str[0])
+        tree = html.fromstring(html_list[0])
 
         content_lines = tree.xpath(self._CHAPTER_CONTENT_XPATH)
         content = "\n\n".join(line.strip() for line in content_lines if line.strip())

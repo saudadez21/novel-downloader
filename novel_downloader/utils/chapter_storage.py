@@ -12,7 +12,13 @@ import json
 import sqlite3
 import types
 from pathlib import Path
-from typing import Any, Literal, Self, TypedDict, cast
+from typing import Any, Self, cast
+
+from novel_downloader.models import (
+    ChapterDict,
+    SaveMode,
+    StorageBackend,
+)
 
 from .file_utils import save_as_json
 
@@ -24,27 +30,6 @@ CREATE TABLE IF NOT EXISTS "{table}" (
     extra TEXT NOT NULL
 )
 """
-
-
-class ChapterDict(TypedDict, total=True):
-    """
-    TypedDict for a novel chapter.
-
-    Fields:
-        id      -- Unique chapter identifier
-        title   -- Chapter title
-        content -- Chapter text
-        extra   -- Arbitrary metadata (e.g. author remarks, timestamps)
-    """
-
-    id: str
-    title: str
-    content: str
-    extra: dict[str, Any]
-
-
-BackendType = Literal["json", "sqlite"]
-SaveMode = Literal["overwrite", "skip"]
 
 
 class ChapterStorage:
@@ -60,7 +45,7 @@ class ChapterStorage:
         self,
         raw_base: str | Path,
         namespace: str,
-        backend_type: BackendType = "json",
+        backend_type: StorageBackend = "json",
         *,
         batch_size: int = 1,
     ) -> None:
@@ -70,6 +55,7 @@ class ChapterStorage:
         self._batch_size = batch_size
         self._pending = 0
         self._conn: sqlite3.Connection | None = None
+        self._existing_ids: set[str] = set()
 
         if self.backend == "json":
             self._init_json()
@@ -80,6 +66,7 @@ class ChapterStorage:
         """Prepare directory for JSON files."""
         self._json_dir = self.raw_base / self.namespace
         self._json_dir.mkdir(parents=True, exist_ok=True)
+        self._existing_ids = {p.stem for p in self._json_dir.glob("*.json")}
 
     def _init_sql(self) -> None:
         """Prepare SQLite connection and ensure table exists."""
@@ -89,20 +76,12 @@ class ChapterStorage:
         self._conn.execute(stmt)
         self._conn.commit()
 
+        cur = self._conn.execute(f'SELECT id FROM "{self.namespace}"')
+        self._existing_ids = {row[0] for row in cur.fetchall()}
+
     def _json_path(self, chap_id: str) -> Path:
         """Return Path for JSON file of given chapter ID."""
         return self._json_dir / f"{chap_id}.json"
-
-    def _exists_json(self, chap_id: str) -> bool:
-        return self._json_path(chap_id).is_file()
-
-    def _exists_sql(self, chap_id: str) -> bool:
-        if self._conn is None:
-            raise RuntimeError("ChapterStorage is closed")
-        cur = self._conn.execute(
-            f'SELECT 1 FROM "{self.namespace}" WHERE id = ? LIMIT 1', (chap_id,)
-        )
-        return cur.fetchone() is not None
 
     def exists(self, chap_id: str) -> bool:
         """
@@ -111,10 +90,7 @@ class ChapterStorage:
         :param chap_id: Chapter identifier.
         :return: True if found, else False.
         """
-        if self.backend == "json":
-            return self._exists_json(chap_id)
-        else:
-            return self._exists_sql(chap_id)
+        return chap_id in self._existing_ids
 
     def _load_json(self, chap_id: str) -> ChapterDict:
         raw = self._json_path(chap_id).read_text(encoding="utf-8")
@@ -153,6 +129,7 @@ class ChapterStorage:
     def _save_json(self, data: ChapterDict, on_exist: SaveMode) -> None:
         path = self._json_path(data["id"])
         save_as_json(data, path, on_exist=on_exist)
+        self._existing_ids.add(data["id"])
 
     def _save_sql(self, data: ChapterDict, on_exist: SaveMode) -> None:
         if self._conn is None:
@@ -173,6 +150,7 @@ class ChapterStorage:
                 json.dumps(data["extra"], ensure_ascii=False),
             ),
         )
+        self._existing_ids.add(data["id"])
         if self._batch_size == 1:
             self._conn.commit()
         else:
@@ -217,6 +195,8 @@ class ChapterStorage:
 
         with self._conn:
             self._conn.executemany(sql, params)
+
+        self._existing_ids.update(data["id"] for data in datas)
 
     def save(
         self,

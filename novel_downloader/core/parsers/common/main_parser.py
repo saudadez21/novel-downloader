@@ -9,9 +9,12 @@ Common pages.
 
 from typing import Any
 
-from novel_downloader.config import ParserConfig, SiteRules
 from novel_downloader.core.parsers.base import BaseParser
-from novel_downloader.utils.chapter_storage import ChapterDict
+from novel_downloader.models import (
+    ChapterDict,
+    ParserConfig,
+    SiteRules,
+)
 
 from .helper import HTMLExtractor
 
@@ -37,37 +40,37 @@ class CommonParser(BaseParser):
 
     def parse_book_info(
         self,
-        html_str: list[str],
+        html_list: list[str],
         **kwargs: Any,
     ) -> dict[str, Any]:
         """
         Parse a book info page and extract metadata and chapter structure.
 
-        :param html: Raw HTML of the book info page.
+        :param html_list: Raw HTML of the book info page.
         :return: Parsed metadata and chapter structure as a dictionary.
         """
-        if not html_str:
+        if not html_list:
             return {}
-        extractor = HTMLExtractor(html_str[0])
+        extractor = HTMLExtractor(html_list[0])
         rules = self._site_rule["book_info"]
         return extractor.extract_book_info(rules)
 
     def parse_chapter(
         self,
-        html_str: list[str],
+        html_list: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
         """
         Parse a single chapter page and extract clean text or simplified HTML.
 
-        :param html: Raw HTML of the chapter page.
+        :param html_list: Raw HTML of the chapter page.
         :param chapter_id: Identifier of the chapter being parsed.
         :return: Cleaned chapter content as plain text or minimal HTML.
         """
-        if not html_str:
+        if not html_list:
             return None
-        extractor = HTMLExtractor(html_str[0])
+        extractor = HTMLExtractor(html_list[0])
         chapter_rules = self._site_rule["chapter"]
 
         # 必须有正文内容

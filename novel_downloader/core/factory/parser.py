@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.factory.parser_factory
---------------------------------------------
+novel_downloader.core.factory.parser
+------------------------------------
 
 This module implements a factory function for creating parser instances
 based on the site name and parser mode specified in the configuration.
@@ -9,7 +9,7 @@ based on the site name and parser mode specified in the configuration.
 
 from collections.abc import Callable
 
-from novel_downloader.config import ParserConfig, load_site_rules
+from novel_downloader.config import load_site_rules
 from novel_downloader.core.interfaces import ParserProtocol
 from novel_downloader.core.parsers import (
     BiqugeParser,
@@ -17,42 +17,42 @@ from novel_downloader.core.parsers import (
     EsjzoneParser,
     LinovelibParser,
     QianbiParser,
-    QidianBrowserParser,
-    QidianSessionParser,
+    QidianParser,
     SfacgParser,
     YamiboParser,
 )
+from novel_downloader.models import ParserConfig
 
 ParserBuilder = Callable[[ParserConfig], ParserProtocol]
 
 _site_map: dict[str, dict[str, ParserBuilder]] = {
     "biquge": {
+        "browser": BiqugeParser,
         "session": BiqugeParser,
-        "async": BiqugeParser,
     },
     "esjzone": {
+        "browser": EsjzoneParser,
         "session": EsjzoneParser,
-        "async": EsjzoneParser,
     },
     "linovelib": {
+        "browser": LinovelibParser,
         "session": LinovelibParser,
-        "async": LinovelibParser,
     },
     "qianbi": {
+        "browser": QianbiParser,
         "session": QianbiParser,
-        "async": QianbiParser,
     },
     "qidian": {
-        "browser": QidianBrowserParser,
-        "session": QidianSessionParser,
+        "browser": QidianParser,
+        "session": QidianParser,
     },
     "sfacg": {
+        "browser": SfacgParser,
         "session": SfacgParser,
-        "async": SfacgParser,
     },
     "yamibo": {
+        "browser": YamiboParser,
         "session": YamiboParser,
-        "async": YamiboParser,
     },
 }
 

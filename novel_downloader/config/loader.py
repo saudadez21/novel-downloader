@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 novel_downloader.config.loader
---------------------------------
+------------------------------
 
 Provides functionality to load Toml configuration files into Python
 dictionaries, with robust error handling and fallback support.
@@ -120,9 +120,9 @@ def load_config(
     config_path: str | Path | None = None,
 ) -> dict[str, Any]:
     """
-    Load configuration data from a YAML file.
+    Load configuration data from a Toml file.
 
-    :param config_path: Optional path to the YAML configuration file.
+    :param config_path: Optional path to the Toml configuration file.
     :return:            Parsed configuration as a dict.
     """
     path = resolve_file_path(

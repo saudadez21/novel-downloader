@@ -82,7 +82,7 @@ async def async_sleep_with_random_delay(
     :param mul_spread: Maximum multiplier factor for base; drawn from [1.0, mul_spread].
     :param max_sleep: Optional upper limit for the final sleep duration.
     """
-    if base < 0 or add_spread < 0 or mul_spread < 0:
+    if base < 0 or add_spread < 0 or mul_spread < 1.0:
         logger.warning(
             "[async sleep] Invalid parameters: base=%s, add_spread=%s, mul_spread=%s",
             base,

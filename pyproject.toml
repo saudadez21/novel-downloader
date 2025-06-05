@@ -6,7 +6,7 @@ authors = [
 ]
 license = {file = "LICENSE"}
 readme = {file = "README.md", content-type = "text/markdown"}
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 keywords = ["novel", "web novel", "qidian", "biquge", "downloader", "parser", "fiction", "cli", "automation", "ebook"]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -15,19 +15,18 @@ classifiers = [
     "Natural Language :: Chinese (Simplified)",
     "Topic :: Utilities",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13"
 ]
 dynamic = ["version"]
 dependencies = [
+    "textual",
     "requests",
     "aiohttp",
-    "beautifulsoup4",
-    "DrissionPage",
-    "opencv-python",
+    "playwright",
     "lxml",
     "platformdirs",
-    "click",
     "ebooklib"
 ]
 
@@ -39,6 +38,8 @@ dev = [
     "pytest",
     "pytest-cov",
     "pytest-mock",
+    "types-requests",
+    "types-PyYAML",
     "pre-commit",
     "commitizen"
 ]
@@ -49,6 +50,7 @@ font-recovery = [
     "tinycss2",
     "fonttools",
     "brotli",
+    "opencv-python",
     "pillow",
     "huggingface_hub"
 ]
@@ -68,7 +70,7 @@ build-backend = "setuptools.build_meta"
 include = ["novel_downloader", "novel_downloader.*"]
 
 [tool.setuptools.package-data]
-"novel_downloader.resources.config" = ["settings.toml", "rules.toml"]
+"novel_downloader.resources.config" = ["*.toml"]
 "novel_downloader.resources.text" = ["*.txt"]
 "novel_downloader.resources.js_scripts" = ["*.js"]
 "novel_downloader.resources.json" = ["*.json"]

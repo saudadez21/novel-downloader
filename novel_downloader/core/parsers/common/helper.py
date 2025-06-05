@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.parsers.common.helpers
---------------------------------------------
+novel_downloader.core.parsers.common.helper
+-------------------------------------------
 
 Shared utility functions for parsing Common pages.
 """
@@ -13,7 +13,7 @@ from typing import Any, cast
 
 from bs4 import BeautifulSoup, Tag
 
-from novel_downloader.config import (
+from novel_downloader.models import (
     BookInfoRules,
     FieldRules,
     RuleStep,

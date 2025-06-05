@@ -17,9 +17,8 @@ import abc
 from pathlib import Path
 from typing import Any
 
-from novel_downloader.config import ParserConfig
 from novel_downloader.core.interfaces import ParserProtocol
-from novel_downloader.utils.chapter_storage import ChapterDict
+from novel_downloader.models import ChapterDict, ParserConfig
 
 
 class BaseParser(ParserProtocol, abc.ABC):
@@ -51,33 +50,30 @@ class BaseParser(ParserProtocol, abc.ABC):
     @abc.abstractmethod
     def parse_book_info(
         self,
-        html_str: list[str],
+        html_list: list[str],
         **kwargs: Any,
     ) -> dict[str, Any]:
         """
-        Parse a book info page and extract metadata and chapter structure.
+        Parse and return a dictionary of book information from the raw HTML.
 
-        Depending on the site structure, the return dict may include a
-        flat `chapters` list or nested `volumes` with chapter groups.
-
-        :param html_str: Raw HTML of the book info page.
-        :return: Parsed metadata and chapter structure as a dictionary.
+        :param html_list: The HTML list of a book's info pages.
+        :return: A dict containing metadata like title, author, chapters list, etc.
         """
         ...
 
     @abc.abstractmethod
     def parse_chapter(
         self,
-        html_str: list[str],
+        html_list: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
         """
-        Parse a single chapter page and extract clean text or simplified HTML.
+        Parse and return the text content of one chapter.
 
-        :param html_str: Raw HTML of the chapter page.
+        :param html_list: The HTML list of the chapter pages.
         :param chapter_id: Identifier of the chapter being parsed.
-        :return: Cleaned chapter content as plain text or minimal HTML.
+        :return: The chapter's text.
         """
         ...
 

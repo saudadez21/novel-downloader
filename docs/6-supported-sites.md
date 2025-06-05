@@ -22,7 +22,6 @@
 
 ```bash
 # 下载起点中文网的小说
-novel-cli download 1234567890
 novel-cli download --site qidian 1234567890
 
 # 下载笔趣阁的小说
@@ -52,6 +51,8 @@ novel-cli download --site yamibo 1234
 
   `https://www.qidian.com/book/1010868264/` -> `1010868264`
 
+  登录需要 Cookies
+
 * 笔趣阁 (biquge)
 
   `http://www.b520.cc/8_8187/` -> `8_8187`
@@ -63,6 +64,8 @@ novel-cli download --site yamibo 1234
 * SF轻小说 (sfacg)
 
   `https://m.sfacg.com/b/456123/` -> `456123`
+
+  登录需要 Cookies
 
 * ESJ Zone (esjzone)
 
@@ -79,6 +82,10 @@ novel-cli download --site yamibo 1234
   `https://www.linovelib.com/novel/1234.html` -> `1234`
 
   **注意**: 若请求间隔过短, 可能触发平台限制机制, 导致账号/设备在一段时间内被封禁或限制访问。
+
+如果需要 Cookie, 可以在浏览器登录后, 通过浏览器开发者工具 (F12) 复制完整的 Cookie 字符串, 请参考 [复制 Cookies](./copy-cookies.md)。
+
+p.s. 目前 session 登录方式的 cookie 还不支持自动续期, 可能每次运行前都需要手动重新设置一次 cookie, 后续会考虑优化这一流程
 
 ### 注意事项
 

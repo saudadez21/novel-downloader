@@ -5,12 +5,13 @@ novel_downloader.core.parsers.esjzone.main_parser
 
 """
 
+import re
 from typing import Any
 
 from lxml import html
 
 from novel_downloader.core.parsers.base import BaseParser
-from novel_downloader.utils.chapter_storage import ChapterDict
+from novel_downloader.models import ChapterDict
 
 
 class EsjzoneParser(BaseParser):
@@ -39,7 +40,7 @@ class EsjzoneParser(BaseParser):
 
     def parse_book_info(
         self,
-        html_str: list[str],
+        html_list: list[str],
         **kwargs: Any,
     ) -> dict[str, Any]:
         """
@@ -48,12 +49,12 @@ class EsjzoneParser(BaseParser):
         注: 由于网站使用了多种不同的分卷格式, 已经尝试兼容常见情况,
         但仍可能存在未覆盖的 cases
 
-        :param html: Raw HTML of the book info page.
+        :param html_list: Raw HTML of the book info page.
         :return: Parsed metadata and chapter structure as a dictionary.
         """
-        if not html_str or self._is_forum_page(html_str):
+        if not html_list or self._is_forum_page(html_list):
             return {}
-        tree = html.fromstring(html_str[0])
+        tree = html.fromstring(html_list[0])
         result: dict[str, Any] = {}
 
         result["book_name"] = self._get_text(tree, self._BOOK_NAME_XPATH)
@@ -74,8 +75,14 @@ class EsjzoneParser(BaseParser):
         volumes: list[dict[str, Any]] = []
         current_vol: dict[str, Any] = {}
 
+        def _is_garbage_title(name: str) -> bool:
+            stripped = name.strip()
+            return not stripped or bool(re.fullmatch(r"[\W_]+", stripped))
+
         def _start_volume(name: str) -> None:
             nonlocal current_vol
+            if _is_garbage_title(name):
+                return
             name = name.strip() or "未命名卷"
             if name == "未命名卷" and current_vol is not None:
                 return
@@ -133,20 +140,20 @@ class EsjzoneParser(BaseParser):
 
     def parse_chapter(
         self,
-        html_str: list[str],
+        html_list: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
         """
         Parse a single chapter page and extract clean text or simplified HTML.
 
-        :param html: Raw HTML of the chapter page.
+        :param html_list: Raw HTML of the chapter page.
         :param chapter_id: Identifier of the chapter being parsed.
         :return: Cleaned chapter content as plain text or minimal HTML.
         """
-        if not html_str or self._is_forum_page(html_str):
+        if not html_list or self._is_forum_page(html_list):
             return None
-        tree = html.fromstring(html_str[0], parser=None)
+        tree = html.fromstring(html_list[0], parser=None)
 
         content_lines: list[str] = []
         content_nodes = tree.xpath(self._CHAPTER_CONTENT_NODES_XPATH)

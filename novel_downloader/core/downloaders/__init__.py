@@ -20,29 +20,22 @@ Currently supported platforms:
 - common (通用架构)
 """
 
-from .biquge import BiqugeAsyncDownloader, BiqugeDownloader
-from .common import CommonAsyncDownloader, CommonDownloader
-from .esjzone import EsjzoneAsyncDownloader, EsjzoneDownloader
-from .linovelib import LinovelibAsyncDownloader, LinovelibDownloader
-from .qianbi import QianbiAsyncDownloader, QianbiDownloader
+from .biquge import BiqugeDownloader
+from .common import CommonDownloader
+from .esjzone import EsjzoneDownloader
+from .linovelib import LinovelibDownloader
+from .qianbi import QianbiDownloader
 from .qidian import QidianDownloader
-from .sfacg import SfacgAsyncDownloader, SfacgDownloader
-from .yamibo import YamiboAsyncDownloader, YamiboDownloader
+from .sfacg import SfacgDownloader
+from .yamibo import YamiboDownloader
 
 __all__ = [
-    "BiqugeAsyncDownloader",
     "BiqugeDownloader",
-    "CommonAsyncDownloader",
-    "CommonDownloader",
-    "EsjzoneAsyncDownloader",
     "EsjzoneDownloader",
-    "LinovelibAsyncDownloader",
     "LinovelibDownloader",
-    "QianbiAsyncDownloader",
     "QianbiDownloader",
     "QidianDownloader",
-    "SfacgAsyncDownloader",
     "SfacgDownloader",
-    "YamiboAsyncDownloader",
     "YamiboDownloader",
+    "CommonDownloader",
 ]

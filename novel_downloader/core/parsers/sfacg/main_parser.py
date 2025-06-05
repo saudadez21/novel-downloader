@@ -10,7 +10,7 @@ from typing import Any
 from lxml import html
 
 from novel_downloader.core.parsers.base import BaseParser
-from novel_downloader.utils.chapter_storage import ChapterDict
+from novel_downloader.models import ChapterDict
 
 
 class SfacgParser(BaseParser):
@@ -40,20 +40,20 @@ class SfacgParser(BaseParser):
 
     def parse_book_info(
         self,
-        html_str: list[str],
+        html_list: list[str],
         **kwargs: Any,
     ) -> dict[str, Any]:
         """
         Parse a book info page and extract metadata and chapter structure.
 
-        :param html: Raw HTML of the book info page.
+        :param html_list: Raw HTML of the book info page.
         :return: Parsed metadata and chapter structure as a dictionary.
         """
-        if len(html_str) < 2:
+        if len(html_list) < 2:
             return {}
 
-        info_tree = html.fromstring(html_str[0])
-        catalog_tree = html.fromstring(html_str[1])
+        info_tree = html.fromstring(html_list[0])
+        catalog_tree = html.fromstring(html_list[1])
 
         result: dict[str, Any] = {}
 
@@ -113,25 +113,25 @@ class SfacgParser(BaseParser):
 
     def parse_chapter(
         self,
-        html_str: list[str],
+        html_list: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
         """
         Parse a single chapter page and extract clean text or simplified HTML.
 
-        :param html: Raw HTML of the chapter page.
+        :param html_list: Raw HTML of the chapter page.
         :param chapter_id: Identifier of the chapter being parsed.
         :return: Cleaned chapter content as plain text or minimal HTML.
         """
-        if not html_str:
+        if not html_list:
             return None
         keywords = [
             "本章为VIP章节",  # 本章为VIP章节，订阅后可立即阅读
         ]
-        if any(kw in html_str[0] for kw in keywords):
+        if any(kw in html_list[0] for kw in keywords):
             return None
-        tree = html.fromstring(html_str[0])
+        tree = html.fromstring(html_list[0])
 
         content_lines: list[str] = []
         content_nodes = tree.xpath(self._CHAPTER_CONTENT_NODES_XPATH)

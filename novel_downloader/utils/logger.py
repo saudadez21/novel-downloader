@@ -11,11 +11,10 @@ import logging
 from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
-from typing import Literal
+
+from novel_downloader.models import LogLevel
 
 from .constants import LOGGER_DIR, LOGGER_NAME
-
-LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
 
 LOG_LEVELS: dict[LogLevel, int] = {
     "DEBUG": logging.DEBUG,
