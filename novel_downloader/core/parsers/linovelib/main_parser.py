@@ -13,7 +13,7 @@ from typing import Any
 from lxml import html
 
 from novel_downloader.core.parsers.base import BaseParser
-from novel_downloader.utils.chapter_storage import ChapterDict
+from novel_downloader.models import ChapterDict
 from novel_downloader.utils.constants import LINOVELIB_FONT_MAP_PATH
 
 
@@ -44,18 +44,18 @@ class LinovelibParser(BaseParser):
 
     def parse_book_info(
         self,
-        html_str: list[str],
+        html_list: list[str],
         **kwargs: Any,
     ) -> dict[str, Any]:
         """
         Parse a book info page and extract metadata and chapter structure.
 
-        :param html: Raw HTML of the book info page.
+        :param html_list: Raw HTML of the book info page.
         :return: Parsed metadata and chapter structure as a dictionary.
         """
-        if not html_str:
+        if not html_list:
             return {}
-        info_tree = html.fromstring(html_str[0])
+        info_tree = html.fromstring(html_list[0])
         result: dict[str, Any] = {}
 
         result["book_name"] = self._safe_xpath(info_tree, self._BOOK_NAME_XPATH)
@@ -71,7 +71,7 @@ class LinovelibParser(BaseParser):
 
         result["summary"] = self._extract_intro(info_tree, self._SUMMARY_XPATH)
 
-        vol_pages = html_str[1:]
+        vol_pages = html_list[1:]
         volumes: list[dict[str, Any]] = []
         for vol_page in vol_pages:
             vol_tree = html.fromstring(vol_page)
@@ -111,22 +111,22 @@ class LinovelibParser(BaseParser):
 
     def parse_chapter(
         self,
-        html_str: list[str],
+        html_list: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
         """
-        Parse a single chapter page and extract clean text or simplified HTML.
+        Parse chapter pages and extract clean text or simplified HTML.
 
-        :param html: Raw HTML of the chapter page.
+        :param html_list: Raw HTML of the chapter page.
         :param chapter_id: Identifier of the chapter being parsed.
         :return: Cleaned chapter content as plain text or minimal HTML.
         """
-        if not html_str:
+        if not html_list:
             return None
         title_text: str = ""
         contents: list[str] = []
-        for curr_html in html_str:
+        for curr_html in html_list:
             is_encrypted = self._is_encrypted(curr_html)
             tree = html.fromstring(curr_html)
 

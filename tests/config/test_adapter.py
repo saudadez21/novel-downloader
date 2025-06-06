@@ -78,9 +78,8 @@ def test_set_site_to_empty():
 # ---------- RequesterConfig ----------
 def test_requester_config_defaults():
     adapter = ConfigAdapter(config={}, site="qidian")
-    cfg = adapter.get_requester_config()
-    assert cfg.headless is True
-    assert cfg.user_data_folder == "./user_data"
+    cfg = adapter.get_fetcher_config()
+    assert cfg.headless is False
 
 
 def test_requester_config_custom():
@@ -88,14 +87,12 @@ def test_requester_config_custom():
         "requests": {
             "retry_times": 1,
             "headless": False,
-            "user_data_folder": "/custom",
         }
     }
     adapter = ConfigAdapter(config, "qidian")
-    cfg = adapter.get_requester_config()
+    cfg = adapter.get_fetcher_config()
     assert cfg.retry_times == 1
     assert cfg.headless is False
-    assert cfg.user_data_folder == "/custom"
 
 
 # ---------- DownloaderConfig ----------
@@ -153,7 +150,7 @@ def test_parser_config_combined():
 # ---------- SaverConfig ----------
 def test_saver_config_defaults():
     adapter = ConfigAdapter(config={}, site="qidian")
-    cfg = adapter.get_saver_config()
+    cfg = adapter.get_exporter_config()
     assert cfg.output_dir == "./downloads"
     assert cfg.make_txt is True
     assert cfg.make_epub is False
@@ -171,7 +168,7 @@ def test_saver_config_custom_all():
         },
     }
     adapter = ConfigAdapter(config, "qidian")
-    cfg = adapter.get_saver_config()
+    cfg = adapter.get_exporter_config()
     assert cfg.raw_data_dir == "raw/"
     assert cfg.output_dir == "out/"
     assert cfg.make_txt is False

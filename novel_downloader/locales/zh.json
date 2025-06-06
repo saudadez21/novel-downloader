@@ -3,7 +3,7 @@
   "help_config": "配置文件路径",
   "help_download": "下载小说",
   "help_clean": "清理缓存和配置文件",
-  "main_no_command": "未提供命令, 进入交互模式...",
+  "help_export": "导出已下载的小说",
 
   "settings_help": "配置下载器设置",
   "settings_set_lang_help": "在中文和英文之间切换语言",
@@ -65,6 +65,15 @@
   "download_edit_config": "请编辑配置并将示例 ID 替换为真实书籍 ID",
   "download_downloading": "正在从 {site} 下载书籍 {book_id}...",
   "download_prompt_parse": "结束...",
+  "download_book_ids": "要处理的一个或多个小说 ID",
+  "login_description": "说明",
+  "login_hint": "提示",
+  "login_manual_prompt": ">> 请在浏览器中完成登录后按回车继续...",
+  "login_use_config": "使用配置中的默认值",
+  "login_enter_password": "请输入密码: ",
+  "login_enter_cookie": "请输入 Cookie: ",
+  "login_enter_value": "请输入值: ",
+  "login_required_field": "该字段是必填项, 请重新输入",
 
   "login_prompt_intro": "需要手动登录, 请切换到浏览器窗口完成登录",
   "login_prompt_press_enter": "第 {attempt}/{max_retries} 次尝试: 请在浏览器中完成登录后按回车键...",
@@ -96,5 +105,12 @@
   "clean_nothing": "未指定任何要清理的内容",
   "clean_deleted": "已删除",
   "clean_not_found": "未找到",
-  "clean_cancelled": "已取消清理操作"
+  "clean_cancelled": "已取消清理操作",
+
+  "export_format_help": "导出格式: txt、epub 或 all",
+  "export_processing": "正在导出小说 {book_id}, 格式: {format}",
+  "export_success_txt": "成功将 {book_id} 导出为 TXT。",
+  "export_failed_txt": "导出 {book_id} 为 TXT 失败: {err}",
+  "export_success_epub": "成功将 {book_id} 导出为 EPUB",
+  "export_failed_epub": "导出 {book_id} 为 EPUB 失败: {err}"
 }

@@ -3,17 +3,8 @@
 novel_downloader.core.parsers.qidian
 ------------------------------------
 
-This package provides parsing implementations for the Qidian platform.
-
-Modules:
-- browser: Contains `QidianBrowserParser` for browser-rendered page parsing.
-- session: Contains `QidianSessionParser` for session page parsing.
 """
 
-from .browser import QidianBrowserParser
-from .session import QidianSessionParser
+from .main_parser import QidianParser
 
-__all__ = [
-    "QidianBrowserParser",
-    "QidianSessionParser",
-]
+__all__ = ["QidianParser"]

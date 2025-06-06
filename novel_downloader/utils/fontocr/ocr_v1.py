@@ -18,6 +18,7 @@ import paddle
 from fontTools.ttLib import TTFont
 from paddleocr import PaddleOCR
 from PIL import Image, ImageDraw, ImageFont
+from PIL.Image import Transpose
 
 from novel_downloader.utils.constants import (
     REC_CHAR_MODEL_FILES,
@@ -142,7 +143,7 @@ class FontOCRV1:
         y = (size - h) // 2 - bbox[1]
         draw.text((x, y), char, fill=0, font=render_font)
         if is_reflect:
-            img = img.transpose(Image.FLIP_LEFT_RIGHT)
+            img = img.transpose(Transpose.FLIP_LEFT_RIGHT)
 
         img_np = np.array(img)
         if np.unique(img_np).size == 1:

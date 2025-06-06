@@ -11,7 +11,7 @@ from typing import Any
 from lxml import html
 
 from novel_downloader.core.parsers.base import BaseParser
-from novel_downloader.utils.chapter_storage import ChapterDict
+from novel_downloader.models import ChapterDict
 
 
 class QianbiParser(BaseParser):
@@ -19,20 +19,20 @@ class QianbiParser(BaseParser):
 
     def parse_book_info(
         self,
-        html_str: list[str],
+        html_list: list[str],
         **kwargs: Any,
     ) -> dict[str, Any]:
         """
         Parse a book info page and extract metadata and chapter structure.
 
-        :param html: Raw HTML of the book info page.
+        :param html_list: Raw HTML of the book info pages.
         :return: Parsed metadata and chapter structure as a dictionary.
         """
-        if len(html_str) < 2:
+        if len(html_list) < 2:
             return {}
 
-        info_tree = html.fromstring(html_str[0])
-        catalog_tree = html.fromstring(html_str[1])
+        info_tree = html.fromstring(html_list[0])
+        catalog_tree = html.fromstring(html_list[1])
         result: dict[str, Any] = {}
 
         title = info_tree.xpath('//h1[@class="page-title"]/text()')
@@ -105,20 +105,20 @@ class QianbiParser(BaseParser):
 
     def parse_chapter(
         self,
-        html_str: list[str],
+        html_list: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
         """
         Parse a single chapter page and extract clean text or simplified HTML.
 
-        :param html: Raw HTML of the chapter page.
+        :param html_list: Raw HTML of the chapter page.
         :param chapter_id: Identifier of the chapter being parsed.
         :return: Cleaned chapter content as plain text or minimal HTML.
         """
-        if not html_str:
+        if not html_list:
             return None
-        tree = html.fromstring(html_str[0])
+        tree = html.fromstring(html_list[0])
 
         paras = tree.xpath('//div[@class="article-content"]/p/text()')
         content_text = "\n\n".join(p.strip() for p in paras if p.strip())

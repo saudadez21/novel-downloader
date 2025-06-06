@@ -22,10 +22,7 @@ from .common import CommonParser
 from .esjzone import EsjzoneParser
 from .linovelib import LinovelibParser
 from .qianbi import QianbiParser
-from .qidian import (
-    QidianBrowserParser,
-    QidianSessionParser,
-)
+from .qidian import QidianParser
 from .sfacg import SfacgParser
 from .yamibo import YamiboParser
 
@@ -35,8 +32,7 @@ __all__ = [
     "EsjzoneParser",
     "LinovelibParser",
     "QianbiParser",
-    "QidianBrowserParser",
-    "QidianSessionParser",
+    "QidianParser",
     "SfacgParser",
     "YamiboParser",
 ]

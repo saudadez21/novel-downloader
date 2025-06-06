@@ -5,25 +5,18 @@ novel_downloader.config.adapter
 
 Defines ConfigAdapter, which maps a raw configuration dictionary and
 site name into structured dataclass-based config models.
-
-Supported mappings:
-- requests          -> RequesterConfig
-- general+site      -> DownloaderConfig
-- general+site      -> ParserConfig
-- general+output    -> SaverConfig
-- sites[site]       -> book_ids list
 """
 
 from typing import Any
 
+from novel_downloader.models import (
+    DownloaderConfig,
+    ExporterConfig,
+    FetcherConfig,
+    ParserConfig,
+)
 from novel_downloader.utils.constants import SUPPORTED_SITES
 
-from .models import (
-    DownloaderConfig,
-    ParserConfig,
-    RequesterConfig,
-    SaverConfig,
-)
 from .site_rules import load_site_rules
 
 
@@ -70,28 +63,29 @@ class ConfigAdapter:
 
         return {}
 
-    def get_requester_config(self) -> RequesterConfig:
+    def get_fetcher_config(self) -> FetcherConfig:
         """
-        从 config["requests"] 中读取通用请求配置 (含 DrissionPage 设置)
-        返回 RequesterConfig 实例
+        从 config["requests"] 中读取通用请求配置
+        返回 FetcherConfig 实例
         """
         gen = self._config.get("general", {})
         req = self._config.get("requests", {})
         site_cfg = self._get_site_cfg()
-        return RequesterConfig(
+        return FetcherConfig(
             request_interval=gen.get("request_interval", 2.0),
             retry_times=req.get("retry_times", 3),
             backoff_factor=req.get("backoff_factor", 2.0),
             timeout=req.get("timeout", 30.0),
             max_connections=req.get("max_connections", 10),
             max_rps=req.get("max_rps", None),
-            headless=req.get("headless", True),
-            user_data_folder=req.get("user_data_folder", "./user_data"),
-            profile_name=req.get("profile_name", "Profile_1"),
-            auto_close=req.get("auto_close", True),
-            disable_images=req.get("disable_images", True),
-            mute_audio=req.get("mute_audio", True),
+            headless=req.get("headless", False),
+            disable_images=req.get("disable_images", False),
             mode=site_cfg.get("mode", "session"),
+            proxy=req.get("proxy", None),
+            user_agent=req.get("user_agent", None),
+            headers=req.get("headers", None),
+            browser_type=req.get("browser_type", "chromium"),
+            verify_ssl=req.get("verify_ssl", True),
         )
 
     def get_downloader_config(self) -> DownloaderConfig:
@@ -100,15 +94,17 @@ class ConfigAdapter:
         返回 DownloaderConfig 实例
         """
         gen = self._config.get("general", {})
+        req = self._config.get("requests", {})
         debug = gen.get("debug", {})
         site_cfg = self._get_site_cfg()
         return DownloaderConfig(
             request_interval=gen.get("request_interval", 2.0),
+            retry_times=req.get("retry_times", 3),
+            backoff_factor=req.get("backoff_factor", 2.0),
             raw_data_dir=gen.get("raw_data_dir", "./raw_data"),
             cache_dir=gen.get("cache_dir", "./novel_cache"),
-            download_workers=gen.get("download_workers", 4),
-            parser_workers=gen.get("parser_workers", 4),
-            use_process_pool=gen.get("use_process_pool", True),
+            download_workers=gen.get("download_workers", 2),
+            parser_workers=gen.get("parser_workers", 2),
             skip_existing=gen.get("skip_existing", True),
             login_required=site_cfg.get("login_required", False),
             save_html=debug.get("save_html", False),
@@ -117,6 +113,7 @@ class ConfigAdapter:
             storage_batch_size=gen.get("storage_batch_size", 1),
             username=site_cfg.get("username", ""),
             password=site_cfg.get("password", ""),
+            cookies=site_cfg.get("cookies", ""),
         )
 
     def get_parser_config(self) -> ParserConfig:
@@ -143,10 +140,10 @@ class ConfigAdapter:
             mode=site_cfg.get("mode", "session"),
         )
 
-    def get_saver_config(self) -> SaverConfig:
+    def get_exporter_config(self) -> ExporterConfig:
         """
         从 config["general"] 与 config["output"] 中读取存储器相关配置,
-        返回 SaverConfig 实例
+        返回 ExporterConfig 实例
         """
         gen = self._config.get("general", {})
         out = self._config.get("output", {})
@@ -154,7 +151,7 @@ class ConfigAdapter:
         naming = out.get("naming", {})
         epub_opts = out.get("epub", {})
         site_cfg = self._get_site_cfg()
-        return SaverConfig(
+        return ExporterConfig(
             cache_dir=gen.get("cache_dir", "./novel_cache"),
             raw_data_dir=gen.get("raw_data_dir", "./raw_data"),
             output_dir=gen.get("output_dir", "./downloads"),

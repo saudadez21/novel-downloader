@@ -16,6 +16,7 @@ Provides:
 """
 
 import numpy as np
+from numpy.typing import NDArray
 from PIL import Image
 from scipy.fft import dct as dct_1d
 
@@ -24,7 +25,7 @@ HASH_SIZE = 10  # default is 8
 HASH_DISTANCE_THRESHOLD = 5
 
 
-def hash_to_int(hash_array: np.ndarray) -> int:
+def hash_to_int(hash_array: NDArray[np.bool_]) -> int:
     """
     Convert a boolean hash array to an integer.
 
@@ -60,7 +61,7 @@ def fast_hamming_distance(hash_1: int, hash_2: int) -> int:
     return count
 
 
-def _threshold_and_pack(dct_low: np.ndarray) -> int:
+def _threshold_and_pack(dct_low: NDArray[np.float64]) -> int:
     """
     Convert a low-frequency DCT matrix into a binary hash.
 

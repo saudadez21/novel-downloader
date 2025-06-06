@@ -180,3 +180,4 @@ downloads/
 novel_cache/
 raw_data/
 *.sqlite
+check_format.py

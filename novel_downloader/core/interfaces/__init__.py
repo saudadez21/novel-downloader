@@ -9,23 +9,19 @@ injection.
 
 Included protocols:
 - DownloaderProtocol
+- FetcherProtocol
 - ParserProtocol
-- RequesterProtocol
-- SaverProtocol
+- ExporterProtocol
 """
 
-from .async_downloader import AsyncDownloaderProtocol
-from .async_requester import AsyncRequesterProtocol
+from .downloader import DownloaderProtocol
+from .exporter import ExporterProtocol
+from .fetcher import FetcherProtocol
 from .parser import ParserProtocol
-from .saver import SaverProtocol
-from .sync_downloader import SyncDownloaderProtocol
-from .sync_requester import SyncRequesterProtocol
 
 __all__ = [
-    "AsyncDownloaderProtocol",
-    "AsyncRequesterProtocol",
+    "DownloaderProtocol",
+    "ExporterProtocol",
+    "FetcherProtocol",
     "ParserProtocol",
-    "SaverProtocol",
-    "SyncDownloaderProtocol",
-    "SyncRequesterProtocol",
 ]

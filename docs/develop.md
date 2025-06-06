@@ -3,7 +3,7 @@
 ```bash
 git clone https://github.com/BowenZ217/novel-downloader.git
 cd novel-downloader
-````
+```
 
 ---
 

@@ -13,7 +13,6 @@ import logging
 from collections.abc import Callable
 from pathlib import Path
 
-import numpy as np
 from PIL import Image
 
 from .constants import HASH_STORE_FILE
@@ -104,14 +103,10 @@ class ImageHashStore:
                 "[ImageHashStore] No file found at %s, starting empty.", self._path
             )
             return
-        else:
-            if self._path.suffix == ".npy":
-                arr = np.load(self._path, allow_pickle=True).item()
-                self._hash = {lbl: set(v) for lbl, v in arr.items()}
-            else:
-                txt = self._path.read_text(encoding="utf-8")
-                obj = json.loads(txt) or {}
-                self._hash = {lbl: set(obj.get(lbl, [])) for lbl in obj}
+
+        txt = self._path.read_text(encoding="utf-8")
+        obj = json.loads(txt) or {}
+        self._hash = {lbl: set(obj.get(lbl, [])) for lbl in obj}
 
         # rebuild reverse map and BK-Tree
         self._hash_to_labels.clear()
@@ -143,11 +138,8 @@ class ImageHashStore:
         """Persist current store to disk."""
         self._path.parent.mkdir(parents=True, exist_ok=True)
         data = {lbl: list(s) for lbl, s in self._hash.items()}
-        if self._path.suffix == ".npy":
-            np.save(self._path, data)
-        else:
-            txt = json.dumps(data, ensure_ascii=False, indent=2)
-            self._path.write_text(txt, encoding="utf-8")
+        txt = json.dumps(data, ensure_ascii=False, indent=2)
+        self._path.write_text(txt, encoding="utf-8")
         logger.debug("[ImageHashStore] Saved hash store to %s", self._path)
 
     def _maybe_save(self) -> None:

@@ -9,7 +9,7 @@ Constants and default paths used throughout the NovelDownloader project.
 from importlib.resources import files
 from pathlib import Path
 
-from platformdirs import user_config_dir
+from platformdirs import user_config_path
 
 # -----------------------------------------------------------------------------
 # Application identity
@@ -20,15 +20,20 @@ APP_DIR_NAME = "novel_downloader"  # Directory name for platformdirs
 LOGGER_NAME = PACKAGE_NAME  # Root logger name
 
 SUPPORTED_SITES = {
-    "qidian",
     "biquge",
+    "esjzone",
+    "linovelib",
+    "qianbi",
+    "qidian",
+    "sfacg",
+    "yamibo",
 }
 
 # -----------------------------------------------------------------------------
 # Base directories
 # -----------------------------------------------------------------------------
 # Base config directory (e.g. ~/AppData/Local/novel_downloader/)
-BASE_CONFIG_DIR = Path(user_config_dir(APP_DIR_NAME, appauthor=False))
+BASE_CONFIG_DIR = Path(user_config_path(APP_DIR_NAME, appauthor=False))
 WORK_DIR = Path.cwd()
 PACKAGE_ROOT: Path = Path(__file__).parent.parent
 LOCALES_DIR: Path = PACKAGE_ROOT / "locales"
@@ -79,11 +84,9 @@ DEFAULT_USER_HEADERS = {
 # Embedded resources (via importlib.resources)
 # -----------------------------------------------------------------------------
 BASE_CONFIG_PATH = files("novel_downloader.resources.config").joinpath("settings.toml")
-BASE_RULE_PATH = files("novel_downloader.resources.config").joinpath("rules.toml")
 
 DEFAULT_SETTINGS_PATHS = [
     BASE_CONFIG_PATH,
-    BASE_RULE_PATH,
 ]
 
 # CSS Styles
