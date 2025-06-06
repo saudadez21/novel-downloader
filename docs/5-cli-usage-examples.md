@@ -111,25 +111,16 @@ novel-cli config COMMAND [ARGS]...
 
 ```bash
 # 切换界面语言为英文
-novel-cli settings set-lang en
+novel-cli config set-lang en
 
 # 使用新的 settings.toml
-novel-cli settings set-config ./settings.toml
-
-# 更新站点解析规则
-novel-cli settings update-rules ./rules.toml
-
-# 为起点设置 Cookie (方式 1: 一行输入)
-novel-cli settings set-cookies qidian '{"token": "abc123"}'
-
-# 为起点设置 Cookie (方式 2: 交互输入)
-novel-cli settings set-cookies
+novel-cli config set-config ./settings.toml
 
 # 初始化默认配置到当前目录
-novel-cli settings init
+novel-cli config init
 
 # 强制覆盖已存在的配置文件
-novel-cli settings init --force
+novel-cli config init --force
 ```
 
 ---
@@ -147,6 +138,7 @@ novel-cli clean [OPTIONS]
 * `--logs`: 清理日志目录 (`logs/`)
 * `--cache`: 清理脚本缓存与浏览器数据 (`js_script/`、`browser_data/`)
 * `--data`: 清理状态文件与 cookies (`state.json`)
+* `--config`: 清理全局设置
 * `--models`: 清理模型缓存目录
 * `--all`: 清除所有配置、缓存、状态 (包括设置文件)
 * `--yes`: 跳过确认提示
