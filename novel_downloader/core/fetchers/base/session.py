@@ -25,6 +25,7 @@ from novel_downloader.utils.constants import (
     DATA_DIR,
     DEFAULT_USER_HEADERS,
 )
+from novel_downloader.utils.cookies import parse_cookie_expires
 from novel_downloader.utils.time_utils import async_sleep_with_random_delay
 
 from .rate_limiter import TokenBucketRateLimiter
@@ -273,7 +274,7 @@ class BaseSession(FetcherProtocol, abc.ABC):
                         "value": cookie.value,
                         "domain": cookie.get("domain", ""),
                         "path": cookie.get("path", "/"),
-                        "expires": int(cookie.get("expires") or -1),
+                        "expires": parse_cookie_expires(cookie.get("expires")),
                         "httpOnly": bool(cookie.get("httponly", False)),
                         "secure": bool(cookie.get("secure", False)),
                         "sameSite": cookie.get("samesite") or "Lax",

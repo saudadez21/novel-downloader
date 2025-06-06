@@ -7,6 +7,7 @@ Utility for normalizing cookie input from user configuration.
 """
 
 from collections.abc import Mapping
+from email.utils import parsedate_to_datetime
 from http.cookies import SimpleCookie
 
 
@@ -30,3 +31,16 @@ def resolve_cookies(cookies: str | Mapping[str, str]) -> dict[str, str]:
     elif isinstance(cookies, Mapping):
         return {str(k).strip(): str(v).strip() for k, v in cookies.items()}
     raise TypeError("Unsupported cookie format: must be str or dict-like")
+
+
+def parse_cookie_expires(value: str | None) -> int:
+    if not value:
+        return -1
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        try:
+            dt = parsedate_to_datetime(value)
+            return int(dt.timestamp())
+        except Exception:
+            return -1
