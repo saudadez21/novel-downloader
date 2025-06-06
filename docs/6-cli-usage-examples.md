@@ -2,7 +2,7 @@
 
 ### 1. 下载小说
 
-支持的站点列表详见: [站点支持文档](./6-supported-sites.md)
+支持的站点列表详见: [站点支持文档](./4-supported-sites.md)
 
 #### 1.1 显式指定配置文件 (优先级最高)
 
@@ -87,7 +87,7 @@ novel-cli download --site biquge 8_8187
 novel-cli download
 ```
 
-查看完整支持站点列表: [`supported-sites.md`](./6-supported-sites.md)
+查看完整支持站点列表: [`supported-sites.md`](./4-supported-sites.md)
 
 ---
 

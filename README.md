@@ -45,13 +45,14 @@ pip install novel-downloader[font-recovery]
 novel-cli settings init
 
 # 编辑 ./settings.toml 修改网络配置
-# 可查看 docs/4-settings-schema.md
+# 可查看 docs/3-settings-schema.md
 
 # 启动 TUI 界面
 novel-tui
 ```
 
-- 详细可见: [支持站点列表](docs/6-supported-sites.md)
+- 详细可见: [支持站点列表](docs/4-supported-sites.md)
+- 更多使用方法, 查看 [使用示例](docs/5-tui-usage-examples.md)
 
 ### CLI 模式
 
@@ -60,14 +61,14 @@ novel-tui
 novel-cli settings init
 
 # 编辑 ./settings.toml 完成 site/book_ids 等
-# 可查看 docs/4-settings-schema.md
+# 可查看 docs/3-settings-schema.md
 
 # 执行下载任务
 novel-cli download 123456
 ```
 
-- 详细可见: [支持站点列表](docs/6-supported-sites.md)
-- 更多使用方法, 查看 [使用示例](docs/5-usage-examples.md)
+- 详细可见: [支持站点列表](docs/4-supported-sites.md)
+- 更多使用方法, 查看 [使用示例](docs/6-cli-usage-examples.md)
 
 ---
 
@@ -97,9 +98,9 @@ pip install .
 - [安装](docs/1-installation.md)
 - [配置](docs/2-configuration.md)
 - [settings.toml 配置说明](docs/3-settings-schema.md)
-- [TUI 使用示例](docs/4-tui-usage-examples.md)
-- [CLI 使用示例](docs/5-cli-usage-examples.md)
-- [支持站点列表](docs/6-supported-sites.md)
+- [支持站点列表](docs/4-supported-sites.md)
+- [TUI 使用示例](docs/5-tui-usage-examples.md)
+- [CLI 使用示例](docs/6-cli-usage-examples.md)
 - [复制 Cookies](docs/copy-cookies.md)
 - [文件保存](docs/file-saving.md)
 - [TODO](docs/todo.md)
