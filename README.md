@@ -96,7 +96,7 @@ pip install .
 - [项目简介](#项目简介)
 - [安装](docs/1-installation.md)
 - [配置](docs/2-configuration.md)
-- [settings.toml 配置说明](docs/4-settings-schema.md)
+- [settings.toml 配置说明](docs/3-settings-schema.md)
 - [TUI 使用示例](docs/4-tui-usage-examples.md)
 - [CLI 使用示例](docs/5-cli-usage-examples.md)
 - [支持站点列表](docs/6-supported-sites.md)

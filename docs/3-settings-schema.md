@@ -7,14 +7,10 @@
 | `retry_times`      | int    | 3             | 请求失败重试次数                         |
 | `backoff_factor`   | float  | 2.0           | 重试的退避因子 (每次重试等待时间将按倍数增加, 如 `2s`, `4s`, `8s`) |
 | `timeout`          | float  | 30.0          | 页面加载超时时间 (秒)                    |
-| `max_connections`  | int    | 10            | 最大并发连接数 (适用于异步请求场景)       |
+| `max_connections`  | int    | 10            | 最大并发连接数                           |
 | `max_rps`           | int \| null | null    | 最大请求速率 (requests per second), 为空则不限制 |
 | `headless`         | bool   | false         | 启动浏览器时是否使用无头模式 (不显示窗口)          |
-| `user_data_folder` | string | `""`          | 浏览器用户数据目录, 为空则使用默认目录      |
-| `profile_name`     | string | `""`          | 使用的浏览器配置文件名称, 为空则使用默认配置        |
-| `auto_close`       | bool   | true          | 抓取完后是否自动关闭浏览器               |
 | `disable_images`   | bool   | true          | 是否禁用图片加载 (可加速页面渲染)           |
-| `mute_audio`       | bool   | true          | 是否禁用音频播放 (静音)                 |
 
 > 注意: 部分站点在面对高频的访问频率时 (例如每秒 5 次), 可能因负载压力而返回 `503 Service Temporarily Unavailable` 错误。
 >
@@ -26,12 +22,12 @@
 
 | 参数名               | 类型    | 默认值              | 说明                                   |
 |---------------------|--------|-------------------|--------------------------------------|
-| `request_interval`   | float  | 5.0               | 同一本书各章节请求间隔 (秒)                   |
+| `request_interval`   | float  | 2.0               | 同一本书各章节请求间隔 (秒)                   |
 | `raw_data_dir`       | string | `"./raw_data"`    | 原始章节 JSON / DB 存放目录             |
 | `output_dir`         | string | `"./downloads"`   | 最终输出文件存放目录                   |
 | `cache_dir`          | string | `"./novel_cache"` | 本地缓存目录 (字体 / 图片等)       |
-| `download_workers`   | int    | 4                 | 并发下载任务的协程数量                         |
-| `parser_workers`     | int    | 4                 | 并发解析任务的协程数量                        |
+| `download_workers`   | int    | 2                 | 并发下载任务的协程数量                         |
+| `parser_workers`     | int    | 2                 | 并发解析任务的协程数量                        |
 | `skip_existing`      | bool   | true              | 下载时是否跳过本地已存在的章节文件            |
 | `storage_backend`    | string | `"sqlite"`        | 章节存储方式, 可选值：`json`、`sqlite`   |
 | `storage_batch_size` | int    | 30                | 使用 SQLite 时每批次提交的章节数 (提高写入性能) |

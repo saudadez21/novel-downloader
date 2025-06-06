@@ -40,10 +40,9 @@ novel-cli download 123456 654321
 ### 2. 全局选项
 
 ```text
-novel-cli [OPTIONS] COMMAND [ARGS]...
+novel-cli COMMAND [ARGS]...
 
 Options:
-  --config FILE   配置文件路径
   --help      显示此帮助信息并退出
 ```
 
@@ -53,9 +52,10 @@ Options:
 
 ```text
 Commands:
-  download     下载小说
-  settings     配置下载器设置
-  clean        清理本地缓存和配置文件
+    clean               清理缓存和配置文件
+    config              配置文件路径
+    download            下载小说
+    export              导出已下载的小说
 ```
 
 ---
@@ -65,12 +65,12 @@ Commands:
 按书籍 ID 下载完整小说, 支持从命令行或配置文件读取 ID:
 
 ```bash
-novel-cli download [OPTIONS] [BOOK_IDS]...
+novel-cli download [-h] [--site SITE] [--config CONFIG] [book_ids ...]
 ```
 
 **参数说明**:
 
-* `BOOK_IDS`: 要下载的书籍 ID (可选, 省略时将从配置文件读取)
+* `book_ids`: 要下载的书籍 ID (可选, 省略时将从配置文件读取)
 * `--site [qidian|biquge|...]`: 站点名称缩写, 默认 `qidian`
 * `--help`: 显示帮助信息
 
@@ -91,21 +91,21 @@ novel-cli download
 
 ---
 
-### 5. settings 子命令
+### 5. config 子命令
 
 用于初始化和管理下载器设置, 包括切换语言、设置 Cookie、更新规则等:
 
 ```bash
-novel-cli settings [OPTIONS] COMMAND [ARGS]...
+novel-cli config COMMAND [ARGS]...
 ```
 
 **参数说明**:
 
+* `init [--force]`: 在当前目录初始化默认配置文件
 * `set-lang LANG`: 在中文 (zh) 和英文 (en) 之间切换界面语言
 * `set-config PATH`: 设置并保存自定义 YAML 配置文件
 * `update-rules PATH`: 从 TOML/YAML/JSON 文件更新站点解析规则
 * `set-cookies [SITE] [COOKIES]`: 为指定站点设置 Cookie, 可省略参数交互输入
-* `init [--force]`: 在当前目录初始化默认配置文件
 
 **示例:**
 
@@ -146,7 +146,8 @@ novel-cli clean [OPTIONS]
 
 * `--logs`: 清理日志目录 (`logs/`)
 * `--cache`: 清理脚本缓存与浏览器数据 (`js_script/`、`browser_data/`)
-* `--state`: 清理状态文件与 cookies (`state.json`)
+* `--data`: 清理状态文件与 cookies (`state.json`)
+* `--models`: 清理模型缓存目录
 * `--all`: 清除所有配置、缓存、状态 (包括设置文件)
 * `--yes`: 跳过确认提示
 * `--help`: 显示帮助信息并退出
@@ -158,7 +159,7 @@ novel-cli clean [OPTIONS]
 novel-cli clean --cache
 
 # 清理日志和状态文件
-novel-cli clean --logs --state
+novel-cli clean --logs --data
 
 # 交互确认后清理所有数据 (包括配置文件)
 novel-cli clean --all
@@ -168,6 +169,41 @@ novel-cli clean --all --yes
 ```
 
 > **注意**: `--all` 会删除包括设置文件在内的所有本地数据, 请慎重使用！
+
+---
+
+### 7. export 子命令
+
+导出已下载的小说为指定格式的文件:
+
+```bash
+novel-cli export [OPTIONS] book_ids [book_ids ...]
+```
+
+**参数说明**:
+
+* `book_ids`: 要导出的一个或多个小说 ID
+* `--format`: 导出格式, 可选值为 `txt`, `epub`, `all`, 默认 `all`
+* `--site SITE`: 网站来源 (如 `biquge`, `qidian`), 默认 `qidian`
+* `--config CONFIG`: 可选指定配置文件路径
+
+**示例:**
+
+```bash
+# 导出为默认格式 (txt + epub)
+novel-cli export 12345 23456
+
+# 指定导出格式为 EPUB
+novel-cli export --format epub 88888
+
+# 指定站点来源并导出多本书
+novel-cli export --site biquge 12345 23456
+
+# 使用指定配置文件导出
+novel-cli export --config ./settings.toml 4321
+```
+
+> **注意**: 必须提供至少一个 `book_ids`
 
 ---
 
