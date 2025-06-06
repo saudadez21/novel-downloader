@@ -43,49 +43,71 @@ novel-cli download --site yamibo 123456
 novel-cli download --site yamibo 1234
 ```
 
+---
+
 ### Book ID 说明
 
-根据不同站点, Book ID 通常来源于小说详情页 URL 中的路径段:
+Book ID 通常来源于小说详情页 URL 中的路径段, 各资源站点的对应关系如下:
 
-* 起点中文网 (qidian)
+* **起点中文网 (qidian)**
 
-  `https://www.qidian.com/book/1010868264/` -> `1010868264`
+  示例 URL: `https://www.qidian.com/book/1010868264/` -> Book ID: `1010868264`
 
-  登录需要 Cookies
+  该站点需提供有效的 Cookie 才能访问订阅章节。
 
-* 笔趣阁 (biquge)
+* **笔趣阁 (biquge)**
 
-  `http://www.b520.cc/8_8187/` -> `8_8187`
+  示例 URL: `http://www.b520.cc/8_8187/` -> Book ID: `8_8187`
 
-* 铅笔小说 (qianbi)
+  该站点无需额外认证即可获取小说内容。
 
-  `https://www.23qb.net/book/12282/` -> `12282`
+* **铅笔小说 (qianbi)**
 
-* SF轻小说 (sfacg)
+  示例 URL: `https://www.23qb.net/book/12282/` -> Book ID: `12282`
 
-  `https://m.sfacg.com/b/456123/` -> `456123`
+* **SF 轻小说 (sfacg)**
 
-  登录需要 Cookies
+  示例 URL: `https://m.sfacg.com/b/456123/` -> Book ID: `456123`
 
-* ESJ Zone (esjzone)
+  该站点需提供有效的 Cookie 才能访问订阅章节。
 
-  `https://www.esjzone.cc/detail/1660702902.html` -> `1660702902`
+* **ESJ Zone (esjzone)**
 
-  **注意**: 若用户未登录账号, 部分小说页面可能无法访问。此时, 浏览器将自动重定向至「論壇」页面, 导致内容加载失败。
+  示例 URL: `https://www.esjzone.cc/detail/1660702902.html` -> Book ID: `1660702902`
 
-* 百合会 (yamibo)
+  **注意**: 若未完成登录验证, 部分小说页面会自动重定向至「論壇」页面, 导致内容加载失败。
 
-  `https://www.yamibo.com/novel/262117` -> `262117`
+* **百合会 (yamibo)**
 
-* 哔哩轻小说 (linovelib)
+  示例 URL: `https://www.yamibo.com/novel/262117` -> Book ID: `262117`
 
-  `https://www.linovelib.com/novel/1234.html` -> `1234`
+* **哔哩轻小说 (linovelib)**
 
-  **注意**: 若请求间隔过短, 可能触发平台限制机制, 导致账号/设备在一段时间内被封禁或限制访问。
+  示例 URL: `https://www.linovelib.com/novel/1234.html` -> Book ID: `1234`
 
-如果需要 Cookie, 可以在浏览器登录后, 通过浏览器开发者工具 (F12) 复制完整的 Cookie 字符串, 请参考 [复制 Cookies](./copy-cookies.md)。
+  该站点对于频繁请求有访问限制, 若请求间隔过短, 可能触发风控机制, 导致账号或设备被封禁或限制访问。
 
-p.s. 目前 session 登录方式的 cookie 还不支持自动续期, 可能每次运行前都需要手动重新设置一次 cookie, 后续会考虑优化这一流程
+---
+
+若需提供 Cookie, 可在浏览器登录后, 通过开发者工具 (F12) 复制完整的 Cookie 字符串 (详见 [复制 Cookies](./copy-cookies.md))
+
+当前 Session 登录方式的 Cookie 尚不支持自动续期, 每次运行前需手动更新。未来版本将考虑优化此流程。
+
+对于 ESJ Zone 和 百合会, 如需通过登录模式获取内容, 可在 `settings.toml` 中取消注释并填写对应账户信息, 或在运行时根据提示输入。示例如下:
+
+```toml
+[sites.<site_name>]
+book_ids = [
+  "0000000000",
+  "0000000000"
+]
+mode = "session"
+login_required = true
+username = "yourusername"     # 登录账户
+password = "yourpassword"     # 登录密码
+```
+
+---
 
 ### 注意事项
 

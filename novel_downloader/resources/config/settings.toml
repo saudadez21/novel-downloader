@@ -84,8 +84,8 @@ book_ids = [
 ]
 mode = "session"                   # browser / session
 login_required = true
-username = "youremail@domain.com"  # 登录邮箱
-password = "yourpassword"          # 登录密码
+# username = "youremail@domain.com"  # 登录邮箱
+# password = "yourpassword"          # 登录密码
 
 [sites.yamibo]  # 百合会
 book_ids = [
@@ -94,8 +94,8 @@ book_ids = [
 ]
 mode = "session"                   # browser / session
 login_required = false
-username = "yourusername"          # 登录账户
-password = "yourpassword"          # 登录密码
+# username = "yourusername"          # 登录账户
+# password = "yourpassword"          # 登录密码
 
 [sites.linovelib]  # 哔哩轻小说
 book_ids = [
