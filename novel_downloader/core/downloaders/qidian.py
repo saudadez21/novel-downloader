@@ -172,12 +172,20 @@ class QidianDownloader(BaseDownloader):
         ) -> None:
             while True:
                 task = await html_queue.get()
+                skip_retry = False
                 try:
-                    chap_json = await asyncio.to_thread(
-                        self.parser.parse_chapter,
-                        task.html_list,
-                        task.cid,
-                    )
+                    chap_json: ChapterDict | None = None
+                    if is_restricted_page(task.html_list):
+                        self.logger.info(
+                            "[Parser] Skipped restricted page for cid %s", task.cid
+                        )
+                        skip_retry = True
+                    else:
+                        chap_json = await asyncio.to_thread(
+                            self.parser.parse_chapter,
+                            task.html_list,
+                            task.cid,
+                        )
                     if chap_json:
                         await save_queue.put(chap_json)
                         self.logger.info(
@@ -191,18 +199,18 @@ class QidianDownloader(BaseDownloader):
                             folder = chapters_html_dir / (
                                 "html_encrypted" if is_encrypted else "html_plain"
                             )
-                            html_path = folder / f"{cid}.html"
+                            html_path = folder / f"{task.cid}.html"
                             save_as_txt(task.html_list[0], html_path, on_exist="skip")
                             self.logger.debug(
                                 "%s Saved raw HTML for chapter %s to %s",
                                 TAG,
-                                cid,
+                                task.cid,
                                 html_path,
                             )
                     else:
                         raise ValueError("Empty parse result")
                 except Exception as e:
-                    if task.retry < retry_times:
+                    if not skip_retry and task.retry < retry_times:
                         await cid_queue.put(
                             CidTask(prev_cid=None, cid=task.cid, retry=task.retry + 1)
                         )
@@ -212,7 +220,7 @@ class QidianDownloader(BaseDownloader):
                             task.retry + 1,
                             e,
                         )
-                    else:
+                    elif not skip_retry:
                         self.logger.warning(
                             "[Parser] Max retries reached for cid %s: %s",
                             task.cid,
@@ -296,3 +304,14 @@ class QidianDownloader(BaseDownloader):
             book_info.get("book_name", "unknown"),
         )
         return
+
+
+def is_restricted_page(html_list: list[str]) -> bool:
+    """
+    Return True if page content indicates access restriction
+    (e.g. not subscribed/purchased).
+
+    :param html_list: Raw HTML string.
+    """
+    markers = ["这是VIP章节", "需要订阅", "订阅后才能阅读"]
+    return any(m in html_list[0] for m in markers)
