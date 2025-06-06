@@ -32,7 +32,7 @@ class LinovelibExporter(BaseExporter):
         self._chapter_storage_cache: dict[str, list[ChapterStorage]] = {}
         self._chap_folders: list[str] = ["chapters"]
 
-    def save_as_txt(self, book_id: str) -> None:
+    def export_as_txt(self, book_id: str) -> None:
         """
         Compile and export a novel as a single .txt file.
 
@@ -41,7 +41,7 @@ class LinovelibExporter(BaseExporter):
         self._init_chapter_storages(book_id)
         return linovelib_export_as_txt(self, book_id)
 
-    def save_as_epub(self, book_id: str) -> None:
+    def export_as_epub(self, book_id: str) -> None:
         """
         Persist the assembled book as a EPUB (.epub) file.
 
