@@ -8,6 +8,7 @@ Main parser class for handling Qidian HTML
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -18,6 +19,8 @@ from novel_downloader.utils.state import state_mgr
 from .book_info_parser import parse_book_info
 from .chapter_router import parse_chapter
 from .utils import is_encrypted
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from novel_downloader.utils.fontocr import FontOCR
@@ -49,22 +52,27 @@ class QidianParser(BaseParser):
 
         self._font_ocr: FontOCR | None = None
         if self._decode_font:
-            from novel_downloader.utils.fontocr import FontOCR
-
-            self._font_ocr = FontOCR(
-                cache_dir=self._base_cache_dir,
-                use_freq=config.use_freq,
-                use_ocr=config.use_ocr,
-                use_vec=config.use_vec,
-                batch_size=config.batch_size,
-                gpu_mem=config.gpu_mem,
-                gpu_id=config.gpu_id,
-                ocr_weight=config.ocr_weight,
-                vec_weight=config.vec_weight,
-                font_debug=config.save_font_debug,
-            )
-            self._font_debug_dir = self._base_cache_dir / "qidian" / "font_debug"
-            self._font_debug_dir.mkdir(parents=True, exist_ok=True)
+            try:
+                from novel_downloader.utils.fontocr import FontOCR
+            except ImportError:
+                logger.warning(
+                    "[QidianParser] FontOCR not available, font decoding will skip"
+                )
+            else:
+                self._font_ocr = FontOCR(
+                    cache_dir=self._base_cache_dir,
+                    use_freq=config.use_freq,
+                    use_ocr=config.use_ocr,
+                    use_vec=config.use_vec,
+                    batch_size=config.batch_size,
+                    gpu_mem=config.gpu_mem,
+                    gpu_id=config.gpu_id,
+                    ocr_weight=config.ocr_weight,
+                    vec_weight=config.vec_weight,
+                    font_debug=config.save_font_debug,
+                )
+                self._font_debug_dir = self._base_cache_dir / "qidian" / "font_debug"
+                self._font_debug_dir.mkdir(parents=True, exist_ok=True)
 
     def parse_book_info(
         self,

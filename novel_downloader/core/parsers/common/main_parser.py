@@ -16,7 +16,7 @@ from novel_downloader.models import (
     SiteRules,
 )
 
-from .helper import HTMLExtractor
+# from .helper import HTMLExtractor
 
 
 class CommonParser(BaseParser):
@@ -51,9 +51,10 @@ class CommonParser(BaseParser):
         """
         if not html_list:
             return {}
-        extractor = HTMLExtractor(html_list[0])
-        rules = self._site_rule["book_info"]
-        return extractor.extract_book_info(rules)
+        # extractor = HTMLExtractor(html_list[0])
+        # rules = self._site_rule["book_info"]
+        # return extractor.extract_book_info(rules)
+        return {}
 
     def parse_chapter(
         self,
@@ -70,28 +71,29 @@ class CommonParser(BaseParser):
         """
         if not html_list:
             return None
-        extractor = HTMLExtractor(html_list[0])
-        chapter_rules = self._site_rule["chapter"]
+        # extractor = HTMLExtractor(html_list[0])
+        # chapter_rules = self._site_rule["chapter"]
 
-        # 必须有正文内容
-        content_steps = chapter_rules.get("content")
-        if not content_steps:
-            raise ValueError(f"No chapter content steps defined for site: {self._site}")
+        # # 必须有正文内容
+        # content_steps = chapter_rules.get("content")
+        # if not content_steps:
+        #     raise ValueError(f"No chapter content steps for site: {self._site}")
 
-        title_steps = chapter_rules.get("title")
-        title = extractor.extract_field(title_steps["steps"]) if title_steps else ""
-        content = extractor.extract_field(content_steps["steps"])
-        if not content:
-            return None
+        # title_steps = chapter_rules.get("title")
+        # title = extractor.extract_field(title_steps["steps"]) if title_steps else ""
+        # content = extractor.extract_field(content_steps["steps"])
+        # if not content:
+        #     return None
 
-        return {
-            "id": chapter_id,
-            "title": title or "Untitled",
-            "content": content,
-            "extra": {
-                "site": self._site,
-            },
-        }
+        # return {
+        #     "id": chapter_id,
+        #     "title": title or "Untitled",
+        #     "content": content,
+        #     "extra": {
+        #         "site": self._site,
+        #     },
+        # }
+        return None
 
     @property
     def site(self) -> str:

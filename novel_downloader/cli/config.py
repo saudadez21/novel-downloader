@@ -13,10 +13,11 @@ from pathlib import Path
 
 from novel_downloader.config import save_config_file, save_rules_as_json
 from novel_downloader.utils.constants import DEFAULT_SETTINGS_PATHS
-from novel_downloader.utils.hash_store import img_hash_store
 from novel_downloader.utils.i18n import t
 from novel_downloader.utils.logger import setup_logging
 from novel_downloader.utils.state import state_mgr
+
+# from novel_downloader.utils.hash_store import img_hash_store
 
 
 def register_config_subcommand(subparsers: _SubParsersAction) -> None:  # type: ignore
@@ -28,7 +29,7 @@ def register_config_subcommand(subparsers: _SubParsersAction) -> None:  # type: 
     _register_set_config(config_subparsers)
     _register_update_rules(config_subparsers)
     _register_set_cookies(config_subparsers)
-    _register_add_hash(config_subparsers)
+    # _register_add_hash(config_subparsers)
 
 
 def _register_init(subparsers: _SubParsersAction) -> None:  # type: ignore
@@ -64,10 +65,10 @@ def _register_set_cookies(subparsers: _SubParsersAction) -> None:  # type: ignor
     parser.set_defaults(func=_handle_set_cookies)
 
 
-def _register_add_hash(subparsers: _SubParsersAction) -> None:  # type: ignore
-    parser = subparsers.add_parser("add-hash", help=t("settings_add_hash_help"))
-    parser.add_argument("--path", type=str, help=t("settings_add_hash_path_help"))
-    parser.set_defaults(func=_handle_add_hash)
+# def _register_add_hash(subparsers: _SubParsersAction) -> None:  # type: ignore
+#     parser = subparsers.add_parser("add-hash", help=t("settings_add_hash_help"))
+#     parser.add_argument("--path", type=str, help=t("settings_add_hash_path_help"))
+#     parser.set_defaults(func=_handle_add_hash)
 
 
 def _handle_init(args: Namespace) -> None:
@@ -143,34 +144,34 @@ def _handle_set_cookies(args: Namespace) -> None:
         raise
 
 
-def _handle_add_hash(args: Namespace) -> None:
-    if args.path:
-        try:
-            img_hash_store.add_from_map(args.path)
-            img_hash_store.save()
-            print(t("settings_add_hash_loaded", path=args.path))
-        except Exception as e:
-            print(t("settings_add_hash_load_fail", err=str(e)))
-            raise
-    else:
-        print(t("settings_add_hash_prompt_tip"))
-        while True:
-            img_path = input(t("settings_add_hash_prompt_img") + ": ").strip()
-            if not img_path or img_path.lower() in {"exit", "quit"}:
-                break
-            if not Path(img_path).exists():
-                print(t("settings_add_hash_path_invalid"))
-                continue
+# def _handle_add_hash(args: Namespace) -> None:
+#     if args.path:
+#         try:
+#             img_hash_store.add_from_map(args.path)
+#             img_hash_store.save()
+#             print(t("settings_add_hash_loaded", path=args.path))
+#         except Exception as e:
+#             print(t("settings_add_hash_load_fail", err=str(e)))
+#             raise
+#     else:
+#         print(t("settings_add_hash_prompt_tip"))
+#         while True:
+#             img_path = input(t("settings_add_hash_prompt_img") + ": ").strip()
+#             if not img_path or img_path.lower() in {"exit", "quit"}:
+#                 break
+#             if not Path(img_path).exists():
+#                 print(t("settings_add_hash_path_invalid"))
+#                 continue
 
-            label = input(t("settings_add_hash_prompt_label") + ": ").strip()
-            if not label or label.lower() in {"exit", "quit"}:
-                break
+#             label = input(t("settings_add_hash_prompt_label") + ": ").strip()
+#             if not label or label.lower() in {"exit", "quit"}:
+#                 break
 
-            try:
-                img_hash_store.add_image(img_path, label)
-                print(t("settings_add_hash_added", img=img_path, label=label))
-            except Exception as e:
-                print(t("settings_add_hash_failed", err=str(e)))
+#             try:
+#                 img_hash_store.add_image(img_path, label)
+#                 print(t("settings_add_hash_added", img=img_path, label=label))
+#             except Exception as e:
+#                 print(t("settings_add_hash_failed", err=str(e)))
 
-        img_hash_store.save()
-        print(t("settings_add_hash_saved"))
+#         img_hash_store.save()
+#         print(t("settings_add_hash_saved"))
