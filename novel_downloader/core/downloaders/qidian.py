@@ -42,6 +42,7 @@ class QidianDownloader(BaseDownloader):
         exporter: ExporterProtocol,
         config: DownloaderConfig,
     ):
+        config.request_interval = max(1.0, config.request_interval)
         super().__init__(fetcher, parser, exporter, config, "qidian")
 
     async def _download_one(self, book_id: str) -> None:
