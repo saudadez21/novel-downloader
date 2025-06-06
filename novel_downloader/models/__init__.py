@@ -26,6 +26,7 @@ from .site_rules import (
 from .tasks import (
     CidTask,
     HtmlTask,
+    RestoreTask,
 )
 from .types import (
     BrowserType,
@@ -59,4 +60,5 @@ __all__ = [
     "VolumesRules",
     "CidTask",
     "HtmlTask",
+    "RestoreTask",
 ]

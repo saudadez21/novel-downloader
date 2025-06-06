@@ -12,7 +12,7 @@ from contextlib import suppress
 from typing import Any, cast
 
 from novel_downloader.core.downloaders.base import BaseDownloader
-from novel_downloader.models import ChapterDict, CidTask, HtmlTask
+from novel_downloader.models import ChapterDict, CidTask, HtmlTask, RestoreTask
 from novel_downloader.utils.chapter_storage import ChapterStorage
 from novel_downloader.utils.file_utils import save_as_json, save_as_txt
 from novel_downloader.utils.time_utils import (
@@ -98,15 +98,31 @@ class CommonDownloader(BaseDownloader):
         # setup queue, semaphore
         semaphore = asyncio.Semaphore(self.download_workers)
         cid_queue: asyncio.Queue[CidTask] = asyncio.Queue()
-        restore_queue: asyncio.Queue[str] = asyncio.Queue()
+        restore_queue: asyncio.Queue[RestoreTask] = asyncio.Queue()
         html_queue: asyncio.Queue[HtmlTask] = asyncio.Queue()
         save_queue: asyncio.Queue[ChapterDict] = asyncio.Queue()
+        pending_restore: dict[str, RestoreTask] = {}
+
+        def update_book_info(
+            vol_idx: int,
+            chap_idx: int,
+            cid: str,
+        ) -> None:
+            try:
+                book_info["volumes"][vol_idx]["chapters"][chap_idx]["chapterId"] = cid
+            except (IndexError, KeyError, TypeError) as e:
+                self.logger.info(
+                    "[update_book_info] Failed to update vol=%s, chap=%s: %s",
+                    vol_idx,
+                    chap_idx,
+                    e,
+                )
 
         async def fetcher_worker(
             book_id: str,
             cid_queue: asyncio.Queue[CidTask],
             html_queue: asyncio.Queue[HtmlTask],
-            restore_queue: asyncio.Queue[str],
+            restore_queue: asyncio.Queue[RestoreTask],
             retry_times: int,
             semaphore: asyncio.Semaphore,
         ) -> None:
@@ -114,7 +130,13 @@ class CommonDownloader(BaseDownloader):
                 task = await cid_queue.get()
                 cid = task.cid
                 if not cid and task.prev_cid:
-                    await restore_queue.put(task.prev_cid)
+                    await restore_queue.put(
+                        RestoreTask(
+                            vol_idx=task.vol_idx,
+                            chap_idx=task.chap_idx,
+                            prev_cid=task.prev_cid,
+                        )
+                    )
                     cid_queue.task_done()
                     continue
 
@@ -127,7 +149,13 @@ class CommonDownloader(BaseDownloader):
                     async with semaphore:
                         html_list = await self.fetcher.get_book_chapter(book_id, cid)
                     await html_queue.put(
-                        HtmlTask(cid=cid, retry=task.retry, html_list=html_list)
+                        HtmlTask(
+                            cid=cid,
+                            retry=task.retry,
+                            html_list=html_list,
+                            vol_idx=task.vol_idx,
+                            chap_idx=task.chap_idx,
+                        )
                     )
                     self.logger.info("[Fetcher] Downloaded chapter %s", cid)
                     await async_sleep_with_random_delay(
@@ -140,7 +168,11 @@ class CommonDownloader(BaseDownloader):
                     if task.retry < retry_times:
                         await cid_queue.put(
                             CidTask(
-                                prev_cid=task.prev_cid, cid=cid, retry=task.retry + 1
+                                prev_cid=task.prev_cid,
+                                cid=cid,
+                                retry=task.retry + 1,
+                                vol_idx=task.vol_idx,
+                                chap_idx=task.chap_idx,
                             )
                         )
                         self.logger.info(
@@ -192,7 +224,13 @@ class CommonDownloader(BaseDownloader):
                 except Exception as e:
                     if task.retry < retry_times:
                         await cid_queue.put(
-                            CidTask(prev_cid=None, cid=task.cid, retry=task.retry + 1)
+                            CidTask(
+                                prev_cid=None,
+                                cid=task.cid,
+                                retry=task.retry + 1,
+                                vol_idx=task.vol_idx,
+                                chap_idx=task.chap_idx,
+                            )
                         )
                         self.logger.info(
                             "[Parser-%d] Re-queued cid %s for retry #%d: %s",
@@ -214,7 +252,7 @@ class CommonDownloader(BaseDownloader):
         async def storage_worker(
             cs: ChapterStorage,
             save_queue: asyncio.Queue[ChapterDict],
-            restore_queue: asyncio.Queue[str],
+            restore_queue: asyncio.Queue[RestoreTask],
             cid_queue: asyncio.Queue[CidTask],
         ) -> None:
             nonlocal completed_count
@@ -241,25 +279,58 @@ class CommonDownloader(BaseDownloader):
                             completed_count += 1
                             if progress_hook:
                                 await progress_hook(completed_count, total_chapters)
+
+                            curr_cid = item["id"]
+                            if curr_cid in pending_restore:
+                                rt = pending_restore.pop(curr_cid)
+                                next_cid = item.get("extra", {}).get("next_chapter_id")
+                                if next_cid:
+                                    update_book_info(
+                                        vol_idx=rt.vol_idx,
+                                        chap_idx=rt.chap_idx,
+                                        cid=next_cid,
+                                    )
+                                    await cid_queue.put(
+                                        CidTask(
+                                            prev_cid=rt.prev_cid,
+                                            cid=next_cid,
+                                            vol_idx=rt.vol_idx,
+                                            chap_idx=rt.chap_idx,
+                                        )
+                                    )
+                                else:
+                                    self.logger.warning(
+                                        "[storage_worker] No next_cid found for %r",
+                                        rt,
+                                    )
                         except Exception as e:
                             self.logger.error("[storage_worker] Failed to save: %s", e)
                         finally:
                             save_queue.task_done()
 
-                    elif isinstance(item, str):  # from restore_queue
-                        prev_json = cs.get(item)
+                    elif isinstance(item, RestoreTask):  # from restore_queue
+                        prev_json = cs.get(item.prev_cid)
                         next_cid = (
                             prev_json.get("extra", {}).get("next_chapter_id")
                             if prev_json
                             else None
                         )
                         if next_cid:
-                            await cid_queue.put(CidTask(prev_cid=item, cid=next_cid))
-                        else:
-                            self.logger.warning(
-                                "[storage_worker] No next_cid found for %s",
-                                item,
+                            update_book_info(
+                                vol_idx=item.vol_idx,
+                                chap_idx=item.chap_idx,
+                                cid=next_cid,
                             )
+                            await cid_queue.put(
+                                CidTask(
+                                    prev_cid=item.prev_cid,
+                                    cid=next_cid,
+                                    vol_idx=item.vol_idx,
+                                    chap_idx=item.chap_idx,
+                                )
+                            )
+                        else:
+                            pending_restore[item.prev_cid] = item
                         restore_queue.task_done()
 
         fetcher_tasks = [
@@ -299,9 +370,9 @@ class CommonDownloader(BaseDownloader):
         )
 
         last_cid: str | None = None
-        for vol in book_info.get("volumes", []):
+        for vol_idx, vol in enumerate(vols):
             chapters = vol.get("chapters", [])
-            for chap in chapters:
+            for chap_idx, chap in enumerate(chapters):
                 cid = chap.get("chapterId")
                 if cid and normal_cs.exists(cid) and self.skip_existing:
                     completed_count += 1
@@ -310,7 +381,14 @@ class CommonDownloader(BaseDownloader):
                     last_cid = cid
                     continue
 
-                await cid_queue.put(CidTask(cid=cid, prev_cid=last_cid))
+                await cid_queue.put(
+                    CidTask(
+                        vol_idx=vol_idx,
+                        chap_idx=chap_idx,
+                        cid=cid,
+                        prev_cid=last_cid,
+                    )
+                )
                 last_cid = cid
 
         await restore_queue.join()
@@ -324,6 +402,7 @@ class CommonDownloader(BaseDownloader):
                 await task
 
         normal_cs.close()
+        save_as_json(book_info, info_path)
 
         await asyncio.to_thread(self.exporter.export, book_id)
 

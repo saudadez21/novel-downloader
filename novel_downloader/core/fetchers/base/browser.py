@@ -196,7 +196,7 @@ class BaseBrowser(FetcherProtocol, abc.ABC):
         self,
         url: str,
         wait_until: Literal["commit", "domcontentloaded", "load", "networkidle"]
-        | None = "networkidle",
+        | None = "load",
         referer: str | None = None,
         **kwargs: Any,
     ) -> str:

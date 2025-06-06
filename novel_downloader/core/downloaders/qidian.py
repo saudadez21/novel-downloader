@@ -156,7 +156,9 @@ class QidianDownloader(BaseDownloader):
                     if task.retry < retry_times:
                         await cid_queue.put(
                             CidTask(
-                                prev_cid=task.prev_cid, cid=cid, retry=task.retry + 1
+                                prev_cid=task.prev_cid,
+                                cid=cid,
+                                retry=task.retry + 1,
                             )
                         )
                         self.logger.info(
