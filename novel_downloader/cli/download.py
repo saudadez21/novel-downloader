@@ -112,7 +112,7 @@ async def _download(
 
         for book_id in valid_book_ids:
             print(t("download_downloading", book_id=book_id, site=site))
-            await downloader.download(book_id)
+            await downloader.download(book_id, progress_hook=_print_progress)
 
         if downloader_cfg.login_required and fetcher.is_logged_in:
             await fetcher.save_state()
@@ -166,3 +166,8 @@ async def _prompt_login_fields(
         result[field.name] = value
 
     return result
+
+
+async def _print_progress(done: int, total: int) -> None:
+    percent = done / total * 100
+    print(f"下载进度: {done}/{total} 章 ({percent:.2f}%)")

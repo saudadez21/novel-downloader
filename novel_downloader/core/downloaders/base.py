@@ -9,7 +9,9 @@ common interface and reusable logic for all downloader implementations.
 
 import abc
 import logging
+from collections.abc import Awaitable, Callable
 from pathlib import Path
+from typing import Any
 
 from novel_downloader.core.interfaces import (
     DownloaderProtocol,
@@ -49,11 +51,19 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
 
         self.logger = logging.getLogger(f"{self.__class__.__name__}")
 
-    async def download_many(self, book_ids: list[str]) -> None:
+    async def download_many(
+        self,
+        book_ids: list[str],
+        *,
+        progress_hook: Callable[[int, int], Awaitable[None]] | None = None,
+        **kwargs: Any,
+    ) -> None:
         """
         Download multiple books with pre-download hook and error handling.
 
         :param book_ids: A list of book identifiers to download.
+        :param progress_hook: (optional) Called after each chapter;
+                                args: completed_count, total_count.
         """
         if not await self._ensure_ready():
             self.logger.warning(
@@ -65,17 +75,29 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
 
         for book_id in book_ids:
             try:
-                await self._download_one(book_id)
+                await self._download_one(
+                    book_id,
+                    progress_hook=progress_hook,
+                    **kwargs,
+                )
             except Exception as e:
                 self._handle_download_exception(book_id, e)
 
         await self._finalize()
 
-    async def download(self, book_id: str) -> None:
+    async def download(
+        self,
+        book_id: str,
+        *,
+        progress_hook: Callable[[int, int], Awaitable[None]] | None = None,
+        **kwargs: Any,
+    ) -> None:
         """
         Download a single book with pre-download hook and error handling.
 
         :param book_id: The identifier of the book to download.
+        :param progress_hook: (optional) Called after each chapter;
+                                args: completed_count, total_count.
         """
         if not await self._ensure_ready():
             self.logger.warning(
@@ -86,14 +108,24 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
             return
 
         try:
-            await self._download_one(book_id)
+            await self._download_one(
+                book_id,
+                progress_hook=progress_hook,
+                **kwargs,
+            )
         except Exception as e:
             self._handle_download_exception(book_id, e)
 
         await self._finalize()
 
     @abc.abstractmethod
-    async def _download_one(self, book_id: str) -> None:
+    async def _download_one(
+        self,
+        book_id: str,
+        *,
+        progress_hook: Callable[[int, int], Awaitable[None]] | None = None,
+        **kwargs: Any,
+    ) -> None:
         """
         Subclasses must implement this to define how to download a single book.
         """

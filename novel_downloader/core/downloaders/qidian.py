@@ -7,6 +7,7 @@ novel_downloader.core.downloaders.qidian
 
 import asyncio
 import json
+from collections.abc import Awaitable, Callable
 from contextlib import suppress
 from typing import Any, cast
 
@@ -45,7 +46,13 @@ class QidianDownloader(BaseDownloader):
         config.request_interval = max(1.0, config.request_interval)
         super().__init__(fetcher, parser, exporter, config, "qidian")
 
-    async def _download_one(self, book_id: str) -> None:
+    async def _download_one(
+        self,
+        book_id: str,
+        *,
+        progress_hook: Callable[[int, int], Awaitable[None]] | None = None,
+        **kwargs: Any,
+    ) -> None:
         """
         The full download logic for a single book.
 
@@ -103,6 +110,16 @@ class QidianDownloader(BaseDownloader):
                 book_info = old_data or {"book_name": "未找到书名"}
         else:
             book_info = old_data
+
+        vols = book_info.get("volumes", [])
+        total_chapters = 0
+        for vol in vols:
+            total_chapters += len(vol.get("chapters", []))
+        if total_chapters == 0:
+            self.logger.warning("%s 书籍没有章节可下载: book_id=%s", TAG, book_id)
+            return
+
+        completed_count = 0
 
         # setup queue
         cid_queue: asyncio.Queue[CidTask] = asyncio.Queue()
@@ -234,13 +251,16 @@ class QidianDownloader(BaseDownloader):
             encrypted_cs: ChapterStorage,
             save_queue: asyncio.Queue[ChapterDict],
         ) -> None:
+            nonlocal completed_count
             while True:
                 item = await save_queue.get()
                 try:
                     is_encrypted = item.get("extra", {}).get("encrypted", False)
                     cs = encrypted_cs if is_encrypted else normal_cs
                     cs.save(cast(ChapterDict, item))
-                    cs.save(cast(ChapterDict, item))
+                    completed_count += 1
+                    if progress_hook:
+                        await progress_hook(completed_count, total_chapters)
                 except Exception as e:
                     self.logger.error("[storage_worker] Failed to save: %s", e)
                 finally:
@@ -278,6 +298,9 @@ class QidianDownloader(BaseDownloader):
             for chap in chapters:
                 cid = chap.get("chapterId")
                 if cid and normal_cs.exists(cid) and self.skip_existing:
+                    completed_count += 1
+                    if progress_hook:
+                        await progress_hook(completed_count, total_chapters)
                     last_cid = cid
                     continue
 

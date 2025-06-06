@@ -7,6 +7,7 @@ novel_downloader.core.downloaders.common
 
 import asyncio
 import json
+from collections.abc import Awaitable, Callable
 from contextlib import suppress
 from typing import Any, cast
 
@@ -25,7 +26,13 @@ class CommonDownloader(BaseDownloader):
     Specialized Async downloader for common novels.
     """
 
-    async def _download_one(self, book_id: str) -> None:
+    async def _download_one(
+        self,
+        book_id: str,
+        *,
+        progress_hook: Callable[[int, int], Awaitable[None]] | None = None,
+        **kwargs: Any,
+    ) -> None:
         """
         The full download logic for a single book.
 
@@ -77,6 +84,16 @@ class CommonDownloader(BaseDownloader):
                 book_info = old_data or {"book_name": "未找到书名"}
         else:
             book_info = old_data
+
+        vols = book_info.get("volumes", [])
+        total_chapters = 0
+        for vol in vols:
+            total_chapters += len(vol.get("chapters", []))
+        if total_chapters == 0:
+            self.logger.warning("%s 书籍没有章节可下载: book_id=%s", TAG, book_id)
+            return
+
+        completed_count = 0
 
         # setup queue, semaphore
         semaphore = asyncio.Semaphore(self.download_workers)
@@ -200,6 +217,7 @@ class CommonDownloader(BaseDownloader):
             restore_queue: asyncio.Queue[str],
             cid_queue: asyncio.Queue[CidTask],
         ) -> None:
+            nonlocal completed_count
             while True:
                 save_task = asyncio.create_task(save_queue.get())
                 restore_task = asyncio.create_task(restore_queue.get())
@@ -220,6 +238,9 @@ class CommonDownloader(BaseDownloader):
                     if isinstance(item, dict):  # from save_queue
                         try:
                             cs.save(cast(ChapterDict, item))
+                            completed_count += 1
+                            if progress_hook:
+                                await progress_hook(completed_count, total_chapters)
                         except Exception as e:
                             self.logger.error("[storage_worker] Failed to save: %s", e)
                         finally:
@@ -283,6 +304,9 @@ class CommonDownloader(BaseDownloader):
             for chap in chapters:
                 cid = chap.get("chapterId")
                 if cid and normal_cs.exists(cid) and self.skip_existing:
+                    completed_count += 1
+                    if progress_hook:
+                        await progress_hook(completed_count, total_chapters)
                     last_cid = cid
                     continue
 
