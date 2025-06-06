@@ -102,3 +102,7 @@ class QianbiSession(BaseSession):
         :return: Fully qualified chapter URL.
         """
         return cls.CHAPTER_URL.format(book_id=book_id, chapter_id=chapter_id)
+
+    @property
+    def hostname(self) -> str:
+        return "www.23qb.com"

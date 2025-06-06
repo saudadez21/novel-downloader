@@ -287,6 +287,10 @@ class BaseBrowser(FetcherProtocol, abc.ABC):
         self.logger.debug("[browser] Browser restarted (headless=%s).", headless)
 
     @property
+    def hostname(self) -> str:
+        return ""
+
+    @property
     def site(self) -> str:
         return self._site
 

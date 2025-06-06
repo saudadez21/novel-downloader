@@ -163,6 +163,10 @@ class LinovelibSession(BaseSession):
         """
         return f"/novel/{book_id}/{chapter_id}.html"
 
+    @property
+    def hostname(self) -> str:
+        return "www.linovelib.com"
+
     def _extract_vol_ids(self, html_str: str) -> list[str]:
         """
         Extract volume IDs (like 'vol_12345') from the info HTML.

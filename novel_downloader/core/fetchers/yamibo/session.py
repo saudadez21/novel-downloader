@@ -166,6 +166,10 @@ class YamiboSession(BaseSession):
         """
         return cls.CHAPTER_URL.format(book_id=book_id, chapter_id=chapter_id)
 
+    @property
+    def hostname(self) -> str:
+        return "www.yamibo.com"
+
     async def _api_login(self, username: str, password: str) -> bool:
         """
         Login to the API using a 2-step token-based process.

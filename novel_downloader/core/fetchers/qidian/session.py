@@ -219,6 +219,10 @@ class QidianSession(BaseSession):
         """
         return cls.CHAPTER_URL.format(book_id=book_id, chapter_id=chapter_id)
 
+    @property
+    def hostname(self) -> str:
+        return "www.qidian.com"
+
     def _update_fp_val(
         self,
         *,

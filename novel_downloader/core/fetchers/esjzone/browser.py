@@ -196,3 +196,7 @@ class EsjzoneBrowser(BaseBrowser):
         if not resp_text:
             return False
         return not any(kw in resp_text[0] for kw in keywords)
+
+    @property
+    def hostname(self) -> str:
+        return "www.esjzone.cc"

@@ -18,7 +18,6 @@ from typing import Any, Self
 
 import aiohttp
 from aiohttp import ClientResponse, ClientSession, ClientTimeout, TCPConnector
-from yarl import URL
 
 from novel_downloader.core.interfaces import FetcherProtocol
 from novel_downloader.models import FetcherConfig, LoginField
@@ -242,9 +241,7 @@ class BaseSession(FetcherProtocol, abc.ABC):
         try:
             storage = json.loads(self._state_file.read_text(encoding="utf-8"))
             for c in storage.get("cookies", []):
-                self._session.cookie_jar.update_cookies(
-                    {c["name"]: c["value"]}, response_url=URL(f"https://{c['domain']}")
-                )
+                self._session.cookie_jar.update_cookies({c["name"]: c["value"]})
             self._is_logged_in = await self._check_login_status()
             return self._is_logged_in
         except Exception as e:
@@ -279,7 +276,7 @@ class BaseSession(FetcherProtocol, abc.ABC):
                         "expires": int(cookie.get("expires") or -1),
                         "httpOnly": bool(cookie.get("httponly", False)),
                         "secure": bool(cookie.get("secure", False)),
-                        "sameSite": cookie.get("samesite", "Lax"),
+                        "sameSite": cookie.get("samesite") or "Lax",
                     }
                 )
             storage_state = {
@@ -341,6 +338,10 @@ class BaseSession(FetcherProtocol, abc.ABC):
         :return: True if the user is logged in, False otherwise.
         """
         return False
+
+    @property
+    def hostname(self) -> str:
+        return ""
 
     @property
     def site(self) -> str:

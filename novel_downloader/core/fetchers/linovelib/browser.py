@@ -156,6 +156,10 @@ class LinovelibBrowser(BaseBrowser):
         """
         return cls.CHAPTER_URL.format(book_id=book_id, chapter_id=chapter_id)
 
+    @property
+    def hostname(self) -> str:
+        return "www.linovelib.com"
+
     @classmethod
     def relative_chapter_url(cls, book_id: str, chapter_id: str) -> str:
         """

@@ -1,42 +1,35 @@
 #!/usr/bin/env python3
 """
 novel_downloader.cli.main
---------------------------
+-------------------------
 
 Unified CLI entry point. Parses arguments and delegates to parser or interactive.
 """
 
+import argparse
 
-import click
-from click import Context
-
-from novel_downloader.cli import clean, download, interactive, settings
 from novel_downloader.utils.i18n import t
 
-
-@click.group(help=t("cli_help"), invoke_without_command=True)  # type: ignore
-@click.option(
-    "--config",
-    type=click.Path(exists=True, dir_okay=False, resolve_path=True),
-    default=None,
-    help=t("help_config"),
-)  # type: ignore
-@click.pass_context  # type: ignore
-def cli_main(ctx: Context, config: str | None) -> None:
-    """Novel Downloader CLI."""
-    ctx.ensure_object(dict)
-    ctx.obj["config_path"] = config
-
-    if ctx.invoked_subcommand is None:
-        click.echo(t("main_no_command"))
-        ctx.invoke(interactive.interactive_cli)
+from .clean import register_clean_subcommand
+from .config import register_config_subcommand
+from .download import register_download_subcommand
+from .export import register_export_subcommand
 
 
-# Register subcommands
-cli_main.add_command(clean.clean_cli)
-cli_main.add_command(download.download_cli)
-cli_main.add_command(interactive.interactive_cli)
-cli_main.add_command(settings.settings_cli)
+def cli_main() -> None:
+    parser = argparse.ArgumentParser(description=t("cli_help"))
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    register_clean_subcommand(subparsers)
+    register_config_subcommand(subparsers)
+    register_download_subcommand(subparsers)
+    register_export_subcommand(subparsers)
+
+    args = parser.parse_args()
+    if hasattr(args, "func"):
+        args.func(args)
+    else:
+        parser.print_help()
 
 
 if __name__ == "__main__":

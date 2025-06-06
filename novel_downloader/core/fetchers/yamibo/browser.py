@@ -204,6 +204,10 @@ class YamiboBrowser(BaseBrowser):
         """
         return cls.CHAPTER_URL.format(book_id=book_id, chapter_id=chapter_id)
 
+    @property
+    def hostname(self) -> str:
+        return "www.yamibo.com"
+
     async def _check_login_status(self) -> bool:
         """
         Check whether the user is currently logged in by
