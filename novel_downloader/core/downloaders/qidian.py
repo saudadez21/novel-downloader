@@ -194,7 +194,7 @@ class QidianDownloader(BaseDownloader):
                 skip_retry = False
                 try:
                     chap_json: ChapterDict | None = None
-                    if is_restricted_page(task.html_list):
+                    if self.is_restricted_page(task.html_list):
                         self.logger.info(
                             "[Parser] Skipped restricted page for cid %s", task.cid
                         )
@@ -205,6 +205,8 @@ class QidianDownloader(BaseDownloader):
                             task.html_list,
                             task.cid,
                         )
+                    if self.check_encrypted(task.html_list):
+                        skip_retry = True
                     if chap_json:
                         await save_queue.put(chap_json)
                         self.logger.info(
@@ -330,13 +332,21 @@ class QidianDownloader(BaseDownloader):
         )
         return
 
+    @staticmethod
+    def is_restricted_page(html_list: list[str]) -> bool:
+        """
+        Return True if page content indicates access restriction
+        (e.g. not subscribed/purchased).
 
-def is_restricted_page(html_list: list[str]) -> bool:
-    """
-    Return True if page content indicates access restriction
-    (e.g. not subscribed/purchased).
+        :param html_list: Raw HTML string.
+        """
+        if not html_list:
+            return True
+        markers = ["这是VIP章节", "需要订阅", "订阅后才能阅读"]
+        return any(m in html_list[0] for m in markers)
 
-    :param html_list: Raw HTML string.
-    """
-    markers = ["这是VIP章节", "需要订阅", "订阅后才能阅读"]
-    return any(m in html_list[0] for m in markers)
+    @staticmethod
+    def check_encrypted(html_list: list[str]) -> bool:
+        if not html_list:
+            return True
+        return '"cES":2' in html_list[0]
