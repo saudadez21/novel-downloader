@@ -105,7 +105,7 @@ class QidianNodeDecryptor:
     def decrypt(
         self,
         ciphertext: str | bytes,
-        chapter_id: str | int,
+        chapter_id: str,
         fkp: str,
         fuid: str,
     ) -> str:
@@ -120,6 +120,8 @@ class QidianNodeDecryptor:
         :raises RuntimeError: if the Node.js subprocess exits with a non-zero code.
         """
         if not self._script_cmd:
+            return ""
+        if not (ciphertext and chapter_id and fkp and fuid):
             return ""
         # Normalize inputs
         cipher_str = (

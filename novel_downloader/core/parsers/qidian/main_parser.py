@@ -14,7 +14,8 @@ from typing import TYPE_CHECKING, Any
 
 from novel_downloader.core.parsers.base import BaseParser
 from novel_downloader.models import ChapterDict, ParserConfig
-from novel_downloader.utils.state import state_mgr
+from novel_downloader.utils.constants import DATA_DIR
+from novel_downloader.utils.cookies import find_cookie_value
 
 from .book_info_parser import parse_book_info
 from .chapter_router import parse_chapter
@@ -47,8 +48,11 @@ class QidianParser(BaseParser):
         self._fixed_font_dir.mkdir(parents=True, exist_ok=True)
         self._font_debug_dir: Path | None = None
 
-        qd_cookies = state_mgr.get_cookies("qidian")
-        self._fuid: str = qd_cookies.get("ywguid", "")
+        state_files = [
+            DATA_DIR / "qidian" / "browser_state.cookies",
+            DATA_DIR / "qidian" / "session_state.cookies",
+        ]
+        self._fuid: str = find_cookie_value(state_files, "ywguid")
 
         self._font_ocr: FontOCR | None = None
         if self._decode_font:
