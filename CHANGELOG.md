@@ -1,3 +1,9 @@
+## v1.4.1 (2025-06-07)
+
+### Fix
+
+- **fetcher**: handle single-volume extraction for linovelib
+
 ## v1.4.0 (2025-06-07)
 
 ### Feat
