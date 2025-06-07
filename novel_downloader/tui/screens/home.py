@@ -43,13 +43,11 @@ class HomeScreen(Screen):  # type: ignore[misc]
     def on_mount(self) -> None:
         log_widget = self.query_one("#log", RichLog)
 
-        handler = RichLogHandler(log_widget)
-        handler.setLevel(logging.INFO)
-        handler.setFormatter(logging.Formatter("[%(levelname)s] %(message)s"))
+        self._log_handler = RichLogHandler(log_widget)
+        self._log_handler.setLevel(logging.INFO)
+        self._log_handler.setFormatter(logging.Formatter("[%(levelname)s] %(message)s"))
 
-        logger = logging.getLogger()
-        logger.setLevel(logging.INFO)
-        logger.addHandler(handler)
+        self._setup_logging(self._log_handler)
 
     async def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "exit":
@@ -121,6 +119,7 @@ class HomeScreen(Screen):  # type: ignore[misc]
 
             parser = get_parser(site, parser_cfg)
             exporter = get_exporter(site, exporter_cfg)
+            self._setup_logging(self._log_handler)
 
             async with get_fetcher(site, fetcher_cfg) as fetcher:
                 if downloader_cfg.login_required and not await fetcher.load_state():
@@ -166,6 +165,22 @@ class HomeScreen(Screen):  # type: ignore[misc]
         # await self.app.push_screen(login_screen)
         # await self.app.pop_screen()
         return {}
+
+    def _setup_logging(self, handler: logging.Handler) -> None:
+        """
+        Attach the given handler to the root logger.
+        """
+        ft_logger = logging.getLogger("fontTools.ttLib.tables._p_o_s_t")
+        ft_logger.setLevel(logging.ERROR)
+        ft_logger.propagate = False
+
+        logger = logging.getLogger()
+        logger.setLevel(logging.INFO)
+
+        logger.handlers = [
+            h for h in logger.handlers if not isinstance(h, RichLogHandler)
+        ]
+        logger.addHandler(handler)
 
     async def _update_progress(self, done: int, total: int) -> None:
         prog = self.query_one("#prog", ProgressBar)
