@@ -78,6 +78,7 @@ include = ["novel_downloader", "novel_downloader.*"]
 "novel_downloader.locales" = ["*.json"]
 "novel_downloader.resources.css_styles" = ["*.css"]
 "novel_downloader.resources.images" = ["*.png"]
+"novel_downloader.tui.styles" = ["*.tcss"]
 
 [tool.setuptools.dynamic]
 version = {attr = "novel_downloader.__version__"}
