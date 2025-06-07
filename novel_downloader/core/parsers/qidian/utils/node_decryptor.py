@@ -66,8 +66,8 @@ class QidianNodeDecryptor:
         """
         try:
             # 1) Check Node.js
-            # if not shutil.which("node"):
-            #     raise OSError("Node.js is not installed or not in PATH.")
+            if not shutil.which("node"):
+                raise OSError("Node.js is not installed or not in PATH.")
 
             # 2) Copy bundled decrypt script into place if missing
             if not self.QIDIAN_DECRYPT_SCRIPT_PATH.exists():
@@ -93,8 +93,7 @@ class QidianNodeDecryptor:
                     raise
             self._script_cmd = ["node", str(self.QIDIAN_DECRYPT_SCRIPT_PATH)]
             return
-        except Exception as e:
-            logger.warning("[decryptor] Node.js not found: %s", e)
+        except Exception:
             try:
                 self._script_cmd = [str(ensure_decryptor(self.script_dir))]
             except Exception as exc:
