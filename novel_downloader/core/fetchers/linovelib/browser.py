@@ -20,6 +20,7 @@ class LinovelibBrowser(BaseBrowser):
 
     BASE_URL = "https://www.linovelib.com"
     BOOK_INFO_URL = "https://www.linovelib.com/novel/{book_id}.html"
+    BOOK_CATALOG_UTL = "https://www.linovelib.com/novel/{book_id}/catalog"
     BOOK_VOL_URL = "https://www.linovelib.com/novel/{book_id}/{vol_id}.html"
     CHAPTER_URL = "https://www.linovelib.com/novel/{book_id}/{chapter_id}.html"
 
@@ -49,6 +50,10 @@ class LinovelibBrowser(BaseBrowser):
 
         vol_ids = self._extract_vol_ids(info_html)
         vol_ids.reverse()
+        if not vol_ids:
+            url = self.catalog_url(book_id=book_id)
+            catalog_html = await self.fetch(url, **kwargs)
+            vol_ids = self._extract_vol_ids(catalog_html)
 
         vol_htmls = []
         for vol_id in vol_ids:
@@ -133,6 +138,16 @@ class LinovelibBrowser(BaseBrowser):
         :return: Fully qualified URL for the book info page.
         """
         return cls.BOOK_INFO_URL.format(book_id=book_id)
+
+    @classmethod
+    def catalog_url(cls, book_id: str) -> str:
+        """
+        Construct the URL for fetching a catalog page.
+
+        :param book_id: The identifier of the book.
+        :return: Fully qualified catalog URL.
+        """
+        return cls.BOOK_CATALOG_UTL.format(book_id=book_id)
 
     @classmethod
     def volume_url(cls, book_id: str, vol_id: str) -> str:
