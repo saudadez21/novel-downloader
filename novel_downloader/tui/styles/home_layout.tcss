@@ -1,10 +1,15 @@
 #main-layout {
+    grid-rows: 3 auto 1 auto 1fr;
+    grid-columns: 1fr;
+    grid-gutter: 1;
     padding: 1;
     height: 100%;
 }
 
 #title-bar {
     height: 3;
+    layout: horizontal;
+    align: left middle;
     padding: 0 1;
     background: $boost;
 }
@@ -17,24 +22,27 @@
 #settings,
 #exit {
     width: 8;
-    margin-left: 1;
+    padding: 0 1;
 }
 
 #input-row {
+    layout: horizontal;
     padding: 1 0;
+    overflow-x: auto;
 }
 
-.left {
+#site {
     width: 20;
     margin-right: 1;
 }
 
-.middle {
+#book_ids {
     width: 1fr;
+    min-width: 0;
     margin-right: 1;
 }
 
-.right {
+#download {
     width: 15;
 }
 
@@ -44,8 +52,28 @@
     width: 100%;
 }
 
+Button#download {
+    border: round $accent;
+    padding: 0 1;
+}
+Button#download:hover {
+    background: $accent-lighten-3;
+    color: $text;
+}
+
+
+#prog {
+    height: 1;
+    color: $success;
+}
+
+#label {
+    content-align: left middle;
+    padding-left: 1;
+}
+
 #log {
-    height: 1fr;
     border: round $primary;
     padding: 1;
+    overflow-y: auto;
 }

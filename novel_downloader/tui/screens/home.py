@@ -1,18 +1,30 @@
 #!/usr/bin/env python3
 """
-novel_downloader.tui.screens
-----------------------------
+novel_downloader.tui.screens.home
+---------------------------------
 
 """
 
+import asyncio
 import logging
+from typing import Any
 
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
-from textual.widgets import Button, Input, RichLog, Select, Static
+from textual.widgets import Button, Input, ProgressBar, RichLog, Select, Static
 
+from novel_downloader.config import ConfigAdapter
+from novel_downloader.core.factory import (
+    get_downloader,
+    get_exporter,
+    get_fetcher,
+    get_parser,
+)
+from novel_downloader.core.interfaces import FetcherProtocol
+from novel_downloader.models import LoginField
 from novel_downloader.tui.widgets.richlog_handler import RichLogHandler
+from novel_downloader.utils.i18n import t
 
 
 class HomeScreen(Screen):  # type: ignore[misc]
@@ -22,6 +34,8 @@ class HomeScreen(Screen):  # type: ignore[misc]
         yield Vertical(
             self._make_title_bar(),
             self._make_input_row(),
+            ProgressBar(id="prog", name="下载进度"),
+            Static("下载进度: 0/0 章", id="label-progress"),
             RichLog(id="log", highlight=True, markup=False),
             id="main-layout",
         )
@@ -30,11 +44,11 @@ class HomeScreen(Screen):  # type: ignore[misc]
         log_widget = self.query_one("#log", RichLog)
 
         handler = RichLogHandler(log_widget)
-        handler.setLevel(logging.DEBUG)
+        handler.setLevel(logging.INFO)
         handler.setFormatter(logging.Formatter("[%(levelname)s] %(message)s"))
 
         logger = logging.getLogger()
-        logger.setLevel(logging.DEBUG)
+        logger.setLevel(logging.INFO)
         logger.addHandler(handler)
 
     async def on_button_pressed(self, event: Button.Pressed) -> None:
@@ -50,9 +64,10 @@ class HomeScreen(Screen):  # type: ignore[misc]
             ids = self.query_one("#book_ids", Input).value
             if not site or not ids.strip():
                 logging.warning("请填写完整信息")
-            else:
-                id_list = [x.strip() for x in ids.split(",") if x.strip()]
-                logging.info(f"下载请求: {site} | {id_list}")
+                return
+            id_list = {x.strip() for x in ids.split(",") if x.strip()}
+            adapter = ConfigAdapter(config=self.app.config, site=str(site))
+            asyncio.create_task(self._download(adapter, str(site), id_list))
 
     def _make_title_bar(self) -> Horizontal:
         return Horizontal(
@@ -88,3 +103,74 @@ class HomeScreen(Screen):  # type: ignore[misc]
             value="qidian",
             id="site",
         )
+
+    async def _download(
+        self,
+        adapter: ConfigAdapter,
+        site: str,
+        valid_book_ids: set[str],
+    ) -> None:
+        btn = self.query_one("#download", Button)
+        btn.disabled = True
+        try:
+            logging.info(f"下载请求: {site} | {valid_book_ids}")
+            downloader_cfg = adapter.get_downloader_config()
+            fetcher_cfg = adapter.get_fetcher_config()
+            parser_cfg = adapter.get_parser_config()
+            exporter_cfg = adapter.get_exporter_config()
+
+            parser = get_parser(site, parser_cfg)
+            exporter = get_exporter(site, exporter_cfg)
+
+            async with get_fetcher(site, fetcher_cfg) as fetcher:
+                if downloader_cfg.login_required and not await fetcher.load_state():
+                    login_data = await self._prompt_login_fields(
+                        fetcher, fetcher.login_fields, downloader_cfg
+                    )
+                    if not await fetcher.login(**login_data):
+                        logging.info(t("download_login_failed"))
+                        return
+                    await fetcher.save_state()
+
+                downloader = get_downloader(
+                    fetcher=fetcher,
+                    parser=parser,
+                    exporter=exporter,
+                    site=site,
+                    config=downloader_cfg,
+                )
+
+                for book_id in valid_book_ids:
+                    logging.info(t("download_downloading", book_id=book_id, site=site))
+                    await downloader.download(
+                        book_id, progress_hook=self._update_progress
+                    )
+
+                if downloader_cfg.login_required and fetcher.is_logged_in:
+                    await fetcher.save_state()
+        finally:
+            btn.disabled = False
+
+    async def _prompt_login_fields(
+        self,
+        fetcher: FetcherProtocol,
+        fields: list[LoginField],
+        cfg: Any = None,
+    ) -> dict[str, Any]:
+        """
+        Push a LoginScreen to collect all required fields,
+        then return the dict of values when the user submits.
+        """
+        # cfg_dict = asdict(cfg) if cfg else {}
+        # login_screen = LoginScreen(fields, cfg_dict)
+        # await self.app.push_screen(login_screen)
+        # await self.app.pop_screen()
+        return {}
+
+    async def _update_progress(self, done: int, total: int) -> None:
+        prog = self.query_one("#prog", ProgressBar)
+        label = self.query_one("#label-progress", Static)
+
+        prog.update(total=total, progress=min(done, total))
+
+        label.update(f"下载进度: {done}/{total} 章")
