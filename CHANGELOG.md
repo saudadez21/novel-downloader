@@ -1,3 +1,20 @@
+## v1.4.0 (2025-06-07)
+
+### Feat
+
+- **tui**: implement basic download UI (#32)
+- **site**: add support for linovelib (#28)
+
+### Fix
+
+- **tui**: include .tcss styles in package data for Textual UI
+- **parser**: add missing Node.js check for qidian
+
+### Refactor
+
+- **core**: migrate to async, switch to lxml, and use argparse (#31)
+- **login**: extract login from requester into downloader (#29)
+
 ## v1.3.3 (2025-05-26)
 
 ### Feat
