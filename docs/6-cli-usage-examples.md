@@ -24,7 +24,7 @@ novel-cli download 123456 654321
 ```bash
 # 如果当前目录下没有 settings.toml, CLI 会尝试使用已注册的全局配置
 # 注册命令示例:
-# novel-cli settings set-config ./path/to/settings.toml
+# novel-cli config set-config ./path/to/settings.toml
 novel-cli download 123456 654321
 ```
 
