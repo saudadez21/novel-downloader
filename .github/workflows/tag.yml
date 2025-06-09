@@ -7,7 +7,6 @@ on:
     paths:
       - CHANGELOG.md
       - novel_downloader/__init__.py
-      - pyproject.toml
 
 permissions:
   contents: write
