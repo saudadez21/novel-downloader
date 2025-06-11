@@ -12,24 +12,17 @@ import html
 import json
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
-from ebooklib import epub
-
-from novel_downloader.core.exporters.epub_utils import (
-    add_images_from_dir,
-    add_images_from_list,
-    chapter_txt_to_html,
-    create_css_items,
-    create_volume_intro,
-    init_epub,
+from novel_downloader.core.exporters.epub_util import (
+    Book,
+    Chapter,
+    StyleSheet,
+    Volume,
 )
 from novel_downloader.utils.constants import (
+    CSS_MAIN_PATH,
     DEFAULT_HEADERS,
-    EPUB_IMAGE_FOLDER,
-    EPUB_IMAGE_WRAPPER,
-    EPUB_OPTIONS,
-    EPUB_TEXT_FOLDER,
 )
 from novel_downloader.utils.file_utils import sanitize_filename
 from novel_downloader.utils.network import download_image
@@ -37,8 +30,14 @@ from novel_downloader.utils.network import download_image
 if TYPE_CHECKING:
     from .main_exporter import LinovelibExporter
 
+_IMAGE_WRAPPER = (
+    '<div class="duokan-image-single illus"><img src="../Images/{filename}" /></div>'
+)
 _IMG_TAG_PATTERN = re.compile(
     r'<img\s+[^>]*src=[\'"]([^\'"]+)[\'"][^>]*>', re.IGNORECASE
+)
+_RAW_HTML_RE = re.compile(
+    r'^(<img\b[^>]*?\/>|<div class="duokan-image-single illus">.*?<\/div>)$', re.DOTALL
 )
 _IMG_HEADERS = DEFAULT_HEADERS.copy()
 _IMG_HEADERS["Referer"] = "https://www.linovelib.com/"
@@ -79,12 +78,12 @@ def export_whole_book(
         return
 
     book_name = book_info.get("book_name", book_id)
+    book_author = book_info.get("author", "")
     exporter.logger.info(
         "%s Starting EPUB generation: %s (ID: %s)", TAG, book_name, book_id
     )
 
     # --- Generate intro + cover ---
-    intro_html = _generate_intro_html(book_info)
     cover_path: Path | None = None
     cover_url = book_info.get("cover_url", "")
     if config.include_cover and cover_url:
@@ -99,63 +98,56 @@ def export_whole_book(
             exporter.logger.warning("Failed to download cover from %s", cover_url)
 
     # --- Initialize EPUB ---
-    book, spine, toc_list = init_epub(
-        book_info=book_info,
-        book_id=book_id,
-        intro_html=intro_html,
-        book_cover_path=cover_path,
-        include_toc=config.include_toc,
+    book = Book(
+        title=book_name,
+        author=book_author,
+        description=book_info.get("summary", ""),
+        cover_path=cover_path,
+        subject=book_info.get("subject", []),
+        serial_status=book_info.get("serial_status", ""),
+        word_count=book_info.get("word_count", ""),
+        uid=f"{exporter.site}_{book_id}",
     )
-    for css in create_css_items(
-        include_main=True,
-        include_volume=True,
-    ):
-        book.add_item(css)
+    main_css = StyleSheet(
+        id="main_style",
+        content=CSS_MAIN_PATH.read_text(encoding="utf-8"),
+        filename="main.css",
+    )
+    book.add_stylesheet(main_css)
 
     # --- Compile chapters ---
     volumes = book_info.get("volumes", [])
     for vol_index, vol in enumerate(volumes, start=1):
-        vol_name = vol.get("volume_name", "").strip() or f"Unknown Volume {vol_index}"
-        vol_name = vol_name.replace(book_name, "").strip()
+        raw_vol_name = vol.get("volume_name", "")
+        raw_vol_name = raw_vol_name.replace(book_name, "").strip()
+        vol_name = raw_vol_name or f"Volume {vol_index}"
+        exporter.logger.info("Processing volume %d: %s", vol_index, vol_name)
+
         vol_cover_path: Path | None = None
         vol_cover_url = vol.get("volume_cover", "")
-        if config.include_cover and vol_cover_url:
+        if vol_cover_url:
             vol_cover_path = download_image(
                 vol_cover_url,
                 img_dir,
-                headers=_IMG_HEADERS,
                 on_exist="skip",
             )
 
-        exporter.logger.info("Processing volume %d: %s", vol_index, vol_name)
-
-        # Volume intro
-        vol_intro = epub.EpubHtml(
+        curr_vol = Volume(
+            id=f"vol_{vol_index}",
             title=vol_name,
-            file_name=f"{EPUB_TEXT_FOLDER}/volume_intro_{vol_index}.xhtml",
-            lang="zh",
+            intro=vol.get("volume_intro", ""),
+            cover=vol_cover_path,
         )
-        vol_intro.content = _generate_vol_intro_html(
-            vol_name,
-            vol.get("volume_intro", ""),
-            vol_cover_path,
-        )
-        vol_intro.add_link(
-            href="../Styles/volume-intro.css",
-            rel="stylesheet",
-            type="text/css",
-        )
-        book.add_item(vol_intro)
-        spine.append(vol_intro)
-
-        section = epub.Section(vol_name, vol_intro.file_name)
-        chapter_items: list[epub.EpubHtml] = []
 
         for chap in vol.get("chapters", []):
             chap_id = chap.get("chapterId")
             chap_title = chap.get("title", "")
             if not chap_id:
-                exporter.logger.warning("%s Missing chapterId, skipping: %s", TAG, chap)
+                exporter.logger.warning(
+                    "%s Missing chapterId, skipping: %s",
+                    TAG,
+                    chap,
+                )
                 continue
 
             chapter_data = exporter._get_chapter(book_id, chap_id)
@@ -168,38 +160,30 @@ def export_whole_book(
                 )
                 continue
 
-            title = chapter_data.get("title", "") or chap_id
+            title = chapter_data.get("title") or chap_id
             content: str = chapter_data.get("content", "")
-            content, _ = _inline_remote_images(content, img_dir)
-            chap_html = chapter_txt_to_html(
+            content, img_paths = _inline_remote_images(content, img_dir)
+            chap_html = _txt_to_html(
                 chapter_title=title,
                 chapter_text=content,
-                author_say="",
+                extras={
+                    "作者说": chapter_data.get("author_say", ""),
+                },
             )
-
-            chap_path = f"{EPUB_TEXT_FOLDER}/{chap_id}.xhtml"
-            item = epub.EpubHtml(title=chap_title, file_name=chap_path, lang="zh")
-            item.content = chap_html
-            item.add_link(
-                href="../Styles/main.css",
-                rel="stylesheet",
-                type="text/css",
+            curr_vol.add_chapter(
+                Chapter(
+                    id=f"c_{chap_id}",
+                    title=title,
+                    content=chap_html,
+                    css=[main_css],
+                )
             )
-            book.add_item(item)
-            spine.append(item)
-            chapter_items.append(item)
+            for img_path in img_paths:
+                book.add_image(img_path)
 
-        toc_list.append((section, chapter_items))
-
-    book = add_images_from_dir(book, img_dir)
+        book.add_volume(curr_vol)
 
     # --- 5. Finalize EPUB ---
-    exporter.logger.info("%s Building TOC and spine...", TAG)
-    book.toc = toc_list
-    book.spine = spine
-    book.add_item(epub.EpubNcx())
-    book.add_item(epub.EpubNav())
-
     out_name = exporter.get_filename(
         title=book_name,
         author=book_info.get("author"),
@@ -208,7 +192,7 @@ def export_whole_book(
     out_path = out_dir / sanitize_filename(out_name)
 
     try:
-        epub.write_epub(out_path, book, EPUB_OPTIONS)
+        book.export(out_path)
         exporter.logger.info("%s EPUB successfully written to %s", TAG, out_path)
     except Exception as e:
         exporter.logger.error("%s Failed to write EPUB to %s: %s", TAG, out_path, e)
@@ -243,18 +227,25 @@ def export_by_volume(
         return
 
     book_name = book_info.get("book_name", book_id)
+    book_author = book_info.get("author", "")
+    book_summary = book_info.get("summary", "")
     exporter.logger.info(
         "%s Starting EPUB generation: %s (ID: %s)", TAG, book_name, book_id
     )
-    css_items = create_css_items(
-        include_main=True,
-        include_volume=True,
+
+    main_css = StyleSheet(
+        id="main_style",
+        content=CSS_MAIN_PATH.read_text(encoding="utf-8"),
+        filename="main.css",
     )
 
     # --- Compile columes ---
     volumes = book_info.get("volumes", [])
     for vol_index, vol in enumerate(volumes, start=1):
-        vol_name = vol.get("volume_name", "").strip() or f"Unknown Volume {vol_index}"
+        raw_vol_name = vol.get("volume_name", "")
+        raw_vol_name = raw_vol_name.replace(book_name, "").strip()
+        vol_name = raw_vol_name or f"Volume {vol_index}"
+
         vol_cover_path: Path | None = None
         vol_cover_url = vol.get("volume_cover", "")
         if config.include_cover and vol_cover_url:
@@ -264,23 +255,28 @@ def export_by_volume(
                 headers=_IMG_HEADERS,
                 on_exist="skip",
             )
-        intro_html = _generate_intro_html(vol)
 
-        book, spine, toc_list = init_epub(
-            book_info=vol,
-            book_id=f"{book_id}_{vol_index}",
-            intro_html=intro_html,
-            book_cover_path=vol_cover_path,
-            include_toc=config.include_toc,
+        book = Book(
+            title=vol_name,
+            author=book_author,
+            description=vol.get("volume_intro") or book_summary,
+            cover_path=vol_cover_path,
+            subject=book_info.get("subject", []),
+            serial_status=vol.get("serial_status", ""),
+            word_count=vol.get("word_count", ""),
+            uid=f"{exporter.site}_{book_id}_v{vol_index}",
         )
-        for css in css_items:
-            book.add_item(css)
+        book.add_stylesheet(main_css)
 
         for chap in vol.get("chapters", []):
             chap_id = chap.get("chapterId")
             chap_title = chap.get("title", "")
             if not chap_id:
-                exporter.logger.warning("%s Missing chapterId, skipping: %s", TAG, chap)
+                exporter.logger.warning(
+                    "%s Missing chapterId, skipping: %s",
+                    TAG,
+                    chap,
+                )
                 continue
 
             chapter_data = exporter._get_chapter(book_id, chap_id)
@@ -296,29 +292,21 @@ def export_by_volume(
             title = chapter_data.get("title", "") or chap_id
             content: str = chapter_data.get("content", "")
             content, imgs = _inline_remote_images(content, img_dir)
-            chap_html = chapter_txt_to_html(
+            chap_html = _txt_to_html(
                 chapter_title=title,
                 chapter_text=content,
-                author_say="",
+                extras={},
             )
-            add_images_from_list(book, imgs)
-
-            chap_path = f"{EPUB_TEXT_FOLDER}/{chap_id}.xhtml"
-            item = epub.EpubHtml(title=chap_title, file_name=chap_path, lang="zh")
-            item.content = chap_html
-            item.add_link(
-                href="../Styles/main.css",
-                rel="stylesheet",
-                type="text/css",
+            book.add_chapter(
+                Chapter(
+                    id=f"c_{chap_id}",
+                    title=title,
+                    content=chap_html,
+                    css=[main_css],
+                )
             )
-            book.add_item(item)
-            spine.append(item)
-            toc_list.append(item)
-
-        book.toc = toc_list
-        book.spine = spine
-        book.add_item(epub.EpubNcx())
-        book.add_item(epub.EpubNav())
+            for img_path in imgs:
+                book.add_image(img_path)
 
         out_name = exporter.get_filename(
             title=vol_name,
@@ -328,87 +316,11 @@ def export_by_volume(
         out_path = out_dir / sanitize_filename(out_name)
 
         try:
-            epub.write_epub(out_path, book, EPUB_OPTIONS)
+            book.export(out_path)
             exporter.logger.info("%s EPUB successfully written to %s", TAG, out_path)
         except Exception as e:
             exporter.logger.error("%s Failed to write EPUB to %s: %s", TAG, out_path, e)
     return
-
-
-def _generate_intro_html(
-    info: dict[str, Any],
-    default_author: str = "",
-) -> str:
-    """
-    Generate an HTML snippet containing book metadata and summary.
-
-    :param info: A dict that may contain book info
-    :param default_author: Fallback author name.
-
-    :return: An HTML-formatted string.
-    """
-    title = info.get("book_name") or info.get("volume_name")
-    author = info.get("author") or default_author
-    status = info.get("serial_status")
-    words = info.get("word_count")
-    raw_summary = (info.get("summary") or info.get("volume_intro") or "").strip()
-
-    html_parts = [
-        "<h1>书籍简介</h1>",
-        '<div class="list">',
-        "<ul>",
-    ]
-    metadata = [
-        ("书名", title),
-        ("作者", author),
-        ("状态", status),
-        ("字数", words),
-    ]
-    for label, value in metadata:
-        if value is not None and str(value).strip():
-            safe = html.escape(str(value))
-            if label == "书名":
-                safe = f"《{safe}》"
-            html_parts.append(f"<li>{label}: {safe}</li>")
-
-    html_parts.extend(["</ul>", "</div>"])
-
-    if raw_summary:
-        html_parts.append('<p class="new-page-after"><br/></p>')
-        html_parts.append("<h2>简介</h2>")
-        for para in filter(None, (p.strip() for p in raw_summary.split("\n\n"))):
-            safe_para = html.escape(para).replace("\n", "<br/>")
-            html_parts.append(f"<p>{safe_para}</p>")
-
-    return "\n".join(html_parts)
-
-
-def _generate_vol_intro_html(
-    title: str,
-    intro: str = "",
-    cover_path: Path | None = None,
-) -> str:
-    """
-    Generate the HTML snippet for a volume's introduction section.
-
-    :param title: Title of the volume.
-    :param intro: Optional introduction text for the volume.
-    :param cover_path: Path of the volume cover.
-    :return: HTML string representing the volume's intro section.
-    """
-    if cover_path is None:
-        return create_volume_intro(title, intro)
-
-    html_parts = [
-        f'<h1 class="volume-title-line1">{title}</h1>',
-        f'<img class="width100" src="../{EPUB_IMAGE_FOLDER}/{cover_path.name}" />',
-        '<p class="new-page-after"><br/></p>',
-    ]
-
-    if intro.strip():
-        html_parts.append(f'<p class="intro">{intro}</p>')
-
-    return "\n".join(html_parts)
 
 
 def _inline_remote_images(
@@ -417,7 +329,7 @@ def _inline_remote_images(
 ) -> tuple[str, list[Path]]:
     """
     Download every remote `<img src="...">` in `content` into `image_dir`,
-    and replace the original tag with EPUB_IMAGE_WRAPPER
+    and replace the original tag with _IMAGE_WRAPPER
     pointing to the local filename.
 
     :param content: HTML/text of the chapter containing <img> tags.
@@ -441,9 +353,54 @@ def _inline_remote_images(
                 return match.group(0)
 
             downloaded_images.append(local_path)
-            return EPUB_IMAGE_WRAPPER.format(filename=local_path.name)
+            return _IMAGE_WRAPPER.format(filename=local_path.name)
         except Exception:
             return match.group(0)
 
     modified_content = _IMG_TAG_PATTERN.sub(_replace, content)
     return modified_content, downloaded_images
+
+
+def _txt_to_html(
+    chapter_title: str,
+    chapter_text: str,
+    extras: dict[str, str] | None = None,
+) -> str:
+    """
+    Convert chapter text and author note to styled HTML.
+
+    :param chapter_title: Title of the chapter.
+    :param chapter_text: Main content of the chapter.
+    :param extras: Optional dict of titles and content, e.g. {"作者说": "text"}.
+    :return: Rendered HTML as a string.
+    """
+
+    def _render_block(text: str) -> str:
+        lines = (line.strip() for line in text.splitlines() if line.strip())
+        out = []
+        for line in lines:
+            # preserve raw HTML, otherwise wrap in <p>
+            if _RAW_HTML_RE.match(line):
+                out.append(line)
+            else:
+                out.append(f"<p>{html.escape(line)}</p>")
+        return "\n".join(out)
+
+    parts = []
+    parts.append(f"<h2>{html.escape(chapter_title)}</h2>")
+    parts.append(_render_block(chapter_text))
+
+    if extras:
+        for title, note in extras.items():
+            note = note.strip()
+            if not note:
+                continue
+            parts.extend(
+                [
+                    "<hr />",
+                    f"<p>{html.escape(title)}</p>",
+                    _render_block(note),
+                ]
+            )
+
+    return "\n".join(parts)
