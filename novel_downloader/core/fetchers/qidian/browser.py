@@ -5,6 +5,7 @@ novel_downloader.core.fetchers.qidian.browser
 
 """
 
+import asyncio
 from typing import Any
 
 from playwright.async_api import Page
@@ -189,18 +190,35 @@ class QidianBrowser(BaseBrowser):
         """
         try:
             page = await self.context.new_page()
-            await page.goto(self.HOMEPAGE_URL, wait_until="networkidle")
             await self._login_auto(page)
             await self._dismiss_overlay(page)
-            sign_in_elem = await page.query_selector(".sign-in")
-            if sign_in_elem and await sign_in_elem.is_visible():
-                self.logger.debug("[auth] Sign-in element visible.")
-                await page.close()
-                return False
-            else:
-                self.logger.debug("[auth] Sign-in element not found.")
-                await page.close()
+            await page.goto(self.HOMEPAGE_URL, wait_until="networkidle")
+            sign_in_elem = await page.query_selector("#login-box .sign-in")
+            sign_out_elem = await page.query_selector("#login-box .sign-out")
+
+            sign_in_class = (
+                (await sign_in_elem.get_attribute("class") or "")
+                if sign_in_elem
+                else ""
+            )
+            sign_out_class = (
+                (await sign_out_elem.get_attribute("class") or "")
+                if sign_out_elem
+                else ""
+            )
+
+            sign_in_hidden = "hidden" in sign_in_class
+            sign_out_hidden = "hidden" in sign_out_class
+
+            await page.close()
+
+            # if sign_in_visible and not sign_out_visible:
+            if not sign_in_hidden and sign_out_hidden:
+                self.logger.debug("[auth] Detected as logged in.")
                 return True
+            else:
+                self.logger.debug("[auth] Detected as not logged in.")
+                return False
         except Exception as e:
             self.logger.warning("[auth] Error while checking login status: %s", e)
         return False
@@ -220,7 +238,10 @@ class QidianBrowser(BaseBrowser):
 
             self.logger.debug("[auth] Overlay mask detected; attempting to close.")
 
-            iframe_element = await page.query_selector('iframe[name="loginIfr"]')
+            iframe_element = await page.wait_for_selector(
+                "#loginIfr",
+                timeout=timeout * 1000,
+            )
             if iframe_element is None:
                 self.logger.debug("[auth] Login iframe not found.")
                 return
@@ -261,6 +282,37 @@ class QidianBrowser(BaseBrowser):
             btn = await page.query_selector("#login-btn")
             if btn and await btn.is_visible():
                 await btn.click()
+                tasks = [
+                    asyncio.create_task(
+                        page.wait_for_selector(
+                            "div.mask",
+                            timeout=timeout * 1000,
+                        )
+                    ),
+                    asyncio.create_task(
+                        page.wait_for_selector(
+                            "div.qdlogin-wrap",
+                            timeout=timeout * 1000,
+                        )
+                    ),
+                    asyncio.create_task(
+                        page.wait_for_url(
+                            lambda url: "login" not in url,
+                            timeout=timeout * 1000,
+                        )
+                    ),
+                ]
+                done, pending = await asyncio.wait(
+                    tasks,
+                    timeout=timeout + 1,
+                    return_when=asyncio.FIRST_COMPLETED,
+                )
+                for task in pending:
+                    task.cancel()
+                if done:
+                    self.logger.debug("[auth] Login flow proceeded after button click.")
+                else:
+                    self.logger.warning("[auth] Timeout waiting for login to proceed.")
         except Exception as e:
             self.logger.debug("[auth] Failed to click login button: %s", e)
         return
