@@ -38,6 +38,8 @@ playwright install
 pip install novel-downloader[font-recovery]
 ```
 
+- 详细可见: [安装](docs/1-installation.md)
+
 ---
 
 ### CLI 模式

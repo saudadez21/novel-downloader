@@ -26,8 +26,7 @@ dependencies = [
     "aiohttp",
     "playwright",
     "lxml",
-    "platformdirs",
-    "ebooklib"
+    "platformdirs"
 ]
 
 [project.optional-dependencies]
@@ -39,6 +38,7 @@ dev = [
     "pytest-cov",
     "pytest-mock",
     "types-requests",
+    "types-lxml",
     "types-PyYAML",
     "pre-commit",
     "commitizen"
