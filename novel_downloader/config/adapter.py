@@ -10,6 +10,7 @@ site name into structured dataclass-based config models.
 from typing import Any
 
 from novel_downloader.models import (
+    BookConfig,
     DownloaderConfig,
     ExporterConfig,
     FetcherConfig,
@@ -169,22 +170,54 @@ class ConfigAdapter:
             split_mode=site_cfg.get("split_mode", "book"),
         )
 
-    def get_book_ids(self) -> list[str]:
+    def get_book_ids(self) -> list[BookConfig]:
         """
         从 config["sites"][site]["book_ids"] 中提取目标书籍列表
         """
         site_cfg = self._get_site_cfg()
-        raw_ids = site_cfg.get("book_ids", [])
+        raw = site_cfg.get("book_ids", [])
 
-        if isinstance(raw_ids, str):
-            return [raw_ids]
+        if isinstance(raw, str | int):
+            return [{"book_id": str(raw)}]
 
-        if isinstance(raw_ids, int):
-            return [str(raw_ids)]
+        if isinstance(raw, dict):
+            return [self._dict_to_book_config(raw)]
 
-        if not isinstance(raw_ids, list):
+        if not isinstance(raw, list):
             raise ValueError(
-                f"book_ids must be a list or string, got {type(raw_ids).__name__}"
+                f"book_ids must be a list or string, got {type(raw).__name__}"
             )
 
-        return [str(book_id) for book_id in raw_ids]
+        result: list[BookConfig] = []
+        for item in raw:
+            try:
+                if isinstance(item, str | int):
+                    result.append({"book_id": str(item)})
+                elif isinstance(item, dict):
+                    result.append(self._dict_to_book_config(item))
+            except ValueError:
+                continue
+
+        return result
+
+    @staticmethod
+    def _dict_to_book_config(data: dict[str, Any]) -> BookConfig:
+        """
+        Converts a dict to BookConfig with type normalization.
+        Raises ValueError if 'book_id' is missing.
+        """
+        if "book_id" not in data:
+            raise ValueError("Missing required field 'book_id'")
+
+        result: BookConfig = {"book_id": str(data["book_id"])}
+
+        if "start_id" in data:
+            result["start_id"] = str(data["start_id"])
+
+        if "end_id" in data:
+            result["end_id"] = str(data["end_id"])
+
+        if "ignore_ids" in data:
+            result["ignore_ids"] = [str(x) for x in data["ignore_ids"]]
+
+        return result

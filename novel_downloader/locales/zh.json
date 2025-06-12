@@ -66,6 +66,8 @@
   "download_downloading": "正在从 {site} 下载书籍 {book_id}...",
   "download_prompt_parse": "结束...",
   "download_book_ids": "要处理的一个或多个小说 ID",
+  "download_option_start": "起始章节 ID (仅用于第一个书籍 ID)",
+  "download_option_end": "结束章节 ID (仅用于第一个书籍 ID)",
   "login_description": "说明",
   "login_hint": "提示",
   "login_manual_prompt": ">> 请在浏览器中完成登录后按回车继续...",
