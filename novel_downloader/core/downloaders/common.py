@@ -12,7 +12,13 @@ from contextlib import suppress
 from typing import Any, cast
 
 from novel_downloader.core.downloaders.base import BaseDownloader
-from novel_downloader.models import ChapterDict, CidTask, HtmlTask, RestoreTask
+from novel_downloader.models import (
+    BookConfig,
+    ChapterDict,
+    CidTask,
+    HtmlTask,
+    RestoreTask,
+)
 from novel_downloader.utils.chapter_storage import ChapterStorage
 from novel_downloader.utils.file_utils import save_as_json, save_as_txt
 from novel_downloader.utils.time_utils import (
@@ -28,7 +34,7 @@ class CommonDownloader(BaseDownloader):
 
     async def _download_one(
         self,
-        book_id: str,
+        book: BookConfig,
         *,
         progress_hook: Callable[[int, int], Awaitable[None]] | None = None,
         **kwargs: Any,
@@ -36,9 +42,13 @@ class CommonDownloader(BaseDownloader):
         """
         The full download logic for a single book.
 
-        :param book_id: The identifier of the book to download.
+        :param book: BookConfig with at least 'book_id'.
         """
         TAG = "[Downloader]"
+        book_id = book["book_id"]
+        start_id = book.get("start_id")
+        end_id = book.get("end_id")
+        ignore_set = set(book.get("ignore_ids", []))
 
         raw_base = self.raw_data_dir / book_id
         cache_base = self.cache_dir / book_id
@@ -369,11 +379,32 @@ class CommonDownloader(BaseDownloader):
             )
         )
 
+        found_start = start_id is None
+        stop_early = False
         last_cid: str | None = None
+
         for vol_idx, vol in enumerate(vols):
             chapters = vol.get("chapters", [])
             for chap_idx, chap in enumerate(chapters):
                 cid = chap.get("chapterId")
+
+                # Skip until reaching start_id
+                if not found_start:
+                    if cid == start_id:
+                        found_start = True
+                    else:
+                        last_cid = cid
+                        continue
+
+                # Stop when reaching end_id
+                if end_id is not None and cid == end_id:
+                    stop_early = True
+                    break
+
+                if cid in ignore_set:
+                    last_cid = cid
+                    continue
+
                 if cid and normal_cs.exists(cid) and self.skip_existing:
                     completed_count += 1
                     if progress_hook:
@@ -390,6 +421,9 @@ class CommonDownloader(BaseDownloader):
                     )
                 )
                 last_cid = cid
+
+            if stop_early:
+                break
 
         await restore_queue.join()
         await cid_queue.join()

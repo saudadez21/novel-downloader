@@ -71,18 +71,18 @@ def handle_download(args: Namespace) -> None:
             print(t("download_fail_get_ids", err=str(e)))
             return
 
-    valid_book_ids = _filter_valid_book_configs(book_ids)
+    valid_books = _filter_valid_book_configs(book_ids)
 
     if not book_ids:
         print(t("download_no_ids"))
         return
 
-    if not valid_book_ids:
+    if not valid_books:
         print(t("download_only_example", example="0000000000"))
         print(t("download_edit_config"))
         return
 
-    asyncio.run(_download(adapter, site, valid_book_ids))
+    asyncio.run(_download(adapter, site, valid_books))
 
 
 def _cli_args_to_book_configs(
@@ -137,7 +137,7 @@ def _filter_valid_book_configs(
 async def _download(
     adapter: ConfigAdapter,
     site: str,
-    valid_book_ids: list[BookConfig],
+    valid_books: list[BookConfig],
 ) -> None:
     downloader_cfg = adapter.get_downloader_config()
     fetcher_cfg = adapter.get_fetcher_config()
@@ -166,10 +166,10 @@ async def _download(
             config=downloader_cfg,
         )
 
-        for book_id in valid_book_ids:
-            print(t("download_downloading", book_id=book_id, site=site))
+        for book in valid_books:
+            print(t("download_downloading", book_id=book["book_id"], site=site))
             await downloader.download(
-                book_id["book_id"],
+                book,
                 progress_hook=_print_progress,
             )
 

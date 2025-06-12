@@ -18,6 +18,7 @@ from novel_downloader.core.interfaces import (
     ParserProtocol,
 )
 from novel_downloader.models import (
+    BookConfig,
     ChapterDict,
     CidTask,
     DownloaderConfig,
@@ -48,7 +49,7 @@ class QidianDownloader(BaseDownloader):
 
     async def _download_one(
         self,
-        book_id: str,
+        book: BookConfig,
         *,
         progress_hook: Callable[[int, int], Awaitable[None]] | None = None,
         **kwargs: Any,
@@ -56,9 +57,13 @@ class QidianDownloader(BaseDownloader):
         """
         The full download logic for a single book.
 
-        :param book_id: The identifier of the book to download.
+        :param book: BookConfig with at least 'book_id'.
         """
         TAG = "[Downloader]"
+        book_id = book["book_id"]
+        start_id = book.get("start_id")
+        end_id = book.get("end_id")
+        ignore_set = set(book.get("ignore_ids", []))
 
         raw_base = self.raw_data_dir / book_id
         cache_base = self.cache_dir / book_id
@@ -296,20 +301,39 @@ class QidianDownloader(BaseDownloader):
             )
         )
 
-        last_cid: str | None = None
+        found_start = start_id is None
+        stop_early = False
+
         for vol in book_info.get("volumes", []):
             chapters = vol.get("chapters", [])
             for chap in chapters:
                 cid = chap.get("chapterId")
-                if cid and normal_cs.exists(cid) and self.skip_existing:
+                if not cid:
+                    continue
+
+                if not found_start:
+                    if cid == start_id:
+                        found_start = True
+                    else:
+                        continue
+
+                if end_id is not None and cid == end_id:
+                    stop_early = True
+                    break
+
+                if cid in ignore_set:
+                    continue
+
+                if normal_cs.exists(cid) and self.skip_existing:
                     completed_count += 1
                     if progress_hook:
                         await progress_hook(completed_count, total_chapters)
-                    last_cid = cid
                     continue
 
-                await cid_queue.put(CidTask(cid=cid, prev_cid=last_cid))
-                last_cid = cid
+                await cid_queue.put(CidTask(cid=cid, prev_cid=None))
+
+            if stop_early:
+                break
 
         await cid_queue.join()
         await html_queue.join()
