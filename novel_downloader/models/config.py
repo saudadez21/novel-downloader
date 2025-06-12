@@ -17,6 +17,7 @@ strongly typed Python objects for safer and cleaner access.
 """
 
 from dataclasses import dataclass
+from typing import NotRequired, TypedDict
 
 from .types import (
     BrowserType,
@@ -98,3 +99,10 @@ class ExporterConfig:
     include_toc: bool = False
     include_picture: bool = False
     split_mode: SplitMode = "book"
+
+
+class BookConfig(TypedDict):
+    book_id: str
+    start_id: NotRequired[str]
+    end_id: NotRequired[str]
+    ignore_ids: NotRequired[list[str]]
