@@ -65,14 +65,23 @@ Commands:
 按书籍 ID 下载完整小说, 支持从命令行或配置文件读取 ID:
 
 ```bash
-novel-cli download [-h] [--site SITE] [--config CONFIG] [book_ids ...]
+novel-cli download [-h] [--site SITE] [--config CONFIG] [--start START] [--end END] [book_ids ...]
 ```
 
 **参数说明**:
 
 * `book_ids`: 要下载的书籍 ID (可选, 省略时将从配置文件读取)
 * `--site [qidian|biquge|...]`: 站点名称缩写, 默认 `qidian`
+* `--config`: 指定配置文件路径, 覆盖默认 `settings.toml` 配置
+* `--start`: 下载起始章节 ID (仅用于第一个书籍 ID)
+* `--end`: 下载结束章节 ID (包含在内, 仅用于第一个书籍 ID)
 * `--help`: 显示帮助信息
+
+> CLI 中的 `--start` / `--end` 用于临时下载部分章节, 仅影响**第一个**命令行提供的 `book_id`。
+>
+> `--start` 和 `--end` 接收的是章节的 **唯一 ID**, 并非 "第几章" 的序号。可参考 [`supported-sites.md`](./4-supported-sites.md) 内说明。
+>
+> 若要配置更复杂的范围或忽略章节, 请使用配置文件中的结构化 `book_ids` 格式 (参见 [配置文件说明](./3-settings-schema.md))。
 
 **示例**:
 
@@ -82,6 +91,9 @@ novel-cli download 1234567890
 
 # 指定站点 (如 biquge)
 novel-cli download --site biquge 8_8187
+
+# 只下载起点小说的一部分章节
+novel-cli download --start 10001 --end 10200 1234567890
 
 # 从配置文件中读取 ID
 novel-cli download
