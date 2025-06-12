@@ -155,6 +155,10 @@ class CommonDownloader(BaseDownloader):
                     cid_queue.task_done()
                     continue
 
+                if cid in ignore_set:
+                    cid_queue.task_done()
+                    continue
+
                 try:
                     async with semaphore:
                         html_list = await self.fetcher.get_book_chapter(book_id, cid)
@@ -386,6 +390,9 @@ class CommonDownloader(BaseDownloader):
         for vol_idx, vol in enumerate(vols):
             chapters = vol.get("chapters", [])
             for chap_idx, chap in enumerate(chapters):
+                if stop_early:
+                    break
+
                 cid = chap.get("chapterId")
 
                 # Skip until reaching start_id
@@ -393,22 +400,16 @@ class CommonDownloader(BaseDownloader):
                     if cid == start_id:
                         found_start = True
                     else:
+                        completed_count += 1
                         last_cid = cid
                         continue
 
                 # Stop when reaching end_id
                 if end_id is not None and cid == end_id:
                     stop_early = True
-                    break
-
-                if cid in ignore_set:
-                    last_cid = cid
-                    continue
 
                 if cid and normal_cs.exists(cid) and self.skip_existing:
                     completed_count += 1
-                    if progress_hook:
-                        await progress_hook(completed_count, total_chapters)
                     last_cid = cid
                     continue
 
@@ -420,6 +421,7 @@ class CommonDownloader(BaseDownloader):
                         prev_cid=last_cid,
                     )
                 )
+
                 last_cid = cid
 
             if stop_early:

@@ -145,6 +145,10 @@ class QidianDownloader(BaseDownloader):
                     cid_queue.task_done()
                     continue
 
+                if cid in ignore_set:
+                    cid_queue.task_done()
+                    continue
+
                 try:
                     html_list = await self.fetcher.get_book_chapter(book_id, cid)
                     await html_queue.put(
@@ -307,6 +311,9 @@ class QidianDownloader(BaseDownloader):
         for vol in book_info.get("volumes", []):
             chapters = vol.get("chapters", [])
             for chap in chapters:
+                if stop_early:
+                    break
+
                 cid = chap.get("chapterId")
                 if not cid:
                     continue
@@ -315,19 +322,17 @@ class QidianDownloader(BaseDownloader):
                     if cid == start_id:
                         found_start = True
                     else:
+                        completed_count += 1
                         continue
 
                 if end_id is not None and cid == end_id:
                     stop_early = True
-                    break
 
                 if cid in ignore_set:
                     continue
 
                 if normal_cs.exists(cid) and self.skip_existing:
                     completed_count += 1
-                    if progress_hook:
-                        await progress_hook(completed_count, total_chapters)
                     continue
 
                 await cid_queue.put(CidTask(cid=cid, prev_cid=None))
