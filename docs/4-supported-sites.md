@@ -97,7 +97,7 @@ Book ID 通常来源于小说详情页 URL 中的路径段, 各资源站点的�
   示例 URL:
 
     - 书籍页面: `https://www.yamibo.com/novel/262117` -> Book ID: `262117`
-    - 章节页面: `https://www.qidian.com/chapter/1010868264/405976997/` -> Chapter ID: `405976997`
+    - 章节页面: `https://www.yamibo.com/novel/view-chapter?id=38772952` -> Chapter ID: `38772952`
 
 * **哔哩轻小说 (linovelib)**
 
