@@ -10,45 +10,46 @@ that outlines the expected behavior of any downloader class.
 from collections.abc import Awaitable, Callable
 from typing import Any, Protocol, runtime_checkable
 
+from novel_downloader.models import BookConfig
+
 
 @runtime_checkable
 class DownloaderProtocol(Protocol):
     """
-    Protocol for fully-asynchronous downloader classes.
+    Protocol for async downloader implementations.
 
-    Defines the expected interface for any downloader implementation,
-    including both batch and single book downloads,
-    as well as optional pre-download hooks.
+    Uses BookConfig (with book_id, optional start_id/end_id/ignore_ids)
+    for both single and batch downloads.
     """
 
     async def download(
         self,
-        book_id: str,
+        book: BookConfig,
         *,
         progress_hook: Callable[[int, int], Awaitable[None]] | None = None,
         **kwargs: Any,
     ) -> None:
         """
-        Download logic for a single book.
+        Download a single book.
 
-        :param book_id: The identifier of the book.
-        :param progress_hook: (optional) Called after each chapter;
+        :param book: BookConfig with at least 'book_id'.
+        :param progress_hook: Optional async callback after each chapter.
                                 args: completed_count, total_count.
         """
         ...
 
     async def download_many(
         self,
-        book_ids: list[str],
+        books: list[BookConfig],
         *,
         progress_hook: Callable[[int, int], Awaitable[None]] | None = None,
         **kwargs: Any,
     ) -> None:
         """
-        Batch download entry point.
+        Download multiple books.
 
-        :param book_ids: List of book IDs to download.
-        :param progress_hook: (optional) Called after each chapter;
+        :param books: List of BookConfig entries.
+        :param progress_hook: Optional async callback after each chapter.
                                 args: completed_count, total_count.
         """
         ...

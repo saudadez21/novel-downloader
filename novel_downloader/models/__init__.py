@@ -8,6 +8,7 @@ novel_downloader.models
 from .browser import NewContextOptions
 from .chapter import ChapterDict
 from .config import (
+    BookConfig,
     DownloaderConfig,
     ExporterConfig,
     FetcherConfig,
@@ -39,6 +40,7 @@ from .types import (
 
 __all__ = [
     "NewContextOptions",
+    "BookConfig",
     "DownloaderConfig",
     "ParserConfig",
     "FetcherConfig",

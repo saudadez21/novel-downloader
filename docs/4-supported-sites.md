@@ -51,39 +51,60 @@ Book ID 通常来源于小说详情页 URL 中的路径段, 各资源站点的�
 
 * **起点中文网 (qidian)**
 
-  示例 URL: `https://www.qidian.com/book/1010868264/` -> Book ID: `1010868264`
+  示例 URL:
+
+    - 书籍页面: `https://www.qidian.com/book/1010868264/` -> Book ID: `1010868264`
+    - 章节页面: `https://www.qidian.com/chapter/1010868264/405976997/` -> Chapter ID: `405976997`
 
   该站点需提供有效的 Cookie 才能访问订阅章节。
 
 * **笔趣阁 (biquge)**
 
-  示例 URL: `http://www.b520.cc/8_8187/` -> Book ID: `8_8187`
+  示例 URL:
+
+    - 书籍页面: `http://www.b520.cc/8_8187/` -> Book ID: `8_8187`
+    - 章节页面: `http://www.b520.cc/8_8187/3899831.html` -> Chapter ID: `3899831`
 
   该站点无需额外认证即可获取小说内容。
 
 * **铅笔小说 (qianbi)**
 
-  示例 URL: `https://www.23qb.net/book/12282/` -> Book ID: `12282`
+  示例 URL:
+
+    - 书籍页面: `https://www.23qb.net/book/12282/` -> Book ID: `12282`
+    - 章节页面: `https://www.23qb.net/book/12282/7908999.html` -> Chapter ID: `7908999`
 
 * **SF 轻小说 (sfacg)**
 
-  示例 URL: `https://m.sfacg.com/b/456123/` -> Book ID: `456123`
+  示例 URL:
+
+    - 书籍页面: `https://m.sfacg.com/b/456123/` -> Book ID: `456123`
+    - 章节页面: `https://m.sfacg.com/c/5417665/` -> Chapter ID: `5417665`
 
   该站点需提供有效的 Cookie 才能访问订阅章节。
 
 * **ESJ Zone (esjzone)**
 
-  示例 URL: `https://www.esjzone.cc/detail/1660702902.html` -> Book ID: `1660702902`
+  示例 URL:
+
+    - 书籍页面: `https://www.esjzone.cc/detail/1660702902.html` -> Book ID: `1660702902`
+    - 章节页面: `https://www.esjzone.cc/forum/1660702902/294593.html` -> Chapter ID: `294593`
 
   **注意**: 若未完成登录验证, 部分小说页面会自动重定向至「論壇」页面, 导致内容加载失败。
 
 * **百合会 (yamibo)**
 
-  示例 URL: `https://www.yamibo.com/novel/262117` -> Book ID: `262117`
+  示例 URL:
+
+    - 书籍页面: `https://www.yamibo.com/novel/262117` -> Book ID: `262117`
+    - 章节页面: `https://www.yamibo.com/novel/view-chapter?id=38772952` -> Chapter ID: `38772952`
 
 * **哔哩轻小说 (linovelib)**
 
-  示例 URL: `https://www.linovelib.com/novel/1234.html` -> Book ID: `1234`
+  示例 URL:
+
+    - 书籍页面: `https://www.linovelib.com/novel/1234.html` -> Book ID: `1234`
+    - 章节页面: `https://www.linovelib.com/novel/1234/47800.html` -> Chapter ID: `47800`
 
   该站点对于频繁请求有访问限制, 若请求间隔过短, 可能触发风控机制, 导致账号或设备被封禁或限制访问。
 

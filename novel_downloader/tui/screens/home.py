@@ -106,12 +106,12 @@ class HomeScreen(Screen):  # type: ignore[misc]
         self,
         adapter: ConfigAdapter,
         site: str,
-        valid_book_ids: set[str],
+        book_ids: set[str],
     ) -> None:
         btn = self.query_one("#download", Button)
         btn.disabled = True
         try:
-            logging.info(f"下载请求: {site} | {valid_book_ids}")
+            logging.info(f"下载请求: {site} | {book_ids}")
             downloader_cfg = adapter.get_downloader_config()
             fetcher_cfg = adapter.get_fetcher_config()
             parser_cfg = adapter.get_parser_config()
@@ -139,10 +139,11 @@ class HomeScreen(Screen):  # type: ignore[misc]
                     config=downloader_cfg,
                 )
 
-                for book_id in valid_book_ids:
+                for book_id in book_ids:
                     logging.info(t("download_downloading", book_id=book_id, site=site))
                     await downloader.download(
-                        book_id, progress_hook=self._update_progress
+                        {"book_id": book_id},
+                        progress_hook=self._update_progress,
                     )
 
                 if downloader_cfg.login_required and fetcher.is_logged_in:

@@ -66,6 +66,8 @@
   "download_downloading": "Downloading book {book_id} from {site}...",
   "download_prompt_parse": "Parse...",
   "download_book_ids": "One or more book IDs to process",
+  "download_option_start": "Start chapter ID (applies to the first book ID only)",
+  "download_option_end": "End chapter ID (applies to the first book ID only)",
   "login_description": "Description",
   "login_hint": "Hint",
   "login_manual_prompt": ">> Please complete login in your browser and press Enter to continue...",

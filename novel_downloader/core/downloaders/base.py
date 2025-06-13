@@ -19,7 +19,7 @@ from novel_downloader.core.interfaces import (
     FetcherProtocol,
     ParserProtocol,
 )
-from novel_downloader.models import DownloaderConfig
+from novel_downloader.models import BookConfig, DownloaderConfig
 
 
 class BaseDownloader(DownloaderProtocol, abc.ABC):
@@ -53,7 +53,7 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
 
     async def download_many(
         self,
-        book_ids: list[str],
+        books: list[BookConfig],
         *,
         progress_hook: Callable[[int, int], Awaitable[None]] | None = None,
         **kwargs: Any,
@@ -61,33 +61,34 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
         """
         Download multiple books with pre-download hook and error handling.
 
-        :param book_ids: A list of book identifiers to download.
-        :param progress_hook: (optional) Called after each chapter;
+        :param books: List of BookConfig entries.
+        :param progress_hook: Optional async callback after each chapter.
                                 args: completed_count, total_count.
         """
         if not await self._ensure_ready():
+            book_ids = [b["book_id"] for b in books]
             self.logger.warning(
-                "[%s] login failed, skipping download of %s",
+                "[%s] login failed, skipping download of books: %s",
                 self._site,
-                book_ids,
+                ", ".join(book_ids) or "<none>",
             )
             return
 
-        for book_id in book_ids:
+        for book in books:
             try:
                 await self._download_one(
-                    book_id,
+                    book,
                     progress_hook=progress_hook,
                     **kwargs,
                 )
             except Exception as e:
-                self._handle_download_exception(book_id, e)
+                self._handle_download_exception(book, e)
 
         await self._finalize()
 
     async def download(
         self,
-        book_id: str,
+        book: BookConfig,
         *,
         progress_hook: Callable[[int, int], Awaitable[None]] | None = None,
         **kwargs: Any,
@@ -95,33 +96,34 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
         """
         Download a single book with pre-download hook and error handling.
 
-        :param book_id: The identifier of the book to download.
-        :param progress_hook: (optional) Called after each chapter;
+        :param book: BookConfig with at least 'book_id'.
+        :param progress_hook: Optional async callback after each chapter.
                                 args: completed_count, total_count.
         """
         if not await self._ensure_ready():
             self.logger.warning(
-                "[%s] login failed, skipping download of %s",
+                "[%s] login failed, skipping download of book: %s (%s-%s)",
                 self._site,
-                book_id,
+                book["book_id"],
+                book.get("start_id", "-"),
+                book.get("end_id", "-"),
             )
-            return
 
         try:
             await self._download_one(
-                book_id,
+                book,
                 progress_hook=progress_hook,
                 **kwargs,
             )
         except Exception as e:
-            self._handle_download_exception(book_id, e)
+            self._handle_download_exception(book, e)
 
         await self._finalize()
 
     @abc.abstractmethod
     async def _download_one(
         self,
-        book_id: str,
+        book: BookConfig,
         *,
         progress_hook: Callable[[int, int], Awaitable[None]] | None = None,
         **kwargs: Any,
@@ -208,19 +210,21 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
     def download_workers(self) -> int:
         return self._config.download_workers
 
-    def _handle_download_exception(self, book_id: str, error: Exception) -> None:
+    def _handle_download_exception(self, book: BookConfig, error: Exception) -> None:
         """
         Handle download errors in a consistent way.
 
         This method can be overridden or extended to implement retry logic, etc.
 
-        :param book_id: The ID of the book that failed.
+        :param book: The book that failed.
         :param error: The exception raised during download.
         """
         self.logger.warning(
-            "[%s] Failed to download %r: %s",
+            "[%s] Failed to download (book_id=%s, start=%s, end=%s): %s",
             self.__class__.__name__,
-            book_id,
+            book.get("book_id", "<unknown>"),
+            book.get("start_id", "-"),
+            book.get("end_id", "-"),
             error,
         )
 
