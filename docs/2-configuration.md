@@ -10,10 +10,10 @@ mkdir novel-folder
 cd novel-folder
 
 # 在当前目录下生成 settings.toml (已存在则跳过)
-novel-cli config init
+novel-cli settings init
 
 # 如果想强制覆盖
-novel-cli config init --force
+novel-cli settings init --force
 ````
 
 ### 2. 编辑生成的 `settings.toml`
@@ -35,7 +35,7 @@ login_required = true              # 是否需要登录才能访问
 
 ```bash
 # 将当前目录下的 settings.toml 设为默认配置
-novel-cli config set-config ./settings.toml
+novel-cli settings set-config ./settings.toml
 ```
 
 ### 配置文件查找顺序
@@ -46,7 +46,7 @@ CLI 启动时会按以下优先级依次查找并加载配置 (越靠前优先�
 2. 当前工作目录下的 `./settings.toml` 文件
 3. 已注册 (全局保存) 的配置文件
 
-> 注: 使用 `novel-cli config init` 会在当前目录生成 `settings.toml` 和 `rules.toml`, 作为默认配置的模板文件, 方便后续编辑与使用。
+> 注: 使用 `novel-cli settings init` 会在当前目录生成 `settings.toml` 和 `rules.toml`, 作为默认配置的模板文件, 方便后续编辑与使用。
 
 ### 站点信息查找顺序
 
