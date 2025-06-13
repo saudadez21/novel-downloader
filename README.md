@@ -46,7 +46,7 @@ pip install novel-downloader[font-recovery]
 
 ```bash
 # 初始化默认配置 (生成 settings.toml)
-novel-cli config init
+novel-cli settings init
 
 # 编辑 ./settings.toml 完成 site/book_ids 等
 # 可查看 docs/3-settings-schema.md
@@ -66,7 +66,7 @@ novel-cli download 123456
 
 ```bash
 # 初始化默认配置 (生成 settings.toml)
-novel-cli config init
+novel-cli settings init
 
 # 编辑 ./settings.toml 修改网络配置
 # 可查看 docs/3-settings-schema.md
