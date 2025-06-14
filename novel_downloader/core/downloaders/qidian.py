@@ -203,40 +203,39 @@ class QidianDownloader(BaseDownloader):
                 skip_retry = False
                 try:
                     chap_json: ChapterDict | None = None
-                    if self.is_restricted_page(task.html_list):
+                    if self.check_restricted(task.html_list):
                         self.logger.info(
                             "[Parser] Skipped restricted page for cid %s", task.cid
                         )
                         skip_retry = True
-                    else:
-                        chap_json = await asyncio.to_thread(
-                            self.parser.parse_chapter,
-                            task.html_list,
-                            task.cid,
-                        )
-                    if self.check_encrypted(task.html_list):
+                        raise ValueError("Restricted content detected")
+
+                    is_encrypted = self.check_encrypted(task.html_list)
+                    chap_json = await asyncio.to_thread(
+                        self.parser.parse_chapter,
+                        task.html_list,
+                        task.cid,
+                    )
+                    if is_encrypted:
                         skip_retry = True
+                    if self.save_html:
+                        folder = chapters_html_dir / (
+                            "html_encrypted" if is_encrypted else "html_plain"
+                        )
+                        html_path = folder / f"{task.cid}.html"
+                        save_as_txt(task.html_list[0], html_path, on_exist="skip")
+                        self.logger.debug(
+                            "%s Saved raw HTML for chapter %s to %s",
+                            TAG,
+                            task.cid,
+                            html_path,
+                        )
                     if chap_json:
                         await save_queue.put(chap_json)
                         self.logger.info(
                             "[Parser] saved chapter %s",
                             task.cid,
                         )
-                        if self.save_html:
-                            is_encrypted = chap_json.get("extra", {}).get(
-                                "encrypted", False
-                            )
-                            folder = chapters_html_dir / (
-                                "html_encrypted" if is_encrypted else "html_plain"
-                            )
-                            html_path = folder / f"{task.cid}.html"
-                            save_as_txt(task.html_list[0], html_path, on_exist="skip")
-                            self.logger.debug(
-                                "%s Saved raw HTML for chapter %s to %s",
-                                TAG,
-                                task.cid,
-                                html_path,
-                            )
                     else:
                         raise ValueError("Empty parse result")
                 except Exception as e:
@@ -362,7 +361,7 @@ class QidianDownloader(BaseDownloader):
         return
 
     @staticmethod
-    def is_restricted_page(html_list: list[str]) -> bool:
+    def check_restricted(html_list: list[str]) -> bool:
         """
         Return True if page content indicates access restriction
         (e.g. not subscribed/purchased).
