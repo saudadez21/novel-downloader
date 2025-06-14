@@ -48,8 +48,8 @@ class YamiboBrowser(BaseBrowser):
             return False
 
         for i in range(1, attempt + 1):
+            login_page = await self.context.new_page()
             try:
-                login_page = await self.context.new_page()
                 await login_page.goto(self.LOGIN_URL, wait_until="networkidle")
 
                 await login_page.fill("#loginform-username", username)
@@ -68,8 +68,6 @@ class YamiboBrowser(BaseBrowser):
                         f"[auth] No URL change after login attempt {i}: {e}"
                     )
 
-                await login_page.close()
-
                 self._is_logged_in = await self._check_login_status()
                 if self._is_logged_in:
                     self.logger.info(f"[auth] Login successful on attempt {i}.")
@@ -83,6 +81,8 @@ class YamiboBrowser(BaseBrowser):
                 self.logger.error(
                     f"[auth] Unexpected error during login attempt {i}: {e}"
                 )
+            finally:
+                await login_page.close()
 
         self.logger.error(f"[auth] Login failed after {attempt} attempt(s).")
         return False

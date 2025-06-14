@@ -49,15 +49,17 @@ class EsjzoneBrowser(BaseBrowser):
 
         login_page = await self.context.new_page()
 
-        await login_page.goto(self.API_LOGIN_URL_1, wait_until="networkidle")
+        try:
+            await login_page.goto(self.API_LOGIN_URL_1, wait_until="networkidle")
 
-        await login_page.fill('input[name="email"]', username)
-        await login_page.fill('input[name="pwd"]', password)
+            await login_page.fill('input[name="email"]', username)
+            await login_page.fill('input[name="pwd"]', password)
 
-        await login_page.click('a.btn-send[data-send="mem_login"]')
+            await login_page.click('a.btn-send[data-send="mem_login"]')
 
-        await login_page.wait_for_load_state("networkidle")
-        await login_page.close()
+            await login_page.wait_for_load_state("networkidle")
+        finally:
+            await login_page.close()
 
         self._is_logged_in = await self._check_login_status()
 
