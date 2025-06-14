@@ -201,19 +201,9 @@ class BaseBrowser(FetcherProtocol, abc.ABC):
         **kwargs: Any,
     ) -> str:
         if self._reuse_page:
-            if not self._page:
-                self._page = await self.context.new_page()
-            page = self._page
+            return await self._fetch_with_reuse(url, wait_until, referer, **kwargs)
         else:
-            page = await self.context.new_page()
-
-        await page.goto(url, wait_until=wait_until, referer=referer)
-        content = await page.content()
-
-        if not self._reuse_page:
-            await page.close()
-
-        return str(content)
+            return await self._fetch_with_new(url, wait_until, referer, **kwargs)
 
     async def load_state(self) -> bool:
         """ """
@@ -285,6 +275,36 @@ class BaseBrowser(FetcherProtocol, abc.ABC):
         # Apply new headless setting and reinitialize
         await self.init(headless=headless)
         self.logger.debug("[browser] Browser restarted (headless=%s).", headless)
+
+    async def _fetch_with_new(
+        self,
+        url: str,
+        wait_until: Literal["commit", "domcontentloaded", "load", "networkidle"]
+        | None = "load",
+        referer: str | None = None,
+        **kwargs: Any,
+    ) -> str:
+        page = await self.context.new_page()
+        try:
+            await page.goto(url, wait_until=wait_until, referer=referer, **kwargs)
+            html: str = await page.content()
+            return html
+        finally:
+            await page.close()
+
+    async def _fetch_with_reuse(
+        self,
+        url: str,
+        wait_until: Literal["commit", "domcontentloaded", "load", "networkidle"]
+        | None = "load",
+        referer: str | None = None,
+        **kwargs: Any,
+    ) -> str:
+        if not self._page:
+            self._page = await self.context.new_page()
+        await self._page.goto(url, wait_until=wait_until, referer=referer, **kwargs)
+        html: str = await self._page.content()
+        return html
 
     @property
     def hostname(self) -> str:
