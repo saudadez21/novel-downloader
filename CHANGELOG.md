@@ -1,3 +1,17 @@
+## v1.4.2 (2025-06-14)
+
+### Feat
+
+- **download**: support partial chapter download with start_id and end_id (#37)
+
+### Fix
+
+- **debug**: restore save_html behavior for encrypted content (#39)
+
+### Refactor
+
+- **exporter**: replace ebooklib with custom EPUB generator (#35)
+
 ## v1.4.1 (2025-06-07)
 
 ### Fix
