@@ -45,6 +45,7 @@ class QidianParser(BaseParser):
         super().__init__(config)
 
         # Extract and store parser flags from config
+        self._use_truncation = config.use_truncation
         self._decode_font: bool = config.decode_font
         self._save_font_debug: bool = config.save_font_debug
 

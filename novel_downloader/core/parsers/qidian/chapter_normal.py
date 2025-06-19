@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING
 from lxml import html
 
 from novel_downloader.models import ChapterDict
+from novel_downloader.utils.text_utils import content_prefix
 
 from .utils import (
     extract_chapter_info,
@@ -27,6 +28,7 @@ if TYPE_CHECKING:
     from .main_parser import QidianParser
 
 logger = logging.getLogger(__name__)
+WHITESPACE_CHARS = {"\n", " ", "\u3000", "\t"}
 
 
 def parse_normal_chapter(
@@ -73,6 +75,13 @@ def parse_normal_chapter(
             )
             if not chapter_text:
                 return None
+
+        if parser._use_truncation:
+            chapter_text = content_prefix(
+                chapter_text,
+                n=word_count,
+                ignore_chars=WHITESPACE_CHARS,
+            )
 
         return {
             "id": str(chapter_id),

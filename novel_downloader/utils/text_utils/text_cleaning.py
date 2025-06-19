@@ -50,7 +50,33 @@ def is_promotional_line(line: str) -> bool:
     return False
 
 
+def content_prefix(
+    text: str,
+    n: int,
+    ignore_chars: set[str] | None = None,
+) -> str:
+    """
+    Return the prefix of `text` containing the first `n` non-ignored characters.
+
+    :param text: The full input string.
+    :param n: Number of content characters to include.
+    :param ignore_chars: Characters to ignore when counting content.
+    :return: Truncated string preserving original whitespace and line breaks.
+    """
+    ignore = ignore_chars or set()
+    cnt = 0
+
+    for i, ch in enumerate(text):
+        if ch not in ignore:
+            cnt += 1
+            if cnt >= n:
+                return text[: i + 1]
+
+    return text
+
+
 __all__ = [
     "clean_chapter_title",
     "is_promotional_line",
+    "content_prefix",
 ]

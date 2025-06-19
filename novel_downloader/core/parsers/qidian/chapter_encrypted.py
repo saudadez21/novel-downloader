@@ -19,7 +19,10 @@ from lxml import html
 
 from novel_downloader.models import ChapterDict
 from novel_downloader.utils.network import download_font_file
-from novel_downloader.utils.text_utils import apply_font_mapping
+from novel_downloader.utils.text_utils import (
+    apply_font_mapping,
+    content_prefix,
+)
 
 from .utils import (
     extract_chapter_info,
@@ -34,6 +37,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 IGNORED_CLASS_LISTS = {"title", "review"}
 NON_CONTENT_KEYWORDS = {"旧版", "反馈", "扫码"}
+WHITESPACE_CHARS = {"\n", " ", "\u3000", "\t"}
 
 
 def parse_encrypted_chapter(
@@ -141,6 +145,12 @@ def parse_encrypted_chapter(
             paragraphs_rules,
             end_number,
         )
+        if parser._use_truncation:
+            paragraphs_str = content_prefix(
+                paragraphs_str,
+                n=word_count,
+                ignore_chars=WHITESPACE_CHARS,
+            )
         if debug_base_dir:
             paragraphs_str_path = debug_base_dir / f"{chapter_id}_debug.txt"
             paragraphs_str_path.write_text(paragraphs_str, encoding="utf-8")
