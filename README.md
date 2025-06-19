@@ -111,6 +111,7 @@ pip install .
 - [CLI 使用示例](docs/6-cli-usage-examples.md)
 - [复制 Cookies](docs/copy-cookies.md)
 - [文件保存](docs/file-saving.md)
+- [模块与接口文档](docs/api/README.md)
 - [TODO](docs/todo.md)
 - [开发](docs/develop.md)
 - [项目说明](#项目说明)
