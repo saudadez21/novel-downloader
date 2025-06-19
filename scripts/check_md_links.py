@@ -20,6 +20,8 @@ def find_invalid_links(base_dir: Path):
     Scan all .md files under base_dir for local Markdown and image links,
     and check if their targets exist.
 
+    Skips any text inside ``` ... ``` code fences.
+
     :param base_dir: Root directory to search recursively.
 
     :return: List of errors. Each error is a dict with:
@@ -33,9 +35,18 @@ def find_invalid_links(base_dir: Path):
 
     for md_file in base_dir.rglob("*.md"):
         rel_base = md_file.parent
+        in_code_block = False
+
         try:
             with md_file.open(encoding="utf-8") as f:
                 for lineno, line in enumerate(f, start=1):
+                    if line.lstrip().startswith("```"):
+                        in_code_block = not in_code_block
+                        continue
+
+                    if in_code_block:
+                        continue
+
                     for match in LINK_PATTERN.finditer(line):
                         raw_path = match.group(1).strip()
 
