@@ -25,7 +25,8 @@ from novel_downloader.utils.constants import (
     REC_IMAGE_SHAPE_MAP,
 )
 from novel_downloader.utils.hash_store import img_hash_store
-from novel_downloader.utils.model_loader import get_rec_chinese_char_model_dir
+
+from .model_loader import get_rec_chinese_char_model_dir
 
 logger = logging.getLogger(__name__)
 

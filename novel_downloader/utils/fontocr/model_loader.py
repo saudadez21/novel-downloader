@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.utils.model_loader
------------------------------------
+novel_downloader.utils.fontocr.model_loader
+-------------------------------------------
 
 Utility functions for managing pre-trained model downloads.
 
