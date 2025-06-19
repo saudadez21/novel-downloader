@@ -9,13 +9,13 @@ from pathlib import Path
 import pytest
 from huggingface_hub.errors import LocalEntryNotFoundError
 
-import novel_downloader.utils.model_loader as model_loader
+import novel_downloader.utils.fontocr.model_loader as model_loader
 from novel_downloader.utils.constants import (
     REC_CHAR_MODEL_FILES,
     REC_CHAR_MODEL_REPO,
     REC_CHAR_VECTOR_FILES,
 )
-from novel_downloader.utils.model_loader import (
+from novel_downloader.utils.fontocr.model_loader import (
     get_rec_char_vector_dir,
     get_rec_chinese_char_model_dir,
 )

@@ -14,8 +14,26 @@ downloading and processing online novel content, including:
 - Exporter: Responsible for exporting downloaded data into various output formats.
 """
 
-from .factory import get_parser
+from .factory import (
+    get_downloader,
+    get_exporter,
+    get_fetcher,
+    get_parser,
+)
+from .interfaces import (
+    DownloaderProtocol,
+    ExporterProtocol,
+    FetcherProtocol,
+    ParserProtocol,
+)
 
 __all__ = [
+    "get_downloader",
+    "get_exporter",
+    "get_fetcher",
     "get_parser",
+    "DownloaderProtocol",
+    "ExporterProtocol",
+    "FetcherProtocol",
+    "ParserProtocol",
 ]
