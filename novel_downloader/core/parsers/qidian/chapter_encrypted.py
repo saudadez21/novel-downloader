@@ -38,7 +38,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 IGNORED_CLASS_LISTS = {"title", "review"}
 NON_CONTENT_KEYWORDS = {"旧版", "反馈", "扫码"}
-WHITESPACE_CHARS = {"\n", " ", "\u3000", "\t"}
 
 
 def parse_encrypted_chapter(

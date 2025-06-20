@@ -29,7 +29,6 @@ if TYPE_CHECKING:
     from .main_parser import QidianParser
 
 logger = logging.getLogger(__name__)
-WHITESPACE_CHARS = {"\n", " ", "\u3000", "\t"}
 
 
 def parse_normal_chapter(
