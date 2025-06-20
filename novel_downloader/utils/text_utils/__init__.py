@@ -19,6 +19,7 @@ from .text_cleaning import (
     clean_chapter_title,
     content_prefix,
     is_promotional_line,
+    truncate_half_lines,
 )
 
 __all__ = [
@@ -27,5 +28,6 @@ __all__ = [
     "clean_chapter_title",
     "is_promotional_line",
     "content_prefix",
+    "truncate_half_lines",
     "diff_inline_display",
 ]

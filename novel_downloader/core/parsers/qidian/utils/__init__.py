@@ -9,6 +9,7 @@ from .helpers import (
     can_view_chapter,
     extract_chapter_info,
     find_ssr_page_context,
+    is_duplicated,
     is_encrypted,
     is_restricted_page,
     vip_status,
@@ -22,6 +23,7 @@ __all__ = [
     "vip_status",
     "can_view_chapter",
     "is_encrypted",
+    "is_duplicated",
     "QidianNodeDecryptor",
     "get_decryptor",
 ]

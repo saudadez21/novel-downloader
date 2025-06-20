@@ -21,13 +21,14 @@ from novel_downloader.models import ChapterDict
 from novel_downloader.utils.network import download_font_file
 from novel_downloader.utils.text_utils import (
     apply_font_mapping,
-    content_prefix,
+    truncate_half_lines,
 )
 
 from .utils import (
     extract_chapter_info,
     find_ssr_page_context,
     get_decryptor,
+    is_duplicated,
     vip_status,
 )
 
@@ -80,6 +81,7 @@ def parse_encrypted_chapter(
         fixedFontWoff2_url = chapter_info["fixedFontWoff2"]
 
         title = chapter_info.get("chapterName", "Untitled")
+        duplicated = is_duplicated(ssr_data)
         raw_html = chapter_info.get("content", "")
         chapter_id = chapter_info.get("chapterId", chapter_id)
         fkp = chapter_info.get("fkp", "")
@@ -87,7 +89,7 @@ def parse_encrypted_chapter(
         update_time = chapter_info.get("updateTime", "")
         update_timestamp = chapter_info.get("updateTimestamp", 0)
         modify_time = chapter_info.get("modifyTime", 0)
-        word_count = chapter_info.get("wordsCount", 0)
+        word_count = chapter_info.get("actualWords", 0)
         seq = chapter_info.get("seq", None)
         volume = chapter_info.get("extra", {}).get("volumeName", "")
 
@@ -145,12 +147,6 @@ def parse_encrypted_chapter(
             paragraphs_rules,
             end_number,
         )
-        if parser._use_truncation:
-            paragraphs_str = content_prefix(
-                paragraphs_str,
-                n=word_count,
-                ignore_chars=WHITESPACE_CHARS,
-            )
         if debug_base_dir:
             paragraphs_str_path = debug_base_dir / f"{chapter_id}_debug.txt"
             paragraphs_str_path.write_text(paragraphs_str, encoding="utf-8")
@@ -187,6 +183,9 @@ def parse_encrypted_chapter(
         final_paragraphs_str = "\n\n".join(
             line.strip() for line in original_text.splitlines() if line.strip()
         )
+        if parser._use_truncation and duplicated:
+            final_paragraphs_str = truncate_half_lines(final_paragraphs_str)
+
         return {
             "id": str(chapter_id),
             "title": str(title),
@@ -197,6 +196,7 @@ def parse_encrypted_chapter(
                 "update_timestamp": update_timestamp,
                 "modify_time": modify_time,
                 "word_count": word_count,
+                "duplicated": duplicated,
                 "seq": seq,
                 "volume": volume,
                 "encrypted": True,
