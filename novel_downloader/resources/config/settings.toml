@@ -52,7 +52,7 @@ book_ids = [
 ]
 mode = "session"                   # browser / session
 login_required = true              # 是否需要登录才能访问
-use_truncation = false             # 是否基于章节长度截断以避免重复内容
+use_truncation = true              # 是否基于章节长度截断以避免重复内容
 
 [sites.biquge]  # 笔趣阁
 book_ids = [

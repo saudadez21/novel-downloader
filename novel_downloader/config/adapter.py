@@ -127,7 +127,7 @@ class ConfigAdapter:
         site_cfg = self._get_site_cfg()
         return ParserConfig(
             cache_dir=gen.get("cache_dir", "./novel_cache"),
-            use_truncation=site_cfg.get("use_truncation", False),
+            use_truncation=site_cfg.get("use_truncation", True),
             decode_font=font_ocr.get("decode_font", False),
             use_freq=font_ocr.get("use_freq", False),
             use_ocr=font_ocr.get("use_ocr", True),

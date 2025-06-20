@@ -68,7 +68,7 @@ class DownloaderConfig:
 @dataclass
 class ParserConfig:
     cache_dir: str = "./novel_cache"
-    use_truncation: bool = False
+    use_truncation: bool = True
     decode_font: bool = False
     use_freq: bool = False
     use_ocr: bool = True

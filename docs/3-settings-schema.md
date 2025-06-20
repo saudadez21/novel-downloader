@@ -127,7 +127,9 @@ vec_weight = 0.5
 | `book_ids`        | array\<string\> 或 array\<table\>     | -             | 小说 ID 列表 (如 `1010868264`)                                 |
 | `mode`            | string            | `"browser"`   | 请求方式: `browser` / `session` /                             |
 | `login_required`  | bool              | false         | 是否需要登录才能访问                                           |
-| `use_truncation`  | bool              | false         | 是否启用基于章节长度的截断以避免重复内容                         |
+| `use_truncation`  | bool              | true          | 是否启用基于章节长度的截断以避免重复内容                         |
+
+当需避免重复内容保存时, 请在 `settings.toml` 中将该站点 (例如 `[sites.qidian]`) 的 `use_truncation` 设置为 `true`。
 
 #### `book_ids` 字段说明
 
