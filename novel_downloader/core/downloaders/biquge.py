@@ -7,7 +7,6 @@ novel_downloader.core.downloaders.biquge
 
 from novel_downloader.core.downloaders.common import CommonDownloader
 from novel_downloader.core.interfaces import (
-    ExporterProtocol,
     FetcherProtocol,
     ParserProtocol,
 )
@@ -21,7 +20,6 @@ class BiqugeDownloader(CommonDownloader):
         self,
         fetcher: FetcherProtocol,
         parser: ParserProtocol,
-        exporter: ExporterProtocol,
         config: DownloaderConfig,
     ):
-        super().__init__(fetcher, parser, exporter, config, "biquge")
+        super().__init__(fetcher, parser, config, "biquge")

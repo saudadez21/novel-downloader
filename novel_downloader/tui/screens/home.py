@@ -65,7 +65,13 @@ class HomeScreen(Screen):  # type: ignore[misc]
                 return
             id_list = {x.strip() for x in ids.split(",") if x.strip()}
             adapter = ConfigAdapter(config=self.app.config, site=str(site))
-            asyncio.create_task(self._download(adapter, str(site), id_list))
+            # asyncio.create_task(self._download(adapter, str(site), id_list))
+            self.run_worker(
+                self._download(adapter, str(site), id_list),
+                name="download",
+                group="downloads",
+                description="正在下载书籍...",
+            )
 
     def _make_title_bar(self) -> Horizontal:
         return Horizontal(
@@ -134,7 +140,6 @@ class HomeScreen(Screen):  # type: ignore[misc]
                 downloader = get_downloader(
                     fetcher=fetcher,
                     parser=parser,
-                    exporter=exporter,
                     site=site,
                     config=downloader_cfg,
                 )
@@ -145,6 +150,7 @@ class HomeScreen(Screen):  # type: ignore[misc]
                         {"book_id": book_id},
                         progress_hook=self._update_progress,
                     )
+                    await asyncio.to_thread(exporter.export, book_id)
 
                 if downloader_cfg.login_required and fetcher.is_logged_in:
                     await fetcher.save_state()
