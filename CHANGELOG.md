@@ -1,3 +1,14 @@
+## v1.4.3 (2025-06-21)
+
+### Fix
+
+- **qidian**: add use_truncation flag to prevent duplicate chapter content (#45)
+- **fetcher**: close pages in finally block to prevent leak on failures (#41)
+
+### Refactor
+
+- **downloader**: separate exporter from download flow (#47)
+
 ## v1.4.2 (2025-06-14)
 
 ### Feat
