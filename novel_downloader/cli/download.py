@@ -161,7 +161,6 @@ async def _download(
         downloader = get_downloader(
             fetcher=fetcher,
             parser=parser,
-            exporter=exporter,
             site=site,
             config=downloader_cfg,
         )
@@ -172,6 +171,7 @@ async def _download(
                 book,
                 progress_hook=_print_progress,
             )
+            await asyncio.to_thread(exporter.export, book["book_id"])
 
         if downloader_cfg.login_required and fetcher.is_logged_in:
             await fetcher.save_state()

@@ -15,7 +15,6 @@ from typing import Any
 
 from novel_downloader.core.interfaces import (
     DownloaderProtocol,
-    ExporterProtocol,
     FetcherProtocol,
     ParserProtocol,
 )
@@ -34,13 +33,11 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
         self,
         fetcher: FetcherProtocol,
         parser: ParserProtocol,
-        exporter: ExporterProtocol,
         config: DownloaderConfig,
         site: str,
     ):
         self._fetcher = fetcher
         self._parser = parser
-        self._exporter = exporter
         self._config = config
         self._site = site
 
@@ -157,10 +154,6 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
     @property
     def parser(self) -> ParserProtocol:
         return self._parser
-
-    @property
-    def exporter(self) -> ExporterProtocol:
-        return self._exporter
 
     @property
     def config(self) -> DownloaderConfig:

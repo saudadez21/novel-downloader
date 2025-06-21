@@ -13,7 +13,6 @@ from typing import Any, cast
 
 from novel_downloader.core.downloaders.base import BaseDownloader
 from novel_downloader.core.interfaces import (
-    ExporterProtocol,
     FetcherProtocol,
     ParserProtocol,
 )
@@ -41,11 +40,10 @@ class QidianDownloader(BaseDownloader):
         self,
         fetcher: FetcherProtocol,
         parser: ParserProtocol,
-        exporter: ExporterProtocol,
         config: DownloaderConfig,
     ):
         config.request_interval = max(1.0, config.request_interval)
-        super().__init__(fetcher, parser, exporter, config, "qidian")
+        super().__init__(fetcher, parser, config, "qidian")
 
     async def _download_one(
         self,
@@ -350,8 +348,6 @@ class QidianDownloader(BaseDownloader):
 
         normal_cs.close()
         encrypted_cs.close()
-
-        await asyncio.to_thread(self.exporter.export, book_id)
 
         self.logger.info(
             "%s Novel '%s' download completed.",

@@ -440,8 +440,6 @@ class CommonDownloader(BaseDownloader):
         normal_cs.close()
         save_as_json(book_info, info_path)
 
-        await asyncio.to_thread(self.exporter.export, book_id)
-
         self.logger.info(
             "%s Novel '%s' download completed.",
             TAG,

@@ -22,14 +22,13 @@ from novel_downloader.core.downloaders import (
 )
 from novel_downloader.core.interfaces import (
     DownloaderProtocol,
-    ExporterProtocol,
     FetcherProtocol,
     ParserProtocol,
 )
 from novel_downloader.models import DownloaderConfig
 
 DownloaderBuilder = Callable[
-    [FetcherProtocol, ParserProtocol, ExporterProtocol, DownloaderConfig],
+    [FetcherProtocol, ParserProtocol, DownloaderConfig],
     DownloaderProtocol,
 ]
 
@@ -47,7 +46,6 @@ _site_map: dict[str, DownloaderBuilder] = {
 def get_downloader(
     fetcher: FetcherProtocol,
     parser: ParserProtocol,
-    exporter: ExporterProtocol,
     site: str,
     config: DownloaderConfig,
 ) -> DownloaderProtocol:
@@ -56,7 +54,6 @@ def get_downloader(
 
     :param fetcher: Fetcher implementation
     :param parser: Parser implementation
-    :param exporter: Exporter implementation
     :param site: Site name (e.g., 'qidian')
     :param config: Downloader configuration
 
@@ -66,11 +63,11 @@ def get_downloader(
 
     # site-specific
     if site_key in _site_map:
-        return _site_map[site_key](fetcher, parser, exporter, config)
+        return _site_map[site_key](fetcher, parser, config)
 
     # fallback
     site_rules = load_site_rules()
     if site_key not in site_rules:
         raise ValueError(f"Unsupported site: {site}")
 
-    return CommonDownloader(fetcher, parser, exporter, config, site_key)
+    return CommonDownloader(fetcher, parser, config, site_key)
