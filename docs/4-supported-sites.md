@@ -58,6 +58,8 @@ Book ID 通常来源于小说详情页 URL 中的路径段, 各资源站点的�
 
   该站点需提供有效的 Cookie 才能访问订阅章节。
 
+  当保存时遇到重复内容, 请确保 `settings.toml` 中该站点 (`[sites.qidian]`) 的 `use_truncation` 为 `true`。
+
 * **笔趣阁 (biquge)**
 
   示例 URL:

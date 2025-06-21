@@ -32,7 +32,11 @@ class QidianParser(BaseParser):
     Parser for Qidian site.
     """
 
-    def __init__(self, config: ParserConfig):
+    def __init__(
+        self,
+        config: ParserConfig,
+        fuid: str = "",
+    ):
         """
         Initialize the QidianParser with the given configuration.
 
@@ -41,6 +45,7 @@ class QidianParser(BaseParser):
         super().__init__(config)
 
         # Extract and store parser flags from config
+        self._use_truncation = config.use_truncation
         self._decode_font: bool = config.decode_font
         self._save_font_debug: bool = config.save_font_debug
 
@@ -52,7 +57,7 @@ class QidianParser(BaseParser):
             DATA_DIR / "qidian" / "browser_state.cookies",
             DATA_DIR / "qidian" / "session_state.cookies",
         ]
-        self._fuid: str = find_cookie_value(state_files, "ywguid")
+        self._fuid: str = fuid or find_cookie_value(state_files, "ywguid")
 
         self._font_ocr: FontOCR | None = None
         if self._decode_font:

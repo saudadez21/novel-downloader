@@ -89,6 +89,15 @@ def can_view_chapter(ssr_data: dict[str, Any]) -> bool:
     return not (vip_status == 1 and is_buy == 0)
 
 
+def is_duplicated(ssr_data: dict[str, Any]) -> bool:
+    """
+    Check if chapter is marked as duplicated (eFW = 1).
+    """
+    chapter_info = extract_chapter_info(ssr_data)
+    efw_flag = chapter_info.get("eFW", 0)
+    return bool(efw_flag == 1)
+
+
 def is_encrypted(content: str | dict[str, Any]) -> bool:
     """
     Return True if content is encrypted.

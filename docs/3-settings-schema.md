@@ -127,6 +127,9 @@ vec_weight = 0.5
 | `book_ids`        | array\<string\> 或 array\<table\>     | -             | 小说 ID 列表 (如 `1010868264`)                                 |
 | `mode`            | string            | `"browser"`   | 请求方式: `browser` / `session` /                             |
 | `login_required`  | bool              | false         | 是否需要登录才能访问                                           |
+| `use_truncation`  | bool              | true          | 是否启用基于章节长度的截断以避免重复内容                         |
+
+当需避免重复内容保存时, 请在 `settings.toml` 中将该站点 (例如 `[sites.qidian]`) 的 `use_truncation` 设置为 `true`。
 
 #### `book_ids` 字段说明
 
@@ -165,8 +168,8 @@ book_id = "1111111111"
 | 字段名          | 类型            | 必需 | 说明               |
 | ------------ | ------------- | -- | ---------------- |
 | `book_id`    | string        | 是  | 小说的唯一标识 ID       |
-| `start_id`   | string        | 否  | 起始章节 ID，从该章节开始下载 |
-| `end_id`     | string        | 否  | 结束章节 ID，下载至该章节为止 |
+| `start_id`   | string        | 否  | 起始章节 ID, 从该章节开始下载 |
+| `end_id`     | string        | 否  | 结束章节 ID, 下载至该章节为止 |
 | `ignore_ids` | `list[string]` | 否  | 要跳过的章节 ID 列表     |
 
 #### 示例: 起点中文网配置
