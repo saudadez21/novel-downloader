@@ -16,12 +16,12 @@
 from novel_downloader.core.downloaders import QidianDownloader
 ```
 
-描述: 直接导入站点专用的 Downloader 类, 初始化需传入 `fetcher`、`parser`、`exporter` 和 `config`
+描述: 直接导入站点专用的 Downloader 类, 初始化需传入 `fetcher`、`parser` 和 `config`
 
 示例:
 
 ```python
-downloader = QidianDownloader(fetcher, parser, exporter, downloader_cfg)
+downloader = QidianDownloader(fetcher, parser, downloader_cfg)
 ```
 
 ---
@@ -42,7 +42,6 @@ async with get_fetcher(site, fetcher_cfg) as fetcher:
     downloader = get_downloader(
         fetcher=fetcher,
         parser=parser,
-        exporter=exporter,
         site=site,
         config=downloader_cfg,
     )
@@ -52,6 +51,8 @@ async with get_fetcher(site, fetcher_cfg) as fetcher:
         book_config,
         progress_hook=_print_progress,
     )
+    # 导出保存为 txt / epub
+    exporter.export(book_id)
 
     # 批量下载多本书
     await downloader.download_many(

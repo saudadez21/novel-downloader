@@ -44,19 +44,27 @@ fetcher_cfg = FetcherConfig(...)
 parser_cfg  = ParserConfig(...)
 exporter_cfg = ExporterConfig(...)
 downloader_cfg = DownloaderConfig(...)
+book_config = {
+    "book_id": 12345,
+}
+
+# 创建 Parser/Exporter
+parser   = get_parser("qidian", parser_cfg)
+exporter = get_exporter("qidian", exporter_cfg)
 
 # 异步上下文中创建并登录 Fetcher
 async with get_fetcher("qidian", fetcher_cfg) as fetcher:
     await fetcher.login(username, password)
 
-    # 创建 Parser/Exporter
-    parser   = get_parser("qidian", parser_cfg)
-    exporter = get_exporter("qidian", exporter_cfg)
-
-    # 下载并导出整本书
+    # 下载整本书
     downloader = get_downloader(
-        fetcher, parser, exporter,
-        site="qidian", config=downloader_cfg
+        fetcher,
+        parser,
+        site="qidian",
+        config=downloader_cfg,
     )
     await downloader.download(book_config, progress_hook=progress_hook)
+
+# 导出整本书
+exporter.export(book["book_id"])
 ```
