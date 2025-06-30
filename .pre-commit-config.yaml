@@ -22,7 +22,7 @@ repos:
     rev: v1.15.0
     hooks:
       - id: mypy
-        files: ^novel_downloader/
+        files: ^src/
         args: ["--install-types", "--non-interactive", "--ignore-missing-imports"]
 
   - repo: https://github.com/commitizen-tools/commitizen
