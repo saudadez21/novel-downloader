@@ -64,6 +64,8 @@
 - [起点中文网安卓APP超详细算法分析过程](https://bbs.125.la/forum.php?mod=viewthread&tid=14053235)
   - 2017-8-8
 
+注: 经过分析, 这些 header 字段应该主要是 `com.qidian.QDReader.component.util.FockUtil` 的 `addRetrofitH` 函数添加的
+
 ### 2. 主要接口一览
 
 #### 2.1 获取书籍基础信息
@@ -302,6 +304,18 @@
 /data/media/0/Android/data/com.qidian.QDReader/files/QDReader/book/{user_id}/
 ```
 
+或
+
+```sh
+/sdcard/Android/data/com.qidian.QDReader/files/QDReader/book/{user_id}/
+```
+
+或
+
+```sh
+/storage/emulated/0/Android/data/com.qidian.QDReader/files/QDReader/book/{user_id}/
+```
+
 该目录结构如下所示:
 
 ```sh
@@ -461,6 +475,8 @@ pprint(table_previews)
 
 ### 3. `{chap_id}.qd` 内容解析
 
+> 声明: 本文为笔者首次尝试进行 Android 应用的逆向分析, 相关方法和思路均基于个人现阶段理解, 主要目的在于探索学习。部分手段可能存在更优或更规范的实现方式, 欢迎指正与交流。
+
 #### 所用工具与依赖
 
 用于分析和提取章节 `.qd` 文件内容, 涉及以下工具与库:
@@ -469,6 +485,7 @@ pprint(table_previews)
 
 - [`jadx`](https://github.com/skylot/jadx/releases): 用于反编译 APK, 提取 Java 层逻辑
 - [`Ghidra`](https://github.com/NationalSecurityAgency/ghidra/releases): 静态分析原生库 (如 `.so` 文件)
+- [`IDA Pro`](https://hex-rays.com/ida-pro/): 反汇编工具, 用于静态分析本地代码
 - [`Android Platform Tools (adb)`](https://developer.android.com/tools/releases/platform-tools): 用于连接调试设备
 - [`Frida`](https://github.com/frida/frida): 动态插桩与函数 Hook, 辅助定位或调用加密逻辑
 
@@ -732,7 +749,7 @@ public static ChapterContentItem H(long j10, ChapterItem chapterItem) throws Thr
         stringBuffer.append(chapterItem.ChapterId);
         stringBuffer.append(" chapterName:");
         stringBuffer.append(chapterItem.ChapterName);
-        stringBuffer.append(" 读取，耗时:");
+        stringBuffer.append(" 读取, 耗时:");
         stringBuffer.append(System.currentTimeMillis() - j11);
         stringBuffer.append("毫秒");
         Logger.d("QDReader", stringBuffer.toString());
@@ -975,6 +992,197 @@ Java_a_b_b(long *param_1,undefined8 param_2,undefined8 param_3,undefined8 param_
   return 0;
 }
 ```
+
+`package a`:
+
+```java
+package a;
+
+import android.content.Context;
+import android.util.Base64;
+import bf.cihai;
+import com.qidian.QDReader.autotracker.bean.AutoTrackerItem;
+import com.qidian.common.lib.Logger;
+import com.qidian.common.lib.util.q0;
+import java.security.NoSuchAlgorithmException;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+
+public class b {
+    private static final String CHARSET_ASCII = "ascii";
+    private static final String MAC_SHA1_NAME = "HmacSHA1";
+
+    static {
+        try {
+            System.loadLibrary("load-jni");
+        } catch (Exception e10) {
+            e10.printStackTrace();
+        } catch (UnsatisfiedLinkError e11) {
+            e11.printStackTrace();
+        }
+    }
+
+    public static native byte[] b(long j10, long j11, byte[] bArr, long j12, String str);
+
+    public static native void c(Context context);
+
+    public static byte[] d(byte[] bArr, String str) {
+        try {
+            return cihai.search(bArr, str);
+        } catch (Exception e10) {
+            Logger.exception(e10);
+            return null;
+        }
+    }
+
+    private static String encryptToSHA1(String str, String str2) throws Exception {
+        SecretKeySpec secretKeySpec = new SecretKeySpec(str.getBytes(CHARSET_ASCII), MAC_SHA1_NAME);
+        Mac mac = Mac.getInstance(MAC_SHA1_NAME);
+        mac.init(secretKeySpec);
+        return new String(Base64.encode(mac.doFinal(str2.getBytes(CHARSET_ASCII)), 0));
+    }
+
+    public static String m(String str, String str2) {
+        String str3;
+        try {
+            str3 = bf.a.judian(str, str2);
+        } catch (NoSuchAlgorithmException e10) {
+            e = e10;
+            str3 = null;
+        }
+        try {
+            if (str3.length() != 24) {
+                d5.cihai.p(new AutoTrackerItem.Builder().setPn("OKR_b_m").setEx1(String.valueOf(str3.length())).setEx2(str + "/" + str2 + "/" + str3).buildCol());
+            }
+        } catch (NoSuchAlgorithmException e11) {
+            e = e11;
+            Logger.exception(e);
+            return str3;
+        }
+        return str3;
+    }
+
+    public static String s(String str, String str2) {
+        String str3;
+        try {
+            str3 = encryptToSHA1(str, str2);
+            try {
+                if (str3.length() >= 24) {
+                    return str3;
+                }
+                d5.cihai.p(new AutoTrackerItem.Builder().setPn("OKR_b_s").setEx1(String.valueOf(str3.length())).setEx2(str + "/" + str2 + "/" + str3).buildCol());
+                return q0.m(str3, 24, (char) 0);
+            } catch (Exception e10) {
+                e = e10;
+                Logger.exception(e);
+                return str3;
+            }
+        } catch (Exception e11) {
+            e = e11;
+            str3 = null;
+        }
+    }
+}
+```
+
+`q0.m`:
+
+```java
+public static String m(String str, int i10, char c10) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(str);
+    int length = i10 - str.length();
+    for (int i11 = 0; i11 < length; i11++) {
+        sb.append(c10);
+    }
+    return sb.toString();
+}
+```
+
+`package bf`:
+
+```java
+import com.qidian.QDReader.qmethod.pandoraex.monitor.c;
+import com.qidian.common.lib.Logger;
+import java.nio.charset.StandardCharsets;
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
+public class cihai {
+
+    /* renamed from: search, reason: collision with root package name */
+    private static final String f1806search = "bf.cihai";
+
+    public static String cihai(String str, String str2) throws Exception {
+        IvParameterSpec ivParameterSpec = new IvParameterSpec(new byte[8]);
+        byte[] bytes = str2.getBytes("UTF-8");
+        if (bytes.length == 16) {
+            byte[] bArr = new byte[24];
+            System.arraycopy(bytes, 0, bArr, 0, 16);
+            System.arraycopy(bytes, 0, bArr, 16, 8);
+            bytes = bArr;
+        }
+        SecretKeySpec secretKeySpec = new SecretKeySpec(bytes, "DESede");
+        Cipher cipher = Cipher.getInstance("DESede/CBC/PKCS5Padding");
+        if (cipher == null) {
+            return "";
+        }
+        cipher.init(1, secretKeySpec, ivParameterSpec);
+        return search.judian(c.search(cipher, str.getBytes()));
+    }
+
+    public static String judian(byte[] bArr, String str) throws Exception {
+        IvParameterSpec ivParameterSpec = new IvParameterSpec("01234567".getBytes(StandardCharsets.UTF_8));
+        byte[] bytes = str.getBytes("UTF-8");
+        if (bytes.length == 16) {
+            byte[] bArr2 = new byte[24];
+            System.arraycopy(bytes, 0, bArr2, 0, 16);
+            System.arraycopy(bytes, 0, bArr2, 16, 8);
+            bytes = bArr2;
+        }
+        SecretKeySpec secretKeySpec = new SecretKeySpec(bytes, "DESede");
+        Cipher cipher = Cipher.getInstance("DESede/CBC/PKCS5Padding");
+        if (cipher == null) {
+            return "";
+        }
+        cipher.init(1, secretKeySpec, ivParameterSpec);
+        return search.judian(c.search(cipher, bArr));
+    }
+
+    public static byte[] search(byte[] bArr, String str) throws Exception {
+        if (bArr != null && str != null) {
+            IvParameterSpec ivParameterSpec = new IvParameterSpec(new byte[8]);
+            byte[] bytes = str.getBytes("UTF-8");
+            if (bytes != null && bytes.length >= 1) {
+                if (bytes.length == 16) {
+                    byte[] bArr2 = new byte[24];
+                    System.arraycopy(bytes, 0, bArr2, 0, 16);
+                    System.arraycopy(bytes, 0, bArr2, 16, 8);
+                    bytes = bArr2;
+                }
+                Cipher cipher = Cipher.getInstance("DESede/CBC/PKCS5Padding");
+                if (cipher == null) {
+                    Logger.e(f1806search, "cipher is null");
+                    return null;
+                }
+                cipher.init(2, new SecretKeySpec(bytes, "DESede"), ivParameterSpec);
+                try {
+                    return c.search(cipher, bArr);
+                } catch (Exception e10) {
+                    e10.printStackTrace();
+                    int length = bArr.length;
+                    Logger.e(f1806search, "decryptDES失败：" + str + "," + length);
+                    return null;
+                }
+            }
+            Logger.e(f1806search, "keyBytes is illegal");
+        }
+        return null;
+    }
+}
+```
+
 </details>
 
 在函数中意外发现该方法内部大量调用了 `__android_log_print` 打印中间变量 (如解密参数 / 密钥等)。
@@ -1002,6 +1210,7 @@ import hashlib
 import hmac
 from base64 import b64encode
 from Crypto.Cipher import DES3
+from Crypto.Util.Padding import unpad
 
 def sha1_hmac(key: str, data: str) -> str:
     digest = hmac.new(key.encode(), data.encode(), hashlib.sha1).digest()
@@ -1014,13 +1223,12 @@ def md5_hmac(key: str, data: str) -> str:
 def des3_decrypt(data: bytes, secret: str) -> bytes:
     """3DES/CBC 解密"""
     cipher = DES3.new(secret.encode(), DES3.MODE_CBC, b'\x00' * 8)
-    return cipher.decrypt(data)
+    decrypted = cipher.decrypt(data)
+    return unpad(decrypted, block_size=8)
 
 def decrypt_content(cid: str, chunk1: bytes, uid: str, imei: str) -> str:
     """
     - 对 chunk1 做两次 3DES 解密
-    - 自动探测 PKCS#7 填充并丢掉
-    - 去掉末尾非加密的 '附加' 字节
     """
     # 计算两把 key
     sec1 = sha1_hmac(
@@ -1034,25 +1242,7 @@ def decrypt_content(cid: str, chunk1: bytes, uid: str, imei: str) -> str:
     step1 = des3_decrypt(raw, sec2)
     step2 = des3_decrypt(step1, sec1)
 
-    # 自动检测 PKCS#7 填充:
-    # 找最后一个重复 p 次的字节 p (1 <= p <= 8),
-    # 且 (idx + p) 是 8 的倍数, 即 padded_length = idx + p
-    padded_len = None
-    pad_len = None
-    for p in range(8, 0, -1):
-        pattern = bytes([p]) * p
-        idx = step2.rfind(pattern)
-        if idx != -1 and (idx + p) % 8 == 0:
-            padded_len = idx + p
-            pad_len = p
-            break
-    if padded_len is None:
-        raise ValueError("无法自动检测填充 (padding) 位置")
-
-    # 去掉后 pad_len 字节
-    json_bytes = step2[: padded_len - pad_len ]
-    text = json_bytes.decode('utf-8', errors='replace')
-    return text
+    return step2.decode("utf-8", errors="ignore")  # or "replace"
 ```
 
 ##### 3.5.3 `fockUtil.unlock` 函数
@@ -1132,7 +1322,9 @@ public class Fock {
 ```
 </details>
 
-由于 `libfock.so` 是另一套独立的 native 实现, 此处不继续深入分析其内部逻辑, 而是选择直接使用 `Frida` 对相关方法进行 Hook。
+---
+
+方案 1. 使用 `Frida` 对相关方法进行 Hook
 
 > 注意: 执行此 Hook 前, 需先在手机端启动 App 并打开任意一个 VIP 章节, 以确保目标类和方法 (如 `Fock` 等) 已加载并初始化, 否则 Hook 将无法生效。
 
@@ -1204,6 +1396,327 @@ if __name__ == "__main__":
     test()
 ```
 
+---
+
+方案 2. 逆向并实现
+
+首先使用 `frida` 对 `Fock` 相关的函数进行 hook 分析:
+
+<details>
+<summary>Hook 脚本 (点击展开)</summary>
+
+```js
+// hook_fock_v2.js
+var indentMap = {};
+
+function getIndent(threadId) {
+    var lvl = indentMap[threadId] || 0;
+    return Array(lvl + 1).join('  ');
+}
+
+Java.perform(function () {
+    const Thread = Java.use("java.lang.Thread");
+    const fockClass = Java.use("com.yuewen.fock.Fock");
+
+    const methods = fockClass.class.getDeclaredMethods();
+    methods.forEach(function (method) {
+        const name = method.getName();
+        try {
+            const overloads = fockClass[name].overloads;
+            overloads.forEach(function (overload) {
+                overload.implementation = function () {
+                    const tid = Thread.currentThread().getId().toString();
+
+                    indentMap[tid] = (indentMap[tid] || 0) + 1;
+                    console.log(getIndent(tid) + "-> Enter: " + this.$className + "." + name);
+
+                    for (let i = 0; i < arguments.length; i++) {
+                        console.log(getIndent(tid) + "Arg[" + i + "]: " + arguments[i]);
+                    }
+
+                    var result, exception = null;
+                    try {
+                        result = this[name].apply(this, arguments);
+                    } catch (e) {
+                        exception = e;
+                    } finally {
+                        if (exception) {
+                            console.log(getIndent(tid) + "<- Exception: " + exception);
+                        } else {
+                            console.log(getIndent(tid) + "<- Exit:  " + this.$className + "." + name
+                                        + " => " + result);
+                        }
+                        indentMap[tid]--;
+                        if (indentMap[tid] === 0) {
+                            delete indentMap[tid];
+                        }
+                    }
+
+                    if (exception) throw exception;
+                    return result;
+                };
+            });
+        } catch (e) {
+            console.log("Could not hook " + name + ": " + e);
+        }
+    });
+});
+```
+
+```python
+import frida
+import sys
+
+PACKAGE_NAME = "com.qidian.QDReader"
+
+device = frida.get_device("...")
+
+pid = device.spawn([PACKAGE_NAME])
+session = device.attach(pid)
+
+with open("hook_fock_v2.js", encoding="utf-8") as f:
+    script = session.create_script(f.read())
+
+script.on("message", lambda msg, data: print("[FRIDA]", msg))
+script.load()
+
+device.resume(pid)
+print("[*] Hook started. Ctrl+C to stop.")
+sys.stdin.read()
+```
+
+</details>
+
+使用 `IDA Pro` 的 64 位版本打开 `libfork.so`
+
+根据介绍先去找到了 `JNI_OnLoad(JavaVM *vm, void *reserved)` 函数
+
+<details>
+<summary>`JNI_OnLoad` (点击展开)</summary>
+
+```c
+jint JNI_OnLoad(JavaVM *vm, void *reserved)
+{
+  jint v2; // w19
+  __int64 v4; // x8
+  __int64 v5; // x0
+  __int64 v6; // x20
+  __int64 v7; // [xsp+8h] [xbp-188h] BYREF
+  __int128 dest[20]; // [xsp+10h] [xbp-180h] BYREF
+  __int64 v9[4]; // [xsp+150h] [xbp-40h] BYREF
+
+  v9[3] = *(_QWORD *)(_ReadStatusReg(ARM64_SYSREG(3, 3, 13, 0, 2)) + 40);
+  v2 = 65542;
+  if ( (*vm)->GetEnv(vm, (void **)&v7, 65542LL) )
+    return -1;
+  v4 = 0LL;
+  memset(v9, 0, 21);
+  do
+  {
+    dest[0] = xmmword_1BD00;
+    *((_BYTE *)v9 + v4) = *(_BYTE *)((unsigned __int64)dest | v4 & 0xF) ^ byte_1BE21[v4];
+    ++v4;
+  }
+  while ( v4 != 20 );
+  v5 = (*(__int64 (__fastcall **)(__int64, __int64 *, long double))(*(_QWORD *)v7 + 48LL))(
+         v7,
+         v9,
+         *(long double *)&xmmword_1BD00);
+  if ( !v5 )
+    return -1;
+  v6 = v5;
+  memcpy(dest, off_24408, 0x138u);
+  if ( (*(unsigned int (__fastcall **)(__int64, __int64, __int128 *, __int64))(*(_QWORD *)v7 + 1720LL))(
+         v7,
+         v6,
+         dest,
+         13LL) )
+  {
+    return -1;
+  }
+  qword_26058 = (unsigned __int64)&qword_26058 ^ (unsigned __int64)fock_43254543;
+  qword_26060 = (unsigned __int64)&qword_26060 ^ (unsigned __int64)fock_uk;
+  qword_26070 = (unsigned __int64)&qword_26070 ^ (unsigned __int64)fock_uksf;
+  qword_26068 = (unsigned __int64)&qword_26068 ^ (unsigned __int64)fock_sn;
+  return v2;
+}
+```
+
+`xmmword_1BD00` 数据:
+
+```
+.rodata:000000000001BD00 76 36 31 6F 75 61 6B 70 67 34+xmmword_1BD00 DCB 0x76, 0x36, 0x31, 0x6F, 0x75, 0x61, 0x6B, 0x70, 0x67, 0x34, 0x69, 0x7A, 0x6D, 0x35, 0x32, 0x77
+.rodata:000000000001BD00 69 7A 6D 35 32 77                                                     ; DATA XREF: JNI_OnLoad:loc_937C↑o
+.rodata:000000000001BD00                                                                       ; JNI_OnLoad+74↑r
+```
+
+`byte_1BE21` 数据:
+
+```
+.rodata:000000000001BE21 15 59 5C 40 0C 14 0E 07 02 5A+byte_1BE21 DCB 0x15, 0x59, 0x5C, 0x40, 0xC, 0x14, 0xE, 7, 2, 0x5A, 0x46, 0x1C, 2, 0x56, 0x59, 0x58, 0x30, 0x59
+.rodata:000000000001BE21 46 1C 02 56 59 58 30 59 52 04+                                        ; DATA XREF: JNI_OnLoad+78↑o
+.rodata:000000000001BE21 00 00 00                                                              ; JNI_OnLoad+80↑o
+```
+
+`off_24408` 数据:
+
+```
+.data.rel.ro:0000000000024408 3F BD 01 00 00 00 00 00       off_24408 DCQ aIt                       ; DATA XREF: JNI_OnLoad+D0↑o
+.data.rel.ro:0000000000024408                                                                       ; JNI_OnLoad+D8↑o
+.data.rel.ro:0000000000024408                                                                       ; "it"
+.data.rel.ro:0000000000024410 42 BD 01 00 00 00 00 00       DCQ aBiI                                ; "([BI)I",0
+.data.rel.ro:0000000000024418 70 89 00 00 00 00 00 00       DCQ sub_8970
+.data.rel.ro:0000000000024420 49 BD 01 00 00 00 00 00       DCQ aAk                                 ; "ak"
+.data.rel.ro:0000000000024428 4C BD 01 00 00 00 00 00       DCQ aBiBV                               ; "([BI[B)V",0
+.data.rel.ro:0000000000024430 58 8A 00 00 00 00 00 00       DCQ sub_8A58
+.data.rel.ro:0000000000024438 55 BD 01 00 00 00 00 00       DCQ aUk                                 ; "uk"
+.data.rel.ro:0000000000024440 58 BD 01 00 00 00 00 00       DCQ aBiBiLcomYuewen                     ; "([BI[BI)Lcom/yuewen/fock/Fock",0x24,"FockResult;",0
+.data.rel.ro:0000000000024448 64 8B 00 00 00 00 00 00       DCQ sub_8B64
+.data.rel.ro:0000000000024450 82 BD 01 00 00 00 00 00       DCQ aAv                                 ; "av"
+.data.rel.ro:0000000000024458 D0 BC 01 00 00 00 00 00       DCQ aLjavaLangStrin                     ; "()Ljava/lang/String;",0
+.data.rel.ro:0000000000024460 00 8D 00 00 00 00 00 00       DCQ sub_8D00
+.data.rel.ro:0000000000024468 85 BD 01 00 00 00 00 00       DCQ aSn                                 ; "sn"
+.data.rel.ro:0000000000024470 88 BD 01 00 00 00 00 00       DCQ aBiLjavaLangStr                     ; "([BI)Ljava/lang/String;",0
+.data.rel.ro:0000000000024478 C8 8D 00 00 00 00 00 00       DCQ sub_8DC8
+.data.rel.ro:0000000000024480 A0 BD 01 00 00 00 00 00       DCQ aUrk                                ; "urk"
+.data.rel.ro:0000000000024488 D0 BC 01 00 00 00 00 00       DCQ aLjavaLangStrin                     ; "()Ljava/lang/String;",0
+.data.rel.ro:0000000000024490 64 8D 00 00 00 00 00 00       DCQ sub_8D64
+.data.rel.ro:0000000000024498 A4 BD 01 00 00 00 00 00       DCQ aLk                                 ; "lk"
+.data.rel.ro:00000000000244A0 A7 BD 01 00 00 00 00 00       DCQ aBiB                                ; "([BI)[B",0
+.data.rel.ro:00000000000244A8 84 8E 00 00 00 00 00 00       DCQ sub_8E84
+.data.rel.ro:00000000000244B0 AF BD 01 00 00 00 00 00       DCQ aEts                                ; "ets"
+.data.rel.ro:00000000000244B8 B3 BD 01 00 00 00 00 00       DCQ aZJ                                 ; "(Z)J",0
+.data.rel.ro:00000000000244C0 44 8F 00 00 00 00 00 00       DCQ sub_8F44
+.data.rel.ro:00000000000244C8 B8 BD 01 00 00 00 00 00       DCQ aUksf                               ; "uksf"
+.data.rel.ro:00000000000244D0 BD BD 01 00 00 00 00 00       DCQ aBiBiBLcomYuewe                     ; "([BI[BI[B)Lcom/yuewen/fock/Fock",0x24,"FockResult;",0
+.data.rel.ro:00000000000244D8 50 8F 00 00 00 00 00 00       DCQ sub_8F50
+.data.rel.ro:00000000000244E0 E9 BD 01 00 00 00 00 00       DCQ aResf                               ; "resf"
+.data.rel.ro:00000000000244E8 EE BD 01 00 00 00 00 00       DCQ aBiBB                               ; "([BI[B)[B",0
+.data.rel.ro:00000000000244F0 0C 91 00 00 00 00 00 00       DCQ sub_910C
+.data.rel.ro:00000000000244F8 F8 BD 01 00 00 00 00 00       DCQ aTsf                                ; "tsf"
+.data.rel.ro:0000000000024500 EE BD 01 00 00 00 00 00       DCQ aBiBB                               ; "([BI[B)[B",0
+.data.rel.ro:0000000000024508 C4 91 00 00 00 00 00 00       DCQ sub_91C4
+.data.rel.ro:0000000000024510 FC BD 01 00 00 00 00 00       DCQ aRmdk                               ; "rmdk"
+.data.rel.ro:0000000000024518 01 BE 01 00 00 00 00 00       DCQ aBV                                 ; "([B)V",0
+.data.rel.ro:0000000000024520 7C 92 00 00 00 00 00 00       DCQ sub_927C
+.data.rel.ro:0000000000024528 07 BE 01 00 00 00 00 00       DCQ aIde                                ; "ide"
+.data.rel.ro:0000000000024530 0B BE 01 00 00 00 00 00       DCQ aJLjavaLangStri                     ; "(J)Ljava/lang/String;",0
+.data.rel.ro:0000000000024538 A8 92 00 00 00 00 00 00       DCQ sub_92A8
+```
+
+Java 类型到 JNI 签名映射规则:
+
+| Java 类型   | JNI 签名                       |
+| ---------- | ------------------------------ |
+| `int`      | `I`                            |
+| `boolean`  | `Z`                            |
+| `byte`     | `B`                            |
+| `short`    | `S`                            |
+| `long`     | `J`                            |
+| `float`    | `F`                            |
+| `double`   | `D`                            |
+| `char`     | `C`                            |
+| `void`     | `V`                            |
+| `Object`   | `Lfully/qualified/ClassName;`  |
+| `byte[]`   | `[B`                           |
+| `int[]`    | `[I`                           |
+| `Object[]` | `[Lfully/qualified/ClassName;` |
+
+</details>
+
+可能没必要, 但还是处于好奇分析了每步的值
+
+1. 获取 JNIEnv 指针
+
+```c
+if ( (*vm)->GetEnv(vm, (void **)&v7, 65542LL) )
+    return -1;
+```
+
+* 这一步调用 `vm->GetEnv`, 把 `JNIEnv*` 存到 `v7` (用于后续所有 JNI 调用)。
+* 如果失败就返回 `-1`, 使 JNI 加载失败。
+
+2. 准备一个 20 字节的密钥数组 v9
+
+```c
+v4 = 0;
+memset(v9, 0, 21);
+do {
+    dest[0] = xmmword_1BD00;
+    *((_BYTE *)v9 + v4) = *(_BYTE *)((unsigned __int64)dest | v4 & 0xF) ^ byte_1BE21[v4];
+    ++v4;
+} while ( v4 != 20 );
+```
+
+* `xmmword_1BD00` (16 字节常量) 和 `byte_1BE21` 静态数组 (至少 20 字节) 逐字节做 XOR。
+* 当索引 >= 16 时, 用 `index & 0xF` 重复取常量的前面字节。
+* 最终生成一个长度 20 的混淆字节序列, 存入 `v9`。
+* 下方已用 Python 还原这 20 字节内容:
+
+```python
+import struct
+
+xmmword = [
+    0x76, 0x36, 0x31, 0x6F, 0x75, 0x61, 0x6B, 0x70,
+    0x67, 0x34, 0x69, 0x7A, 0x6D, 0x35, 0x32, 0x77,
+]
+byte_1BE21 = [
+    0x15, 0x59, 0x5C, 0x40, 0x0C,
+    0x14, 0x0E, 0x07, 0x02, 0x5A,
+    0x46, 0x1C, 0x02, 0x56, 0x59,
+    0x58, 0x30, 0x59, 0x52, 0x04,
+]
+
+v9 = []
+for i in range(20):
+    base = xmmword[i] if i < 16 else xmmword[i & 0xF]
+    v9.append(base ^ byte_1BE21[i])
+
+# hex_vals = [f"0x{b:02x}" for b in v9]
+# print("v9 (hex):", hex_vals)
+ascii_vals = ''.join(chr(b) if 32 <= b < 127 else f"\\x{b:02x}" for b in v9)
+print("v9 (ASCII):", ascii_vals)
+"""
+v9 (ASCII): com/yuewen/fock/Fock
+"""
+```
+
+3. 创建 Java 层的 `byte[]` 或者查找类 (取决于实际偏移)
+
+```c
+v5 = (*(__int64 (__fastcall **)(__int64, __int64 *, long double))(*(_QWORD *)v7 + 48LL))(
+       v7,
+       v9,
+       *(long double *)&xmmword_1BD00);
+if ( !v5 )
+    return -1;
+v6 = v5;
+```
+
+* 取 `JNIEnv` 虚表偏移 `+48` 的函数 (可能是 `NewByteArray`、`FindClass`、或其他自定义钩子),
+* 传入生成的 `v9`、以及常量 `xmmword_1BD00` (以 `long double` 的方式透传),
+* 返回一个引用 (如 `jbyteArray` 或者 `jclass`), 保存在 `v6`。
+
+4. 注册本地方法表
+
+```c
+memcpy(dest, off_24408, 0x138u);
+if ((*(unsigned int (__fastcall **)(__int64, __int64, __int128 *, __int64))(*(_QWORD *)v7 + 1720LL))(
+       v7,
+       v6,
+       dest,
+       13LL))
+{
+    return -1;
+}
+```
+
+* `off_24408` 地址处是一段连续的 `JNINativeMethod[13]` 数组 (13×24 = 312 = 0x138 字节)
+* 调用虚表偏移 `+1720` 的函数 (对应 `RegisterNatives`)
+* 把方法表注册到 `v6` (上一步得到的 `jclass`)
+
+---
+
 ##### 3.5.4 批量解密与导出实现
 
 基于前述各模块, 可整合为一个完整的批量解密脚本。
@@ -1234,6 +1747,7 @@ from typing import Any
 
 import frida
 from Crypto.Cipher import DES3
+from Crypto.Util.Padding import unpad
 
 
 def sha1_hmac(key: str, data: str) -> str:
@@ -1249,7 +1763,8 @@ def md5_hmac(key: str, data: str) -> str:
 def des3_decrypt(data: bytes, secret: str) -> bytes:
     """3DES/CBC 解密"""
     cipher = DES3.new(secret.encode(), DES3.MODE_CBC, b'\x00' * 8)
-    return cipher.decrypt(data)
+    decrypted = cipher.decrypt(data)
+    return unpad(decrypted, block_size=8)
 
 
 def decrypt_content(cid: str, chunk1: bytes, uid: str, imei: str) -> str:
@@ -1268,21 +1783,7 @@ def decrypt_content(cid: str, chunk1: bytes, uid: str, imei: str) -> str:
     step1 = des3_decrypt(raw, sec2)
     step2 = des3_decrypt(step1, sec1)
 
-    padded_len = None
-    pad_len = None
-    for p in range(8, 0, -1):
-        pattern = bytes([p]) * p
-        idx = step2.rfind(pattern)
-        if idx != -1 and (idx + p) % 8 == 0:
-            padded_len = idx + p
-            pad_len = p
-            break
-    if padded_len is None:
-        raise ValueError("无法自动检测填充 (padding) 位置")
-
-    json_bytes = step2[: padded_len - pad_len ]
-    text = json_bytes.decode('utf-8', errors='replace')
-    return text
+    return step2.decode("utf-8", errors="ignore")
 
 
 def decrypt(
@@ -1317,7 +1818,7 @@ def decrypt(
     def read_chunk():
         raw = buf.read(4)
         if len(raw) < 4:
-            raise IOError("文件结构不完整，无法读取长度")
+            raise IOError("文件结构不完整, 无法读取长度")
         length = int.from_bytes(raw, byteorder='little')
         return buf.read(length)
 
