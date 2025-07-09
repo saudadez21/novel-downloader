@@ -33,11 +33,11 @@
 *.db     binary
 
 # === Treat JS in resources as vendored (for GitHub) ===
-novel_downloader/resources/js_scripts/**      linguist-vendored
-novel_downloader/resources/css_styles/**      linguist-vendored
-novel_downloader/resources/images/**          linguist-vendored
-novel_downloader/resources/json/**            linguist-vendored
-novel_downloader/resources/text/**            linguist-vendored
-novel_downloader/resources/config/**          linguist-vendored
+src/novel_downloader/resources/js_scripts/**      linguist-vendored
+src/novel_downloader/resources/css_styles/**      linguist-vendored
+src/novel_downloader/resources/images/**          linguist-vendored
+src/novel_downloader/resources/json/**            linguist-vendored
+src/novel_downloader/resources/text/**            linguist-vendored
+src/novel_downloader/resources/config/**          linguist-vendored
 
 docs/**                                       linguist-documentation
