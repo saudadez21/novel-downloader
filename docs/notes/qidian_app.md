@@ -142,6 +142,16 @@
   | md5Signature     | string | 是  | MD5 |
   | extendchapterIds | string | 否  | 扩展查询章节 ID 列表         |
 
+* **`md5Signature` 计算说明**
+
+  将本地已存在的章节 ID 与对应的卷 ID 按阅读顺序用竖线拼接, 得到形如:
+
+  ```
+  cid1|vcode1|cid2|vcode2|...|cidN|vcodeN
+  ```
+
+  对该字符串取 `MD5`, 结果即为 `md5Signature`。
+
 * **示例 param**:
 
   ```json
@@ -149,8 +159,8 @@
     "bookId": 1234567,
     "timeStamp": 1750000000000,
     "requestSource": 0,
-    "md5Signature": "xxxxxxx",
-    "extendchapterIds": 1234567
+    "md5Signature": "5f4dcc3b5aa765d61d8327deb882cf99",
+    "extendchapterIds": "2345678,3456789"
   }
   ```
 
@@ -240,7 +250,7 @@
     | -------- | ---------- |
     | b        | bookId     |
     | c        | chapterId  |
-    | ui       | userId |
+    | ui       | 不确定 |
     | b-string | 加密包标识      |
 
   * **示例 Body**:
@@ -291,6 +301,74 @@
     ```
 
   * **返回**包含 `DownloadUrl`、`Key`、`Md5`、`Size`, 需后续 GET COS 链接下载 ZIP, 然后解包。
+  * 注意: `DownloadUrl` 是加密状态需要使用 `Fock` 的 `unlock` 进行解密
+
+    <details>
+    <summary>相关函数 (点击展开)</summary>
+
+    ```java
+    // 调用:
+    unLockContent = qDChapterBatchDownloadLoader.unLockContent(qDChapterBatchDownloadLoader.getBookId(), key, downloadUrl);
+    ```
+
+    `qDChapterBatchDownloadLoader.unLockContent`:
+
+    ```java
+    public final String unLockContent(long j10, String str, String str2) {
+        if (str2 == null || str2.length() == 0) {
+            return "";
+        }
+        String valueOf = String.valueOf(j10);
+        String str3 = "BatchChapterCos_" + j10 + "_" + str;
+        FockUtil fockUtil = FockUtil.INSTANCE;
+        Fock.FockResult unlock = fockUtil.unlock(str2, valueOf, str3);
+        if (unlock.status == Fock.FockResult.STATUS_EMPTY_USER_KEY) {
+            Fock.setup(we.d.X());
+            unlock = fockUtil.unlock(str2, valueOf, str3);
+        }
+        if (unlock.status != 0) {
+            return "";
+        }
+        byte[] bArr = unlock.data;
+        kotlin.jvm.internal.o.d(bArr, "unlockResult.data");
+        Charset UTF_8 = StandardCharsets.UTF_8;
+        kotlin.jvm.internal.o.d(UTF_8, "UTF_8");
+        return new String(bArr, UTF_8);
+    }
+    ```
+
+    </details>
+
+#### 2.7 获取书籍封面
+
+支持两种图片格式: WebP 和 JPEG。
+
+请将以下 URL 中的占位符替换为实际值:
+
+* **`{book_id}`**: 书籍的唯一 ID
+* **`{width}`**: 封面宽度, 单位为像素, 可选值: `90`、`150`、`180`、`300`、`600`
+
+**WebP 格式**
+
+```
+https://bookcover.yuewen.com/qdbimg/349573/{book_id}/{width}.webp
+```
+
+**JPEG 格式**
+
+```
+https://bookcover.yuewen.com/qdbimg/349573/{book_id}/{width}
+```
+
+##### 使用示例
+
+* 获取 `book_id = 123456`, 宽度为 `300px` 的 WebP 封面:
+
+  `https://bookcover.yuewen.com/qdbimg/349573/123456/300.webp`
+
+* 获取同一书籍的 JPEG 封面:
+
+  `https://bookcover.yuewen.com/qdbimg/349573/123456/300`
 
 ---
 
@@ -885,111 +963,259 @@ public class b {
 }
 ```
 
-使用 Ghidra 对 `libload-jni.so` 进行反汇编分析后. 可快速定位到对应的 native 方法实现 `Java_a_b_b`:
+使用 Ghidra (或 IDA) 对 `libload-jni.so` 进行反汇编分析后. 可快速定位到对应的 native 方法实现 `Java_a_b_b`:
 
 <details>
 <summary>Java_a_b_b 实现片段 (点击展开)</summary>
 
 ```c
-undefined8
-Java_a_b_b(long *param_1,undefined8 param_2,undefined8 param_3,undefined8 param_4,undefined8 param_5
-          ,undefined8 param_6,undefined8 param_7,undefined8 param_8)
+jobject __fastcall Java_a_b_b(
+        JNIEnv *env,
+        jobject clazz,
+        jlong bookIdLong,
+        jlong chapterIdLong,
+        jbyteArray dataArray,
+        jlong userIdLong,
+        jstring imei)
 {
-  // ...
-  lVar5 = (**(code **)(*param_1 + 0x30))(param_1,&DAT_00100a57);
-  if (((lVar5 != 0) && (lVar6 = (**(code **)(*param_1 + 0x30))(param_1,&DAT_00100a57), lVar6 != 0))
-     && (lVar7 = (**(code **)(*param_1 + 0x30))(param_1,&DAT_00100a57), lVar7 != 0)) {
-    __android_log_print(3,"QDReader_Jni","JNI:0");
-    uVar8 = (**(code **)(*param_1 + 0x548))(param_1,param_7,0);
-    __android_log_print(3,"QDReader_Jni","bookid: %s,chapterid: %s,userid: %s,imei: %s",__ptr,__src,
-                        puVar1,uVar8);
-    __android_log_print(3,"QDReader_Jni","JNI:1");
-    __strcpy_chk(puVar2,puVar1,0xff);
-    pcVar9 = (char *)__strcat_chk(puVar2,uVar8,0xff);
-    __s = strcat(pcVar9,__src);
-    sVar10 = strlen(__s);
-    builtin_strncpy(pcVar9 + sVar10,"2EEE1433A152E84B3756301D8FA3E69A",0x21);
-    __android_log_print(3,"QDReader_Jni","JNI:2");
-    uVar11 = (**(code **)(*param_1 + 0x538))(param_1,puVar2);
-    __android_log_print(3,"QDReader_Jni","JNI:3");
-    lVar12 = (**(code **)(*param_1 + 0x388))
-                       (param_1,lVar5,&DAT_00100a86,
-                        "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
-    __android_log_print(3,"QDReader_Jni","JNI:4");
-    if (lVar12 != 0) {
-      __android_log_print(3,"QDReader_Jni","sha1id:%d",lVar12);
-      __android_log_print(3,"QDReader_Jni","JNI:5");
-      uVar13 = (**(code **)(*param_1 + 0x390))(param_1,lVar5,lVar12,param_7,uVar11);
-      (**(code **)(*param_1 + 0x550))(param_1,uVar11,puVar2);
-      __android_log_print(3,"QDReader_Jni","JNI:6");
-      pcVar9 = (char *)(**(code **)(*param_1 + 0x548))(param_1,uVar13,0);
-      __android_log_print(3,"QDReader_Jni","sha1key1 = %s",pcVar9);
-      __android_log_print(3,"QDReader_Jni","JNI:7");
-      sVar10 = strlen(pcVar9);
-      if (0x17 < sVar10) {
-        memset(&DAT_00104100,0,0x400);
-        strncpy(&DAT_00104100,pcVar9,0x18);
-      }
-      __android_log_print(3,"QDReader_Jni","JNI:8 sha1key2:%s sha1key1:%s",&DAT_00104100,pcVar9);
-      (**(code **)(*param_1 + 0x550))(param_1,uVar13,pcVar9);
-      uVar11 = (**(code **)(*param_1 + 0x538))(param_1,&DAT_00104100);
-      __android_log_print(3,"QDReader_Jni","JNI:9");
-      __strcpy_chk(puVar3,&DAT_00104100,0xff);
-      __strcat_chk(puVar3,uVar8,0xff);
-      __android_log_print(3,"QDReader_Jni","JNI:10");
-      uVar13 = (**(code **)(*param_1 + 0x538))(param_1,puVar3);
-      __android_log_print(3,"QDReader_Jni","JNI:11");
-      lVar5 = (**(code **)(*param_1 + 0x388))
-                        (param_1,lVar6,&DAT_00100c2f,
-                         "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
-      __android_log_print(3,"QDReader_Jni","JNI:12");
-      if (lVar5 != 0) {
-        __android_log_print(3,"QDReader_Jni","JNI:13");
-        uVar14 = (**(code **)(*param_1 + 0x538))(param_1,puVar1);
-        uVar15 = (**(code **)(*param_1 + 0x390))(param_1,lVar6,lVar5,uVar14,uVar13);
-        (**(code **)(*param_1 + 0x550))(param_1,uVar13,puVar3);
-        __android_log_print(3,"QDReader_Jni","JNI:14");
-        pcVar9 = (char *)(**(code **)(*param_1 + 0x548))(param_1,uVar15,0);
-        __android_log_print(3,"QDReader_Jni","JNI:15");
-        sVar10 = strlen(pcVar9);
-        if (sVar10 < 0x19) {
-          __strcpy_chk(puVar4,pcVar9,0xff);
-        }
-        else {
-          puVar4 = (undefined8 *)&DAT_00104100;
-          memset(&DAT_00104100,0,0x400);
-          strncpy(&DAT_00104100,pcVar9,0x18);
-        }
-        (**(code **)(*param_1 + 0x550))(param_1,uVar15,pcVar9);
-        __android_log_print(3,"QDReader_Jni","JNI:16");
-        uVar13 = (**(code **)(*param_1 + 0x538))(param_1,puVar4);
-        __android_log_print(3,"QDReader_Jni","JNI:17");
-        lVar5 = (**(code **)(*param_1 + 0x388))
-                          (param_1,lVar7,&DAT_00100c72,"([BLjava/lang/String;)[B");
-        __android_log_print(3,"QDReader_Jni","JNI:18");
-        if (lVar5 != 0) {
-          __android_log_print(3,"QDReader_Jni","JNI:19");
-          uVar15 = (**(code **)(*param_1 + 0x390))(param_1,lVar7,lVar5,param_5,uVar13);
-          __android_log_print(3,"QDReader_Jni","JNI:20");
-          uVar11 = (**(code **)(*param_1 + 0x390))(param_1,lVar7,lVar5,uVar15,uVar11);
-          __android_log_print(3,"QDReader_Jni","JNI:21");
-          (**(code **)(*param_1 + 0x550))(param_1,param_7,uVar8);
-          __android_log_print(3,"QDReader_Jni","JNI:22 %s",&DAT_00104100);
-          __android_log_print(3,"QDReader_Jni","JNI:23");
-          (**(code **)(*param_1 + 0x550))(param_1,uVar13,puVar4);
-          __android_log_print(3,"QDReader_Jni","JNI:24");
-          (**(code **)(*param_1 + 0x550))(param_1,uVar14,puVar1);
-          __android_log_print(3,"QDReader_Jni","JNI:25");
-          free(__ptr);
-          __android_log_print(3,"QDReader_Jni","JNI:26");
-          free(__src);
-          __android_log_print(3,"QDReader_Jni","JNI:27");
-          return uVar11;
-        }
-      }
-    }
+  char *bookIdCStr; // x19
+  char *chapterIdCStr; // x21
+  const char *userIdCStr; // x23
+  _OWORD *secBuffer1; // x27
+  _OWORD *secBuffer2; // x28
+  _OWORD *sha2KeyBufArea; // x0
+  const char *sha2KeyCStr; // x25
+  jclass clsAB_1; // x0
+  void *clsAB_ref1; // x26
+  const char *imeiCStr; // x24
+  char *ptrAfterFirstConcat; // x24
+  char *ptrAfterChapterConcat; // x0
+  struct _jmethodID *mid_s; // x24
+  jobject jSha1Key1; // x26
+  const char *sha1Key1CStr; // x24
+  jstring jSec2Str; // x24
+  struct _jmethodID *mid_m; // x26
+  jstring jUserIdJStr; // x0
+  void *clsAB_ref2; // x1
+  jobject jSha1Key2; // x22
+  const char *sha1Key2CStr; // x24
+  jstring jSha2KeyJStr; // x26
+  struct _jmethodID *mid_d; // x22
+  jobject intermediateData1; // x27
+  jobject finalData; // x22
+  jstring jSec1Str; // [xsp+0h] [xbp-30h]
+  jstring jSha1Key1FinalStr; // [xsp+0h] [xbp-30h]
+  const char *imeiCStrRef; // [xsp+8h] [xbp-28h]
+  jclass clsAB_3; // [xsp+10h] [xbp-20h]
+  jclass clsAB_2; // [xsp+18h] [xbp-18h]
+  void *jUserIdJStrRef; // [xsp+18h] [xbp-18h]
+
+  bookIdCStr = (char *)malloc(0x40u);
+  *(_OWORD *)bookIdCStr = 0u;
+  *((_OWORD *)bookIdCStr + 1) = 0u;
+  *((_OWORD *)bookIdCStr + 2) = 0u;
+  *((_OWORD *)bookIdCStr + 3) = 0u;
+  sub_1230((__int64)bookIdCStr, 64LL, (__int64)"%lld", bookIdLong);
+
+  chapterIdCStr = (char *)malloc(0x40u);
+  *(_OWORD *)chapterIdCStr = 0u;
+  *((_OWORD *)chapterIdCStr + 1) = 0u;
+  *((_OWORD *)chapterIdCStr + 2) = 0u;
+  *((_OWORD *)chapterIdCStr + 3) = 0u;
+  sub_1230((__int64)chapterIdCStr, 64LL, (__int64)"%lld", chapterIdLong);
+
+  userIdCStr = (const char *)malloc(0x40u);
+  *(_OWORD *)userIdCStr = 0u;
+  *((_OWORD *)userIdCStr + 1) = 0u;
+  *((_OWORD *)userIdCStr + 2) = 0u;
+  *((_OWORD *)userIdCStr + 3) = 0u;
+  sub_1230((__int64)userIdCStr, 64LL, (__int64)"%lld", userIdLong);
+
+  secBuffer1 = malloc(0xFFu);
+  *secBuffer1 = 0u;
+  secBuffer1[1] = 0u;
+  secBuffer1[2] = 0u;
+  secBuffer1[3] = 0u;
+  secBuffer1[4] = 0u;
+  secBuffer1[5] = 0u;
+  secBuffer1[6] = 0u;
+  secBuffer1[7] = 0u;
+  secBuffer1[8] = 0u;
+  secBuffer1[9] = 0u;
+  secBuffer1[10] = 0u;
+  secBuffer1[11] = 0u;
+  secBuffer1[12] = 0u;
+  secBuffer1[13] = 0u;
+  secBuffer1[14] = 0u;
+  *(_OWORD *)((char *)secBuffer1 + 239) = 0u;
+
+  secBuffer2 = malloc(0xFFu);
+  *secBuffer2 = 0u;
+  secBuffer2[1] = 0u;
+  secBuffer2[2] = 0u;
+  secBuffer2[3] = 0u;
+  secBuffer2[4] = 0u;
+  secBuffer2[5] = 0u;
+  secBuffer2[6] = 0u;
+  secBuffer2[7] = 0u;
+  secBuffer2[8] = 0u;
+  secBuffer2[9] = 0u;
+  secBuffer2[10] = 0u;
+  secBuffer2[11] = 0u;
+  secBuffer2[12] = 0u;
+  secBuffer2[13] = 0u;
+  secBuffer2[14] = 0u;
+  *(_OWORD *)((char *)secBuffer2 + 239) = 0u;
+
+  sha2KeyBufArea = malloc(0xFFu);
+  *sha2KeyBufArea = 0u;
+  sha2KeyBufArea[1] = 0u;
+  sha2KeyBufArea[2] = 0u;
+  sha2KeyBufArea[3] = 0u;
+  sha2KeyBufArea[4] = 0u;
+  sha2KeyBufArea[5] = 0u;
+  sha2KeyBufArea[6] = 0u;
+  sha2KeyBufArea[7] = 0u;
+  sha2KeyBufArea[8] = 0u;
+  sha2KeyBufArea[9] = 0u;
+  sha2KeyBufArea[10] = 0u;
+  sha2KeyBufArea[11] = 0u;
+  sha2KeyBufArea[12] = 0u;
+  sha2KeyBufArea[13] = 0u;
+  sha2KeyBufArea[14] = 0u;
+  *(_OWORD *)((char *)sha2KeyBufArea + 239) = 0u;
+
+  sha2KeyCStr = (const char *)sha2KeyBufArea;
+
+  clsAB_1 = (*env)->FindClass(env, "a/b");
+  if ( !clsAB_1 )
+    return 0LL;
+  clsAB_ref1 = clsAB_1;
+
+  clsAB_2 = (*env)->FindClass(env, "a/b");
+  if ( !clsAB_2 )
+    return 0LL;
+
+  clsAB_3 = (*env)->FindClass(env, "a/b");
+  if ( !clsAB_3 )
+    return 0LL;
+
+  __android_log_print(3, "QDReader_Jni", "JNI:0");
+  imeiCStr = (*env)->GetStringUTFChars(env, imei, 0LL);
+  __android_log_print(
+    3,
+    "QDReader_Jni",
+    "bookid: %s,chapterid: %s,userid: %s,imei: %s",
+    bookIdCStr,
+    chapterIdCStr,
+    userIdCStr,
+    imeiCStr);
+  __android_log_print(3, "QDReader_Jni", "JNI:1");
+
+  __strcpy_chk(secBuffer1, userIdCStr, 255LL);
+  imeiCStrRef = imeiCStr;
+  ptrAfterFirstConcat = (char *)__strcat_chk(secBuffer1, imeiCStr, 255LL);
+  ptrAfterChapterConcat = strcat(ptrAfterFirstConcat, chapterIdCStr);
+  strcpy(&ptrAfterFirstConcat[strlen(ptrAfterChapterConcat)], "2EEE1433A152E84B3756301D8FA3E69A");
+  __android_log_print(3, "QDReader_Jni", "JNI:2");
+
+  jSec1Str = (*env)->NewStringUTF(env, secBuffer1);
+  __android_log_print(3, "QDReader_Jni", "JNI:3");
+
+  mid_s = (*env)->GetStaticMethodID(env, clsAB_ref1, "s", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
+  __android_log_print(3, "QDReader_Jni", "JNI:4");
+  if ( !mid_s )
+    return 0LL;
+  __android_log_print(3, "QDReader_Jni", "sha1id:%d", mid_s);
+  __android_log_print(3, "QDReader_Jni", "JNI:5");
+
+  jSha1Key1 = (*env)->CallStaticObjectMethod(env, clsAB_ref1, mid_s, imei, jSec1Str);
+  (*env)->ReleaseStringUTFChars(env, jSec1Str, (const char *)secBuffer1);
+  __android_log_print(3, "QDReader_Jni", "JNI:6");
+
+  sha1Key1CStr = (*env)->GetStringUTFChars(env, jSha1Key1, 0LL);
+  __android_log_print(3, "QDReader_Jni", "sha1key1 = %s", sha1Key1CStr);
+  __android_log_print(3, "QDReader_Jni", "JNI:7");
+
+  if ( strlen(sha1Key1CStr) >= 0x18uLL )
+  {
+    memset(gShaKeyBuf, 0, sizeof(gShaKeyBuf));
+    strncpy(gShaKeyBuf, sha1Key1CStr, 0x18u);
   }
-  return 0;
+  __android_log_print(3, "QDReader_Jni", "JNI:8 sha1key2:%s sha1key1:%s", gShaKeyBuf, sha1Key1CStr);
+  (*env)->ReleaseStringUTFChars(env, jSha1Key1, sha1Key1CStr);
+
+  jSha1Key1FinalStr = (*env)->NewStringUTF(env, gShaKeyBuf);
+  __android_log_print(3, "QDReader_Jni", "JNI:9");
+
+  __strcpy_chk(secBuffer2, gShaKeyBuf, 255LL);
+  __strcat_chk(secBuffer2, imeiCStrRef, 255LL);
+  __android_log_print(3, "QDReader_Jni", "JNI:10");
+
+  jSec2Str = (*env)->NewStringUTF(env, secBuffer2);
+  __android_log_print(3, "QDReader_Jni", "JNI:11");
+
+  mid_m = (*env)->GetStaticMethodID(env, clsAB_2, "m", "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
+  __android_log_print(3, "QDReader_Jni", "JNI:12");
+  if ( !mid_m )
+    return 0LL;
+  __android_log_print(3, "QDReader_Jni", "JNI:13");
+
+  jUserIdJStr = (*env)->NewStringUTF(env, userIdCStr);
+  clsAB_ref2 = clsAB_2;
+  jUserIdJStrRef = jUserIdJStr;
+  jSha1Key2 = (*env)->CallStaticObjectMethod(env, clsAB_ref2, mid_m);
+  (*env)->ReleaseStringUTFChars(env, jSec2Str, (const char *)secBuffer2);
+  __android_log_print(3, "QDReader_Jni", "JNI:14");
+
+  sha1Key2CStr = (*env)->GetStringUTFChars(env, jSha1Key2, 0LL);
+  __android_log_print(3, "QDReader_Jni", "JNI:15");
+
+  if ( strlen(sha1Key2CStr) < 0x19uLL )
+  {
+    __strcpy_chk(sha2KeyCStr, sha1Key2CStr, 255LL);
+  }
+  else
+  {
+    sha2KeyCStr = gShaKeyBuf;
+    memset(gShaKeyBuf, 0, sizeof(gShaKeyBuf));
+    strncpy(gShaKeyBuf, sha1Key2CStr, 0x18u);
+  }
+  (*env)->ReleaseStringUTFChars(env, jSha1Key2, sha1Key2CStr);
+  __android_log_print(3, "QDReader_Jni", "JNI:16");
+
+  jSha2KeyJStr = (*env)->NewStringUTF(env, sha2KeyCStr);
+  __android_log_print(3, "QDReader_Jni", "JNI:17");
+
+  mid_d = (*env)->GetStaticMethodID(env, clsAB_3, "d", "([BLjava/lang/String;)[B");
+  __android_log_print(3, "QDReader_Jni", "JNI:18");
+  if ( !mid_d )
+    return 0LL;
+  __android_log_print(3, "QDReader_Jni", "JNI:19");
+
+  intermediateData1 = (*env)->CallStaticObjectMethod(env, clsAB_3, mid_d, dataArray, jSha2KeyJStr);
+  __android_log_print(3, "QDReader_Jni", "JNI:20");
+
+  finalData = (*env)->CallStaticObjectMethod(env, clsAB_3, mid_d, intermediateData1, jSha1Key1FinalStr);
+  __android_log_print(3, "QDReader_Jni", "JNI:21");
+
+  (*env)->ReleaseStringUTFChars(env, imei, imeiCStrRef);
+  __android_log_print(3, "QDReader_Jni", "JNI:22 %s", gShaKeyBuf);
+  __android_log_print(3, "QDReader_Jni", "JNI:23");
+
+  (*env)->ReleaseStringUTFChars(env, jSha2KeyJStr, sha2KeyCStr);
+  __android_log_print(3, "QDReader_Jni", "JNI:24");
+
+  (*env)->ReleaseStringUTFChars(env, jUserIdJStrRef, userIdCStr);
+  __android_log_print(3, "QDReader_Jni", "JNI:25");
+
+  free(bookIdCStr);
+  __android_log_print(3, "QDReader_Jni", "JNI:26");
+
+  free(chapterIdCStr);
+  __android_log_print(3, "QDReader_Jni", "JNI:27");
+
+  return finalData;
 }
 ```
 
@@ -1102,6 +1328,8 @@ public static String m(String str, int i10, char c10) {
 `package bf`:
 
 ```java
+package bf;
+
 import com.qidian.QDReader.qmethod.pandoraex.monitor.c;
 import com.qidian.common.lib.Logger;
 import java.nio.charset.StandardCharsets;
@@ -1183,6 +1411,179 @@ public class cihai {
 }
 ```
 
+```java
+package bf;
+
+import com.tencent.qcloud.core.util.IOUtils;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+public class a {
+
+    /* renamed from: search, reason: collision with root package name */
+    private static char[] f1805search = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', IOUtils.DIR_SEPARATOR_UNIX};
+
+    public static String a(String str) throws Exception {
+        byte[] digest = MessageDigest.getInstance("MD5").digest(str.getBytes("UTF-8"));
+        StringBuilder sb = new StringBuilder(digest.length * 2);
+        for (byte b10 : digest) {
+            int i10 = b10 & 255;
+            if (i10 < 16) {
+                sb.append("0");
+            }
+            sb.append(Integer.toHexString(i10));
+        }
+        return sb.toString();
+    }
+
+    private static byte[] b(byte[] bArr) throws NoSuchAlgorithmException {
+        MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+        messageDigest.update(bArr);
+        return messageDigest.digest();
+    }
+
+    private static byte[] cihai(byte[] bArr, byte[] bArr2) throws NoSuchAlgorithmException {
+        byte[] bArr3 = new byte[64];
+        byte[] bArr4 = new byte[64];
+        for (int i10 = 0; i10 < 64; i10++) {
+            bArr3[i10] = 54;
+            bArr4[i10] = 92;
+        }
+        byte[] bArr5 = new byte[64];
+        if (bArr.length > 64) {
+            bArr = b(bArr);
+        }
+        for (int i11 = 0; i11 < bArr.length; i11++) {
+            bArr5[i11] = bArr[i11];
+        }
+        if (bArr.length < 64) {
+            for (int length = bArr.length; length < 64; length++) {
+                bArr5[length] = 0;
+            }
+        }
+        byte[] bArr6 = new byte[64];
+        for (int i12 = 0; i12 < 64; i12++) {
+            bArr6[i12] = (byte) (bArr5[i12] ^ bArr3[i12]);
+        }
+        byte[] bArr7 = new byte[bArr2.length + 64];
+        for (int i13 = 0; i13 < 64; i13++) {
+            bArr7[i13] = bArr6[i13];
+        }
+        for (int i14 = 0; i14 < bArr2.length; i14++) {
+            bArr7[i14 + 64] = bArr2[i14];
+        }
+        byte[] b10 = b(bArr7);
+        byte[] bArr8 = new byte[64];
+        for (int i15 = 0; i15 < 64; i15++) {
+            bArr8[i15] = (byte) (bArr5[i15] ^ bArr4[i15]);
+        }
+        byte[] bArr9 = new byte[b10.length + 64];
+        for (int i16 = 0; i16 < 64; i16++) {
+            bArr9[i16] = bArr8[i16];
+        }
+        for (int i17 = 0; i17 < b10.length; i17++) {
+            bArr9[i17 + 64] = b10[i17];
+        }
+        return b(bArr9);
+    }
+
+    public static String judian(String str, String str2) throws NoSuchAlgorithmException {
+        return search(cihai(str.getBytes(), str2.getBytes()));
+    }
+
+    public static String search(byte[] bArr) {
+        StringBuffer stringBuffer = new StringBuffer();
+        int length = bArr.length;
+        int i10 = 0;
+        while (true) {
+            if (i10 >= length) {
+                break;
+            }
+            int i11 = i10 + 1;
+            int i12 = bArr[i10] & 255;
+            if (i11 == length) {
+                stringBuffer.append(f1805search[i12 >>> 2]);
+                stringBuffer.append(f1805search[(i12 & 3) << 4]);
+                stringBuffer.append("==");
+                break;
+            }
+            int i13 = i11 + 1;
+            int i14 = bArr[i11] & 255;
+            if (i13 == length) {
+                stringBuffer.append(f1805search[i12 >>> 2]);
+                stringBuffer.append(f1805search[((i12 & 3) << 4) | ((i14 & 240) >>> 4)]);
+                stringBuffer.append(f1805search[(i14 & 15) << 2]);
+                stringBuffer.append("=");
+                break;
+            }
+            int i15 = i13 + 1;
+            int i16 = bArr[i13] & 255;
+            stringBuffer.append(f1805search[i12 >>> 2]);
+            stringBuffer.append(f1805search[((i12 & 3) << 4) | ((i14 & 240) >>> 4)]);
+            stringBuffer.append(f1805search[((i14 & 15) << 2) | ((i16 & 192) >>> 6)]);
+            stringBuffer.append(f1805search[i16 & 63]);
+            i10 = i15;
+        }
+        return stringBuffer.toString();
+    }
+}
+```
+
+`package com.qidian.QDReader.qmethod.pandoraex.monitor`:
+
+```java
+package com.qidian.QDReader.qmethod.pandoraex.monitor;
+
+import j$.util.concurrent.ConcurrentHashMap;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+
+public class c {
+
+    /* renamed from: search, reason: collision with root package name */
+    private static ConcurrentHashMap<String, byte[]> f26010search = new ConcurrentHashMap<>();
+
+    public static void a(byte[] bArr, byte[] bArr2) {
+        f26010search.put(judian(bArr), bArr2);
+    }
+
+    public static byte[] cihai(byte[] bArr) {
+        byte[] bArr2 = null;
+        while (bArr != null) {
+            bArr = f26010search.get(judian(bArr));
+            if (bArr != null) {
+                bArr2 = bArr;
+            }
+        }
+        return bArr2;
+    }
+
+    public static String judian(byte[] bArr) {
+        try {
+            byte[] digest = MessageDigest.getInstance("MD5").digest(bArr);
+            StringBuilder sb = new StringBuilder();
+            for (byte b10 : digest) {
+                sb.append(String.format("%02x", Byte.valueOf(b10)));
+            }
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e10) {
+            throw new RuntimeException("MD5 algorithm is not available", e10);
+        }
+    }
+
+    public static byte[] search(Cipher cipher, byte[] bArr) throws IllegalBlockSizeException, BadPaddingException {
+        byte[] doFinal = cipher.doFinal(bArr);
+        if (com.qidian.QDReader.qmethod.pandoraex.core.ext.netcap.g.a()) {
+            a(doFinal, bArr);
+        }
+        return doFinal;
+    }
+}
+```
+
 </details>
 
 在函数中意外发现该方法内部大量调用了 `__android_log_print` 打印中间变量 (如解密参数 / 密钥等)。
@@ -1212,35 +1613,93 @@ from base64 import b64encode
 from Crypto.Cipher import DES3
 from Crypto.Util.Padding import unpad
 
-def sha1_hmac(key: str, data: str) -> str:
+_MAGIC = "2EEE1433A152E84B3756301D8FA3E69A"
+
+def _pad_to_24(s: str) -> str:
+    """
+    Ensure the given string is exactly 24 characters long.
+
+    :param s: Input string.
+    :return: 24-character string.
+    """
+    if len(s) >= 24:
+        return s[:24]
+    return s + ("\x00" * (24 - len(s)))
+
+def _hmac_sha1(key: str, data: str) -> str:
+    """
+    Compute HMAC-SHA1 over `data` using `key`, Base64-encode the result,
+    then truncate/pad to 24 characters.
+
+    :param key: ASCII key string.
+    :param data: ASCII data string.
+    :return: 24-character Base64 HMAC-SHA1 string.
+    """
     digest = hmac.new(key.encode(), data.encode(), hashlib.sha1).digest()
-    return b64encode(digest).decode()[:24]
+    b64 = b64encode(digest).decode()
+    return _pad_to_24(b64)
 
-def md5_hmac(key: str, data: str) -> str:
+def _hmac_md5(key: str, data: str) -> str:
+    """
+    Compute HMAC-MD5 over `data` using `key`, Base64-encode the result,
+    then truncate/pad to 24 characters.
+
+    :param key: UTF-8 key string.
+    :param data: UTF-8 data string.
+    :return: 24-character Base64 HMAC-MD5 string.
+    """
     digest = hmac.new(key.encode(), data.encode(), hashlib.md5).digest()
-    return b64encode(digest).decode()[:24]
+    b64 = b64encode(digest).decode()
+    return _pad_to_24(b64)
 
-def des3_decrypt(data: bytes, secret: str) -> bytes:
-    """3DES/CBC 解密"""
-    cipher = DES3.new(secret.encode(), DES3.MODE_CBC, b'\x00' * 8)
+def _des3_decrypt(data: bytes, secret: str) -> bytes:
+    """
+    Decrypt `data` using 3DES (DES-EDE/CBC/PKCS5Padding) with a zero IV.
+    If `secret` is 16 bytes long, its first 8 bytes are appended to make 24.
+
+    :param data: Ciphertext bytes.
+    :param secret: Key string (will be .encode('utf-8')).
+    :return: Plaintext bytes (PKCS#5 padding removed).
+    """
+    key_bytes = secret.encode()
+    if len(key_bytes) == 16:
+        key_bytes += key_bytes[:8]
+    cipher = DES3.new(key_bytes, DES3.MODE_CBC, iv=b'\x00' * 8)
     decrypted = cipher.decrypt(data)
     return unpad(decrypted, block_size=8)
 
-def decrypt_content(cid: str, chunk1: bytes, uid: str, imei: str) -> str:
+def decrypt_content(
+    cid: str,
+    data: bytes,
+    uid: str,
+    imei: str,
+) -> str:
     """
-    - 对 chunk1 做两次 3DES 解密
-    """
-    # 计算两把 key
-    sec1 = sha1_hmac(
-        imei,
-        uid + imei + cid + "2EEE1433A152E84B3756301D8FA3E69A",
-    )
-    sec2 = md5_hmac(uid, sec1 + imei)
+    Perform the two-stage DES3 decryption matching the native `b(...)`:
 
-    # 解密
-    raw = chunk1
-    step1 = des3_decrypt(raw, sec2)
-    step2 = des3_decrypt(step1, sec1)
+      1. sec1 = uid + imei + cid + _MAGIC
+      2. sha1_key1 = HMAC-SHA1_Base64(imei, sec1) -> 24 chars
+      3. sec2 = sha1_key1 + imei
+      4. sha1_key2 = HMAC-MD5_Base64(uid, sec2) -> 24 chars
+      5. step1 = DES3_CBC_DECRYPT(data, key=sha1_key2)
+      6. step2 = DES3_CBC_DECRYPT(step1,   key=sha1_key1)
+      7. UTF-8 decode step2 (ignore errors)
+
+    :param cid: Chapter ID string.
+    :param data: Encrypted bytes to decrypt.
+    :param uid: User ID string.
+    :param imei: Device IMEI string.
+    :return: Decrypted plaintext as a UTF-8 string.
+    """
+    # 1) build the two "sec" buffers and derive two keys
+    sec1 = uid + imei + cid + _MAGIC
+    sha1_key1 = _hmac_sha1(imei, sec1)
+    sec2 = sha1_key1 + imei
+    sha1_key2 = _hmac_md5(uid, sec2)
+
+    # 2) two-pass 3DES decryption
+    step1 = _des3_decrypt(data, sha1_key2)
+    step2 = _des3_decrypt(step1, sha1_key1)
 
     return step2.decode("utf-8", errors="ignore")  # or "replace"
 ```
@@ -1348,15 +1807,15 @@ rpc.exports = {
                     var javaStr = StringClass.$new(result.data.value, utf8Charset);
                     var contentStr = javaStr.toString();
 
-                    resolve(JSON.stringify({
+                    resolve({
                         status: status,
                         content: contentStr
-                    }));
+                    });
                 } catch (e) {
-                    resolve(JSON.stringify({
+                    resolve({
                         status: -999,
                         error: e.toString()
-                    }));
+                    });
                 }
             });
         });
@@ -1497,48 +1956,42 @@ sys.stdin.read()
 ```c
 jint JNI_OnLoad(JavaVM *vm, void *reserved)
 {
-  jint v2; // w19
-  __int64 v4; // x8
-  __int64 v5; // x0
-  __int64 v6; // x20
-  __int64 v7; // [xsp+8h] [xbp-188h] BYREF
-  __int128 dest[20]; // [xsp+10h] [xbp-180h] BYREF
-  __int64 v9[4]; // [xsp+150h] [xbp-40h] BYREF
+  jint jniVersion; // w19
+  size_t i; // w8
+  jclass foundClass; // x0
+  jclass v6; // x20
+  JNIEnv *env; // [xsp+8h] [xbp-188h] BYREF
+  __int128 decryptBlock[20]; // [xsp+10h] [xbp-180h] BYREF
+  __int64 className[4]; // [xsp+150h] [xbp-40h] BYREF
 
-  v9[3] = *(_QWORD *)(_ReadStatusReg(ARM64_SYSREG(3, 3, 13, 0, 2)) + 40);
-  v2 = 65542;
-  if ( (*vm)->GetEnv(vm, (void **)&v7, 65542LL) )
+  className[3] = *(_QWORD *)(_ReadStatusReg(ARM64_SYSREG(3, 3, 13, 0, 2)) + 40);
+  jniVersion = 65542;                           // JNI_VERSION_1_6: 0x00010006 == 65542
+  if ( (*vm)->GetEnv(vm, (void **)&env, 65542LL) )
     return -1;
-  v4 = 0LL;
-  memset(v9, 0, 21);
+  *(_QWORD *)&i = 0LL;
+  memset(className, 0, 21);
   do
   {
-    dest[0] = xmmword_1BD00;
-    *((_BYTE *)v9 + v4) = *(_BYTE *)((unsigned __int64)dest | v4 & 0xF) ^ byte_1BE21[v4];
-    ++v4;
+    decryptBlock[0] = xmmword_1BD00;
+    *((_BYTE *)className + *(_QWORD *)&i) = *(_BYTE *)((unsigned __int64)decryptBlock | i & 0xF) ^ byte_1BE21[*(_QWORD *)&i];
+    ++*(_QWORD *)&i;
   }
-  while ( v4 != 20 );
-  v5 = (*(__int64 (__fastcall **)(__int64, __int64 *, long double))(*(_QWORD *)v7 + 48LL))(
-         v7,
-         v9,
-         *(long double *)&xmmword_1BD00);
-  if ( !v5 )
+  while ( *(_QWORD *)&i != 20LL );
+  foundClass = (jclass)((__int64 (__fastcall *)(JNIEnv *, __int64 *, long double))(*env)->FindClass)(
+                         env,
+                         className,
+                         *(long double *)&xmmword_1BD00);
+  if ( !foundClass )
     return -1;
-  v6 = v5;
-  memcpy(dest, off_24408, 0x138u);
-  if ( (*(unsigned int (__fastcall **)(__int64, __int64, __int128 *, __int64))(*(_QWORD *)v7 + 1720LL))(
-         v7,
-         v6,
-         dest,
-         13LL) )
-  {
+  v6 = foundClass;
+  memcpy(decryptBlock, off_24408, 0x138u);
+  if ( (*env)->RegisterNatives(env, v6, (const JNINativeMethod *)decryptBlock, 13LL) )
     return -1;
-  }
   qword_26058 = (unsigned __int64)&qword_26058 ^ (unsigned __int64)fock_43254543;
   qword_26060 = (unsigned __int64)&qword_26060 ^ (unsigned __int64)fock_uk;
   qword_26070 = (unsigned __int64)&qword_26070 ^ (unsigned __int64)fock_uksf;
   qword_26068 = (unsigned __int64)&qword_26068 ^ (unsigned __int64)fock_sn;
-  return v2;
+  return jniVersion;
 }
 ```
 
@@ -1626,17 +2079,7 @@ Java 类型到 JNI 签名映射规则:
 
 可能没必要, 但还是处于好奇分析了每步的值
 
-1. 获取 JNIEnv 指针
-
-```c
-if ( (*vm)->GetEnv(vm, (void **)&v7, 65542LL) )
-    return -1;
-```
-
-* 这一步调用 `vm->GetEnv`, 把 `JNIEnv*` 存到 `v7` (用于后续所有 JNI 调用)。
-* 如果失败就返回 `-1`, 使 JNI 加载失败。
-
-2. 准备一个 20 字节的密钥数组 v9
+1. 准备一个 20 字节的密钥数组 v9
 
 ```c
 v4 = 0;
@@ -1681,35 +2124,12 @@ v9 (ASCII): com/yuewen/fock/Fock
 """
 ```
 
-3. 创建 Java 层的 `byte[]` 或者查找类 (取决于实际偏移)
+2. 创建 Java 层的 `byte[]` 或者查找类 (取决于实际偏移)
 
-```c
-v5 = (*(__int64 (__fastcall **)(__int64, __int64 *, long double))(*(_QWORD *)v7 + 48LL))(
-       v7,
-       v9,
-       *(long double *)&xmmword_1BD00);
-if ( !v5 )
-    return -1;
-v6 = v5;
-```
-
-* 取 `JNIEnv` 虚表偏移 `+48` 的函数 (可能是 `NewByteArray`、`FindClass`、或其他自定义钩子),
 * 传入生成的 `v9`、以及常量 `xmmword_1BD00` (以 `long double` 的方式透传),
 * 返回一个引用 (如 `jbyteArray` 或者 `jclass`), 保存在 `v6`。
 
-4. 注册本地方法表
-
-```c
-memcpy(dest, off_24408, 0x138u);
-if ((*(unsigned int (__fastcall **)(__int64, __int64, __int128 *, __int64))(*(_QWORD *)v7 + 1720LL))(
-       v7,
-       v6,
-       dest,
-       13LL))
-{
-    return -1;
-}
-```
+3. 注册本地方法表
 
 * `off_24408` 地址处是一段连续的 `JNINativeMethod[13]` 数组 (13×24 = 312 = 0x138 字节)
 * 调用虚表偏移 `+1720` 的函数 (对应 `RegisterNatives`)
@@ -1723,23 +2143,51 @@ if ((*(unsigned int (__fastcall **)(__int64, __int64, __int128 *, __int64))(*(_Q
 
 该脚本支持对指定目录下的 `.qd` 文件进行批量处理, 并将解析结果导出为对应的 `.json` 文件, 便于后续分析与使用。
 
-使用前, 请根据实际情况修改 `main()` 函数中的以下参数:
+**主要功能**
 
-* `book_id`, `user_id`, `imei` (作为解密参数)
-* `device = frida.get_device("your.device.ip.address")` (根据连接方式选择 IP/USB)
+* **批量扫描**: 遍历指定目录下的所有 `.qd` 文件
+* **逐一解密**: 依次调用 `decrypt()`, 对每个章节文件进行双重解密与 Frida 解锁
+* **结果导出**: 将每个章节的解密内容保存为对应的 `{chapter_id}.json`
 
-默认行为如下:
+**运行前准备**
 
-* 输入目录: `./data/{book_id}/` (包含章节 `.qd` 文件)
-* 输出目录: `./output/{book_id}/` (生成对应的 `.json` 文件)
+1. **配置解密参数**
+
+   * `USER_ID`、`BOOK_ID`、`IMEI`: 作为解密过程中 HMAC 和 3DES 的密钥输入
+   * `DEVICE_ADDRESS`: Frida 远程调试端口或设备标识
+2. **修改连接方式**
+
+   * 默认使用:
+
+     ```python
+     device = frida.get_device_manager().add_remote_device(f"127.0.0.1:{ADB_FORWARD_PORT}")
+     ```
+   * 可替换为 IP 直连或 USB:
+
+     ```python
+     device = frida.get_device("<your.device.ip.address>")
+     ```
+3. **命令行参数**
+   脚本支持通过命令行覆盖上述全局变量:
+
+   ```bash
+   python qd_decrypt.py --user-id 123456 --book-id 654321 --imei 8675309
+   ```
+
+**默认目录结构**
+
+* **输入目录**: `./data/{user_id}/{book_id}/`, 存放待解密的 `.qd` 文件
+* **输出目录**: `./output/{user_id}/{book_id}/`, 生成对应的 `.json` 文件
 
 <details>
 <summary>`qd_decrypt.py` (点击展开)</summary>
 
 ```python
-import json
+import argparse
 import hashlib
 import hmac
+import json
+import sys
 from base64 import b64encode
 from io import BytesIO
 from pathlib import Path
@@ -1748,8 +2196,100 @@ from typing import Any
 import frida
 from Crypto.Cipher import DES3
 from Crypto.Util.Padding import unpad
+from tqdm import tqdm
 
 
+# --------------------------------------------------
+# Static constants
+# --------------------------------------------------
+TARGET_APP     = "起点读书"
+HOOK_JS_FILE   = "hook_fock.js"
+CONFIG_PATH    = Path.cwd() / "config.json"
+_SECRET_SUFFIX  = "2EEE1433A152E84B3756301D8FA3E69A"
+
+# Globals filled in at runtime
+ADB_FORWARD_PORT = "12345"
+DEVICE_ADDRESS: str = ""
+USER_ID: str = ""
+BOOK_ID: str = ""
+IMEI: str = ""
+DATA_DIR: Path
+OUT_DIR: Path
+
+
+# --------------------------------------------------
+# Load configuration from config.json
+# --------------------------------------------------
+def load_config() -> None:
+    global DEVICE_ADDRESS, USER_ID, BOOK_ID, IMEI
+    try:
+        raw = CONFIG_PATH.read_text(encoding="utf-8")
+        cfg = json.loads(raw)
+    except Exception:
+        cfg = {}
+
+    DEVICE_ADDRESS = DEVICE_ADDRESS or cfg.get("adb_port") or ""
+    USER_ID        = USER_ID or cfg.get("user_id") or ""
+    BOOK_ID        = BOOK_ID or cfg.get("book_id") or ""
+    IMEI           = IMEI or cfg.get("imei") or ""
+
+
+# --------------------------------------------------
+# Argument Parsing
+# --------------------------------------------------
+def parse_args() -> argparse.Namespace:
+    """
+    Parse command-line arguments for user/date/book/imei.
+    """
+    p = argparse.ArgumentParser(
+        description="Decrypt Qidian .qd files into JSON chapters"
+    )
+    p.add_argument("-u", "--user-id",
+                        default=USER_ID,
+                        help="USER ID (default: %(default)s)")
+    p.add_argument("-b", "--book-id",
+                        default=BOOK_ID,
+                        help="Book ID (default: %(default)s)")
+    p.add_argument("-i", "--imei",
+                        default=IMEI,
+                        help="Device IMEI (default: %(default)s)")
+    return p.parse_args()
+
+
+def update_globals(args) -> None:
+    """
+    Update globals from parsed args, rebuild DATA_DIR and OUT_DIR,
+    and ensure OUT_DIR exists.
+    """
+    global USER_ID, BOOK_ID, IMEI, DATA_DIR, OUT_DIR
+
+    USER_ID  = args.user_id
+    BOOK_ID  = args.book_id
+    IMEI     = args.imei
+
+    DATA_DIR = Path.cwd() / "data"   / USER_ID / BOOK_ID
+    OUT_DIR  = Path.cwd() / "output" / USER_ID / BOOK_ID
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def check_globals() -> bool:
+    """
+    Ensure that DEVICE_ADDRESS, USER_ID, BOOK_ID, IMEI
+    are all non-empty; report and return False otherwise.
+    """
+    missing = []
+    for name in ("DEVICE_ADDRESS", "USER_ID", "BOOK_ID", "IMEI"):
+        if not globals().get(name):
+            missing.append(name)
+    if missing:
+        print(f"[ERROR] Missing required parameters: {', '.join(missing)}", file=sys.stderr)
+        return False
+    return True
+
+
+# --------------------------------------------------
+# Crypto Helpers
+# --------------------------------------------------
 def sha1_hmac(key: str, data: str) -> str:
     digest = hmac.new(key.encode(), data.encode(), hashlib.sha1).digest()
     return b64encode(digest).decode()[:24]
@@ -1761,28 +2301,30 @@ def md5_hmac(key: str, data: str) -> str:
 
 
 def des3_decrypt(data: bytes, secret: str) -> bytes:
-    """3DES/CBC 解密"""
+    """3DES/CBC decrypt with zero IV and PKCS#7 unpad."""
     cipher = DES3.new(secret.encode(), DES3.MODE_CBC, b'\x00' * 8)
     decrypted = cipher.decrypt(data)
     return unpad(decrypted, block_size=8)
 
 
-def decrypt_content(cid: str, chunk1: bytes, uid: str, imei: str) -> str:
+# --------------------------------------------------
+# Decryption Logic
+# --------------------------------------------------
+def decrypt_content(
+    cid: str,
+    chunk1: bytes,
+    uid: str,
+    imei: str,
+) -> str:
     """
-    - 对 chunk1 做两次 3DES 解密
-    - 自动探测 PKCS#7 填充并丢掉
-    - 去掉末尾非加密的 '附加' 字节
+    Double-decrypt chunk1 with keys derived via HMACs,
+    strip padding/extras, return UTF-8 string.
     """
-    sec1 = sha1_hmac(
-        imei,
-        uid + imei + cid + "2EEE1433A152E84B3756301D8FA3E69A",
-    )
+    sec1 = sha1_hmac(imei, uid + imei + cid + _SECRET_SUFFIX)
     sec2 = md5_hmac(uid, sec1 + imei)
 
-    raw = chunk1
-    step1 = des3_decrypt(raw, sec2)
+    step1 = des3_decrypt(chunk1, sec2)
     step2 = des3_decrypt(step1, sec1)
-
     return step2.decode("utf-8", errors="ignore")
 
 
@@ -1791,38 +2333,23 @@ def decrypt(
     book_id: str,
     uid: str,
     imei: str,
-    script,
+    script
 ) -> dict[str, Any]:
     """
-    解密起点章节 .qd 文件内容
-
-    文件结构格式符合 Java 方法 `com.qidian.common.lib.util.m.r` 中的定义:
-
-    采用定长前缀结构 `[len0][data0][len1][data1]...[len4][data4]`, 共 5 段
-
-    解密流程概述:
-    - 分段读取加密数据块
-    - 使用解密算法与 Frida 提供的 JS 脚本进行解密
-    - 若类型为 `type == 1`, 进一步解包内容与结构块信息 (blocks)
+    Read a .qd file (five chunks) and decrypt chunk1 (and
+    potentially unlock further with Frida for content_type==1).
     """
     cid = path.stem
     with path.open('rb') as f:
         buf = BytesIO(f.read())
 
-    def decode_str(barr: bytes) -> str:
-        try:
-            return barr.decode('utf-8')
-        except Exception:
-            return barr.decode('utf-8', errors='replace')
-
-    def read_chunk():
+    def read_chunk() -> bytes:
         raw = buf.read(4)
         if len(raw) < 4:
-            raise IOError("文件结构不完整, 无法读取长度")
+            raise IOError("Incomplete file, cannot read length")
         length = int.from_bytes(raw, byteorder='little')
         return buf.read(length)
 
-    # 按顺序读出所有 5 段
     chunk0 = read_chunk()
     chunk1 = read_chunk()
     chunk2 = read_chunk()
@@ -1830,98 +2357,780 @@ def decrypt(
     chunk4 = read_chunk()
 
     text_1 = decrypt_content(cid, chunk1, uid, imei)
-    content = ""
-    content_type = 0
-    block_infos = []
-    author_content = {}
-    resources = []
     try:
         data_obj = json.loads(text_1 or "{}")
-        content = data_obj.get("content") or data_obj.get("Content", "")
-        content_type = data_obj.get("type", 0)
-        block_infos = data_obj.get("Blocks", [])
-        author_content = data_obj.get("AuthorComments", {})
-        resources = data_obj.get("Resources", [])
-    except Exception as e:
-        print(f"decrypt_content(cid = {cid}): {e}")
+    except Exception:
+        data_obj = {}
 
+    content        = data_obj.get("content", "") or data_obj.get("Content", "")
+    content_type   = data_obj.get("type", 0)
+    block_infos    = data_obj.get("Blocks", [])
+    author_content = data_obj.get("AuthorComments", {})
+    resources      = data_obj.get("Resources", [])
+
+    # for type==1, use Frida unlock, then re-parse chunk2/4:
     if content_type == 1:
-        key_1 = cid
-        key_2 = f"{book_id}_{cid}"
-        raw = script.exports_sync.unlock(content, key_1, key_2)
-        if raw:
-            try:
-                decoded = json.loads(raw)
-                content = decoded.get("content", "")
-            except Exception:
-                pass
+        try:
+            raw = script.exports_sync.unlock(
+                content, cid, f"{book_id}_{cid}"
+            )
+            # decoded = json.loads(raw)
+            content = raw.get("content", "")
+        except Exception:
+            pass
 
         try:
-            txt2 = decode_str(chunk2)
-            author_content = json.loads(txt2)
+            author_content = json.loads(
+                chunk2.decode('utf-8', errors='ignore')
+            )
         except Exception:
             author_content = {}
 
-        block_infos: list[Any] = []
         try:
-            txt4 = decode_str(chunk4)
-            if txt4:
-                block_infos = json.loads(txt4)
+            block_infos = json.loads(
+                chunk4.decode('utf-8', errors='ignore')
+            )
         except Exception:
             block_infos = []
 
     return {
-        "content": content,
-        "type": content_type,
+        "content":         content,
+        "type":            content_type,
         "author_comments": author_content,
-        "blocks": block_infos,
-        "resources": resources,
+        "blocks":          block_infos,
+        "resources":       resources,
     }
 
 
-def main():
-    book_id = "11111111"
-    user_id = "22222222"
-    imei = "your:imei:info"
+# --------------------------------------------------
+# Main
+# --------------------------------------------------
+def main() -> None:
+    load_config()
+    args = parse_args()
+    update_globals(args)
+    if not check_globals():
+        sys.exit(1)
 
-    data_dir = Path.cwd() / "data" / book_id
-    out_dir = Path.cwd() / "output" / book_id
-    out_dir.mkdir(parents=True, exist_ok=True)
-
-    device = frida.get_device("your.device.ip.address")
-
-    session = device.attach("起点读书")
-
-    with open("hook_fock.js", "r", encoding="utf-8") as f:
+    # device  = frida.get_device(DEVICE_ADDRESS)
+    device = frida.get_device_manager().add_remote_device(f"127.0.0.1:{ADB_FORWARD_PORT}")
+    session = device.attach(TARGET_APP)
+    with open(HOOK_JS_FILE, "r", encoding="utf-8") as f:
         jscode = f.read()
-
     script = session.create_script(jscode)
     script.load()
 
-    print("[*] Script loaded. Starting unlock tasks...")
+    print("[*] Script loaded. Starting decryption...")
 
-    for file_path in data_dir.glob("*.qd"):
-        cid = file_path.stem
-        out_path = out_dir / f"{cid}.json"
+    files = list(DATA_DIR.glob("*.qd"))
 
+    for file_path in tqdm(files, desc="Decrypting files", unit="file"):
+        out_path = OUT_DIR / f"{file_path.stem}.json"
         try:
-            obj = decrypt(
-                file_path,
-                book_id,
-                user_id,
-                imei,
-                script,
-            )
+            obj = decrypt(file_path, BOOK_ID, USER_ID, IMEI, script)
         except Exception as e:
             obj = {"error": str(e)}
-
         with out_path.open('w', encoding='utf-8') as f:
             json.dump(obj, f, ensure_ascii=False, indent=2)
-
-        print(f"{file_path.name} -> {out_path.name}")
 
 
 if __name__ == "__main__":
     main()
 ```
+</details>
+
+##### 3.5.5 解密数据导出为 HTML
+
+本脚本基于 `qd_decrypt.py` 的 JSON 输出, 自动生成带目录和章节导航的静态 HTML 页面 (EPUB 同理, 在此不作展示)。
+
+**主要功能**
+
+* **元数据加载**: 读取 `-10000.json` 中的书籍信息 (书名、作者、状态、总章节数、字数、简介、标签)
+* **章节列表构建**: 从 SQLite 数据库 (`{book_id}.qd`) 提取章节 (`volume`、`chapter` 表), 并筛选现有 JSON 文件
+* **HTML 渲染**
+
+  * **章节页面**: 依次渲染每个章节内容, 插入段落与内嵌图片, 并生成上下章导航
+  * **目录页面**: 生成全书 TOC, 包括卷名与章节列表, 并渲染元数据头部
+* **资源下载**: 自动下载并本地化图片到 `images/{book_id}/`, 更新 HTML 中的 `<img>` 路径
+
+**运行前准备**
+
+1. **配置参数**
+
+   * `USER_ID`、`BOOK_ID`: 确定数据来源和输出目标
+2. **命令行参数**
+
+   ```bash
+   python export2html.py --user-id 123456 --book-id 654321
+   ```
+
+**默认目录结构**
+
+* **输入目录**: `./output/{user_id}/{book_id}/` (`qd_decrypt.py` 生成的 JSON)
+* **输出目录**: `./chapter_html/{user_id}/{book_id}/` (生成的 `c{chapter_id}.html`)
+* **图片目录**: `./images/{book_id}/` (下载的封面/插图资源)
+
+执行完成后, `chapter_html/{user_id}/{book_id}/` 下包含所有章节页面和根目录 `/{book_id}.html`, 可直接用浏览器打开。
+
+<details>
+<summary>`export2html.py` (点击展开)</summary>
+
+```python
+import argparse
+import html
+import json
+import os
+import random
+import sqlite3
+import sys
+import time
+from collections import defaultdict
+from pathlib import Path
+from typing import Any
+from urllib.parse import urlparse
+
+import requests
+from tqdm import tqdm
+
+
+# --------------------------------------------------
+# Static constants
+# --------------------------------------------------
+DEFAULT_USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/134.0.0.0 Safari/537.36"
+)
+DEFAULT_HEADERS = {
+    "Accept-Encoding": "gzip",
+    "Connection": "Keep-Alive",
+    "Referer": "https://www.qidian.com/",
+    "User-Agent": DEFAULT_USER_AGENT,
+}
+
+CONFIG_PATH = Path.cwd() / "config.json"
+
+# Globals filled in at runtime
+USER_ID: str = ""
+BOOK_ID: str = ""
+DATA_DIR: Path
+OUT_DIR: Path
+IMG_DIR: Path
+
+SESSION: requests.Session
+
+
+# -------------------------------------------------------------------
+# HTML Templates
+# -------------------------------------------------------------------
+CHAPTER_CSS_TEMPLATE = '''
+:root {
+  --max-width: 800px;
+  --spacing: 1rem;
+  --color-bg: #fff;
+  --color-text: #333;
+  --color-primary: #0070f3;
+  --color-muted: #666;
+  --color-border: #eaeaea;
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #121212;
+    --color-text: #e4e4e4;
+    --color-muted: #aaa;
+    --color-border: #333;
+  }
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body {
+  max-width: var(--max-width);
+  margin: calc(var(--spacing) * 2) auto;
+  padding: var(--spacing);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  line-height: 1.7;
+}
+.chapter-nav {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing);
+  padding: var(--spacing);
+  background: var(--color-border);
+  border-radius: 8px;
+  position: sticky;
+  top: var(--spacing);
+  z-index: 100;
+}
+.chapter-nav a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+.chapter-nav a:hover {
+  text-decoration: underline;
+}
+h1 {
+  margin-top: var(--spacing);
+  font-size: 2rem;
+  text-align: center;
+}
+img, video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: var(--spacing) auto;
+  border-radius: 4px;
+}
+hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: calc(var(--spacing) * 2) 0;
+}
+.author-comments {
+  background: var(--color-border);
+  padding: var(--spacing);
+  border-left: 4px solid var(--color-muted);
+  border-radius: 4px;
+}
+.author-comments p:first-child {
+  font-weight: 600;
+  margin-bottom: .5rem;
+}
+/* Scroll buttons */
+.scroll-btns {
+  position: fixed;
+  bottom: var(--spacing);
+  right: var(--spacing);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 200;
+}
+.scroll-btns button {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transition: background 0.2s;
+}
+.scroll-btns button:hover {
+  background: var(--color-muted);
+}
+'''
+
+CHAPTER_JS_TEMPLATE = '''
+(() => {
+  document.addEventListener('keydown', (e) => {
+    if (['ArrowLeft','ArrowRight'].includes(e.key)) {
+      const role = e.key === 'ArrowLeft' ? 'prev' : 'next';
+      const link = document.querySelector(`.chapter-nav a[data-role="${role}"]`);
+      if (link) window.location.href = link.href;
+    }
+  });
+  // scroll buttons
+  document.getElementById('scroll-top')?.addEventListener('click', () =>
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  );
+  document.getElementById('scroll-bottom')?.addEventListener('click', () =>
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+  );
+})();
+'''
+
+CHAPTER_TEMPLATE = '''<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{title}</title>
+  <style>{css}</style>
+</head>
+<body>
+  <nav class="chapter-nav" id="nav-top">{nav_top}</nav>
+  <main>
+    <h1>{title}</h1>
+    {body}
+    {author_comments}
+  </main>
+  <nav class="chapter-nav" id="nav-bottom">{nav_bottom}</nav>
+  <!-- Scroll to Top/Bottom Buttons -->
+  <div class="scroll-btns">
+    <button id="scroll-top" aria-label="Scroll to top">↑</button>
+    <button id="scroll-bottom" aria-label="Scroll to bottom">↓</button>
+  </div>
+  <script>{js}</script>
+</body>
+</html>'''
+
+INDEX_CSS_TEMPLATE = '''
+:root {
+  --max-width: 800px;
+  --spacing: 1rem;
+  --color-bg: #fff;
+  --color-text: #333;
+  --color-primary: #0070f3;
+  --color-muted: #666;
+  --color-border: #eaeaea;
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #121212;
+    --color-text: #e4e4e4;
+    --color-muted: #aaa;
+    --color-border: #333;
+  }
+}
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  max-width: var(--max-width);
+  margin: calc(var(--spacing) * 2) auto;
+  padding: var(--spacing);
+}
+/* Header grid: Title + Meta badges */
+header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--spacing);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--spacing);
+  margin-bottom: calc(var(--spacing) * 2);
+}
+header h1 {
+  font-size: 2.5rem;
+  line-height: 1.2;
+}
+.meta-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.meta-item {
+  background: var(--color-border);
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+.meta-item strong {
+  color: var(--color-text);
+}
+/* Volume sections */
+.volume-section {
+  margin-bottom: calc(var(--spacing) * 2);
+}
+.volume-section h2 {
+  font-size: 1.75rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 2px solid var(--color-primary);
+  padding-bottom: 0.25rem;
+  color: var(--color-primary);
+}
+/* TOC grid of chapter links */
+.toc ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--spacing);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.toc a {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  text-decoration: none;
+  color: var(--color-text);
+  transition: background 0.2s, color 0.2s;
+}
+.toc a:hover,
+.toc a:focus {
+  background: var(--color-border);
+  color: var(--color-primary);
+}
+/* Scroll buttons for TOC */
+.scroll-btns {
+  position: fixed;
+  bottom: var(--spacing);
+  right: var(--spacing);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 200;
+}
+.scroll-btns button {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transition: background 0.2s;
+}
+.scroll-btns button:hover {
+  background: var(--color-muted);
+}
+'''
+
+INDEX_JS_TEMPLATE = """
+// Scroll button handlers
+document.getElementById('scroll-top')?.addEventListener('click', () =>
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+);
+document.getElementById('scroll-bottom')?.addEventListener('click', () =>
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+);
+"""
+
+INDEX_TEMPLATE = '''<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TOC - {BookName}</title>
+  <style>{css}</style>
+</head>
+<body>
+  <header>
+    <h1>{BookName}</h1>
+    <div class="meta-list">
+      <div class="meta-item"><strong>Author:</strong> {Author}</div>
+      <div class="meta-item"><strong>Status:</strong> {BookStatus}</div>
+      <div class="meta-item"><strong>Chapters:</strong> {TotalChapterCount}</div>
+      <div class="meta-item"><strong>Words:</strong> {WordsCnt}</div>
+    </div>
+  </header>
+  <section class="description">
+    <p>{Description}</p>
+    <p><em>Tags:</em> {Tags}</p>
+  </section>
+  <main class="toc">
+    {toc}
+  </main>
+  <!-- Scroll to Top/Bottom Buttons -->
+  <div class="scroll-btns">
+    <button id="scroll-top" aria-label="Scroll to top">↑</button>
+    <button id="scroll-bottom" aria-label="Scroll to bottom">↓</button>
+  </div>
+  <script>{js}</script>
+</body>
+</html>'''
+
+
+# --------------------------------------------------
+# I/O & Config
+# --------------------------------------------------
+def load_config() -> None:
+    global USER_ID, BOOK_ID
+    try:
+        cfg = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        cfg = {}
+    USER_ID = USER_ID or cfg.get("user_id") or ""
+    BOOK_ID = BOOK_ID or cfg.get("book_id") or ""
+
+
+def parse_args() -> argparse.Namespace:
+    p = argparse.ArgumentParser(
+        description="Generate HTML chapters and midpages for a given user/book/date."
+    )
+    p.add_argument("-u", "--user-id",  default=USER_ID,   help="USER_ID for fetching data")
+    p.add_argument("-b", "--book-id",  default=BOOK_ID,   help="BOOK_ID for this export")
+    return p.parse_args()
+
+
+def update_globals(args: argparse.Namespace) -> None:
+    global USER_ID, BOOK_ID, DATA_DIR, OUT_DIR, IMG_DIR, SESSION
+    USER_ID, BOOK_ID = args.user_id.strip(), args.book_id.strip()
+    base = Path.cwd()
+    DATA_DIR    = base / "output"       / USER_ID / BOOK_ID
+    OUT_DIR     = base / "chapter_html" / USER_ID / BOOK_ID
+    IMG_DIR     = base / "images"       / BOOK_ID
+    for d in (DATA_DIR, OUT_DIR, IMG_DIR):
+        d.mkdir(parents=True, exist_ok=True)
+
+    SESSION = requests.Session()
+    SESSION.headers.update(DEFAULT_HEADERS)
+
+
+def check_globals() -> bool:
+    missing = [n for n in ("USER_ID","BOOK_ID") if not globals().get(n)]
+    if missing:
+        print(f"[ERROR] Missing parameters: {', '.join(missing)}", file=sys.stderr)
+        return False
+    return True
+
+
+def load_json(path: Path) -> dict[str, Any]:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+# --------------------------------------------------
+# Download & image helpers
+# --------------------------------------------------
+def sleep_with_random_delay(
+    base: float,
+    add_spread: float = 0.0,
+    mul_spread: float = 1.0,
+    *,
+    max_sleep: float | None = None,
+) -> None:
+    if base < 0 or add_spread < 0 or mul_spread < 1.0:
+        return
+
+    multiplicative_jitter = random.uniform(1.0, mul_spread)
+    additive_jitter = random.uniform(0, add_spread)
+    duration = base * multiplicative_jitter + additive_jitter
+
+    if max_sleep is not None:
+        duration = min(duration, max_sleep)
+
+    time.sleep(duration)
+
+
+def download_image(
+    url: str,
+    target_dir: Path,
+) -> Path:
+    parsed = urlparse(url)
+    fn = Path(parsed.path).name or "unnamed"
+    dest = target_dir / fn
+    if dest.exists():
+        return dest
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    resp = SESSION.get(url, timeout=10)
+    resp.raise_for_status()
+    dest.write_bytes(resp.content)
+    sleep_with_random_delay(1.0, add_spread=0.5)
+    return dest
+
+# -------------------------------------------------------------------
+# HTML conversion helpers
+# -------------------------------------------------------------------
+def wrap_paragraphs(text: str) -> list[str]:
+    return [
+        f"<p>{html.escape(line.strip())}</p>"
+        for line in text.splitlines()
+        if line.strip()
+    ]
+
+
+def extract_image_map(cid: str, blocks: list[dict[str, Any]]) -> dict[int, list[str]]:
+    img_map: dict[int, list[str]] = defaultdict(list[str])
+    for blk in blocks:
+        if blk.get("Type") == "image" and blk.get("Url"):
+            idx = max(blk.get("Attach", 1) - 1, 0)
+            url = blk["Url"]
+            try:
+                local = download_image(url, IMG_DIR / f"c{cid}")
+                src = os.path.relpath(local, start=OUT_DIR).replace(os.sep, "/")
+            except Exception:
+                src = url
+            img_map[idx].append(f'<p><img src="{html.escape(src, quote=True)}"/></p>')
+    return img_map
+
+
+# --------------------------------------------------
+# HTML builders
+# --------------------------------------------------
+def build_nav_links(items: list[dict[str, Any]], idx: int) -> tuple[str, str]:
+    def mk(item: dict[str, Any], role: str) -> str:
+        eid, name = item["id"], item["name"]
+        label = html.escape(name)
+        if role == "prev":
+            label = f"« {label}"
+        elif role == "next":
+            label = f"{label} »"
+        return f'<a href="c{eid}.html" data-role="{role}">{label}</a>'
+
+    prev_link = mk(items[idx - 1], "prev") if idx > 0 else ""
+    toc_link  = f'<a href="../{BOOK_ID}.html">TOC</a>'
+    next_link = mk(items[idx + 1], "next") if idx < len(items) - 1 else ""
+    nav = " | ".join(filter(None, [prev_link, toc_link, next_link]))
+    return nav, nav
+
+
+def build_chapter_html(
+    cid: str,
+    data: dict[str, Any],
+    title: str,
+    nav_top: str,
+    nav_bottom: str
+) -> str:
+    content = data.get("Content", "") or data.get("content", "")
+    blocks  = data.get("Blocks", [])  or data.get("blocks", [])
+    paras   = wrap_paragraphs(content)
+    img_map = extract_image_map(cid, blocks)
+
+    body_parts: list[str] = []
+    for i, p in enumerate(paras):
+        body_parts.append(p)
+        body_parts.extend(img_map.get(i, []))
+    body = "\n".join(body_parts)
+
+    raw = data.get("author_comments", {}).get("AuthorComments", "").strip()
+    if raw:
+        comment_html = "\n".join(wrap_paragraphs(raw))
+        author_comments = (
+            "<hr/>\n<div class=\"author-comments\">\n"
+            "<p>Author's Notes</p>\n"
+            f"{comment_html}\n</div>"
+        )
+    else:
+        author_comments = ""
+
+    return CHAPTER_TEMPLATE.format(
+        title=html.escape(title),
+        nav_top=nav_top,
+        body=body,
+        nav_bottom=nav_bottom,
+        author_comments=author_comments,
+        css=CHAPTER_CSS_TEMPLATE,
+        js=CHAPTER_JS_TEMPLATE,
+    )
+
+
+def build_toc_html(
+    volumes: list[tuple[str, str]],
+    items: list[dict[str, Any]],
+    meta: dict[str, Any],
+    book_id: str
+) -> str:
+    toc_lines: list[str] = []
+    for vcode, vname in volumes:
+        toc_lines.append(f'<div class="volume-section"><h2>{html.escape(vname)}</h2><ul>')
+        for it in items:
+            if it["vol"] == int(vcode):
+                toc_lines.append(
+                    f'<li><a href="{book_id}/c{it["id"]}.html">'
+                    f'{html.escape(it["name"])}</a></li>'
+                )
+        toc_lines.append('</ul></div>')
+
+    return INDEX_TEMPLATE.format(
+        BookName=meta["BookName"],
+        Author=meta["Author"],
+        BookStatus=meta["BookStatus"],
+        Description=meta["Description"],
+        Tags=meta["Tags"],
+        TotalChapterCount=meta["TotalChapterCount"],
+        WordsCnt=meta["WordsCnt"],
+        toc="\n".join(toc_lines),
+        css=INDEX_CSS_TEMPLATE,
+        js=INDEX_JS_TEMPLATE,
+    )
+
+
+# --------------------------------------------------
+# Data loading
+# --------------------------------------------------
+def load_metadata(meta_path: Path) -> dict[str, Any]:
+    raw = load_json(meta_path).get("content", {})
+    return {
+        "BookName": raw.get("BookName", ""),
+        "Author": raw.get("Author", ""),
+        "BookStatus": raw.get("BookStatus", ""),
+        "Description": raw.get("Description", "").replace("\n", " "),
+        "Tags": ", ".join(t.get("Name", "") for t in raw.get("Tags", [])),
+        "TotalChapterCount": raw.get("TotalChapterCount", 0),
+        "WordsCnt": raw.get("WordsCnt", 0),
+    }
+
+
+def load_volumes(db_path: Path) -> list[tuple[str, str]]:
+    conn = sqlite3.connect(str(db_path))
+    cur  = conn.cursor()
+    cur.execute("SELECT VolumeCode, VolumeName FROM volume")
+    vols = cur.fetchall()
+    conn.close()
+    return sorted(vols, key=lambda x: int(x[0]))
+
+
+def load_all_items(
+    db_path: Path,
+) -> list[dict[str, Any]]:
+    conn = sqlite3.connect(str(db_path))
+    cur  = conn.cursor()
+    cur.execute("SELECT ChapterId, ChapterName, VolumeCode, ShowOrder FROM chapter")
+    rows = cur.fetchall()
+    conn.close()
+
+    available = {p.stem for p in DATA_DIR.glob("*.json") if p.stem != "-10000"}
+    items: list[dict[str, Any]] = []
+
+    for cid, name, vcode, order in rows:
+        scid = str(cid)
+        if scid not in available:
+            continue
+        items.append({
+            "id": scid, "name": name,
+            "vol": int(vcode), "order": order,
+        })
+    items.sort(key=lambda x: (x["vol"], x["order"]))
+    return items
+
+
+# --------------------------------------------------
+# Main
+# --------------------------------------------------
+def main() -> None:
+    load_config()
+    args = parse_args()
+    update_globals(args)
+    if not check_globals():
+        sys.exit(1)
+
+    # 1) metadata
+    meta      = load_metadata(DATA_DIR / "-10000.json")
+    info_path = Path.cwd() / "data" / USER_ID / f"{BOOK_ID}.qd"
+    volumes   = load_volumes(info_path)
+    all_items = load_all_items(info_path)
+
+    # 2) render chapters
+    for idx, item in enumerate(tqdm(all_items, desc="Processing items")):
+        eid, name = item["id"], item["name"]
+        nav_top, nav_bottom = build_nav_links(all_items, idx)
+
+        jpath = DATA_DIR / f"{eid}.json"
+        if not jpath.exists():
+            tqdm.write(f"[skip] Missing chapter JSON: {eid}.json")
+            continue
+        data    = load_json(jpath)
+        html_out= build_chapter_html(eid, data, name, nav_top, nav_bottom)
+
+        out_file = OUT_DIR / f"c{eid}.html"
+        out_file.write_text(html_out, encoding="utf-8")
+
+    # 3) build and save TOC
+    toc_html = build_toc_html(volumes, all_items, meta, BOOK_ID)
+    toc_path = OUT_DIR.parent / f"{BOOK_ID}.html"
+    toc_path.write_text(toc_html, encoding="utf-8")
+
+
+if __name__ == "__main__":
+    main()
+```
+
 </details>
