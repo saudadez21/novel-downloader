@@ -63,8 +63,11 @@ def parse_book_info(html_str: str) -> dict[str, Any]:
 
         info["word_count"] = doc.xpath('string(//p[@class="count"]/em[1])').strip()
 
+        summary = doc.xpath('string(//p[@class="intro"])').strip()
+        info["summary_brief"] = summary
+
         raw = doc.xpath('//p[@id="book-intro-detail"]//text()')
-        info["summary_brief"] = "\n".join(line.strip() for line in raw if line.strip())
+        info["summary"] = "\n".join(line.strip() for line in raw if line.strip())
 
         volumes = []
         for vol in doc.xpath('//div[@id="allCatalog"]//div[@class="catalog-volume"]'):
