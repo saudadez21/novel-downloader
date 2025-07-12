@@ -1,3 +1,13 @@
+## v1.4.4 (2025-07-12)
+
+### Fix
+
+- **qidian**: rewrite book info parser for new page structure (#54)
+
+### Refactor
+
+- **project**: migrate project to src layout (#49)
+
 ## v1.4.3 (2025-06-21)
 
 ### Fix
