@@ -27,7 +27,8 @@ class QidianSession(BaseSession):
 
     HOMEPAGE_URL = "https://www.qidian.com/"
     BOOKCASE_URL = "https://my.qidian.com/bookcase/"
-    BOOK_INFO_URL = "https://book.qidian.com/info/{book_id}/"
+    # BOOK_INFO_URL = "https://book.qidian.com/info/{book_id}/"
+    BOOK_INFO_URL = "https://www.qidian.com/book/{book_id}/"
     CHAPTER_URL = "https://www.qidian.com/chapter/{book_id}/{chapter_id}/"
 
     LOGIN_URL = "https://passport.qidian.com/"
