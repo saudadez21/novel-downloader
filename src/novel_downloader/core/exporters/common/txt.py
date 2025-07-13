@@ -15,11 +15,8 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING
 
-from novel_downloader.utils.file_utils import save_as_txt
-from novel_downloader.utils.text_utils import (
-    clean_chapter_title,
-    format_chapter,
-)
+from novel_downloader.core.exporters.txt_util import format_chapter
+from novel_downloader.utils import save_as_txt
 
 if TYPE_CHECKING:
     from .main_exporter import CommonExporter
@@ -63,7 +60,6 @@ def common_export_as_txt(
 
     for vol in volumes:
         vol_name = vol.get("volume_name", "").strip()
-        vol_name = clean_chapter_title(vol_name)
         if vol_name:
             volume_header = f"\n\n{'=' * 6} {vol_name} {'=' * 6}\n\n"
             parts.append(volume_header)
@@ -89,10 +85,9 @@ def common_export_as_txt(
             title = chapter_data.get("title", chap_title).strip()
             content = chapter_data.get("content", "").strip()
             author_say = chapter_data.get("author_say", "").strip()
-            clean_title = clean_chapter_title(title)
 
-            parts.append(format_chapter(clean_title, content, author_say))
-            latest_chapter = clean_title
+            parts.append(format_chapter(title, content, author_say))
+            latest_chapter = title
 
     # --- Build header ---
     name = book_info.get("book_name")

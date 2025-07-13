@@ -17,9 +17,17 @@ Included utilities:
 - read_text_file / read_json_file / read_binary_file: load content from file
 """
 
+__all__ = [
+    "sanitize_filename",
+    "save_as_json",
+    "save_as_txt",
+    "read_text_file",
+    "read_json_file",
+    "read_binary_file",
+    "normalize_txt_line_endings",
+]
+
 from .io import (
-    load_blacklisted_words,
-    load_text_resource,
     read_binary_file,
     read_json_file,
     read_text_file,
@@ -28,15 +36,3 @@ from .io import (
 )
 from .normalize import normalize_txt_line_endings
 from .sanitize import sanitize_filename
-
-__all__ = [
-    "sanitize_filename",
-    "save_as_json",
-    "save_as_txt",
-    "read_text_file",
-    "read_json_file",
-    "read_binary_file",
-    "load_text_resource",
-    "load_blacklisted_words",
-    "normalize_txt_line_endings",
-]

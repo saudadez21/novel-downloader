@@ -7,6 +7,8 @@ Provides a configurable logging setup for Python applications.
 Log files are rotated daily and named with the given logger name and current date.
 """
 
+__all__ = ["setup_logging"]
+
 import logging
 from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler

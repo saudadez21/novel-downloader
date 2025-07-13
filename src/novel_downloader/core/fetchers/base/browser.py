@@ -8,7 +8,8 @@ novel_downloader.core.fetchers.base.browser
 import abc
 import logging
 import types
-from typing import Any, Literal, Self
+from pathlib import Path
+from typing import Any, Literal, Self, TypedDict
 
 from playwright.async_api import (
     Browser,
@@ -21,7 +22,7 @@ from playwright.async_api import (
 )
 
 from novel_downloader.core.interfaces import FetcherProtocol
-from novel_downloader.models import FetcherConfig, LoginField, NewContextOptions
+from novel_downloader.models import FetcherConfig, LoginField
 from novel_downloader.utils.constants import (
     DATA_DIR,
     DEFAULT_USER_AGENT,
@@ -35,6 +36,16 @@ Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3] });
 Object.defineProperty(navigator, 'languages', { get: () => ['zh-CN', 'zh', 'en'] });
 window.chrome = { runtime: {} };
 """.strip()
+
+
+class NewContextOptions(TypedDict, total=False):
+    user_agent: str
+    locale: str
+    storage_state: Path
+    viewport: ViewportSize
+    java_script_enabled: bool
+    ignore_https_errors: bool
+    extra_http_headers: dict[str, str]
 
 
 class BaseBrowser(FetcherProtocol, abc.ABC):

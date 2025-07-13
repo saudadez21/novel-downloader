@@ -419,26 +419,29 @@ plain = rc4_crypt("secret", cipher, mode="decrypt")
 ---
 
 ```python
-def download_image(
+def download(
     url: str,
-    target_folder: str | Path | None = None,
-    target_name: str | None = None,
+    target_dir: str | Path | None = None,
+    filename: str | None = None,
     *,
     timeout: int = 10,
     retries: int = 3,
     backoff: float = 0.5,
     headers: dict[str, str] | None = None,
+    stream: bool = False,
     on_exist: Literal["overwrite", "skip", "rename"] = "overwrite",
+    default_suffix: str = "",
+    chunk_size: int = _DEFAULT_CHUNK_SIZE,
 ) -> Path | None:
 ```
 
-描述: 下载图片并保存
+描述: 下载文件并保存
 
 参数:
 
 * `url`: 链接
-* `target_folder`: 保存目录
-* `target_name`: 文件名
+* `target_dir`: 保存目录
+* `filename`: 文件名
 * `timeout`, `retries`, `backoff`, `headers`, `on_exist`
 
 返回:
@@ -448,49 +451,7 @@ def download_image(
 示例:
 
 ```python
-path = download_image("https://.../img.png", Path("./imgs"))
-```
-
----
-
-```python
-def download_font_file(
-    url: str,
-    target_folder: str | Path,
-    *,
-    timeout: int = 10,
-    retries: int = 3,
-    backoff: float = 0.5,
-    on_exist: Literal["overwrite", "skip", "rename"] = "skip",
-) -> Path | None:
-```
-
-描述: 下载字体文件
-
-示例:
-
-```python
-font_path = download_font_file("https://.../font.ttf", Path("./fonts"))
-```
-
----
-
-```python
-def download_js_file(
-    url: str,
-    target_folder: str | Path,
-    *,
-    timeout: int = 10,
-    retries: int = 3,
-    backoff: float = 0.5,
-    on_exist: Literal["overwrite", "skip", "rename"] = "skip",
-) -> Path | None:
-```
-
-描述: 下载 JS 文件
-
-示例:
-
-```python
-js_path = download_js_file("https://.../script.js", Path("./js"))
+img_path = download("https://.../img.png", Path("./imgs"))
+font_path = download("https://.../font.ttf", Path("./fonts"))
+js_path = download("https://.../script.js", Path("./js"))
 ```

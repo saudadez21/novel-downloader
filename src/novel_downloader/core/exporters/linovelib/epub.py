@@ -20,12 +20,15 @@ from novel_downloader.core.exporters.epub_util import (
     StyleSheet,
     Volume,
 )
+from novel_downloader.utils import (
+    download,
+    sanitize_filename,
+)
 from novel_downloader.utils.constants import (
     CSS_MAIN_PATH,
     DEFAULT_HEADERS,
+    DEFAULT_IMAGE_SUFFIX,
 )
-from novel_downloader.utils.file_utils import sanitize_filename
-from novel_downloader.utils.network import download_image
 
 if TYPE_CHECKING:
     from .main_exporter import LinovelibExporter
@@ -87,12 +90,13 @@ def export_whole_book(
     cover_path: Path | None = None
     cover_url = book_info.get("cover_url", "")
     if config.include_cover and cover_url:
-        cover_path = download_image(
+        cover_path = download(
             cover_url,
             raw_base,
-            target_name="cover",
+            filename="cover",
             headers=_IMG_HEADERS,
             on_exist="overwrite",
+            default_suffix=DEFAULT_IMAGE_SUFFIX,
         )
         if not cover_path:
             exporter.logger.warning("Failed to download cover from %s", cover_url)
@@ -126,10 +130,11 @@ def export_whole_book(
         vol_cover_path: Path | None = None
         vol_cover_url = vol.get("volume_cover", "")
         if vol_cover_url:
-            vol_cover_path = download_image(
+            vol_cover_path = download(
                 vol_cover_url,
                 img_dir,
                 on_exist="skip",
+                default_suffix=DEFAULT_IMAGE_SUFFIX,
             )
 
         curr_vol = Volume(
@@ -249,11 +254,12 @@ def export_by_volume(
         vol_cover_path: Path | None = None
         vol_cover_url = vol.get("volume_cover", "")
         if config.include_cover and vol_cover_url:
-            vol_cover_path = download_image(
+            vol_cover_path = download(
                 vol_cover_url,
                 img_dir,
                 headers=_IMG_HEADERS,
                 on_exist="skip",
+                default_suffix=DEFAULT_IMAGE_SUFFIX,
             )
 
         book = Book(
@@ -341,13 +347,12 @@ def _inline_remote_images(
     def _replace(match: re.Match[str]) -> str:
         url = match.group(1)
         try:
-            # download_image returns a Path or None
-            local_path = download_image(
+            local_path = download(
                 url,
                 image_dir,
-                target_name=None,
                 headers=_IMG_HEADERS,
                 on_exist="skip",
+                default_suffix=DEFAULT_IMAGE_SUFFIX,
             )
             if not local_path:
                 return match.group(0)

@@ -16,16 +16,29 @@ Subpackages:
 - qidian (起点中文网)
 - sfacg (SF轻小说)
 - yamibo (百合会)
-- common (通用架构)
 """
+
+__all__ = [
+    "get_fetcher",
+    "BiqugeBrowser",
+    "BiqugeSession",
+    "EsjzoneBrowser",
+    "EsjzoneSession",
+    "LinovelibBrowser",
+    "LinovelibSession",
+    "QianbiBrowser",
+    "QianbiSession",
+    "QidianBrowser",
+    "QidianSession",
+    "SfacgBrowser",
+    "SfacgSession",
+    "YamiboBrowser",
+    "YamiboSession",
+]
 
 from .biquge import (
     BiqugeBrowser,
     BiqugeSession,
-)
-from .common import (
-    CommonBrowser,
-    CommonSession,
 )
 from .esjzone import (
     EsjzoneBrowser,
@@ -43,6 +56,7 @@ from .qidian import (
     QidianBrowser,
     QidianSession,
 )
+from .registry import get_fetcher
 from .sfacg import (
     SfacgBrowser,
     SfacgSession,
@@ -51,22 +65,3 @@ from .yamibo import (
     YamiboBrowser,
     YamiboSession,
 )
-
-__all__ = [
-    "BiqugeBrowser",
-    "BiqugeSession",
-    "CommonBrowser",
-    "CommonSession",
-    "EsjzoneBrowser",
-    "EsjzoneSession",
-    "LinovelibBrowser",
-    "LinovelibSession",
-    "QianbiBrowser",
-    "QianbiSession",
-    "QidianBrowser",
-    "QidianSession",
-    "SfacgBrowser",
-    "SfacgSession",
-    "YamiboBrowser",
-    "YamiboSession",
-]

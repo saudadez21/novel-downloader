@@ -12,22 +12,14 @@ Submodules:
 - diff_display: Generate inline diffs with aligned character markers
 """
 
-from .chapter_formatting import format_chapter
-from .diff_display import diff_inline_display
-from .font_mapping import apply_font_mapping
-from .text_cleaning import (
-    clean_chapter_title,
-    content_prefix,
-    is_promotional_line,
-    truncate_half_lines,
-)
-
 __all__ = [
-    "apply_font_mapping",
-    "format_chapter",
-    "clean_chapter_title",
-    "is_promotional_line",
     "content_prefix",
     "truncate_half_lines",
     "diff_inline_display",
 ]
+
+from .diff_display import diff_inline_display
+from .truncate_utils import (
+    content_prefix,
+    truncate_half_lines,
+)

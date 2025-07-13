@@ -10,10 +10,15 @@ from typing import Any
 from lxml import html
 
 from novel_downloader.core.fetchers.base import BaseSession
+from novel_downloader.core.fetchers.registry import register_fetcher
 from novel_downloader.models import FetcherConfig, LoginField
-from novel_downloader.utils.time_utils import async_sleep_with_random_delay
+from novel_downloader.utils import async_sleep_with_random_delay
 
 
+@register_fetcher(
+    site_keys=["yamibo"],
+    backends=["session"],
+)
 class YamiboSession(BaseSession):
     """
     A session class for interacting with the Yamibo (www.yamibo.com) novel website.

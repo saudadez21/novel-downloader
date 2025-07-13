@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.utils.hash_utils
----------------------------------
+novel_downloader.utils.fontocr.hash_utils
+-----------------------------------------
 
 Utilities for image perceptual hashing and comparison.
 

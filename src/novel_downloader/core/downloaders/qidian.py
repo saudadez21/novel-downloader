@@ -12,6 +12,7 @@ from contextlib import suppress
 from typing import Any, cast
 
 from novel_downloader.core.downloaders.base import BaseDownloader
+from novel_downloader.core.downloaders.registry import register_downloader
 from novel_downloader.core.interfaces import (
     FetcherProtocol,
     ParserProtocol,
@@ -19,18 +20,23 @@ from novel_downloader.core.interfaces import (
 from novel_downloader.models import (
     BookConfig,
     ChapterDict,
-    CidTask,
     DownloaderConfig,
-    HtmlTask,
 )
-from novel_downloader.utils.chapter_storage import ChapterStorage
-from novel_downloader.utils.file_utils import save_as_json, save_as_txt
-from novel_downloader.utils.time_utils import (
+from novel_downloader.utils import (
+    ChapterStorage,
     async_sleep_with_random_delay,
     calculate_time_difference,
+    save_as_json,
+    save_as_txt,
+)
+
+from .tasks import (
+    CidTask,
+    HtmlTask,
 )
 
 
+@register_downloader(site_keys=["qidian", "qd"])
 class QidianDownloader(BaseDownloader):
     """
     Specialized downloader for Qidian novels.

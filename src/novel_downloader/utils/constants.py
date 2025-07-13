@@ -19,16 +19,6 @@ APP_NAME = "NovelDownloader"  # Display name
 APP_DIR_NAME = "novel_downloader"  # Directory name for platformdirs
 LOGGER_NAME = PACKAGE_NAME  # Root logger name
 
-SUPPORTED_SITES = {
-    "biquge",
-    "esjzone",
-    "linovelib",
-    "qianbi",
-    "qidian",
-    "sfacg",
-    "yamibo",
-}
-
 # -----------------------------------------------------------------------------
 # Base directories
 # -----------------------------------------------------------------------------
@@ -49,9 +39,7 @@ MODEL_CACHE_DIR = BASE_CONFIG_DIR / "models"
 # Default file paths
 # -----------------------------------------------------------------------------
 STATE_FILE = DATA_DIR / "state.json"
-HASH_STORE_FILE = DATA_DIR / "image_hashes.json"
 SETTING_FILE = CONFIG_DIR / "settings.json"
-SITE_RULES_FILE = CONFIG_DIR / "site_rules.json"
 DEFAULT_USER_DATA_DIR = DATA_DIR / "browser_data"
 
 
@@ -101,9 +89,6 @@ VOLUME_BORDER_IMAGE_PATH = files("novel_downloader.resources.images").joinpath(
 )
 
 # JSON
-REPLACE_WORD_MAP_PATH = files("novel_downloader.resources.json").joinpath(
-    "replace_word_map.json"
-)
 LINOVELIB_FONT_MAP_PATH = files("novel_downloader.resources.json").joinpath(
     "linovelib_font_map.json"
 )
@@ -112,9 +97,6 @@ LINOVELIB_FONT_MAP_PATH = files("novel_downloader.resources.json").joinpath(
 QD_DECRYPT_SCRIPT_PATH = files("novel_downloader.resources.js_scripts").joinpath(
     "qidian_decrypt_node.js"
 )
-
-# Text Files
-BLACKLIST_PATH = files("novel_downloader.resources.text").joinpath("blacklist.txt")
 
 # ---------------------------------------------------------------------
 # Pretrained model registry (e.g. used in font recovery or OCR)

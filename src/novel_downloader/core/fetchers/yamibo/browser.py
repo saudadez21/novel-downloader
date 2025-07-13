@@ -8,9 +8,14 @@ novel_downloader.core.fetchers.yamibo.browser
 from typing import Any
 
 from novel_downloader.core.fetchers.base import BaseBrowser
+from novel_downloader.core.fetchers.registry import register_fetcher
 from novel_downloader.models import FetcherConfig, LoginField
 
 
+@register_fetcher(
+    site_keys=["yamibo"],
+    backends=["browser"],
+)
 class YamiboBrowser(BaseBrowser):
     """
     A browser class for interacting with the Yamibo (www.yamibo.com) novel website.

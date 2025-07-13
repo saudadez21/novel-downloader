@@ -14,9 +14,9 @@ Supports:
 Exposes the selected OCR engine version via `FontOCR`.
 """
 
-# from .ocr_v1 import FontOCRV1 as FontOCR
-from .ocr_v2 import FontOCRV2 as FontOCR
-
-__version__ = "v2"
-
 __all__ = ["FontOCR"]
+__version__ = "3.0"
+
+# from .ocr_v1 import FontOCRV1 as FontOCR
+# from .ocr_v2 import FontOCRV2 as FontOCR
+from .ocr_v3 import FontOCRV3 as FontOCR

@@ -9,12 +9,14 @@ from collections.abc import Mapping
 from typing import Any
 
 from novel_downloader.core.exporters.base import BaseExporter
+from novel_downloader.core.exporters.registry import register_exporter
 from novel_downloader.models import ExporterConfig
-from novel_downloader.utils.chapter_storage import ChapterStorage
+from novel_downloader.utils import ChapterStorage
 
 from .txt import linovelib_export_as_txt
 
 
+@register_exporter(site_keys=["linovelib"])
 class LinovelibExporter(BaseExporter):
     """"""
 

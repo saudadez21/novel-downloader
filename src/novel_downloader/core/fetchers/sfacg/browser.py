@@ -8,10 +8,15 @@ novel_downloader.core.fetchers.sfacg.browser
 from typing import Any
 
 from novel_downloader.core.fetchers.base import BaseBrowser
+from novel_downloader.core.fetchers.registry import register_fetcher
 from novel_downloader.models import FetcherConfig, LoginField
 from novel_downloader.utils.i18n import t
 
 
+@register_fetcher(
+    site_keys=["sfacg"],
+    backends=["browser"],
+)
 class SfacgBrowser(BaseBrowser):
     """
     A browser class for interacting with the Sfacg (m.sfacg.com) novel website.

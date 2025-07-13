@@ -18,9 +18,8 @@ import tinycss2
 from lxml import html
 
 from novel_downloader.models import ChapterDict
-from novel_downloader.utils.network import download_font_file
-from novel_downloader.utils.text_utils import (
-    apply_font_mapping,
+from novel_downloader.utils import (
+    download,
     truncate_half_lines,
 )
 
@@ -98,8 +97,10 @@ def parse_encrypted_chapter(
         rand_path.parent.mkdir(parents=True, exist_ok=True)
         rand_path.write_bytes(bytes(rf["data"]))
 
-        fixed_path = download_font_file(
-            url=fixedFontWoff2_url, target_folder=parser._fixed_font_dir
+        fixed_path = download(
+            url=fixedFontWoff2_url,
+            target_dir=parser._fixed_font_dir,
+            stream=True,
         )
         if fixed_path is None:
             raise ValueError("fixed_path is None: failed to download font")
@@ -177,7 +178,10 @@ def parse_encrypted_chapter(
             )
 
         # Reconstruct final readable text
-        original_text = apply_font_mapping(paragraphs_str, mapping_result)
+        original_text = parser._font_ocr.apply_font_mapping(
+            text=paragraphs_str,
+            font_map=mapping_result,
+        )
 
         final_paragraphs_str = "\n\n".join(
             line.strip() for line in original_text.splitlines() if line.strip()

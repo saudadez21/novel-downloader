@@ -15,10 +15,8 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING
 
-from novel_downloader.utils.file_utils import save_as_txt
-from novel_downloader.utils.text_utils import (
-    format_chapter,
-)
+from novel_downloader.core.exporters.txt_util import format_chapter
+from novel_downloader.utils import save_as_txt
 
 if TYPE_CHECKING:
     from .main_exporter import LinovelibExporter

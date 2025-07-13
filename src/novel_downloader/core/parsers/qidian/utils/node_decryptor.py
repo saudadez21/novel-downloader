@@ -80,10 +80,10 @@ class QidianNodeDecryptor:
 
             # 3) Download the Fock JS module from Qidian CDN if missing
             if not self.QIDIAN_FOCK_JS_PATH.exists():
-                from novel_downloader.utils.network import download_js_file
+                from novel_downloader.utils.network import download
 
                 try:
-                    download_js_file(
+                    download(
                         self.QIDIAN_FOCK_JS_URL,
                         self.script_dir,
                         on_exist="overwrite",

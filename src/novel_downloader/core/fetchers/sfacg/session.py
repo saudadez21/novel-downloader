@@ -8,9 +8,14 @@ novel_downloader.core.fetchers.sfacg.session
 from typing import Any
 
 from novel_downloader.core.fetchers.base import BaseSession
+from novel_downloader.core.fetchers.registry import register_fetcher
 from novel_downloader.models import FetcherConfig, LoginField
 
 
+@register_fetcher(
+    site_keys=["sfacg"],
+    backends=["session"],
+)
 class SfacgSession(BaseSession):
     """
     A session class for interacting with the Sfacg (m.sfacg.com) novel website.

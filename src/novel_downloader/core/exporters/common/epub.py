@@ -20,10 +20,11 @@ from novel_downloader.core.exporters.epub_util import (
     StyleSheet,
     Volume,
 )
-from novel_downloader.utils.constants import CSS_MAIN_PATH
-from novel_downloader.utils.file_utils import sanitize_filename
-from novel_downloader.utils.network import download_image
-from novel_downloader.utils.text_utils import clean_chapter_title
+from novel_downloader.utils import (
+    download,
+    sanitize_filename,
+)
+from novel_downloader.utils.constants import CSS_MAIN_PATH, DEFAULT_IMAGE_SUFFIX
 
 if TYPE_CHECKING:
     from .main_exporter import CommonExporter
@@ -84,11 +85,12 @@ def common_export_as_epub(
     cover_path: Path | None = None
     cover_url = book_info.get("cover_url", "")
     if config.include_cover and cover_url:
-        cover_path = download_image(
+        cover_path = download(
             cover_url,
             raw_base,
-            target_name="cover",
+            filename="cover",
             on_exist="overwrite",
+            default_suffix=DEFAULT_IMAGE_SUFFIX,
         )
         if not cover_path:
             exporter.logger.warning("Failed to download cover from %s", cover_url)
@@ -122,10 +124,11 @@ def common_export_as_epub(
         vol_cover_path: Path | None = None
         vol_cover_url = vol.get("volume_cover", "")
         if vol_cover_url:
-            vol_cover_path = download_image(
+            vol_cover_path = download(
                 vol_cover_url,
                 img_dir,
                 on_exist="skip",
+                default_suffix=DEFAULT_IMAGE_SUFFIX,
             )
 
         curr_vol = Volume(
@@ -156,7 +159,7 @@ def common_export_as_epub(
                 )
                 continue
 
-            title = clean_chapter_title(chapter_data.get("title", "")) or chap_id
+            title = chapter_data.get("title", "") or chap_id
             content: str = chapter_data.get("content", "")
             content, img_paths = _inline_remote_images(content, img_dir)
             chap_html = _txt_to_html(
@@ -213,12 +216,11 @@ def _inline_remote_images(
     def _replace(match: re.Match[str]) -> str:
         url = match.group(1)
         try:
-            # download_image returns a Path or None
-            local_path = download_image(
+            local_path = download(
                 url,
                 image_dir,
-                target_name=None,
                 on_exist="skip",
+                default_suffix=DEFAULT_IMAGE_SUFFIX,
             )
             if not local_path:
                 return match.group(0)

@@ -14,7 +14,6 @@ Includes:
 import json
 import logging
 import tempfile
-from importlib.resources import files
 from pathlib import Path
 from typing import Any, Literal
 
@@ -42,12 +41,12 @@ def _get_non_conflicting_path(path: Path) -> Path:
 def _write_file(
     content: str | bytes | dict[Any, Any] | list[Any] | Any,
     filepath: str | Path,
-    mode: str | None = None,
+    write_mode: str = "w",
     *,
     on_exist: Literal["overwrite", "skip", "rename"] = "overwrite",
     dump_json: bool = False,
     encoding: str = "utf-8",
-) -> bool:
+) -> Path | None:
     """
     Write content to a file safely with optional atomic behavior
     and JSON serialization.
@@ -60,7 +59,7 @@ def _write_file(
         or 'rename'.
     :param dump_json: If True, serialize content as JSON.
     :param encoding: Text encoding for writing.
-    :return: True if writing succeeds, False otherwise.
+    :return: Path if writing succeeds, None otherwise.
     """
     path = Path(filepath)
     path = path.with_name(sanitize_filename(path.name))
@@ -69,7 +68,7 @@ def _write_file(
     if path.exists():
         if on_exist == "skip":
             logger.debug("[file] '%s' exists, skipping", path)
-            return False
+            return path
         if on_exist == "rename":
             path = _get_non_conflicting_path(path)
             logger.debug("[file] Renaming target to avoid conflict: %s", path)
@@ -104,10 +103,10 @@ def _write_file(
             tmp_path = Path(tmp.name)
         tmp_path.replace(path)
         logger.debug("[file] '%s' written successfully", path)
-        return True
+        return path
     except Exception as exc:
         logger.warning("[file] Error writing %r: %s", path, exc)
-        return False
+        return None
 
 
 def save_as_txt(
@@ -116,7 +115,7 @@ def save_as_txt(
     *,
     encoding: str = "utf-8",
     on_exist: Literal["overwrite", "skip", "rename"] = "overwrite",
-) -> bool:
+) -> Path | None:
     """
     Save plain text content to the given file path.
 
@@ -124,12 +123,12 @@ def save_as_txt(
     :param filepath: Destination file path.
     :param encoding: Text encoding to use (default: 'utf-8').
     :param on_exist: How to handle existing files: 'overwrite', 'skip', or 'rename'.
-    :return: True if successful, False otherwise.
+    :return: Path if writing succeeds, None otherwise.
     """
     return _write_file(
         content=content,
         filepath=filepath,
-        mode="w",
+        write_mode="w",
         on_exist=on_exist,
         dump_json=False,
         encoding=encoding,
@@ -142,7 +141,7 @@ def save_as_json(
     *,
     encoding: str = "utf-8",
     on_exist: Literal["overwrite", "skip", "rename"] = "overwrite",
-) -> bool:
+) -> Path | None:
     """
     Save JSON-serializable content to the given file path.
 
@@ -150,12 +149,12 @@ def save_as_json(
     :param filepath: Destination file path.
     :param encoding: Text encoding to use (default: 'utf-8').
     :param on_exist: How to handle existing files: 'overwrite', 'skip', or 'rename'.
-    :return: True if successful, False otherwise.
+    :return: Path if writing succeeds, None otherwise.
     """
     return _write_file(
         content=content,
         filepath=filepath,
-        mode="w",
+        write_mode="w",
         on_exist=on_exist,
         dump_json=True,
         encoding=encoding,
@@ -209,39 +208,10 @@ def read_binary_file(filepath: str | Path) -> bytes | None:
         return None
 
 
-def load_text_resource(
-    filename: str,
-    package: str = "novel_downloader.resources.text",
-) -> str:
-    """
-    Load and return the contents of a text resource.
-
-    :param filename: Name of the text file (e.g. "blacklist.txt").
-    :param package: Package path where resources live (default: text resources).
-                    For other resource types, point to the appropriate subpackage
-                    (e.g. "novel_downloader.resources.css").
-    :return: File contents as a string.
-    """
-    resource_path = files(package).joinpath(filename)
-    return resource_path.read_text(encoding="utf-8")
-
-
-def load_blacklisted_words() -> set[str]:
-    """
-    Convenience loader for the blacklist.txt in the text resources.
-
-    :return: A set of non-empty, stripped lines from blacklist.txt.
-    """
-    text = load_text_resource("blacklist.txt")
-    return {line.strip() for line in text.splitlines() if line.strip()}
-
-
 __all__ = [
     "save_as_txt",
     "save_as_json",
     "read_text_file",
     "read_json_file",
     "read_binary_file",
-    "load_text_resource",
-    "load_blacklisted_words",
 ]

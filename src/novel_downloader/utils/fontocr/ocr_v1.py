@@ -24,8 +24,8 @@ from novel_downloader.utils.constants import (
     REC_CHAR_MODEL_FILES,
     REC_IMAGE_SHAPE_MAP,
 )
-from novel_downloader.utils.hash_store import img_hash_store
 
+from .hash_store import img_hash_store
 from .model_loader import get_rec_chinese_char_model_dir
 
 logger = logging.getLogger(__name__)
@@ -301,3 +301,15 @@ class FontOCRV1:
             logger.error("[FontOCR] Failed to save fixed map: %s", e)
 
         return mapping_result
+
+    @staticmethod
+    def apply_font_mapping(text: str, font_map: dict[str, str]) -> str:
+        """
+        Replace each character in `text` using `font_map`,
+        leaving unmapped characters unchanged.
+
+        :param text:    The input string, possibly containing obfuscated font chars.
+        :param font_map: A dict mapping obfuscated chars to real chars.
+        :return:        The de-obfuscated text.
+        """
+        return "".join(font_map.get(ch, ch) for ch in text)

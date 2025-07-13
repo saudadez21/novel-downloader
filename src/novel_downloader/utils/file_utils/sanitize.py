@@ -11,6 +11,8 @@ that replaces or removes illegal characters from filenames, trims
 lengths, and avoids reserved names on Windows systems.
 """
 
+__all__ = ["sanitize_filename"]
+
 import logging
 import os
 import re
@@ -65,6 +67,3 @@ def sanitize_filename(filename: str, max_length: int | None = 255) -> str:
         cleaned = "_untitled"
     logger.debug("[file] Sanitized filename: %r -> %r", filename, cleaned)
     return cleaned
-
-
-__all__ = ["sanitize_filename"]

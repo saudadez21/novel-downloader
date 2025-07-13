@@ -11,10 +11,15 @@ from typing import Any
 from playwright.async_api import Page
 
 from novel_downloader.core.fetchers.base import BaseBrowser
+from novel_downloader.core.fetchers.registry import register_fetcher
 from novel_downloader.models import FetcherConfig, LoginField
 from novel_downloader.utils.i18n import t
 
 
+@register_fetcher(
+    site_keys=["qidian", "qd"],
+    backends=["browser"],
+)
 class QidianBrowser(BaseBrowser):
     """
     A browser class for interacting with the Qidian (www.qidian.com) novel website.

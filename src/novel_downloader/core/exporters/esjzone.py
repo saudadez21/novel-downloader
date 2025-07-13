@@ -5,11 +5,13 @@ novel_downloader.core.exporters.esjzone
 
 """
 
+from novel_downloader.core.exporters.registry import register_exporter
 from novel_downloader.models import ExporterConfig
 
 from .common import CommonExporter
 
 
+@register_exporter(site_keys=["esjzone"])
 class EsjzoneExporter(CommonExporter):
     def __init__(
         self,

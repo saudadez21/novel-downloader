@@ -13,7 +13,7 @@ from typing import Any
 
 from novel_downloader.core.exporters.base import BaseExporter
 from novel_downloader.models import ExporterConfig
-from novel_downloader.utils.chapter_storage import ChapterStorage
+from novel_downloader.utils import ChapterStorage
 
 from .txt import common_export_as_txt
 

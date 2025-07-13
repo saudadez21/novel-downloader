@@ -6,6 +6,7 @@ novel_downloader.core.downloaders.yamibo
 """
 
 from novel_downloader.core.downloaders.common import CommonDownloader
+from novel_downloader.core.downloaders.registry import register_downloader
 from novel_downloader.core.interfaces import (
     FetcherProtocol,
     ParserProtocol,
@@ -13,6 +14,7 @@ from novel_downloader.core.interfaces import (
 from novel_downloader.models import DownloaderConfig
 
 
+@register_downloader(site_keys=["yamibo"])
 class YamiboDownloader(CommonDownloader):
     """"""
 

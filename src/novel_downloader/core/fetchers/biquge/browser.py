@@ -8,9 +8,14 @@ novel_downloader.core.fetchers.biquge.browser
 from typing import Any
 
 from novel_downloader.core.fetchers.base import BaseBrowser
+from novel_downloader.core.fetchers.registry import register_fetcher
 from novel_downloader.models import FetcherConfig
 
 
+@register_fetcher(
+    site_keys=["biquge", "bqg"],
+    backends=["browser"],
+)
 class BiqugeBrowser(BaseBrowser):
     """
     A browser class for interacting with the Biquge (www.b520.cc) novel website.

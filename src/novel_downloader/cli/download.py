@@ -15,13 +15,13 @@ from pathlib import Path
 from typing import Any
 
 from novel_downloader.config import ConfigAdapter, load_config
-from novel_downloader.core.factory import (
+from novel_downloader.core import (
+    FetcherProtocol,
     get_downloader,
     get_exporter,
     get_fetcher,
     get_parser,
 )
-from novel_downloader.core.interfaces import FetcherProtocol
 from novel_downloader.models import BookConfig, LoginField
 from novel_downloader.utils.cookies import resolve_cookies
 from novel_downloader.utils.i18n import t
@@ -44,8 +44,6 @@ def register_download_subcommand(subparsers: _SubParsersAction) -> None:  # type
 
 
 def handle_download(args: Namespace) -> None:
-    setup_logging()
-
     site: str = args.site
     config_path: Path | None = Path(args.config) if args.config else None
     book_ids: list[BookConfig] = _cli_args_to_book_configs(
@@ -143,10 +141,11 @@ async def _download(
     fetcher_cfg = adapter.get_fetcher_config()
     parser_cfg = adapter.get_parser_config()
     exporter_cfg = adapter.get_exporter_config()
+    log_level = adapter.get_log_level()
 
     parser = get_parser(site, parser_cfg)
     exporter = get_exporter(site, exporter_cfg)
-    setup_logging()
+    setup_logging(log_level=log_level)
 
     async with get_fetcher(site, fetcher_cfg) as fetcher:
         if downloader_cfg.login_required and not await fetcher.load_state():

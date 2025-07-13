@@ -6,6 +6,8 @@ novel_downloader.utils.i18n
 Multilingual text dictionary and utility for CLI and interactive mode.
 """
 
+__all__ = ["t"]
+
 import json
 from typing import Any
 

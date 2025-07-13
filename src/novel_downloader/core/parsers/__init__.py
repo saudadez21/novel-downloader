@@ -14,21 +14,11 @@ Modules:
 - qidian (起点中文网)
 - sfacg (SF轻小说)
 - yamibo (百合会)
-- common (通用架构)
 """
 
-from .biquge import BiqugeParser
-from .common import CommonParser
-from .esjzone import EsjzoneParser
-from .linovelib import LinovelibParser
-from .qianbi import QianbiParser
-from .qidian import QidianParser
-from .sfacg import SfacgParser
-from .yamibo import YamiboParser
-
 __all__ = [
+    "get_parser",
     "BiqugeParser",
-    "CommonParser",
     "EsjzoneParser",
     "LinovelibParser",
     "QianbiParser",
@@ -36,3 +26,12 @@ __all__ = [
     "SfacgParser",
     "YamiboParser",
 ]
+
+from .biquge import BiqugeParser
+from .esjzone import EsjzoneParser
+from .linovelib import LinovelibParser
+from .qianbi import QianbiParser
+from .qidian import QidianParser
+from .registry import get_parser
+from .sfacg import SfacgParser
+from .yamibo import YamiboParser

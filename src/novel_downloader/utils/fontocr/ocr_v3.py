@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-novel_downloader.utils.fontocr.ocr_v2
+novel_downloader.utils.fontocr.ocr_v3
 -------------------------------------
 
 This class provides utility methods for optical character recognition (OCR)
@@ -25,18 +25,11 @@ from paddle.inference import create_predictor as _create_predictor
 from PIL import Image, ImageDraw, ImageFont
 from PIL.Image import Transpose
 
-try:
-    # pip install cupy-cuda11x
-    import cupy as array_backend  # GPU acceleration
-except ImportError:
-    import numpy as array_backend  # CPU only
-
 from novel_downloader.utils.constants import (
     REC_CHAR_MODEL_FILES,
     REC_IMAGE_SHAPE_MAP,
 )
 
-from .hash_store import img_hash_store
 from .model_loader import (
     get_rec_char_vector_dir,
     get_rec_chinese_char_model_dir,
@@ -281,9 +274,9 @@ class TextRecognizer:
         return resized
 
 
-class FontOCRV2:
+class FontOCRV3:
     """
-    Version 2 of the FontOCR utility.
+    Version 3 of the FontOCR utility.
 
     :param use_freq: if True, weight scores by character frequency
     :param cache_dir: base path to store font-map JSON data
@@ -322,7 +315,7 @@ class FontOCRV2:
         self.use_freq = use_freq
         self.use_ocr = use_ocr
         self.use_vec = use_vec
-        self.batch_size = batch_size
+        self.batch_size = max(batch_size, 1)
         self.gpu_mem = gpu_mem
         self.gpu_id = gpu_id
         self.ocr_weight = ocr_weight
@@ -348,290 +341,6 @@ class FontOCRV2:
             self._load_char_freq_db()
         if self.use_vec:
             self._load_char_vec_db()
-
-    def _load_ocr_model(self) -> None:
-        """
-        Initialize the shared PaddleOCR model if not already loaded.
-        """
-        if FontOCRV2._global_ocr is not None:
-            return
-
-        gpu_available = paddle.device.is_compiled_with_cuda()
-        self._char_model_dir = get_rec_chinese_char_model_dir(self.ocr_version)
-
-        for fname in REC_CHAR_MODEL_FILES:
-            full_path = self._char_model_dir / fname
-            if not full_path.exists():
-                raise FileNotFoundError(f"[FontOCR] Required file missing: {full_path}")
-
-        char_dict_file = self._char_model_dir / "rec_custom_keys.txt"
-        FontOCRV2._global_ocr = TextRecognizer(
-            rec_model_dir=str(self._char_model_dir),
-            rec_char_dict_path=str(char_dict_file),
-            rec_image_shape=REC_IMAGE_SHAPE_MAP[self.ocr_version],
-            rec_batch_num=self.batch_size,
-            use_gpu=gpu_available,
-            gpu_mem=self.gpu_mem,
-            gpu_id=self.gpu_id,
-        )
-
-    def _load_char_freq_db(self) -> bool:
-        """
-        Loads character frequency data from a JSON file and
-        assigns it to the instance variable.
-
-        :return: True if successfully loaded, False otherwise.
-        """
-        if FontOCRV2._global_char_freq_db is not None:
-            return True
-
-        try:
-            char_freq_map_file = self._char_model_dir / "char_freq.json"
-            with char_freq_map_file.open("r", encoding="utf-8") as f:
-                FontOCRV2._global_char_freq_db = json.load(f)
-            self._max_freq = max(FontOCRV2._global_char_freq_db.values())
-            return True
-        except Exception as e:
-            logger.warning("[FontOCR] Failed to load char freq DB: %s", e)
-            return False
-
-    def _load_char_vec_db(self) -> None:
-        """
-        Initialize the shared Char Vector if not already loaded.
-        """
-        if FontOCRV2._global_vec_db is not None:
-            return
-
-        char_vec_dir = get_rec_char_vector_dir(self.ocr_version)
-        char_vec_npy_file = char_vec_dir / "char_vectors.npy"
-        char_vec_label_file = char_vec_dir / "char_vectors.txt"
-
-        # Load and normalize vector database
-        vec_db = array_backend.load(char_vec_npy_file)
-        _, dim = vec_db.shape
-        side = int(np.sqrt(dim))
-        FontOCRV2._global_vec_shape = (side, side)
-
-        norm = array_backend.linalg.norm(vec_db, axis=1, keepdims=True) + 1e-6
-        FontOCRV2._global_vec_db = vec_db / norm
-
-        # Load corresponding labels
-        with open(char_vec_label_file, encoding="utf-8") as f:
-            FontOCRV2._global_vec_label = tuple(line.strip() for line in f)
-
-    @staticmethod
-    def _generate_char_image(
-        char: str,
-        render_font: ImageFont.FreeTypeFont,
-        is_reflect: bool = False,
-    ) -> Image.Image | None:
-        """
-        Render a single character into a square image.
-        If is_reflect is True, flip horizontally.
-        """
-        size = FontOCRV2.CHAR_IMAGE_SIZE
-        img = Image.new("L", (size, size), color=255)
-        draw = ImageDraw.Draw(img)
-        bbox = draw.textbbox((0, 0), char, font=render_font)
-        w, h = bbox[2] - bbox[0], bbox[3] - bbox[1]
-        x = (size - w) // 2 - bbox[0]
-        y = (size - h) // 2 - bbox[1]
-        draw.text((x, y), char, fill=0, font=render_font)
-        if is_reflect:
-            img = img.transpose(Transpose.FLIP_LEFT_RIGHT)
-
-        img_np = np.array(img)
-        if np.unique(img_np).size == 1:
-            return None
-
-        return img
-
-    def match_text_by_embedding(
-        self,
-        images: Image.Image | list[Image.Image],
-        top_k: int = 1,
-    ) -> list[tuple[str, float]] | list[list[tuple[str, float]]]:
-        """
-        Match input image to precomputed character embeddings using cosine similarity.
-
-        :param images: a PIL.Image or a list of PIL.Image to match
-        :param top_k: int, how many top matches to return
-
-        :return:
-        - If a single Image was passed in,
-                returns a list of (label, score) tuples sorted descending.
-
-        - If a list of Images was passed in, returns a list of such lists.
-        """
-        if self._global_vec_db is None:
-            return []
-        try:
-            imgs: list[Image.Image] = (
-                [images] if isinstance(images, Image.Image) else images
-            )
-
-            # Convert images to normalized 1D vectors
-            vecs = []
-            for img in imgs:
-                pil_gray = img.convert("L").resize(self._global_vec_shape)
-                arr = np.asarray(pil_gray, dtype=np.float32) / 255.0
-                v = array_backend.asarray(arr).ravel()
-                v /= array_backend.linalg.norm(v) + 1e-6
-                vecs.append(v)
-
-            batch = array_backend.stack(vecs, axis=0)  # (N, D)
-            # Compute all cosine similarities in one batch:
-            sims_batch = batch.dot(self._global_vec_db.T)  # (N, num_chars)
-
-            all_results: list[list[tuple[str, float]]] = []
-            for sims in sims_batch:
-                k = min(top_k, sims.shape[0])
-                top_unsorted = array_backend.argpartition(-sims, k - 1)[:k]
-                top_idx = top_unsorted[array_backend.argsort(-sims[top_unsorted])]
-                results = [
-                    (self._global_vec_label[int(i)], float(sims[int(i)]))
-                    for i in top_idx
-                ]
-                all_results.append(results)
-
-            # Unwrap single-image case
-            return all_results[0] if isinstance(images, Image.Image) else all_results
-        except Exception as e:
-            logger.warning("[FontOCR] Error: %s", e)
-            default = [("", 0.0)]
-            if isinstance(images, Image.Image):
-                return default
-            else:
-                return [default for _ in range(len(images))]
-
-    def run_ocr_on_images(
-        self,
-        images: Image.Image | list[Image.Image],
-    ) -> tuple[str, float] | list[tuple[str, float]]:
-        """
-        Run OCR on one or more PIL.Image(s) and return recognized text with confidence
-
-        :param images: A single PIL.Image or list of PIL.Images to recognize.
-        :return:
-        - If a single image is passed, returns Tuple[str, float].
-
-        - If a list is passed, returns List[Tuple[str, float]].
-        """
-        if self._global_ocr is None:
-            return []
-        try:
-            # Normalize input to a list of numpy arrays (RGB)
-            img_list = [images] if isinstance(images, Image.Image) else images
-            np_imgs: list[np.ndarray] = [
-                np.array(img.convert("RGB")) for img in img_list
-            ]
-
-            # Run OCR
-            ocr_results = self._global_ocr(np_imgs)
-
-            # Return result depending on input type
-            return ocr_results if isinstance(images, list) else ocr_results[0]
-
-        except Exception as e:
-            logger.warning("[FontOCR] OCR failed: %s", e)
-            fallback = ("", 0.0)
-            return (
-                fallback
-                if isinstance(images, Image.Image)
-                else [fallback for _ in images]
-            )
-
-    def query(
-        self,
-        images: Image.Image | list[Image.Image],
-        top_k: int = 3,
-    ) -> list[tuple[str, float]] | list[list[tuple[str, float]]]:
-        """
-        For each input image, run OCR + embedding match, fuse scores,
-        and return a sorted list of (char, score) above self.threshold.
-        """
-        # normalize to list
-        single = isinstance(images, Image.Image)
-        imgs: list[Image.Image] = [images] if single else images
-
-        # try the hash store
-        hash_batch = [img_hash_store.query(img, k=top_k) or [] for img in imgs]
-
-        fallback_indices = [i for i, h in enumerate(hash_batch) if not h]
-        fallback_imgs = [imgs[i] for i in fallback_indices]
-
-        # OCR scores
-        raw_ocr: tuple[str, float] | list[tuple[str, float]] = (
-            self.run_ocr_on_images(fallback_imgs)
-            if (self.use_ocr and fallback_imgs)
-            else []
-        )
-        if isinstance(raw_ocr, tuple):
-            ocr_fallback: list[tuple[str, float]] = [raw_ocr]
-        else:
-            ocr_fallback = raw_ocr
-
-        # Vec-embedding scores
-        raw_vec: list[tuple[str, float]] | list[list[tuple[str, float]]] = (
-            self.match_text_by_embedding(fallback_imgs, top_k=top_k)
-            if (self.use_vec and fallback_imgs)
-            else []
-        )
-        if raw_vec and isinstance(raw_vec[0], tuple):
-            vec_fallback: list[list[tuple[str, float]]] = [raw_vec]  # type: ignore
-        else:
-            vec_fallback = raw_vec  # type: ignore
-
-        # Fuse OCR+vector for the fallback set
-        fused_fallback: list[list[tuple[str, float]]] = []
-        for ocr_preds, vec_preds in zip(ocr_fallback, vec_fallback, strict=False):
-            scores: dict[str, float] = {}
-
-            # OCR weight
-            if ocr_preds:
-                ch, s = ocr_preds
-                scores[ch] = scores.get(ch, 0.0) + self.ocr_weight * s
-                logger.debug(
-                    "[FontOCR] OCR with weight: scores[%s] = %s", ch, scores[ch]
-                )
-            # Vec weight
-            for ch, s in vec_preds:
-                scores[ch] = scores.get(ch, 0.0) + self.vec_weight * s
-                logger.debug(
-                    "[FontOCR] Vec with weight: scores[%s] = %s", ch, scores[ch]
-                )
-            # Optional frequency
-            if self.use_freq:
-                for ch in list(scores):
-                    level = self._global_char_freq_db.get(ch, self._max_freq)
-                    freq_score = (self._max_freq - level) / max(1, self._max_freq)
-                    scores[ch] += self._freq_weight * freq_score
-                    logger.debug(
-                        "[FontOCR] After Freq weight: scores[%s] = %s", ch, scores[ch]
-                    )
-
-            # Threshold + sort + top_k
-            filtered = [(ch, sc) for ch, sc in scores.items() if sc >= self.threshold]
-            filtered.sort(key=lambda x: -x[1])
-
-            fused_fallback.append(filtered[:top_k])
-
-        # Recombine hash hits + fallback in original order
-        fused_batch: list[list[tuple[str, float]]] = []
-        fallback_iter = iter(fused_fallback)
-        for h_preds in hash_batch:
-            if h_preds:
-                fused_batch.append(h_preds)
-            else:
-                fused_batch.append(next(fallback_iter))
-
-        # Unwrap single-image case
-        return fused_batch[0] if single else fused_batch
-
-    def _chunked(self, seq: list[T], size: int) -> Generator[list[T], None, None]:
-        """Yield successive chunks of `seq` of length `size`."""
-        for i in range(0, len(seq), size):
-            yield seq[i : i + size]
 
     def generate_font_map(
         self,
@@ -660,8 +369,18 @@ class FontOCRV2:
         try:
             with open(fixed_map_file, encoding="utf-8") as f:
                 fixed_map = json.load(f)
+            cached_chars = set(fixed_map.keys())
+            mapping_result.update(
+                {ch: fixed_map[ch] for ch in char_set if ch in fixed_map}
+            )
+            mapping_result.update(
+                {ch: fixed_map[ch] for ch in refl_set if ch in fixed_map}
+            )
+            char_set = set(char_set) - cached_chars
+            refl_set = set(refl_set) - cached_chars
         except Exception:
             fixed_map = {}
+            cached_chars = set()
 
         # prepare font renderers and cmap sets
         try:
@@ -712,35 +431,17 @@ class FontOCRV2:
 
                 # pick best per char, apply threshold + cache
                 for (ch, img), preds in zip(rendered, fused, strict=False):
-                    if ch in fixed_map:
-                        mapping_result[ch] = fixed_map[ch]
-                        logger.debug(
-                            "[FontOCR] Using cached mapping: '%s' -> '%s'",
-                            ch,
-                            fixed_map[ch],
-                        )
-                        continue
                     if not preds:
                         if self.font_debug and chapter_id:
                             dbg_path = (
                                 self._debug_dir / f"{chapter_id}_{debug_idx:04d}.png"
                             )
                             img.save(dbg_path)
-                            logger.debug(
-                                "[FontOCR] Saved debug image for '%s': %s", ch, dbg_path
-                            )
                             debug_idx += 1
                         continue
                     real_char, _ = preds[0]
                     mapping_result[ch] = real_char
                     fixed_map[ch] = real_char
-                    if self.font_debug:
-                        logger.debug(
-                            "[FontOCR] Prediction for char '%s': top_pred='%s'",
-                            ch,
-                            real_char,
-                        )
-                        logger.debug("[FontOCR] All predictions: %s", preds)
 
         # persist updated fixed_map
         try:
@@ -762,3 +463,265 @@ class FontOCRV2:
         :return:        The de-obfuscated text.
         """
         return "".join(font_map.get(ch, ch) for ch in text)
+
+    def query(
+        self,
+        images: Image.Image | list[Image.Image],
+        top_k: int = 3,
+    ) -> list[tuple[str, float]] | list[list[tuple[str, float]]]:
+        """
+        For each input image, run OCR + embedding match, fuse scores,
+        and return a sorted list of (char, score) above self.threshold.
+        """
+        # normalize to list
+        single = isinstance(images, Image.Image)
+        imgs: list[Image.Image] = [images] if single else images
+
+        # OCR scores
+        if self.use_ocr and imgs:
+            raw_ocr = self.run_ocr_on_images(imgs)
+            ocr_results = [raw_ocr] if isinstance(raw_ocr, tuple) else raw_ocr
+        else:
+            ocr_results = [("", 0.0) for _ in imgs]
+
+        # Vec-embedding scores
+        if self.use_vec and imgs:
+            raw_vec = self.match_text_by_embedding(imgs, top_k=top_k)
+            if raw_vec and isinstance(raw_vec[0], tuple):
+                vec_results: list[list[tuple[str, float]]] = [raw_vec]  # type: ignore
+            else:
+                vec_results = raw_vec  # type: ignore
+        else:
+            vec_results = [[] for _ in imgs]
+
+        total_results: list[list[tuple[str, float]]] = []
+        for ocr_preds, vec_preds in zip(ocr_results, vec_results, strict=False):
+            scores: dict[str, float] = {}
+
+            if ocr_preds and ocr_preds[0]:
+                ch, s = ocr_preds
+                scores[ch] = scores.get(ch, 0.0) + self.ocr_weight * s
+            for ch, s in vec_preds:
+                scores[ch] = scores.get(ch, 0.0) + self.vec_weight * s
+            if self.use_freq:
+                for ch in list(scores):
+                    level = self._global_char_freq_db.get(ch, self._max_freq)
+                    freq_score = (self._max_freq - level) / max(1, self._max_freq)
+                    scores[ch] += self._freq_weight * freq_score
+
+            # Threshold + sort + top_k
+            filtered = [(ch, sc) for ch, sc in scores.items() if sc >= self.threshold]
+            filtered.sort(key=lambda x: -x[1])
+
+            total_results.append(filtered[:top_k])
+
+        return total_results[0] if single else total_results
+
+    def match_text_by_embedding(
+        self,
+        images: Image.Image | list[Image.Image],
+        top_k: int = 1,
+    ) -> list[tuple[str, float]] | list[list[tuple[str, float]]]:
+        """
+        Match input image to precomputed character embeddings using cosine similarity.
+
+        :param images: a PIL.Image or a list of PIL.Image to match
+        :param top_k: int, how many top matches to return
+
+        :return:
+        - If a single Image was passed in,
+                returns a list of (label, score) tuples sorted descending.
+
+        - If a list of Images was passed in, returns a list of such lists.
+        """
+        if self._global_vec_db is None:
+            default = [("", 0.0)]
+            if isinstance(images, Image.Image):
+                return default
+            else:
+                return [default for _ in range(len(images))]
+        try:
+            imgs: list[Image.Image] = (
+                [images] if isinstance(images, Image.Image) else images
+            )
+
+            # Convert images to normalized 1D vectors
+            vecs = []
+            for img in imgs:
+                pil_gray = img.convert("L").resize(self._global_vec_shape)
+                arr = np.asarray(pil_gray, dtype=np.float32) / 255.0
+                v = np.asarray(arr).ravel()
+                v /= np.linalg.norm(v) + 1e-6
+                vecs.append(v)
+
+            batch = np.stack(vecs, axis=0)  # (N, D)
+            # Compute all cosine similarities in one batch:
+            sims_batch = batch.dot(self._global_vec_db.T)  # (N, num_chars)
+
+            all_results: list[list[tuple[str, float]]] = []
+            for sims in sims_batch:
+                k = min(top_k, sims.shape[0])
+                top_unsorted = np.argpartition(-sims, k - 1)[:k]
+                top_idx = top_unsorted[np.argsort(-sims[top_unsorted])]
+                results = [
+                    (self._global_vec_label[int(i)], float(sims[int(i)]))
+                    for i in top_idx
+                ]
+                all_results.append(results)
+
+            # Unwrap single-image case
+            return all_results[0] if isinstance(images, Image.Image) else all_results
+        except Exception as e:
+            logger.warning("[FontOCR] Error: %s", e)
+            default = [("", 0.0)]
+            if isinstance(images, Image.Image):
+                return default
+            else:
+                return [default for _ in range(len(images))]
+
+    def run_ocr_on_images(
+        self,
+        images: Image.Image | list[Image.Image],
+    ) -> tuple[str, float] | list[tuple[str, float]]:
+        """
+        Run OCR on one or more PIL.Image(s) and return recognized text with confidence
+
+        :param images: A single PIL.Image or list of PIL.Images to recognize.
+        :return:
+        - If a single image is passed, returns Tuple[str, float].
+
+        - If a list is passed, returns List[Tuple[str, float]].
+        """
+        if self._global_ocr is None:
+            fallback = ("", 0.0)
+            return (
+                fallback
+                if isinstance(images, Image.Image)
+                else [fallback for _ in images]
+            )
+        try:
+            # Normalize input to a list of numpy arrays (RGB)
+            img_list = [images] if isinstance(images, Image.Image) else images
+            np_imgs: list[np.ndarray] = [
+                np.array(img.convert("RGB")) for img in img_list
+            ]
+
+            # Run OCR
+            ocr_results = self._global_ocr(np_imgs)
+
+            # Return result depending on input type
+            return ocr_results if isinstance(images, list) else ocr_results[0]
+
+        except Exception as e:
+            logger.warning("[FontOCR] OCR failed: %s", e)
+            fallback = ("", 0.0)
+            return (
+                fallback
+                if isinstance(images, Image.Image)
+                else [fallback for _ in images]
+            )
+
+    def _load_ocr_model(self) -> None:
+        """
+        Initialize the shared PaddleOCR model if not already loaded.
+        """
+        if FontOCRV3._global_ocr is not None:
+            return
+
+        gpu_available = paddle.device.is_compiled_with_cuda()
+        self._char_model_dir = get_rec_chinese_char_model_dir(self.ocr_version)
+
+        for fname in REC_CHAR_MODEL_FILES:
+            full_path = self._char_model_dir / fname
+            if not full_path.exists():
+                raise FileNotFoundError(f"[FontOCR] Required file missing: {full_path}")
+
+        char_dict_file = self._char_model_dir / "rec_custom_keys.txt"
+        FontOCRV3._global_ocr = TextRecognizer(
+            rec_model_dir=str(self._char_model_dir),
+            rec_char_dict_path=str(char_dict_file),
+            rec_image_shape=REC_IMAGE_SHAPE_MAP[self.ocr_version],
+            rec_batch_num=self.batch_size,
+            use_gpu=gpu_available,
+            gpu_mem=self.gpu_mem,
+            gpu_id=self.gpu_id,
+        )
+
+    def _load_char_freq_db(self) -> bool:
+        """
+        Loads character frequency data from a JSON file and
+        assigns it to the instance variable.
+
+        :return: True if successfully loaded, False otherwise.
+        """
+        if FontOCRV3._global_char_freq_db is not None:
+            return True
+
+        try:
+            char_freq_map_file = self._char_model_dir / "char_freq.json"
+            with char_freq_map_file.open("r", encoding="utf-8") as f:
+                FontOCRV3._global_char_freq_db = json.load(f)
+            self._max_freq = max(FontOCRV3._global_char_freq_db.values())
+            return True
+        except Exception as e:
+            logger.warning("[FontOCR] Failed to load char freq DB: %s", e)
+            return False
+
+    def _load_char_vec_db(self) -> None:
+        """
+        Initialize the shared Char Vector if not already loaded.
+        """
+        if FontOCRV3._global_vec_db is not None:
+            return
+
+        char_vec_dir = get_rec_char_vector_dir(self.ocr_version)
+        char_vec_npy_file = char_vec_dir / "char_vectors.npy"
+        char_vec_label_file = char_vec_dir / "char_vectors.txt"
+
+        # Load and normalize vector database
+        vec_db = np.load(char_vec_npy_file)
+        _, dim = vec_db.shape
+        side = int(np.sqrt(dim))
+        FontOCRV3._global_vec_shape = (side, side)
+
+        norm = np.linalg.norm(vec_db, axis=1, keepdims=True) + 1e-6
+        FontOCRV3._global_vec_db = vec_db / norm
+
+        # Load corresponding labels
+        with open(char_vec_label_file, encoding="utf-8") as f:
+            FontOCRV3._global_vec_label = tuple(line.strip() for line in f)
+
+    @staticmethod
+    def _generate_char_image(
+        char: str,
+        render_font: ImageFont.FreeTypeFont,
+        is_reflect: bool = False,
+    ) -> Image.Image | None:
+        """
+        Render a single character into a square image.
+        If is_reflect is True, flip horizontally.
+        """
+        size = FontOCRV3.CHAR_IMAGE_SIZE
+        img = Image.new("L", (size, size), color=255)
+        draw = ImageDraw.Draw(img)
+        bbox = draw.textbbox((0, 0), char, font=render_font)
+        w, h = bbox[2] - bbox[0], bbox[3] - bbox[1]
+        x = (size - w) // 2 - bbox[0]
+        y = (size - h) // 2 - bbox[1]
+        draw.text((x, y), char, fill=0, font=render_font)
+        if is_reflect:
+            img = img.transpose(Transpose.FLIP_LEFT_RIGHT)
+
+        img_np = np.array(img)
+        if np.unique(img_np).size == 1:
+            return None
+
+        return img
+
+    @staticmethod
+    def _chunked(seq: list[T], size: int) -> Generator[list[T], None, None]:
+        """
+        Yield successive chunks of `seq` of length `size`.
+        """
+        for i in range(0, len(seq), size):
+            yield seq[i : i + size]
