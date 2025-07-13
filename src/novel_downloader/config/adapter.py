@@ -7,6 +7,7 @@ Defines ConfigAdapter, which maps a raw configuration dictionary and
 site name into structured dataclass-based config models.
 """
 
+import re
 from typing import Any, cast
 
 from novel_downloader.models import (
@@ -16,6 +17,7 @@ from novel_downloader.models import (
     FetcherConfig,
     LogLevel,
     ParserConfig,
+    TextCleanerConfig,
 )
 
 
@@ -154,10 +156,12 @@ class ConfigAdapter:
         """
         gen = self._config.get("general", {})
         out = self._config.get("output", {})
+        cln = self._config.get("cleaner", {})
         fmt = out.get("formats", {})
         naming = out.get("naming", {})
         epub_opts = out.get("epub", {})
         site_cfg = self._get_site_cfg()
+        cleaner_cfg = self._dict_to_cleaner_cfg(cln)
         return ExporterConfig(
             cache_dir=gen.get("cache_dir", "./novel_cache"),
             raw_data_dir=gen.get("raw_data_dir", "./raw_data"),
@@ -174,6 +178,7 @@ class ConfigAdapter:
             include_toc=epub_opts.get("include_toc", False),
             include_picture=epub_opts.get("include_picture", False),
             split_mode=site_cfg.get("split_mode", "book"),
+            cleaner_cfg=cleaner_cfg,
         )
 
     def get_book_ids(self) -> list[BookConfig]:
@@ -195,7 +200,7 @@ class ConfigAdapter:
             return [{"book_id": str(raw)}]
 
         if isinstance(raw, dict):
-            return [self._dict_to_book_config(raw)]
+            return [self._dict_to_book_cfg(raw)]
 
         if not isinstance(raw, list):
             raise ValueError(
@@ -208,7 +213,7 @@ class ConfigAdapter:
                 if isinstance(item, str | int):
                     result.append({"book_id": str(item)})
                 elif isinstance(item, dict):
-                    result.append(self._dict_to_book_config(item))
+                    result.append(self._dict_to_book_cfg(item))
             except ValueError:
                 continue
 
@@ -266,7 +271,7 @@ class ConfigAdapter:
         return sites_cfg.get("common", {}) or {}
 
     @staticmethod
-    def _dict_to_book_config(data: dict[str, Any]) -> BookConfig:
+    def _dict_to_book_cfg(data: dict[str, Any]) -> BookConfig:
         """
         Convert a dictionary to a BookConfig with normalized types.
 
@@ -289,3 +294,31 @@ class ConfigAdapter:
             result["ignore_ids"] = [str(x) for x in data["ignore_ids"]]
 
         return result
+
+    @staticmethod
+    def _dict_to_cleaner_cfg(cfg: dict[str, Any]) -> TextCleanerConfig:
+        """
+        Convert a nested dict of title/content rules into a TextCleanerConfig.
+
+        :param cfg: configuration dictionary
+        :return: fully constructed TextCleanerConfig
+        """
+        # Title rules
+        title_section = cfg.get("title", {})
+        title_remove = [re.compile(p) for p in title_section.get("remove_patterns", [])]
+        title_repl = title_section.get("replace", {})
+
+        # Content rules
+        content_section = cfg.get("content", {})
+        content_remove = [
+            re.compile(p) for p in content_section.get("remove_patterns", [])
+        ]
+        content_repl = content_section.get("replace", {})
+
+        return TextCleanerConfig(
+            remove_invisible=cfg.get("remove_invisible") or True,
+            title_remove_patterns=title_remove,
+            title_replacements=title_repl,
+            content_remove_patterns=content_remove,
+            content_replacements=content_repl,
+        )

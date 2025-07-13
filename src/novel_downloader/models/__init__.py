@@ -12,6 +12,7 @@ from .config import (
     ExporterConfig,
     FetcherConfig,
     ParserConfig,
+    TextCleanerConfig,
 )
 from .login import LoginField
 from .types import (
@@ -29,6 +30,7 @@ __all__ = [
     "ParserConfig",
     "FetcherConfig",
     "ExporterConfig",
+    "TextCleanerConfig",
     "ChapterDict",
     "LoginField",
     "BrowserType",
