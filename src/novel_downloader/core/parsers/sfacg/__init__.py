@@ -5,6 +5,6 @@ novel_downloader.core.parsers.sfacg
 
 """
 
-from .main_parser import SfacgParser
-
 __all__ = ["SfacgParser"]
+
+from .main_parser import SfacgParser

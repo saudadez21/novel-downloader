@@ -7,6 +7,7 @@ novel_downloader.utils
 
 __all__ = [
     "ChapterStorage",
+    "TextCleaner",
     "resolve_cookies",
     "parse_cookie_expires",
     "find_cookie_value",
@@ -18,6 +19,7 @@ __all__ = [
     "read_json_file",
     "read_binary_file",
     "download",
+    "get_cleaner",
     "content_prefix",
     "truncate_half_lines",
     "diff_inline_display",
@@ -43,8 +45,10 @@ from .file_utils import (
 )
 from .network import download
 from .text_utils import (
+    TextCleaner,
     content_prefix,
     diff_inline_display,
+    get_cleaner,
     truncate_half_lines,
 )
 from .time_utils import (

@@ -17,7 +17,6 @@ strongly typed Python objects for safer and cleaner access.
 """
 
 from dataclasses import dataclass, field
-from re import Pattern
 from typing import NotRequired, TypedDict
 
 from .types import (
@@ -87,9 +86,9 @@ class ParserConfig:
 @dataclass
 class TextCleanerConfig:
     remove_invisible: bool = True
-    title_remove_patterns: list[Pattern[str]] = field(default_factory=list)
+    title_remove_patterns: list[str] = field(default_factory=list)
     title_replacements: dict[str, str] = field(default_factory=dict)
-    content_remove_patterns: list[Pattern[str]] = field(default_factory=list)
+    content_remove_patterns: list[str] = field(default_factory=list)
     content_replacements: dict[str, str] = field(default_factory=dict)
 
 

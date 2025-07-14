@@ -5,6 +5,8 @@ novel_downloader.core.exporters.esjzone
 
 """
 
+__all__ = ["EsjzoneExporter"]
+
 from novel_downloader.core.exporters.registry import register_exporter
 from novel_downloader.models import ExporterConfig
 
@@ -22,6 +24,3 @@ class EsjzoneExporter(CommonExporter):
             site="esjzone",
             chap_folders=["chapters"],
         )
-
-
-__all__ = ["EsjzoneExporter"]

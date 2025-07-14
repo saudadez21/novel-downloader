@@ -5,6 +5,6 @@ novel_downloader.core.exporters.linovelib
 
 """
 
-from .main_exporter import LinovelibExporter
-
 __all__ = ["LinovelibExporter"]
+
+from .main_exporter import LinovelibExporter

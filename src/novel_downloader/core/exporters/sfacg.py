@@ -5,6 +5,8 @@ novel_downloader.core.exporters.sfacg
 
 """
 
+__all__ = ["SfacgExporter"]
+
 from novel_downloader.core.exporters.registry import register_exporter
 from novel_downloader.models import ExporterConfig
 
@@ -22,6 +24,3 @@ class SfacgExporter(CommonExporter):
             site="sfacg",
             chap_folders=["chapters"],
         )
-
-
-__all__ = ["SfacgExporter"]

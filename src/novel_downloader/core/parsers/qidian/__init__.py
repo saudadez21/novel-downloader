@@ -5,6 +5,6 @@ novel_downloader.core.parsers.qidian
 
 """
 
-from .main_parser import QidianParser
-
 __all__ = ["QidianParser"]
+
+from .main_parser import QidianParser

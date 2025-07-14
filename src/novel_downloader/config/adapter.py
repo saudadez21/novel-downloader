@@ -7,7 +7,7 @@ Defines ConfigAdapter, which maps a raw configuration dictionary and
 site name into structured dataclass-based config models.
 """
 
-import re
+import json
 from typing import Any, cast
 
 from novel_downloader.models import (
@@ -295,8 +295,8 @@ class ConfigAdapter:
 
         return result
 
-    @staticmethod
-    def _dict_to_cleaner_cfg(cfg: dict[str, Any]) -> TextCleanerConfig:
+    @classmethod
+    def _dict_to_cleaner_cfg(cls, cfg: dict[str, Any]) -> TextCleanerConfig:
         """
         Convert a nested dict of title/content rules into a TextCleanerConfig.
 
@@ -305,20 +305,59 @@ class ConfigAdapter:
         """
         # Title rules
         title_section = cfg.get("title", {})
-        title_remove = [re.compile(p) for p in title_section.get("remove_patterns", [])]
+        title_remove = title_section.get("remove_patterns", [])
         title_repl = title_section.get("replace", {})
+
+        title_ext = title_section.get("external", {})
+        title_ext_en = title_ext.get("enabled", False)
+        title_ext_rm_p = title_ext.get("remove_patterns", "")
+        title_ext_rp_p = title_ext.get("replace", "")
+        if title_ext_en:
+            title_remove_ext = cls._load_str_list(title_ext_rm_p)
+            title_remove += title_remove_ext
+
+            title_repl_ext = cls._load_str_dict(title_ext_rp_p)
+            title_repl = {**title_repl, **title_repl_ext}
 
         # Content rules
         content_section = cfg.get("content", {})
-        content_remove = [
-            re.compile(p) for p in content_section.get("remove_patterns", [])
-        ]
+        content_remove = content_section.get("remove_patterns", [])
         content_repl = content_section.get("replace", {})
 
+        content_ext = content_section.get("external", {})
+        content_ext_en = content_ext.get("enabled", False)
+        content_ext_rm_p = content_ext.get("remove_patterns", "")
+        content_ext_rp_p = content_ext.get("replace", "")
+
+        if content_ext_en:
+            content_remove_ext = cls._load_str_list(content_ext_rm_p)
+            content_remove += content_remove_ext
+
+            content_repl_ext = cls._load_str_dict(content_ext_rp_p)
+            content_repl = {**content_repl, **content_repl_ext}
+
         return TextCleanerConfig(
-            remove_invisible=cfg.get("remove_invisible") or True,
+            remove_invisible=cfg.get("remove_invisible", True),
             title_remove_patterns=title_remove,
             title_replacements=title_repl,
             content_remove_patterns=content_remove,
             content_replacements=content_repl,
         )
+
+    @staticmethod
+    def _load_str_list(path: str) -> list[str]:
+        try:
+            with open(path, encoding="utf-8") as f:
+                parsed = json.load(f)
+            return cast(list[str], parsed)
+        except Exception:
+            return []
+
+    @staticmethod
+    def _load_str_dict(path: str) -> dict[str, str]:
+        try:
+            with open(path, encoding="utf-8") as f:
+                parsed = json.load(f)
+            return cast(dict[str, str], parsed)
+        except Exception:
+            return {}

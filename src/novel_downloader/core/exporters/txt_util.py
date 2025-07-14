@@ -3,11 +3,12 @@
 novel_downloader.core.exporters.txt_util
 ----------------------------------------
 
-Format chapter content with title, paragraph blocks, and optional author notes.
+Utilities for generating plain-text exports of novel content.
 """
 
 __all__ = [
-    "format_chapter",
+    "build_txt_header",
+    "build_txt_chapter",
 ]
 
 import re
@@ -15,18 +16,35 @@ import re
 _IMG_TAG_RE = re.compile(r"<img[^>]*>")
 
 
-def format_chapter(
+def build_txt_header(fields: list[tuple[str, str]]) -> str:
+    """
+    Build a simple text header from label-value pairs, followed by a dashed separator.
+
+    :param fields: List of (label, value) pairs.
+    :return: A single string containing the formatted header.
+    """
+    header_lines = [f"{label}: {value}" for label, value in fields if value]
+    header_lines += ["", "-" * 10, ""]
+    return "\n".join(header_lines)
+
+
+def build_txt_chapter(
     title: str,
     paragraphs: str,
-    author_say: str | None = None,
+    extras: dict[str, str] | None = None,
 ) -> str:
     """
-    Build a formatted chapter string with title, paragraphs, and optional author note.
+    Build a formatted chapter text block including title, body paragraphs,
+    and optional extra sections.
 
-    :param title:       The chapter title.
-    :param paragraphs:  Raw multi-line string; lines are treated as paragraphs.
-    :param author_say:  Optional author comment to append at the end.
-    :return:            A string where title, paragraphs, and others.
+    - Strips any `<img...>` tags from paragraphs.
+    - Title appears first (stripped of surrounding whitespace).
+    - Each non-blank line in `paragraphs` becomes its own paragraph.
+
+    :param title:      Chapter title.
+    :param paragraphs: Raw multi-line string. Blank lines are ignored.
+    :param extras:     Optional dict mapping section titles to multi-line strings.
+    :return:           A string where title, paragraphs, and extras are joined by lines.
     """
     parts: list[str] = [title.strip()]
 
@@ -37,12 +55,13 @@ def format_chapter(
         if line:
             parts.append(line)
 
-    # add author_say lines if present
-    if author_say:
-        author_lines = [ln.strip() for ln in author_say.splitlines() if ln.strip()]
-        if author_lines:
+    if extras:
+        for title, text in extras.items():
+            lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+            if not lines:
+                continue
             parts.append("---")
-            parts.append("作者说:")
-            parts.extend(author_lines)
+            parts.append(title.strip())
+            parts.extend(lines)
 
     return "\n\n".join(parts)

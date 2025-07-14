@@ -8,7 +8,6 @@ Unified interface for loading and adapting configuration files.
 This module provides:
 - load_config: loads YAML config from file path with fallback support
 - ConfigAdapter: maps raw config + site name to structured config models
-- Configuration dataclasses: RequesterConfig, DownloaderConfig, etc.
 """
 
 __all__ = [

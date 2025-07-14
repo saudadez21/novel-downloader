@@ -278,10 +278,10 @@ class FontOCRV3:
     """
     Version 3 of the FontOCR utility.
 
-    :param use_freq: if True, weight scores by character frequency
-    :param cache_dir: base path to store font-map JSON data
-    :param threshold: minimum confidence threshold [0.0-1.0]
-    :param font_debug: if True, dump per-char debug images under cache_dir
+    This class provides character recognition using a hybrid approach combining:
+    - OCR model inference
+    - Feature vector similarity matching
+    - Optional frequency-based scoring adjustments
     """
 
     # Default constants
@@ -312,6 +312,23 @@ class FontOCRV3:
         font_debug: bool = False,
         **kwargs: Any,
     ) -> None:
+        """
+        Initialize a FontOCRV3 instance.
+
+        :param cache_dir: base path to store font-map JSON data
+        :param use_freq: if True, weight scores using character frequency database
+        :param use_ocr: if True, use OCR model for character prediction
+        :param use_vec: if True, use feature vector matching for prediction
+        :param batch_size: batch size for OCR inference (minimum 1)
+        :param gpu_mem: GPU memory allocation in MB for OCR model
+        :param gpu_id: target GPU ID for running the OCR model (optional)
+        :param ocr_weight: weight factor for OCR-based prediction scores
+        :param vec_weight: weight factor for vector-based similarity scores
+        :param ocr_version: OCR model version identifier
+        :param threshold: minimum confidence threshold for predictions [0.0-1.0]
+        :param font_debug: if True, dump per-character debug images under cache_dir
+        :param kwargs: reserved for future extensions
+        """
         self.use_freq = use_freq
         self.use_ocr = use_ocr
         self.use_vec = use_vec
@@ -321,7 +338,7 @@ class FontOCRV3:
         self.ocr_weight = ocr_weight
         self.vec_weight = vec_weight
         self.ocr_version = ocr_version
-        self.threshold = threshold
+        self.threshold = min(threshold, 1.0)
         self.font_debug = font_debug
         self._max_freq = 5
 

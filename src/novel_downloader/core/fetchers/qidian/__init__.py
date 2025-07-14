@@ -5,10 +5,10 @@ novel_downloader.core.fetchers.qidian
 
 """
 
-from .browser import QidianBrowser
-from .session import QidianSession
-
 __all__ = [
     "QidianBrowser",
     "QidianSession",
 ]
+
+from .browser import QidianBrowser
+from .session import QidianSession

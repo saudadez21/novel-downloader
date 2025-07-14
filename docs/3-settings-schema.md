@@ -256,3 +256,71 @@ include_cover = true
 include_toc = false
 include_picture = false
 ```
+
+### cleaner 配置
+
+控制文本清理器的行为, 包括对章节标题与内容的正则移除与字符串替换规则。
+
+#### 主配置项
+
+| 参数名                | 类型   | 默认值  | 说明                 |
+| ------------------ | ---- | ---- | ------------------ |
+| `remove_invisible` | bool | true | 是否移除 BOM 与零宽/不可见字符 |
+
+#### 标题清理 `[cleaner.title]`
+
+| 参数名               | 类型        | 默认值  | 说明                 |
+| ----------------- | --------- | ---- | ------------------ |
+| `remove_patterns` | string 数组 | `[]` | 通过正则匹配, 移除标题中不需要的内容 |
+| `replace` | 键值对 | `{}` | 每一项把 "源字符串" 替换成 "目标字符串" |
+
+#### 外部加载 `[cleaner.title.external]`
+
+  | 字段                | 类型     | 说明                          |
+  | ----------------- | ------ | --------------------------- |
+  | `enabled`         | bool | 是否启用外部文件   |
+  | `remove_patterns` | string | 指向 JSON 文件, 加载标题的正则删除模式列表   |
+  | `replace`         | string | 指向 JSON 文件, 加载标题的字面替换映射 |
+
+> `content` 同理, 对应的是正文规则
+
+---
+
+### 示例配置
+
+```toml
+[cleaner]
+remove_invisible = true
+
+[cleaner.title]
+remove_patterns = [
+  '【[^】]*?】',
+  '[(（][^()（）]*?求票[^()（）]*?[)）]',
+]
+
+[cleaner.title.replace]
+'：' = ':'
+
+[cleaner.title.external]
+enabled = true
+remove_patterns = "path/to/title-remove.json"
+replace         = "path/to/title-replace.json"
+
+[cleaner.content]
+remove_patterns = []
+
+[cleaner.content.replace]
+'li子' = '例子'
+'pinbi词' = '屏蔽词'
+
+[cleaner.content.external]
+enabled = true
+remove_patterns = "path/to/content-remove.json"
+replace         = "path/to/content-replace.json"
+```
+
+> **说明**:
+>
+> * `remove_patterns` 配置的是一系列正则, 用于删除所有匹配到的内容
+> * `replace` 配置的是字面量替换, 对文本中出现的 "源" 一律换成 "目标"。
+> * `*.external.remove_patterns` / `*.external.replace`: 如果配置了外部文件, 脚本会从对应 JSON 路径加载并合并配置, 映射冲突时外部优先。

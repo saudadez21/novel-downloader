@@ -12,6 +12,10 @@ Includes:
     Computes timedelta between two datetime strings, with optional timezones.
 """
 
+__all__ = [
+    "calculate_time_difference",
+]
+
 import logging
 import re
 from datetime import UTC, datetime, timedelta, timezone
@@ -139,8 +143,3 @@ def calculate_time_difference(
     except Exception as e:
         logger.warning("[time] Failed to calculate time difference: %s", e)
         return 999, 23, 59, 59
-
-
-__all__ = [
-    "calculate_time_difference",
-]

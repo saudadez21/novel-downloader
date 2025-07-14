@@ -9,6 +9,11 @@ GitHub releases.
 
 from __future__ import annotations
 
+__all__ = [
+    "ensure_decryptor",
+    "RELEASE_VERSION",
+]
+
 import hashlib
 import platform
 import stat
@@ -137,9 +142,3 @@ def _make_executable(p: Path) -> None:
         p.chmod(mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     except PermissionError:
         pass
-
-
-__all__ = [
-    "ensure_decryptor",
-    "RELEASE_VERSION",
-]

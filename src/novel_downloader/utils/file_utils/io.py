@@ -11,6 +11,14 @@ Includes:
 - Simple helpers for reading files with fallback and logging
 """
 
+__all__ = [
+    "save_as_txt",
+    "save_as_json",
+    "read_text_file",
+    "read_json_file",
+    "read_binary_file",
+]
+
 import json
 import logging
 import tempfile
@@ -206,12 +214,3 @@ def read_binary_file(filepath: str | Path) -> bytes | None:
     except Exception as e:
         logger.warning("[file] Failed to read %r: %s", path, e)
         return None
-
-
-__all__ = [
-    "save_as_txt",
-    "save_as_json",
-    "read_text_file",
-    "read_json_file",
-    "read_binary_file",
-]

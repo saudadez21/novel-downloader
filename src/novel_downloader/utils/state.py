@@ -8,6 +8,7 @@ Supported sections:
 - general: global preferences (e.g. language)
 - sites: per-site flags & data (e.g. manual_login, cookies)
 """
+
 import json
 from pathlib import Path
 from typing import Any

@@ -5,6 +5,8 @@ novel_downloader.core.exporters.yamibo
 
 """
 
+__all__ = ["YamiboExporter"]
+
 from novel_downloader.core.exporters.registry import register_exporter
 from novel_downloader.models import ExporterConfig
 
@@ -22,6 +24,3 @@ class YamiboExporter(CommonExporter):
             site="yamibo",
             chap_folders=["chapters"],
         )
-
-
-__all__ = ["YamiboExporter"]

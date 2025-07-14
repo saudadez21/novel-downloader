@@ -136,11 +136,16 @@ remove_invisible = true
 [cleaner.title]
 remove_patterns = [
   '【[^】]*?】',
-  '[(（][^()（）]*?求票[^()（）]*?[)）]'
+  '[(（][^()（）]*?求票[^()（）]*?[)）]',
 ]
 
 [cleaner.title.replace]
 '：' = ':'
+
+[cleaner.title.external]
+enabled = false
+remove_patterns = "path/to/title-remove.json"
+replace         = "path/to/title-replace.json"
 
 [cleaner.content]
 remove_patterns = []
@@ -148,3 +153,8 @@ remove_patterns = []
 [cleaner.content.replace]
 'li子' = '例子'
 'pinbi词' = '屏蔽词'
+
+[cleaner.content.external]
+enabled = false
+remove_patterns = "path/to/content-remove.json"
+replace         = "path/to/content-replace.json"
