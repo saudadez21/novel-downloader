@@ -58,32 +58,44 @@ def build_book_intro(
     summary: str,
 ) -> str:
     """
-    Generate HTML string for a book's information and summary.
+    Build the HTML snippet for the overall book introduction.
 
-    :return: An HTML-formatted string presenting the book's information.
+    This includes:
+      - A main heading ("Book Introduction")
+      - A list of metadata items (title, author, categories, word count, status)
+      - A "Summary" subheading and one or more paragraphs of summary text
+
+    :return: A HTML string for inclusion in `intro.xhtml`
     """
     root = html.Element("div")
 
-    title_el = etree.SubElement(root, "h1")
-    title_el.text = "书籍简介"
+    # Main heading
+    h1 = etree.SubElement(root, "h1")
+    h1.text = "书籍简介"
 
-    div_list = etree.SubElement(root, "div", {"class": "list"})
-    ul = etree.SubElement(div_list, "ul")
-
+    # Metadata list
+    info_div = etree.SubElement(root, "div", {"class": "intro-info"})
+    ul = etree.SubElement(info_div, "ul")
     _add_li(ul, "书名", f"《{book_name}》" if book_name else "")
     _add_li(ul, "作者", author)
     _add_li(ul, "分类", ", ".join(subject) if subject else "")
     _add_li(ul, "字数", word_count)
     _add_li(ul, "状态", serial_status)
 
+    # Summary section
     if summary:
-        etree.SubElement(root, "p", {"class": "new-page-after"}).text = ""
-        etree.SubElement(root, "h2").text = "简介"
-        for line in summary.split("\n"):
+        # force page break before summary
+        etree.SubElement(root, "p", {"class": "new-page-after"})
+        h2 = etree.SubElement(root, "h2")
+        h2.text = "简介"
+
+        summary_div = etree.SubElement(root, "div", {"class": "intro-summary"})
+        for line in summary.splitlines():
             line = line.strip()
-            if line:
-                p = etree.SubElement(root, "p")
-                p.text = line
+            if not line:
+                continue
+            p = etree.SubElement(summary_div, "p")
+            p.text = line
 
     html_string: str = html.tostring(
         root,
@@ -98,33 +110,51 @@ def build_volume_intro(
     volume_intro_text: str = "",
 ) -> str:
     """
-    Generate the HTML snippet for a volume's introduction section.
+    Build the HTML snippet for a single-volume introduction.
 
-    :param volume_title: Title of the volume.
-    :param volume_intro_text: Optional introduction text for the volume.
-    :return: HTML string representing the volume's intro section.
+    This includes:
+      - A decorative border image (top and bottom)
+      - A primary heading (volume main title)
+      - An optional secondary line (subtitle)
+      - One or more paragraphs of intro text
+
+    :param volume_title: e.g. "Volume 1 - The Beginning"
+    :param volume_intro_text: multiline intro text for this volume
+    :return: A HTML string for inclusion in `vol_<n>.xhtml`
     """
     root = html.Element("div")
 
+    # Break the title into two lines if possible
     line1, line2 = _split_volume_title(volume_title)
 
-    root.append(_make_vol_border_img("border1"))
+    header = etree.SubElement(root, "div", {"class": "vol-header"})
 
-    h1 = etree.SubElement(root, "h1", {"class": "volume-title-line1"})
+    # Top decorative border
+    header.append(_make_vol_border_img(flip=False))
+
+    # Main title
+    h1 = etree.SubElement(header, "h1", {"class": "vol-title-main"})
     h1.text = line1
 
-    root.append(_make_vol_border_img("border2"))
+    # Bottom decorative border (flipped)
+    header.append(_make_vol_border_img(flip=True))
 
+    # Subtitle (if any)
     if line2:
-        p_line2 = etree.SubElement(root, "p", {"class": "volume-title-line2"})
-        p_line2.text = line2
+        h2 = etree.SubElement(header, "h2", {"class": "vol-title-sub"})
+        h2.text = line2
 
+    # Intro text paragraphs
     if volume_intro_text:
-        for line in volume_intro_text.split("\n"):
+        etree.SubElement(root, "p", {"class": "new-page-after"})
+
+        vol_div = etree.SubElement(root, "div", {"class": "vol-intro-text"})
+        for line in volume_intro_text.splitlines():
             line = line.strip()
-            if line:
-                p = etree.SubElement(root, "p", {"class": "intro"})
-                p.text = line
+            if not line:
+                continue
+            p = etree.SubElement(vol_div, "p")
+            p.text = line
 
     html_string: str = html.tostring(
         root,
@@ -135,20 +165,31 @@ def build_volume_intro(
 
 
 def _add_li(ul: etree._Element, label: str, value: str) -> None:
+    """
+    Append a `<li>` with 'label: value' if value is nonempty.
+    """
     if value:
         li = etree.SubElement(ul, "li")
         li.text = f"{label}: {value}"
 
 
-def _make_vol_border_img(class_name: str) -> html.HtmlElement:
-    div = html.Element("div", {"class": class_name})
+def _make_vol_border_img(flip: bool = False) -> html.HtmlElement:
+    """
+    Return a `<div>` containing the `volume_border.png` image,
+    styled by the given class name.
+    """
+    classes = ["vol-border"]
+    if flip:
+        classes.append("flip")
+    cls = " ".join(classes)
+
+    div = html.Element("div", {"class": cls})
     etree.SubElement(
         div,
         "img",
         {
-            "alt": "",
-            "class": class_name,
             "src": f"../{IMAGE_FOLDER}/volume_border.png",
+            "alt": "",
         },
     )
     return div
@@ -162,10 +203,10 @@ def _split_volume_title(volume_title: str) -> tuple[str, str]:
     :return: Tuple of (line1, line2)
     """
     if " " in volume_title:
-        parts = volume_title.split(" ")
+        parts = volume_title.split(" ", 1)
     elif "-" in volume_title:
-        parts = volume_title.split("-")
+        parts = volume_title.split("-", 1)
     else:
         return volume_title, ""
 
-    return parts[0], "".join(parts[1:])
+    return parts[0], parts[1]

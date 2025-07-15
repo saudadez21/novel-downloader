@@ -19,7 +19,7 @@ from pathlib import Path
 from zipfile import ZIP_DEFLATED, ZIP_STORED
 
 from novel_downloader.utils.constants import (
-    CSS_VOLUME_INTRO_PATH,
+    CSS_INTRO_PATH,
     VOLUME_BORDER_IMAGE_PATH,
 )
 
@@ -165,7 +165,7 @@ class EpubBuilder:
             id=f"vol_{self._vol_idx}",
             title=volume.title,
             content=intro_content,
-            css=[self.vol_css],
+            css=[self.intro_css],
             filename=f"vol_{self._vol_idx}.xhtml",
         )
         self.chapters.append(vol_intro)
@@ -232,13 +232,13 @@ class EpubBuilder:
 
     def _init_styles(self) -> None:
         # volume border & intro CSS
-        self.vol_css = StyleSheet(
-            id="volume_style",
-            content=CSS_VOLUME_INTRO_PATH.read_text("utf-8"),
-            filename="volume_style.css",
+        self.intro_css = StyleSheet(
+            id="intro_style",
+            content=CSS_INTRO_PATH.read_text("utf-8"),
+            filename="intro_style.css",
         )
-        self.styles.append(self.vol_css)
-        self._register(self.vol_css, folder=CSS_FOLDER, in_spine=False)
+        self.styles.append(self.intro_css)
+        self._register(self.intro_css, folder=CSS_FOLDER, in_spine=False)
 
         try:
             border_bytes = VOLUME_BORDER_IMAGE_PATH.read_bytes()
@@ -314,6 +314,7 @@ class EpubBuilder:
             title="书籍简介",
             content=intro_html,
             filename="intro.xhtml",
+            css=[self.intro_css],
         )
         self.chapters.append(intro)
         self._register(intro, folder=TEXT_FOLDER)

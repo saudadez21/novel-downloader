@@ -79,9 +79,7 @@ DEFAULT_SETTINGS_PATHS = [
 
 # CSS Styles
 CSS_MAIN_PATH = files("novel_downloader.resources.css_styles").joinpath("main.css")
-CSS_VOLUME_INTRO_PATH = files("novel_downloader.resources.css_styles").joinpath(
-    "volume-intro.css"
-)
+CSS_INTRO_PATH = files("novel_downloader.resources.css_styles").joinpath("intro.css")
 
 # Images
 VOLUME_BORDER_IMAGE_PATH = files("novel_downloader.resources.images").joinpath(

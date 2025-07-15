@@ -204,7 +204,7 @@ def build_epub_chapter(
             parts.extend(
                 [
                     "<hr />",
-                    f"<p>{html.escape(title)}</p>",
+                    f"<h3>{html.escape(title)}</h3>",
                     _render_block(note),
                 ]
             )
