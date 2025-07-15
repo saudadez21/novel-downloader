@@ -28,8 +28,7 @@ from novel_downloader.utils.constants import (
     DEFAULT_HEADERS,
     DEFAULT_IMAGE_SUFFIX,
 )
-
-from .epub_builder import EpubBuilder, StyleSheet
+from novel_downloader.utils.epub import EpubBuilder, StyleSheet
 
 _IMAGE_WRAPPER = (
     '<div class="duokan-image-single illus"><img src="../Images/{filename}" /></div>'

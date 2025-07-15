@@ -11,10 +11,6 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from novel_downloader.core.exporters.epub_builder import (
-    Chapter,
-    Volume,
-)
 from novel_downloader.core.exporters.epub_util import (
     build_epub_chapter,
     download_cover,
@@ -30,6 +26,10 @@ from novel_downloader.utils import (
 from novel_downloader.utils.constants import (
     DEFAULT_HEADERS,
     DEFAULT_IMAGE_SUFFIX,
+)
+from novel_downloader.utils.epub import (
+    Chapter,
+    Volume,
 )
 
 if TYPE_CHECKING:
@@ -182,6 +182,7 @@ def export_whole_book(
             curr_vol.add_chapter(
                 Chapter(
                     id=f"c_{chap_id}",
+                    filename=f"c{chap_id}.xhtml",
                     title=title,
                     content=chap_html,
                     css=[main_css],
@@ -321,6 +322,7 @@ def export_by_volume(
             book.add_chapter(
                 Chapter(
                     id=f"c_{chap_id}",
+                    filename=f"c{chap_id}.xhtml",
                     title=title,
                     content=chap_html,
                     css=[main_css],
