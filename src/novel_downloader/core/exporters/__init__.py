@@ -13,19 +13,10 @@ Currently supported platforms:
 - qidian (起点中文网)
 - sfacg (SF轻小说)
 - yamibo (百合会)
-- common (通用架构)
 """
 
-from .biquge import BiqugeExporter
-from .common import CommonExporter
-from .esjzone import EsjzoneExporter
-from .linovelib import LinovelibExporter
-from .qianbi import QianbiExporter
-from .qidian import QidianExporter
-from .sfacg import SfacgExporter
-from .yamibo import YamiboExporter
-
 __all__ = [
+    "get_exporter",
     "BiqugeExporter",
     "EsjzoneExporter",
     "LinovelibExporter",
@@ -33,5 +24,13 @@ __all__ = [
     "QidianExporter",
     "SfacgExporter",
     "YamiboExporter",
-    "CommonExporter",
 ]
+
+from .biquge import BiqugeExporter
+from .esjzone import EsjzoneExporter
+from .linovelib import LinovelibExporter
+from .qianbi import QianbiExporter
+from .qidian import QidianExporter
+from .registry import get_exporter
+from .sfacg import SfacgExporter
+from .yamibo import YamiboExporter

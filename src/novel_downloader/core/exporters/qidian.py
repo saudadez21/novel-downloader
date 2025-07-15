@@ -8,11 +8,15 @@ of novels sourced from Qidian (起点中文网). It implements the platform-spec
 logic required to structure and export novel content into desired formats.
 """
 
+__all__ = ["QidianExporter"]
+
+from novel_downloader.core.exporters.registry import register_exporter
 from novel_downloader.models import ExporterConfig
 
 from .common import CommonExporter
 
 
+@register_exporter(site_keys=["qidian", "qd"])
 class QidianExporter(CommonExporter):
     def __init__(
         self,
@@ -23,6 +27,3 @@ class QidianExporter(CommonExporter):
             site="qidian",
             chap_folders=["chapters", "encrypted_chapters"],
         )
-
-
-__all__ = ["QidianExporter"]

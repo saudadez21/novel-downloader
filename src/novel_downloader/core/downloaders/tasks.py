@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.models.tasks
------------------------------
+novel_downloader.core.downloaders.tasks
+---------------------------------------
 
 """
 

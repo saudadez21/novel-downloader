@@ -7,6 +7,6 @@ This module provides the `CommonExporter` class for
 handling the saving process of novels.
 """
 
-from .main_exporter import CommonExporter
-
 __all__ = ["CommonExporter"]
+
+from .main_exporter import CommonExporter

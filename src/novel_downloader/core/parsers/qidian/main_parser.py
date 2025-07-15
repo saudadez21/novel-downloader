@@ -13,9 +13,10 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from novel_downloader.core.parsers.base import BaseParser
+from novel_downloader.core.parsers.registry import register_parser
 from novel_downloader.models import ChapterDict, ParserConfig
+from novel_downloader.utils import find_cookie_value
 from novel_downloader.utils.constants import DATA_DIR
-from novel_downloader.utils.cookies import find_cookie_value
 
 from .book_info_parser import parse_book_info
 from .chapter_router import parse_chapter
@@ -27,6 +28,10 @@ if TYPE_CHECKING:
     from novel_downloader.utils.fontocr import FontOCR
 
 
+@register_parser(
+    site_keys=["qidian", "qd"],
+    backends=["session", "browser"],
+)
 class QidianParser(BaseParser):
     """
     Parser for Qidian site.

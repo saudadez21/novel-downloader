@@ -5,6 +5,6 @@ novel_downloader.core.parsers.biquge
 
 """
 
-from .main_parser import BiqugeParser
-
 __all__ = ["BiqugeParser"]
+
+from .main_parser import BiqugeParser

@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 from lxml import html
 
 from novel_downloader.models import ChapterDict
-from novel_downloader.utils.text_utils import truncate_half_lines
+from novel_downloader.utils import truncate_half_lines
 
 from .utils import (
     extract_chapter_info,

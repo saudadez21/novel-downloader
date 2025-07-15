@@ -9,6 +9,8 @@ across platforms or output formats.
 Currently includes line-ending normalization for .txt files.
 """
 
+__all__ = ["normalize_txt_line_endings"]
+
 import logging
 from pathlib import Path
 
@@ -45,8 +47,6 @@ def normalize_txt_line_endings(folder_path: str | Path) -> None:
     logger.info("[file] Completed. Success: %s, Failed: %s", count_success, count_fail)
     return
 
-
-__all__ = ["normalize_txt_line_endings"]
 
 if __name__ == "__main__":  # pragma: no cover
     import argparse

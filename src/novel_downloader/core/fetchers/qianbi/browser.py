@@ -8,9 +8,14 @@ novel_downloader.core.fetchers.qianbi.browser
 from typing import Any
 
 from novel_downloader.core.fetchers.base import BaseBrowser
+from novel_downloader.core.fetchers.registry import register_fetcher
 from novel_downloader.models import FetcherConfig
 
 
+@register_fetcher(
+    site_keys=["qianbi"],
+    backends=["browser"],
+)
 class QianbiBrowser(BaseBrowser):
     """
     A browser class for interacting with the Qianbi (www.23qb.com) novel website.

@@ -15,15 +15,19 @@ from novel_downloader.core.downloaders.base import BaseDownloader
 from novel_downloader.models import (
     BookConfig,
     ChapterDict,
+)
+from novel_downloader.utils import (
+    ChapterStorage,
+    async_sleep_with_random_delay,
+    calculate_time_difference,
+    save_as_json,
+    save_as_txt,
+)
+
+from .tasks import (
     CidTask,
     HtmlTask,
     RestoreTask,
-)
-from novel_downloader.utils.chapter_storage import ChapterStorage
-from novel_downloader.utils.file_utils import save_as_json, save_as_txt
-from novel_downloader.utils.time_utils import (
-    async_sleep_with_random_delay,
-    calculate_time_difference,
 )
 
 

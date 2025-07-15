@@ -7,6 +7,8 @@ Provides functionality to load Toml configuration files into Python
 dictionaries, with robust error handling and fallback support.
 """
 
+__all__ = ["load_config"]
+
 import json
 import logging
 from pathlib import Path
@@ -180,6 +182,3 @@ def save_config_file(
 
     logger.info("[config] Configuration successfully saved to JSON: %s", output)
     return
-
-
-__all__ = ["load_config"]

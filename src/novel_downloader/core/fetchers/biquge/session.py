@@ -8,9 +8,14 @@ novel_downloader.core.fetchers.biquge.session
 from typing import Any
 
 from novel_downloader.core.fetchers.base import BaseSession
+from novel_downloader.core.fetchers.registry import register_fetcher
 from novel_downloader.models import FetcherConfig
 
 
+@register_fetcher(
+    site_keys=["biquge", "bqg"],
+    backends=["session"],
+)
 class BiqugeSession(BaseSession):
     """
     A session class for interacting with the Biquge (www.b520.cc) novel website.

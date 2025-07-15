@@ -13,9 +13,8 @@ import json
 import logging
 import re
 
-import pytest
-
 import novel_downloader.utils.file_utils.io as io_module
+import pytest
 from novel_downloader.utils.file_utils.io import (
     _get_non_conflicting_path,
     _write_file,
@@ -149,40 +148,6 @@ def test_readers_failure(tmp_path, caplog, reader):
     assert result is None
     # must log a warning
     assert any("Failed to read" in rec.message for rec in caplog.records)
-
-
-def test_load_text_resource_success(tmp_path, monkeypatch):
-    """Test that load_text_resource returns correct content for an existing file."""
-    file_path = tmp_path / "sample.txt"
-    expected_content = "Hello, 世界"
-    file_path.write_text(expected_content, encoding="utf-8")
-
-    monkeypatch.setattr(io_module, "files", lambda pkg: tmp_path)
-
-    result = io_module.load_text_resource("sample.txt", package="any_pkg")
-    assert result == expected_content
-
-
-def test_load_text_resource_file_not_found(tmp_path, monkeypatch):
-    """Test that load_text_resource raises FileNotFoundError for a missing file."""
-    monkeypatch.setattr(io_module, "files", lambda pkg: tmp_path)
-
-    with pytest.raises(FileNotFoundError):
-        io_module.load_text_resource("missing.txt", package="some_pkg")
-
-
-def test_load_blacklisted_words(monkeypatch):
-    """
-    Test that load_blacklisted_words returns a deduplicated, non-empty set of lines
-    """
-    dummy_text = "\n求票\n月票\n\n投票\n"
-
-    monkeypatch.setattr(
-        io_module, "load_text_resource", lambda filename, package=None: dummy_text
-    )
-
-    result = io_module.load_blacklisted_words()
-    assert result == {"求票", "月票", "投票"}
 
 
 def test_write_file_type_error(tmp_path):

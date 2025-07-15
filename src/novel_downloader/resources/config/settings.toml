@@ -129,3 +129,32 @@ filename_template = "{title}_{author}"  # 文件命名规则
 include_cover = true               # 是否在 EPUB 中包含封面
 include_toc = false                # 是否自动生成目录
 include_picture = false            # 是否下载章节图片 (体积较大)
+
+[cleaner]
+remove_invisible = true
+
+[cleaner.title]
+remove_patterns = [
+  '【[^】]*?】',
+  '[(（][^()（）]*?求票[^()（）]*?[)）]',
+]
+
+[cleaner.title.replace]
+'：' = ':'
+
+[cleaner.title.external]
+enabled = false
+remove_patterns = "path/to/title-remove.json"
+replace         = "path/to/title-replace.json"
+
+[cleaner.content]
+remove_patterns = []
+
+[cleaner.content.replace]
+'li子' = '例子'
+'pinbi词' = '屏蔽词'
+
+[cleaner.content.external]
+enabled = false
+remove_patterns = "path/to/content-remove.json"
+replace         = "path/to/content-replace.json"

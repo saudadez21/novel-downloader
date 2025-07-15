@@ -9,10 +9,15 @@ import re
 from typing import Any
 
 from novel_downloader.core.fetchers.base import BaseSession
+from novel_downloader.core.fetchers.registry import register_fetcher
 from novel_downloader.models import FetcherConfig
-from novel_downloader.utils.time_utils import async_sleep_with_random_delay
+from novel_downloader.utils import async_sleep_with_random_delay
 
 
+@register_fetcher(
+    site_keys=["linovelib"],
+    backends=["session"],
+)
 class LinovelibSession(BaseSession):
     """
     A session class for interacting with Linovelib (www.linovelib.com) novel website.

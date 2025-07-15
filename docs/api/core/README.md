@@ -15,9 +15,6 @@
 
 ## 模块组成
 
-* [**factory**](factory.md)
-  提供 `get_fetcher`、`get_parser`、`get_exporter`、`get_downloader` 四个工厂函数
-
 * [**fetchers**](fetchers.md)
   针对各站点的抓取器实现, 符合 `FetcherProtocol`
 

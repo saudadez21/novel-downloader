@@ -8,9 +8,14 @@ novel_downloader.core.fetchers.esjzone.browser
 from typing import Any
 
 from novel_downloader.core.fetchers.base import BaseBrowser
+from novel_downloader.core.fetchers.registry import register_fetcher
 from novel_downloader.models import FetcherConfig, LoginField
 
 
+@register_fetcher(
+    site_keys=["esjzone"],
+    backends=["browser"],
+)
 class EsjzoneBrowser(BaseBrowser):
     """
     A browser class for interacting with the Esjzone (www.esjzone.cc) novel website.

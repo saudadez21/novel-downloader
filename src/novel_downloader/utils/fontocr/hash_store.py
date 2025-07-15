@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.utils.hash_store
----------------------------------
+novel_downloader.utils.fontocr.hash_store
+-----------------------------------------
 
 Manage a small collection of image perceptual hashes and their labels.
 Supports loading/saving to .json or .npy, and basic CRUD + search.
@@ -15,10 +15,11 @@ from pathlib import Path
 
 from PIL import Image
 
-from .constants import HASH_STORE_FILE
+from ..constants import DATA_DIR
 from .hash_utils import HASH_DISTANCE_THRESHOLD, fast_hamming_distance, phash
 
 logger = logging.getLogger(__name__)
+HASH_STORE_FILE = DATA_DIR / "image_hashes.json"
 
 
 class _BKNode:

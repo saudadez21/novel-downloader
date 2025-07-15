@@ -11,13 +11,10 @@ from argparse import Namespace, _SubParsersAction
 from importlib.resources import as_file
 from pathlib import Path
 
-from novel_downloader.config import save_config_file, save_rules_as_json
+from novel_downloader.config import save_config_file
 from novel_downloader.utils.constants import DEFAULT_SETTINGS_PATHS
 from novel_downloader.utils.i18n import t
-from novel_downloader.utils.logger import setup_logging
 from novel_downloader.utils.state import state_mgr
-
-# from novel_downloader.utils.hash_store import img_hash_store
 
 
 def register_config_subcommand(subparsers: _SubParsersAction) -> None:  # type: ignore
@@ -27,9 +24,6 @@ def register_config_subcommand(subparsers: _SubParsersAction) -> None:  # type: 
     _register_init(config_subparsers)
     _register_set_lang(config_subparsers)
     _register_set_config(config_subparsers)
-    _register_update_rules(config_subparsers)
-    _register_set_cookies(config_subparsers)
-    # _register_add_hash(config_subparsers)
 
 
 def _register_init(subparsers: _SubParsersAction) -> None:  # type: ignore
@@ -52,27 +46,7 @@ def _register_set_config(subparsers: _SubParsersAction) -> None:  # type: ignore
     parser.set_defaults(func=_handle_set_config)
 
 
-def _register_update_rules(subparsers: _SubParsersAction) -> None:  # type: ignore
-    parser = subparsers.add_parser("update-rules", help=t("settings_update_rules_help"))
-    parser.add_argument("path", type=str, help="Path to TOML/YAML/JSON rule file")
-    parser.set_defaults(func=_handle_update_rules)
-
-
-def _register_set_cookies(subparsers: _SubParsersAction) -> None:  # type: ignore
-    parser = subparsers.add_parser("set-cookies", help=t("settings_set_cookies_help"))
-    parser.add_argument("site", nargs="?", help="Site identifier")
-    parser.add_argument("cookies", nargs="?", help="Cookies string")
-    parser.set_defaults(func=_handle_set_cookies)
-
-
-# def _register_add_hash(subparsers: _SubParsersAction) -> None:  # type: ignore
-#     parser = subparsers.add_parser("add-hash", help=t("settings_add_hash_help"))
-#     parser.add_argument("--path", type=str, help=t("settings_add_hash_path_help"))
-#     parser.set_defaults(func=_handle_add_hash)
-
-
 def _handle_init(args: Namespace) -> None:
-    setup_logging()
     cwd = Path.cwd()
 
     for resource in DEFAULT_SETTINGS_PATHS:
@@ -119,59 +93,3 @@ def _handle_set_config(args: Namespace) -> None:
     except Exception as e:
         print(t("settings_set_config_fail", err=str(e)))
         raise
-
-
-def _handle_update_rules(args: Namespace) -> None:
-    try:
-        save_rules_as_json(args.path)
-        print(t("settings_update_rules", path=args.path))
-    except Exception as e:
-        print(t("settings_update_rules_fail", err=str(e)))
-        raise
-
-
-def _handle_set_cookies(args: Namespace) -> None:
-    site = args.site or input(t("settings_set_cookies_prompt_site") + ": ").strip()
-    cookies = (
-        args.cookies or input(t("settings_set_cookies_prompt_payload") + ": ").strip()
-    )
-
-    try:
-        state_mgr.set_cookies(site, cookies)
-        print(t("settings_set_cookies_success", site=site))
-    except Exception as e:
-        print(t("settings_set_cookies_fail", err=str(e)))
-        raise
-
-
-# def _handle_add_hash(args: Namespace) -> None:
-#     if args.path:
-#         try:
-#             img_hash_store.add_from_map(args.path)
-#             img_hash_store.save()
-#             print(t("settings_add_hash_loaded", path=args.path))
-#         except Exception as e:
-#             print(t("settings_add_hash_load_fail", err=str(e)))
-#             raise
-#     else:
-#         print(t("settings_add_hash_prompt_tip"))
-#         while True:
-#             img_path = input(t("settings_add_hash_prompt_img") + ": ").strip()
-#             if not img_path or img_path.lower() in {"exit", "quit"}:
-#                 break
-#             if not Path(img_path).exists():
-#                 print(t("settings_add_hash_path_invalid"))
-#                 continue
-
-#             label = input(t("settings_add_hash_prompt_label") + ": ").strip()
-#             if not label or label.lower() in {"exit", "quit"}:
-#                 break
-
-#             try:
-#                 img_hash_store.add_image(img_path, label)
-#                 print(t("settings_add_hash_added", img=img_path, label=label))
-#             except Exception as e:
-#                 print(t("settings_add_hash_failed", err=str(e)))
-
-#         img_hash_store.save()
-#         print(t("settings_add_hash_saved"))

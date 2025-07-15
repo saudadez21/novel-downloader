@@ -5,17 +5,6 @@ novel_downloader.core.parsers.qidian.utils
 
 """
 
-from .helpers import (
-    can_view_chapter,
-    extract_chapter_info,
-    find_ssr_page_context,
-    is_duplicated,
-    is_encrypted,
-    is_restricted_page,
-    vip_status,
-)
-from .node_decryptor import QidianNodeDecryptor, get_decryptor
-
 __all__ = [
     "find_ssr_page_context",
     "extract_chapter_info",
@@ -27,3 +16,14 @@ __all__ = [
     "QidianNodeDecryptor",
     "get_decryptor",
 ]
+
+from .helpers import (
+    can_view_chapter,
+    extract_chapter_info,
+    find_ssr_page_context,
+    is_duplicated,
+    is_encrypted,
+    is_restricted_page,
+    vip_status,
+)
+from .node_decryptor import QidianNodeDecryptor, get_decryptor

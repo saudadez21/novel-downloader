@@ -9,9 +9,14 @@ import asyncio
 from typing import Any
 
 from novel_downloader.core.fetchers.base import BaseSession
+from novel_downloader.core.fetchers.registry import register_fetcher
 from novel_downloader.models import FetcherConfig
 
 
+@register_fetcher(
+    site_keys=["qianbi"],
+    backends=["session"],
+)
 class QianbiSession(BaseSession):
     """
     A session class for interacting with the Qianbi (www.23qb.com) novel website.

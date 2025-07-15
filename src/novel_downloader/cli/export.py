@@ -9,7 +9,7 @@ from argparse import Namespace, _SubParsersAction
 from pathlib import Path
 
 from novel_downloader.config import ConfigAdapter, load_config
-from novel_downloader.core.factory import get_exporter
+from novel_downloader.core import get_exporter
 from novel_downloader.utils.i18n import t
 
 

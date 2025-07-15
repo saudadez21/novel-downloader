@@ -17,19 +17,10 @@ Currently supported platforms:
 - qidian (起点中文网)
 - sfacg (SF轻小说)
 - yamibo (百合会)
-- common (通用架构)
 """
 
-from .biquge import BiqugeDownloader
-from .common import CommonDownloader
-from .esjzone import EsjzoneDownloader
-from .linovelib import LinovelibDownloader
-from .qianbi import QianbiDownloader
-from .qidian import QidianDownloader
-from .sfacg import SfacgDownloader
-from .yamibo import YamiboDownloader
-
 __all__ = [
+    "get_downloader",
     "BiqugeDownloader",
     "EsjzoneDownloader",
     "LinovelibDownloader",
@@ -37,5 +28,13 @@ __all__ = [
     "QidianDownloader",
     "SfacgDownloader",
     "YamiboDownloader",
-    "CommonDownloader",
 ]
+
+from .biquge import BiqugeDownloader
+from .esjzone import EsjzoneDownloader
+from .linovelib import LinovelibDownloader
+from .qianbi import QianbiDownloader
+from .qidian import QidianDownloader
+from .registry import get_downloader
+from .sfacg import SfacgDownloader
+from .yamibo import YamiboDownloader

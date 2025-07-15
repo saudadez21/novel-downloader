@@ -21,12 +21,14 @@ from aiohttp import ClientResponse, ClientSession, ClientTimeout, TCPConnector
 
 from novel_downloader.core.interfaces import FetcherProtocol
 from novel_downloader.models import FetcherConfig, LoginField
+from novel_downloader.utils import (
+    async_sleep_with_random_delay,
+    parse_cookie_expires,
+)
 from novel_downloader.utils.constants import (
     DATA_DIR,
     DEFAULT_USER_HEADERS,
 )
-from novel_downloader.utils.cookies import parse_cookie_expires
-from novel_downloader.utils.time_utils import async_sleep_with_random_delay
 
 from .rate_limiter import TokenBucketRateLimiter
 

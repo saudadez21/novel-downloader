@@ -10,6 +10,8 @@ Includes:
   optionally capped with a max_sleep limit.
 """
 
+__all__ = ["sleep_with_random_delay", "async_sleep_with_random_delay"]
+
 import asyncio
 import logging
 import random
@@ -100,6 +102,3 @@ async def async_sleep_with_random_delay(
 
     logger.debug("[async time] Sleeping for %.2f seconds", duration)
     await asyncio.sleep(duration)
-
-
-__all__ = ["sleep_with_random_delay", "async_sleep_with_random_delay"]

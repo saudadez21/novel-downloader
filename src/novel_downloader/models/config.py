@@ -16,7 +16,7 @@ These models are used to map loaded YAML or JSON config data into
 strongly typed Python objects for safer and cleaner access.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import NotRequired, TypedDict
 
 from .types import (
@@ -84,6 +84,15 @@ class ParserConfig:
 
 
 @dataclass
+class TextCleanerConfig:
+    remove_invisible: bool = True
+    title_remove_patterns: list[str] = field(default_factory=list)
+    title_replacements: dict[str, str] = field(default_factory=dict)
+    content_remove_patterns: list[str] = field(default_factory=list)
+    content_replacements: dict[str, str] = field(default_factory=dict)
+
+
+@dataclass
 class ExporterConfig:
     cache_dir: str = "./novel_cache"
     raw_data_dir: str = "./raw_data"
@@ -100,6 +109,7 @@ class ExporterConfig:
     include_toc: bool = False
     include_picture: bool = False
     split_mode: SplitMode = "book"
+    cleaner_cfg: TextCleanerConfig = field(default_factory=TextCleanerConfig)
 
 
 class BookConfig(TypedDict):

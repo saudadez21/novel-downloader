@@ -11,9 +11,14 @@ from typing import Any
 from lxml import html
 
 from novel_downloader.core.parsers.base import BaseParser
+from novel_downloader.core.parsers.registry import register_parser
 from novel_downloader.models import ChapterDict
 
 
+@register_parser(
+    site_keys=["biquge", "bqg"],
+    backends=["session", "browser"],
+)
 class BiqugeParser(BaseParser):
     """ """
 

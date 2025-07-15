@@ -6,6 +6,10 @@ novel_downloader.utils.text_utils.diff_display
 Generate inline character-level diff between two strings with visual markers.
 """
 
+__all__ = [
+    "diff_inline_display",
+]
+
 import difflib
 import unicodedata
 
@@ -67,8 +71,3 @@ def diff_inline_display(old_str: str, new_str: str) -> str:
             marker_s2 += "".join(_char_width_space(c, mark_1, mark_2) for c in s2_seg)
     output_str = f"-{s1}\n {marker_s1}\n+{s2}\n {marker_s2}"
     return output_str
-
-
-__all__ = [
-    "diff_inline_display",
-]
