@@ -94,7 +94,8 @@ def common_export_as_txt(
             # Extract and clean fields
             title = cleaner.clean_title(data.get("title", chap_title))
             content = cleaner.clean_content(data.get("content", ""))
-            author_note = cleaner.clean_content(data.get("author_say", ""))
+            extra = data.get("extra", {})
+            author_note = cleaner.clean_content(extra.get("author_say", ""))
 
             extras = {"作者说": author_note} if author_note else {}
             parts.append(

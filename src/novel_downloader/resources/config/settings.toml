@@ -24,8 +24,7 @@ cache_dir = "./novel_cache"        # 本地缓存目录 (字体 / 图片等)
 download_workers = 2               # 并发下载线程数
 parser_workers = 2                 # 并发解析线程数
 skip_existing = true               # 是否跳过已存在章节
-storage_backend = "sqlite"         # 章节储存方法: json / sqlite
-storage_batch_size = 30            # SQLite 批量提交的章节数量
+storage_batch_size = 1             # SQLite 批量提交的章节数量
 
 [general.debug]
 save_html = false                  # 是否将抓取到的原始 HTML 保留到磁盘

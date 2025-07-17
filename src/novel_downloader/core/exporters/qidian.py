@@ -18,6 +18,15 @@ from .common import CommonExporter
 
 @register_exporter(site_keys=["qidian", "qd"])
 class QidianExporter(CommonExporter):
+    """ """
+
+    DEFAULT_SOURCE_ID = 0
+    ENCRYPTED_SOURCE_ID = 1
+    PRIORITIES_MAP = {
+        DEFAULT_SOURCE_ID: 0,
+        ENCRYPTED_SOURCE_ID: 1,
+    }
+
     def __init__(
         self,
         config: ExporterConfig,
@@ -25,5 +34,5 @@ class QidianExporter(CommonExporter):
         super().__init__(
             config,
             site="qidian",
-            chap_folders=["chapters", "encrypted_chapters"],
+            priorities=self.PRIORITIES_MAP,
         )

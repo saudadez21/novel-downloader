@@ -14,21 +14,21 @@ import types
 from pathlib import Path
 from typing import Any, Self, cast
 
-from novel_downloader.models import (
-    ChapterDict,
-    SaveMode,
-    StorageBackend,
-)
-
-from .file_utils import save_as_json
+from novel_downloader.models import ChapterDict
 
 _CREATE_TABLE_SQL = """
-CREATE TABLE IF NOT EXISTS "{table}" (
-    id TEXT PRIMARY KEY,
-    title TEXT NOT NULL,
-    content TEXT NOT NULL,
-    extra TEXT NOT NULL
-)
+CREATE TABLE IF NOT EXISTS chapters (
+  id        TEXT    NOT NULL,
+  source_id INTEGER NOT NULL,
+  priority  INTEGER NOT NULL DEFAULT 1000,
+  title     TEXT    NOT NULL,
+  content   TEXT    NOT NULL,
+  extra     TEXT,
+  PRIMARY KEY (id, source_id)
+);
+
+CREATE INDEX IF NOT EXISTS
+idx_chapters_id_priority ON chapters(id, priority);
 """
 
 
@@ -36,276 +36,292 @@ class ChapterStorage:
     """
     Manage storage of chapters in JSON files or an SQLite database.
 
-    :param raw_base: Base directory or file path for storage.
-    :param namespace: Novel identifier (subfolder name or DB/table basename).
-    :param backend_type: "json" (default) or "sqlite".
+    Supports storing multiple versions of each chapter from different sources,
+    each with a defined priority for selecting the preferred version.
     """
 
     def __init__(
         self,
         raw_base: str | Path,
-        namespace: str,
-        backend_type: StorageBackend = "json",
-        *,
-        batch_size: int = 1,
+        priorities: dict[int, int],
     ) -> None:
-        self.raw_base = Path(raw_base)
-        self.namespace = namespace
-        self.backend = backend_type
-        self._batch_size = batch_size
-        self._pending = 0
+        """
+        Initialize storage for a specific book.
+
+        :param raw_base: Directory path where the SQLite file will be stored.
+        :param priorities: Mapping of source_id to priority value.
+                           Lower numbers indicate higher priority.
+                           E.X. {0: 10, 1: 100} means source 0 is preferred.
+        """
+        self._db_path = Path(raw_base) / "chapter_data.sqlite"
         self._conn: sqlite3.Connection | None = None
-        self._existing_ids: set[str] = set()
+        self._priorities = priorities
+        self._existing_ids: set[tuple[str, int]] = set()  # (chap_id, source_id)
 
-        if self.backend == "json":
-            self._init_json()
-        else:
-            self._init_sql()
-
-    def _init_json(self) -> None:
-        """Prepare directory for JSON files."""
-        self._json_dir = self.raw_base / self.namespace
-        self._json_dir.mkdir(parents=True, exist_ok=True)
-        self._existing_ids = {p.stem for p in self._json_dir.glob("*.json")}
-
-    def _init_sql(self) -> None:
-        """Prepare SQLite connection and ensure table exists."""
-        self._db_path = self.raw_base / f"{self.namespace}.sqlite"
+    def connect(self) -> None:
+        """
+        Open the SQLite connection, enable foreign keys,
+        create schema, register initial sources, and cache existing keys.
+        """
+        if self._conn:
+            return
         self._conn = sqlite3.connect(self._db_path)
-        stmt = _CREATE_TABLE_SQL.format(table=self.namespace)
-        self._conn.execute(stmt)
+        self._conn.row_factory = sqlite3.Row
+        self._conn.execute("PRAGMA foreign_keys = ON;")
+        self._conn.executescript(_CREATE_TABLE_SQL)
         self._conn.commit()
+        self._load_existing_keys()
 
-        cur = self._conn.execute(f'SELECT id FROM "{self.namespace}"')
-        self._existing_ids = {row[0] for row in cur.fetchall()}
-
-    def _json_path(self, chap_id: str) -> Path:
-        """Return Path for JSON file of given chapter ID."""
-        return self._json_dir / f"{chap_id}.json"
-
-    def exists(self, chap_id: str) -> bool:
+    def exists(
+        self,
+        chap_id: str,
+        source_id: int | None = None,
+    ) -> bool:
         """
         Check if a chapter exists.
 
         :param chap_id: Chapter identifier.
+        :param source_id: If provided, check existence for that source.
         :return: True if found, else False.
         """
-        return chap_id in self._existing_ids
+        if source_id is not None:
+            return (chap_id, source_id) in self._existing_ids
+        return any(key[0] == chap_id for key in self._existing_ids)
 
-    def _load_json(self, chap_id: str) -> ChapterDict:
-        raw = self._json_path(chap_id).read_text(encoding="utf-8")
-        return cast(ChapterDict, json.loads(raw))
+    def upsert_chapter(
+        self,
+        data: ChapterDict,
+        source_id: int,
+    ) -> None:
+        """
+        Insert or update a single chapter record.
 
-    def _load_sql(self, chap_id: str) -> ChapterDict:
-        if self._conn is None:
-            raise RuntimeError("ChapterStorage is closed")
-        cur = self._conn.execute(
-            f'SELECT id, title, content, extra FROM "{self.namespace}" WHERE id = ?',
+        :param data: ChapterDict containing id, title, content, extra.
+        :param source_id: Integer index of source.
+        """
+        priority = self._priorities[source_id]
+        chap_id = data["id"]
+        title = data["title"]
+        content = data["content"]
+        extra_json = json.dumps(data["extra"])
+
+        self.conn.execute(
+            """
+            INSERT OR REPLACE INTO chapters
+              (id, source_id, priority, title, content, extra)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (chap_id, source_id, priority, title, content, extra_json),
+        )
+        self._existing_ids.add((chap_id, source_id))
+        self.conn.commit()
+
+    def upsert_chapters(
+        self,
+        data: list[ChapterDict],
+        source_id: int,
+    ) -> None:
+        """
+        Insert or update multiple chapters in one batch operation.
+
+        :param data: List of ChapterDicts.
+        :param source_id: Integer index of source.
+        """
+        priority = self._priorities[source_id]
+        records = []
+        for chapter in data:
+            chap_id = chapter["id"]
+            title = chapter["title"]
+            content = chapter["content"]
+            extra_json = json.dumps(chapter["extra"])
+            records.append((chap_id, source_id, priority, title, content, extra_json))
+            self._existing_ids.add((chap_id, source_id))
+
+        self.conn.executemany(
+            """
+            INSERT OR REPLACE INTO chapters
+              (id, source_id, priority, title, content, extra)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            records,
+        )
+        self.conn.commit()
+
+    def get_chapter(
+        self,
+        chap_id: str,
+        source_id: int,
+    ) -> ChapterDict | None:
+        """
+        Retrieve a single chapter by id and source.
+
+        :param chap_id: Chapter identifier.
+        :param source_id: Integer index of source.
+        :return: A ChapterDict if found, else None.
+        """
+        cur = self.conn.execute(
+            """
+            SELECT title, content, extra
+              FROM chapters
+             WHERE id = ? AND source_id = ?
+             LIMIT 1
+            """,
+            (chap_id, source_id),
+        )
+        row = cur.fetchone()
+        if not row:
+            return None
+
+        return ChapterDict(
+            id=chap_id,
+            title=row["title"],
+            content=row["content"],
+            extra=self._load_dict(row["extra"]),
+        )
+
+    def get_chapters(
+        self,
+        chap_ids: list[str],
+        source_id: int,
+    ) -> dict[str, ChapterDict | None]:
+        """
+        Retrieve multiple chapters by their ids for a given source in one query.
+
+        :param chap_ids: List of chapter identifiers.
+        :param source_id: Integer index of source.
+        :return: A dict mapping chap_id to ChapterDict or None.
+        """
+        placeholders = ",".join("?" for _ in chap_ids)
+        query = f"""
+            SELECT id, title, content, extra
+              FROM chapters
+             WHERE id IN ({placeholders}) AND source_id = ?
+        """
+        rows = self.conn.execute(query, (*chap_ids, source_id)).fetchall()
+
+        result: dict[str, ChapterDict | None] = {cid: None for cid in chap_ids}
+        for row in rows:
+            result[row["id"]] = ChapterDict(
+                id=row["id"],
+                title=row["title"],
+                content=row["content"],
+                extra=self._load_dict(row["extra"]),
+            )
+        return result
+
+    def get_best_chapter(
+        self,
+        chap_id: str,
+    ) -> ChapterDict | None:
+        """
+        Retrieve the chapter with the highest priority (lowest priority number)
+        among all sources for the given chap_id.
+        """
+        cur = self.conn.execute(
+            """
+            SELECT title, content, extra
+              FROM chapters
+             WHERE id = ?
+             ORDER BY priority ASC
+             LIMIT 1
+            """,
             (chap_id,),
         )
         row = cur.fetchone()
-        return {
-            "id": row[0],
-            "title": row[1],
-            "content": row[2],
-            "extra": json.loads(row[3]),
-        }
+        if not row:
+            return None
 
-    def get(self, chap_id: str) -> ChapterDict | dict[str, Any]:
-        """
-        Retrieve chapter by ID.
-
-        :param chap_id: Chapter identifier.
-        :return: ChapterDict if exists, else empty dict.
-        """
-        if not self.exists(chap_id):
-            return {}
-        return (
-            self._load_json(chap_id)
-            if self.backend == "json"
-            else self._load_sql(chap_id)
+        return ChapterDict(
+            id=chap_id,
+            title=row["title"],
+            content=row["content"],
+            extra=self._load_dict(row["extra"]),
         )
 
-    def _save_json(self, data: ChapterDict, on_exist: SaveMode) -> None:
-        path = self._json_path(data["id"])
-        save_as_json(data, path, on_exist=on_exist)
-        self._existing_ids.add(data["id"])
-
-    def _save_sql(self, data: ChapterDict, on_exist: SaveMode) -> None:
-        if self._conn is None:
-            raise RuntimeError("ChapterStorage is closed")
-        sql = (
-            f'INSERT OR REPLACE INTO "{self.namespace}" '
-            "(id, title, content, extra) VALUES (?, ?, ?, ?)"
-            if on_exist == "overwrite"
-            else f'INSERT OR IGNORE INTO "{self.namespace}" '
-            "(id, title, content, extra) VALUES (?, ?, ?, ?)"
-        )
-        self._conn.execute(
-            sql,
-            (
-                data["id"],
-                data["title"],
-                data["content"],
-                json.dumps(data["extra"], ensure_ascii=False),
-            ),
-        )
-        self._existing_ids.add(data["id"])
-        if self._batch_size == 1:
-            self._conn.commit()
-        else:
-            self._pending += 1
-            if self._pending >= self._batch_size:
-                self._conn.commit()
-                self._pending = 0
-
-    def _save_many_sql(
+    def get_best_chapters(
         self,
-        datas: list[ChapterDict],
-        on_exist: SaveMode = "overwrite",
-    ) -> None:
+        chap_ids: list[str],
+    ) -> dict[str, ChapterDict | None]:
         """
-        Bulk-insert into SQLite using executemany + one commit.
-
-        :param datas: List of ChapterDict to store.
-        :param on_exist: "overwrite" to REPLACE, "skip" to IGNORE on conflicts.
+        Retrieve the best (highest-priority) chapter for each given id
+        in a single query using window functions.
         """
-        if on_exist not in ("overwrite", "skip"):
-            raise ValueError(f"invalid on_exist mode: {on_exist!r}")
-        if self._conn is None:
-            raise RuntimeError("ChapterStorage is closed")
+        placeholders = ",".join("?" for _ in chap_ids)
+        query = f"""
+            SELECT chap_id, title, content, extra FROM (
+              SELECT id AS chap_id, title, content, extra,
+                     ROW_NUMBER() OVER (
+                       PARTITION BY id ORDER BY priority ASC
+                     ) AS rn
+                FROM chapters
+               WHERE id IN ({placeholders})
+            ) sub
+            WHERE rn = 1
+        """
+        rows = self.conn.execute(query, chap_ids).fetchall()
 
-        sql = (
-            f'INSERT OR REPLACE INTO "{self.namespace}" '
-            "(id, title, content, extra) VALUES (?, ?, ?, ?)"
-            if on_exist == "overwrite"
-            else f'INSERT OR IGNORE INTO "{self.namespace}" '
-            "(id, title, content, extra) VALUES (?, ?, ?, ?)"
-        )
-
-        params = [
-            (
-                data["id"],
-                data["title"],
-                data["content"],
-                json.dumps(data["extra"], ensure_ascii=False),
+        result: dict[str, ChapterDict | None] = {chap_id: None for chap_id in chap_ids}
+        for row in rows:
+            result[row["chap_id"]] = ChapterDict(
+                id=row["chap_id"],
+                title=row["title"],
+                content=row["content"],
+                extra=self._load_dict(row["extra"]),
             )
-            for data in datas
-        ]
-
-        with self._conn:
-            self._conn.executemany(sql, params)
-
-        self._existing_ids.update(data["id"] for data in datas)
-
-    def save(
-        self,
-        data: ChapterDict,
-        on_exist: SaveMode = "overwrite",
-    ) -> None:
-        """
-        Save a chapter record.
-
-        :param data: ChapterDict to store.
-        :param on_exist: What to do if chap_id already exists
-        """
-        if on_exist not in ("overwrite", "skip"):
-            raise ValueError(f"invalid on_exist mode: {on_exist!r}")
-
-        if self.backend == "json":
-            self._save_json(data, on_exist)
-        else:
-            self._save_sql(data, on_exist)
-
-    def save_many(
-        self,
-        datas: list[ChapterDict],
-        on_exist: SaveMode = "overwrite",
-    ) -> None:
-        """
-        Save multiple chapter records in one shot.
-
-        :param datas: List of ChapterDict to store.
-        :param on_exist: What to do if chap_id already exists.
-        """
-        if on_exist not in ("overwrite", "skip"):
-            raise ValueError(f"invalid on_exist mode: {on_exist!r}")
-
-        if self.backend == "json":
-            for data in datas:
-                self._save_json(data, on_exist)
-        else:
-            self._save_many_sql(datas, on_exist)
-
-    def list_ids(self) -> list[str]:
-        """
-        List all stored chapter IDs.
-        """
-        if self.backend == "json":
-            return [p.stem for p in self._json_dir.glob("*.json") if p.is_file()]
-
-        if self._conn is None:
-            raise RuntimeError("ChapterStorage is closed")
-        cur = self._conn.execute(f'SELECT id FROM "{self.namespace}"')
-        return [row[0] for row in cur.fetchall()]
-
-    def delete(self, chap_id: str) -> bool:
-        """
-        Delete a chapter by ID.
-
-        :param chap_id: Chapter identifier.
-        :return: True if deleted, False if not found.
-        """
-        if not self.exists(chap_id):
-            return False
-        if self.backend == "json":
-            self._json_path(chap_id).unlink()
-            return True
-
-        if self._conn is None:
-            raise RuntimeError("ChapterStorage is closed")
-        cur = self._conn.execute(
-            f'DELETE FROM "{self.namespace}" WHERE id = ?', (chap_id,)
-        )
-        self._conn.commit()
-        return cur.rowcount > 0
+        return result
 
     def count(self) -> int:
         """
         Count total chapters stored.
         """
-        if self.backend == "json":
-            return len(self.list_ids())
-
-        if self._conn is None:
-            raise RuntimeError("ChapterStorage is closed")
-        cur = self._conn.execute(f'SELECT COUNT(1) FROM "{self.namespace}"')
-        return int(cur.fetchone()[0])
-
-    def flush(self) -> None:
-        """
-        Write out any leftover rows (< batch_size) at the end.
-        """
-        if self._conn is not None and self._pending > 0:
-            self._conn.commit()
-            self._pending = 0
+        return len(self._existing_ids)
 
     def close(self) -> None:
         """
         Gracefully close any open resources.
         """
-        if self.backend != "sqlite" or self._conn is None:
+        if self._conn is None:
             return
-
-        with contextlib.suppress(Exception):
-            self.flush()
 
         with contextlib.suppress(Exception):
             self._conn.close()
 
         self._conn = None
+        self._existing_ids = set()
+
+    @property
+    def conn(self) -> sqlite3.Connection:
+        """
+        Return the active SQLite connection, or raise if not connected.
+
+        :raises RuntimeError: if connect() has not been called.
+        """
+        if self._conn is None:
+            raise RuntimeError(
+                "Database connection is not established. Call connect() first."
+            )
+        return self._conn
+
+    def _load_existing_keys(self) -> None:
+        """
+        Cache all existing (chapter_id, source_id) pairs for fast upsert.
+        """
+        cur = self.conn.execute("SELECT id, source_id FROM chapters")
+        self._existing_ids = {(row["id"], row["source_id"]) for row in cur.fetchall()}
+
+    @staticmethod
+    def _load_dict(data: str) -> dict[str, Any]:
+        try:
+            parsed = json.loads(data)
+            return cast(dict[str, Any], parsed)
+        except Exception:
+            return {}
 
     def __enter__(self) -> Self:
+        """
+        Enter context manager, automatically connecting to the database.
+        """
+        self.connect()
         return self
 
     def __exit__(
@@ -314,14 +330,18 @@ class ChapterStorage:
         exc_val: BaseException | None,
         tb: types.TracebackType | None,
     ) -> None:
+        """
+        Exit context manager, closing the database connection.
+        """
         self.close()
 
     def __del__(self) -> None:
+        """
+        Ensure the database connection is closed upon object deletion.
+        """
         self.close()
 
     def __repr__(self) -> str:
         return (
-            f"<ChapterStorage ns='{self.namespace}' "
-            f"backend='{self.backend}' "
-            f"path='{self.raw_base}'>"
+            f"<ChapterStorage priorities='{self._priorities}' path='{self._db_path}'>"
         )

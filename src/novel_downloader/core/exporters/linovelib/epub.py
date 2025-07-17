@@ -60,7 +60,7 @@ def export_whole_book(
     config = exporter._config
 
     raw_base = exporter._raw_data_dir / book_id
-    img_dir = exporter._cache_dir / book_id / "images"
+    img_dir = raw_base / "images"
     out_dir = exporter.output_dir
 
     img_dir.mkdir(parents=True, exist_ok=True)
@@ -166,7 +166,6 @@ def export_whole_book(
 
             title = cleaner.clean_title(data.get("title", chap_title)) or chap_id
             content = cleaner.clean_content(data.get("content", ""))
-            author_note = cleaner.clean_content(data.get("author_say", ""))
             content = inline_remote_images(
                 book,
                 content,
@@ -177,7 +176,7 @@ def export_whole_book(
             chap_html = build_epub_chapter(
                 title=title,
                 paragraphs=content,
-                extras={"作者说": author_note},
+                extras={},
             )
             curr_vol.add_chapter(
                 Chapter(
@@ -220,7 +219,7 @@ def export_by_volume(
     config = exporter._config
 
     raw_base = exporter._raw_data_dir / book_id
-    img_dir = exporter._cache_dir / book_id / "images"
+    img_dir = raw_base / "images"
     out_dir = exporter.output_dir
 
     img_dir.mkdir(parents=True, exist_ok=True)

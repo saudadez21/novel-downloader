@@ -19,18 +19,6 @@
   novel_cache/fixed_font_map/{font_name}.json
   ```
 
-- **HTML 调试文件** (当 `debug.save_html: true` 时):
-
-  ```text
-  novel_cache/{site_name}/{book_id}/html/{chapter_id}.html
-  ```
-
-- **字体解码调试数据** (当 `save_font_debug: true` 时):
-
-  ```text
-  novel_cache/font_debug/{chapter_id}/debug_data.json
-  ```
-
 ---
 
 ### raw_data
@@ -69,18 +57,10 @@
   }
   ```
 
-- **普通章节内容**
-
-  1. JSON 文件模式
+- **章节内容**
 
   ```text
-  raw_data/{site_name}/{book_id}/chapters/{chapter_id}.json
-  ```
-
-  2. SQLite 数据库模式
-
-  ```text
-  raw_data/{site_name}/{book_id}/chapters.sqlite
+  raw_data/{site_name}/{book_id}/chapter_data.sqlite
   ```
 
   示例章节结构:
@@ -100,13 +80,6 @@
         "volume": "示例卷"
     }
   }
-  ```
-
-- **加密章节 (仅限 qidian)**
-  当遇到 VIP 章节或加密字体时 (一般对应一个月内更新的章节), 会在下面路径生成解密后的数据:
-
-  ```text
-  raw_data/{site_name}/{book_id}/encrypted_chapters/{chapter_id}.json
   ```
 
 ---

@@ -19,8 +19,4 @@ class SfacgExporter(CommonExporter):
         self,
         config: ExporterConfig,
     ):
-        super().__init__(
-            config,
-            site="sfacg",
-            chap_folders=["chapters"],
-        )
+        super().__init__(config, site="sfacg")

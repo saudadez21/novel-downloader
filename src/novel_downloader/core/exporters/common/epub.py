@@ -54,7 +54,7 @@ def common_export_as_epub(
     config = exporter._config
 
     raw_base = exporter._raw_data_dir / book_id
-    img_dir = exporter._cache_dir / book_id / "images"
+    img_dir = raw_base / "images"
     out_dir = exporter.output_dir
 
     img_dir.mkdir(parents=True, exist_ok=True)
@@ -157,7 +157,8 @@ def common_export_as_epub(
 
             title = cleaner.clean_title(data.get("title", chap_title)) or chap_id
             content = cleaner.clean_content(data.get("content", ""))
-            author_note = cleaner.clean_content(data.get("author_say", ""))
+            extra = data.get("extra", {})
+            author_note = cleaner.clean_content(extra.get("author_say", ""))
             content = inline_remote_images(book, content, img_dir)
 
             chap_html = build_epub_chapter(

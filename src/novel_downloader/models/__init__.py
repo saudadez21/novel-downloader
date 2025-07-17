@@ -19,9 +19,7 @@ from .types import (
     BrowserType,
     LogLevel,
     ModeType,
-    SaveMode,
     SplitMode,
-    StorageBackend,
 )
 
 __all__ = [
@@ -35,8 +33,6 @@ __all__ = [
     "LoginField",
     "BrowserType",
     "ModeType",
-    "SaveMode",
-    "StorageBackend",
     "SplitMode",
     "LogLevel",
 ]

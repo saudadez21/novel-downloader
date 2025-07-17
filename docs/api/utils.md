@@ -330,11 +330,10 @@ data = storage.get("77882211")
 ---
 
 ```python
-    def save(
-        self,
-        data: ChapterDict,
-        on_exist: SaveMode = "overwrite",
-    ) -> None:
+def save(
+    self,
+    data: ChapterDict,
+) -> None:
 ```
 
 描述: 保存章节记录

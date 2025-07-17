@@ -6,6 +6,7 @@ novel_downloader.core.fetchers.base.browser
 """
 
 import abc
+import asyncio
 import logging
 import types
 from pathlib import Path
@@ -209,12 +210,15 @@ class BaseBrowser(FetcherProtocol, abc.ABC):
         wait_until: Literal["commit", "domcontentloaded", "load", "networkidle"]
         | None = "load",
         referer: str | None = None,
+        delay: float = 0.0,
         **kwargs: Any,
     ) -> str:
         if self._reuse_page:
-            return await self._fetch_with_reuse(url, wait_until, referer, **kwargs)
+            return await self._fetch_with_reuse(
+                url, wait_until, referer, delay, **kwargs
+            )
         else:
-            return await self._fetch_with_new(url, wait_until, referer, **kwargs)
+            return await self._fetch_with_new(url, wait_until, referer, delay, **kwargs)
 
     async def load_state(self) -> bool:
         """ """
@@ -293,11 +297,13 @@ class BaseBrowser(FetcherProtocol, abc.ABC):
         wait_until: Literal["commit", "domcontentloaded", "load", "networkidle"]
         | None = "load",
         referer: str | None = None,
+        delay: float = 0.0,
         **kwargs: Any,
     ) -> str:
         page = await self.context.new_page()
         try:
             await page.goto(url, wait_until=wait_until, referer=referer, **kwargs)
+            await asyncio.sleep(delay)
             html: str = await page.content()
             return html
         finally:
@@ -309,11 +315,13 @@ class BaseBrowser(FetcherProtocol, abc.ABC):
         wait_until: Literal["commit", "domcontentloaded", "load", "networkidle"]
         | None = "load",
         referer: str | None = None,
+        delay: float = 0.0,
         **kwargs: Any,
     ) -> str:
         if not self._page:
             self._page = await self.context.new_page()
         await self._page.goto(url, wait_until=wait_until, referer=referer, **kwargs)
+        await asyncio.sleep(delay)
         html: str = await self._page.content()
         return html
 
