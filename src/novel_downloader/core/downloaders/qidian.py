@@ -31,7 +31,7 @@ from novel_downloader.utils import (
 @register_downloader(site_keys=["qidian", "qd"])
 class QidianDownloader(BaseDownloader):
     """
-    Specialized downloader for Qidian novels.
+    Specialized downloader for Qidian (起点) novels.
 
     Processes each chapter in a single worker that
     handles fetch -> parse -> enqueue storage.

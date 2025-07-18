@@ -16,7 +16,9 @@ from novel_downloader.models import DownloaderConfig
 
 @register_downloader(site_keys=["sfacg"])
 class SfacgDownloader(CommonDownloader):
-    """"""
+    """
+    Downloader for sfacg (SF 轻小说) novels.
+    """
 
     def __init__(
         self,

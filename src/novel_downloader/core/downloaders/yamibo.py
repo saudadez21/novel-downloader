@@ -16,7 +16,9 @@ from novel_downloader.models import DownloaderConfig
 
 @register_downloader(site_keys=["yamibo"])
 class YamiboDownloader(CommonDownloader):
-    """"""
+    """
+    Downloader for yamibo (百合会) novels.
+    """
 
     def __init__(
         self,
