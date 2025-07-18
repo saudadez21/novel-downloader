@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.parsers.qianbi.main_parser
-------------------------------------------------
+novel_downloader.core.parsers.qianbi
+------------------------------------
 
 """
 
