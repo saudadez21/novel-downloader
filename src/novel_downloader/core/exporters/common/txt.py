@@ -84,7 +84,7 @@ def common_export_as_txt(
             data = exporter._get_chapter(book_id, chap_id)
             if not data:
                 exporter.logger.info(
-                    "%s Missing chapter file in: %s (%s), skipping.",
+                    "%s Missing chapter: %s (%s), skipping.",
                     TAG,
                     chap_title,
                     chap_id,

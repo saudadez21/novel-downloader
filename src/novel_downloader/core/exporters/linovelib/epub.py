@@ -157,7 +157,7 @@ def export_whole_book(
             data = exporter._get_chapter(book_id, chap_id)
             if not data:
                 exporter.logger.info(
-                    "%s Missing chapter file: %s (%s), skipping.",
+                    "%s Missing chapter: %s (%s), skipping.",
                     TAG,
                     chap_title,
                     chap_id,
@@ -298,7 +298,7 @@ def export_by_volume(
             data = exporter._get_chapter(book_id, chap_id)
             if not data:
                 exporter.logger.info(
-                    "%s Missing chapter file: %s (%s), skipping.",
+                    "%s Missing chapter: %s (%s), skipping.",
                     TAG,
                     chap_title,
                     chap_id,

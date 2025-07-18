@@ -322,12 +322,8 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
         return self._config.backoff_factor
 
     @property
-    def parser_workers(self) -> int:
-        return self._config.parser_workers
-
-    @property
-    def download_workers(self) -> int:
-        return self._config.download_workers
+    def workers(self) -> int:
+        return self._config.workers
 
     @property
     def storage_batch_size(self) -> int:
