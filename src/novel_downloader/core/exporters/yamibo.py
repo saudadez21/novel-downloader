@@ -19,8 +19,4 @@ class YamiboExporter(CommonExporter):
         self,
         config: ExporterConfig,
     ):
-        super().__init__(
-            config,
-            site="yamibo",
-            chap_folders=["chapters"],
-        )
+        super().__init__(config, site="yamibo")

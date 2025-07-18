@@ -9,6 +9,7 @@ content into various output formats.
 """
 
 import abc
+import json
 import logging
 import types
 from datetime import datetime
@@ -16,7 +17,8 @@ from pathlib import Path
 from typing import Any, Self
 
 from novel_downloader.core.interfaces import ExporterProtocol
-from novel_downloader.models import ExporterConfig
+from novel_downloader.models import ChapterDict, ExporterConfig
+from novel_downloader.utils import ChapterStorage
 
 
 class SafeDict(dict[str, Any]):
@@ -31,24 +33,33 @@ class BaseExporter(ExporterProtocol, abc.ABC):
     such as TXT, EPUB, Markdown, or PDF.
     """
 
+    DEFAULT_SOURCE_ID = 0
+    DEFAULT_PRIORITIES_MAP = {
+        DEFAULT_SOURCE_ID: 0,
+    }
+
     def __init__(
         self,
         config: ExporterConfig,
         site: str,
+        priorities: dict[int, int] | None = None,
     ):
         """
         Initialize the exporter with given configuration.
 
-        :param config: A ExporterConfig object that defines
-                        save paths, formats, and options.
+        :param config: Exporter configuration settings.
+        :param site: Identifier for the target website or source.
+        :param priorities: Mapping of source_id to priority value.
+                           Lower numbers indicate higher priority.
+                           E.X. {0: 10, 1: 100} means source 0 is preferred.
         """
         self._config = config
         self._site = site
+        self._priorities = priorities or self.DEFAULT_PRIORITIES_MAP
+        self._storage_cache: dict[str, ChapterStorage] = {}
 
-        self._cache_dir = Path(config.cache_dir) / site
         self._raw_data_dir = Path(config.raw_data_dir) / site
         self._output_dir = Path(config.output_dir)
-        self._cache_dir.mkdir(parents=True, exist_ok=True)
         self._output_dir.mkdir(parents=True, exist_ok=True)
 
         self.logger = logging.getLogger(f"{self.__class__.__name__}")
@@ -161,14 +172,82 @@ class BaseExporter(ExporterProtocol, abc.ABC):
         return f"{name}.{ext}"
 
     @property
+    def site(self) -> str:
+        """
+        Get the site identifier.
+
+        :return: The site string.
+        """
+        return self._site
+
+    @property
     def output_dir(self) -> Path:
-        """Access the output directory for saving files."""
+        """
+        Access the output directory for saving files.
+        """
         return self._output_dir
 
     @property
     def filename_template(self) -> str:
-        """Access the filename template."""
+        """
+        Access the filename template.
+        """
         return self._config.filename_template
+
+    def _get_chapter(
+        self,
+        book_id: str,
+        chap_id: str,
+    ) -> ChapterDict | None:
+        if book_id not in self._storage_cache:
+            return None
+        return self._storage_cache[book_id].get_best_chapter(chap_id)
+
+    def _get_chapters(
+        self,
+        book_id: str,
+        chap_ids: list[str],
+    ) -> dict[str, ChapterDict | None]:
+        if book_id not in self._storage_cache:
+            return {}
+        return self._storage_cache[book_id].get_best_chapters(chap_ids)
+
+    def _load_book_info(self, book_id: str) -> dict[str, Any]:
+        info_path = self._raw_data_dir / book_id / "book_info.json"
+        if not info_path.is_file():
+            self.logger.error("Missing metadata file: %s", info_path)
+            return {}
+
+        try:
+            text = info_path.read_text(encoding="utf-8")
+            data: Any = json.loads(text)
+            if not isinstance(data, dict):
+                self.logger.error(
+                    "Invalid JSON structure in %s: expected an object at the top",
+                    info_path,
+                )
+                return {}
+            return data
+        except json.JSONDecodeError as e:
+            self.logger.error("Corrupt JSON in %s: %s", info_path, e)
+        return {}
+
+    def _init_chapter_storages(self, book_id: str) -> None:
+        if book_id in self._storage_cache:
+            return
+        self._storage_cache[book_id] = ChapterStorage(
+            raw_base=self._raw_data_dir / book_id,
+            priorities=self._priorities,
+        )
+        self._storage_cache[book_id].connect()
+
+    def _close_chapter_storages(self) -> None:
+        for storage in self._storage_cache.values():
+            try:
+                storage.close()
+            except Exception as e:
+                self.logger.warning("Failed to close storage %s: %s", storage, e)
+        self._storage_cache.clear()
 
     def _on_close(self) -> None:
         """
@@ -182,6 +261,7 @@ class BaseExporter(ExporterProtocol, abc.ABC):
         Shutdown and clean up the exporter.
         """
         self._on_close()
+        self._close_chapter_storages()
 
     def __enter__(self) -> Self:
         return self

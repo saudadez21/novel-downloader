@@ -16,7 +16,9 @@ from novel_downloader.models import DownloaderConfig
 
 @register_downloader(site_keys=["linovelib"])
 class LinovelibDownloader(CommonDownloader):
-    """"""
+    """
+    Downloader for Linovelib (哔哩轻小说) novels.
+    """
 
     def __init__(
         self,

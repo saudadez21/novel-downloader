@@ -11,6 +11,7 @@ from pathlib import Path
 from novel_downloader.config import ConfigAdapter, load_config
 from novel_downloader.core import get_exporter
 from novel_downloader.utils.i18n import t
+from novel_downloader.utils.logger import setup_logging
 
 
 def register_export_subcommand(subparsers: _SubParsersAction) -> None:  # type: ignore
@@ -57,7 +58,9 @@ def handle_export(args: Namespace) -> None:
 
     adapter = ConfigAdapter(config=config_data, site=site)
     exporter_cfg = adapter.get_exporter_config()
+    log_level = adapter.get_log_level()
     exporter = get_exporter(site, exporter_cfg)
+    setup_logging(log_level=log_level)
 
     for book_id in book_ids:
         print(t("export_processing", book_id=book_id, format=export_format))

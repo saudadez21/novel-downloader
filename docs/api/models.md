@@ -18,8 +18,6 @@
 
 ```python
 ModeType = Literal["browser", "session"]
-SaveMode = Literal["overwrite", "skip"]
-StorageBackend = Literal["json", "sqlite"]
 SplitMode = Literal["book", "volume"]
 LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
 BrowserType = Literal["chromium", "firefox", "webkit"]
@@ -107,8 +105,7 @@ class DownloaderConfig:
     backoff_factor: float = 2.0
     raw_data_dir: str = "./raw_data"
     cache_dir: str = "./novel_cache"
-    download_workers: int = 4
-    parser_workers: int = 4
+    workers: int = 4
     skip_existing: bool = True
     login_required: bool = False
     save_html: bool = False

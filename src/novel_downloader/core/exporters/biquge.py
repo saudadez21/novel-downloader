@@ -19,8 +19,4 @@ class BiqugeExporter(CommonExporter):
         self,
         config: ExporterConfig,
     ):
-        super().__init__(
-            config,
-            site="biquge",
-            chap_folders=["chapters"],
-        )
+        super().__init__(config, site="biquge")

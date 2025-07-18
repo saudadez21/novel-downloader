@@ -21,11 +21,9 @@ request_interval = 2.0             # 同一本书各章节请求间隔 (秒)
 raw_data_dir = "./raw_data"        # 原始章节 JSON/DB 存放目录
 output_dir = "./downloads"         # 最终输出文件存放目录
 cache_dir = "./novel_cache"        # 本地缓存目录 (字体 / 图片等)
-download_workers = 2               # 并发下载线程数
-parser_workers = 2                 # 并发解析线程数
+workers = 2                        # 工作协程数
 skip_existing = true               # 是否跳过已存在章节
-storage_backend = "sqlite"         # 章节储存方法: json / sqlite
-storage_batch_size = 30            # SQLite 批量提交的章节数量
+storage_batch_size = 1             # SQLite 批量提交的章节数量
 
 [general.debug]
 save_html = false                  # 是否将抓取到的原始 HTML 保留到磁盘

@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import json
 import logging
-from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import tinycss2
@@ -69,10 +68,9 @@ def parse_encrypted_chapter(
             )
             return None
 
-        debug_base_dir: Path | None = None
-        if parser._font_debug_dir:
-            debug_base_dir = parser._font_debug_dir / chapter_id
-            debug_base_dir.mkdir(parents=True, exist_ok=True)
+        debug_dir = parser._debug_dir / "font_debug" / "qidian" / chapter_id
+        if parser.save_font_debug:
+            debug_dir.mkdir(parents=True, exist_ok=True)
 
         css_str = chapter_info["css"]
         randomFont_str = chapter_info["randomFont"]
@@ -126,16 +124,16 @@ def parse_encrypted_chapter(
                     return None
             main_paragraphs = extract_paragraphs_recursively(raw_html, chapter_id)
 
-        if debug_base_dir:
-            main_paragraphs_path = debug_base_dir / "main_paragraphs_debug.json"
+        if parser.save_font_debug:
+            main_paragraphs_path = debug_dir / "main_paragraphs_debug.json"
             main_paragraphs_path.write_text(
                 json.dumps(main_paragraphs, ensure_ascii=False, indent=2),
                 encoding="utf-8",
             )
 
         paragraphs_rules = parse_rule(css_str)
-        if debug_base_dir:
-            paragraphs_rules_path = debug_base_dir / "paragraphs_rules_debug.json"
+        if parser.save_font_debug:
+            paragraphs_rules_path = debug_dir / "paragraphs_rules_debug.json"
             paragraphs_rules_path.write_text(
                 json.dumps(paragraphs_rules, ensure_ascii=False, indent=2),
                 encoding="utf-8",
@@ -147,16 +145,16 @@ def parse_encrypted_chapter(
             paragraphs_rules,
             end_number,
         )
-        if debug_base_dir:
-            paragraphs_str_path = debug_base_dir / f"{chapter_id}_debug.txt"
+        if parser.save_font_debug:
+            paragraphs_str_path = debug_dir / f"{chapter_id}_debug.txt"
             paragraphs_str_path.write_text(paragraphs_str, encoding="utf-8")
 
         # Run OCR + fallback mapping
         char_set = {c for c in paragraphs_str if c not in {" ", "\n", "\u3000"}}
         refl_set = set(refl_list)
         char_set = char_set - refl_set
-        if debug_base_dir:
-            char_sets_path = debug_base_dir / "char_set_debug.txt"
+        if parser.save_font_debug:
+            char_sets_path = debug_dir / "char_set_debug.txt"
             temp = f"char_set:\n{char_set}\n\nrefl_set:\n{refl_set}"
             char_sets_path.write_text(
                 temp,
@@ -170,8 +168,8 @@ def parse_encrypted_chapter(
             refl_set=refl_set,
             chapter_id=chapter_id,
         )
-        if debug_base_dir:
-            mapping_json_path = debug_base_dir / "font_mapping.json"
+        if parser.save_font_debug:
+            mapping_json_path = debug_dir / "font_mapping.json"
             mapping_json_path.write_text(
                 json.dumps(mapping_result, ensure_ascii=False, indent=2),
                 encoding="utf-8",

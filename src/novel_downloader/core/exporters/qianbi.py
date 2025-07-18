@@ -19,8 +19,4 @@ class QianbiExporter(CommonExporter):
         self,
         config: ExporterConfig,
     ):
-        super().__init__(
-            config,
-            site="qianbi",
-            chap_folders=["chapters"],
-        )
+        super().__init__(config, site="qianbi")

@@ -175,6 +175,7 @@ cython_debug/
 
 # Settings
 examples/settings.toml
+debug/
 dev/
 downloads/
 novel_cache/

@@ -6,10 +6,10 @@ novel_downloader.core.downloaders.qidian
 """
 
 import asyncio
-import json
-from collections.abc import Awaitable, Callable
-from contextlib import suppress
-from typing import Any, cast
+from collections.abc import AsyncIterator, Awaitable, Callable
+from contextlib import asynccontextmanager
+from pathlib import Path
+from typing import Any
 
 from novel_downloader.core.downloaders.base import BaseDownloader
 from novel_downloader.core.downloaders.registry import register_downloader
@@ -25,22 +25,24 @@ from novel_downloader.models import (
 from novel_downloader.utils import (
     ChapterStorage,
     async_sleep_with_random_delay,
-    calculate_time_difference,
-    save_as_json,
-    save_as_txt,
-)
-
-from .tasks import (
-    CidTask,
-    HtmlTask,
 )
 
 
 @register_downloader(site_keys=["qidian", "qd"])
 class QidianDownloader(BaseDownloader):
     """
-    Specialized downloader for Qidian novels.
+    Specialized downloader for Qidian (起点) novels.
+
+    Processes each chapter in a single worker that
+    handles fetch -> parse -> enqueue storage.
     """
+
+    DEFAULT_SOURCE_ID = 0
+    ENCRYPTED_SOURCE_ID = 1
+    PRIORITIES_MAP = {
+        DEFAULT_SOURCE_ID: 0,
+        ENCRYPTED_SOURCE_ID: 1,
+    }
 
     def __init__(
         self,
@@ -49,7 +51,7 @@ class QidianDownloader(BaseDownloader):
         config: DownloaderConfig,
     ):
         config.request_interval = max(1.0, config.request_interval)
-        super().__init__(fetcher, parser, config, "qidian")
+        super().__init__(fetcher, parser, config, "qidian", self.PRIORITIES_MAP)
 
     async def _download_one(
         self,
@@ -69,301 +71,123 @@ class QidianDownloader(BaseDownloader):
         end_id = book.get("end_id")
         ignore_set = set(book.get("ignore_ids", []))
 
-        raw_base = self.raw_data_dir / book_id
-        cache_base = self.cache_dir / book_id
-        info_path = raw_base / "book_info.json"
-        chapters_html_dir = cache_base / "html"
-
+        raw_base = self._raw_data_dir / book_id
         raw_base.mkdir(parents=True, exist_ok=True)
-        if self.save_html:
-            chapters_html_dir.mkdir(parents=True, exist_ok=True)
-        normal_cs = ChapterStorage(
+        html_dir = self._debug_dir / book_id / "html"
+        chapter_storage = ChapterStorage(
             raw_base=raw_base,
-            namespace="chapters",
-            backend_type=self._config.storage_backend,
-            batch_size=self._config.storage_batch_size,
+            priorities=self._priorities,
         )
-        encrypted_cs = ChapterStorage(
-            raw_base=raw_base,
-            namespace="encrypted_chapters",
-            backend_type=self._config.storage_backend,
-            batch_size=self._config.storage_batch_size,
-        )
+        chapter_storage.connect()
 
-        # load or fetch book_info
-        book_info: dict[str, Any]
-        re_fetch = True
-        old_data: dict[str, Any] = {}
-
-        if info_path.exists():
-            try:
-                old_data = json.loads(info_path.read_text("utf-8"))
-                days, *_ = calculate_time_difference(
-                    old_data.get("update_time", ""), "UTC+8"
-                )
-                re_fetch = days > 1
-            except Exception:
-                re_fetch = True
-
-        if re_fetch:
-            info_html = await self.fetcher.get_book_info(book_id)
-            if self.save_html:
-                for i, html in enumerate(info_html):
-                    save_as_txt(html, chapters_html_dir / f"info_{i}.html")
-            book_info = self.parser.parse_book_info(info_html)
-
-            if book_info.get("book_name") != "未找到书名":
-                save_as_json(book_info, info_path)
-            else:
-                self.logger.warning("%s 书籍信息未找到, book_id = %s", TAG, book_id)
-                book_info = old_data or {"book_name": "未找到书名"}
-        else:
-            book_info = old_data
-
+        # load or fetch metadata
+        book_info = await self.load_book_info(book_id=book_id, html_dir=html_dir)
         vols = book_info.get("volumes", [])
-        total_chapters = 0
-        for vol in vols:
-            total_chapters += len(vol.get("chapters", []))
+        total_chapters = sum(len(v.get("chapters", [])) for v in vols)
         if total_chapters == 0:
-            self.logger.warning("%s 书籍没有章节可下载: book_id=%s", TAG, book_id)
+            self.logger.warning("%s 书籍没有章节可下载: %s", TAG, book_id)
             return
 
-        completed_count = 0
+        # concurrency primitives
+        sem = asyncio.Semaphore(self.workers)
+        cid_q: asyncio.Queue[str | None] = asyncio.Queue()
+        save_q: asyncio.Queue[ChapterDict | None] = asyncio.Queue()
+        default_batch: list[ChapterDict] = []
+        encrypted_batch: list[ChapterDict] = []
+        completed = 0
 
-        # setup queue
-        cid_queue: asyncio.Queue[CidTask] = asyncio.Queue()
-        html_queue: asyncio.Queue[HtmlTask] = asyncio.Queue()
-        save_queue: asyncio.Queue[ChapterDict] = asyncio.Queue()
+        def _select(batch_item: ChapterDict) -> tuple[list[ChapterDict], int]:
+            if batch_item.get("extra", {}).get("encrypted", False):
+                return encrypted_batch, self.ENCRYPTED_SOURCE_ID
+            return default_batch, self.DEFAULT_SOURCE_ID
 
-        async def fetcher_worker(
-            book_id: str,
-            cid_queue: asyncio.Queue[CidTask],
-            html_queue: asyncio.Queue[HtmlTask],
-            retry_times: int,
-        ) -> None:
+        async def _flush(batch: list[ChapterDict], src: int) -> None:
+            nonlocal completed
+            if not batch:
+                return
+            try:
+                chapter_storage.upsert_chapters(batch, src)
+            except Exception as e:
+                self.logger.error(
+                    "[Storage] batch upsert failed (size=%d, source=%d): %s",
+                    len(batch),
+                    src,
+                    e,
+                    exc_info=True,
+                )
+            else:
+                completed += len(batch)
+                if progress_hook:
+                    await progress_hook(completed, total_chapters)
+            finally:
+                batch.clear()
+
+        async def storage_worker(q: asyncio.Queue[ChapterDict | None]) -> None:
             while True:
-                task = await cid_queue.get()
-                cid = task.cid
-                if not cid:
-                    self.logger.warning("[Fetcher] Skipped empty cid task: %s", task)
-                    cid_queue.task_done()
-                    continue
-
-                if cid in ignore_set:
-                    cid_queue.task_done()
-                    continue
-
-                try:
-                    html_list = await self.fetcher.get_book_chapter(book_id, cid)
-                    await html_queue.put(
-                        HtmlTask(cid=cid, retry=task.retry, html_list=html_list)
-                    )
-                    self.logger.info("[Fetcher] Downloaded chapter %s", cid)
-                    await async_sleep_with_random_delay(
-                        self.request_interval,
-                        mul_spread=1.1,
-                        max_sleep=self.request_interval + 2,
-                    )
-
-                except Exception as e:
-                    if task.retry < retry_times:
-                        await cid_queue.put(
-                            CidTask(
-                                prev_cid=task.prev_cid,
-                                cid=cid,
-                                retry=task.retry + 1,
-                            )
-                        )
-                        self.logger.info(
-                            "[Fetcher] Re-queued chapter %s for retry #%d: %s",
-                            cid,
-                            task.retry + 1,
-                            e,
-                        )
-                        backoff = self.backoff_factor * (2**task.retry)
-                        await async_sleep_with_random_delay(
-                            base=backoff,
-                            mul_spread=1.2,
-                            max_sleep=backoff + 3,
-                        )
-                    else:
-                        self.logger.warning(
-                            "[Fetcher] Max retries reached for chapter %s: %s",
-                            cid,
-                            e,
-                        )
-
-                finally:
-                    cid_queue.task_done()
-
-        async def parser_worker(
-            cid_queue: asyncio.Queue[CidTask],
-            html_queue: asyncio.Queue[HtmlTask],
-            save_queue: asyncio.Queue[ChapterDict],
-            retry_times: int,
-        ) -> None:
-            while True:
-                task = await html_queue.get()
-                skip_retry = False
-                try:
-                    chap_json: ChapterDict | None = None
-                    if self.check_restricted(task.html_list):
-                        self.logger.info(
-                            "[Parser] Skipped restricted page for cid %s", task.cid
-                        )
-                        skip_retry = True
-                        raise ValueError("Restricted content detected")
-
-                    is_encrypted = self.check_encrypted(task.html_list)
-                    chap_json = await asyncio.to_thread(
-                        self.parser.parse_chapter,
-                        task.html_list,
-                        task.cid,
-                    )
-                    if is_encrypted:
-                        skip_retry = True
-                    if self.save_html:
-                        folder = chapters_html_dir / (
-                            "html_encrypted" if is_encrypted else "html_plain"
-                        )
-                        html_path = folder / f"{task.cid}.html"
-                        save_as_txt(task.html_list[0], html_path, on_exist="skip")
-                        self.logger.debug(
-                            "%s Saved raw HTML for chapter %s to %s",
-                            TAG,
-                            task.cid,
-                            html_path,
-                        )
-                    if chap_json:
-                        await save_queue.put(chap_json)
-                        self.logger.info(
-                            "[Parser] saved chapter %s",
-                            task.cid,
-                        )
-                    else:
-                        raise ValueError("Empty parse result")
-                except Exception as e:
-                    if not skip_retry and task.retry < retry_times:
-                        await cid_queue.put(
-                            CidTask(prev_cid=None, cid=task.cid, retry=task.retry + 1)
-                        )
-                        self.logger.info(
-                            "[Parser] Re-queued cid %s for retry #%d: %s",
-                            task.cid,
-                            task.retry + 1,
-                            e,
-                        )
-                    elif not skip_retry:
-                        self.logger.warning(
-                            "[Parser] Max retries reached for cid %s: %s",
-                            task.cid,
-                            e,
-                        )
-                finally:
-                    html_queue.task_done()
-
-        async def storage_worker(
-            normal_cs: ChapterStorage,
-            encrypted_cs: ChapterStorage,
-            save_queue: asyncio.Queue[ChapterDict],
-        ) -> None:
-            nonlocal completed_count
-            while True:
-                item = await save_queue.get()
-                try:
-                    is_encrypted = item.get("extra", {}).get("encrypted", False)
-                    cs = encrypted_cs if is_encrypted else normal_cs
-                    cs.save(cast(ChapterDict, item))
-                    completed_count += 1
-                    if progress_hook:
-                        await progress_hook(completed_count, total_chapters)
-                except Exception as e:
-                    self.logger.error("[storage_worker] Failed to save: %s", e)
-                finally:
-                    save_queue.task_done()
-
-        fetcher_task = asyncio.create_task(
-            fetcher_worker(
-                book_id,
-                cid_queue,
-                html_queue,
-                self.retry_times,
-            )
-        )
-
-        parser_task = asyncio.create_task(
-            parser_worker(
-                cid_queue,
-                html_queue,
-                save_queue,
-                self.retry_times,
-            )
-        )
-
-        storage_task = asyncio.create_task(
-            storage_worker(
-                normal_cs=normal_cs,
-                encrypted_cs=encrypted_cs,
-                save_queue=save_queue,
-            )
-        )
-
-        found_start = start_id is None
-        stop_early = False
-
-        for vol in book_info.get("volumes", []):
-            chapters = vol.get("chapters", [])
-            for chap in chapters:
-                if stop_early:
+                chap = await q.get()
+                q.task_done()
+                if chap is None:
+                    # final flush before exit
+                    await _flush(default_batch, self.DEFAULT_SOURCE_ID)
+                    await _flush(encrypted_batch, self.ENCRYPTED_SOURCE_ID)
                     break
+                batch, src = _select(chap)
+                batch.append(chap)
+                if len(batch) >= self.storage_batch_size:
+                    await _flush(batch, src)
 
-                cid = chap.get("chapterId")
-                if not cid:
-                    continue
+        async def producer() -> None:
+            nonlocal completed
+            async for cid in self._chapter_ids(vols, start_id, end_id):
+                if self.skip_existing and chapter_storage.exists(
+                    cid, self.DEFAULT_SOURCE_ID
+                ):
+                    completed += 1
+                    if progress_hook:
+                        await progress_hook(completed, total_chapters)
+                else:
+                    await cid_q.put(cid)
 
-                if not found_start:
-                    if cid == start_id:
-                        found_start = True
-                    else:
-                        completed_count += 1
-                        continue
+        @asynccontextmanager
+        async def task_group_ctx() -> AsyncIterator[None]:
+            async with asyncio.TaskGroup() as tg:
+                tg.create_task(
+                    self._chapter_worker(
+                        book_id,
+                        ignore_set,
+                        cid_q,
+                        save_q,
+                        sem,
+                    )
+                )
+                tg.create_task(storage_worker(save_q))
+                yield
 
-                if end_id is not None and cid == end_id:
-                    stop_early = True
+        # run producer + workers, send None sentinels to shut down loops
+        async with task_group_ctx():
+            await producer()
 
-                if cid in ignore_set:
-                    continue
+            # signal fetcher to exit
+            await cid_q.put(None)
+            await cid_q.join()
 
-                if normal_cs.exists(cid) and self.skip_existing:
-                    completed_count += 1
-                    continue
+            # signal storage to exit
+            await save_q.put(None)
+            await save_q.join()
 
-                await cid_queue.put(CidTask(cid=cid, prev_cid=None))
+            # final flush for both batches
+            await _flush(default_batch, self.DEFAULT_SOURCE_ID)
+            await _flush(encrypted_batch, self.ENCRYPTED_SOURCE_ID)
 
-            if stop_early:
-                break
-
-        await cid_queue.join()
-        await html_queue.join()
-        await save_queue.join()
-
-        for task in [fetcher_task, parser_task, storage_task]:
-            task.cancel()
-            with suppress(asyncio.CancelledError):
-                await task
-
-        normal_cs.close()
-        encrypted_cs.close()
-
+        chapter_storage.close()
         self.logger.info(
             "%s Novel '%s' download completed.",
             TAG,
             book_info.get("book_name", "unknown"),
         )
-        return
 
     @staticmethod
-    def check_restricted(html_list: list[str]) -> bool:
+    def _check_restricted(html_list: list[str]) -> bool:
         """
         Return True if page content indicates access restriction
         (e.g. not subscribed/purchased).
@@ -376,7 +200,91 @@ class QidianDownloader(BaseDownloader):
         return any(m in html_list[0] for m in markers)
 
     @staticmethod
-    def check_encrypted(html_list: list[str]) -> bool:
+    def _check_encrypted(html_list: list[str]) -> bool:
         if not html_list:
             return True
         return '"cES":2' in html_list[0]
+
+    async def _chapter_worker(
+        self,
+        book_id: str,
+        ignore_set: set[str],
+        cid_q: asyncio.Queue[str | None],
+        save_q: asyncio.Queue[ChapterDict | None],
+        sem: asyncio.Semaphore,
+    ) -> None:
+        """
+        Worker that processes one chapter at a time:
+        fetch + parse with retry, then enqueue to save_q.
+        """
+        html_dir = self._debug_dir / book_id / "html"
+        while True:
+            cid = await cid_q.get()
+            if cid is None:
+                cid_q.task_done()
+                break
+            if not cid or cid in ignore_set:
+                cid_q.task_done()
+                continue
+
+            async with sem:
+                chap = await self._process_chapter(book_id, cid, html_dir)
+            if chap:
+                await save_q.put(chap)
+
+            cid_q.task_done()
+            await async_sleep_with_random_delay(
+                self.request_interval,
+                mul_spread=1.1,
+                max_sleep=self.request_interval + 2,
+            )
+
+    async def _process_chapter(
+        self,
+        book_id: str,
+        cid: str,
+        html_dir: Path,
+    ) -> ChapterDict | None:
+        """
+        Fetch, debug-save, parse a single chapter with retries.
+        Returns ChapterDict or None on failure.
+        """
+        for attempt in range(self.retry_times + 1):
+            try:
+                html_list = await self.fetcher.get_book_chapter(book_id, cid)
+                if self._check_restricted(html_list):
+                    self.logger.info(
+                        "[ChapterWorker] Restricted content detected: %s", cid
+                    )
+                    return None
+                encrypted = self._check_encrypted(html_list)
+
+                folder = "html_encrypted" if encrypted else "html_plain"
+                self._save_html_pages(html_dir / folder, cid, html_list)
+
+                chap = await asyncio.to_thread(
+                    self.parser.parse_chapter, html_list, cid
+                )
+                if encrypted and not chap:
+                    self.logger.info(
+                        "[ChapterWorker] Fail for encrypted chapter: %s", cid
+                    )
+                    return None
+                if not chap:
+                    raise ValueError("Empty parse result")
+                return chap
+
+            except Exception as e:
+                if attempt < self.retry_times:
+                    self.logger.info(
+                        "[ChapterWorker] Retry %s (%s): %s", cid, attempt + 1, e
+                    )
+                    backoff = self.backoff_factor * (2**attempt)
+                    await async_sleep_with_random_delay(
+                        base=backoff,
+                        mul_spread=1.2,
+                        max_sleep=backoff + 3,
+                    )
+                else:
+                    self.logger.warning("[ChapterWorker] Failed %s: %s", cid, e)
+        return None

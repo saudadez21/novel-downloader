@@ -16,7 +16,9 @@ from novel_downloader.models import DownloaderConfig
 
 @register_downloader(site_keys=["esjzone"])
 class EsjzoneDownloader(CommonDownloader):
-    """"""
+    """
+    Downloader for ESJ Zone novels.
+    """
 
     def __init__(
         self,

@@ -16,7 +16,6 @@ from novel_downloader.core.exporters.epub_util import (
     download_cover,
     finalize_export,
     inline_remote_images,
-    load_book_info,
     prepare_builder,
 )
 from novel_downloader.utils import (
@@ -50,7 +49,7 @@ def export_whole_book(
       1. Load `book_info.json` for metadata.
       2. Generate introductory HTML and optionally include the cover image.
       3. Initialize the EPUB container.
-      4. Iterate through volumes and chapters, convert each to XHTML.
+      4. Iterate through volumes and chapters in volume-batches, convert each to XHTML.
       5. Assemble the spine, TOC, CSS and write out the final `.epub`.
 
     :param exporter: The exporter instance, carrying config and path info.
@@ -60,7 +59,7 @@ def export_whole_book(
     config = exporter._config
 
     raw_base = exporter._raw_data_dir / book_id
-    img_dir = exporter._cache_dir / book_id / "images"
+    img_dir = raw_base / "images"
     out_dir = exporter.output_dir
 
     img_dir.mkdir(parents=True, exist_ok=True)
@@ -72,8 +71,8 @@ def export_whole_book(
     )
 
     # --- Load book_info.json ---
-    book_info = load_book_info(raw_base, exporter.logger, TAG)
-    if book_info is None:
+    book_info = exporter._load_book_info(book_id)
+    if not book_info:
         return
 
     book_name = book_info.get("book_name", book_id)
@@ -117,13 +116,13 @@ def export_whole_book(
         vol_name = raw_name or f"Volume {vol_index}"
         exporter.logger.info("Processing volume %d: %s", vol_index, vol_name)
 
-        if not vol.get("chapters"):
-            exporter.logger.warning(
-                "%s No chapters found in volume %d: %s",
-                TAG,
-                vol_index,
-                vol_name,
-            )
+        # Batch-fetch chapters for this volume
+        chap_ids = [
+            chap.get("chapterId")
+            for chap in vol.get("chapters", [])
+            if chap.get("chapterId")
+        ]
+        chap_map = exporter._get_chapters(book_id, chap_ids)
 
         vol_cover: Path | None = None
         vol_cover_url = vol.get("volume_cover", "")
@@ -143,21 +142,21 @@ def export_whole_book(
             cover=vol_cover,
         )
 
-        for chap in vol.get("chapters", []):
-            chap_id = chap.get("chapterId")
+        for chap_meta in vol.get("chapters", []):
+            chap_id = chap_meta.get("chapterId")
             if not chap_id:
                 exporter.logger.warning(
                     "%s Missing chapterId, skipping: %s",
                     TAG,
-                    chap,
+                    chap_meta,
                 )
                 continue
 
-            chap_title = cleaner.clean_title(chap.get("title", ""))
-            data = exporter._get_chapter(book_id, chap_id)
+            chap_title = cleaner.clean_title(chap_meta.get("title", ""))
+            data = chap_map.get(chap_id)
             if not data:
                 exporter.logger.info(
-                    "%s Missing chapter file: %s (%s), skipping.",
+                    "%s Missing chapter: %s (%s), skipping.",
                     TAG,
                     chap_title,
                     chap_id,
@@ -166,7 +165,6 @@ def export_whole_book(
 
             title = cleaner.clean_title(data.get("title", chap_title)) or chap_id
             content = cleaner.clean_content(data.get("content", ""))
-            author_note = cleaner.clean_content(data.get("author_say", ""))
             content = inline_remote_images(
                 book,
                 content,
@@ -177,7 +175,7 @@ def export_whole_book(
             chap_html = build_epub_chapter(
                 title=title,
                 paragraphs=content,
-                extras={"作者说": author_note},
+                extras={},
             )
             curr_vol.add_chapter(
                 Chapter(
@@ -212,7 +210,16 @@ def export_by_volume(
     book_id: str,
 ) -> None:
     """
-    Export a single novel (identified by `book_id`) to multi EPUB file.
+    Export each volume of a novel as a separate EPUB file.
+
+    Steps:
+      1. Load metadata from `book_info.json`.
+      2. For each volume:
+         a. Clean the volume title and determine output filename.
+         b. Batch-fetch all chapters in this volume to minimize SQLite overhead.
+         c. Initialize an EPUB builder for the volume, including cover and intro.
+         d. For each chapter: clean title & content, inline remote images.
+         e. Finalize and write the volume EPUB.
 
     :param book_id: Identifier of the novel (used as subdirectory name).
     """
@@ -220,7 +227,7 @@ def export_by_volume(
     config = exporter._config
 
     raw_base = exporter._raw_data_dir / book_id
-    img_dir = exporter._cache_dir / book_id / "images"
+    img_dir = raw_base / "images"
     out_dir = exporter.output_dir
 
     img_dir.mkdir(parents=True, exist_ok=True)
@@ -232,8 +239,8 @@ def export_by_volume(
     )
 
     # --- Load book_info.json ---
-    book_info = load_book_info(raw_base, exporter.logger, TAG)
-    if book_info is None:
+    book_info = exporter._load_book_info(book_id)
+    if not book_info:
         return
 
     book_name = book_info.get("book_name", book_id)
@@ -254,13 +261,13 @@ def export_by_volume(
         raw_name = cleaner.clean_title(raw_name.replace(book_name, ""))
         vol_name = raw_name or f"Volume {vol_index}"
 
-        if not vol.get("chapters"):
-            exporter.logger.warning(
-                "%s No chapters found in volume %d: %s",
-                TAG,
-                vol_index,
-                vol_name,
-            )
+        # Batch-fetch chapters for this volume
+        chap_ids = [
+            chap.get("chapterId")
+            for chap in vol.get("chapters", [])
+            if chap.get("chapterId")
+        ]
+        chap_map = exporter._get_chapters(book_id, chap_ids)
 
         vol_cover: Path | None = None
         vol_cover_url = vol.get("volume_cover", "")
@@ -285,21 +292,21 @@ def export_by_volume(
             cover_path=vol_cover,
         )
 
-        for chap in vol.get("chapters", []):
-            chap_id = chap.get("chapterId")
+        for chap_meta in vol.get("chapters", []):
+            chap_id = chap_meta.get("chapterId")
             if not chap_id:
                 exporter.logger.warning(
                     "%s Missing chapterId, skipping: %s",
                     TAG,
-                    chap,
+                    chap_meta,
                 )
                 continue
 
-            chap_title = cleaner.clean_title(chap.get("title", ""))
-            data = exporter._get_chapter(book_id, chap_id)
+            chap_title = cleaner.clean_title(chap_meta.get("title", ""))
+            data = chap_map.get(chap_id)
             if not data:
                 exporter.logger.info(
-                    "%s Missing chapter file: %s (%s), skipping.",
+                    "%s Missing chapter: %s (%s), skipping.",
                     TAG,
                     chap_title,
                     chap_id,

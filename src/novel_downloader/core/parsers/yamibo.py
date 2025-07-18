@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.parsers.yamibo.main_parser
-------------------------------------------------
+novel_downloader.core.parsers.yamibo
+------------------------------------
 
 """
 

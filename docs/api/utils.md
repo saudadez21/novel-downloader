@@ -260,94 +260,234 @@ await async_sleep_with_random_delay(3.0, mul_spread=1.1, max_sleep=5.0)
 
 ### 章节存储
 
-> `novel_downloader.utils.chapter_storage`
+> `novel_downloader.utils.ChapterStorage`
 
 ---
 
 ```python
 class ChapterStorage:
-    def __init__(self, raw_base: Path, namespace: str, backend_type: str = "json"):
+    def __init__(self, raw_base: Path | str, priorities: dict[int, int]) -> None:
 ```
 
-描述: 初始化存储，可选 JSON 或 SQLite 后端
+**描述**
+初始化章节存储, 使用 SQLite 数据库, 支持根据不同 `source_id` 的优先级保留最优版本。
 
-参数:
+**参数**
 
-* `raw_base`: 存储根路径
-* `namespace`: 名称空间
-* `backend_type`: `"json"`/`"sqlite"`
+* `raw_base`: 存储根目录 (数据库文件将写入 `<raw_base>/chapter_data.sqlite`)
+* `priorities`: 源 ID 到优先级的映射, 数值越低代表优先级越高。例如：`{0: 10, 1: 100}`
 
-示例:
+**示例**
 
 ```python
-storage = ChapterStorage(Path("./data/book123/"), "chapters", backend_type="json")
+storage = ChapterStorage("./data/book123", {0: 10, 1: 20})
+storage.connect()
 ```
 
 ---
 
 ```python
-    def exists(self, chap_id: str) -> bool:
+def connect(self) -> None:
 ```
 
-描述: 检查章节是否存在
+**描述**
+打开并初始化 SQLite 连接, 创建表和索引, 并缓存已有 `(chapter_id, source_id)` 键。
 
-参数:
+---
+
+```python
+def exists(self, chap_id: str, source_id: int | None = None) -> bool:
+```
+
+**描述**
+检查章节是否存在。
+
+**参数**
 
 * `chap_id`: 章节 ID
+* `source_id` (可选): 指定源 ID 则检查该源; 否则检查任意源是否存在
 
-返回:
+**返回**
 
 * `bool`
 
-示例:
+**示例**
 
 ```python
-exists = storage.exists("77882211")
+storage.connect()
+exists_any = storage.exists("77882211")
+exists_src0 = storage.exists("77882211", source_id=0)
 ```
 
 ---
 
 ```python
-    def get(self, chap_id: str) -> ChapterDict | dict[str, Any]:
+def upsert_chapter(self, data: ChapterDict, source_id: int) -> None:
 ```
 
-描述: 获取章节数据
+**描述**
+插入或更新单个章节记录。
 
-参数:
+**参数**
+
+* `data`: 包含 `id`, `title`, `content`, `extra` 的 `ChapterDict`
+* `source_id`: 整数型源 ID
+
+**示例**
+
+```python
+storage.upsert_chapter(
+    {"id":"77882211","title":"第1章","content":"...","extra":{}},
+    source_id=0
+)
+```
+
+---
+
+```python
+def upsert_chapters(self, data: list[ChapterDict], source_id: int) -> None:
+```
+
+**描述**
+批量插入或更新多个章节。
+
+**参数**
+
+* `data`: `ChapterDict` 列表
+* `source_id`: 整数型源 ID
+
+**示例**
+
+```python
+batch = [
+    {"id":"77882211",...},
+    {"id":"77882212",...},
+]
+storage.upsert_chapters(batch, source_id=0)
+```
+
+---
+
+```python
+def get_chapter(self, chap_id: str, source_id: int) -> ChapterDict | None:
+```
+
+**描述**
+根据指定 `chap_id` 和 `source_id` 获取单个章节。
+
+**参数**
+
+* `chap_id`: 章节 ID
+* `source_id`: 源 ID
+
+**返回**
+
+* `ChapterDict` 或 `None`
+
+**示例**
+
+```python
+data = storage.get_chapter("77882211", source_id=0)
+```
+
+---
+
+```python
+def get_chapters(self, chap_ids: list[str], source_id: int) -> dict[str, ChapterDict | None]:
+```
+
+**描述**
+批量获取同一源下的多个章节。
+
+**参数**
+
+* `chap_ids`: 章节 ID 列表
+* `source_id`: 源 ID
+
+**返回**
+
+* 映射每个 `chap_id` 到 `ChapterDict` 或 `None`
+
+**示例**
+
+```python
+chap_map = storage.get_chapters(["77882211","77882212"], source_id=0)
+```
+
+---
+
+```python
+def get_best_chapter(self, chap_id: str) -> ChapterDict | None:
+```
+
+**描述**
+从所有源中按优先级选出给定 `chap_id` 的最佳章节。
+
+**参数**
 
 * `chap_id`: 章节 ID
 
-返回:
+**返回**
 
-* `ChapterDict` 或 空字典
+* `ChapterDict` 或 `None`
 
-示例:
+**示例**
 
 ```python
-data = storage.get("77882211")
+best = storage.get_best_chapter("77882211")
 ```
 
 ---
 
 ```python
-    def save(
-        self,
-        data: ChapterDict,
-        on_exist: SaveMode = "overwrite",
-    ) -> None:
+def get_best_chapters(self, chap_ids: list[str]) -> dict[str, ChapterDict | None]:
 ```
 
-描述: 保存章节记录
+**描述**
+批量获取多个章节的最佳版本 (按优先级选出) 。
 
-参数:
+**参数**
 
-* `data`: 章节数据
-* `on_exist`: 冲突策略
+* `chap_ids`: 章节 ID 列表
 
-示例:
+**返回**
+
+* 映射每个 `chap_id` 到 `ChapterDict` 或 `None`
+
+**示例**
 
 ```python
-storage.save({"id": "77882211", "title": "第1章", "content": "...", "extra": {}}, on_exist="overwrite")
+best_map = storage.get_best_chapters(["77882211","77882212"])
+```
+
+---
+
+```python
+def count(self) -> int:
+```
+
+**描述**
+返回已存储的章节总数。
+
+**示例**
+
+```python
+total = storage.count()
+```
+
+---
+
+```python
+def close(self) -> None:
+```
+
+**描述**
+关闭数据库连接并清空缓存的键。
+
+**示例**
+
+```python
+storage.close()
 ```
 
 ### Cookies 工具

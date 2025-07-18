@@ -16,7 +16,9 @@ from novel_downloader.models import DownloaderConfig
 
 @register_downloader(site_keys=["biquge", "bqg"])
 class BiqugeDownloader(CommonDownloader):
-    """"""
+    """
+    Downloader for biquge (笔趣阁) novels.
+    """
 
     def __init__(
         self,

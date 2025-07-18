@@ -23,7 +23,6 @@ from .types import (
     BrowserType,
     ModeType,
     SplitMode,
-    StorageBackend,
 )
 
 
@@ -52,13 +51,11 @@ class DownloaderConfig:
     backoff_factor: float = 2.0
     raw_data_dir: str = "./raw_data"
     cache_dir: str = "./novel_cache"
-    download_workers: int = 4
-    parser_workers: int = 4
+    workers: int = 4
     skip_existing: bool = True
     login_required: bool = False
     save_html: bool = False
     mode: ModeType = "session"
-    storage_backend: StorageBackend = "json"
     storage_batch_size: int = 1
     username: str = ""
     password: str = ""
@@ -97,7 +94,6 @@ class ExporterConfig:
     cache_dir: str = "./novel_cache"
     raw_data_dir: str = "./raw_data"
     output_dir: str = "./downloads"
-    storage_backend: StorageBackend = "json"
     clean_text: bool = True
     make_txt: bool = True
     make_epub: bool = False
