@@ -27,18 +27,18 @@ def common_export_as_txt(
     book_id: str,
 ) -> None:
     """
-    Merge all chapter JSON files for the given novel into a single .txt file
-    and save it to the export directory.
+    Export a novel as a single text file by merging all chapter data.
 
-    Processing steps:
-      1. Load book metadata from 'book_info.json' (title, author, summary,
-         word count, update time, volumes, and chapters).
+    Steps:
+      1. Load book metadata (title, author, summary, word count, update time,
+         volumes, and chapters).
       2. For each volume:
          a. Append the volume title.
-         b. Append each chapter's title, content, and (optional) author note.
-      3. Build a header with book metadata and latest chapter title.
+         b. Batch-fetch all chapters in that volume to minimize SQLite calls.
+         c. Append each chapter's title, content, and optional author note.
+      3. Build a header with book metadata and the latest chapter title.
       4. Concatenate header and all chapter contents.
-      5. Save the resulting text file to the output directory
+      5. Save the resulting .txt file to the output directory
          (e.g., '{book_name}.txt').
 
     :param exporter: The CommonExporter instance managing paths and config.
@@ -57,8 +57,7 @@ def common_export_as_txt(
     # --- Load book_info.json ---
     info_path = raw_base / "book_info.json"
     try:
-        info_text = info_path.read_text(encoding="utf-8")
-        book_info = json.loads(info_text)
+        book_info = json.loads(info_path.read_text(encoding="utf-8"))
     except Exception as e:
         exporter.logger.error("%s Failed to load %s: %s", TAG, info_path, e)
         return
@@ -74,14 +73,24 @@ def common_export_as_txt(
             parts.append(f"\n\n{'=' * 6} {vol_name} {'=' * 6}\n\n")
             exporter.logger.info("%s Processing volume: %s", TAG, vol_name)
 
-        for chap in vol.get("chapters", []):
-            chap_id = chap.get("chapterId")
+        # Batch-fetch chapters for this volume
+        chap_ids = [
+            chap.get("chapterId")
+            for chap in vol.get("chapters", [])
+            if chap.get("chapterId")
+        ]
+        chap_map = exporter._get_chapters(book_id, chap_ids)
+
+        for chap_meta in vol.get("chapters", []):
+            chap_id = chap_meta.get("chapterId")
             if not chap_id:
-                exporter.logger.warning("%s Missing chapterId, skipping: %s", TAG, chap)
+                exporter.logger.warning(
+                    "%s Missing chapterId, skipping: %s", TAG, chap_meta
+                )
                 continue
 
-            chap_title = cleaner.clean_title(chap.get("title", ""))
-            data = exporter._get_chapter(book_id, chap_id)
+            chap_title = cleaner.clean_title(chap_meta.get("title", ""))
+            data = chap_map.get(chap_id)
             if not data:
                 exporter.logger.info(
                     "%s Missing chapter: %s (%s), skipping.",

@@ -27,15 +27,15 @@ def linovelib_export_as_txt(
     book_id: str,
 ) -> None:
     """
-    Merge all chapter JSON files under `raw_data/<book_id>` into one TXT,
-    then write it to the exporter's output directory.
+    Export a novel as a single text file by merging all chapter data.
 
     Steps:
       1. Read metadata from `book_info.json`.
       2. For each volume:
          - Clean & append the volume title.
          - Clean & append optional volume intro.
-         - For each chapter: load JSON, clean title & content, then append.
+         - Batch-fetch all chapters in this volume to minimize SQLite overhead.
+         - For each chapter: clean title & content, then append.
       3. Build a header block with metadata.
       4. Concatenate header + all chapter blocks, then save as `{book_name}.txt`.
 
@@ -55,8 +55,7 @@ def linovelib_export_as_txt(
     # --- Load book_info.json ---
     info_path = raw_base / "book_info.json"
     try:
-        info_text = info_path.read_text(encoding="utf-8")
-        book_info = json.loads(info_text)
+        book_info = json.loads(info_path.read_text(encoding="utf-8"))
     except Exception as e:
         exporter.logger.error("%s Failed to load %s: %s", TAG, info_path, e)
         return
@@ -74,15 +73,24 @@ def linovelib_export_as_txt(
         if vol_intro:
             parts.append(f"{vol_intro}\n\n")
 
-        for chap in vol.get("chapters", []):
-            chap_id = chap.get("chapterId")
+        # Batch-fetch chapters for this volume
+        chap_ids = [
+            chap.get("chapterId")
+            for chap in vol.get("chapters", [])
+            if chap.get("chapterId")
+        ]
+        chap_map = exporter._get_chapters(book_id, chap_ids)
+
+        for chap_meta in vol.get("chapters", []):
+            chap_id = chap_meta.get("chapterId")
             if not chap_id:
-                exporter.logger.warning("%s Missing chapterId, skipping: %s", TAG, chap)
+                exporter.logger.warning(
+                    "%s Missing chapterId, skipping: %s", TAG, chap_meta
+                )
                 continue
 
-            chap_title = cleaner.clean_title(chap.get("title", ""))
-
-            data = exporter._get_chapter(book_id, chap_id)
+            chap_title = cleaner.clean_title(chap_meta.get("title", ""))
+            data = chap_map.get(chap_id)
             if not data:
                 exporter.logger.info(
                     "%s Missing chapter: %s (%s), skipping.",
