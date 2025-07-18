@@ -9,7 +9,6 @@ into a single `.txt` file. Intended for use by `LinovelibExporter`.
 
 from __future__ import annotations
 
-import json
 from typing import TYPE_CHECKING
 
 from novel_downloader.core.exporters.txt_util import (
@@ -44,7 +43,6 @@ def linovelib_export_as_txt(
     """
     TAG = "[exporter]"
     # --- Paths & options ---
-    raw_base = exporter._raw_data_dir / book_id
     out_dir = exporter.output_dir
     out_dir.mkdir(parents=True, exist_ok=True)
     cleaner = get_cleaner(
@@ -53,11 +51,8 @@ def linovelib_export_as_txt(
     )
 
     # --- Load book_info.json ---
-    info_path = raw_base / "book_info.json"
-    try:
-        book_info = json.loads(info_path.read_text(encoding="utf-8"))
-    except Exception as e:
-        exporter.logger.error("%s Failed to load %s: %s", TAG, info_path, e)
+    book_info = exporter._load_book_info(book_id)
+    if not book_info:
         return
 
     # --- Compile chapters ---
@@ -107,11 +102,11 @@ def linovelib_export_as_txt(
             parts.append(build_txt_chapter(title=title, paragraphs=content, extras={}))
 
     # --- Build header ---
-    name = book_info.get("book_name")
-    author = book_info.get("author")
-    words = book_info.get("word_count")
-    updated = book_info.get("update_time")
-    summary = book_info.get("summary")
+    name = book_info.get("book_name") or ""
+    author = book_info.get("author") or ""
+    words = book_info.get("word_count") or ""
+    updated = book_info.get("update_time") or ""
+    summary = book_info.get("summary") or ""
 
     header_fields = [
         ("书名", name),

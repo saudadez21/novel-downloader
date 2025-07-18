@@ -9,6 +9,7 @@ content into various output formats.
 """
 
 import abc
+import json
 import logging
 import types
 from datetime import datetime
@@ -210,6 +211,26 @@ class BaseExporter(ExporterProtocol, abc.ABC):
         if book_id not in self._storage_cache:
             return {}
         return self._storage_cache[book_id].get_best_chapters(chap_ids)
+
+    def _load_book_info(self, book_id: str) -> dict[str, Any]:
+        info_path = self._raw_data_dir / book_id / "book_info.json"
+        if not info_path.is_file():
+            self.logger.error("Missing metadata file: %s", info_path)
+            return {}
+
+        try:
+            text = info_path.read_text(encoding="utf-8")
+            data: Any = json.loads(text)
+            if not isinstance(data, dict):
+                self.logger.error(
+                    "Invalid JSON structure in %s: expected an object at the top",
+                    info_path,
+                )
+                return {}
+            return data
+        except json.JSONDecodeError as e:
+            self.logger.error("Corrupt JSON in %s: %s", info_path, e)
+        return {}
 
     def _init_chapter_storages(self, book_id: str) -> None:
         if book_id in self._storage_cache:

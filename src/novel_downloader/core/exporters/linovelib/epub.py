@@ -16,7 +16,6 @@ from novel_downloader.core.exporters.epub_util import (
     download_cover,
     finalize_export,
     inline_remote_images,
-    load_book_info,
     prepare_builder,
 )
 from novel_downloader.utils import (
@@ -72,8 +71,8 @@ def export_whole_book(
     )
 
     # --- Load book_info.json ---
-    book_info = load_book_info(raw_base, exporter.logger, TAG)
-    if book_info is None:
+    book_info = exporter._load_book_info(book_id)
+    if not book_info:
         return
 
     book_name = book_info.get("book_name", book_id)
@@ -240,8 +239,8 @@ def export_by_volume(
     )
 
     # --- Load book_info.json ---
-    book_info = load_book_info(raw_base, exporter.logger, TAG)
-    if book_info is None:
+    book_info = exporter._load_book_info(book_id)
+    if not book_info:
         return
 
     book_name = book_info.get("book_name", book_id)

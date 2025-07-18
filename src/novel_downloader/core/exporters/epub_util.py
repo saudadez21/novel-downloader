@@ -7,7 +7,6 @@ Utilities for preparing and formatting chapter HTML for EPUB exports.
 """
 
 __all__ = [
-    "load_book_info",
     "download_cover",
     "prepare_builder",
     "finalize_export",
@@ -16,11 +15,9 @@ __all__ = [
 ]
 
 import html
-import json
 import logging
 import re
 from pathlib import Path
-from typing import Any
 
 from novel_downloader.utils import download, sanitize_filename
 from novel_downloader.utils.constants import (
@@ -39,30 +36,6 @@ _IMG_TAG_PATTERN = re.compile(
 _RAW_HTML_RE = re.compile(
     r'^(<img\b[^>]*?\/>|<div class="duokan-image-single illus">.*?<\/div>)$', re.DOTALL
 )
-
-
-def load_book_info(
-    raw_base: Path,
-    logger: logging.Logger,
-    tag: str,
-) -> dict[str, Any] | None:
-    info_path = raw_base / "book_info.json"
-    try:
-        text = info_path.read_text(encoding="utf-8")
-        data: Any = json.loads(text)
-        if not isinstance(data, dict):
-            logger.error(
-                "%s Invalid JSON structure in %s: expected an object at the top level",
-                tag,
-                info_path,
-            )
-            return None
-        return data
-    except FileNotFoundError:
-        logger.error("%s Missing metadata file: %s", tag, info_path)
-    except json.JSONDecodeError as e:
-        logger.error("%s Corrupt JSON in %s: %s", tag, info_path, e)
-    return None
 
 
 def download_cover(
