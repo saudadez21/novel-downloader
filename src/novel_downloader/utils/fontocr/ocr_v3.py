@@ -326,7 +326,7 @@ class FontOCRV3:
         :param vec_weight: weight factor for vector-based similarity scores
         :param ocr_version: OCR model version identifier
         :param threshold: minimum confidence threshold for predictions [0.0-1.0]
-        :param font_debug: if True, dump per-character debug images under cache_dir
+        :param font_debug: if True, dump per-character debug images under debug_dir
         :param kwargs: reserved for future extensions
         """
         self.use_freq = use_freq
@@ -348,7 +348,7 @@ class FontOCRV3:
         self._fixed_map_dir.mkdir(parents=True, exist_ok=True)
 
         if font_debug:
-            self._debug_dir = self._cache_dir / "font_debug" / "badcase"
+            self._debug_dir = Path.cwd() / "debug" / "font_debug" / "badcase"
             self._debug_dir.mkdir(parents=True, exist_ok=True)
 
         # load shared OCR + frequency DB
