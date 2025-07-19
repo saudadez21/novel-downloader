@@ -326,10 +326,6 @@ class EpubBuilder:
         Write out the .epub ZIP file.
         """
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        container_xml = build_container_xml()
-        nav_xhtml = self.nav.to_xhtml()
-        ncx_xml = self.ncx.to_xml()
-        opf_xml = self.opf.to_xml()
 
         with zipfile.ZipFile(output_path, "w") as epub:
             # must be first and uncompressed
@@ -342,24 +338,24 @@ class EpubBuilder:
             # container
             epub.writestr(
                 "META-INF/container.xml",
-                container_xml,
+                build_container_xml(),
                 compress_type=ZIP_DEFLATED,
             )
 
             # core documents
             epub.writestr(
                 f"{ROOT_PATH}/nav.xhtml",
-                nav_xhtml,
+                self.nav.to_xhtml(),
                 compress_type=ZIP_DEFLATED,
             )
             epub.writestr(
                 f"{ROOT_PATH}/toc.ncx",
-                ncx_xml,
+                self.ncx.to_xml(),
                 compress_type=ZIP_DEFLATED,
             )
             epub.writestr(
                 f"{ROOT_PATH}/content.opf",
-                opf_xml,
+                self.opf.to_xml(),
                 compress_type=ZIP_DEFLATED,
             )
 

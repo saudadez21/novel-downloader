@@ -33,7 +33,7 @@ CHAP_DOC_TYPE = (
     '<?xml version="1.0" encoding="utf-8"?>\n'
     "<!DOCTYPE html PUBLIC "
     '"-//W3C//DTD XHTML 1.1//EN" '
-    '"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">\n'
+    '"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">'
 )
 
 IMAGE_MEDIA_TYPES: dict[str, str] = {
@@ -59,3 +59,19 @@ COVER_IMAGE_TEMPLATE = (
     f'style="max-width: 100%; height: auto;" />'
     f"</div>"
 )
+
+CSS_TMPLATE = (
+    f'<link href="../{CSS_FOLDER}/{{filename}}" '
+    f'rel="stylesheet" type="{{media_type}}"/>'
+)
+
+CHAP_TMPLATE = f"""\
+{CHAP_DOC_TYPE}
+<html xmlns="{XHTML_NS}" xmlns:epub="{EPUB_NS}" lang="{{lang}}" xml:lang="{{lang}}">
+  <head>
+    <title>{{title}}</title>
+{{xlinks}}
+  </head>
+  <body>{{content}}</body>
+</html>
+"""
