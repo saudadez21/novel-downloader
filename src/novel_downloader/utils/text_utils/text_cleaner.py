@@ -8,7 +8,7 @@ by removing unwanted patterns, replacing strings.
 """
 
 import re
-from collections.abc import Iterable
+from re import Match, Pattern
 from typing import Protocol, runtime_checkable
 
 from novel_downloader.models import TextCleanerConfig
@@ -38,24 +38,54 @@ class NullCleaner(Cleaner):
 
 
 class TextCleaner(Cleaner):
-    _INVISIBLE_PATTERN = re.compile(r"[\ufeff\u200B\u200C\u200D\u2060]")
+    """
+    TextCleaner removes invisible characters, strips unwanted patterns,
+    and applies literal replacements in a single pass using a combined regex.
+
+    For regex that never matches, reference:
+
+    https://stackoverflow.com/questions/2930182/regex-to-not-match-anything
+    """
+
+    _INVISIBLE_PATTERN: Pattern[str] = re.compile(r"[\ufeff\u200B\u200C\u200D\u2060]")
 
     def __init__(self, config: TextCleanerConfig) -> None:
+        """
+        Initialize TextCleaner with the given configuration.
+
+        :param config: TextCleanerConfig instance containing:
+
+            - remove_invisible: whether to strip BOM/zero-width chars
+            - title_remove_patterns: list of regex patterns to delete from titles
+            - content_remove_patterns: list of regex patterns to delete from content
+            - title_replacements: dict of literal replacements for titles
+            - content_replacements: dict of literal replacements for content
+        """
         self._remove_invisible = config.remove_invisible
-        self._title_remove = self._merge_patterns(
-            config.title_remove_patterns,
-        )
-        self._content_remove = self._merge_patterns(
-            config.content_remove_patterns,
-            flags=re.MULTILINE,
-        )
-        self._title_replacements: list[tuple[str, str]] = sorted(
-            config.title_replacements.items(),
-            key=lambda kv: -len(kv[0]),
-        )
-        self._content_replacements: list[tuple[str, str]] = sorted(
-            config.content_replacements.items(),
-            key=lambda kv: -len(kv[0]),
+
+        # Build literal‐to‐literal replacement maps
+        self._title_repl_map = config.title_replacements
+        self._content_repl_map = config.content_replacements
+
+        # Deduplicate removal patterns (keep order)
+        title_remove = list(dict.fromkeys(config.title_remove_patterns))
+        content_remove = list(dict.fromkeys(config.content_remove_patterns))
+
+        # Build a single combined regex for title:
+        #   all delete‐patterns OR all escaped replacement‐keys
+        title_parts = title_remove + [re.escape(k) for k in self._title_repl_map]
+        title_parts.sort(
+            key=len, reverse=True
+        )  # longer first to avoid prefix collisions
+        title_pattern = "|".join(title_parts) if title_parts else r"$^"
+        self._title_combined_rx: Pattern[str] = re.compile(title_pattern)
+
+        # Build a single combined regex for content (multiline mode)
+        content_parts = content_remove + [re.escape(k) for k in self._content_repl_map]
+        content_parts.sort(key=len, reverse=True)
+        content_pattern = "|".join(content_parts) if content_parts else r"$^"
+        self._content_combined_rx: Pattern[str] = re.compile(
+            content_pattern, flags=re.MULTILINE
         )
 
     def clean_title(self, text: str) -> str:
@@ -64,19 +94,13 @@ class TextCleaner(Cleaner):
 
         Steps:
           1. Optionally strip BOM & zero-width characters.
-          2. Remove all patterns in title_remove_patterns.
-          3. Apply literal replacements from title_replacements.
-          4. Trim leading/trailing whitespace.
+          2. Remove unwanted patterns and apply literal replacements in one pass.
+          3. Trim leading/trailing whitespace.
 
         :param text: Raw title text.
         :return: Cleaned title.
         """
-        return self._do_clean(
-            text,
-            self._title_remove,
-            self._title_replacements,
-            self._remove_invisible,
-        )
+        return self._do_clean(text, self._title_combined_rx, self._title_repl_map)
 
     def clean_content(self, text: str) -> str:
         """
@@ -84,36 +108,28 @@ class TextCleaner(Cleaner):
 
         Steps:
           1. Optionally strip BOM & zero-width characters.
-          2. Remove all patterns in content_remove_patterns.
-          3. Apply literal replacements from content_replacements.
-          4. Trim leading/trailing whitespace.
+          2. Remove unwanted patterns and apply literal replacements in one pass.
+          3. Trim leading/trailing whitespace.
 
         :param text: Raw content/body text.
         :return: Cleaned content.
         """
-        return self._do_clean(
-            text,
-            self._content_remove,
-            self._content_replacements,
-            self._remove_invisible,
-        )
+        return self._do_clean(text, self._content_combined_rx, self._content_repl_map)
 
     def clean(self, text: str, *, as_title: bool = False) -> str:
         """
-        Single-entry point to clean text as either title or content.
+        Unified clean method to process text as either title or content.
 
-        :param text: The raw text.
+        :param text: Raw text to clean.
         :param as_title: If True, use title rules; otherwise content rules.
-        :return: The cleaned text.
+        :return: Cleaned text.
         """
-        if as_title:
-            return self.clean_title(text)
-        return self.clean_content(text)
+        return self.clean_title(text) if as_title else self.clean_content(text)
 
     @classmethod
     def _remove_bom_and_invisible(cls, text: str) -> str:
         """
-        Remove BOM and common zero-width/invisible characters from text.
+        Remove BOM and zero-width/invisible characters from the text.
 
         Matches:
           - U+FEFF (BOM)
@@ -127,46 +143,32 @@ class TextCleaner(Cleaner):
         """
         return cls._INVISIBLE_PATTERN.sub("", text)
 
-    @staticmethod
-    def _merge_patterns(
-        patterns: Iterable[str],
-        flags: int = 0,
-    ) -> re.Pattern[str]:
-        """
-        Merge a collection of regex pattern strings into a single compiled pattern.
-
-        It sort the unique patterns by length in descending order, so that
-        longer (more specific) patterns are attempted before shorter ones,
-        preventing partial matches from shadowing full matches.
-
-        If no patterns remain, return a regex that never matches (see ref).
-
-        Reference:
-
-        https://stackoverflow.com/questions/2930182/regex-to-not-match-anything
-
-        :param patterns: An iterable of regex pattern strings.
-        :return: A compiled `re.Pattern` matching any of the input patterns
-        """
-        unique_patterns = set(patterns)
-        sorted_patterns = sorted(unique_patterns, key=len, reverse=True)
-        if not sorted_patterns:
-            return re.compile(r"$-")
-        return re.compile(r"(?:{})".format("|".join(sorted_patterns)), flags=flags)
-
-    @classmethod
     def _do_clean(
-        cls,
+        self,
         text: str,
-        remove_rx: re.Pattern[str],
-        replacements: Iterable[tuple[str, str]],
-        remove_invisible: bool,
+        combined_rx: Pattern[str],
+        repl_map: dict[str, str],
     ) -> str:
-        if remove_invisible:
-            text = cls._remove_bom_and_invisible(text)
-        text = remove_rx.sub("", text)
-        for src, tgt in replacements:
-            text = text.replace(src, tgt)
+        """
+        Core cleaning logic:
+        optional invisible removal, single-pass remove/replace, trimming.
+
+        :param text: Text to clean.
+        :param combined_rx: Compiled regex for removal patterns and replacement keys.
+        :param repl_map: Mapping from matched token to replacement text.
+        :return: Cleaned text.
+        """
+        # Strip invisible chars if configured
+        if self._remove_invisible:
+            text = self._remove_bom_and_invisible(text)
+
+        # Single‐pass removal & replacement
+        def _sub(match: Match[str]) -> str:
+            token = match.group(0)
+            # If token in repl_map -> replacement; else -> delete (empty string)
+            return repl_map.get(token, "")
+
+        text = combined_rx.sub(_sub, text)
         return text.strip()
 
 
