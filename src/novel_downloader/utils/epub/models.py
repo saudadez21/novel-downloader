@@ -19,21 +19,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from lxml import etree, html
-from lxml.builder import ElementMaker
-
 from .constants import (
-    CHAP_DOC_TYPE,
-    CSS_FOLDER,
-    EPUB_NS,
-    PRETTY_PRINT_FLAG,
-    XHTML_NS,
-    XML_NS,
-)
-
-HTML = ElementMaker(
-    namespace=XHTML_NS,
-    nsmap={None: XHTML_NS, "epub": EPUB_NS},
+    CHAP_TMPLATE,
+    CSS_TMPLATE,
 )
 
 
@@ -121,38 +109,16 @@ class Chapter(EpubResource):
         """
         Generate the XHTML for a chapter.
         """
-        html_el = HTML.html(
-            # <head>
-            HTML.head(
-                # <title>
-                HTML.title(self.title),
-                # <link> for each stylesheet
-                *[
-                    HTML.link(
-                        href=f"../{CSS_FOLDER}/{css.filename}",
-                        rel="stylesheet",
-                        type=css.media_type,
-                    )
-                    for css in self.css
-                ],
-            ),
-            # <body>
-            HTML.body(
-                *list(html.fromstring(f'<div xmlns="{XHTML_NS}">{self.content}</div>'))
-            ),
-            # attributes on <html>
+        links = "\n".join(
+            CSS_TMPLATE.format(filename=css.filename, media_type=css.media_type)
+            for css in self.css
+        )
+        return CHAP_TMPLATE.format(
             lang=lang,
-            **{f"{{{XML_NS}}}lang": lang},
+            title=self.title,
+            xlinks=links,
+            content=self.content,
         )
-        xhtml_bytes = etree.tostring(
-            html_el,
-            pretty_print=PRETTY_PRINT_FLAG,
-            xml_declaration=False,
-            encoding="utf-8",
-            method="xml",
-        )
-        xhtml_string: str = xhtml_bytes.decode("utf-8")
-        return CHAP_DOC_TYPE + xhtml_string
 
 
 @dataclass
