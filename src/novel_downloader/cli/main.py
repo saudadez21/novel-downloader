@@ -14,6 +14,7 @@ from .clean import register_clean_subcommand
 from .config import register_config_subcommand
 from .download import register_download_subcommand
 from .export import register_export_subcommand
+from .search import register_search_subcommand
 
 
 def cli_main() -> None:
@@ -24,6 +25,7 @@ def cli_main() -> None:
     register_config_subcommand(subparsers)
     register_download_subcommand(subparsers)
     register_export_subcommand(subparsers)
+    register_search_subcommand(subparsers)
 
     args = parser.parse_args()
     if hasattr(args, "func"):

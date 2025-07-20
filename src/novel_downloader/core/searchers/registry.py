@@ -34,7 +34,7 @@ def register_searcher(
 
 
 def search(
-    name: str,
+    keyword: str,
     sites: Sequence[str] | None = None,
     limit: int | None = None,
 ) -> list[SearchResult]:
@@ -42,23 +42,20 @@ def search(
     Perform a search for the given keyword across one or more registered sites,
     then aggregate and sort the results by their `priority` value.
 
-    :param name:  The search term or keyword to query.
-    :param sites: An optional sequence of site keys to limit which searchers.
-    :param limit: Maximum total number of results to return; if None, return all.
-    :return:      A flat list of `SearchResult` objects.
+    :param keyword: The search term or keyword to query.
+    :param sites:   An optional sequence of site keys to limit which searchers.
+    :param limit:   Maximum total number of results to return; if None, return all.
+    :return:        A flat list of `SearchResult` objects.
     """
     keys = list(sites or _SEARCHER_REGISTRY.keys())
+    to_call = {_SEARCHER_REGISTRY[key] for key in keys if key in _SEARCHER_REGISTRY}
 
     results: list[SearchResult] = []
-
-    for key in keys:
-        cls = _SEARCHER_REGISTRY[key]
+    for cls in to_call:
         try:
-            results.extend(cls.search(name))
+            results.extend(cls.search(keyword, limit=3))
         except Exception:
             continue
 
     results.sort(key=lambda res: res["priority"])
-    if limit is not None:
-        return results[:limit]
-    return results
+    return results[:limit] if limit is not None else results

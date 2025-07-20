@@ -10,16 +10,19 @@ import logging
 from lxml import html
 
 from novel_downloader.core.searchers.base import BaseSearcher
-from novel_downloader.core.searchers.registry import register_searcher
 from novel_downloader.models import SearchResult
 
 logger = logging.getLogger(__name__)
 
 
-@register_searcher(
-    site_keys=["qidian", "qd"],
-)
+# @register_searcher(
+#     site_keys=["qidian", "qd"],
+# )
 class QidianSearcher(BaseSearcher):
+    """
+    TODO: 现在默认没有 cookie 会跳转
+    """
+
     site_name = "qidian"
     priority = 0
     SEARCH_URL = "https://www.qidian.com/so/{query}.html"
