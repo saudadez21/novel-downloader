@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.searchers.qidian
---------------------------------------
+novel_downloader.core.searchers.esjzone
+---------------------------------------
 
 """
 
@@ -17,19 +17,19 @@ logger = logging.getLogger(__name__)
 
 
 @register_searcher(
-    site_keys=["qidian", "qd"],
+    site_keys=["esjzone"],
 )
-class QidianSearcher(BaseSearcher):
-    site_name = "qidian"
-    priority = 0
-    SEARCH_URL = "https://www.qidian.com/so/{query}.html"
+class EsjzoneSearcher(BaseSearcher):
+    site_name = "esjzone"
+    priority = 3
+    SEARCH_URL = "https://www.esjzone.cc/tags/{query}/"
 
     @classmethod
     def _fetch_html(cls, keyword: str) -> str:
         """
-        Fetch raw HTML from Qidian's search page.
+        Fetch raw HTML from Esjzone's search page.
 
-        :param keyword: The search term to query on Qidian.
+        :param keyword: The search term to query on Esjzone.
         :return: HTML text of the search results page, or an empty string on fail.
         """
         url = cls.SEARCH_URL.format(query=cls._quote(keyword))
@@ -48,30 +48,30 @@ class QidianSearcher(BaseSearcher):
     @classmethod
     def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
         """
-        Parse raw HTML from Qidian search results into list of SearchResult.
+        Parse raw HTML from Esjzone search results into list of SearchResult.
 
-        :param html_str: Raw HTML string from Qidian search results page.
+        :param html_str: Raw HTML string from Esjzone search results page.
         :param limit: Maximum number of results to return, or None for all.
         :return: List of SearchResult dicts.
         """
         doc = html.fromstring(html_str)
-        items = doc.xpath(
-            '//div[@id="result-list"]//li[contains(@class, "res-book-item")]'
-        )
+        cards = doc.xpath('//div[contains(@class,"card-body")]')
         results: list[SearchResult] = []
 
-        base_prio = getattr(cls, "priority", 0)
-        for idx, item in enumerate(items):
+        for idx, card in enumerate(cards):
             if limit is not None and idx >= limit:
                 break
-            book_id = item.get("data-bid")
-            title_elem = item.xpath('.//h3[@class="book-info-title"]/a')[0]
-            title = title_elem.text_content().strip()
-            author_nodes = item.xpath(
-                './/p[@class="author"]/a[@class="name"] | .//p[@class="author"]/i'
-            )
-            author = author_nodes[0].text_content().strip() if author_nodes else ""
-            prio = base_prio + idx
+            # Title and book_id
+            link = card.xpath('.//h5[@class="card-title"]/a')[0]
+            title = link.text_content().strip()
+            href = link.get("href", "")
+            # href format: /detail/<book_id>.html
+            book_id = href.strip("/").replace("detail/", "").replace(".html", "")
+            # Author
+            author_link = card.xpath('.//div[@class="card-author"]/a')[0]
+            author = author_link.text_content().strip()
+            # Compute priority incrementally
+            prio = cls.priority + idx
             results.append(
                 SearchResult(
                     site=cls.site_name,
