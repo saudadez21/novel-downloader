@@ -15,6 +15,7 @@ from .config import (
     TextCleanerConfig,
 )
 from .login import LoginField
+from .search import SearchResult
 from .types import (
     BrowserType,
     LogLevel,
@@ -31,6 +32,7 @@ __all__ = [
     "TextCleanerConfig",
     "ChapterDict",
     "LoginField",
+    "SearchResult",
     "BrowserType",
     "ModeType",
     "SplitMode",
