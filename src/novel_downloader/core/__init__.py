@@ -19,6 +19,7 @@ __all__ = [
     "get_exporter",
     "get_fetcher",
     "get_parser",
+    "search",
     "DownloaderProtocol",
     "ExporterProtocol",
     "FetcherProtocol",
@@ -35,3 +36,4 @@ from .interfaces import (
     ParserProtocol,
 )
 from .parsers import get_parser
+from .searchers import search

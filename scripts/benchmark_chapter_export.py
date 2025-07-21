@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
+import argparse
 import contextlib
 import json
 import random
+import shutil
 import sqlite3
 import string
 import time
@@ -10,6 +12,7 @@ from typing import Any, TypedDict, cast
 
 # --- Constants Configuration ---
 SCRIPT_DIR = Path(__file__).resolve().parent
+CHAPTER_DATA_DIR = SCRIPT_DIR / "chapter_data"
 NUM_VOLUMES = 12
 CHAPTERS_PER_VOLUME = 600
 PRIORITIES = {0: 0, 1: 1}  # source_id -> priority
@@ -171,6 +174,26 @@ class ChapterStorage:
 
 
 # --- Helper Functions ---
+def load_best_chapter_json(data_dir: Path, chap_id: str) -> ChapterDict | None:
+    """
+    Look in each source subdirectory for chap_id.json, in order of priority,
+    and return the first found ChapterDict.
+    """
+    # sort source IDs by their priority (lower number first)
+    for src_id in sorted(PRIORITIES, key=lambda k: PRIORITIES[k]):
+        path = data_dir / str(src_id) / f"{chap_id}.json"
+        if path.exists():
+            with open(path) as f:
+                raw = json.load(f)
+            return ChapterDict(
+                id=raw["id"],
+                title=raw["title"],
+                content=raw["content"],
+                extra=raw.get("extra", {}),
+            )
+    return None
+
+
 def generate_volumes(num_volumes: int, chapters_per: int) -> list[dict]:
     volumes = []
     for vi in range(num_volumes):
@@ -187,6 +210,11 @@ def populate_db(volumes: list[dict]) -> None:
     # Remove old DB file if it exists, then recreate schema
     if DB_PATH.exists():
         DB_PATH.unlink()
+    if CHAPTER_DATA_DIR.exists():
+        shutil.rmtree(CHAPTER_DATA_DIR)
+    CHAPTER_DATA_DIR.mkdir(parents=True)
+    for src_id in PRIORITIES:
+        (CHAPTER_DATA_DIR / str(src_id)).mkdir()
 
     storage = ChapterStorage(SCRIPT_DIR, PRIORITIES)
     storage.connect()
@@ -214,9 +242,27 @@ def populate_db(volumes: list[dict]) -> None:
 
     # Upsert each bucket
     for src_id, ch_list in buffer.items():
+        src_dir = CHAPTER_DATA_DIR / str(src_id)
+        for cd in ch_list:
+            json_path = src_dir / f"{cd['id']}.json"
+            with open(json_path, "w") as f:
+                json.dump(cd, f)
         storage.upsert_chapters(ch_list, src_id)
 
     storage.close()
+
+
+def test_scenario0(data_dir: Path, volumes: list[dict]) -> None:
+    lines: list[str] = []
+    for vol in volumes:
+        lines.append(vol["volume_title"])
+        for chap in vol["chapters"]:
+            cd = load_best_chapter_json(data_dir, chap["chapter_id"])
+            if not cd:
+                continue
+            lines.append(cd["title"])
+            lines.append(cd["content"])
+    _ = "\n".join(lines)  # simulate writing to a text file
 
 
 def test_scenario1(storage: ChapterStorage, volumes: list[dict]) -> None:
@@ -229,7 +275,7 @@ def test_scenario1(storage: ChapterStorage, volumes: list[dict]) -> None:
                 continue
             lines.append(data["title"])
             lines.append(data["content"])
-    _ = "\n".join(lines)  # simulate writing to a text file
+    _ = "\n".join(lines)
 
 
 def test_scenario2(storage: ChapterStorage, volumes: list[dict]) -> None:
@@ -247,18 +293,30 @@ def test_scenario2(storage: ChapterStorage, volumes: list[dict]) -> None:
     _ = "\n".join(lines)
 
 
-# --- Main Flow ---
-def main():
+def clean_data() -> None:
+    if DB_PATH.exists():
+        DB_PATH.unlink()
+    if CHAPTER_DATA_DIR.exists():
+        shutil.rmtree(CHAPTER_DATA_DIR)
+
+
+def run_tests() -> None:
     volumes = generate_volumes(NUM_VOLUMES, CHAPTERS_PER_VOLUME)
 
     print("Generating and upserting test data...")
     populate_db(volumes)
 
     print("Starting performance tests:")
-    times1, times2 = [], []
+    times0, times1, times2 = [], [], []
 
     for i in range(TEST_COUNT):
-        # Scenario 1: single-chapter queries
+        # Scenario 0: JSON-by-chapter with best-source helper
+        t0 = time.perf_counter()
+        test_scenario0(CHAPTER_DATA_DIR, volumes)
+        t1 = time.perf_counter()
+        times0.append(t1 - t0)
+
+        # Scenario 1: single-chapter DB queries
         t0 = time.perf_counter()
         storage = ChapterStorage(SCRIPT_DIR, PRIORITIES)
         storage.connect()
@@ -267,7 +325,7 @@ def main():
         t1 = time.perf_counter()
         times1.append(t1 - t0)
 
-        # Scenario 2: batched-chapter queries
+        # Scenario 2: batched-chapter DB queries
         t0 = time.perf_counter()
         storage = ChapterStorage(SCRIPT_DIR, PRIORITIES)
         storage.connect()
@@ -278,15 +336,38 @@ def main():
 
         print(
             f"  Iteration {i+1}/{TEST_COUNT} - "
+            f"Scenario 0: {times0[-1]:.4f}s, "
             f"Scenario 1: {times1[-1]:.4f}s, "
             f"Scenario 2: {times2[-1]:.4f}s"
         )
 
-    avg1 = sum(times1) / TEST_COUNT
-    avg2 = sum(times2) / TEST_COUNT
     print("\nTests completed:")
-    print(f"  Average time Scenario 1: {avg1:.4f} seconds")
-    print(f"  Average time Scenario 2: {avg2:.4f} seconds")
+    print(f"  Average time Scenario 0: {sum(times0)/TEST_COUNT:.4f} seconds")
+    print(f"  Average time Scenario 1: {sum(times1)/TEST_COUNT:.4f} seconds")
+    print(f"  Average time Scenario 2: {sum(times2)/TEST_COUNT:.4f} seconds")
+
+
+# --- Main Flow ---
+def main():
+    parser = argparse.ArgumentParser(description="Benchmark chapter-loading scenarios")
+    parser.add_argument(
+        "--test",
+        action="store_true",
+        help="Run the benchmark tests",
+    )
+    parser.add_argument(
+        "--clean",
+        action="store_true",
+        help="Clean out existing database and JSON data before running",
+    )
+    args = parser.parse_args()
+
+    if args.clean:
+        clean_data()
+        print("Cleaned existing DB and JSON data.")
+
+    if args.test or (not args.clean and not args.test):
+        run_tests()
 
 
 if __name__ == "__main__":

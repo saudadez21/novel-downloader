@@ -175,6 +175,7 @@ cython_debug/
 
 # Settings
 examples/settings.toml
+chapter_data/
 debug/
 dev/
 downloads/

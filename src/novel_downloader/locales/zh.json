@@ -58,9 +58,11 @@
   "download_site_mode": "使用模式: {mode}",
   "download_no_ids": "未提供书籍 ID, 正在退出",
   "download_fail_get_ids": "从配置获取书籍 ID 失败: {err}",
+  "download_config_load_fail": "加载配置失败: {err}",
   "download_only_example": "只发现示例书籍 ID (例如 '{example}')",
   "download_edit_config": "请编辑配置并将示例 ID 替换为真实书籍 ID",
   "download_downloading": "正在从 {site} 下载书籍 {book_id}...",
+  "download_login_failed": "登录失败: 请检查您的 Cookie 或账户信息后重试",
   "download_prompt_parse": "结束...",
   "download_book_ids": "要处理的一个或多个小说 ID",
   "download_option_start": "起始章节 ID (仅用于第一个书籍 ID)",
@@ -111,5 +113,14 @@
   "export_success_txt": "成功将 {book_id} 导出为 TXT。",
   "export_failed_txt": "导出 {book_id} 为 TXT 失败: {err}",
   "export_success_epub": "成功将 {book_id} 导出为 EPUB",
-  "export_failed_epub": "导出 {book_id} 为 EPUB 失败: {err}"
+  "export_failed_epub": "导出 {book_id} 为 EPUB 失败: {err}",
+
+  "help_search": "在一个或多个站点搜索书籍",
+  "help_search_sites": "要搜索的站点键 (默认为全部)",
+  "help_search_keyword": "要搜索的关键字",
+  "help_search_limit": "总体搜索结果数量上限",
+  "help_search_site_limit": "单站点搜索结果数量上限",
+  "no_results": "未找到结果",
+  "prompt_select_index": "通过编号选择结果 (或按回车取消): ",
+  "invalid_selection": "无效选择, 请重试。"
 }

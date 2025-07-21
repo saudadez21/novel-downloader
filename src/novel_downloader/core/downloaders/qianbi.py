@@ -212,20 +212,33 @@ class QianbiDownloader(BaseDownloader):
                     # fetch+parse previous to discover next
                     data = await self._process_chapter(book_id, prev_cid, html_dir)
                     if not data:
+                        self.logger.warning(
+                            "failed to fetch chapter %s, skipping repair",
+                            prev_cid,
+                        )
                         continue
                     storage.upsert_chapter(data, self.DEFAULT_SOURCE_ID)
+                    await async_sleep_with_random_delay(
+                        self.request_interval,
+                        mul_spread=1.1,
+                        max_sleep=self.request_interval + 2,
+                    )
 
                 next_cid = data.get("extra", {}).get("next_chapter_id")
                 if not next_cid:
+                    self.logger.warning(
+                        "No next_chapter_id in data for %s",
+                        prev_cid,
+                    )
                     continue
 
+                self.logger.info(
+                    "repaired chapterId: set to %s (from prev %s)",
+                    next_cid,
+                    prev_cid,
+                )
                 chap["chapterId"] = next_cid
                 prev_cid = next_cid
-                await async_sleep_with_random_delay(
-                    self.request_interval,
-                    mul_spread=1.1,
-                    max_sleep=self.request_interval + 2,
-                )
 
         self._save_book_info(book_id, book_info)
         return book_info

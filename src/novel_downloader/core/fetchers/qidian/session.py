@@ -151,6 +151,7 @@ class QidianSession(BaseSession):
     async def fetch(
         self,
         url: str,
+        encoding: str | None = None,
         **kwargs: Any,
     ) -> str:
         """
@@ -174,7 +175,7 @@ class QidianSession(BaseSession):
 
                 async with self.session.get(url, **kwargs) as resp:
                     resp.raise_for_status()
-                    text: str = await resp.text()
+                    text: str = await resp.text(encoding=encoding)
                     return text
             except aiohttp.ClientError:
                 if attempt < self.retry_times:

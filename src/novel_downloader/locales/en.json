@@ -58,10 +58,12 @@
   "download_site_mode": "Mode: {mode}",
   "download_no_ids": "No book IDs provided. Exiting.",
   "download_fail_get_ids": "Failed to get book IDs from config: {err}",
+  "download_config_load_fail": "Failed to load config: {err}",
   "download_only_example": "Only example book IDs found (e.g. '{example}').",
   "download_edit_config": "Please edit your config and replace them with real book IDs.",
   "download_downloading": "Downloading book {book_id} from {site}...",
   "download_prompt_parse": "Parse...",
+  "download_login_failed": "Download login failed: please check your cookies or account credentials and try again.",
   "download_book_ids": "One or more book IDs to process",
   "download_option_start": "Start chapter ID (applies to the first book ID only)",
   "download_option_end": "End chapter ID (applies to the first book ID only)",
@@ -111,5 +113,14 @@
   "export_success_txt": "Successfully exported {book_id} as TXT.",
   "export_failed_txt": "Failed to export {book_id} as TXT: {err}",
   "export_success_epub": "Successfully exported {book_id} as EPUB.",
-  "export_failed_epub": "Failed to export {book_id} as EPUB: {err}"
+  "export_failed_epub": "Failed to export {book_id} as EPUB: {err}",
+
+  "help_search": "search for a book on one or more sites",
+  "help_search_sites": "which site keys to search (default: all)",
+  "help_search_keyword": "keyword to look for",
+  "help_search_limit": "Maximum number of search results",
+  "help_search_site_limit":  "Maximum number of search results per site",
+  "no_results": "No results found.",
+  "prompt_select_index": "Select a result by number (or press Enter to cancel): ",
+  "invalid_selection": "Invalid choice, please try again."
 }
