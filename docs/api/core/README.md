@@ -27,14 +27,34 @@
 * [**downloaders**](downloaders.md)
   将抓取、解析、导出整合, 符合 `DownloaderProtocol`
 
+* [**searchers**](searchers.md)
+  根据关键词搜索并返回结果
+
 ---
 
 ## 快速使用示例
 
 ```python
 from novel_downloader.core import (
-    get_fetcher, get_parser, get_exporter, get_downloader
+    get_fetcher, get_parser, get_exporter, get_downloader, search
 )
+
+async def _print_progress(done: int, total: int) -> None:
+    print(f"下载进度: {done}/{total} 章")
+
+keyword = "关键词"
+sites = ["biquge"]
+
+results = search(
+    keyword=keyword,
+    sites=sites,
+    limit=10,
+    per_site_limit=5,
+)
+
+chosen = results[0]  # 选择一个
+book_id = chosen["book_id"]  # 或不使用 search 直接定义
+site_key = chosen["site"]  # 了例如 "qidian"
 
 # 准备配置对象
 fetcher_cfg = FetcherConfig(...)
@@ -42,26 +62,26 @@ parser_cfg  = ParserConfig(...)
 exporter_cfg = ExporterConfig(...)
 downloader_cfg = DownloaderConfig(...)
 book_config = {
-    "book_id": 12345,
+    "book_id": book_id,
 }
 
 # 创建 Parser/Exporter
-parser   = get_parser("qidian", parser_cfg)
-exporter = get_exporter("qidian", exporter_cfg)
+parser   = get_parser(site_key, parser_cfg)
+exporter = get_exporter(site_key, exporter_cfg)
 
 # 异步上下文中创建并登录 Fetcher
-async with get_fetcher("qidian", fetcher_cfg) as fetcher:
+async with get_fetcher(site_key, fetcher_cfg) as fetcher:
     await fetcher.login(username, password)
 
     # 下载整本书
     downloader = get_downloader(
         fetcher,
         parser,
-        site="qidian",
+        site=site_key,
         config=downloader_cfg,
     )
-    await downloader.download(book_config, progress_hook=progress_hook)
+    await downloader.download(book_config, progress_hook=_print_progress)
 
 # 导出整本书
-exporter.export(book["book_id"])
+exporter.export(book_config["book_id"])
 ```

@@ -8,15 +8,17 @@
 - **支持图片**: 是否支持抓取章节内插图并嵌入 EPUB 导出文件
 - **支持登录**: 部分站点提供书架或 VIP 阅读功能, 需账号登录
 
-| 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 |
-| ------------------------------------------------------------ | ---------- | -------- | -------- | -------- |
-| [起点中文网](https://www.qidian.com)                         | qidian     | ✅        | ❌        | ✅        |
-| [笔趣阁](http://www.b520.cc)                                 | biquge     | ❌        | ❌        | ❌        |
-| [铅笔小说](https://www.23qb.net), [备用](https://www.23qb.com/) | qianbi   | ✅        | ❌        | ❌        |
-| [SF轻小说](https://m.sfacg.com)                              | sfacg      | ✅        | ✅        | ✅        |
-| [ESJ Zone](https://www.esjzone.cc)                           | esjzone    | ✅        | ✅        | ✅        |
-| [百合会](https://www.yamibo.com/site/novel)                  | yamibo     | ✅        | ❌        | ✅        |
-| [哔哩轻小说](https://www.linovelib.com/)                     | linovelib   | ✅        | ✅        | ❌        |
+| 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 |
+| ------------------------------------------------------------ | ---------- | -------- | -------- | -------- | ---- |
+| [起点中文网](https://www.qidian.com)                         | qidian     | ✅        | ❌        | ✅        | ⚠️   |
+| [笔趣阁](http://www.b520.cc)                                 | biquge     | ❌        | ❌        | ❌        | ✅    |
+| [铅笔小说](https://www.23qb.net), [备用](https://www.23qb.com/) | qianbi   | ✅        | ❌        | ❌        | ✅    |
+| [SF轻小说](https://m.sfacg.com)                              | sfacg      | ✅        | ✅        | ✅        | ⚠️   |
+| [ESJ Zone](https://www.esjzone.cc)                           | esjzone    | ✅        | ✅        | ✅        | ✅    |
+| [百合会](https://www.yamibo.com/site/novel)                  | yamibo     | ✅        | ❌        | ✅        | ⚠️   |
+| [哔哩轻小说](https://www.linovelib.com/)                     | linovelib   | ✅        | ✅        | ❌        | ⚠️   |
+
+> ⚠️ 表示该功能尚未在本库中实现
 
 使用示例:
 
@@ -41,6 +43,9 @@ novel-cli download --site yamibo 123456
 
 # 下载 哔哩轻小说
 novel-cli download --site yamibo 1234
+
+# 根据关键词搜索
+novel-cli search 关键词
 ```
 
 ---

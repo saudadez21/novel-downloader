@@ -36,6 +36,21 @@ def register_search_subcommand(subparsers: _SubParsersAction) -> None:  # type: 
         type=str,
         help=t("help_config"),
     )
+    parser.add_argument(
+        "--limit",
+        "-l",
+        type=int,
+        default=10,
+        metavar="N",
+        help=t("help_search_limit"),
+    )
+    parser.add_argument(
+        "--site-limit",
+        type=int,
+        default=5,
+        metavar="M",
+        help=t("help_search_site_limit"),
+    )
 
     parser.set_defaults(func=handle_search)
 
@@ -47,6 +62,8 @@ def handle_search(args: Namespace) -> None:
     """
     sites: Sequence[str] | None = args.site or None
     keyword: str = args.keyword
+    overall_limit = max(1, args.limit)
+    per_site_limit = max(1, args.site_limit)
     config_path: Path | None = Path(args.config) if args.config else None
 
     try:
@@ -58,7 +75,8 @@ def handle_search(args: Namespace) -> None:
     results = search(
         keyword=keyword,
         sites=sites,
-        limit=10,
+        limit=overall_limit,
+        per_site_limit=per_site_limit,
     )
 
     chosen = _prompt_user_select(results)
@@ -88,7 +106,7 @@ def _prompt_user_select(
 
     # Show choices
     for i, r in enumerate(results, start=1):
-        print(f"[{i}] {r['title']} - {r['author']} ({r['site']})")
+        print(f"[{i}] {r['title']} - {r['author']} ({r['site']}, id: {r['book_id']})")
 
     attempts = 0
     while attempts < max_attempts:

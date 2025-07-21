@@ -63,6 +63,7 @@
   "download_edit_config": "Please edit your config and replace them with real book IDs.",
   "download_downloading": "Downloading book {book_id} from {site}...",
   "download_prompt_parse": "Parse...",
+  "download_login_failed": "Download login failed: please check your cookies or account credentials and try again.",
   "download_book_ids": "One or more book IDs to process",
   "download_option_start": "Start chapter ID (applies to the first book ID only)",
   "download_option_end": "End chapter ID (applies to the first book ID only)",
@@ -117,6 +118,8 @@
   "help_search": "search for a book on one or more sites",
   "help_search_sites": "which site keys to search (default: all)",
   "help_search_keyword": "keyword to look for",
+  "help_search_limit": "Maximum number of search results",
+  "help_search_site_limit":  "Maximum number of search results per site",
   "no_results": "No results found.",
   "prompt_select_index": "Select a result by number (or press Enter to cancel): ",
   "invalid_selection": "Invalid choice, please try again."

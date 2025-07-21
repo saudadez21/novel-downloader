@@ -37,6 +37,7 @@ def search(
     keyword: str,
     sites: Sequence[str] | None = None,
     limit: int | None = None,
+    per_site_limit: int = 5,
 ) -> list[SearchResult]:
     """
     Perform a search for the given keyword across one or more registered sites,
@@ -45,6 +46,7 @@ def search(
     :param keyword: The search term or keyword to query.
     :param sites:   An optional sequence of site keys to limit which searchers.
     :param limit:   Maximum total number of results to return; if None, return all.
+    :param per_site_limit: Maximum number of search results per site.
     :return:        A flat list of `SearchResult` objects.
     """
     keys = list(sites or _SEARCHER_REGISTRY.keys())
@@ -53,7 +55,7 @@ def search(
     results: list[SearchResult] = []
     for cls in to_call:
         try:
-            results.extend(cls.search(keyword, limit=3))
+            results.extend(cls.search(keyword, limit=per_site_limit))
         except Exception:
             continue
 

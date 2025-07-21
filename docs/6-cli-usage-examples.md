@@ -103,7 +103,79 @@ novel-cli download
 
 ---
 
-### 5. config 子命令
+### 5. search 子命令
+
+按关键字搜索小说, 并根据用户选择开始下载:
+
+```bash
+novel-cli search [-h] [--site SITE] [--config CONFIG] [--limit N] [--site-limit M] keyword
+```
+
+**参数说明**:
+
+* `keyword`: 要搜索的关键字
+* `--site SITE`, `-s SITE`: 要搜索的站点键, 可多次指定, 默认搜索全部已支持站点
+* `--limit N`: 总体搜索结果数量上限, 默认为 `10`, 最小为 `1`
+* `--site-limit M`: 单站点搜索结果数量上限, 默认为 `5`, 最小为 `1`
+* `--config CONFIG`: 可选指定配置文件路径
+
+**示例**:
+
+```bash
+# 搜索所有站点 (默认全部)
+novel-cli search 三体
+
+# 指定单个站点 (如 biquge)
+novel-cli search --site biquge 三体
+
+# 搜索 biquge, 返回最多 5 条结果
+novel-cli search --site biquge --limit 5 三体
+
+# 总体返回最多 20 条, 每站点最多 5 条
+novel-cli search --limit 20 --site-limit 5 三体
+
+# 指定多个站点 (biquge 和 qianbi)
+novel-cli search -s biquge -s qianbi 三体
+```
+
+---
+
+### 6. export 子命令
+
+导出已下载的小说为指定格式的文件:
+
+```bash
+novel-cli export [OPTIONS] book_ids [book_ids ...]
+```
+
+**参数说明**:
+
+* `book_ids`: 要导出的一个或多个小说 ID
+* `--format`: 导出格式, 可选值为 `txt`, `epub`, `all`, 默认 `all`
+* `--site SITE`: 网站来源 (如 `biquge`, `qidian`), 默认 `qidian`
+* `--config CONFIG`: 可选指定配置文件路径
+
+**示例:**
+
+```bash
+# 导出为默认格式 (txt + epub)
+novel-cli export 12345 23456
+
+# 指定导出格式为 EPUB
+novel-cli export --format epub 88888
+
+# 指定站点来源并导出多本书
+novel-cli export --site biquge 12345 23456
+
+# 使用指定配置文件导出
+novel-cli export --config ./settings.toml 4321
+```
+
+> **注意**: 必须提供至少一个 `book_ids`
+
+---
+
+### 7. config 子命令
 
 用于初始化和管理下载器设置, 包括切换语言、设置 Cookie、更新规则等:
 
@@ -137,7 +209,7 @@ novel-cli config init --force
 
 ---
 
-### 6. clean 子命令
+### 8. clean 子命令
 
 清理下载器生成的本地缓存和全局配置文件:
 
@@ -172,42 +244,7 @@ novel-cli clean --all
 novel-cli clean --all --yes
 ```
 
-> **注意**: `--all` 会删除包括设置文件在内的所有本地数据, 请慎重使用！
-
----
-
-### 7. export 子命令
-
-导出已下载的小说为指定格式的文件:
-
-```bash
-novel-cli export [OPTIONS] book_ids [book_ids ...]
-```
-
-**参数说明**:
-
-* `book_ids`: 要导出的一个或多个小说 ID
-* `--format`: 导出格式, 可选值为 `txt`, `epub`, `all`, 默认 `all`
-* `--site SITE`: 网站来源 (如 `biquge`, `qidian`), 默认 `qidian`
-* `--config CONFIG`: 可选指定配置文件路径
-
-**示例:**
-
-```bash
-# 导出为默认格式 (txt + epub)
-novel-cli export 12345 23456
-
-# 指定导出格式为 EPUB
-novel-cli export --format epub 88888
-
-# 指定站点来源并导出多本书
-novel-cli export --site biquge 12345 23456
-
-# 使用指定配置文件导出
-novel-cli export --config ./settings.toml 4321
-```
-
-> **注意**: 必须提供至少一个 `book_ids`
+> **注意**: `--all` 会删除包括设置文件在内的所有本地数据, 请慎重使用!
 
 ---
 
