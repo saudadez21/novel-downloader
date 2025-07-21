@@ -1,3 +1,18 @@
+## v1.5.0 (2025-07-21)
+
+### Feat
+
+- **search**: add BaseSearcher, site-specific searchers, CLI subcommand (#61)
+
+### Refactor
+
+- **core**: migrate ChapterStorage to SQLite and optimize download/export pipelines (#59)
+- **code**: cleanup resources, decorator-based module registration, and streamline exporter (#58)
+
+### Perf
+
+- **utils**: single-pass TextCleaner and template-based chapter rendering (#60)
+
 ## v1.4.5 (2025-07-12)
 
 ## v1.4.4 (2025-07-12)
