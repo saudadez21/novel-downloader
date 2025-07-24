@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 )
 class EsjzoneSearcher(BaseSearcher):
     site_name = "esjzone"
-    priority = 3
+    priority = 30
     SEARCH_URL = "https://www.esjzone.cc/tags/{query}/"
 
     @classmethod

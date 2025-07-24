@@ -37,6 +37,7 @@ class FetcherConfig:
     user_agent: str | None = None
     headers: dict[str, str] | None = None
     verify_ssl: bool = True
+    lang: str = "cn"
 
 
 @dataclass

@@ -48,8 +48,9 @@ novel-cli search 关键词
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 |
 | ------------------------------------------------------------ | ---------- | -------- | -------- | -------- | ---- |
 | [起点中文网](https://www.qidian.com)                         | qidian     | ✅        | ❌        | ✅        | ⚠️   |
-| [笔趣阁](http://www.b520.cc)                                 | biquge     | ❌        | ❌        | ❌        | ✅    |
-| [铅笔小说](https://www.23qb.net), [备用](https://www.23qb.com/) | qianbi   | ✅        | ❌        | ❌        | ✅    |
+| [笔趣阁](http://www.b520.cc)                                 | biquge     | ❌        | ❌        | ⚠️        | ✅    |
+| [铅笔小说](https://www.23qb.net), [备用](https://www.23qb.com/) | qianbi   | ✅        | ❌        | ⚠️        | ✅    |
+| [天天看小说](https://www.ttkan.co/)                           | ttkan     | ❌        | ❌        | ❌        | ✅    |
 
 #### 使用示例
 
@@ -62,6 +63,9 @@ novel-cli download --site biquge 1_2345
 
 # 下载铅笔小说
 novel-cli download --site qianbi 12345
+
+# 下载天天看小说
+novel-cli download --site ttkan bookname-authorname
 ```
 
 #### Book ID 说明
@@ -93,6 +97,13 @@ Book ID 通常来源于小说详情页 URL 中的路径段, 各资源站点的�
     - 书籍页面: `https://www.23qb.net/book/12282/` -> Book ID: `12282`
     - 章节页面: `https://www.23qb.net/book/12282/7908999.html` -> Chapter ID: `7908999`
 
+* **天天看小說 (ttkan)**
+
+  示例 URL:
+
+    - 书籍页面: `https://www.ttkan.co/novel/chapters/bookname-authorname` -> Book ID: `bookname-authorname`
+    - 章节页面: `https://www.wa01.com/novel/pagea/bookname-authorname_1.html` -> Chapter ID: `1`
+
 ---
 
 ### 轻小说
@@ -100,7 +111,7 @@ Book ID 通常来源于小说详情页 URL 中的路径段, 各资源站点的�
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 |
 | ------------------------------------------------------------ | ---------- | -------- | -------- | -------- | ---- |
 | [SF轻小说](https://m.sfacg.com)                              | sfacg      | ✅        | ✅        | ✅        | ⚠️   |
-| [哔哩轻小说](https://www.linovelib.com/)                     | linovelib   | ✅        | ✅        | ❌        | ⚠️   |
+| [哔哩轻小说](https://www.linovelib.com/)                     | linovelib   | ✅        | ✅        | ⚠️        | ⚠️   |
 | [ESJ Zone](https://www.esjzone.cc)                           | esjzone    | ✅        | ✅        | ✅        | ✅    |
 
 #### 使用示例

@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 )
 class BiqugeSearcher(BaseSearcher):
     site_name = "biquge"
-    priority = 5
+    priority = 30
     SEARCH_URL = "http://www.b520.cc/modules/article/search.php"
 
     @classmethod

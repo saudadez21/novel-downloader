@@ -11,6 +11,7 @@ __all__ = [
     "EsjzoneSearcher",
     "QianbiSearcher",
     "QidianSearcher",
+    "TtkanSearcher",
 ]
 
 from .biquge import BiqugeSearcher
@@ -18,3 +19,4 @@ from .esjzone import EsjzoneSearcher
 from .qianbi import QianbiSearcher
 from .qidian import QidianSearcher
 from .registry import search
+from .ttkan import TtkanSearcher

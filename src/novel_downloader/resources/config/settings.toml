@@ -15,6 +15,7 @@ cache_dir = "./novel_cache"        # 本地缓存目录 (字体 / 图片等)
 workers = 2                        # 工作协程数
 skip_existing = true               # 是否跳过已存在章节
 storage_batch_size = 1             # SQLite 批量提交的章节数量
+lang = "cn"
 
 [general.debug]
 save_html = false                  # 是否将抓取到的原始 HTML 保留到磁盘

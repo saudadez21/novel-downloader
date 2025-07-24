@@ -69,6 +69,7 @@ class ConfigAdapter:
             user_agent=req.get("user_agent", None),
             headers=req.get("headers", None),
             verify_ssl=req.get("verify_ssl", True),
+            lang=gen.get("lang", "cn"),
         )
 
     def get_downloader_config(self) -> DownloaderConfig:
