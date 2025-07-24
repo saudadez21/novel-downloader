@@ -21,7 +21,7 @@ class TtkanSession(BaseSession):
     """
 
     BOOK_INFO_URL = "https://{lang}.ttkan.co/novel/chapters/{book_id}"
-    CHAPTER_URL = "https://{lang}.ttkan.co/novel/user/page_direct"
+    CHAPTER_URL = "https://{lang}.wa01.com/novel/pagea/{book_id}_{chapter_id}.html"
 
     def __init__(
         self,
@@ -59,12 +59,12 @@ class TtkanSession(BaseSession):
         :param chapter_id: The chapter identifier.
         :return: The chapter content as a string.
         """
-        params = {
-            "novel_id": book_id,
-            "page": chapter_id,
-        }
-        url = self.chapter_url(lang=self._lang)
-        return [await self.fetch(url, params=params, **kwargs)]
+        url = self.chapter_url(
+            book_id=book_id,
+            chapter_id=chapter_id,
+            lang=self._lang,
+        )
+        return [await self.fetch(url, **kwargs)]
 
     @classmethod
     def book_info_url(cls, book_id: str, lang: str = "cn") -> str:
@@ -78,11 +78,18 @@ class TtkanSession(BaseSession):
         return cls.BOOK_INFO_URL.format(book_id=book_id, lang=lang)
 
     @classmethod
-    def chapter_url(cls, lang: str = "cn") -> str:
+    def chapter_url(
+        cls,
+        book_id: str,
+        chapter_id: str,
+        lang: str = "cn",
+    ) -> str:
         """
         Construct the URL for fetching a specific chapter.
 
+        :param book_id: The identifier of the book.
+        :param chapter_id: The chapter identifier.
         :param lang: The language of the book. (cn / tw)
         :return: Fully qualified chapter URL.
         """
-        return cls.CHAPTER_URL.format(lang=lang)
+        return cls.CHAPTER_URL.format(book_id=book_id, chapter_id=chapter_id, lang=lang)

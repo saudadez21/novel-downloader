@@ -13,11 +13,13 @@ of retrieving, parsing, and saving novel content for a given source.
 __all__ = [
     "get_downloader",
     "CommonDownloader",
+    "PiaotiaDownloader",
     "QianbiDownloader",
     "QidianDownloader",
 ]
 
 from .common import CommonDownloader
+from .piaotia import PiaotiaDownloader
 from .qianbi import QianbiDownloader
 from .qidian import QidianDownloader
 from .registry import get_downloader

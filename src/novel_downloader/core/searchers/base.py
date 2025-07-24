@@ -87,6 +87,6 @@ class BaseSearcher(abc.ABC, SearcherProtocol):
         return resp
 
     @staticmethod
-    def _quote(q: str) -> str:
+    def _quote(q: str, encoding: str | None = None, errors: str | None = None) -> str:
         """URL-encode a query string safely."""
-        return quote_plus(q)
+        return quote_plus(q, encoding=encoding, errors=errors)

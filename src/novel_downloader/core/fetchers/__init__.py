@@ -14,6 +14,7 @@ __all__ = [
     "BiqugeSession",
     "EsjzoneSession",
     "LinovelibSession",
+    "PiaotiaSession",
     "QianbiSession",
     "QidianSession",
     "SfacgSession",
@@ -24,6 +25,7 @@ __all__ = [
 from .biquge import BiqugeSession
 from .esjzone import EsjzoneSession
 from .linovelib import LinovelibSession
+from .piaotia import PiaotiaSession
 from .qianbi import QianbiSession
 from .qidian import QidianSession
 from .registry import get_fetcher

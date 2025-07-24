@@ -45,6 +45,8 @@ class CommonDownloader(BaseDownloader):
         end_id = book.get("end_id")
         ignore_set = set(book.get("ignore_ids", []))
 
+        book_id = self._normalize_book_id(book_id)
+
         # prepare storage & dirs
         raw_base = self._raw_data_dir / book_id
         raw_base.mkdir(parents=True, exist_ok=True)
@@ -225,3 +227,13 @@ class CommonDownloader(BaseDownloader):
                 else:
                     self.logger.warning("[ChapterWorker] Failed %s: %s", cid, e)
         return None
+
+    @staticmethod
+    def _normalize_book_id(book_id: str) -> str:
+        """
+        Normalize a book identifier.
+
+        Subclasses may override this method to transform the book ID
+        into their preferred format.
+        """
+        return book_id

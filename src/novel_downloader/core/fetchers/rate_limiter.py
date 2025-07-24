@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.fetchers.base.rate_limiter
-------------------------------------------------
+novel_downloader.core.fetchers.rate_limiter
+-------------------------------------------
 
 """
 
