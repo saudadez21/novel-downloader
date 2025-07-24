@@ -30,7 +30,6 @@ if TYPE_CHECKING:
 
 @register_parser(
     site_keys=["qidian", "qd"],
-    backends=["session", "browser"],
 )
 class QidianParser(BaseParser):
     """
@@ -58,7 +57,6 @@ class QidianParser(BaseParser):
         self._debug_dir: Path = Path.cwd() / "debug"
 
         state_files = [
-            DATA_DIR / "qidian" / "browser_state.cookies",
             DATA_DIR / "qidian" / "session_state.cookies",
         ]
         self._fuid: str = fuid or find_cookie_value(state_files, "ywguid")

@@ -69,7 +69,6 @@
   "download_option_end": "End chapter ID (applies to the first book ID only)",
   "login_description": "Description",
   "login_hint": "Hint",
-  "login_manual_prompt": ">> Please complete login in your browser and press Enter to continue...",
   "login_use_config": "Using value from config.",
   "login_enter_password": "Enter password: ",
   "login_enter_cookie": "Enter cookies: ",

@@ -1,6 +1,6 @@
 # novel-downloader
 
-一个基于 [playwright](https://playwright.dev/) 和 [aiohttp](https://github.com/aio-libs/aiohttp) 的小说下载工具/库。
+一个基于 [aiohttp](https://github.com/aio-libs/aiohttp) 的小说下载工具/库。
 
 > 本项目开发环境为 Python 3.12, 需确保运行环境为 Python 3.11 及以上版本
 
@@ -24,12 +24,6 @@
 
 ```bash
 pip install novel-downloader
-```
-
-如需使用浏览器模式 (即 `mode: browser`), 请确保已安装 Playwright 依赖:
-
-```bash
-playwright install
 ```
 
 如需启用字体解密功能 (`decode_font`, 用于处理起点中文网对近一个月更新章节所采用的字体混淆技术), 请使用扩展安装方式:

@@ -17,7 +17,6 @@ from novel_downloader.models import ChapterDict
 
 @register_parser(
     site_keys=["esjzone"],
-    backends=["session", "browser"],
 )
 class EsjzoneParser(BaseParser):
     """ """

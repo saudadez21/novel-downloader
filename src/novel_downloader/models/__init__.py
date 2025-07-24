@@ -19,7 +19,6 @@ from .search import SearchResult
 from .types import (
     BrowserType,
     LogLevel,
-    ModeType,
     SplitMode,
 )
 
@@ -34,7 +33,6 @@ __all__ = [
     "LoginField",
     "SearchResult",
     "BrowserType",
-    "ModeType",
     "SplitMode",
     "LogLevel",
 ]

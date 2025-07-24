@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.fetchers.linovelib.session
-------------------------------------------------
+novel_downloader.core.fetchers.linovelib
+----------------------------------------
 
 """
 
@@ -16,7 +16,6 @@ from novel_downloader.utils import async_sleep_with_random_delay
 
 @register_fetcher(
     site_keys=["linovelib"],
-    backends=["session"],
 )
 class LinovelibSession(BaseSession):
     """
@@ -182,10 +181,6 @@ class LinovelibSession(BaseSession):
         Return the relative URL path for a given chapter.
         """
         return f"/novel/{book_id}/{chapter_id}.html"
-
-    @property
-    def hostname(self) -> str:
-        return "www.linovelib.com"
 
     def _extract_vol_ids(self, html_str: str) -> list[str]:
         """

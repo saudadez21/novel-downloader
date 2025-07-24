@@ -6,7 +6,6 @@ tests.utils.test_state
 Tests for StateManager:
 - default behavior when no state file exists
 - set/get language preference
-- default and set/get manual_login flags
 - resilience to invalid JSON
 - persistence across instances
 """
@@ -14,7 +13,6 @@ Tests for StateManager:
 import json
 
 import pytest
-
 from novel_downloader.utils.state import StateManager
 
 
@@ -39,29 +37,6 @@ def test_set_language_creates_file_and_updates(mock_state_file):
     assert data["general"]["lang"] == "en"
     # and in-memory state too
     assert sm.get_language() == "en"
-
-
-def test_get_manual_login_flag_default(mock_state_file):
-    """
-    Unknown site defaults to manual_login=True.
-    """
-    sm = StateManager(path=mock_state_file)
-    assert sm.get_manual_login_flag("qidian") is True
-
-
-def test_set_manual_login_flag_persists(mock_state_file):
-    """
-    set_manual_login_flag() writes to state and get_manual_login_flag() reflects it.
-    """
-    sm = StateManager(path=mock_state_file)
-    sm.set_manual_login_flag("qidian", False)
-    # file content
-    data = json.loads(mock_state_file.read_text(encoding="utf-8"))
-    assert data["sites"]["qidian"]["manual_login"] is False
-    # in-memory
-    assert sm.get_manual_login_flag("qidian") is False
-    # other site still defaults to True
-    assert sm.get_manual_login_flag("bqg") is True
 
 
 def test_invalid_json_is_ignored_and_overwritten(mock_state_file):

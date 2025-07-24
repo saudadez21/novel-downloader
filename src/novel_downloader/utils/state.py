@@ -6,7 +6,7 @@ State management for user preferences and runtime flags.
 
 Supported sections:
 - general: global preferences (e.g. language)
-- sites: per-site flags & data (e.g. manual_login, cookies)
+- sites: per-site flags & data
 """
 
 import json
@@ -86,28 +86,6 @@ class StateManager:
         :param lang: Language code (e.g. 'zh', 'en')
         """
         self._data.setdefault("general", {})["lang"] = lang
-        self._save()
-
-    def get_manual_login_flag(self, site: str) -> bool:
-        """
-        Retrieve the manual login requirement flag for a specific site.
-
-        :param site: Site identifier (e.g. 'qidian', 'bqg')
-        :return: True if manual login is required (defaults to True)
-        """
-        val = self._data.get("sites", {}).get(site, {}).get("manual_login", True)
-        return bool(val)
-
-    def set_manual_login_flag(self, site: str, flag: bool) -> None:
-        """
-        Set the 'manual_login' flag for a specific site.
-
-        :param flag: True if the site requires manual login.
-        :param site: Site identifier (e.g. 'qidian', 'bqg')
-        """
-        sites = self._data.setdefault("sites", {})
-        site_data = sites.setdefault(site, {})
-        site_data["manual_login"] = flag
         self._save()
 
     def get_cookies(self, site: str) -> dict[str, str]:

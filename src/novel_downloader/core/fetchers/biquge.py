@@ -1,42 +1,35 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.fetchers.qianbi.browser
----------------------------------------------
+novel_downloader.core.fetchers.biquge
+-------------------------------------
 
 """
 
 from typing import Any
 
-from novel_downloader.core.fetchers.base import BaseBrowser
+from novel_downloader.core.fetchers.base import BaseSession
 from novel_downloader.core.fetchers.registry import register_fetcher
 from novel_downloader.models import FetcherConfig
 
 
 @register_fetcher(
-    site_keys=["qianbi"],
-    backends=["browser"],
+    site_keys=["biquge", "bqg"],
 )
-class QianbiBrowser(BaseBrowser):
+class BiqugeSession(BaseSession):
     """
-    A browser class for interacting with the Qianbi (www.23qb.com) novel website.
+    A session class for interacting with the Biquge (www.b520.cc) novel website.
     """
 
-    BASE_URLS = [
-        "www.23qb.com",
-        "www.23qb.net",
-    ]
-
-    BOOK_INFO_URL = "https://www.23qb.com/book/{book_id}/"
-    BOOK_CATALOG_URL = "https://www.23qb.com/book/{book_id}/catalog"
-    CHAPTER_URL = "https://www.23qb.com/book/{book_id}/{chapter_id}.html"
+    BOOK_INFO_URL = "http://www.b520.cc/{book_id}/"
+    CHAPTER_URL = "http://www.b520.cc/{book_id}/{chapter_id}.html"
 
     def __init__(
         self,
         config: FetcherConfig,
-        reuse_page: bool = False,
+        cookies: dict[str, str] | None = None,
         **kwargs: Any,
     ) -> None:
-        super().__init__("qianbi", config, reuse_page, **kwargs)
+        super().__init__("biquge", config, cookies, **kwargs)
 
     async def get_book_info(
         self,
@@ -46,18 +39,11 @@ class QianbiBrowser(BaseBrowser):
         """
         Fetch the raw HTML of the book info page asynchronously.
 
-        Order: [info, catalog]
-
         :param book_id: The book identifier.
         :return: The page content as a string.
         """
-        info_url = self.book_info_url(book_id=book_id)
-        catalog_url = self.book_catalog_url(book_id=book_id)
-
-        info_html = await self.fetch(info_url, **kwargs)
-        catalog_html = await self.fetch(catalog_url, **kwargs)
-
-        return [info_html, catalog_html]
+        url = self.book_info_url(book_id=book_id)
+        return [await self.fetch(url, **kwargs)]
 
     async def get_book_chapter(
         self,
@@ -72,9 +58,8 @@ class QianbiBrowser(BaseBrowser):
         :param chapter_id: The chapter identifier.
         :return: The chapter content as a string.
         """
-        catalog_url = self.book_catalog_url(book_id=book_id)
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
-        return [await self.fetch(url, referer=catalog_url, **kwargs)]
+        return [await self.fetch(url, encoding="gbk", **kwargs)]
 
     @classmethod
     def book_info_url(cls, book_id: str) -> str:
@@ -87,16 +72,6 @@ class QianbiBrowser(BaseBrowser):
         return cls.BOOK_INFO_URL.format(book_id=book_id)
 
     @classmethod
-    def book_catalog_url(cls, book_id: str) -> str:
-        """
-        Construct the URL for fetching a book's catalog page.
-
-        :param book_id: The identifier of the book.
-        :return: Fully qualified catalog page URL.
-        """
-        return cls.BOOK_CATALOG_URL.format(book_id=book_id)
-
-    @classmethod
     def chapter_url(cls, book_id: str, chapter_id: str) -> str:
         """
         Construct the URL for fetching a specific chapter.
@@ -106,7 +81,3 @@ class QianbiBrowser(BaseBrowser):
         :return: Fully qualified chapter URL.
         """
         return cls.CHAPTER_URL.format(book_id=book_id, chapter_id=chapter_id)
-
-    @property
-    def hostname(self) -> str:
-        return "www.23qb.com"

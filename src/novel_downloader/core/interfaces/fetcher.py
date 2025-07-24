@@ -126,19 +126,6 @@ class FetcherProtocol(Protocol):
         """
         ...
 
-    async def set_interactive_mode(self, enable: bool) -> bool:
-        """
-        Enable or disable interactive mode for manual login.
-
-        :param enable: True to enable, False to disable interactive mode.
-        :return: True if operation or login check succeeded, False otherwise.
-        """
-        ...
-
-    @property
-    def requester_type(self) -> str:
-        ...
-
     @property
     def is_logged_in(self) -> bool:
         """

@@ -16,7 +16,6 @@ from novel_downloader.models import ChapterDict
 
 @register_parser(
     site_keys=["sfacg"],
-    backends=["session", "browser"],
 )
 class SfacgParser(BaseParser):
     """ """

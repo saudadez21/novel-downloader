@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.fetchers.yamibo.session
----------------------------------------------
+novel_downloader.core.fetchers.yamibo
+-------------------------------------
 
 """
 
+from collections.abc import Mapping
 from typing import Any
 
 from lxml import html
@@ -17,7 +18,6 @@ from novel_downloader.utils import async_sleep_with_random_delay
 
 @register_fetcher(
     site_keys=["yamibo"],
-    backends=["session"],
 )
 class YamiboSession(BaseSession):
     """
@@ -171,10 +171,6 @@ class YamiboSession(BaseSession):
         """
         return cls.CHAPTER_URL.format(book_id=book_id, chapter_id=chapter_id)
 
-    @property
-    def hostname(self) -> str:
-        return "www.yamibo.com"
-
     async def _api_login(self, username: str, password: str) -> bool:
         """
         Login to the API using a 2-step token-based process.
@@ -232,3 +228,14 @@ class YamiboSession(BaseSession):
         if not resp_text:
             return False
         return not any(kw in resp_text[0] for kw in keywords)
+
+    @staticmethod
+    def _filter_cookies(
+        raw_cookies: list[Mapping[str, Any]],
+    ) -> dict[str, str]:
+        ALLOWED_DOMAINS = {"www.yamibo.com", "bbs.yamibo.com", ""}
+        return {
+            c["name"]: c["value"]
+            for c in raw_cookies
+            if c.get("domain", "") in ALLOWED_DOMAINS
+        }

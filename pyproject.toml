@@ -24,7 +24,6 @@ dependencies = [
     "textual",
     "requests",
     "aiohttp",
-    "playwright",
     "lxml",
     "platformdirs"
 ]

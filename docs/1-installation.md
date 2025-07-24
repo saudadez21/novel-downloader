@@ -38,12 +38,6 @@ source .venv/bin/activate
 
 安装完成后, 会在系统 `PATH` 中生成 `novel-cli` 可执行命令。
 
-如需使用浏览器模式 (即 `mode: browser`), 请确保已安装 Playwright 依赖:
-
-```bash
-playwright install
-```
-
 ## 可选功能及依赖
 
 ### 字体解密 (`decode_font` 参数)

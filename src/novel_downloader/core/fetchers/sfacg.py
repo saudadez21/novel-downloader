@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.fetchers.sfacg.session
---------------------------------------------
+novel_downloader.core.fetchers.sfacg
+------------------------------------
 
 """
 
@@ -14,7 +14,6 @@ from novel_downloader.models import FetcherConfig, LoginField
 
 @register_fetcher(
     site_keys=["sfacg"],
-    backends=["session"],
 )
 class SfacgSession(BaseSession):
     """
@@ -156,10 +155,6 @@ class SfacgSession(BaseSession):
         :return: Fully qualified chapter URL.
         """
         return cls.CHAPTER_URL.format(chapter_id=chapter_id)
-
-    @property
-    def hostname(self) -> str:
-        return "m.sfacg.com"
 
     async def _check_login_status(self) -> bool:
         """

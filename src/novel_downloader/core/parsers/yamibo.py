@@ -16,7 +16,6 @@ from novel_downloader.models import ChapterDict
 
 @register_parser(
     site_keys=["yamibo"],
-    backends=["session", "browser"],
 )
 class YamiboParser(BaseParser):
     """ """

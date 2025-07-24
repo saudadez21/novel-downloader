@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.fetchers.esjzone.session
-----------------------------------------------
+novel_downloader.core.fetchers.esjzone
+--------------------------------------
 
 """
 
 import re
+from collections.abc import Mapping
 from typing import Any
 
 from novel_downloader.core.fetchers.base import BaseSession
@@ -16,7 +17,6 @@ from novel_downloader.utils import async_sleep_with_random_delay
 
 @register_fetcher(
     site_keys=["esjzone"],
-    backends=["session"],
 )
 class EsjzoneSession(BaseSession):
     """
@@ -170,10 +170,6 @@ class EsjzoneSession(BaseSession):
         """
         return cls.CHAPTER_URL.format(book_id=book_id, chapter_id=chapter_id)
 
-    @property
-    def hostname(self) -> str:
-        return "www.esjzone.cc"
-
     async def _api_login(self, username: str, password: str) -> bool:
         """
         Login to the API using a 2-step token-based process.
@@ -234,3 +230,14 @@ class EsjzoneSession(BaseSession):
     def _extract_token(self, text: str) -> str:
         match = re.search(r"<JinJing>(.+?)</JinJing>", text)
         return match.group(1) if match else ""
+
+    @staticmethod
+    def _filter_cookies(
+        raw_cookies: list[Mapping[str, Any]],
+    ) -> dict[str, str]:
+        ALLOWED_DOMAINS = {".www.esjzone.cc", "www.esjzone.cc", ".esjzone.cc", ""}
+        return {
+            c["name"]: c["value"]
+            for c in raw_cookies
+            if c.get("domain", "") in ALLOWED_DOMAINS
+        }

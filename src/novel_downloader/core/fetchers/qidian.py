@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.fetchers.qidian.session
----------------------------------------------
+novel_downloader.core.fetchers.qidian
+-------------------------------------
 
 """
 
@@ -10,6 +10,7 @@ import hashlib
 import json
 import random
 import time
+from collections.abc import Mapping
 from typing import Any, ClassVar
 
 import aiohttp
@@ -25,7 +26,6 @@ from novel_downloader.utils import (
 
 @register_fetcher(
     site_keys=["qidian", "qd"],
-    backends=["session"],
 )
 class QidianSession(BaseSession):
     """
@@ -34,7 +34,6 @@ class QidianSession(BaseSession):
 
     HOMEPAGE_URL = "https://www.qidian.com/"
     BOOKCASE_URL = "https://my.qidian.com/bookcase/"
-    # BOOK_INFO_URL = "https://book.qidian.com/info/{book_id}/"
     BOOK_INFO_URL = "https://www.qidian.com/book/{book_id}/"
     CHAPTER_URL = "https://www.qidian.com/chapter/{book_id}/{chapter_id}/"
 
@@ -55,11 +54,11 @@ class QidianSession(BaseSession):
         **kwargs: Any,
     ) -> None:
         super().__init__("qidian", config, cookies, **kwargs)
-        self._fp_key = _d("ZmluZ2VycHJpbnQ=")
-        self._ab_key = _d("YWJub3JtYWw=")
-        self._ck_key = _d("Y2hlY2tzdW0=")
-        self._lt_key = _d("bG9hZHRz")
-        self._ts_key = _d("dGltZXN0YW1w")
+        self._fp_key = self._d("ZmluZ2VycHJpbnQ=")
+        self._ab_key = self._d("YWJub3JtYWw=")
+        self._ck_key = self._d("Y2hlY2tzdW0=")
+        self._lt_key = self._d("bG9hZHRz")
+        self._ts_key = self._d("dGltZXN0YW1w")
         self._fp_val: str = ""
         self._ab_val: str = ""
 
@@ -166,7 +165,7 @@ class QidianSession(BaseSession):
         if self._rate_limiter:
             await self._rate_limiter.wait()
 
-        cookie_key = _d("d190c2Zw")
+        cookie_key = self._d("d190c2Zw")
 
         for attempt in range(self.retry_times + 1):
             try:
@@ -228,21 +227,17 @@ class QidianSession(BaseSession):
         """
         return cls.CHAPTER_URL.format(book_id=book_id, chapter_id=chapter_id)
 
-    @property
-    def hostname(self) -> str:
-        return "www.qidian.com"
-
     def _update_fp_val(
         self,
         *,
         key: str = "",
     ) -> None:
         """"""
-        enc_token = self.get_cookie_value(_d("d190c2Zw"))
+        enc_token = self._get_cookie_value(self._d("d190c2Zw"))
         if not enc_token:
             return
         if not key:
-            key = _get_key()
+            key = self._get_key()
         decrypted_json: str = rc4_crypt(key, enc_token, mode="decrypt")
         payload: dict[str, Any] = json.loads(decrypted_json)
         self._fp_val = payload.get(self._fp_key, "")
@@ -268,7 +263,7 @@ class QidianSession(BaseSession):
         if not self._fp_val or not self._ab_val:
             self._update_fp_val()
         if not key:
-            key = _get_key()
+            key = self._get_key()
 
         # rebuild timing fields
         loadts = int(time.time() * 1000)  # ms since epoch
@@ -316,20 +311,37 @@ class QidianSession(BaseSession):
         :param cookies: The cookie dictionary to validate.
         :return: True if all required keys are present, False otherwise.
         """
-        required = {_d(k) for k in self._cookie_keys}
+        required = {self._d(k) for k in self._cookie_keys}
         actual = set(cookies)
         missing = required - actual
         if missing:
             self.logger.warning("Missing required cookies: %s", ", ".join(missing))
         return not missing
 
+    def _get_cookie_value(self, key: str) -> str | None:
+        for cookie in self.session.cookie_jar:
+            if cookie.key == key:
+                return str(cookie.value)
+        return None
 
-def _d(b: str) -> str:
-    return base64.b64decode(b).decode()
+    @staticmethod
+    def _filter_cookies(
+        raw_cookies: list[Mapping[str, Any]],
+    ) -> dict[str, str]:
+        ALLOWED_DOMAINS = {".qidian.com", "www.qidian.com", ""}
+        return {
+            c["name"]: c["value"]
+            for c in raw_cookies
+            if c.get("domain", "") in ALLOWED_DOMAINS
+        }
 
+    @staticmethod
+    def _d(b: str) -> str:
+        return base64.b64decode(b).decode()
 
-def _get_key() -> str:
-    encoded = "Lj1qYxMuaXBjMg=="
-    decoded = base64.b64decode(encoded)
-    key = "".join([chr(b ^ 0x5A) for b in decoded])
-    return key
+    @staticmethod
+    def _get_key() -> str:
+        encoded = "Lj1qYxMuaXBjMg=="
+        decoded = base64.b64decode(encoded)
+        key = "".join([chr(b ^ 0x5A) for b in decoded])
+        return key

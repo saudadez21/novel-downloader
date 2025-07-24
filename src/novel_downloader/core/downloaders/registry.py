@@ -10,6 +10,7 @@ __all__ = ["register_downloader", "get_downloader"]
 from collections.abc import Callable, Sequence
 from typing import TypeVar
 
+from novel_downloader.core.downloaders.common import CommonDownloader
 from novel_downloader.core.interfaces import (
     DownloaderProtocol,
     FetcherProtocol,
@@ -62,6 +63,6 @@ def get_downloader(
     site_key = site.lower()
     try:
         downloader_cls = _DOWNLOADER_MAP[site_key]
-    except KeyError as err:
-        raise ValueError(f"Unsupported site: {site}") from err
+    except KeyError:
+        return CommonDownloader(fetcher, parser, config, site_key)
     return downloader_cls(fetcher, parser, config)

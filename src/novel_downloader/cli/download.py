@@ -191,12 +191,6 @@ async def _prompt_login_fields(
         if field.placeholder:
             print(f"{t('login_hint')}: {field.placeholder}")
 
-        if field.type == "manual_login":
-            await fetcher.set_interactive_mode(True)
-            input(t("login_manual_prompt"))
-            await fetcher.set_interactive_mode(False)
-            continue
-
         existing_value = cfg_dict.get(field.name, "").strip()
         if existing_value:
             result[field.name] = existing_value

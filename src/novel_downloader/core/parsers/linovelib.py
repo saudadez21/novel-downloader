@@ -20,7 +20,6 @@ from novel_downloader.utils.constants import LINOVELIB_FONT_MAP_PATH
 
 @register_parser(
     site_keys=["linovelib"],
-    backends=["session", "browser"],
 )
 class LinovelibParser(BaseParser):
     """ """

@@ -249,31 +249,6 @@ saved = await fetcher.save_state()
 ---
 
 ```python
-async def set_interactive_mode(
-    self,
-    enable: bool,
-) -> bool:
-```
-
-描述: 启用或禁用交互模式, 供手动登录
-
-参数:
-
-* `enable`: `True` 启用, `False` 禁用
-
-返回:
-
-* `bool`, 操作是否成功
-
-示例:
-
-```python
-await fetcher.set_interactive_mode(True)
-```
-
----
-
-```python
 @property
 def is_logged_in(self) -> bool:
 ```

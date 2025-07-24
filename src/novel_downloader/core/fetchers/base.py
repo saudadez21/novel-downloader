@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.fetchers.base.session
--------------------------------------------
+novel_downloader.core.fetchers.base
+-----------------------------------
 
 This module defines the BaseSession class, which provides asynchronous
 HTTP request capabilities using aiohttp. It maintains a persistent
@@ -9,11 +9,11 @@ client session and supports retries, headers, timeout configurations,
 cookie handling, and defines abstract methods for subclasses.
 """
 
-
 import abc
 import json
 import logging
 import types
+from collections.abc import Mapping
 from typing import Any, Self
 
 import aiohttp
@@ -247,8 +247,12 @@ class BaseSession(FetcherProtocol, abc.ABC):
             return False
         try:
             storage = json.loads(self._state_file.read_text(encoding="utf-8"))
-            for c in storage.get("cookies", []):
-                self._session.cookie_jar.update_cookies({c["name"]: c["value"]})
+            raw_cookies = storage.get("cookies", [])
+            cookie_dict = self._filter_cookies(raw_cookies)
+
+            if cookie_dict:
+                self._session.cookie_jar.update_cookies(cookie_dict)
+
             self._is_logged_in = await self._check_login_status()
             return self._is_logged_in
         except Exception as e:
@@ -300,21 +304,6 @@ class BaseSession(FetcherProtocol, abc.ABC):
             self.logger.warning("Failed to save state: %s", e)
             return False
 
-    async def set_interactive_mode(self, enable: bool) -> bool:
-        """
-        Enable or disable interactive mode for manual login.
-
-        :param enable: True to enable, False to disable interactive mode.
-        :return: True if operation or login check succeeded, False otherwise.
-        """
-        return False
-
-    def get_cookie_value(self, key: str) -> str | None:
-        for cookie in self.session.cookie_jar:
-            if cookie.key == key:
-                return str(cookie.value)
-        return None
-
     def update_cookies(
         self,
         cookies: dict[str, str],
@@ -347,16 +336,8 @@ class BaseSession(FetcherProtocol, abc.ABC):
         return False
 
     @property
-    def hostname(self) -> str:
-        return ""
-
-    @property
     def site(self) -> str:
         return self._site
-
-    @property
-    def requester_type(self) -> str:
-        return "session"
 
     @property
     def is_logged_in(self) -> bool:
@@ -410,6 +391,17 @@ class BaseSession(FetcherProtocol, abc.ABC):
         if self._session:
             return dict(self._session.headers)
         return self._headers.copy()
+
+    @staticmethod
+    def _filter_cookies(
+        raw_cookies: list[Mapping[str, Any]],
+    ) -> dict[str, str]:
+        """
+        Hook:
+        take the raw list of cookie-dicts loaded from storage_state
+        and return a simple name -> value mapping.
+        """
+        return {c["name"]: c["value"] for c in raw_cookies}
 
     @staticmethod
     async def _response_to_str(
