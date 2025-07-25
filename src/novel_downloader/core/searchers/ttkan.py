@@ -70,6 +70,8 @@ class TtkanSearcher(BaseSearcher):
             hrefs = item.xpath(".//a[@href]/@href")
             href = hrefs[0].strip() if hrefs else ""
             book_id = href.strip("/").split("/")[-1] if href else ""
+            if not book_id:
+                continue
 
             # title -> <h3> inside that link
             titles = item.xpath(".//h3/text()")
@@ -90,6 +92,9 @@ class TtkanSearcher(BaseSearcher):
                     book_id=book_id,
                     title=title,
                     author=author_str,
+                    latest_chapter="-",
+                    update_date="-",
+                    word_count="-",
                     priority=prio,
                 )
             )

@@ -85,10 +85,20 @@ class PiaotiaSearcher(BaseSearcher):
 
             match = re.search(r"/bookinfo/([^/]+/[^/]+)\.html", href)
             book_id = match.group(1) if match else href.rstrip(".html").split("/")[-1]
+            if not book_id:
+                continue
             book_id = book_id.replace("/", "-")
+
+            latest_elems = row.xpath("./td[2]/a")
+            latest_chapter = (
+                latest_elems[0].text_content().strip() if latest_elems else "-"
+            )
 
             author_nodes = row.xpath("./td[3]/text()")
             author = author_nodes[0].strip() if author_nodes else ""
+
+            word_count = row.xpath("./td[4]")[0].text_content().strip()
+            update_date = row.xpath("./td[5]")[0].text_content().strip()
 
             # Compute priority incrementally
             prio = cls.priority + idx
@@ -98,6 +108,9 @@ class PiaotiaSearcher(BaseSearcher):
                     book_id=book_id,
                     title=title,
                     author=author,
+                    latest_chapter=latest_chapter,
+                    update_date=update_date,
+                    word_count=word_count,
                     priority=prio,
                 )
             )

@@ -12,14 +12,19 @@ import json
 import logging
 from collections.abc import AsyncIterator, Awaitable, Callable, Sequence
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from novel_downloader.core.interfaces import (
     DownloaderProtocol,
     FetcherProtocol,
     ParserProtocol,
 )
-from novel_downloader.models import BookConfig, DownloaderConfig
+from novel_downloader.models import (
+    BookConfig,
+    BookInfoDict,
+    DownloaderConfig,
+    VolumeInfoDict,
+)
 from novel_downloader.utils import calculate_time_difference
 
 
@@ -144,7 +149,7 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
         self,
         book_id: str,
         html_dir: Path,
-    ) -> dict[str, Any]:
+    ) -> BookInfoDict | None:
         book_info = self._load_book_info(
             book_id=book_id,
             max_age_days=1,
@@ -197,7 +202,7 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
         book_id: str,
         *,
         max_age_days: int | None = None,
-    ) -> dict[str, Any]:
+    ) -> BookInfoDict | None:
         """
         Attempt to read and parse the book_info.json for a given book_id.
 
@@ -207,27 +212,28 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
         """
         info_path = self._raw_data_dir / book_id / "book_info.json"
         if not info_path.is_file():
-            return {}
+            return None
 
         try:
-            data: dict[str, Any] = json.loads(info_path.read_text(encoding="utf-8"))
+            raw: dict[str, Any] = json.loads(info_path.read_text(encoding="utf-8"))
         except json.JSONDecodeError:
-            return {}
+            return None
 
         if max_age_days is not None:
             days, *_ = calculate_time_difference(
-                data.get("update_time", ""),
+                raw.get("update_time", ""),
                 "UTC+8",
             )
             if days > max_age_days:
-                return {}
+                return None
 
-        return data
+        # return data
+        return cast(BookInfoDict, raw)
 
     def _save_book_info(
         self,
         book_id: str,
-        book_info: dict[str, Any],
+        book_info: BookInfoDict,
     ) -> None:
         """
         Serialize and save the book_info dict as json.
@@ -267,7 +273,7 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
 
     @staticmethod
     async def _chapter_ids(
-        volumes: list[dict[str, Any]],
+        volumes: list[VolumeInfoDict],
         start_id: str | None,
         end_id: str | None,
     ) -> AsyncIterator[str]:
@@ -276,7 +282,7 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
         """
         seen_start = start_id is None
         for vol in volumes:
-            for chap in vol.get("chapters", []):
+            for chap in vol["chapters"]:
                 cid = chap.get("chapterId")
                 if not cid:
                     continue

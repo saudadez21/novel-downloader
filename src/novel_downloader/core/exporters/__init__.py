@@ -12,6 +12,7 @@ __all__ = [
     "LinovelibExporter",
     "PiaotiaExporter",
     "QidianExporter",
+    "XiaoshuowuExporter",
 ]
 
 from .common import CommonExporter
@@ -19,3 +20,4 @@ from .linovelib import LinovelibExporter
 from .piaotia import PiaotiaExporter
 from .qidian import QidianExporter
 from .registry import get_exporter
+from .xiaoshuowu import XiaoshuowuExporter

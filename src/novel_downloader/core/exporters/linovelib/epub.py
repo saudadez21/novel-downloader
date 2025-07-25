@@ -99,7 +99,7 @@ def export_whole_book(
         title=book_name,
         author=book_author,
         description=book_info.get("summary", ""),
-        subject=book_info.get("subject", []),
+        subject=book_info.get("tags", []),
         serial_status=book_info.get("serial_status", ""),
         word_count=book_info.get("word_count", ""),
         cover_path=cover_path,
@@ -118,7 +118,7 @@ def export_whole_book(
 
         # Batch-fetch chapters for this volume
         chap_ids = [
-            chap.get("chapterId")
+            chap["chapterId"]
             for chap in vol.get("chapters", [])
             if chap.get("chapterId")
         ]
@@ -263,7 +263,7 @@ def export_by_volume(
 
         # Batch-fetch chapters for this volume
         chap_ids = [
-            chap.get("chapterId")
+            chap["chapterId"]
             for chap in vol.get("chapters", [])
             if chap.get("chapterId")
         ]
@@ -286,8 +286,8 @@ def export_by_volume(
             title=book_name,
             author=book_author,
             description=vol.get("volume_intro") or book_summary,
-            subject=book_info.get("subject", []),
-            serial_status=vol.get("serial_status", ""),
+            subject=book_info.get("tags", []),
+            serial_status=book_info.get("serial_status", ""),
             word_count=vol.get("word_count", ""),
             cover_path=vol_cover,
         )

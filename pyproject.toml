@@ -21,6 +21,7 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
+    "rich",
     "textual",
     "requests",
     "aiohttp",

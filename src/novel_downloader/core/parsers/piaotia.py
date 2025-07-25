@@ -12,7 +12,12 @@ from lxml import html
 
 from novel_downloader.core.parsers.base import BaseParser
 from novel_downloader.core.parsers.registry import register_parser
-from novel_downloader.models import ChapterDict
+from novel_downloader.models import (
+    BookInfoDict,
+    ChapterDict,
+    ChapterInfoDict,
+    VolumeInfoDict,
+)
 
 
 @register_parser(
@@ -25,7 +30,7 @@ class PiaotiaParser(BaseParser):
         self,
         html_list: list[str],
         **kwargs: Any,
-    ) -> dict[str, Any]:
+    ) -> BookInfoDict | None:
         """
         Parse a book info page and extract metadata and chapter structure.
 
@@ -33,72 +38,86 @@ class PiaotiaParser(BaseParser):
         :return: Parsed metadata and chapter structure as a dictionary.
         """
         if len(html_list) < 2:
-            return {}
+            return None
 
         # Parse trees
         info_tree = html.fromstring(html_list[0])
         catalog_tree = html.fromstring(html_list[1])
-        result: dict[str, Any] = {}
 
-        # Book name
-        book_name = info_tree.xpath("//span[@style]//h1/text()")
-        result["book_name"] = book_name[0].strip() if book_name else ""
-
-        # Author
-        author_text = info_tree.xpath(
-            '//td[contains(text(),"作") and contains(text(),"者")]/text()'
+        book_name = self._first_str(info_tree.xpath("//span[@style]//h1/text()"))
+        author = (
+            self._first_str(
+                info_tree.xpath(
+                    '//td[contains(text(),"作") and contains(text(),"者")]/text()'
+                )
+            )
+            .split("：")[-1]
+            .strip()
         )
-        result["author"] = author_text[0].split("：")[-1].strip() if author_text else ""
 
         # Category as tag
-        category_text = info_tree.xpath(
-            '//td[contains(text(),"类") and contains(text(),"别")]/text()'
+        category = (
+            self._first_str(
+                info_tree.xpath(
+                    '//td[contains(text(),"类") and contains(text(),"别")]/text()'
+                )
+            )
+            .split("：")[-1]
+            .strip()
         )
-        category = category_text[0].split("：")[-1].strip() if category_text else ""
-        result["tags"] = [category] if category else []
+        tags = [category] if category else []
 
-        # Word count
-        word_count_text = info_tree.xpath('//td[contains(text(),"全文长度")]/text()')
-        result["word_count"] = (
-            word_count_text[0].split("：")[-1].strip() if word_count_text else ""
-        )
-
-        # Update time
-        update_text = info_tree.xpath('//td[contains(text(),"最后更新")]/text()')
-        result["update_time"] = (
-            update_text[0].split("：")[-1].strip() if update_text else ""
-        )
-
-        # Serial status
-        status_text = info_tree.xpath('//td[contains(text(),"文章状态")]/text()')
-        result["serial_status"] = (
-            status_text[0].split("：")[-1].strip() if status_text else ""
+        word_count = (
+            self._first_str(info_tree.xpath('//td[contains(text(),"全文长度")]/text()'))
+            .split("：")[-1]
+            .strip()
         )
 
-        # Cover URL
-        cover = info_tree.xpath('//td[@width="80%"]//img/@src')
-        result["cover_url"] = cover[0].strip() if cover else ""
+        update_time = (
+            self._first_str(info_tree.xpath('//td[contains(text(),"最后更新")]/text()'))
+            .split("：")[-1]
+            .strip()
+        )
+
+        serial_status = (
+            self._first_str(info_tree.xpath('//td[contains(text(),"文章状态")]/text()'))
+            .split("：")[-1]
+            .strip()
+        )
+
+        cover_url = self._first_str(info_tree.xpath('//td[@width="80%"]//img/@src'))
 
         # Summary
-        summary_div = info_tree.xpath('//td[@width="80%"]/div')
-        if summary_div:
-            summary = summary_div[0].xpath("string(.)").split("内容简介：")[-1].strip()
-            result["summary"] = summary
+        summary_divs = info_tree.xpath('//td[@width="80%"]/div')
+        if summary_divs:
+            raw = str(summary_divs[0].text_content())
+            summary = raw.split("内容简介：")[-1].strip()
         else:
-            result["summary"] = ""
+            summary = ""
 
         # Chapters (single volume)
-        chapters = []
+        chapters: list[ChapterInfoDict] = []
         for a in catalog_tree.xpath('//div[@class="centent"]//ul/li/a'):
-            title = a.text.strip()
-            url = a.get("href", "")
+            title = (a.text or "").strip()
+            url = a.get("href", "").strip()
             chapter_id = url.split(".")[0]
             chapters.append({"title": title, "url": url, "chapterId": chapter_id})
 
         # Single volume
-        result["volumes"] = [{"volume_name": "正文", "chapters": chapters}]
+        volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 
-        return result
+        return {
+            "book_name": book_name,
+            "author": author,
+            "cover_url": cover_url,
+            "update_time": update_time,
+            "summary": summary,
+            "volumes": volumes,
+            "tags": tags,
+            "word_count": word_count,
+            "serial_status": serial_status,
+            "extra": {},
+        }
 
     def parse_chapter(
         self,

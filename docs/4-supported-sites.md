@@ -50,7 +50,8 @@ novel-cli search 关键词
 | [起点中文网](https://www.qidian.com)                         | qidian     | ✅        | ❌        | ✅        | ⚠️   |
 | [笔趣阁](http://www.b520.cc)                                 | biquge     | ❌        | ❌        | ⚠️        | ✅    |
 | [铅笔小说](https://www.23qb.net), [备用](https://www.23qb.com/) | qianbi   | ✅        | ❌        | ⚠️        | ✅    |
-| [飘天文学网](https://www.piaotia.com/)                        | piaotia   | ❌        | ❌        | ❌        | ✅    |
+| [飘天文学网](https://www.piaotia.com/)                        | piaotia   | ❌        | ❌        | ⚠️        | ✅    |
+| [小说屋](http://www.xiaoshuoge.info/)                        | xiaoshuowu | ❌        | ❌        | ⚠️        | ✅    |
 | [天天看小说](https://www.ttkan.co/)                           | ttkan     | ❌        | ❌        | ❌        | ✅    |
 
 #### 使用示例
@@ -104,6 +105,13 @@ Book ID 通常来源于小说详情页 URL 中的路径段, 各资源站点的�
 
     - 书籍页面: `https://www.piaotia.com/bookinfo/13/12345.html` -> Book ID: `13-12345`
     - 章节页面: `https://www.piaotia.com/html/13/12345/114514.html` -> Chapter ID: `114514`
+
+* **小说屋 (xiaoshuowu)**
+
+  示例 URL:
+
+    - 书籍页面: `http://www.xiaoshuoge.info/html/987/987654/` -> Book ID: `987-987654`
+    - 章节页面: `http://www.xiaoshuoge.info/html/987/987654/123456789.html` -> Chapter ID: `123456789`
 
 * **天天看小說 (ttkan)**
 

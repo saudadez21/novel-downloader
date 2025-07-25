@@ -12,20 +12,25 @@ from lxml import html
 
 from novel_downloader.core.parsers.base import BaseParser
 from novel_downloader.core.parsers.registry import register_parser
-from novel_downloader.models import ChapterDict
+from novel_downloader.models import (
+    BookInfoDict,
+    ChapterDict,
+    ChapterInfoDict,
+    VolumeInfoDict,
+)
 
 
 @register_parser(
     site_keys=["biquge", "bqg"],
 )
 class BiqugeParser(BaseParser):
-    """ """
+    """Parser for 笔趣阁 book pages."""
 
     def parse_book_info(
         self,
         html_list: list[str],
         **kwargs: Any,
-    ) -> dict[str, Any]:
+    ) -> BookInfoDict | None:
         """
         Parse a book info page and extract metadata and chapter structure.
 
@@ -33,69 +38,61 @@ class BiqugeParser(BaseParser):
         :return: Parsed metadata and chapter structure as a dictionary.
         """
         if not html_list:
-            return {}
+            return None
+
         tree = html.fromstring(html_list[0])
-        result: dict[str, Any] = {}
+        book_name = tree.xpath('string(//div[@id="info"]/h1)').strip()
+        author_text = (
+            tree.xpath('string(//div[@id="info"]/p[1])').replace("\xa0", "").strip()
+        )
+        m = re.search(r"作者[:：]?\s*(.+)", author_text)
+        author = m.group(1).strip() if m else ""
+        cover_list = tree.xpath('//div[@id="fmimg"]/img/@src')
+        cover_url = cover_list[0].strip() if cover_list else ""
+        ut_text = tree.xpath('string(//div[@id="info"]/p[3])').strip()
+        update_time = ut_text.replace("最后更新：", "").strip()
+        summary = tree.xpath('string(//div[@id="intro"])').strip()
 
-        def extract_text(elem: html.HtmlElement | None) -> str:
-            if elem is None:
-                return ""
-            return "".join(elem.itertext(tag=None)).strip()
+        bt = tree.xpath('//div[@class="con_top"]/a[2]/text()')
+        book_type = bt[0].strip() if bt else ""
+        tags = [book_type] if book_type else []
 
-        # 书名
-        book_name_elem = tree.xpath('//div[@id="info"]/h1')
-        result["book_name"] = extract_text(book_name_elem[0]) if book_name_elem else ""
-
-        # 作者
-        author_elem = tree.xpath('//div[@id="info"]/p[1]')
-        if author_elem:
-            author_text = extract_text(author_elem[0]).replace("\u00a0", "")
-            match = re.search(r"作\s*者[:：]?\s*(\S+)", author_text)
-            result["author"] = match.group(1).strip() if match else ""
-        else:
-            result["author"] = ""
-
-        # 封面
-        cover_elem = tree.xpath('//div[@id="fmimg"]/img/@src')
-        result["cover_url"] = cover_elem[0].strip() if cover_elem else ""
-
-        # 最后更新时间
-        update_elem = tree.xpath('//div[@id="info"]/p[3]')
-        if update_elem:
-            update_text = extract_text(update_elem[0])
-            match = re.search(r"最后更新[:：]\s*(\S+)", update_text)
-            result["update_time"] = match.group(1).strip() if match else ""
-        else:
-            result["update_time"] = ""
-
-        # 简介
-        intro_elem = tree.xpath('//div[@id="intro"]')
-        result["summary"] = extract_text(intro_elem[0]) if intro_elem else ""
-
-        # 卷和章节
-        chapters = []
-        in_main_volume = False
-
-        list_dl = tree.xpath('//div[@id="list"]/dl')[0]
-        for elem in list_dl:
-            if elem.tag == "dt":
-                text = "".join(elem.itertext()).strip()
-                in_main_volume = "正文" in text
-            elif in_main_volume and elem.tag == "dd":
-                a: list[html.HtmlElement] = elem.xpath("./a")
-                if a:
-                    title = "".join(a[0].itertext(tag=None)).strip()
-                    url = a[0].get("href", "").strip()
-                    href_cleaned = url.replace(".html", "")
-                    chapter_id_match = re.search(r"/(\d+)$", href_cleaned)
-                    chapter_id = chapter_id_match.group(1) if chapter_id_match else ""
+        chapters: list[ChapterInfoDict] = []
+        dt_list = tree.xpath('//div[@id="list"]/dl/dt[contains(., "正文")]')
+        if dt_list:
+            vol_dt = dt_list[0]
+            for sib in vol_dt.itersiblings():
+                if sib.tag == "dt":
+                    break
+                if sib.tag == "dd":
+                    a = sib.xpath("./a")
+                    if not a:
+                        continue
+                    a = a[0]
+                    title = a.text.strip()
+                    url = a.get("href", "").strip()
+                    # extract "3899817" from "/8_8187/3899817.html"
+                    chapterId = url.split("/")[-1].split(".", 1)[0]
                     chapters.append(
-                        {"title": title, "url": url, "chapterId": chapter_id}
+                        {
+                            "title": title,
+                            "url": url,
+                            "chapterId": chapterId,
+                        }
                     )
 
-        result["volumes"] = [{"volume_name": "正文", "chapters": chapters}]
+        volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 
-        return result
+        return {
+            "book_name": book_name,
+            "author": author,
+            "cover_url": cover_url,
+            "update_time": update_time,
+            "tags": tags,
+            "summary": summary,
+            "volumes": volumes,
+            "extra": {},
+        }
 
     def parse_chapter(
         self,

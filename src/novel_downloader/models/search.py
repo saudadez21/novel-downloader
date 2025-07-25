@@ -13,4 +13,7 @@ class SearchResult(TypedDict, total=True):
     book_id: str
     title: str
     author: str
+    latest_chapter: str
+    update_date: str
+    word_count: str
     priority: int

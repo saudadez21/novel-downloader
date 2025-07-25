@@ -67,6 +67,14 @@ class EsjzoneSearcher(BaseSearcher):
             href = link.get("href", "")
             # href format: /detail/<book_id>.html
             book_id = href.strip("/").replace("detail/", "").replace(".html", "")
+            if not book_id:
+                continue
+
+            latest_elems = card.xpath('.//div[contains(@class,"card-ep")]/a')
+            latest_chapter = (
+                latest_elems[0].text_content().strip() if latest_elems else "-"
+            )
+
             # Author
             author_link = card.xpath('.//div[@class="card-author"]/a')[0]
             author = author_link.text_content().strip()
@@ -78,6 +86,9 @@ class EsjzoneSearcher(BaseSearcher):
                     book_id=book_id,
                     title=title,
                     author=author,
+                    latest_chapter=latest_chapter,
+                    update_date="-",
+                    word_count="-",
                     priority=prio,
                 )
             )

@@ -13,7 +13,12 @@ from lxml import html
 
 from novel_downloader.core.parsers.base import BaseParser
 from novel_downloader.core.parsers.registry import register_parser
-from novel_downloader.models import ChapterDict
+from novel_downloader.models import (
+    BookInfoDict,
+    ChapterDict,
+    ChapterInfoDict,
+    VolumeInfoDict,
+)
 
 
 @register_parser(
@@ -26,7 +31,7 @@ class TtkanParser(BaseParser):
         self,
         html_list: list[str],
         **kwargs: Any,
-    ) -> dict[str, Any]:
+    ) -> BookInfoDict | None:
         """
         Parse a book info page and extract metadata and chapter structure.
 
@@ -34,37 +39,39 @@ class TtkanParser(BaseParser):
         :return: Parsed metadata and chapter structure as a dictionary.
         """
         if not html_list:
-            return {}
+            return None
 
         tree = html.fromstring(html_list[0])
 
-        result: dict[str, Any] = {}
-
         # Book metadata
-        result["book_name"] = tree.xpath(
-            '//div[contains(@class,"novel_info")]//h1/text()'
-        )[0].strip()
-
-        result["author"] = tree.xpath(
-            '//div[contains(@class,"novel_info")]//li[span/text()="作者："]/a/text()'
-        )[0].strip()
-
-        cover = tree.xpath('//div[contains(@class,"novel_info")]//amp-img/@src')
-        result["cover_url"] = cover[0] if cover else ""
-
-        status = tree.xpath(
-            '//div[contains(@class,"novel_info")]//span[contains(@class,"state_serial")]/text()'
+        book_name = self._first_str(
+            tree.xpath('//div[contains(@class,"novel_info")]//h1/text()')
         )
-        result["serial_status"] = status[0].strip() if status else ""
 
-        result["update_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        author = self._first_str(
+            tree.xpath(
+                '//div[contains(@class,"novel_info")]//li[span/text()="作者："]/a/text()'
+            )
+        )
+
+        cover_url = self._first_str(
+            tree.xpath('//div[contains(@class,"novel_info")]//amp-img/@src')
+        )
+
+        serial_status = self._first_str(
+            tree.xpath(
+                '//div[contains(@class,"novel_info")]//span[contains(@class,"state_serial")]/text()'
+            )
+        )
+
+        update_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         # Summary
         summary_nodes = tree.xpath('//div[@class="description"]//p/text()')
-        result["summary"] = "".join(summary_nodes).strip()
+        summary = "".join(summary_nodes).strip()
 
         # Single "正文" volume with all chapter links
-        chapters = []
+        chapters: list[ChapterInfoDict] = []
         for a in tree.xpath('//div[@class="full_chapters"]/div[1]/a'):
             url = a.get("href", "").strip()
             title = a.text_content().strip()
@@ -78,14 +85,23 @@ class TtkanParser(BaseParser):
                 }
             )
 
-        result["volumes"] = [
+        volumes: list[VolumeInfoDict] = [
             {
                 "volume_name": "正文",
                 "chapters": chapters,
             }
         ]
 
-        return result
+        return {
+            "book_name": book_name,
+            "author": author,
+            "cover_url": cover_url,
+            "update_time": update_time,
+            "serial_status": serial_status,
+            "summary": summary,
+            "volumes": volumes,
+            "extra": {},
+        }
 
     def parse_chapter(
         self,

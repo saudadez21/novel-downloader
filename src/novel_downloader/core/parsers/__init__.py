@@ -17,6 +17,7 @@ __all__ = [
     "QidianParser",
     "SfacgParser",
     "TtkanParser",
+    "XiaoshuowuParser",
     "YamiboParser",
 ]
 
@@ -29,4 +30,5 @@ from .qidian import QidianParser
 from .registry import get_parser
 from .sfacg import SfacgParser
 from .ttkan import TtkanParser
+from .xiaoshuowu import XiaoshuowuParser
 from .yamibo import YamiboParser

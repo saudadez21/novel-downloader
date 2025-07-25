@@ -19,6 +19,7 @@ from novel_downloader.core.interfaces import (
 )
 from novel_downloader.models import (
     BookConfig,
+    BookInfoDict,
     ChapterDict,
     DownloaderConfig,
 )
@@ -77,6 +78,9 @@ class QianbiDownloader(BaseDownloader):
 
         # load or fetch metadata
         book_info = await self.load_book_info(book_id=book_id, html_dir=html_dir)
+        if not book_info:
+            return
+
         book_info = await self._repair_chapter_ids(
             book_id,
             book_info,
@@ -84,8 +88,8 @@ class QianbiDownloader(BaseDownloader):
             html_dir,
         )
 
-        vols = book_info.get("volumes", [])
-        total_chapters = sum(len(v.get("chapters", [])) for v in vols)
+        vols = book_info["volumes"]
+        total_chapters = sum(len(v["chapters"]) for v in vols)
         if total_chapters == 0:
             self.logger.warning("%s 书籍没有章节可下载: %s", TAG, book_id)
             return
@@ -186,17 +190,17 @@ class QianbiDownloader(BaseDownloader):
     async def _repair_chapter_ids(
         self,
         book_id: str,
-        book_info: dict[str, Any],
+        book_info: BookInfoDict,
         storage: ChapterStorage,
         html_dir: Path,
-    ) -> dict[str, Any]:
+    ) -> BookInfoDict:
         """
         Fill in missing chapterId fields by retrieving the previous chapter
         and following its 'next_chapter_id'. Uses storage to avoid refetching.
         """
         prev_cid: str = ""
-        for vol in book_info.get("volumes", []):
-            for chap in vol.get("chapters", []):
+        for vol in book_info["volumes"]:
+            for chap in vol["chapters"]:
                 cid = chap.get("chapterId")
                 if cid:
                     prev_cid = cid

@@ -14,10 +14,10 @@ import logging
 import types
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Self
+from typing import Any, Self, cast
 
 from novel_downloader.core.interfaces import ExporterProtocol
-from novel_downloader.models import ChapterDict, ExporterConfig
+from novel_downloader.models import BookInfoDict, ChapterDict, ExporterConfig
 from novel_downloader.utils import ChapterStorage
 
 
@@ -212,11 +212,11 @@ class BaseExporter(ExporterProtocol, abc.ABC):
             return {}
         return self._storage_cache[book_id].get_best_chapters(chap_ids)
 
-    def _load_book_info(self, book_id: str) -> dict[str, Any]:
+    def _load_book_info(self, book_id: str) -> BookInfoDict | None:
         info_path = self._raw_data_dir / book_id / "book_info.json"
         if not info_path.is_file():
             self.logger.error("Missing metadata file: %s", info_path)
-            return {}
+            return None
 
         try:
             text = info_path.read_text(encoding="utf-8")
@@ -226,11 +226,11 @@ class BaseExporter(ExporterProtocol, abc.ABC):
                     "Invalid JSON structure in %s: expected an object at the top",
                     info_path,
                 )
-                return {}
-            return data
+                return None
+            return cast(BookInfoDict, data)
         except json.JSONDecodeError as e:
             self.logger.error("Corrupt JSON in %s: %s", info_path, e)
-        return {}
+        return None
 
     def _init_chapter_storages(self, book_id: str) -> None:
         if book_id in self._storage_cache:

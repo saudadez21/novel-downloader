@@ -11,7 +11,12 @@ from lxml import html
 
 from novel_downloader.core.parsers.base import BaseParser
 from novel_downloader.core.parsers.registry import register_parser
-from novel_downloader.models import ChapterDict
+from novel_downloader.models import (
+    BookInfoDict,
+    ChapterDict,
+    ChapterInfoDict,
+    VolumeInfoDict,
+)
 
 
 @register_parser(
@@ -25,7 +30,11 @@ class SfacgParser(BaseParser):
     _AUTHOR_INFO_XPATH = '//ul[@class="book_info"]//span[@class="book_info3"]/text()'
     _UPDATE_TIME_XPATH = '//ul[@class="book_info"]//span[@class="book_info3"]/br/following-sibling::text()'  # noqa: E501
     _COVER_URL_XPATH = '//ul[@class="book_info"]//li/img/@src'
-    _STATUS_XPATH = '//ul[@class="book_info"]//div[@class="book_info2"]/span/text()'
+    # _STATUS_XPATH = '//ul[@class="book_info"]//div[@class="book_info2"]/span/text()'
+    _STATUS_XPATH = (
+        '//ul[@class="book_info"]//div[@class="book_info2"]/span/text()'
+        ' and (contains(., "完结") or contains(., "连载"))]/text()'
+    )
     _SUMMARY_XPATH = '//ul[@class="book_profile"]/li[@class="book_bk_qs1"]/text()'
 
     # Catalog XPaths
@@ -46,7 +55,7 @@ class SfacgParser(BaseParser):
         self,
         html_list: list[str],
         **kwargs: Any,
-    ) -> dict[str, Any]:
+    ) -> BookInfoDict | None:
         """
         Parse a book info page and extract metadata and chapter structure.
 
@@ -54,46 +63,33 @@ class SfacgParser(BaseParser):
         :return: Parsed metadata and chapter structure as a dictionary.
         """
         if len(html_list) < 2:
-            return {}
+            return None
 
         info_tree = html.fromstring(html_list[0])
         catalog_tree = html.fromstring(html_list[1])
 
-        result: dict[str, Any] = {}
-
         # Book metadata
-        book_name = info_tree.xpath(self._BOOK_NAME_XPATH)
-        result["book_name"] = book_name[0].strip() if book_name else ""
+        book_name = self._first_str(info_tree.xpath(self._BOOK_NAME_XPATH))
 
-        book_info3 = info_tree.xpath(self._AUTHOR_INFO_XPATH)
-        result["author"] = book_info3[0].split("/")[0].strip() if book_info3 else ""
-        result["word_count"] = (
-            book_info3[0].split("/")[1].strip()
-            if book_info3 and len(book_info3[0].split("/")) > 1
-            else ""
-        )
+        book_info3_str = self._first_str(info_tree.xpath(self._AUTHOR_INFO_XPATH))
+        author, _, word_count = (p.strip() for p in book_info3_str.partition("/"))
 
-        book_info3_br = info_tree.xpath(self._UPDATE_TIME_XPATH)
-        result["update_time"] = book_info3_br[0].strip() if book_info3_br else ""
+        update_time = self._first_str(info_tree.xpath(self._UPDATE_TIME_XPATH))
 
-        cover_url = info_tree.xpath(self._COVER_URL_XPATH)
-        result["cover_url"] = "https:" + cover_url[0] if cover_url else ""
+        cover_url = "https:" + self._first_str(info_tree.xpath(self._COVER_URL_XPATH))
 
-        serial_status = info_tree.xpath(self._STATUS_XPATH)
-        result["serial_status"] = next(
-            (s for s in serial_status if "完结" in s or "连载" in s), ""
-        )
+        serial_status = self._first_str(info_tree.xpath(self._STATUS_XPATH))
 
-        summary = info_tree.xpath(self._SUMMARY_XPATH)
-        result["summary"] = "".join(summary).strip()
+        summary_elem = info_tree.xpath(self._SUMMARY_XPATH)
+        summary = "".join(summary_elem).strip()
 
         # Chapter structure
         volume_titles = catalog_tree.xpath(self._VOLUME_TITLE_XPATH)
         volume_blocks = catalog_tree.xpath(self._VOLUME_CONTENT_XPATH)
 
-        volumes = []
+        volumes: list[VolumeInfoDict] = []
         for vol_title, vol_block in zip(volume_titles, volume_blocks, strict=False):
-            chapters = []
+            chapters: list[ChapterInfoDict] = []
             for a in vol_block.xpath(self._CHAPTER_LIST_XPATH):
                 href = a.xpath("./@href")[0] if a.xpath("./@href") else ""
                 title = "".join(a.xpath(".//li//text()")).strip()
@@ -111,9 +107,18 @@ class SfacgParser(BaseParser):
                     "chapters": chapters,
                 }
             )
-        result["volumes"] = volumes
 
-        return result
+        return {
+            "book_name": book_name,
+            "author": author,
+            "cover_url": cover_url,
+            "update_time": update_time,
+            "word_count": word_count,
+            "serial_status": serial_status,
+            "summary": summary,
+            "volumes": volumes,
+            "extra": {},
+        }
 
     def parse_chapter(
         self,

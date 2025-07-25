@@ -59,8 +59,11 @@ class CommonDownloader(BaseDownloader):
 
         # load or fetch metadata
         book_info = await self.load_book_info(book_id=book_id, html_dir=html_dir)
-        vols = book_info.get("volumes", [])
-        total_chapters = sum(len(v.get("chapters", [])) for v in vols)
+        if not book_info:
+            return
+
+        vols = book_info["volumes"]
+        total_chapters = sum(len(v["chapters"]) for v in vols)
         if total_chapters == 0:
             self.logger.warning("%s 书籍没有章节可下载: %s", TAG, book_id)
             return

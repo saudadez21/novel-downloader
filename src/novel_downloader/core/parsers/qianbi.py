@@ -12,7 +12,11 @@ from lxml import html
 
 from novel_downloader.core.parsers.base import BaseParser
 from novel_downloader.core.parsers.registry import register_parser
-from novel_downloader.models import ChapterDict
+from novel_downloader.models import (
+    BookInfoDict,
+    ChapterDict,
+    VolumeInfoDict,
+)
 
 
 @register_parser(
@@ -25,7 +29,7 @@ class QianbiParser(BaseParser):
         self,
         html_list: list[str],
         **kwargs: Any,
-    ) -> dict[str, Any]:
+    ) -> BookInfoDict | None:
         """
         Parse a book info page and extract metadata and chapter structure.
 
@@ -33,41 +37,39 @@ class QianbiParser(BaseParser):
         :return: Parsed metadata and chapter structure as a dictionary.
         """
         if len(html_list) < 2:
-            return {}
+            return None
 
         info_tree = html.fromstring(html_list[0])
         catalog_tree = html.fromstring(html_list[1])
-        result: dict[str, Any] = {}
 
-        title = info_tree.xpath('//h1[@class="page-title"]/text()')
-        result["book_name"] = title[0].strip() if title else ""
-
-        author = info_tree.xpath('//a[contains(@href,"/author/")]/@title')
-        result["author"] = author[0].strip() if author else ""
-
-        cover = info_tree.xpath('//div[@class="novel-cover"]//img/@data-src')
-        result["cover_url"] = cover[0].strip() if cover else ""
-
-        status = info_tree.xpath(
-            '//a[@class="tag-link" and (text()="完结" or text()="连载")]/text()'
+        book_name = self._first_str(info_tree.xpath('//h1[@class="page-title"]/text()'))
+        author = self._first_str(
+            info_tree.xpath('//a[contains(@href,"/author/")]/@title')
         )
-        result["serial_status"] = status[0] if status else ""
-
-        word_count_raw = info_tree.xpath('//span[contains(text(), "万字")]/text()')
-        result["word_count"] = word_count_raw[0].strip() if word_count_raw else ""
+        cover_url = self._first_str(
+            info_tree.xpath('//div[@class="novel-cover"]//img/@data-src')
+        )
+        serial_status = self._first_str(
+            info_tree.xpath(
+                '//a[@class="tag-link" and (text()="完结" or text()="连载")]/text()'
+            )
+        )
+        word_count = self._first_str(
+            info_tree.xpath('//span[contains(text(), "字")]/text()')
+        )
 
         summary_node = info_tree.xpath(
             '//div[@class="novel-info-item novel-info-content"]/span'
         )
         if summary_node and summary_node[0] is not None:
-            result["summary"] = summary_node[0].text_content().strip()
+            summary = str(summary_node[0].text_content()).strip()
         else:
-            result["summary"] = ""
+            summary = ""
 
-        result["update_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        update_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        volumes: list[dict[str, Any]] = []
-        current_volume = None
+        volumes: list[VolumeInfoDict] = []
+        current_volume: VolumeInfoDict | None = None
 
         for elem in catalog_tree.xpath('//div[@class="box"]/*'):
             class_attr = elem.get("class", "")
@@ -103,9 +105,17 @@ class QianbiParser(BaseParser):
         if current_volume:
             volumes.append(current_volume)
 
-        result["volumes"] = volumes
-
-        return result
+        return {
+            "book_name": book_name,
+            "author": author,
+            "cover_url": cover_url,
+            "update_time": update_time,
+            "word_count": word_count,
+            "serial_status": serial_status,
+            "summary": summary,
+            "volumes": volumes,
+            "extra": {},
+        }
 
     def parse_chapter(
         self,

@@ -75,11 +75,30 @@ class QianbiSearcher(BaseSearcher):
         # extract book_id via regex
         m = re.search(r"/book/(\d+)/", url[0])
         book_id = m.group(1) if m else ""
+        if not book_id:
+            return []
+
         # title from <h1 class="page-title">
         title = (doc.xpath('//h1[@class="page-title"]/text()') or [""])[0].strip()
         author = (doc.xpath('//a[contains(@href,"/author/")]/@title') or [""])[
             0
         ].strip()
+
+        latest_elem = doc.xpath(
+            '//div[@class="module-row-info"]//a[@class="module-row-text"]'
+        )
+        latest_chapter = (
+            latest_elem[0].get("title", "-").strip() if latest_elem else "-"
+        )
+
+        time_text = doc.xpath('//div[@class="module-heading newchapter"]/time/text()')
+        if time_text:
+            update_date = time_text[0].replace("更新时间：", "-").strip()
+        else:
+            update_date = "-"
+
+        wc_text = doc.xpath('//span[contains(text(), "字")]/text()')
+        word_count = wc_text[0].strip() if wc_text else ""
 
         return [
             SearchResult(
@@ -87,6 +106,9 @@ class QianbiSearcher(BaseSearcher):
                 book_id=book_id,
                 title=title,
                 author=author,
+                latest_chapter=latest_chapter,
+                update_date=update_date,
+                word_count=word_count,
                 priority=cls.priority,
             )
         ]
@@ -114,8 +136,9 @@ class QianbiSearcher(BaseSearcher):
             title = link.text_content().strip()
             href = link.get("href", "").strip("/")
             book_id = href.replace("book/", "").strip("/")
-            # Author is not present on the page
-            author = ""
+            if not book_id:
+                continue
+
             # Compute priority
             prio = cls.priority + idx
 
@@ -124,7 +147,10 @@ class QianbiSearcher(BaseSearcher):
                     site=cls.site_name,
                     book_id=book_id,
                     title=title,
-                    author=author,
+                    author="-",  # Author is not present on the page
+                    latest_chapter="-",
+                    update_date="-",
+                    word_count="-",
                     priority=prio,
                 )
             )

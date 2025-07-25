@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Any
 
 from novel_downloader.core.interfaces import ParserProtocol
-from novel_downloader.models import ChapterDict, ParserConfig
+from novel_downloader.models import BookInfoDict, ChapterDict, ParserConfig
 
 
 class BaseParser(ParserProtocol, abc.ABC):
@@ -52,7 +52,7 @@ class BaseParser(ParserProtocol, abc.ABC):
         self,
         html_list: list[str],
         **kwargs: Any,
-    ) -> dict[str, Any]:
+    ) -> BookInfoDict | None:
         """
         Parse and return a dictionary of book information from the raw HTML.
 
@@ -104,3 +104,11 @@ class BaseParser(ParserProtocol, abc.ABC):
         book-related folders or states.
         """
         pass
+
+    @staticmethod
+    def _first_str(xs: list[str], replace: tuple[str, str] | None = None) -> str:
+        value: str = xs[0].strip() if xs else ""
+        if replace:
+            old, new = replace
+            value = value.replace(old, new)
+        return value

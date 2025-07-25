@@ -70,7 +70,7 @@ def common_export_as_txt(
 
         # Batch-fetch chapters for this volume
         chap_ids = [
-            chap.get("chapterId")
+            chap["chapterId"]
             for chap in vol.get("chapters", [])
             if chap.get("chapterId")
         ]
