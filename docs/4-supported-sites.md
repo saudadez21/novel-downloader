@@ -54,6 +54,7 @@ novel-cli search 关键词
 | [小说屋](http://www.xiaoshuoge.info/)                        | xiaoshuowu | ❌        | ❌        | ⚠️        | ✅    |
 | [天天看小说](https://www.ttkan.co/)                           | ttkan     | ❌        | ❌        | ❌        | ✅    |
 | [精彩小说](https://biquyuedu.com/)                           | biquyuedu  | ❌        | ❌        | ⚠️        | ❌    |
+| [25中文网](https://www.i25zw.com/)                           | i25zw     | ❌        | ❌        | ❌        | ✅    |
 
 #### 使用示例
 
@@ -113,6 +114,13 @@ Book ID 通常来源于小说详情页 URL 中的路径段, 各资源站点的�
 
     - 书籍页面: `http://www.xiaoshuoge.info/html/987/987654/` -> Book ID: `987-987654`
     - 章节页面: `http://www.xiaoshuoge.info/html/987/987654/123456789.html` -> Chapter ID: `123456789`
+
+* **25中文网 (i25zw)**
+
+  示例 URL:
+
+    - 书籍页面: `https://www.i25zw.com/book/64371.html` -> Book ID: `64371`
+    - 章节页面: `https://www.i25zw.com/64371/153149757.html` -> Chapter ID: `153149757`
 
 * **天天看小說 (ttkan)**
 

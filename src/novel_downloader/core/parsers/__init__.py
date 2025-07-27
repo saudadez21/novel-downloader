@@ -12,6 +12,7 @@ __all__ = [
     "BiqugeParser",
     "BiquyueduParser",
     "EsjzoneParser",
+    "I25zwParser",
     "LinovelibParser",
     "PiaotiaParser",
     "QianbiParser",
@@ -25,6 +26,7 @@ __all__ = [
 from .biquge import BiqugeParser
 from .biquyuedu import BiquyueduParser
 from .esjzone import EsjzoneParser
+from .i25zw import I25zwParser
 from .linovelib import LinovelibParser
 from .piaotia import PiaotiaParser
 from .qianbi import QianbiParser

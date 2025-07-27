@@ -9,6 +9,7 @@ __all__ = [
     "search",
     "BiqugeSearcher",
     "EsjzoneSearcher",
+    "I25zwSearcher",
     "PiaotiaSearcher",
     "QianbiSearcher",
     "QidianSearcher",
@@ -18,6 +19,7 @@ __all__ = [
 
 from .biquge import BiqugeSearcher
 from .esjzone import EsjzoneSearcher
+from .i25zw import I25zwSearcher
 from .piaotia import PiaotiaSearcher
 from .qianbi import QianbiSearcher
 from .qidian import QidianSearcher
