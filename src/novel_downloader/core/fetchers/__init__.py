@@ -12,6 +12,7 @@ or interacting with browser/session-based sources.
 __all__ = [
     "get_fetcher",
     "BiqugeSession",
+    "BiquyueduSession",
     "EsjzoneSession",
     "LinovelibSession",
     "PiaotiaSession",
@@ -24,6 +25,7 @@ __all__ = [
 ]
 
 from .biquge import BiqugeSession
+from .biquyuedu import BiquyueduSession
 from .esjzone import EsjzoneSession
 from .linovelib import LinovelibSession
 from .piaotia import PiaotiaSession

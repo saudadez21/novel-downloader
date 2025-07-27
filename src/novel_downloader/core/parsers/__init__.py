@@ -10,6 +10,7 @@ for the novel_downloader framework.
 __all__ = [
     "get_parser",
     "BiqugeParser",
+    "BiquyueduParser",
     "EsjzoneParser",
     "LinovelibParser",
     "PiaotiaParser",
@@ -22,6 +23,7 @@ __all__ = [
 ]
 
 from .biquge import BiqugeParser
+from .biquyuedu import BiquyueduParser
 from .esjzone import EsjzoneParser
 from .linovelib import LinovelibParser
 from .piaotia import PiaotiaParser

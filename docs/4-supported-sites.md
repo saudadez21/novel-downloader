@@ -53,6 +53,7 @@ novel-cli search 关键词
 | [飘天文学网](https://www.piaotia.com/)                        | piaotia   | ❌        | ❌        | ⚠️        | ✅    |
 | [小说屋](http://www.xiaoshuoge.info/)                        | xiaoshuowu | ❌        | ❌        | ⚠️        | ✅    |
 | [天天看小说](https://www.ttkan.co/)                           | ttkan     | ❌        | ❌        | ❌        | ✅    |
+| [精彩小说](https://biquyuedu.com/)                           | biquyuedu  | ❌        | ❌        | ⚠️        | ❌    |
 
 #### 使用示例
 
@@ -119,6 +120,13 @@ Book ID 通常来源于小说详情页 URL 中的路径段, 各资源站点的�
 
     - 书籍页面: `https://www.ttkan.co/novel/chapters/bookname-authorname` -> Book ID: `bookname-authorname`
     - 章节页面: `https://www.wa01.com/novel/pagea/bookname-authorname_1.html` -> Chapter ID: `1`
+
+* **精彩小说 (biquyuedu)**
+
+  示例 URL:
+
+    - 书籍页面: `https://biquyuedu.com/novel/GDr1I1.html` -> Book ID: `GDr1I1`
+    - 章节页面: `https://biquyuedu.com/novel/GDr1I1/1.html` -> Chapter ID: `1`
 
 ---
 
