@@ -54,26 +54,6 @@ novel-cli download 123456
 
 ---
 
-### TUI 模式 (终端用户界面)
-
-**注意**: TUI 模式仍在开发中, 目前尚未实现登录和修改设置等功能。建议优先使用稳定的 CLI 模式。
-
-```bash
-# 初始化默认配置 (生成 settings.toml)
-novel-cli config init
-
-# 编辑 ./settings.toml 修改网络配置
-# 可查看 docs/3-settings-schema.md
-
-# 启动 TUI 界面
-novel-tui
-```
-
-- 详细可见: [支持站点列表](docs/4-supported-sites.md)
-- 更多使用方法, 查看 [使用示例](docs/5-tui-usage-examples.md)
-
----
-
 ### GUI 模式 (图形界面)
 
 尚未实现
@@ -101,7 +81,6 @@ pip install .
 - [配置](docs/2-configuration.md)
 - [settings.toml 配置说明](docs/3-settings-schema.md)
 - [支持站点列表](docs/4-supported-sites.md)
-- [TUI 使用示例](docs/5-tui-usage-examples.md)
 - [CLI 使用示例](docs/6-cli-usage-examples.md)
 - [复制 Cookies](docs/copy-cookies.md)
 - [文件保存](docs/file-saving.md)

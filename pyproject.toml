@@ -22,7 +22,6 @@ classifiers = [
 dynamic = ["version"]
 dependencies = [
     "rich",
-    "textual",
     "requests",
     "aiohttp",
     "lxml",
@@ -57,7 +56,6 @@ font-recovery = [
 
 [project.scripts]
 novel-cli = "novel_downloader.cli.main:cli_main"
-novel-tui = "novel_downloader.tui.main:tui_main"
 
 [project.urls]
 Homepage = "https://github.com/BowenZ217/novel-downloader"
