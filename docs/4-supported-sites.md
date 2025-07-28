@@ -55,6 +55,7 @@ novel-cli search 关键词
 | [天天看小说](https://www.ttkan.co/)                           | ttkan     | ❌        | ❌        | ❌        | ✅    |
 | [精彩小说](https://biquyuedu.com/)                           | biquyuedu  | ❌        | ❌        | ⚠️        | ❌    |
 | [25中文网](https://www.i25zw.com/)                           | i25zw     | ❌        | ❌        | ❌        | ✅    |
+| [全本小说网](https://quanben5.com/)                           | quanben5  | ❌        | ❌        | ❌        | ✅    |
 
 #### 使用示例
 
@@ -121,6 +122,13 @@ Book ID 通常来源于小说详情页 URL 中的路径段, 各资源站点的�
 
     - 书籍页面: `https://www.i25zw.com/book/64371.html` -> Book ID: `64371`
     - 章节页面: `https://www.i25zw.com/64371/153149757.html` -> Chapter ID: `153149757`
+
+* **全本小说网 (quanben5)**
+
+  示例 URL:
+
+    - 书籍页面: `https://quanben5.com/n/doushentianxia/` -> Book ID: `doushentianxia`
+    - 章节页面: `https://quanben5.com/n/doushentianxia/13685.html` -> Chapter ID: `13685`
 
 * **天天看小說 (ttkan)**
 

@@ -13,6 +13,7 @@ __all__ = [
     "PiaotiaSearcher",
     "QianbiSearcher",
     "QidianSearcher",
+    "Quanben5Searcher",
     "TtkanSearcher",
     "XiaoshuowuSearcher",
 ]
@@ -23,6 +24,7 @@ from .i25zw import I25zwSearcher
 from .piaotia import PiaotiaSearcher
 from .qianbi import QianbiSearcher
 from .qidian import QidianSearcher
+from .quanben5 import Quanben5Searcher
 from .registry import search
 from .ttkan import TtkanSearcher
 from .xiaoshuowu import XiaoshuowuSearcher

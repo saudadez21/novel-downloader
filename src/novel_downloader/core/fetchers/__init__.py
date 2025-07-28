@@ -19,6 +19,7 @@ __all__ = [
     "PiaotiaSession",
     "QianbiSession",
     "QidianSession",
+    "Quanben5Session",
     "SfacgSession",
     "TtkanSession",
     "XiaoshuowuSession",
@@ -33,6 +34,7 @@ from .linovelib import LinovelibSession
 from .piaotia import PiaotiaSession
 from .qianbi import QianbiSession
 from .qidian import QidianSession
+from .quanben5 import Quanben5Session
 from .registry import get_fetcher
 from .sfacg import SfacgSession
 from .ttkan import TtkanSession
