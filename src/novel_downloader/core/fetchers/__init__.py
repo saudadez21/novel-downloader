@@ -14,6 +14,7 @@ __all__ = [
     "BiqugeSession",
     "BiquyueduSession",
     "EsjzoneSession",
+    "GuidayeSession",
     "HetushuSession",
     "I25zwSession",
     "LinovelibSession",
@@ -30,6 +31,7 @@ __all__ = [
 from .biquge import BiqugeSession
 from .biquyuedu import BiquyueduSession
 from .esjzone import EsjzoneSession
+from .guidaye import GuidayeSession
 from .hetushu import HetushuSession
 from .i25zw import I25zwSession
 from .linovelib import LinovelibSession

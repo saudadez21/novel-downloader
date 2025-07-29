@@ -239,4 +239,4 @@ class CommonDownloader(BaseDownloader):
         Subclasses may override this method to transform the book ID
         into their preferred format.
         """
-        return book_id
+        return book_id.replace("/", "-")
