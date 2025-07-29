@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.fetchers.hetushu
---------------------------------------
+novel_downloader.core.fetchers.qbtr
+-----------------------------------
 
 """
 
 from typing import Any
+
+from lxml import html
 
 from novel_downloader.core.fetchers.base import BaseSession
 from novel_downloader.core.fetchers.registry import register_fetcher
@@ -13,15 +15,16 @@ from novel_downloader.models import FetcherConfig
 
 
 @register_fetcher(
-    site_keys=["hetushu"],
+    site_keys=["qbtr"],
 )
-class HetushuSession(BaseSession):
+class QbtrSession(BaseSession):
     """
-    A session class for interacting with the Hetushu (www.hetushu.com) novel website.
+    A session class for interacting with the Qbtr (www.qbtr.cc) novel website.
     """
 
-    BOOK_INFO_URL = "https://{base_url}/book/{book_id}/index.html"
-    CHAPTER_URL = "https://{base_url}/book/{book_id}/{chapter_id}.html"
+    BASE_URL = "https://www.qbtr.cc"
+    BOOK_INFO_URL = "https://www.qbtr.cc/{book_id}.html"
+    CHAPTER_URL = "https://www.qbtr.cc/{book_id}/{chapter_id}.html"
 
     def __init__(
         self,
@@ -29,12 +32,7 @@ class HetushuSession(BaseSession):
         cookies: dict[str, str] | None = None,
         **kwargs: Any,
     ) -> None:
-        super().__init__("hetushu", config, cookies, **kwargs)
-        self.base_url = (
-            "www.hetushu.com"
-            if config.locale_style == "simplified"
-            else "www.hetubook.com"
-        )
+        super().__init__("qbtr", config, cookies, **kwargs)
 
     async def get_book_info(
         self,
@@ -47,8 +45,20 @@ class HetushuSession(BaseSession):
         :param book_id: The book identifier.
         :return: The page content as a string.
         """
-        url = self.book_info_url(base_url=self.base_url, book_id=book_id)
-        return [await self.fetch(url, **kwargs)]
+        book_id = book_id.replace("-", "/")
+        url = self.book_info_url(book_id=book_id)
+        info_html = await self.fetch(url, **kwargs)
+        try:
+            info_tree = html.fromstring(info_html)
+            txt_link = info_tree.xpath(
+                '//div[@class="booktips"]/h3/a[contains(text(), "txt下载")]/@href'
+            )
+            download_url = f"{self.BASE_URL}{txt_link[0]}" if txt_link else None
+        except Exception:
+            download_url = None
+
+        download_html = await self.fetch(download_url, **kwargs) if download_url else ""
+        return [info_html, download_html]
 
     async def get_book_chapter(
         self,
@@ -63,23 +73,22 @@ class HetushuSession(BaseSession):
         :param chapter_id: The chapter identifier.
         :return: The chapter content as a string.
         """
-        url = self.chapter_url(
-            base_url=self.base_url, book_id=book_id, chapter_id=chapter_id
-        )
+        book_id = book_id.replace("-", "/")
+        url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
         return [await self.fetch(url, **kwargs)]
 
     @classmethod
-    def book_info_url(cls, base_url: str, book_id: str) -> str:
+    def book_info_url(cls, book_id: str) -> str:
         """
         Construct the URL for fetching a book's info page.
 
         :param book_id: The identifier of the book.
         :return: Fully qualified URL for the book info page.
         """
-        return cls.BOOK_INFO_URL.format(base_url=base_url, book_id=book_id)
+        return cls.BOOK_INFO_URL.format(book_id=book_id)
 
     @classmethod
-    def chapter_url(cls, base_url: str, book_id: str, chapter_id: str) -> str:
+    def chapter_url(cls, book_id: str, chapter_id: str) -> str:
         """
         Construct the URL for fetching a specific chapter.
 
@@ -87,6 +96,4 @@ class HetushuSession(BaseSession):
         :param chapter_id: The identifier of the chapter.
         :return: Fully qualified chapter URL.
         """
-        return cls.CHAPTER_URL.format(
-            base_url=base_url, book_id=book_id, chapter_id=chapter_id
-        )
+        return cls.CHAPTER_URL.format(book_id=book_id, chapter_id=chapter_id)

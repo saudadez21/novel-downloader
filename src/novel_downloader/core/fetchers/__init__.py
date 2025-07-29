@@ -19,6 +19,7 @@ __all__ = [
     "I25zwSession",
     "LinovelibSession",
     "PiaotiaSession",
+    "QbtrSession",
     "QianbiSession",
     "QidianSession",
     "Quanben5Session",
@@ -36,6 +37,7 @@ from .hetushu import HetushuSession
 from .i25zw import I25zwSession
 from .linovelib import LinovelibSession
 from .piaotia import PiaotiaSession
+from .qbtr import QbtrSession
 from .qianbi import QianbiSession
 from .qidian import QidianSession
 from .quanben5 import Quanben5Session

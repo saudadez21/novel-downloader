@@ -59,7 +59,7 @@ class BiquyueduSession(BaseSession):
         :return: The chapter content as a string.
         """
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
-        return [await self.fetch(url, encoding="gbk", **kwargs)]
+        return [await self.fetch(url, **kwargs)]
 
     @classmethod
     def book_info_url(cls, book_id: str) -> str:

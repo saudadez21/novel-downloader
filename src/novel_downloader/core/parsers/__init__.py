@@ -17,6 +17,7 @@ __all__ = [
     "I25zwParser",
     "LinovelibParser",
     "PiaotiaParser",
+    "QbtrParser",
     "QianbiParser",
     "QidianParser",
     "Quanben5Parser",
@@ -34,6 +35,7 @@ from .hetushu import HetushuParser
 from .i25zw import I25zwParser
 from .linovelib import LinovelibParser
 from .piaotia import PiaotiaParser
+from .qbtr import QbtrParser
 from .qianbi import QianbiParser
 from .qidian import QidianParser
 from .quanben5 import Quanben5Parser

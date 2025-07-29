@@ -12,8 +12,8 @@ __all__ = [
     "HetushuSearcher",
     "I25zwSearcher",
     "PiaotiaSearcher",
+    "QbtrSearcher",
     "QianbiSearcher",
-    "QidianSearcher",
     "Quanben5Searcher",
     "TtkanSearcher",
     "XiaoshuowuSearcher",
@@ -24,8 +24,8 @@ from .esjzone import EsjzoneSearcher
 from .hetushu import HetushuSearcher
 from .i25zw import I25zwSearcher
 from .piaotia import PiaotiaSearcher
+from .qbtr import QbtrSearcher
 from .qianbi import QianbiSearcher
-from .qidian import QidianSearcher
 from .quanben5 import Quanben5Searcher
 from .registry import search
 from .ttkan import TtkanSearcher
