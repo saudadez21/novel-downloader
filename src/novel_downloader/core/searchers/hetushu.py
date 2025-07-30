@@ -7,6 +7,7 @@ novel_downloader.core.searchers.hetushu
 
 import logging
 import re
+from urllib.parse import urljoin
 
 from lxml import html
 
@@ -24,6 +25,7 @@ class HetushuSearcher(BaseSearcher):
     site_name = "hetushu"
     priority = 5
     SEARCH_URL = "https://www.hetushu.com/search/"
+    BASE_URL = "https://www.hetushu.com"
 
     @classmethod
     def _fetch_html(cls, keyword: str) -> str:
@@ -76,6 +78,12 @@ class HetushuSearcher(BaseSearcher):
 
             # Author from the adjacent <span>, strip "/" delimiters
             author = row.xpath(".//h4/span/text()")[0].strip().strip("/").strip()
+
+            cover_nodes = row.xpath(".//a/img/@src")
+            cover_url = (
+                urljoin(cls.BASE_URL, cover_nodes[0].strip()) if cover_nodes else ""
+            )
+
             # Compute priority
             prio = cls.priority + idx
 
@@ -83,6 +91,7 @@ class HetushuSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    cover_url=cover_url,
                     title=title,
                     author=author,
                     latest_chapter="-",

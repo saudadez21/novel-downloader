@@ -105,6 +105,9 @@ class Quanben5Searcher(BaseSearcher):
                 continue
             book_id = m.group(1)
 
+            cover_nodes = row.xpath('.//div[@class="pic"]//img/@src')
+            cover_url = cover_nodes[0].strip() if cover_nodes else ""
+
             title_parts = row.xpath('.//span[@class="name"]//text()')
             title = "".join(p.strip() for p in title_parts if p.strip())
 
@@ -119,6 +122,7 @@ class Quanben5Searcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    cover_url=cover_url,
                     title=title,
                     author=author,
                     latest_chapter="-",

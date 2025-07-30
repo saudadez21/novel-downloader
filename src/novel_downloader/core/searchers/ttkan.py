@@ -73,6 +73,9 @@ class TtkanSearcher(BaseSearcher):
             if not book_id:
                 continue
 
+            cover_nodes = item.xpath(".//amp-img/@src")
+            cover_url = cover_nodes[0].strip() if cover_nodes else ""
+
             # title -> <h3> inside that link
             titles = item.xpath(".//h3/text()")
             title = titles[0].strip() if titles else ""
@@ -90,6 +93,7 @@ class TtkanSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    cover_url=cover_url,
                     title=title,
                     author=author_str,
                     latest_chapter="-",

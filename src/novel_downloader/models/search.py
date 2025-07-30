@@ -11,6 +11,7 @@ from typing import TypedDict
 class SearchResult(TypedDict, total=True):
     site: str
     book_id: str
+    cover_url: str
     title: str
     author: str
     latest_chapter: str

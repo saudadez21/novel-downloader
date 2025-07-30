@@ -1,0 +1,127 @@
+#!/usr/bin/env python3
+"""
+novel_downloader.core.parsers.tongrenquan
+-----------------------------------------
+
+"""
+
+import re
+from datetime import datetime
+from typing import Any
+
+from lxml import html
+
+from novel_downloader.core.parsers.base import BaseParser
+from novel_downloader.core.parsers.registry import register_parser
+from novel_downloader.models import (
+    BookInfoDict,
+    ChapterDict,
+    ChapterInfoDict,
+    VolumeInfoDict,
+)
+
+
+@register_parser(
+    site_keys=["tongrenquan"],
+)
+class TongrenquanParser(BaseParser):
+    """Parser for 同人圈 book pages."""
+
+    BASE_URL = "https://www.tongrenquan.org"
+
+    def parse_book_info(
+        self,
+        html_list: list[str],
+        **kwargs: Any,
+    ) -> BookInfoDict | None:
+        """
+        Parse a book info page and extract metadata and chapter structure.
+
+        :param html_list: Raw HTML of the book info page.
+        :return: Parsed metadata and chapter structure as a dictionary.
+        """
+        if not html_list:
+            return None
+
+        tree = html.fromstring(html_list[0])
+
+        # Metadata
+        book_name = self._first_str(tree.xpath('//div[@class="infos"]/h1/text()'))
+        author = self._first_str(
+            tree.xpath('//div[@class="date"]/span/text()'), replace=("作者：", "")
+        )
+        cover_url = self.BASE_URL + self._first_str(
+            tree.xpath('//div[@class="pic"]//img/@src')
+        )
+        date_text = tree.xpath('string(//div[@class="date"])')
+        m_date = re.search(r"日期[：:]\s*([\d-]+)", date_text)
+        update_time = m_date.group(1) if m_date else datetime.now().strftime("%Y-%m-%d")
+
+        # Summary (collapse text within the <p> tag)
+        paras = tree.xpath('//div[@class="infos"]/p//text()')
+        summary = "\n".join(p.strip() for p in paras if p.strip())
+
+        # Chapters extraction
+        chapters: list[ChapterInfoDict] = []
+        for a in tree.xpath('//div[contains(@class,"book_list")]//ul//li/a'):
+            url = a.get("href", "").strip()
+            title = a.text_content().strip()
+            # General pattern: /category/bookId/chapterId.html
+            m = re.search(r"^/[^/]+/\d+/(\d+)\.html$", url)
+            chapter_id = m.group(1) if m else ""
+            chapters.append({"title": title, "url": url, "chapterId": chapter_id})
+
+        volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
+
+        return {
+            "book_name": book_name,
+            "author": author,
+            "cover_url": cover_url,
+            "update_time": update_time,
+            "tags": ["同人小说"],
+            "summary": summary,
+            "volumes": volumes,
+            "extra": {},
+        }
+
+    def parse_chapter(
+        self,
+        html_list: list[str],
+        chapter_id: str,
+        **kwargs: Any,
+    ) -> ChapterDict | None:
+        """
+        Parse a single chapter page and extract clean text or simplified HTML.
+
+        :param html_list: Raw HTML of the chapter page.
+        :param chapter_id: Identifier of the chapter being parsed.
+        :return: Cleaned chapter content as plain text or minimal HTML.
+        """
+        if not html_list:
+            return None
+
+        tree = html.fromstring(html_list[0])
+
+        raw_title = self._first_str(
+            tree.xpath('//div[contains(@class,"read_chapterName")]//h1/text()')
+        )
+
+        book_name = self._first_str(
+            tree.xpath('//div[contains(@class,"readTop")]//a[last()]/text()')
+        )
+
+        title = raw_title.replace(book_name, "").strip()
+
+        # Extract paragraphs of content
+        paras = tree.xpath('//div[contains(@class,"read_chapterDetail")]/p')
+        texts = [p.text_content().strip() for p in paras if p.text_content().strip()]
+        content = "\n\n".join(texts)
+        if not content:
+            return None
+
+        return {
+            "id": chapter_id,
+            "title": title,
+            "content": content,
+            "extra": {"site": "tongrenquan"},
+        }

@@ -78,12 +78,20 @@ class EsjzoneSearcher(BaseSearcher):
             # Author
             author_link = card.xpath('.//div[@class="card-author"]/a')[0]
             author = author_link.text_content().strip()
+
+            cover_data = card.xpath(
+                './preceding-sibling::a[contains(@class,"card-img-tiles")]'
+                '//div[contains(@class,"lazyload")]/@data-src'
+            )
+            cover_url = cover_data[0].strip() if cover_data else ""
+
             # Compute priority incrementally
             prio = cls.priority + idx
             results.append(
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    cover_url=cover_url,
                     title=title,
                     author=author,
                     latest_chapter=latest_chapter,

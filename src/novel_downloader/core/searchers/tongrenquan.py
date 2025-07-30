@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.searchers.qbtr
-------------------------------------
+novel_downloader.core.searchers.tongrenquan
+-------------------------------------------
 
 """
 
 import logging
 import re
+from urllib.parse import urljoin
 
 from lxml import html
 
@@ -18,19 +19,20 @@ logger = logging.getLogger(__name__)
 
 
 @register_searcher(
-    site_keys=["qbtr"],
+    site_keys=["tongrenquan"],
 )
-class QbtrSearcher(BaseSearcher):
-    site_name = "qbtr"
+class TongrenquanSearcher(BaseSearcher):
+    site_name = "tongrenquan"
     priority = 30
-    SEARCH_URL = "https://www.qbtr.cc/e/search/index.php"
+    SEARCH_URL = "https://www.tongrenquan.org/e/search/indexstart.php"
+    BASE_URL = "https://www.tongrenquan.org"
 
     @classmethod
     def _fetch_html(cls, keyword: str) -> str:
         """
-        Fetch raw HTML from Qbtr's search page.
+        Fetch raw HTML from Tongrenquan's search page.
 
-        :param keyword: The search term to query on Qbtr.
+        :param keyword: The search term to query on Tongrenquan.
         :return: HTML text of the search results page, or an empty string on fail.
         """
         keyboard = cls._quote(keyword, encoding="gbk", errors="replace")
@@ -38,8 +40,8 @@ class QbtrSearcher(BaseSearcher):
         classid = "0"
         body = f"keyboard={keyboard}&show={show}&classid={classid}"
         headers = {
-            "Origin": "https://www.qbtr.cc",
-            "Referer": "https://www.qbtr.cc/",
+            "Origin": "https://www.tongrenquan.cc",
+            "Referer": "https://www.tongrenquan.cc/",
             "Content-Type": "application/x-www-form-urlencoded",
         }
         try:
@@ -57,9 +59,9 @@ class QbtrSearcher(BaseSearcher):
     @classmethod
     def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
         """
-        Parse raw HTML from Qbtr search results into list of SearchResult.
+        Parse raw HTML from Tongrenquan search results into list of SearchResult.
 
-        :param html_str: Raw HTML string from Qbtr search results page.
+        :param html_str: Raw HTML string from Tongrenquan search results page.
         :param limit: Maximum number of results to return, or None for all.
         :return: List of SearchResult dicts.
         """
@@ -74,7 +76,11 @@ class QbtrSearcher(BaseSearcher):
             link_elem = row.xpath(".//h3/a")[0]
             href = link_elem.get("href", "").strip()
             m = re.match(r"^/([^/]+)/(\d+)\.html$", href)
-            book_id = f"{m.group(1)}-{m.group(2)}" if m else ""
+            book_id = m.group(2) if m else ""
+
+            src_nodes = row.xpath('.//div[@class="pic"]//img/@src')
+            rel_src = src_nodes[0].strip() if src_nodes else ""
+            cover_url = urljoin(cls.BASE_URL, rel_src) if rel_src else ""
 
             title = link_elem.text_content().strip()
 
@@ -92,7 +98,7 @@ class QbtrSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
-                    cover_url="",
+                    cover_url=cover_url,
                     title=title,
                     author=author,
                     latest_chapter="-",

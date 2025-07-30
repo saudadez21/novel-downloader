@@ -15,6 +15,7 @@ __all__ = [
     "QbtrSearcher",
     "QianbiSearcher",
     "Quanben5Searcher",
+    "TongrenquanSearcher",
     "TtkanSearcher",
     "XiaoshuowuSearcher",
 ]
@@ -28,5 +29,6 @@ from .qbtr import QbtrSearcher
 from .qianbi import QianbiSearcher
 from .quanben5 import Quanben5Searcher
 from .registry import search
+from .tongrenquan import TongrenquanSearcher
 from .ttkan import TtkanSearcher
 from .xiaoshuowu import XiaoshuowuSearcher

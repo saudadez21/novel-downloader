@@ -10,6 +10,7 @@
 - **新增搜索相关站点**
   - 起点中文网 (需实现起点相关 cookies)
   - 哔哩轻小说 (搜索功能还需要 `cf_clearance` cookie, 已实现 `haha`)
+  - 神凑轻小说 (搜索功能需要 `cf_clearance` cookie)
   - 名著阅读 (搜索功能需要 `cf_clearance` cookie)
 
 - **功能与性能优化**

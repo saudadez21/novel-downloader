@@ -85,6 +85,9 @@ class I25zwSearcher(BaseSearcher):
             auth_nodes = row.xpath(".//div[@class='title']/span/text()")
             author = auth_nodes[0].replace("作者：", "").strip() if auth_nodes else ""
 
+            cover_nodes = row.xpath(".//div[@class='pic']//img/@src")
+            cover_url = cover_nodes[0].strip() if cover_nodes else ""
+
             # Latest chapter
             latest_nodes = row.xpath(".//div[@class='sys']//li/a/text()")
             latest_chapter = latest_nodes[0].strip() if latest_nodes else ""
@@ -93,6 +96,7 @@ class I25zwSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    cover_url=cover_url,
                     title=title,
                     author=author,
                     latest_chapter=latest_chapter,

@@ -85,6 +85,7 @@ class BiqugeSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    cover_url="",
                     title=title,
                     author=author,
                     latest_chapter=latest_chapter,

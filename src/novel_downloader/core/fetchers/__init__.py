@@ -24,6 +24,7 @@ __all__ = [
     "QidianSession",
     "Quanben5Session",
     "SfacgSession",
+    "TongrenquanSession",
     "TtkanSession",
     "XiaoshuowuSession",
     "YamiboSession",
@@ -43,6 +44,7 @@ from .qidian import QidianSession
 from .quanben5 import Quanben5Session
 from .registry import get_fetcher
 from .sfacg import SfacgSession
+from .tongrenquan import TongrenquanSession
 from .ttkan import TtkanSession
 from .xiaoshuowu import XiaoshuowuSession
 from .yamibo import YamiboSession

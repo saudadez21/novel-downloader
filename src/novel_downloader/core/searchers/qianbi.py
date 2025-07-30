@@ -78,6 +78,11 @@ class QianbiSearcher(BaseSearcher):
         if not book_id:
             return []
 
+        cover_nodes = doc.xpath('//div[contains(@class,"novel-cover")]//img/@data-src')
+        if not cover_nodes:
+            cover_nodes = doc.xpath('//div[contains(@class,"novel-cover")]//img/@src')
+        cover_url = cover_nodes[0].strip() if cover_nodes else ""
+
         # title from <h1 class="page-title">
         title = (doc.xpath('//h1[@class="page-title"]/text()') or [""])[0].strip()
         author = (doc.xpath('//a[contains(@href,"/author/")]/@title') or [""])[
@@ -104,6 +109,7 @@ class QianbiSearcher(BaseSearcher):
             SearchResult(
                 site=cls.site_name,
                 book_id=book_id,
+                cover_url=cover_url,
                 title=title,
                 author=author,
                 latest_chapter=latest_chapter,
@@ -138,6 +144,14 @@ class QianbiSearcher(BaseSearcher):
             book_id = href.replace("book/", "").strip("/")
             if not book_id:
                 continue
+            cover_nodes = item.xpath(
+                './/div[contains(@class,"module-item-pic")]//img/@data-src'
+            )
+            if not cover_nodes:
+                cover_nodes = item.xpath(
+                    './/div[contains(@class,"module-item-pic")]//img/@src'
+                )
+            cover_url = cover_nodes[0].strip() if cover_nodes else ""
 
             # Compute priority
             prio = cls.priority + idx
@@ -146,6 +160,7 @@ class QianbiSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    cover_url=cover_url,
                     title=title,
                     author="-",  # Author is not present on the page
                     latest_chapter="-",

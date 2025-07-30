@@ -69,6 +69,9 @@ class XiaoshuowuSearcher(BaseSearcher):
             title_elem = row.xpath('.//span[@class="c_subject"]/a')
             title = title_elem[0].text_content().strip() if title_elem else ""
 
+            cover_nodes = row.xpath('.//div[@class="fl"]//img/@src')
+            cover_url = cover_nodes[0].strip() if cover_nodes else ""
+
             book_id = ""
             cata_elem = row.xpath(
                 './/span[@class="c_subject"]/following-sibling::a[normalize-space(text())="目录"]'
@@ -117,6 +120,7 @@ class XiaoshuowuSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    cover_url=cover_url,
                     title=title,
                     author=author,
                     latest_chapter=latest_chapter,
@@ -125,5 +129,4 @@ class XiaoshuowuSearcher(BaseSearcher):
                     priority=prio,
                 )
             )
-
         return results
