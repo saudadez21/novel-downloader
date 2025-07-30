@@ -6,6 +6,8 @@
   - [刺猬猫](https://www.ciweimao.com/)
   - [纵横中文网](https://www.zongheng.com/)
   - [轻之国度](https://www.lightnovel.fun)
+  - [轻小说文库](https://www.wenku8.net/)
+    - 需要 `cf_clearance` cookie
 
 - **新增搜索相关站点**
   - 起点中文网 (需实现起点相关 cookies)

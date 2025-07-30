@@ -13,6 +13,7 @@ __all__ = [
     "get_fetcher",
     "BiqugeSession",
     "BiquyueduSession",
+    "EightnovelSession",
     "EsjzoneSession",
     "GuidayeSession",
     "HetushuSession",
@@ -33,6 +34,7 @@ __all__ = [
 
 from .biquge import BiqugeSession
 from .biquyuedu import BiquyueduSession
+from .eightnovel import EightnovelSession
 from .esjzone import EsjzoneSession
 from .guidaye import GuidayeSession
 from .hetushu import HetushuSession

@@ -83,85 +83,63 @@ novel-cli download --site ttkan bookname-authorname
 Book ID 通常来源于小说详情页 URL 中的路径段, 各资源站点的对应关系如下:
 
 * **起点中文网 (qidian)**
-
-  示例 URL:
-
-    - 书籍页面: `https://www.qidian.com/book/1010868264/` -> Book ID: `1010868264`
-    - 章节页面: `https://www.qidian.com/chapter/1010868264/405976997/` -> Chapter ID: `405976997`
-
-  该站点需提供有效的 Cookie 才能访问订阅章节。
-
-  当保存时遇到重复内容, 请确保 `settings.toml` 中该站点 (`[sites.qidian]`) 的 `use_truncation` 为 `true`。
+  * 示例 URL:
+    * 书籍页面: `https://www.qidian.com/book/1010868264/` -> Book ID: `1010868264`
+    * 章节页面: `https://www.qidian.com/chapter/1010868264/405976997/` -> Chapter ID: `405976997`
+  * 登录要求:
+    * 该站点需提供有效的 Cookie 才能访问订阅章节。
+  * 其它:
+    * 当保存时遇到重复内容, 请确保 `settings.toml` 中该站点 (`[sites.qidian]`) 的 `use_truncation` 为 `true`。
 
 * **和图书 (hetushu)**
-
-  示例 URL:
-
-    - 书籍页面: `https://www.hetushu.com/book/5763/index.html` -> Book ID: `5763`
-    - 章节页面: `https://www.hetushu.com/book/5763/4327466.html` -> Chapter ID: `4327466`
+  * 示例 URL:
+    * 书籍页面: `https://www.hetushu.com/book/5763/index.html` -> Book ID: `5763`
+    * 章节页面: `https://www.hetushu.com/book/5763/4327466.html` -> Chapter ID: `4327466`
 
 * **笔趣阁 (biquge)**
-
-  示例 URL:
-
-    - 书籍页面: `http://www.b520.cc/8_8187/` -> Book ID: `8_8187`
-    - 章节页面: `http://www.b520.cc/8_8187/3899831.html` -> Chapter ID: `3899831`
+  * 示例 URL:
+    * 书籍页面: `http://www.b520.cc/8_8187/` -> Book ID: `8_8187`
+    * 章节页面: `http://www.b520.cc/8_8187/3899831.html` -> Chapter ID: `3899831`
 
 * **铅笔小说 (qianbi)**
-
-  示例 URL:
-
-    - 书籍页面: `https://www.23qb.net/book/12282/` -> Book ID: `12282`
-    - 章节页面: `https://www.23qb.net/book/12282/7908999.html` -> Chapter ID: `7908999`
+  * 示例 URL:
+    * 书籍页面: `https://www.23qb.net/book/12282/` -> Book ID: `12282`
+    * 章节页面: `https://www.23qb.net/book/12282/7908999.html` -> Chapter ID: `7908999`
 
 * **飘天文学网 (piaotia)**
-
-  示例 URL:
-
-    - 书籍页面: `https://www.piaotia.com/bookinfo/13/12345.html` -> Book ID: `13-12345`
-    - 章节页面: `https://www.piaotia.com/html/13/12345/114514.html` -> Chapter ID: `114514`
+  * 示例 URL:
+    * 书籍页面: `https://www.piaotia.com/bookinfo/13/12345.html` -> Book ID: `13-12345`
+    * 章节页面: `https://www.piaotia.com/html/13/12345/114514.html` -> Chapter ID: `114514`
 
 * **小说屋 (xiaoshuowu)**
-
-  示例 URL:
-
-    - 书籍页面: `http://www.xiaoshuoge.info/html/987/987654/` -> Book ID: `987-987654`
-    - 章节页面: `http://www.xiaoshuoge.info/html/987/987654/123456789.html` -> Chapter ID: `123456789`
+  * 示例 URL:
+    * 书籍页面: `http://www.xiaoshuoge.info/html/987/987654/` -> Book ID: `987-987654`
+    * 章节页面: `http://www.xiaoshuoge.info/html/987/987654/123456789.html` -> Chapter ID: `123456789`
 
 * **25中文网 (i25zw)**
-
-  示例 URL:
-
-    - 书籍页面: `https://www.i25zw.com/book/64371.html` -> Book ID: `64371`
-    - 章节页面: `https://www.i25zw.com/64371/153149757.html` -> Chapter ID: `153149757`
+  * 示例 URL:
+    * 书籍页面: `https://www.i25zw.com/book/64371.html` -> Book ID: `64371`
+    * 章节页面: `https://www.i25zw.com/64371/153149757.html` -> Chapter ID: `153149757`
 
 * **全本小说网 (quanben5)**
-
-  示例 URL:
-
-    - 书籍页面: `https://quanben5.com/n/doushentianxia/` -> Book ID: `doushentianxia`
-    - 章节页面: `https://quanben5.com/n/doushentianxia/13685.html` -> Chapter ID: `13685`
+  * 示例 URL:
+    * 书籍页面: `https://quanben5.com/n/doushentianxia/` -> Book ID: `doushentianxia`
+    * 章节页面: `https://quanben5.com/n/doushentianxia/13685.html` -> Chapter ID: `13685`
 
 * **天天看小說 (ttkan)**
-
-  示例 URL:
-
-    - 书籍页面: `https://www.ttkan.co/novel/chapters/bookname-authorname` -> Book ID: `bookname-authorname`
-    - 章节页面: `https://www.wa01.com/novel/pagea/bookname-authorname_1.html` -> Chapter ID: `1`
+  * 示例 URL:
+    * 书籍页面: `https://www.ttkan.co/novel/chapters/bookname-authorname` -> Book ID: `bookname-authorname`
+    * 章节页面: `https://www.wa01.com/novel/pagea/bookname-authorname_1.html` -> Chapter ID: `1`
 
 * **精彩小说 (biquyuedu)**
-
-  示例 URL:
-
-    - 书籍页面: `https://biquyuedu.com/novel/GDr1I1.html` -> Book ID: `GDr1I1`
-    - 章节页面: `https://biquyuedu.com/novel/GDr1I1/1.html` -> Chapter ID: `1`
+  * 示例 URL:
+    * 书籍页面: `https://biquyuedu.com/novel/GDr1I1.html` -> Book ID: `GDr1I1`
+    * 章节页面: `https://biquyuedu.com/novel/GDr1I1/1.html` -> Chapter ID: `1`
 
 * **名著阅读 (guidaye)**
-
-  示例 URL:
-
-    - 书籍页面: `https://b.guidaye.com/kongbu/654/` -> Book ID: `kongbu-654`
-    - 章节页面: `https://b.guidaye.com/kongbu/654/170737.html` -> Chapter ID: `170737`
+  * 示例 URL:
+    * 书籍页面: `https://b.guidaye.com/kongbu/654/` -> Book ID: `kongbu-654`
+    * 章节页面: `https://b.guidaye.com/kongbu/654/170737.html` -> Chapter ID: `170737`
 
 ---
 
@@ -182,20 +160,16 @@ novel-cli download --site qbtr 9876
 #### Book ID 说明
 
 * **同人圈 (tongrenquan)**
-
-  示例 URL:
-
-    - 书籍页面: `https://www.tongrenquan.org/tongren/7548.html` -> Book ID: `7548`
-    - 章节页面: `https://www.tongrenquan.org/tongren/7548/1.html` -> Chapter ID: `1`
+  * 示例 URL:
+    * 书籍页面: `https://www.tongrenquan.org/tongren/7548.html` -> Book ID: `7548`
+    * 章节页面: `https://www.tongrenquan.org/tongren/7548/1.html` -> Chapter ID: `1`
 
 * **全本同人小说 (qbtr)**
-
-  示例 URL:
-
-    - 书籍页面: `https://www.qbtr.cc/tongren/8978.html` -> Book ID: `tongren-8978`
-    - 章节页面: `https://www.qbtr.cc/tongren/8978/1.html` -> Chapter ID: `1`
-
-  注: 该站点直接提供 txt 下载。
+  * 示例 URL:
+    * 书籍页面: `https://www.qbtr.cc/tongren/8978.html` -> Book ID: `tongren-8978`
+    * 章节页面: `https://www.qbtr.cc/tongren/8978/1.html` -> Chapter ID: `1`
+  * 注意事项:
+    * 该站点直接提供 txt 下载。
 
 ---
 
@@ -207,6 +181,7 @@ novel-cli download --site qbtr 9876
 | [哔哩轻小说](https://www.linovelib.com/)                     | linovelib   | ✅        | ✅        | ⚠️        | ⚠️   |
 | [ESJ Zone](https://www.esjzone.cc)                           | esjzone    | ✅        | ✅        | ✅        | ✅    |
 | [神凑轻小说](https://www.shencou.com/)                        | shencou   | ✅        | ✅        | ⚠️        | ⚠️   |
+| [无限轻小说](https://www.8novel.com/)                        | 8novel   | ✅        | ✅        | ⚠️        | ✅   |
 
 #### 使用示例
 
@@ -224,45 +199,40 @@ novel-cli download --site esjzone 1234567890
 #### Book ID 说明
 
 * **SF 轻小说 (sfacg)**
-
-  示例 URL:
-
-    - 书籍页面: `https://m.sfacg.com/b/456123/` -> Book ID: `456123`
-    - 章节页面: `https://m.sfacg.com/c/5417665/` -> Chapter ID: `5417665`
-
-  该站点需提供有效的 Cookie 才能访问订阅章节。
+  * 示例 URL:
+    * 书籍页面: `https://m.sfacg.com/b/456123/` -> Book ID: `456123`
+    * 章节页面: `https://m.sfacg.com/c/5417665/` -> Chapter ID: `5417665`
+  * 登录要求:
+    * 该站点需提供有效的 Cookie 才能访问订阅章节。
 
 * **哔哩轻小说 (linovelib)**
+  * 示例 URL:
+    * 书籍页面: `https://www.linovelib.com/novel/1234.html` -> Book ID: `1234`
+    * 章节页面: `https://www.linovelib.com/novel/1234/47800.html` -> Chapter ID: `47800`
+  * 注意事项:
+    * 该站点对于频繁请求有访问限制, 若请求间隔过短, 可能触发风控机制, 导致账号或设备被封禁或限制访问。
 
-  示例 URL:
-
-    - 书籍页面: `https://www.linovelib.com/novel/1234.html` -> Book ID: `1234`
-    - 章节页面: `https://www.linovelib.com/novel/1234/47800.html` -> Chapter ID: `47800`
-
-  该站点对于频繁请求有访问限制, 若请求间隔过短, 可能触发风控机制, 导致账号或设备被封禁或限制访问。
+* **无限轻小说 (8novel)**
+  * 示例 URL:
+    * 书籍页面: `https://www.8novel.com/novelbooks/3365/` -> Book ID: `3365`
+    * 章节页面: `https://article.8novel.com/read/3365/?106235` -> Chapter ID: `106235`
 
 * **ESJ Zone (esjzone)**
-
-  示例 URL:
-
-    - 书籍页面: `https://www.esjzone.cc/detail/1660702902.html` -> Book ID: `1660702902`
-    - 章节页面: `https://www.esjzone.cc/forum/1660702902/294593.html` -> Chapter ID: `294593`
-
-  **注意**: 若未完成登录验证, 部分小说页面会自动重定向至「論壇」页面, 导致内容加载失败。
+  * 示例 URL:
+    * 书籍页面: `https://www.esjzone.cc/detail/1660702902.html` -> Book ID: `1660702902`
+    * 章节页面: `https://www.esjzone.cc/forum/1660702902/294593.html` -> Chapter ID: `294593`
+  * 注意事项:
+    * 若未完成登录验证, 部分小说页面会自动重定向至「論壇」页面, 导致内容加载失败。
 
 * **神凑轻小说 (shencou)**
-
-  示例 URL:
-
-    - 书籍页面: `https://www.shencou.com/read/3/3540/index.html` -> Book ID: `3-3540`
-    - 章节页面: `https://www.shencou.com/read/3/3540/156328.html` -> Chapter ID: `156328`
-
-  书籍页面需要在详细页面 (例如 `https://www.shencou.com/books/read_3540.html`) 点击 `开始阅读`。
-
-  该书源存在以下问题:
-
-    - 图片资源可能无法正常加载或失效
-    - 目录页中仍保留了一些已删除章节的重复条目, 却未同步删除
+  * 示例 URL:
+    * 书籍页面: `https://www.shencou.com/read/3/3540/index.html` -> Book ID: `3-3540`
+    * 章节页面: `https://www.shencou.com/read/3/3540/156328.html` -> Chapter ID: `156328`
+  * 目录访问:
+    * 先打开详细页面 (如 `https://www.shencou.com/books/read_3540.html`), 再点击 "小说目录" 查看
+  * 该站点存在以下问题:
+    * 图片资源可能无法正常加载或失效
+    * 目录页中仍保留了一些已删除章节的重复条目, 却未同步删除
 
 ---
 
@@ -285,11 +255,9 @@ novel-cli download --site yamibo 123456
 #### Book ID 说明
 
 * **百合会 (yamibo)**
-
-  示例 URL:
-
-    - 书籍页面: `https://www.yamibo.com/novel/262117` -> Book ID: `262117`
-    - 章节页面: `https://www.yamibo.com/novel/view-chapter?id=38772952` -> Chapter ID: `38772952`
+  * 示例 URL:
+    * 书籍页面: `https://www.yamibo.com/novel/262117` -> Book ID: `262117`
+    * 章节页面: `https://www.yamibo.com/novel/view-chapter?id=38772952` -> Chapter ID: `38772952`
 
 </details>
 
