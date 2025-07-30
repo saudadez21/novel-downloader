@@ -24,7 +24,7 @@ from novel_downloader.models import (
     site_keys=["piaotia"],
 )
 class PiaotiaParser(BaseParser):
-    """ """
+    """Parser for 飘天文学网 book pages."""
 
     def parse_book_info(
         self,

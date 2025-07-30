@@ -25,7 +25,7 @@ from novel_downloader.models import (
     site_keys=["ttkan"],
 )
 class TtkanParser(BaseParser):
-    """ """
+    """Parser for 天天看小說 book pages."""
 
     def parse_book_info(
         self,

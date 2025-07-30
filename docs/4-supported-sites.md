@@ -206,6 +206,7 @@ novel-cli download --site qbtr 9876
 | [SF轻小说](https://m.sfacg.com)                              | sfacg      | ✅        | ✅        | ✅        | ⚠️   |
 | [哔哩轻小说](https://www.linovelib.com/)                     | linovelib   | ✅        | ✅        | ⚠️        | ⚠️   |
 | [ESJ Zone](https://www.esjzone.cc)                           | esjzone    | ✅        | ✅        | ✅        | ✅    |
+| [神凑轻小说](https://www.shencou.com/)                        | shencou   | ✅        | ✅        | ⚠️        | ⚠️   |
 
 #### 使用示例
 
@@ -248,6 +249,20 @@ novel-cli download --site esjzone 1234567890
     - 章节页面: `https://www.esjzone.cc/forum/1660702902/294593.html` -> Chapter ID: `294593`
 
   **注意**: 若未完成登录验证, 部分小说页面会自动重定向至「論壇」页面, 导致内容加载失败。
+
+* **神凑轻小说 (shencou)**
+
+  示例 URL:
+
+    - 书籍页面: `https://www.shencou.com/read/3/3540/index.html` -> Book ID: `3-3540`
+    - 章节页面: `https://www.shencou.com/read/3/3540/156328.html` -> Chapter ID: `156328`
+
+  书籍页面需要在详细页面 (例如 `https://www.shencou.com/books/read_3540.html`) 点击 `开始阅读`。
+
+  该书源存在以下问题:
+
+    - 图片资源可能无法正常加载或失效
+    - 目录页中仍保留了一些已删除章节的重复条目, 却未同步删除
 
 ---
 

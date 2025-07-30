@@ -60,5 +60,4 @@ def search(
             continue
 
     results.sort(key=lambda res: res["priority"])
-    print(results)
     return results[:limit] if limit is not None else results

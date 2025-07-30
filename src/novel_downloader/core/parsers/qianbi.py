@@ -23,7 +23,7 @@ from novel_downloader.models import (
     site_keys=["qianbi"],
 )
 class QianbiParser(BaseParser):
-    """ """
+    """Parser for 铅笔小说 book pages."""
 
     def parse_book_info(
         self,

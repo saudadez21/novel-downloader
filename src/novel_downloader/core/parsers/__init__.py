@@ -22,6 +22,7 @@ __all__ = [
     "QidianParser",
     "Quanben5Parser",
     "SfacgParser",
+    "ShencouParser",
     "TongrenquanParser",
     "TtkanParser",
     "XiaoshuowuParser",
@@ -42,6 +43,7 @@ from .qidian import QidianParser
 from .quanben5 import Quanben5Parser
 from .registry import get_parser
 from .sfacg import SfacgParser
+from .shencou import ShencouParser
 from .tongrenquan import TongrenquanParser
 from .ttkan import TtkanParser
 from .xiaoshuowu import XiaoshuowuParser

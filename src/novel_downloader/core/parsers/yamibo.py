@@ -23,7 +23,7 @@ from novel_downloader.models import (
     site_keys=["yamibo"],
 )
 class YamiboParser(BaseParser):
-    """ """
+    """Parser for 百合会 book pages."""
 
     BASE_URL = "https://www.yamibo.com"
     # Book info XPaths

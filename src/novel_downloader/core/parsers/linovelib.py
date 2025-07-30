@@ -27,7 +27,7 @@ from novel_downloader.utils.constants import LINOVELIB_FONT_MAP_PATH
     site_keys=["linovelib"],
 )
 class LinovelibParser(BaseParser):
-    """ """
+    """Parser for 哔哩轻小说 book pages."""
 
     # Book info XPaths
     _BOOK_NAME_XPATH = '//div[@class="book-info"]/h1[@class="book-name"]/text()'
