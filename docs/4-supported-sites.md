@@ -60,6 +60,7 @@ novel-cli search 关键词
 | [精彩小说](https://biquyuedu.com/)                           | biquyuedu  | ❌        | ❌        | ⚠️        | ❌    |
 | [25中文网](https://www.i25zw.com/)                           | i25zw     | ❌        | ❌        | ❌        | ✅    |
 | [全本小说网](https://quanben5.com/)                           | quanben5  | ❌        | ❌        | ❌        | ✅    |
+| [乐文小说网](https://www.lewenn.net/)                         | lewenn    | ❌        | ❌        | ⚠️        | ⚠️    |
 | [名著阅读](https://b.guidaye.com/)                           | guidaye    | ❌        | ❌        | ❌        | ⚠️    |
 
 #### 使用示例
@@ -135,6 +136,13 @@ Book ID 通常来源于小说详情页 URL 中的路径段, 各资源站点的�
   * 示例 URL:
     * 书籍页面: `https://biquyuedu.com/novel/GDr1I1.html` -> Book ID: `GDr1I1`
     * 章节页面: `https://biquyuedu.com/novel/GDr1I1/1.html` -> Chapter ID: `1`
+
+* **乐文小说网 (lewenn)**
+  * 示例 URL:
+    * 书籍页面: `https://www.lewenn.net/lw1/` -> Book ID: `lw1`
+    * 章节页面: `https://www.lewenn.net/lw1/30038546.html` -> Chapter ID: `30038546`
+  * 其它:
+    * 该站点的搜索结果是 `3A小说网` 的...
 
 * **名著阅读 (guidaye)**
   * 示例 URL:

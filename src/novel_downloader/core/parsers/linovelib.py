@@ -70,11 +70,11 @@ class LinovelibParser(BaseParser):
         author = self._first_str(tree.xpath(self._AUTHOR_XPATH))
         cover_url = self._first_str(tree.xpath(self._COVER_URL_XPATH))
         update_time = self._first_str(
-            tree.xpath(self._UPDATE_TIME_XPATH), replace=("最后更新：", "")
+            tree.xpath(self._UPDATE_TIME_XPATH), replaces=[("最后更新：", "")]
         )
         serial_status = self._first_str(tree.xpath(self._SERIAL_STATUS_XPATH))
         word_count = self._first_str(
-            tree.xpath(self._WORD_COUNT_XPATH), replace=("最后更新：", "")
+            tree.xpath(self._WORD_COUNT_XPATH), replaces=[("最后更新：", "")]
         )
 
         summary = self._extract_intro(tree, self._SUMMARY_XPATH)
@@ -86,10 +86,10 @@ class LinovelibParser(BaseParser):
             volume_cover = self._first_str(vol_tree.xpath(self._COVER_URL_XPATH))
             volume_name = self._first_str(vol_tree.xpath(self._BOOK_NAME_XPATH))
             vol_update_time = self._first_str(
-                vol_tree.xpath(self._UPDATE_TIME_XPATH), replace=("最后更新：", "")
+                vol_tree.xpath(self._UPDATE_TIME_XPATH), replaces=[("最后更新：", "")]
             )
             vol_word_count = self._first_str(
-                vol_tree.xpath(self._WORD_COUNT_XPATH), replace=("字数：", "")
+                vol_tree.xpath(self._WORD_COUNT_XPATH), replaces=[("字数：", "")]
             )
             volume_intro = self._extract_intro(vol_tree, self._SUMMARY_XPATH)
 

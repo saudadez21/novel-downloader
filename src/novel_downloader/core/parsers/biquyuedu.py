@@ -56,7 +56,7 @@ class BiquyueduParser(BaseParser):
         )
         update_time = self._first_str(
             tree.xpath("//div[@class='info']//div[@class='small'][2]//span[1]/text()"),
-            replace=("更新时间：", ""),
+            replaces=[("更新时间：", "")],
         )
 
         crumbs = tree.xpath("//div[@class='path']//div[@class='p']/a/text()")

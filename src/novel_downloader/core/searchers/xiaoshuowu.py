@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 @register_searcher(
-    site_keys=["xiaoshuowu"],
+    site_keys=["xiaoshuowu", "xiaoshuoge"],
 )
 class XiaoshuowuSearcher(BaseSearcher):
     site_name = "xiaoshuowu"

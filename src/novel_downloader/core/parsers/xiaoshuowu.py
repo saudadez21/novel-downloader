@@ -20,7 +20,7 @@ from novel_downloader.models import (
 
 
 @register_parser(
-    site_keys=["xiaoshuowu"],
+    site_keys=["xiaoshuowu", "xiaoshuoge"],
 )
 class XiaoshuowuParser(BaseParser):
     """

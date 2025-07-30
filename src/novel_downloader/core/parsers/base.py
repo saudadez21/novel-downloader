@@ -106,9 +106,10 @@ class BaseParser(ParserProtocol, abc.ABC):
         pass
 
     @staticmethod
-    def _first_str(xs: list[str], replace: tuple[str, str] | None = None) -> str:
+    def _first_str(xs: list[str], replaces: list[tuple[str, str]] | None = None) -> str:
+        replaces = replaces or []
         value: str = xs[0].strip() if xs else ""
-        if replace:
+        for replace in replaces:
             old, new = replace
             value = value.replace(old, new)
         return value

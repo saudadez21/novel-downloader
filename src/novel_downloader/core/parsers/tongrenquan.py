@@ -48,7 +48,7 @@ class TongrenquanParser(BaseParser):
         # Metadata
         book_name = self._first_str(tree.xpath('//div[@class="infos"]/h1/text()'))
         author = self._first_str(
-            tree.xpath('//div[@class="date"]/span/text()'), replace=("作者：", "")
+            tree.xpath('//div[@class="date"]/span/text()'), replaces=[("作者：", "")]
         )
         cover_url = self.BASE_URL + self._first_str(
             tree.xpath('//div[@class="pic"]//img/@src')

@@ -49,7 +49,7 @@ class ShencouParser(BaseParser):
 
         author = self._first_str(
             info_tree.xpath('//td[contains(text(),"小说作者")]/text()'),
-            replace=("小说作者：", ""),
+            replaces=[("小说作者：", "")],
         )
 
         cover_url = self._first_str(
