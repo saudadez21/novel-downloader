@@ -7,6 +7,7 @@ novel_downloader.core.searchers
 
 __all__ = [
     "search",
+    "AaatxtSearcher",
     "BiqugeSearcher",
     "EightnovelSearcher",
     "EsjzoneSearcher",
@@ -21,6 +22,7 @@ __all__ = [
     "XiaoshuowuSearcher",
 ]
 
+from .aaatxt import AaatxtSearcher
 from .biquge import BiqugeSearcher
 from .eightnovel import EightnovelSearcher
 from .esjzone import EsjzoneSearcher

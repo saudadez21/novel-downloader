@@ -9,6 +9,7 @@ for the novel_downloader framework.
 
 __all__ = [
     "get_parser",
+    "AaatxtParser",
     "BiqugeParser",
     "BiquyueduParser",
     "EightnovelParser",
@@ -31,6 +32,7 @@ __all__ = [
     "YamiboParser",
 ]
 
+from .aaatxt import AaatxtParser
 from .biquge import BiqugeParser
 from .biquyuedu import BiquyueduParser
 from .eightnovel import EightnovelParser

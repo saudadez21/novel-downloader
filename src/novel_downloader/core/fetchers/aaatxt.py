@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.fetchers.quanben5
----------------------------------------
+novel_downloader.core.fetchers.aaatxt
+-------------------------------------
 
 """
 
@@ -13,15 +13,15 @@ from novel_downloader.models import FetcherConfig
 
 
 @register_fetcher(
-    site_keys=["quanben5"],
+    site_keys=["aaatxt"],
 )
-class Quanben5Session(BaseSession):
+class AaatxtSession(BaseSession):
     """
-    A session class for interacting with the Quanben5 (quanben5.com) novel website.
+    A session class for interacting with the 3atxt (www.aaatxt.com) novel website.
     """
 
-    BOOK_INFO_URL = "https://{base_url}/n/{book_id}/xiaoshuo.html"
-    CHAPTER_URL = "https://{base_url}/n/{book_id}/{chapter_id}.html"
+    BOOK_INFO_URL = "http://www.aaatxt.com/shu/{book_id}.html"
+    CHAPTER_URL = "http://www.aaatxt.com/yuedu/{chapter_id}.html"
 
     def __init__(
         self,
@@ -29,12 +29,7 @@ class Quanben5Session(BaseSession):
         cookies: dict[str, str] | None = None,
         **kwargs: Any,
     ) -> None:
-        super().__init__("quanben5", config, cookies, **kwargs)
-        self.base_url = (
-            "quanben5.com"
-            if config.locale_style == "simplified"
-            else "big5.quanben5.com"
-        )
+        super().__init__("aaatxt", config, cookies, **kwargs)
 
     async def get_book_info(
         self,
@@ -47,7 +42,7 @@ class Quanben5Session(BaseSession):
         :param book_id: The book identifier.
         :return: The page content as a string.
         """
-        url = self.book_info_url(base_url=self.base_url, book_id=book_id)
+        url = self.book_info_url(book_id=book_id)
         return [await self.fetch(url, **kwargs)]
 
     async def get_book_chapter(
@@ -63,23 +58,21 @@ class Quanben5Session(BaseSession):
         :param chapter_id: The chapter identifier.
         :return: The chapter content as a string.
         """
-        url = self.chapter_url(
-            base_url=self.base_url, book_id=book_id, chapter_id=chapter_id
-        )
-        return [await self.fetch(url, **kwargs)]
+        url = self.chapter_url(chapter_id=chapter_id)
+        return [await self.fetch(url, encoding="gb2312", **kwargs)]
 
     @classmethod
-    def book_info_url(cls, base_url: str, book_id: str) -> str:
+    def book_info_url(cls, book_id: str) -> str:
         """
         Construct the URL for fetching a book's info page.
 
         :param book_id: The identifier of the book.
         :return: Fully qualified URL for the book info page.
         """
-        return cls.BOOK_INFO_URL.format(base_url=base_url, book_id=book_id)
+        return cls.BOOK_INFO_URL.format(book_id=book_id)
 
     @classmethod
-    def chapter_url(cls, base_url: str, book_id: str, chapter_id: str) -> str:
+    def chapter_url(cls, chapter_id: str) -> str:
         """
         Construct the URL for fetching a specific chapter.
 
@@ -87,6 +80,4 @@ class Quanben5Session(BaseSession):
         :param chapter_id: The identifier of the chapter.
         :return: Fully qualified chapter URL.
         """
-        return cls.CHAPTER_URL.format(
-            base_url=base_url, book_id=book_id, chapter_id=chapter_id
-        )
+        return cls.CHAPTER_URL.format(chapter_id=chapter_id)

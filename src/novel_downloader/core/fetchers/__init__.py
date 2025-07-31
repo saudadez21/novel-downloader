@@ -11,6 +11,7 @@ or interacting with browser/session-based sources.
 
 __all__ = [
     "get_fetcher",
+    "AaatxtSession",
     "BiqugeSession",
     "BiquyueduSession",
     "EightnovelSession",
@@ -33,6 +34,7 @@ __all__ = [
     "YamiboSession",
 ]
 
+from .aaatxt import AaatxtSession
 from .biquge import BiqugeSession
 from .biquyuedu import BiquyueduSession
 from .eightnovel import EightnovelSession

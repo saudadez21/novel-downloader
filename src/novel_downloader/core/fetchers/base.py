@@ -413,14 +413,22 @@ class BaseSession(FetcherProtocol, abc.ABC):
         then on UnicodeDecodeError fall back to a lenient utf-8 decode.
         """
         data: bytes = await resp.read()
-        encodings = [encoding, resp.charset, "utf-8", "gb18030", "gbk"]
+        encodings = [
+            encoding,
+            resp.charset,
+            "gb2312",
+            "gb18030",
+            "gbk",
+            "utf-8",
+        ]
         encodings_list: list[str] = [e for e in encodings if e]
         for enc in encodings_list:
             try:
                 return data.decode(enc)
             except UnicodeDecodeError:
                 continue
-        return data.decode("utf-8", errors="ignore")
+        encoding = encoding or "utf-8"
+        return data.decode(encoding, errors="ignore")
 
     async def __aenter__(self) -> Self:
         if self._session is None or self._session.closed:
