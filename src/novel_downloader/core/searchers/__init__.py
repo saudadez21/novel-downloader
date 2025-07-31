@@ -9,6 +9,7 @@ __all__ = [
     "search",
     "AaatxtSearcher",
     "BiqugeSearcher",
+    "DeqixsSearcher",
     "EightnovelSearcher",
     "EsjzoneSearcher",
     "HetushuSearcher",
@@ -24,6 +25,7 @@ __all__ = [
 
 from .aaatxt import AaatxtSearcher
 from .biquge import BiqugeSearcher
+from .deqixs import DeqixsSearcher
 from .eightnovel import EightnovelSearcher
 from .esjzone import EsjzoneSearcher
 from .hetushu import HetushuSearcher

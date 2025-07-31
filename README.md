@@ -65,7 +65,7 @@ novel-cli download 123456
 如需体验开发中的最新功能, 可通过 GitHub 安装:
 
 ```bash
-git clone https://github.com/BowenZ217/novel-downloader.git
+git clone https://github.com/saudadez21/novel-downloader.git
 cd novel-downloader
 pip install .
 # 或安装带可选功能:

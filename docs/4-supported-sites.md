@@ -54,6 +54,7 @@ novel-cli search 关键词
 | [和图书](https://www.hetushu.com/index.php)                  | hetushu   | ✅     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [笔趣阁](http://www.b520.cc)                                 | biquge    | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [铅笔小说](https://www.23qb.net), [备用](https://www.23qb.com/) | qianbi | ✅     | ❌     | ⚠️     | ✅     | 简      |
+| [得奇小说网](https://www.deqixs.com/)                         | deqixs   | ❌     | ❌     | ❌     | ✅     | 简      |
 | [飘天文学网](https://www.piaotia.com/)                        | piaotia  | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [小说屋](http://www.xiaoshuoge.info/)                        | xiaoshuowu | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [天天看小说](https://www.ttkan.co/)                          | ttkan     | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
@@ -106,6 +107,13 @@ Book ID 通常来源于小说详情页 URL 中的路径段, 各资源站点的�
   * 示例 URL:
     * 书籍页面: `https://www.23qb.net/book/12282/` -> Book ID: `12282`
     * 章节页面: `https://www.23qb.net/book/12282/7908999.html` -> Chapter ID: `7908999`
+
+* **得奇小说网 (deqixs)**
+  * 示例 URL:
+    * 书籍页面: `https://www.deqixs.com/xiaoshuo/2026/` -> Book ID: `2026`
+    * 章节页面: `https://www.deqixs.com/xiaoshuo/2026/1969933.html` -> Chapter ID: `1969933`
+  * 注意事项:
+    * 该站点直接提供 txt 下载。
 
 * **飘天文学网 (piaotia)**
   * 示例 URL:

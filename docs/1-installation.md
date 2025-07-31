@@ -29,7 +29,7 @@ source .venv/bin/activate
 
     ```bash
     # 克隆项目
-    git clone https://github.com/BowenZ217/novel-downloader.git
+    git clone https://github.com/saudadez21/novel-downloader.git
     cd novel-downloader
 
     # 安装为库并生成 CLI

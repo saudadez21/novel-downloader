@@ -58,8 +58,8 @@ font-recovery = [
 novel-cli = "novel_downloader.cli.main:cli_main"
 
 [project.urls]
-Homepage = "https://github.com/BowenZ217/novel-downloader"
-Source = "https://github.com/BowenZ217/novel-downloader"
+Homepage = "https://github.com/saudadez21/novel-downloader"
+Source = "https://github.com/saudadez21/novel-downloader"
 
 [build-system]
 requires = ["setuptools>=61.0", "wheel"]
