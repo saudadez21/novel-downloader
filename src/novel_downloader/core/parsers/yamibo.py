@@ -11,15 +11,19 @@ from lxml import html
 
 from novel_downloader.core.parsers.base import BaseParser
 from novel_downloader.core.parsers.registry import register_parser
-from novel_downloader.models import ChapterDict
+from novel_downloader.models import (
+    BookInfoDict,
+    ChapterDict,
+    ChapterInfoDict,
+    VolumeInfoDict,
+)
 
 
 @register_parser(
     site_keys=["yamibo"],
-    backends=["session", "browser"],
 )
 class YamiboParser(BaseParser):
-    """ """
+    """Parser for 百合会 book pages."""
 
     BASE_URL = "https://www.yamibo.com"
     # Book info XPaths
@@ -56,7 +60,7 @@ class YamiboParser(BaseParser):
         self,
         html_list: list[str],
         **kwargs: Any,
-    ) -> dict[str, Any]:
+    ) -> BookInfoDict | None:
         """
         Parse a book info page and extract metadata and chapter structure.
 
@@ -64,41 +68,40 @@ class YamiboParser(BaseParser):
         :return: Parsed metadata and chapter structure as a dictionary.
         """
         if not html_list:
-            return {}
+            return None
 
         tree = html.fromstring(html_list[0])
-        result: dict[str, Any] = {}
 
-        result["book_name"] = tree.xpath(self._BOOK_NAME_XPATH).strip()
-        result["author"] = tree.xpath(self._AUTHOR_XPATH).strip()
+        book_name = tree.xpath(self._BOOK_NAME_XPATH).strip()
+        author = tree.xpath(self._AUTHOR_XPATH).strip()
 
         cover = tree.xpath(self._COVER_URL_XPATH)
-        result["cover_url"] = f"{self.BASE_URL}{cover[0]}" if cover else ""
+        cover_url = f"{self.BASE_URL}{cover[0]}" if cover else ""
 
         update_node = tree.xpath(self._UPDATE_TIME_XPATH)
-        result["update_time"] = (
+        update_time = (
             update_node[0].xpath("string()").replace("更新时间：", "").strip()
             if update_node
             else ""
         )
 
         serial_node = tree.xpath(self._SERIAL_STATUS_XPATH)
-        result["serial_status"] = (
+        serial_status = (
             serial_node[0].xpath("string()").replace("作品状态：", "").strip()
             if serial_node
             else ""
         )
 
         type_node = tree.xpath(self._TYPE_XPATH)
-        result["type"] = (
+        book_type = (
             type_node[0].xpath("string()").replace("作品分类：", "").strip()
             if type_node
             else ""
         )
 
-        result["summary"] = tree.xpath(self._SUMMARY_XPATH).strip()
+        summary = tree.xpath(self._SUMMARY_XPATH).strip()
 
-        volumes = []
+        volumes: list[VolumeInfoDict] = []
         volume_nodes = tree.xpath(self._VOLUME_NODE_XPATH)
 
         if volume_nodes:
@@ -107,7 +110,7 @@ class YamiboParser(BaseParser):
                 volume_name = title_node[0].strip() if title_node else "未命名卷"
 
                 chapter_nodes = volume_node.xpath(self._CHAPTER_NODE_XPATH)
-                chapters = []
+                chapters: list[ChapterInfoDict] = []
                 for chap in chapter_nodes:
                     title = chap.xpath("string()").strip()
                     url = chap.get("href", "")
@@ -150,9 +153,17 @@ class YamiboParser(BaseParser):
                 }
             ]
 
-        result["volumes"] = volumes
-
-        return result
+        return {
+            "book_name": book_name,
+            "author": author,
+            "cover_url": cover_url,
+            "update_time": update_time,
+            "serial_status": serial_status,
+            "tags": [book_type],
+            "summary": summary,
+            "volumes": volumes,
+            "extra": {},
+        }
 
     def parse_chapter(
         self,

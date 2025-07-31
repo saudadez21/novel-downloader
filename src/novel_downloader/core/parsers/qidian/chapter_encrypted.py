@@ -35,7 +35,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 IGNORED_CLASS_LISTS = {"title", "review"}
-NON_CONTENT_KEYWORDS = {"旧版", "反馈", "扫码"}
 
 
 def parse_encrypted_chapter(
@@ -104,25 +103,19 @@ def parse_encrypted_chapter(
             raise ValueError("fixed_path is None: failed to download font")
 
         # Extract and render paragraphs from HTML with CSS rules
-        main_paragraphs = extract_paragraphs_recursively(html_str, chapter_id)
-        if not main_paragraphs or contains_keywords(
-            main_paragraphs, NON_CONTENT_KEYWORDS
-        ):
-            if vip_status(ssr_data):
-                try:
-                    decryptor = get_decryptor()
-                    raw_html = decryptor.decrypt(
-                        raw_html,
-                        chapter_id,
-                        fkp,
-                        parser._fuid,
-                    )
-                except Exception as e:
-                    logger.error(
-                        "[Parser] decryption failed for '%s': %s", chapter_id, e
-                    )
-                    return None
-            main_paragraphs = extract_paragraphs_recursively(raw_html, chapter_id)
+        if vip_status(ssr_data):
+            try:
+                decryptor = get_decryptor()
+                raw_html = decryptor.decrypt(
+                    raw_html,
+                    chapter_id,
+                    fkp,
+                    parser._fuid,
+                )
+            except Exception as e:
+                logger.error("[Parser] decryption failed for '%s': %s", chapter_id, e)
+                return None
+        main_paragraphs = extract_paragraphs_recursively(raw_html)
 
         if parser.save_font_debug:
             main_paragraphs_path = debug_dir / "main_paragraphs_debug.json"
@@ -139,11 +132,9 @@ def parse_encrypted_chapter(
                 encoding="utf-8",
             )
 
-        end_number = parse_end_number(main_paragraphs, paragraphs_rules)
         paragraphs_str, refl_list = render_paragraphs(
             main_paragraphs,
             paragraphs_rules,
-            end_number,
         )
         if parser.save_font_debug:
             paragraphs_str_path = debug_dir / f"{chapter_id}_debug.txt"
@@ -211,10 +202,7 @@ def parse_encrypted_chapter(
     return None
 
 
-def extract_paragraphs_recursively(
-    html_str: str,
-    chapter_id: str,
-) -> list[dict[str, Any]]:
+def extract_paragraphs_recursively(html_str: str) -> list[dict[str, Any]]:
     def parse_element(elem: html.HtmlElement) -> dict[str, Any]:
         class_attr = elem.attrib.get("class", "")
         class_list = class_attr.split() if isinstance(class_attr, str) else class_attr
@@ -247,11 +235,7 @@ def extract_paragraphs_recursively(
         return node
 
     tree = html.fromstring(html_str)
-
-    # Try to find <main id="c-{chapter_id}">
-    main_elem = tree.xpath(f'//main[@id="c-{chapter_id}"]')
-    search_root = main_elem[0] if main_elem else tree
-    return [parse_element(p) for p in search_root.findall(".//p")]
+    return [parse_element(p) for p in tree.findall(".//p")]
 
 
 def parse_rule(css_str: str) -> dict[str, Any]:
@@ -336,7 +320,6 @@ def parse_rule(css_str: str) -> dict[str, Any]:
 def render_paragraphs(
     main_paragraphs: list[dict[str, Any]],
     rules: dict[str, Any],
-    end_number: str = "",
 ) -> tuple[str, list[str]]:
     """
     Applies the parsed CSS rules to the paragraph structure and
@@ -376,15 +359,13 @@ def render_paragraphs(
 
         attr_name = rule.get("append-end-attr", "")
         if attr_name:
-            curr_str += data.get("attrs", {}).get(f"{attr_name}{end_number}", "")
+            curr_str += data.get("attrs", {}).get(attr_name, "")
 
         curr_str = rule.get("append-start-char", "") + curr_str
 
         attr_name = rule.get("append-start-attr", "")
         if attr_name:
-            curr_str = (
-                data.get("attrs", {}).get(f"{attr_name}{end_number}", "") + curr_str
-            )
+            curr_str = data.get("attrs", {}).get(attr_name, "") + curr_str
 
         if rule.get("transform-x_-1", False):
             refl_list.append(curr_str)
@@ -430,8 +411,7 @@ def render_paragraphs(
                     continue
                 # 普通标签处理，根据 orders 顺序匹配
                 for ord_selector, _ in orders:
-                    tag_name = f"{ord_selector}{end_number}"
-                    if data.get("tag") != tag_name:
+                    if data.get("tag") != ord_selector:
                         continue
                     curr_rule = rules.get(p_class_str, {}).get(ord_selector)
                     curr_rule = curr_rule if curr_rule else {}
@@ -445,84 +425,3 @@ def render_paragraphs(
         paragraphs_str += "\n\n"
 
     return paragraphs_str, refl_list
-
-
-def parse_paragraph_names(rules: dict[str, Any]) -> set[str]:
-    """
-    Extract all paragraph selector names from parsed rules, excluding "sy".
-    """
-    paragraph_names = set()
-    for group, group_rules in rules.get("rules", {}).items():
-        if group == "sy":
-            continue
-        paragraph_names.update(group_rules.keys())
-    return paragraph_names
-
-
-def parse_end_number(
-    main_paragraphs: list[dict[str, Any]],
-    rules: dict[str, Any],
-) -> str:
-    """
-    Find the most frequent numeric suffix from tag names
-    matched by given paragraph prefixes.
-    """
-    paragraph_names = parse_paragraph_names(rules)
-    end_numbers: dict[int, int] = {}
-    prefix_hits = 0
-    sorted_names = sorted(paragraph_names, key=len, reverse=True)
-
-    def rec_parse(item: list[Any] | dict[str, Any]) -> None:
-        nonlocal prefix_hits
-        if isinstance(item, list):
-            for element in item:
-                rec_parse(element)
-        elif isinstance(item, dict):
-            tag = item.get("tag")
-            if isinstance(tag, str):
-                for prefix in sorted_names:
-                    if tag.startswith(prefix):
-                        prefix_hits += 1
-                        remain = tag[len(prefix) :]
-                        if remain.isdigit():
-                            num = int(remain)
-                            end_numbers[num] = end_numbers.get(num, 0) + 1
-                        break
-            for val in item.values():
-                if isinstance(val, (list | dict)):
-                    rec_parse(val)
-
-    rec_parse(main_paragraphs)
-
-    if not end_numbers:
-        logger.debug("[Parser] No valid ending numbers found")
-        return ""
-
-    sorted_numbers = sorted(
-        end_numbers.items(), key=lambda x: (x[1], x[0]), reverse=True
-    )
-
-    logger.debug(
-        "[Parser] Top 3 end numbers:\n%s",
-        "\n".join(f"{n}: {c}" for n, c in sorted_numbers[:3]),
-    )
-    most_common_number, most_common_count = sorted_numbers[0]
-    if most_common_count <= prefix_hits / 2:
-        logger.debug(
-            "[Parser] Top number (%s) does not exceed 50%% threshold: %d of %d",
-            most_common_number,
-            most_common_count,
-            prefix_hits,
-        )
-        return ""
-
-    return str(most_common_number)
-
-
-def contains_keywords(paragraphs: list[dict[str, Any]], keywords: set[str]) -> bool:
-    for para in paragraphs:
-        data = para.get("data", [])
-        for item in data:
-            if isinstance(item, str) and any(kw in item for kw in keywords):
-                return True
-    return False

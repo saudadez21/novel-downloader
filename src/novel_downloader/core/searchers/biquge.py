@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 )
 class BiqugeSearcher(BaseSearcher):
     site_name = "biquge"
-    priority = 5
+    priority = 30
     SEARCH_URL = "http://www.b520.cc/modules/article/search.php"
 
     @classmethod
@@ -66,8 +66,18 @@ class BiqugeSearcher(BaseSearcher):
             title = title_elem.text_content().strip()
             href = title_elem.get("href", "").strip("/")
             book_id = href.split("/")[0] if href else ""
-            # Author
+            if not book_id:
+                continue
+
+            latest_elem = row.xpath(".//td[2]/a")
+            latest_chapter = (
+                latest_elem[0].text_content().strip() if latest_elem else "-"
+            )
+
             author = row.xpath(".//td[3]")[0].text_content().strip()
+
+            word_count = row.xpath(".//td[4]")[0].text_content().strip()
+            update_date = row.xpath(".//td[5]")[0].text_content().strip()
             # Compute priority
             prio = cls.priority + idx
 
@@ -75,8 +85,12 @@ class BiqugeSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    cover_url="",
                     title=title,
                     author=author,
+                    latest_chapter=latest_chapter,
+                    update_date=update_date,
+                    word_count=word_count,
                     priority=prio,
                 )
             )

@@ -5,7 +5,30 @@ novel_downloader.models
 
 """
 
-from .chapter import ChapterDict
+__all__ = [
+    "BookConfig",
+    "DownloaderConfig",
+    "ParserConfig",
+    "FetcherConfig",
+    "ExporterConfig",
+    "TextCleanerConfig",
+    "BookInfoDict",
+    "ChapterDict",
+    "ChapterInfoDict",
+    "VolumeInfoDict",
+    "LoginField",
+    "SearchResult",
+    "BrowserType",
+    "SplitMode",
+    "LogLevel",
+]
+
+from .book import (
+    BookInfoDict,
+    ChapterDict,
+    ChapterInfoDict,
+    VolumeInfoDict,
+)
 from .config import (
     BookConfig,
     DownloaderConfig,
@@ -19,22 +42,5 @@ from .search import SearchResult
 from .types import (
     BrowserType,
     LogLevel,
-    ModeType,
     SplitMode,
 )
-
-__all__ = [
-    "BookConfig",
-    "DownloaderConfig",
-    "ParserConfig",
-    "FetcherConfig",
-    "ExporterConfig",
-    "TextCleanerConfig",
-    "ChapterDict",
-    "LoginField",
-    "SearchResult",
-    "BrowserType",
-    "ModeType",
-    "SplitMode",
-    "LogLevel",
-]

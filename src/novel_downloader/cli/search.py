@@ -10,6 +10,10 @@ from argparse import Namespace, _SubParsersAction
 from collections.abc import Sequence
 from pathlib import Path
 
+from rich.console import Console
+from rich.prompt import Prompt
+from rich.table import Table
+
 from novel_downloader.cli.download import _download
 from novel_downloader.config import ConfigAdapter, load_config
 from novel_downloader.core import search
@@ -91,6 +95,59 @@ def handle_search(args: Namespace) -> None:
 
 def _prompt_user_select(
     results: Sequence[SearchResult],
+) -> SearchResult | None:
+    """
+    Show a list of search results in a table and prompt the user to pick one.
+
+    :param results: A sequence of SearchResult dicts to display.
+    :return: The chosen SearchResult, or None if the user cancels or no selection.
+    """
+    if not results:
+        print(t("no_results"))
+        return None
+
+    console = Console()
+    table = Table(title="Search Results", show_lines=True, expand=True)
+    table.add_column("#", justify="right", no_wrap=True)
+    table.add_column("Title", style="bold", overflow="fold")
+    table.add_column("Author", overflow="fold")
+    table.add_column("Latest", overflow="fold")
+    # table.add_column("Words", overflow="fold", justify="right")
+    table.add_column("Updated", no_wrap=True)
+    table.add_column("Site", no_wrap=True)
+    table.add_column("Book ID", overflow="fold")
+
+    for i, r in enumerate(results, 1):
+        table.add_row(
+            str(i),
+            r["title"],
+            r["author"],
+            r["latest_chapter"],
+            # r["word_count"],
+            r["update_date"],
+            r["site"],
+            r["book_id"],
+        )
+    console.print(table)
+
+    # build the list of valid string choices
+    choices = [str(i) for i in range(1, len(results) + 1)]
+
+    choice = Prompt.ask(
+        t("prompt_select_index"),
+        choices=choices + [""],  # allow blank to cancel
+        show_choices=False,
+        default="",
+        show_default=False,
+    ).strip()
+
+    if not choice:
+        return None
+    return results[int(choice) - 1]
+
+
+def _prompt_user_select_v1(
+    results: Sequence[SearchResult],
     max_attempts: int = 3,
 ) -> SearchResult | None:
     """
@@ -106,11 +163,17 @@ def _prompt_user_select(
 
     # Show choices
     for i, r in enumerate(results, start=1):
-        print(f"[{i}] {r['title']} - {r['author']} ({r['site']}, id: {r['book_id']})")
+        print(
+            f"[{i}] {r['title']} - {r['author']} | "
+            f"Latest: {r['latest_chapter']} | "
+            f"Words: {r['word_count']} | "
+            f"Updated: {r['update_date']} "
+            f"({r['site']}, id={r['book_id']})"
+        )
 
     attempts = 0
     while attempts < max_attempts:
-        choice = input(t("prompt_select_index")).strip()
+        choice = input(t("prompt_select_index") + ": ").strip()
         if choice == "":
             return None
         if choice.isdigit():

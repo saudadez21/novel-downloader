@@ -14,7 +14,11 @@ from typing import TYPE_CHECKING, Any
 
 from novel_downloader.core.parsers.base import BaseParser
 from novel_downloader.core.parsers.registry import register_parser
-from novel_downloader.models import ChapterDict, ParserConfig
+from novel_downloader.models import (
+    BookInfoDict,
+    ChapterDict,
+    ParserConfig,
+)
 from novel_downloader.utils import find_cookie_value
 from novel_downloader.utils.constants import DATA_DIR
 
@@ -30,7 +34,6 @@ if TYPE_CHECKING:
 
 @register_parser(
     site_keys=["qidian", "qd"],
-    backends=["session", "browser"],
 )
 class QidianParser(BaseParser):
     """
@@ -58,7 +61,6 @@ class QidianParser(BaseParser):
         self._debug_dir: Path = Path.cwd() / "debug"
 
         state_files = [
-            DATA_DIR / "qidian" / "browser_state.cookies",
             DATA_DIR / "qidian" / "session_state.cookies",
         ]
         self._fuid: str = fuid or find_cookie_value(state_files, "ywguid")
@@ -89,7 +91,7 @@ class QidianParser(BaseParser):
         self,
         html_list: list[str],
         **kwargs: Any,
-    ) -> dict[str, Any]:
+    ) -> BookInfoDict | None:
         """
         Parse a book info page and extract metadata and chapter structure.
 
@@ -97,7 +99,7 @@ class QidianParser(BaseParser):
         :return: Parsed metadata and chapter structure as a dictionary.
         """
         if not html_list:
-            return {}
+            return None
         return parse_book_info(html_list[0])
 
     def parse_chapter(

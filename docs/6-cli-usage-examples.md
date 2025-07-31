@@ -29,10 +29,7 @@ novel-cli download 123456 654321
 ```
 
 > **登录提示说明**
-> 若针对当前下载站点的配置中 `mode: browser` 且启用了 `login_required: true`, 程序将自动弹出浏览器窗口引导登录,
-> 请根据提示完成操作, 以便访问受限章节内容。
->
-> 如果是其他模式 (如 `session`) 并启用了 `login_required: true`, CLI 将检测当前是否已登录;
+> 如果启用了 `login_required: true`, CLI 将检测当前是否已登录;
 > 若未登录, 将提示你在命令行中手动输入当前站点的有效 Cookie 信息或账户信息
 
 ---
@@ -55,6 +52,7 @@ Commands:
     clean               清理缓存和配置文件
     config              配置文件路径
     download            下载小说
+    search              搜索小说
     export              导出已下载的小说
 ```
 

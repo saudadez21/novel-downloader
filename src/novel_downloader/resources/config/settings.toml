@@ -5,15 +5,6 @@ backoff_factor = 2.0
 timeout = 30.0                     # 页面加载超时时间 (秒)
 max_connections = 10               # 并发连接的最大数
 max_rps = 1.0                      # 最大请求速率 (requests per second), 如不设置则请注释掉或删掉本行
-# proxy = "http://127.0.0.1:1080"  # 如需使用代理, 填写完整的代理地址
-# user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
-# headers = {}
-browser_type = "chromium"
-verify_ssl = true
-
-# 浏览器设置
-headless = false                   # 是否以无头模式启动浏览器
-disable_images = false             # 是否禁用图片加载 (加速)
 
 # 全局通用设置
 [general]
@@ -24,6 +15,7 @@ cache_dir = "./novel_cache"        # 本地缓存目录 (字体 / 图片等)
 workers = 2                        # 工作协程数
 skip_existing = true               # 是否跳过已存在章节
 storage_batch_size = 1             # SQLite 批量提交的章节数量
+locale_style = "simplified"        # simplified / traditional
 
 [general.debug]
 save_html = false                  # 是否将抓取到的原始 HTML 保留到磁盘
@@ -48,52 +40,16 @@ book_ids = [
   "0000000000",
   "0000000000"
 ]
-mode = "session"                   # browser / session
 login_required = true              # 是否需要登录才能访问
 use_truncation = true              # 是否基于章节长度截断以避免重复内容
-
-[sites.biquge]  # 笔趣阁
-book_ids = [
-  "0000000000",
-  "0000000000"
-]
-mode = "session"                   # browser / session
-login_required = false
-
-[sites.qianbi]  # 铅笔小说
-book_ids = [
-  "0000000000",
-  "0000000000"
-]
-mode = "session"                   # browser / session
-login_required = false
-
-[sites.sfacg]  # SF轻小说
-book_ids = [
-  "0000000000",
-  "0000000000"
-]
-mode = "session"                   # browser / session
-login_required = false
 
 [sites.esjzone]  # ESJ Zone
 book_ids = [
   "0000000000",
   "0000000000"
 ]
-mode = "session"                   # browser / session
 login_required = true
 # username = "youremail@domain.com"  # 登录邮箱
-# password = "yourpassword"          # 登录密码
-
-[sites.yamibo]  # 百合会
-book_ids = [
-  "0000000000",
-  "0000000000"
-]
-mode = "session"                   # browser / session
-login_required = false
-# username = "yourusername"          # 登录账户
 # password = "yourpassword"          # 登录密码
 
 [sites.linovelib]  # 哔哩轻小说
@@ -101,12 +57,10 @@ book_ids = [
   "0000000000",
   "0000000000"
 ]
-mode = "session"
 split_mode = "book"                # 导出方式: book / volume
 login_required = false
 
 [sites.common]
-mode = "session"                   # browser / session
 login_required = false
 
 # 输出文件格式及相关选项

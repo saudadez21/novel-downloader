@@ -29,7 +29,7 @@ source .venv/bin/activate
 
     ```bash
     # 克隆项目
-    git clone https://github.com/BowenZ217/novel-downloader.git
+    git clone https://github.com/saudadez21/novel-downloader.git
     cd novel-downloader
 
     # 安装为库并生成 CLI
@@ -37,12 +37,6 @@ source .venv/bin/activate
     ```
 
 安装完成后, 会在系统 `PATH` 中生成 `novel-cli` 可执行命令。
-
-如需使用浏览器模式 (即 `mode: browser`), 请确保已安装 Playwright 依赖:
-
-```bash
-playwright install
-```
 
 ## 可选功能及依赖
 

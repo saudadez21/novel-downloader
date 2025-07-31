@@ -91,7 +91,7 @@ def common_export_as_epub(
         title=book_name,
         author=book_author,
         description=book_info.get("summary", ""),
-        subject=book_info.get("subject", []),
+        subject=book_info.get("tags", []),
         serial_status=book_info.get("serial_status", ""),
         word_count=book_info.get("word_count", ""),
         cover_path=cover_path,
@@ -110,7 +110,7 @@ def common_export_as_epub(
 
         # Batch-fetch chapters for this volume
         chap_ids = [
-            chap.get("chapterId")
+            chap["chapterId"]
             for chap in vol.get("chapters", [])
             if chap.get("chapterId")
         ]

@@ -12,15 +12,18 @@ from lxml import html
 
 from novel_downloader.core.parsers.base import BaseParser
 from novel_downloader.core.parsers.registry import register_parser
-from novel_downloader.models import ChapterDict
+from novel_downloader.models import (
+    BookInfoDict,
+    ChapterDict,
+    VolumeInfoDict,
+)
 
 
 @register_parser(
     site_keys=["esjzone"],
-    backends=["session", "browser"],
 )
 class EsjzoneParser(BaseParser):
-    """ """
+    """Parser for esjzone book pages."""
 
     # Book info XPaths
     _BOOK_NAME_XPATH = '//h2[contains(@class, "text-normal")]/text()'
@@ -47,7 +50,7 @@ class EsjzoneParser(BaseParser):
         self,
         html_list: list[str],
         **kwargs: Any,
-    ) -> dict[str, Any]:
+    ) -> BookInfoDict | None:
         """
         Parse a book info page and extract metadata and chapter structure.
 
@@ -58,27 +61,27 @@ class EsjzoneParser(BaseParser):
         :return: Parsed metadata and chapter structure as a dictionary.
         """
         if not html_list or self._is_forum_page(html_list):
-            return {}
-        tree = html.fromstring(html_list[0])
-        result: dict[str, Any] = {}
+            return None
 
-        result["book_name"] = self._get_text(tree, self._BOOK_NAME_XPATH)
-        result["author"] = self._get_text(tree, self._AUTHOR_XPATH)
-        result["cover_url"] = self._get_text(tree, self._COVER_URL_XPATH)
-        result["update_time"] = self._get_text(tree, self._UPDATE_TIME_XPATH)
-        result["word_count"] = self._get_text(
-            tree, self._WORD_COUNT_XPATH, clean_comma=True
-        )
-        result["type"] = self._get_text(tree, self._TYPE_XPATH)
-        result["alt_name"] = self._get_text(tree, self._ALT_NAME_XPATH)
-        result["web_url"] = self._get_text(tree, self._WEB_URL_XPATH)
-        # result["summary"] = self._get_text(tree, self._SUMMARY_XPATH, join=True)
+        tree = html.fromstring(html_list[0])
+
+        book_name = self._get_text(tree, self._BOOK_NAME_XPATH)
+        author = self._get_text(tree, self._AUTHOR_XPATH)
+        cover_url = self._get_text(tree, self._COVER_URL_XPATH)
+        update_time = self._get_text(tree, self._UPDATE_TIME_XPATH)
+        word_count = self._get_text(tree, self._WORD_COUNT_XPATH, clean_comma=True)
+        book_type = self._get_text(tree, self._TYPE_XPATH)
+        alt_name = self._get_text(tree, self._ALT_NAME_XPATH)
+        web_url = self._get_text(tree, self._WEB_URL_XPATH)
         paras = tree.xpath('//div[@class="description"]/p')
         texts = [p.xpath("string()").strip() for p in paras]
-        result["summary"] = "\n".join(texts).strip()
+        summary = "\n".join(texts).strip()
 
-        volumes: list[dict[str, Any]] = []
-        current_vol: dict[str, Any] = {}
+        current_vol: VolumeInfoDict = {
+            "volume_name": "單卷",
+            "chapters": [],
+        }
+        volumes: list[VolumeInfoDict] = [current_vol]
 
         def _is_garbage_title(name: str) -> bool:
             stripped = name.strip()
@@ -89,25 +92,18 @@ class EsjzoneParser(BaseParser):
             if _is_garbage_title(name):
                 return
             name = name.strip() or "未命名卷"
-            if name == "未命名卷" and current_vol is not None:
+            if current_vol and current_vol["volume_name"] == name:
                 return
             current_vol = {"volume_name": name, "chapters": []}
             volumes.append(current_vol)
 
-        _start_volume("單卷")
-
-        # nodes = tree.xpath('//div[@id="chapterList"]/details') + tree.xpath(
-        #     '//div[@id="chapterList"]/*[not(self::details)]'
-        # )
         nodes = tree.xpath('//div[@id="chapterList"]/*')
-
         for node in nodes:
             tag = node.tag.lower()
 
             if tag == "details":
                 # ---- DETAILS-based layout ----
-                summary = node.find("summary")
-                vol_name = summary.text if summary is not None else "未命名卷"
+                vol_name = node.xpath("string(./summary)").strip() or "未命名卷"
                 _start_volume(vol_name)
 
                 # all chapters inside this details
@@ -116,7 +112,11 @@ class EsjzoneParser(BaseParser):
                     href = a.get("href", "")
                     chap_id = href.rstrip("/").split("/")[-1].split(".", 1)[0]
                     current_vol["chapters"].append(
-                        {"title": title, "url": href, "chapterId": chap_id}
+                        {
+                            "title": title,
+                            "url": href,
+                            "chapterId": chap_id,
+                        }
                     )
 
             elif (
@@ -139,9 +139,21 @@ class EsjzoneParser(BaseParser):
                     {"title": title, "url": href, "chapterId": chap_id}
                 )
         volumes = [vol for vol in volumes if vol["chapters"]]
-        result["volumes"] = volumes
 
-        return result
+        return {
+            "book_name": book_name,
+            "author": author,
+            "cover_url": cover_url,
+            "update_time": update_time,
+            "summary": summary,
+            "tags": [book_type],
+            "word_count": word_count,
+            "volumes": volumes,
+            "extra": {
+                "alt_name": alt_name,
+                "web_url": web_url,
+            },
+        }
 
     def parse_chapter(
         self,

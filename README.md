@@ -1,6 +1,6 @@
 # novel-downloader
 
-一个基于 [playwright](https://playwright.dev/) 和 [aiohttp](https://github.com/aio-libs/aiohttp) 的小说下载工具/库。
+一个基于 [aiohttp](https://github.com/aio-libs/aiohttp) 的小说下载工具/库。
 
 > 本项目开发环境为 Python 3.12, 需确保运行环境为 Python 3.11 及以上版本
 
@@ -24,12 +24,6 @@
 
 ```bash
 pip install novel-downloader
-```
-
-如需使用浏览器模式 (即 `mode: browser`), 请确保已安装 Playwright 依赖:
-
-```bash
-playwright install
 ```
 
 如需启用字体解密功能 (`decode_font`, 用于处理起点中文网对近一个月更新章节所采用的字体混淆技术), 请使用扩展安装方式:
@@ -60,26 +54,6 @@ novel-cli download 123456
 
 ---
 
-### TUI 模式 (终端用户界面)
-
-**注意**: TUI 模式仍在开发中, 目前尚未实现登录和修改设置等功能。建议优先使用稳定的 CLI 模式。
-
-```bash
-# 初始化默认配置 (生成 settings.toml)
-novel-cli config init
-
-# 编辑 ./settings.toml 修改网络配置
-# 可查看 docs/3-settings-schema.md
-
-# 启动 TUI 界面
-novel-tui
-```
-
-- 详细可见: [支持站点列表](docs/4-supported-sites.md)
-- 更多使用方法, 查看 [使用示例](docs/5-tui-usage-examples.md)
-
----
-
 ### GUI 模式 (图形界面)
 
 尚未实现
@@ -91,7 +65,7 @@ novel-tui
 如需体验开发中的最新功能, 可通过 GitHub 安装:
 
 ```bash
-git clone https://github.com/BowenZ217/novel-downloader.git
+git clone https://github.com/saudadez21/novel-downloader.git
 cd novel-downloader
 pip install .
 # 或安装带可选功能:
@@ -107,7 +81,6 @@ pip install .
 - [配置](docs/2-configuration.md)
 - [settings.toml 配置说明](docs/3-settings-schema.md)
 - [支持站点列表](docs/4-supported-sites.md)
-- [TUI 使用示例](docs/5-tui-usage-examples.md)
 - [CLI 使用示例](docs/6-cli-usage-examples.md)
 - [复制 Cookies](docs/copy-cookies.md)
 - [文件保存](docs/file-saving.md)

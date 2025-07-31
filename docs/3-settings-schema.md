@@ -13,8 +13,6 @@
 | `timeout`          | float  | 30.0          | 页面加载超时时间 (秒)                    |
 | `max_connections`  | int    | 10            | 最大并发连接数                           |
 | `max_rps`           | int \| null | null    | 最大请求速率 (requests per second), 为空则不限制 |
-| `headless`         | bool   | false         | 启动浏览器时是否使用无头模式 (不显示窗口)          |
-| `disable_images`   | bool   | true          | 是否禁用图片加载 (可加速页面渲染)           |
 
 > 注意: 部分站点在面对高频的访问频率时 (例如每秒 5 次), 可能因负载压力而返回 `503 Service Temporarily Unavailable` 错误。
 >
@@ -29,12 +27,6 @@ backoff_factor = 2.0
 timeout = 30.0
 max_connections = 10
 max_rps = 1.0                  # 每秒最多 1 次请求, 可用于限制站点压力
-verify_ssl = true
-browser_type = "chromium"
-
-# 可选项
-headless = false               # 是否使用无头浏览器
-disable_images = false         # 是否禁用图片加载
 ```
 
 ---
@@ -51,8 +43,7 @@ disable_images = false         # 是否禁用图片加载
 | `raw_data_dir`       | string | `"./raw_data"`    | 原始章节 JSON / DB 存放目录             |
 | `output_dir`         | string | `"./downloads"`   | 最终输出文件存放目录                   |
 | `cache_dir`          | string | `"./novel_cache"` | 本地缓存目录 (字体 / 图片等)       |
-| `download_workers`   | int    | 2                 | 并发下载任务的协程数量                         |
-| `parser_workers`     | int    | 2                 | 并发解析任务的协程数量                        |
+| `workers`            | int    | 2                 | 下载任务的协程数量                         |
 | `skip_existing`      | bool   | true              | 下载时是否跳过本地已存在的章节文件            |
 | `storage_backend`    | string | `"sqlite"`        | 章节存储方式, 可选值：`json`、`sqlite`   |
 | `storage_batch_size` | int    | 30                | 使用 SQLite 时每批次提交的章节数 (提高写入性能) |
@@ -125,7 +116,6 @@ vec_weight = 0.5
 | 参数名           | 类型             | 默认值        | 说明                                                           |
 |------------------|------------------|---------------|----------------------------------------------------------------|
 | `book_ids`        | array\<string\> 或 array\<table\>     | -             | 小说 ID 列表 (如 `1010868264`)                                 |
-| `mode`            | string            | `"browser"`   | 请求方式: `browser` / `session` /                             |
 | `login_required`  | bool              | false         | 是否需要登录才能访问                                           |
 | `use_truncation`  | bool              | true          | 是否启用基于章节长度的截断以避免重复内容                         |
 
@@ -149,7 +139,6 @@ book_ids = [
 
 ```toml
 [sites.<site>]
-mode = "session"
 login_required = true
 
 [[sites.<site>.book_ids]]
@@ -181,14 +170,12 @@ book_ids = [
   "1010868264",
   "1012584111"
 ]
-mode = "session"
 login_required = true
 ```
 
 ```toml
 # 结构化格式
 [sites.qidian]
-mode = "session"
 login_required = true
 
 [[sites.qidian.book_ids]]

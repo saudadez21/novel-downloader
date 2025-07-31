@@ -68,6 +68,8 @@ class QidianSearcher(BaseSearcher):
             if limit is not None and idx >= limit:
                 break
             book_id = item.get("data-bid")
+            if not book_id:
+                continue
             title_elem = item.xpath('.//h3[@class="book-info-title"]/a')[0]
             title = title_elem.text_content().strip()
             author_nodes = item.xpath(
@@ -79,8 +81,12 @@ class QidianSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    cover_url="",
                     title=title,
                     author=author,
+                    latest_chapter="-",
+                    update_date="-",
+                    word_count="-",
                     priority=prio,
                 )
             )

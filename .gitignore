@@ -175,6 +175,7 @@ cython_debug/
 
 # Settings
 examples/settings.toml
+browser_data/
 chapter_data/
 debug/
 dev/

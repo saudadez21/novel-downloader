@@ -45,6 +45,8 @@ class CommonDownloader(BaseDownloader):
         end_id = book.get("end_id")
         ignore_set = set(book.get("ignore_ids", []))
 
+        book_id = self._normalize_book_id(book_id)
+
         # prepare storage & dirs
         raw_base = self._raw_data_dir / book_id
         raw_base.mkdir(parents=True, exist_ok=True)
@@ -57,8 +59,11 @@ class CommonDownloader(BaseDownloader):
 
         # load or fetch metadata
         book_info = await self.load_book_info(book_id=book_id, html_dir=html_dir)
-        vols = book_info.get("volumes", [])
-        total_chapters = sum(len(v.get("chapters", [])) for v in vols)
+        if not book_info:
+            return
+
+        vols = book_info["volumes"]
+        total_chapters = sum(len(v["chapters"]) for v in vols)
         if total_chapters == 0:
             self.logger.warning("%s 书籍没有章节可下载: %s", TAG, book_id)
             return
@@ -225,3 +230,13 @@ class CommonDownloader(BaseDownloader):
                 else:
                     self.logger.warning("[ChapterWorker] Failed %s: %s", cid, e)
         return None
+
+    @staticmethod
+    def _normalize_book_id(book_id: str) -> str:
+        """
+        Normalize a book identifier.
+
+        Subclasses may override this method to transform the book ID
+        into their preferred format.
+        """
+        return book_id.replace("/", "-")

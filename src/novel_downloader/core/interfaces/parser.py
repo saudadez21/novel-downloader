@@ -9,7 +9,7 @@ parsing individual chapter content, and setting parser context via book_id.
 
 from typing import Any, Protocol, runtime_checkable
 
-from novel_downloader.models import ChapterDict
+from novel_downloader.models import BookInfoDict, ChapterDict
 
 
 @runtime_checkable
@@ -24,7 +24,7 @@ class ParserProtocol(Protocol):
         self,
         html_list: list[str],
         **kwargs: Any,
-    ) -> dict[str, Any]:
+    ) -> BookInfoDict | None:
         """
         Parse and return a dictionary of book information from the raw HTML.
 

@@ -14,16 +14,20 @@ from lxml import html
 
 from novel_downloader.core.parsers.base import BaseParser
 from novel_downloader.core.parsers.registry import register_parser
-from novel_downloader.models import ChapterDict
+from novel_downloader.models import (
+    BookInfoDict,
+    ChapterDict,
+    ChapterInfoDict,
+    VolumeInfoDict,
+)
 from novel_downloader.utils.constants import LINOVELIB_FONT_MAP_PATH
 
 
 @register_parser(
     site_keys=["linovelib"],
-    backends=["session", "browser"],
 )
 class LinovelibParser(BaseParser):
-    """ """
+    """Parser for 哔哩轻小说 book pages."""
 
     # Book info XPaths
     _BOOK_NAME_XPATH = '//div[@class="book-info"]/h1[@class="book-name"]/text()'
@@ -51,7 +55,7 @@ class LinovelibParser(BaseParser):
         self,
         html_list: list[str],
         **kwargs: Any,
-    ) -> dict[str, Any]:
+    ) -> BookInfoDict | None:
         """
         Parse a book info page and extract metadata and chapter structure.
 
@@ -59,38 +63,37 @@ class LinovelibParser(BaseParser):
         :return: Parsed metadata and chapter structure as a dictionary.
         """
         if not html_list:
-            return {}
-        info_tree = html.fromstring(html_list[0])
-        result: dict[str, Any] = {}
+            return None
+        tree = html.fromstring(html_list[0])
 
-        result["book_name"] = self._safe_xpath(info_tree, self._BOOK_NAME_XPATH)
-        result["author"] = self._safe_xpath(info_tree, self._AUTHOR_XPATH)
-        result["cover_url"] = self._safe_xpath(info_tree, self._COVER_URL_XPATH)
-        result["update_time"] = self._safe_xpath(
-            info_tree, self._UPDATE_TIME_XPATH, replace=("最后更新：", "")
+        book_name = self._first_str(tree.xpath(self._BOOK_NAME_XPATH))
+        author = self._first_str(tree.xpath(self._AUTHOR_XPATH))
+        cover_url = self._first_str(tree.xpath(self._COVER_URL_XPATH))
+        update_time = self._first_str(
+            tree.xpath(self._UPDATE_TIME_XPATH), replaces=[("最后更新：", "")]
         )
-        result["serial_status"] = self._safe_xpath(info_tree, self._SERIAL_STATUS_XPATH)
-        result["word_count"] = self._safe_xpath(
-            info_tree, self._WORD_COUNT_XPATH, replace=("字数：", "")
+        serial_status = self._first_str(tree.xpath(self._SERIAL_STATUS_XPATH))
+        word_count = self._first_str(
+            tree.xpath(self._WORD_COUNT_XPATH), replaces=[("最后更新：", "")]
         )
 
-        result["summary"] = self._extract_intro(info_tree, self._SUMMARY_XPATH)
+        summary = self._extract_intro(tree, self._SUMMARY_XPATH)
 
         vol_pages = html_list[1:]
-        volumes: list[dict[str, Any]] = []
+        volumes: list[VolumeInfoDict] = []
         for vol_page in vol_pages:
             vol_tree = html.fromstring(vol_page)
-            volume_cover = self._safe_xpath(vol_tree, self._COVER_URL_XPATH)
-            volume_name = self._safe_xpath(vol_tree, self._BOOK_NAME_XPATH)
-            update_time = self._safe_xpath(
-                vol_tree, self._UPDATE_TIME_XPATH, replace=("最后更新：", "")
+            volume_cover = self._first_str(vol_tree.xpath(self._COVER_URL_XPATH))
+            volume_name = self._first_str(vol_tree.xpath(self._BOOK_NAME_XPATH))
+            vol_update_time = self._first_str(
+                vol_tree.xpath(self._UPDATE_TIME_XPATH), replaces=[("最后更新：", "")]
             )
-            word_count = self._safe_xpath(
-                vol_tree, self._WORD_COUNT_XPATH, replace=("字数：", "")
+            vol_word_count = self._first_str(
+                vol_tree.xpath(self._WORD_COUNT_XPATH), replaces=[("字数：", "")]
             )
             volume_intro = self._extract_intro(vol_tree, self._SUMMARY_XPATH)
 
-            chapters = []
+            chapters: list[ChapterInfoDict] = []
             chapter_elements = vol_tree.xpath(self._CHAPTERS_XPATH)
             for a in chapter_elements:
                 title = a.text.strip()
@@ -104,15 +107,24 @@ class LinovelibParser(BaseParser):
                 {
                     "volume_name": volume_name,
                     "volume_cover": volume_cover,
-                    "update_time": update_time,
-                    "word_count": word_count,
+                    "update_time": vol_update_time,
+                    "word_count": vol_word_count,
                     "volume_intro": volume_intro,
                     "chapters": chapters,
                 }
             )
-        result["volumes"] = volumes
 
-        return result
+        return {
+            "book_name": book_name,
+            "author": author,
+            "cover_url": cover_url,
+            "serial_status": serial_status,
+            "word_count": word_count,
+            "summary": summary,
+            "update_time": update_time,
+            "volumes": volumes,
+            "extra": {},
+        }
 
     def parse_chapter(
         self,
@@ -174,21 +186,6 @@ class LinovelibParser(BaseParser):
             "extra": {"site": "linovelib"},
         }
 
-    def _safe_xpath(
-        self,
-        tree: html.HtmlElement,
-        path: str,
-        replace: tuple[str, str] | None = None,
-    ) -> str:
-        result = tree.xpath(path)
-        if not result:
-            return ""
-        value: str = result[0].strip()
-        if replace:
-            old, new = replace
-            value = value.replace(old, new)
-        return value
-
     @staticmethod
     def _extract_intro(tree: html.HtmlElement, xpath: str) -> str:
         paragraphs = tree.xpath(xpath.replace("//text()", ""))
@@ -197,7 +194,7 @@ class LinovelibParser(BaseParser):
             text_segments = p.xpath(".//text()")
             cleaned = [seg.strip() for seg in text_segments if seg.strip()]
             lines.append("\n".join(cleaned))
-        return "\n\n".join(lines)
+        return "\n".join(lines)
 
     @staticmethod
     def _is_encrypted(html: str) -> bool:

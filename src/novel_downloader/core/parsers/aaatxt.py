@@ -1,0 +1,145 @@
+#!/usr/bin/env python3
+"""
+novel_downloader.core.parsers.aaatxt
+------------------------------------
+
+"""
+
+from typing import Any
+
+from lxml import html
+
+from novel_downloader.core.parsers.base import BaseParser
+from novel_downloader.core.parsers.registry import register_parser
+from novel_downloader.models import (
+    BookInfoDict,
+    ChapterDict,
+    ChapterInfoDict,
+    VolumeInfoDict,
+)
+
+
+@register_parser(
+    site_keys=["aaatxt"],
+)
+class AaatxtParser(BaseParser):
+    """Parser for 3A电子书 book pages."""
+
+    ADS: list[str] = [
+        "按键盘上方向键",
+        "未阅读完",
+        "加入书签",
+        "已便下次继续阅读",
+        "更多原创手机电子书",
+        "免费TXT小说下载",
+    ]
+
+    def parse_book_info(
+        self,
+        html_list: list[str],
+        **kwargs: Any,
+    ) -> BookInfoDict | None:
+        """
+        Parse a book info page and extract metadata and chapter structure.
+
+        :param html_list: Raw HTML of the book info page.
+        :return: Parsed metadata and chapter structure as a dictionary.
+        """
+        if not html_list:
+            return None
+
+        tree = html.fromstring(html_list[0])
+
+        book_name = self._first_str(tree.xpath("//div[@class='xiazai']/h1/text()"))
+
+        author = self._first_str(tree.xpath("//span[@id='author']/a/text()"))
+
+        cover_url = self._first_str(
+            tree.xpath("//div[@id='txtbook']//div[@class='fm']//img/@src")
+        )
+
+        update_time = self._first_str(
+            tree.xpath("//div[@id='txtbook']//li[contains(text(), '上传日期')]/text()"),
+            replaces=[("上传日期:", "")],
+        )
+
+        genre = self._first_str(
+            tree.xpath("//div[@id='submenu']/h2/a[@class='lan']/text()")
+        )
+        tags = [genre] if genre else []
+
+        summary_el = tree.xpath("//div[@id='jj']//p")
+        summary = summary_el[0].text_content().strip() if summary_el else ""
+
+        download_url = self._first_str(
+            tree.xpath("//div[@id='down']//li[@class='bd']//a/@href")
+        )
+
+        # Chapters from the book_list
+        chapters: list[ChapterInfoDict] = []
+        for a in tree.xpath("//div[@id='ml']//ol/li/a"):
+            url = a.get("href", "").strip()
+            chapter_id = url.split("/")[-1].replace(".html", "")
+            title = a.text_content().strip()
+            chapters.append(
+                {
+                    "title": title,
+                    "url": url,
+                    "chapterId": chapter_id,
+                }
+            )
+
+        volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
+
+        return {
+            "book_name": book_name,
+            "author": author,
+            "cover_url": cover_url,
+            "update_time": update_time,
+            "tags": tags,
+            "summary": summary,
+            "volumes": volumes,
+            "extra": {"download_url": download_url},
+        }
+
+    def parse_chapter(
+        self,
+        html_list: list[str],
+        chapter_id: str,
+        **kwargs: Any,
+    ) -> ChapterDict | None:
+        """
+        Parse a single chapter page and extract clean text or simplified HTML.
+
+        :param html_list: Raw HTML of the chapter page.
+        :param chapter_id: Identifier of the chapter being parsed.
+        :return: Cleaned chapter content as plain text or minimal HTML.
+        """
+        if not html_list:
+            return None
+
+        tree = html.fromstring(html_list[0])
+
+        raw_title = self._first_str(tree.xpath("//div[@id='content']//h1/text()"))
+        title = raw_title.split("-", 1)[-1].strip()
+
+        texts = []
+        for txt in tree.xpath("//div[@class='chapter']//text()"):
+            line = txt.strip()
+            if not line:
+                continue
+            # Skip instruction/ad lines
+            if any(substr in txt for substr in self.ADS):
+                continue
+            texts.append(line)
+
+        content = "\n\n".join(texts)
+        if not content:
+            return None
+
+        return {
+            "id": chapter_id,
+            "title": title,
+            "content": content,
+            "extra": {"site": "aaatxt"},
+        }

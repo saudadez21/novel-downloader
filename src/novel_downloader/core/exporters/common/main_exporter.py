@@ -36,6 +36,7 @@ class CommonExporter(BaseExporter):
 
         :param book_id: The book identifier (used to locate raw data)
         """
+        book_id = self._normalize_book_id(book_id)
         self._init_chapter_storages(book_id)
         return common_export_as_txt(self, book_id)
 
@@ -53,5 +54,16 @@ class CommonExporter(BaseExporter):
                 "EPUB export not supported. Please install 'ebooklib'"
             ) from err
 
+        book_id = self._normalize_book_id(book_id)
         self._init_chapter_storages(book_id)
         return common_export_as_epub(self, book_id)
+
+    @staticmethod
+    def _normalize_book_id(book_id: str) -> str:
+        """
+        Normalize a book identifier.
+
+        Subclasses may override this method to transform the book ID
+        into their preferred format.
+        """
+        return book_id.replace("/", "-")

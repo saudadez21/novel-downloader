@@ -25,7 +25,6 @@ book_ids = [
   "1234567890",
   "0987654321"
 ]
-mode = "browser"                   # browser / session
 login_required = true              # 是否需要登录才能访问
 ```
 

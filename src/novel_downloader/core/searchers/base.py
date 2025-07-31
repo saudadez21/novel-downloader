@@ -87,6 +87,20 @@ class BaseSearcher(abc.ABC, SearcherProtocol):
         return resp
 
     @staticmethod
-    def _quote(q: str) -> str:
+    def _quote(q: str, encoding: str | None = None, errors: str | None = None) -> str:
         """URL-encode a query string safely."""
-        return quote_plus(q)
+        return quote_plus(q, encoding=encoding, errors=errors)
+
+    @staticmethod
+    def _first_str(xs: list[str], replaces: list[tuple[str, str]] | None = None) -> str:
+        replaces = replaces or []
+        value: str = xs[0].strip() if xs else ""
+        for replace in replaces:
+            old, new = replace
+            value = value.replace(old, new)
+        return value
+
+    @staticmethod
+    def _build_url(base: str, params: dict[str, str]) -> str:
+        query_string = "&".join(f"{k}={v}" for k, v in params.items())
+        return f"{base}?{query_string}"

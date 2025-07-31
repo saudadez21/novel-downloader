@@ -17,7 +17,6 @@
 > `novel_downloader.utils.models`
 
 ```python
-ModeType = Literal["browser", "session"]
 SplitMode = Literal["book", "volume"]
 LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
 BrowserType = Literal["chromium", "firefox", "webkit"]
@@ -77,13 +76,10 @@ class FetcherConfig:
     timeout: float = 30.0
     headless: bool = False
     disable_images: bool = False
-    mode: ModeType = "session"
     max_connections: int = 10
     max_rps: float | None = None
-    proxy: str | None = None
     user_agent: str | None = None
     headers: dict[str, str] | None = None
-    browser_type: BrowserType = "chromium"
     verify_ssl: bool = True
 ```
 
@@ -109,8 +105,6 @@ class DownloaderConfig:
     skip_existing: bool = True
     login_required: bool = False
     save_html: bool = False
-    mode: ModeType = "session"
-    storage_backend: StorageBackend = "json"
     storage_batch_size: int = 1
     username: str = ""
     password: str = ""
@@ -142,7 +136,6 @@ class ParserConfig:
     ocr_weight: float = 0.6
     vec_weight: float = 0.4
     save_font_debug: bool = False
-    mode: ModeType = "session"
 ```
 
 描述: 章节解析与 OCR/向量匹配相关配置
@@ -161,7 +154,6 @@ class ExporterConfig:
     cache_dir: str = "./novel_cache"
     raw_data_dir: str = "./raw_data"
     output_dir: str = "./downloads"
-    storage_backend: StorageBackend = "json"
     clean_text: bool = True
     make_txt: bool = True
     make_epub: bool = False
@@ -221,7 +213,7 @@ book_cfg: BookConfig = {
 class LoginField:
     name: str
     label: str
-    type: Literal["text", "password", "cookie", "manual_login"]
+    type: Literal["text", "password", "cookie"]
     required: bool
     default: str = ""
     placeholder: str = ""

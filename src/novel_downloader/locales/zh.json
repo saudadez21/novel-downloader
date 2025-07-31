@@ -69,7 +69,6 @@
   "download_option_end": "结束章节 ID (仅用于第一个书籍 ID)",
   "login_description": "说明",
   "login_hint": "提示",
-  "login_manual_prompt": ">> 请在浏览器中完成登录后按回车继续...",
   "login_use_config": "使用配置中的默认值",
   "login_enter_password": "请输入密码: ",
   "login_enter_cookie": "请输入 Cookie: ",
@@ -121,6 +120,6 @@
   "help_search_limit": "总体搜索结果数量上限",
   "help_search_site_limit": "单站点搜索结果数量上限",
   "no_results": "未找到结果",
-  "prompt_select_index": "通过编号选择结果 (或按回车取消): ",
+  "prompt_select_index": "通过编号选择书籍 (或按回车取消)",
   "invalid_selection": "无效选择, 请重试。"
 }

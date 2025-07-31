@@ -10,6 +10,7 @@ __all__ = ["register_exporter", "get_exporter"]
 from collections.abc import Callable, Sequence
 from typing import TypeVar
 
+from novel_downloader.core.exporters.common import CommonExporter
 from novel_downloader.core.interfaces import ExporterProtocol
 from novel_downloader.models import ExporterConfig
 
@@ -48,6 +49,6 @@ def get_exporter(site: str, config: ExporterConfig) -> ExporterProtocol:
     site_key = site.lower()
     try:
         exporter_cls = _EXPORTER_MAP[site_key]
-    except KeyError as err:
-        raise ValueError(f"Unsupported site: {site}") from err
+    except KeyError:
+        return CommonExporter(config, site_key)
     return exporter_cls(config)

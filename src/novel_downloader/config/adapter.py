@@ -57,7 +57,6 @@ class ConfigAdapter:
         """
         gen = self._config.get("general", {})
         req = self._config.get("requests", {})
-        site_cfg = self._get_site_cfg()
         return FetcherConfig(
             request_interval=gen.get("request_interval", 2.0),
             retry_times=req.get("retry_times", 3),
@@ -67,12 +66,10 @@ class ConfigAdapter:
             max_rps=req.get("max_rps", None),
             headless=req.get("headless", False),
             disable_images=req.get("disable_images", False),
-            mode=site_cfg.get("mode", "session"),
-            proxy=req.get("proxy", None),
             user_agent=req.get("user_agent", None),
             headers=req.get("headers", None),
-            browser_type=req.get("browser_type", "chromium"),
             verify_ssl=req.get("verify_ssl", True),
+            locale_style=gen.get("locale_style", "simplified"),
         )
 
     def get_downloader_config(self) -> DownloaderConfig:
@@ -101,7 +98,6 @@ class ConfigAdapter:
             skip_existing=gen.get("skip_existing", True),
             login_required=site_cfg.get("login_required", False),
             save_html=debug.get("save_html", False),
-            mode=site_cfg.get("mode", "session"),
             storage_batch_size=gen.get("storage_batch_size", 1),
             username=site_cfg.get("username", ""),
             password=site_cfg.get("password", ""),
@@ -136,7 +132,6 @@ class ConfigAdapter:
             gpu_id=font_ocr.get("gpu_id", None),
             ocr_weight=font_ocr.get("ocr_weight", 0.6),
             vec_weight=font_ocr.get("vec_weight", 0.4),
-            mode=site_cfg.get("mode", "session"),
         )
 
     def get_exporter_config(self) -> ExporterConfig:
@@ -260,12 +255,12 @@ class ConfigAdapter:
         :return: The site-specific or common configuration dict.
         """
         site = site or self._site
-        sites_cfg = self._config.get("sites", {}) or {}
+        sites_cfg = self._config.get("sites") or {}
 
         if site in sites_cfg:
             return sites_cfg[site] or {}
 
-        return sites_cfg.get("common", {}) or {}
+        return sites_cfg.get("common") or {}
 
     @staticmethod
     def _dict_to_book_cfg(data: dict[str, Any]) -> BookConfig:

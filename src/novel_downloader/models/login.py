@@ -13,7 +13,7 @@ from typing import Literal
 class LoginField:
     name: str
     label: str
-    type: Literal["text", "password", "cookie", "manual_login"]
+    type: Literal["text", "password", "cookie"]
     required: bool
     default: str = ""
     placeholder: str = ""

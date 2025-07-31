@@ -16,12 +16,11 @@ from novel_downloader.models import ParserConfig
 ParserBuilder = Callable[[ParserConfig], ParserProtocol]
 
 P = TypeVar("P", bound=ParserProtocol)
-_PARSER_MAP: dict[str, dict[str, ParserBuilder]] = {}
+_PARSER_MAP: dict[str, ParserBuilder] = {}
 
 
 def register_parser(
     site_keys: Sequence[str],
-    backends: Sequence[str],
 ) -> Callable[[type[P]], type[P]]:
     """
     Decorator to register a parser class under given keys.
@@ -34,9 +33,7 @@ def register_parser(
     def decorator(cls: type[P]) -> type[P]:
         for site in site_keys:
             site_lower = site.lower()
-            bucket = _PARSER_MAP.setdefault(site_lower, {})
-            for backend in backends:
-                bucket[backend] = cls
+            _PARSER_MAP[site_lower] = cls
         return cls
 
     return decorator
@@ -52,17 +49,8 @@ def get_parser(site: str, config: ParserConfig) -> ParserProtocol:
     """
     site_key = site.lower()
     try:
-        backend_map = _PARSER_MAP[site_key]
+        parser_cls = _PARSER_MAP[site_key]
     except KeyError as err:
         raise ValueError(f"Unsupported site: {site!r}") from err
-
-    mode = config.mode
-    try:
-        parser_cls = backend_map[mode]
-    except KeyError as err:
-        raise ValueError(
-            f"Unsupported parser mode {mode!r} for site {site!r}. "
-            f"Available modes: {list(backend_map)}"
-        ) from err
 
     return parser_cls(config)

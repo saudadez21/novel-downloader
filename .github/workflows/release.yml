@@ -28,7 +28,7 @@ jobs:
 
       - name: Fix README.md links for PyPI
         run: |
-          sed -i 's#](docs/#](https://github.com/BowenZ217/novel-downloader/blob/main/docs/#g' README.md
+          sed -i 's#](docs/#](https://github.com/saudadez21/novel-downloader/blob/main/docs/#g' README.md
 
       - name: Build package
         run: |

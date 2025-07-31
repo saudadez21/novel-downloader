@@ -25,7 +25,7 @@ import requests
 from novel_downloader.utils.constants import JS_SCRIPT_DIR
 
 DEST_ROOT: Final[Path] = JS_SCRIPT_DIR
-GITHUB_OWNER: Final = "BowenZ217"
+GITHUB_OWNER: Final = "saudadez21"
 GITHUB_REPO: Final = "qidian-decryptor"
 RELEASE_VERSION: Final = "v1.0.1"
 BASE_URL: Final = f"https://github.com/{GITHUB_OWNER}/{GITHUB_REPO}/releases/download/{RELEASE_VERSION}"

@@ -20,8 +20,6 @@ from dataclasses import dataclass, field
 from typing import NotRequired, TypedDict
 
 from .types import (
-    BrowserType,
-    ModeType,
     SplitMode,
 )
 
@@ -34,14 +32,12 @@ class FetcherConfig:
     timeout: float = 30.0
     headless: bool = False
     disable_images: bool = False
-    mode: ModeType = "session"
     max_connections: int = 10
     max_rps: float | None = None  # Maximum requests per second
-    proxy: str | None = None
     user_agent: str | None = None
     headers: dict[str, str] | None = None
-    browser_type: BrowserType = "chromium"
     verify_ssl: bool = True
+    locale_style: str = "simplified"
 
 
 @dataclass
@@ -55,7 +51,6 @@ class DownloaderConfig:
     skip_existing: bool = True
     login_required: bool = False
     save_html: bool = False
-    mode: ModeType = "session"
     storage_batch_size: int = 1
     username: str = ""
     password: str = ""
@@ -77,7 +72,6 @@ class ParserConfig:
     ocr_weight: float = 0.6
     vec_weight: float = 0.4
     save_font_debug: bool = False
-    mode: ModeType = "session"
 
 
 @dataclass
