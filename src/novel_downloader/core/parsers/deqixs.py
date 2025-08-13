@@ -28,6 +28,7 @@ class DeqixsParser(BaseParser):
     ADS: set[str] = {
         "更新不易",
         "记得分享",
+        "(本章完)",
     }
 
     def parse_book_info(
