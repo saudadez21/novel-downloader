@@ -119,6 +119,7 @@
   "help_search_keyword": "要搜索的关键字",
   "help_search_limit": "总体搜索结果数量上限",
   "help_search_site_limit": "单站点搜索结果数量上限",
+  "help_search_timeout": "每次请求的超时时间 (秒) (默认：{secs})",
   "no_results": "未找到结果",
   "prompt_select_index": "通过编号选择书籍 (或按回车取消)",
   "invalid_selection": "无效选择, 请重试。"

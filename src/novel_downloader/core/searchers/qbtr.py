@@ -26,7 +26,7 @@ class QbtrSearcher(BaseSearcher):
     SEARCH_URL = "https://www.qbtr.cc/e/search/index.php"
 
     @classmethod
-    def _fetch_html(cls, keyword: str) -> str:
+    async def _fetch_html(cls, keyword: str) -> str:
         """
         Fetch raw HTML from Qbtr's search page.
 
@@ -43,14 +43,15 @@ class QbtrSearcher(BaseSearcher):
             "Content-Type": "application/x-www-form-urlencoded",
         }
         try:
-            response = cls._http_post(cls.SEARCH_URL, data=body, headers=headers)
-            return response.text
+            async with (
+                await cls._http_post(cls.SEARCH_URL, data=body, headers=headers)
+            ) as resp:
+                return await cls._response_to_str(resp)
         except Exception:
             logger.error(
                 "Failed to fetch HTML for keyword '%s' from '%s'",
                 keyword,
                 cls.SEARCH_URL,
-                exc_info=True,
             )
             return ""
 

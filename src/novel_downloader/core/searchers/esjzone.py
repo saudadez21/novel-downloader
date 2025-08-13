@@ -25,7 +25,7 @@ class EsjzoneSearcher(BaseSearcher):
     SEARCH_URL = "https://www.esjzone.cc/tags/{query}/"
 
     @classmethod
-    def _fetch_html(cls, keyword: str) -> str:
+    async def _fetch_html(cls, keyword: str) -> str:
         """
         Fetch raw HTML from Esjzone's search page.
 
@@ -34,14 +34,13 @@ class EsjzoneSearcher(BaseSearcher):
         """
         url = cls.SEARCH_URL.format(query=cls._quote(keyword))
         try:
-            response = cls._http_get(url)
-            return response.text
+            async with (await cls._http_get(url)) as resp:
+                return await cls._response_to_str(resp)
         except Exception:
             logger.error(
                 "Failed to fetch HTML for keyword '%s' from '%s'",
                 keyword,
                 url,
-                exc_info=True,
             )
             return ""
 

@@ -28,7 +28,7 @@ class HetushuSearcher(BaseSearcher):
     BASE_URL = "https://www.hetushu.com"
 
     @classmethod
-    def _fetch_html(cls, keyword: str) -> str:
+    async def _fetch_html(cls, keyword: str) -> str:
         """
         Fetch raw HTML from Hetushu's search page.
 
@@ -40,14 +40,15 @@ class HetushuSearcher(BaseSearcher):
             "Referer": "https://www.hetushu.com/",
         }
         try:
-            response = cls._http_get(cls.SEARCH_URL, params=params, headers=headers)
-            return response.text
+            async with (
+                await cls._http_get(cls.SEARCH_URL, params=params, headers=headers)
+            ) as resp:
+                return await cls._response_to_str(resp)
         except Exception:
             logger.error(
                 "Failed to fetch HTML for keyword '%s' from '%s'",
                 keyword,
                 cls.SEARCH_URL,
-                exc_info=True,
             )
             return ""
 

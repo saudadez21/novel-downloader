@@ -119,6 +119,7 @@
   "help_search_keyword": "keyword to look for",
   "help_search_limit": "Maximum number of search results",
   "help_search_site_limit":  "Maximum number of search results per site",
+  "help_search_timeout": "Per-request timeout in seconds (default: {secs})",
   "no_results": "No results found.",
   "prompt_select_index": "Select a book by number (or press Enter to cancel)",
   "invalid_selection": "Invalid choice, please try again."

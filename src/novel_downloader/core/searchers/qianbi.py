@@ -26,7 +26,7 @@ class QianbiSearcher(BaseSearcher):
     SEARCH_URL = "https://www.23qb.com/search.html"
 
     @classmethod
-    def _fetch_html(cls, keyword: str) -> str:
+    async def _fetch_html(cls, keyword: str) -> str:
         """
         Fetch raw HTML from Qianbi's search page.
 
@@ -35,14 +35,13 @@ class QianbiSearcher(BaseSearcher):
         """
         params = {"searchkey": keyword}
         try:
-            response = cls._http_get(cls.SEARCH_URL, params=params)
-            return response.text
+            async with (await cls._http_get(cls.SEARCH_URL, params=params)) as resp:
+                return await cls._response_to_str(resp)
         except Exception:
             logger.error(
                 "Failed to fetch HTML for keyword '%s' from '%s'",
                 keyword,
                 cls.SEARCH_URL,
-                exc_info=True,
             )
             return ""
 

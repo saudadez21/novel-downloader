@@ -26,7 +26,7 @@ class AaatxtSearcher(BaseSearcher):
     SEARCH_URL = "http://www.aaatxt.com/search.php"
 
     @classmethod
-    def _fetch_html(cls, keyword: str) -> str:
+    async def _fetch_html(cls, keyword: str) -> str:
         """
         Fetch raw HTML from Aaatxt's search page.
 
@@ -38,20 +38,19 @@ class AaatxtSearcher(BaseSearcher):
             "keyword": cls._quote(keyword, encoding="gb2312", errors="replace"),
             "submit": cls._quote("搜 索", encoding="gb2312", errors="replace"),
         }
-        full_url = cls._build_url(cls.SEARCH_URL, params)
+        full_url = cls._build_url(cls.SEARCH_URL, params)  # need build manually
         headers = {
             "Host": "www.aaatxt.com",
             "Referer": "http://www.aaatxt.com/",
         }
         try:
-            response = cls._http_get(full_url, headers=headers)
-            return response.text
+            async with (await cls._http_get(full_url, headers=headers)) as resp:
+                return await cls._response_to_str(resp, "gb2312")
         except Exception:
             logger.error(
                 "Failed to fetch HTML for keyword '%s' from '%s'",
                 keyword,
                 cls.SEARCH_URL,
-                exc_info=True,
             )
             return ""
 

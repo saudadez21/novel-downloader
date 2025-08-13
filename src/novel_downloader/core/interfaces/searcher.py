@@ -7,6 +7,8 @@ novel_downloader.core.interfaces.searcher
 
 from typing import Protocol
 
+import aiohttp
+
 from novel_downloader.models import SearchResult
 
 
@@ -14,5 +16,10 @@ class SearcherProtocol(Protocol):
     site_name: str
 
     @classmethod
-    def search(cls, keyword: str, limit: int | None = None) -> list[SearchResult]:
+    def configure(cls, session: aiohttp.ClientSession) -> None:
+        """Configure the shared session"""
+        ...
+
+    @classmethod
+    async def search(cls, keyword: str, limit: int | None = None) -> list[SearchResult]:
         ...

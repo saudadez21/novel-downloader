@@ -6,10 +6,10 @@ novel_downloader.core.searchers.base
 """
 
 import abc
-from typing import Any
+from typing import Any, ClassVar
 from urllib.parse import quote_plus
 
-import requests
+import aiohttp
 
 from novel_downloader.core.interfaces import SearcherProtocol
 from novel_downloader.models import SearchResult
@@ -18,17 +18,20 @@ from novel_downloader.utils.constants import DEFAULT_USER_HEADERS
 
 class BaseSearcher(abc.ABC, SearcherProtocol):
     site_name: str
-    _session = requests.Session()
-    _DEFAULT_TIMEOUT: tuple[int, int] = (5, 10)
+    _session: ClassVar[aiohttp.ClientSession | None] = None
 
     @classmethod
-    def search(cls, keyword: str, limit: int | None = None) -> list[SearchResult]:
-        html = cls._fetch_html(keyword)
+    def configure(cls, session: aiohttp.ClientSession) -> None:
+        cls._session = session
+
+    @classmethod
+    async def search(cls, keyword: str, limit: int | None = None) -> list[SearchResult]:
+        html = await cls._fetch_html(keyword)
         return cls._parse_html(html, limit)
 
     @classmethod
     @abc.abstractmethod
-    def _fetch_html(cls, keyword: str) -> str:
+    async def _fetch_html(cls, keyword: str) -> str:
         """Get raw HTML from search API or page"""
         pass
 
@@ -39,57 +42,95 @@ class BaseSearcher(abc.ABC, SearcherProtocol):
         pass
 
     @classmethod
-    def _http_get(
+    async def _http_get(
         cls,
         url: str,
         *,
         params: dict[str, str] | None = None,
         headers: dict[str, str] | None = None,
-        timeout: tuple[int, int] | None = None,
         **kwargs: Any,
-    ) -> requests.Response:
+    ) -> aiohttp.ClientResponse:
         """
-        Helper for GET requests with default headers, timeout, and error-raising.
+        Helper for GET requests with default headers.
         """
+        session = cls._ensure_session()
         hdrs = {**DEFAULT_USER_HEADERS, **(headers or {})}
-        resp = cls._session.get(
-            url,
-            params=params,
-            headers=hdrs,
-            timeout=timeout or cls._DEFAULT_TIMEOUT,
-            **kwargs,
-        )
-        resp.raise_for_status()
+        resp = await session.get(url, params=params, headers=hdrs, **kwargs)
+        try:
+            resp.raise_for_status()
+        except aiohttp.ClientResponseError:
+            try:
+                await resp.read()
+            finally:
+                resp.release()
+            raise
         return resp
 
     @classmethod
-    def _http_post(
+    async def _http_post(
         cls,
         url: str,
         *,
         data: dict[str, str] | str | None = None,
         headers: dict[str, str] | None = None,
-        timeout: tuple[int, int] | None = None,
         **kwargs: Any,
-    ) -> requests.Response:
+    ) -> aiohttp.ClientResponse:
         """
-        Helper for POST requests with default headers, timeout, and error-raising.
+        Helper for POST requests with default headers.
         """
+        session = cls._ensure_session()
         hdrs = {**DEFAULT_USER_HEADERS, **(headers or {})}
-        resp = cls._session.post(
-            url,
-            data=data,
-            headers=hdrs,
-            timeout=timeout or cls._DEFAULT_TIMEOUT,
-            **kwargs,
-        )
-        resp.raise_for_status()
+        resp = await session.post(url, data=data, headers=hdrs, **kwargs)
+        try:
+            resp.raise_for_status()
+        except aiohttp.ClientResponseError:
+            try:
+                await resp.read()
+            finally:
+                resp.release()
+            raise
         return resp
+
+    @classmethod
+    def _ensure_session(cls) -> aiohttp.ClientSession:
+        if cls._session is None:
+            raise RuntimeError(
+                f"{cls.__name__} has no aiohttp session. "
+                "Call .configure(session) first."
+            )
+        return cls._session
 
     @staticmethod
     def _quote(q: str, encoding: str | None = None, errors: str | None = None) -> str:
         """URL-encode a query string safely."""
         return quote_plus(q, encoding=encoding, errors=errors)
+
+    @staticmethod
+    async def _response_to_str(
+        resp: aiohttp.ClientResponse,
+        encoding: str | None = None,
+    ) -> str:
+        """
+        Read the full body of resp as text. First try the declared charset,
+        then on UnicodeDecodeError fall back to a lenient utf-8 decode.
+        """
+        data: bytes = await resp.read()
+        encodings = [
+            encoding,
+            resp.charset,
+            "gb2312",
+            "gb18030",
+            "gbk",
+            "utf-8",
+        ]
+        encodings_list: list[str] = [e for e in encodings if e]
+        for enc in encodings_list:
+            try:
+                return data.decode(enc)
+            except UnicodeDecodeError:
+                continue
+        encoding = encoding or "utf-8"
+        return data.decode(encoding, errors="ignore")
 
     @staticmethod
     def _first_str(xs: list[str], replaces: list[tuple[str, str]] | None = None) -> str:

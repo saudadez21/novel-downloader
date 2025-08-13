@@ -26,7 +26,7 @@ class PiaotiaSearcher(BaseSearcher):
     SEARCH_URL = "https://www.piaotia.com/modules/article/search.php"
 
     @classmethod
-    def _fetch_html(cls, keyword: str) -> str:
+    async def _fetch_html(cls, keyword: str) -> str:
         """
         Fetch raw HTML from Piaotia's search page.
 
@@ -50,15 +50,15 @@ class PiaotiaSearcher(BaseSearcher):
             "Content-Type": "application/x-www-form-urlencoded",
         }
         try:
-            response = cls._http_post(cls.SEARCH_URL, data=body, headers=headers)
-            response.encoding = "gbk"
-            return response.text
+            async with (
+                await cls._http_post(cls.SEARCH_URL, data=body, headers=headers)
+            ) as resp:
+                return await cls._response_to_str(resp, encoding="gbk")
         except Exception:
             logger.error(
                 "Failed to fetch HTML for keyword '%s' from '%s'",
                 keyword,
                 cls.SEARCH_URL,
-                exc_info=True,
             )
             return ""
 

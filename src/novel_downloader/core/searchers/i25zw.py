@@ -26,7 +26,7 @@ class I25zwSearcher(BaseSearcher):
     SEARCH_URL = "https://www.i25zw.com/search.html"
 
     @classmethod
-    def _fetch_html(cls, keyword: str) -> str:
+    async def _fetch_html(cls, keyword: str) -> str:
         """
         Fetch raw HTML from I25zw's search page.
 
@@ -39,14 +39,13 @@ class I25zwSearcher(BaseSearcher):
             "Submit": "",
         }
         try:
-            response = cls._http_post(cls.SEARCH_URL, data=payload)
-            return response.text
+            async with (await cls._http_post(cls.SEARCH_URL, data=payload)) as resp:
+                return await cls._response_to_str(resp)
         except Exception:
             logger.error(
                 "Failed to fetch HTML for keyword '%s' from '%s'",
                 keyword,
                 cls.SEARCH_URL,
-                exc_info=True,
             )
             return ""
 
