@@ -80,11 +80,13 @@ class PiaotiaSearcher(BaseSearcher):
                 break
             # Title and book_id
             link = row.xpath("./td[1]/a")[0]
-            href = link.get("href", "").strip()
+            book_url = link.get("href", "").strip()
             title = link.text_content().strip()
 
-            match = re.search(r"/bookinfo/([^/]+/[^/]+)\.html", href)
-            book_id = match.group(1) if match else href.rstrip(".html").split("/")[-1]
+            match = re.search(r"/bookinfo/([^/]+/[^/]+)\.html", book_url)
+            book_id = (
+                match.group(1) if match else book_url.rstrip(".html").split("/")[-1]
+            )
             if not book_id:
                 continue
             book_id = book_id.replace("/", "-")
@@ -106,6 +108,7 @@ class PiaotiaSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    book_url=book_url,
                     cover_url="",
                     title=title,
                     author=author,

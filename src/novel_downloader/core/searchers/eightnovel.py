@@ -65,6 +65,9 @@ class EightnovelSearcher(BaseSearcher):
             # Extract book_id from href, e.g. '/novelbooks/6045'
             href = a.get("href", "").strip()
             book_id = href.rstrip("/").split("/")[-1]
+            if not book_id:
+                continue
+            book_url = cls.BASE_URL + href
 
             img_src = a.xpath(".//img/@src")
             cover_url = img_src[0] if img_src else ""
@@ -83,6 +86,7 @@ class EightnovelSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    book_url=book_url,
                     cover_url=cover_url,
                     title=title,
                     author="-",

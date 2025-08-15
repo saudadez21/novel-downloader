@@ -131,7 +131,7 @@ class DeqixsParser(BaseParser):
                     continue
                 contents.append(text)
 
-        content = "\n\n".join(contents)
+        content = "\n".join(contents)
         if not content:
             return None
 

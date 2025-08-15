@@ -32,6 +32,7 @@ __all__ = [
     "TongrenquanSession",
     "TtkanSession",
     "XiaoshuowuSession",
+    "XiguashuwuSession",
     "YamiboSession",
 ]
 
@@ -57,4 +58,5 @@ from .shencou import ShencouSession
 from .tongrenquan import TongrenquanSession
 from .ttkan import TtkanSession
 from .xiaoshuowu import XiaoshuowuSession
+from .xiguashuwu import XiguashuwuSession
 from .yamibo import YamiboSession

@@ -41,7 +41,9 @@ try:
     from Crypto.Cipher import AES as _PyAES
     from Crypto.Util.Padding import unpad as _py_unpad
 
-    def aes_cbc_decrypt(key: bytes, iv: bytes, data: bytes) -> bytes:
+    def aes_cbc_decrypt(
+        key: bytes, iv: bytes, data: bytes, block_size: int = _BLOCK
+    ) -> bytes:
         """
         AES-CBC decrypt + PKCS#7 unpad (PyCryptodome).
 
@@ -58,7 +60,7 @@ try:
             return b""
         _validate_inputs(key_b, iv_b, data_b)
         pt = _PyAES.new(key_b, _PyAES.MODE_CBC, iv_b).decrypt(data_b)
-        return _py_unpad(pt, _BLOCK, style="pkcs7")  # type: ignore[no-any-return]
+        return _py_unpad(pt, block_size, style="pkcs7")  # type: ignore[no-any-return]
 
 except ImportError:
     print(
@@ -67,7 +69,9 @@ except ImportError:
     )
     from novel_downloader.utils.crypto_utils.aes_v2 import AES_CBC
 
-    def aes_cbc_decrypt(key: bytes, iv: bytes, data: bytes) -> bytes:
+    def aes_cbc_decrypt(
+        key: bytes, iv: bytes, data: bytes, block_size: int = _BLOCK
+    ) -> bytes:
         """
         AES-CBC decrypt + PKCS#7 unpad (handled by AES_CBC internally).
 
@@ -83,4 +87,4 @@ except ImportError:
         if not data_b:
             return b""
         _validate_inputs(key_b, iv_b, data_b)
-        return AES_CBC(key_b, iv_b).decrypt_padded(data_b)
+        return AES_CBC(key_b, iv_b).decrypt_padded(data_b, block_size)

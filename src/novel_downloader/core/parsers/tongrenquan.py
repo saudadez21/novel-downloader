@@ -115,7 +115,7 @@ class TongrenquanParser(BaseParser):
         # Extract paragraphs of content
         paras = tree.xpath('//div[contains(@class,"read_chapterDetail")]/p')
         texts = [p.text_content().strip() for p in paras if p.text_content().strip()]
-        content = "\n\n".join(texts)
+        content = "\n".join(texts)
         if not content:
             return None
 

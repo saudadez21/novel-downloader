@@ -142,7 +142,7 @@ class BiquyueduParser(BaseParser):
             if not self.PROMO_FILTER.search(txt)
         ]
 
-        content = "\n\n".join(paragraphs)
+        content = "\n".join(paragraphs)
         if not content.strip():
             return None
 

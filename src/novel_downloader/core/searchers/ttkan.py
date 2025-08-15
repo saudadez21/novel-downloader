@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 class TtkanSearcher(BaseSearcher):
     site_name = "ttkan"
     priority = 100
+    BASE_URL = "https://www.ttkan.co"
     SEARCH_URL = "https://www.ttkan.co/novel/search"
 
     @classmethod
@@ -71,6 +72,7 @@ class TtkanSearcher(BaseSearcher):
             book_id = href.strip("/").split("/")[-1] if href else ""
             if not book_id:
                 continue
+            book_url = cls.BASE_URL + href
 
             cover_nodes = item.xpath(".//amp-img/@src")
             cover_url = cover_nodes[0].strip() if cover_nodes else ""
@@ -92,6 +94,7 @@ class TtkanSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    book_url=book_url,
                     cover_url=cover_url,
                     title=title,
                     author=author_str,

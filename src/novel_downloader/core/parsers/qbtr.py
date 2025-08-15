@@ -130,7 +130,7 @@ class QbtrParser(BaseParser):
             if txt:
                 texts.append(txt)
 
-        content = "\n\n".join(texts)
+        content = "\n".join(texts)
         if not content:
             return None
 

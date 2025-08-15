@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 class EsjzoneSearcher(BaseSearcher):
     site_name = "esjzone"
     priority = 30
+    BASE_URL = "https://www.esjzone.cc"
     SEARCH_URL = "https://www.esjzone.cc/tags/{query}/"
 
     @classmethod
@@ -68,6 +69,7 @@ class EsjzoneSearcher(BaseSearcher):
             book_id = href.strip("/").replace("detail/", "").replace(".html", "")
             if not book_id:
                 continue
+            book_url = cls.BASE_URL + href
 
             latest_elems = card.xpath('.//div[contains(@class,"card-ep")]/a')
             latest_chapter = (
@@ -90,6 +92,7 @@ class EsjzoneSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    book_url=book_url,
                     cover_url=cover_url,
                     title=title,
                     author=author,

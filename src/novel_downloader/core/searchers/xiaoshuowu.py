@@ -72,20 +72,21 @@ class XiaoshuowuSearcher(BaseSearcher):
             cover_url = cover_nodes[0].strip() if cover_nodes else ""
 
             book_id = ""
+            book_url = ""
             cata_elem = row.xpath(
                 './/span[@class="c_subject"]/following-sibling::a[normalize-space(text())="目录"]'
             )
             if cata_elem:
-                href = cata_elem[0].get("href", "")
-                m = cls.CATA_ID_PATTERN.search(href)
+                book_url = cata_elem[0].get("href", "")
+                m = cls.CATA_ID_PATTERN.search(book_url)
                 if m:
                     book_id = f"{m.group(1)}-{m.group(2)}"
             if not book_id and title_elem:
-                href = title_elem[0].get("href", "")
-                m2 = cls.BOOK_ID_PATTERN.search(href)
+                book_url = title_elem[0].get("href", "")
+                m2 = cls.BOOK_ID_PATTERN.search(book_url)
                 if m2:
                     book_id = m2.group(1)
-            if not book_id:
+            if not book_id or not book_url:
                 continue
 
             author_nodes = row.xpath(
@@ -119,6 +120,7 @@ class XiaoshuowuSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    book_url=book_url,
                     cover_url=cover_url,
                     title=title,
                     author=author,

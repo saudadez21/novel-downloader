@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 class Quanben5Searcher(BaseSearcher):
     site_name = "quanben5"
     priority = 30
+    BASE_URL = "https://quanben5.com"
     SEARCH_URL = "https://quanben5.com/"
 
     STATIC_CHARS = "PXhw7UT1B0a9kQDKZsjIASmOezxYG4CHo5Jyfg2b8FLpEvRr3WtVnlqMidu6cN"
@@ -103,6 +104,7 @@ class Quanben5Searcher(BaseSearcher):
             if not m:
                 continue
             book_id = m.group(1)
+            book_url = cls.BASE_URL + href
 
             cover_nodes = row.xpath('.//div[@class="pic"]//img/@src')
             cover_url = cover_nodes[0].strip() if cover_nodes else ""
@@ -121,6 +123,7 @@ class Quanben5Searcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    book_url=book_url,
                     cover_url=cover_url,
                     title=title,
                     author=author,

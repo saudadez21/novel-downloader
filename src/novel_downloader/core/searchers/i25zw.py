@@ -69,12 +69,11 @@ class I25zwSearcher(BaseSearcher):
 
             # Extract book_id from picture link or title link
             pic_href = row.xpath(".//div[@class='pic']/a/@href")
-            if pic_href:
-                m = re.search(r"/book/(\d+)\.html", pic_href[0])
-                book_id = m.group(1) if m else ""
-            else:
-                title_href = row.xpath(".//div[@class='title']/h2/a/@href")
-                book_id = title_href[0].strip("/").strip() if title_href else ""
+            if not pic_href:
+                continue
+            m = re.search(r"/book/(\d+)\.html", pic_href[0])
+            book_id = m.group(1) if m else ""
+            book_url = pic_href[0]
 
             # Title text
             title_nodes = row.xpath(".//div[@class='title']/h2/a/text()")
@@ -95,6 +94,7 @@ class I25zwSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    book_url=book_url,
                     cover_url=cover_url,
                     title=title,
                     author=author,

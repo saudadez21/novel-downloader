@@ -80,6 +80,7 @@ class QidianSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    book_url="",
                     cover_url="",
                     title=title,
                     author=author,

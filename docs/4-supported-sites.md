@@ -263,6 +263,7 @@ novel-cli download --site esjzone 1234567890
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
 | [百合会](https://www.yamibo.com/site/novel)                  | yamibo     | ✅     | ❌     | ✅     | ⚠️     | 简      |
 | [3A电子书](http://www.aaatxt.com/)                           | aaatxt     | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [西瓜书屋](https://www.xiguashuwu.com/)                      | xiguashuwu | ❌     | ❌     | ⚠️     | ✅     | 简      |
 
 #### 使用示例
 
@@ -284,6 +285,11 @@ novel-cli download --site yamibo 123456
     * 章节页面: `http://www.aaatxt.com/yuedu/24514_1.html` -> Chapter ID: `24514_1`
   * 注意事项:
     * 该站点直接提供 txt 下载。
+
+* **西瓜书屋 (xiguashuwu)**
+  * 示例 URL:
+    * 书籍页面: `https://www.xiguashuwu.com/book/1234/iszip/1/` -> Book ID: `1234`
+    * 章节页面: `https://www.xiguashuwu.com/book/1234/482.html` -> Chapter ID: `482`
 
 </details>
 

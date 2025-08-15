@@ -78,6 +78,9 @@ class TongrenquanSearcher(BaseSearcher):
             href = link_elem.get("href", "").strip()
             m = re.match(r"^/([^/]+)/(\d+)\.html$", href)
             book_id = m.group(2) if m else ""
+            if not book_id:
+                continue
+            book_url = cls.BASE_URL + href
 
             src_nodes = row.xpath('.//div[@class="pic"]//img/@src')
             rel_src = src_nodes[0].strip() if src_nodes else ""
@@ -99,6 +102,7 @@ class TongrenquanSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    book_url=book_url,
                     cover_url=cover_url,
                     title=title,
                     author=author,

@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 class QbtrSearcher(BaseSearcher):
     site_name = "qbtr"
     priority = 30
+    BASE_URL = "https://www.qbtr.cc"
     SEARCH_URL = "https://www.qbtr.cc/e/search/index.php"
 
     @classmethod
@@ -76,6 +77,9 @@ class QbtrSearcher(BaseSearcher):
             href = link_elem.get("href", "").strip()
             m = re.match(r"^/([^/]+)/(\d+)\.html$", href)
             book_id = f"{m.group(1)}-{m.group(2)}" if m else ""
+            if not book_id:
+                continue
+            book_url = cls.BASE_URL + href
 
             title = link_elem.text_content().strip()
 
@@ -93,6 +97,7 @@ class QbtrSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    book_url=book_url,
                     cover_url="",
                     title=title,
                     author=author,

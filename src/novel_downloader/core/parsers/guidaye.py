@@ -131,7 +131,7 @@ class GuidayeParser(BaseParser):
         if not lines:
             return None
 
-        content = "\n\n".join(lines)
+        content = "\n".join(lines)
 
         return {
             "id": chapter_id,

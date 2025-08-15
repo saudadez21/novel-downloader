@@ -190,7 +190,7 @@ class PiaotiaParser(BaseParser):
 
             node = node.getnext()
 
-        content = "\n\n".join(lines).strip()
+        content = "\n".join(lines).strip()
         if not content:
             return None
 

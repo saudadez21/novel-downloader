@@ -1118,16 +1118,18 @@ class AES_CBC(AES):
         self.iv = prev
         return plaintext
 
-    def encrypt_padded(self, plaintext: bytes) -> bytes:
+    def encrypt_padded(self, plaintext: bytes, block_size: int | None = None) -> bytes:
         """One-shot CBC+PKCS#7 helper."""
-        pad_len = self.block_size - (len(plaintext) % self.block_size)
+        block_size = block_size or self.block_size
+        pad_len = block_size - (len(plaintext) % block_size)
         data = plaintext + bytes([pad_len]) * pad_len
         return self.encrypt(data)
 
-    def decrypt_padded(self, ciphertext: bytes) -> bytes:
+    def decrypt_padded(self, ciphertext: bytes, block_size: int | None = None) -> bytes:
         """One-shot CBC+PKCS#7 helper."""
+        block_size = block_size or self.block_size
         pt = self.decrypt(ciphertext)
-        return self._unpad_pkcs7(pt, self.block_size)
+        return self._unpad_pkcs7(pt, block_size)
 
     @staticmethod
     def _unpad_pkcs7(data: bytes, block_size: int) -> bytes:

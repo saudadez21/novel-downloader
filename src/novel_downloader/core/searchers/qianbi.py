@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 class QianbiSearcher(BaseSearcher):
     site_name = "qianbi"
     priority = 10
+    BASE_URL = "https://www.23qb.com/"
     SEARCH_URL = "https://www.23qb.com/search.html"
 
     @classmethod
@@ -108,6 +109,7 @@ class QianbiSearcher(BaseSearcher):
             SearchResult(
                 site=cls.site_name,
                 book_id=book_id,
+                book_url=url[0],
                 cover_url=cover_url,
                 title=title,
                 author=author,
@@ -143,6 +145,7 @@ class QianbiSearcher(BaseSearcher):
             book_id = href.replace("book/", "").strip("/")
             if not book_id:
                 continue
+            book_url = cls.BASE_URL + href
             cover_nodes = item.xpath(
                 './/div[contains(@class,"module-item-pic")]//img/@data-src'
             )
@@ -159,6 +162,7 @@ class QianbiSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    book_url=book_url,
                     cover_url=cover_url,
                     title=title,
                     author="-",  # Author is not present on the page

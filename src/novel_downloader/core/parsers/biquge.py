@@ -123,7 +123,7 @@ class BiqugeParser(BaseParser):
         paragraph_texts = [
             "".join(p.itertext()).strip() for p in paragraphs if p is not None
         ]
-        content = "\n\n".join([p for p in paragraph_texts if p])
+        content = "\n".join([p for p in paragraph_texts if p])
         if not content.strip():
             return None
 

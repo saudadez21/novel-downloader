@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 class DeqixsSearcher(BaseSearcher):
     site_name = "deqixs"
     priority = 20
+    BASE_URL = "https://www.deqixs.com"
     SEARCH_URL = "https://www.deqixs.com/tag/"
 
     @classmethod
@@ -63,6 +64,9 @@ class DeqixsSearcher(BaseSearcher):
 
             href = row.xpath(".//h3/a/@href")[0]
             book_id = href.strip("/ ").split("/")[-1]
+            if not book_id:
+                continue
+            book_url = cls.BASE_URL + href
             img_src = row.xpath(".//a/img/@src")[0]
             cover_url = "https:" + img_src if img_src.startswith("//") else img_src
             title = row.xpath(".//h3/a/text()")[0].strip()
@@ -85,6 +89,7 @@ class DeqixsSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    book_url=book_url,
                     cover_url=cover_url,
                     title=title,
                     author=author,

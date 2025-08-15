@@ -172,7 +172,7 @@ def parse_encrypted_chapter(
             font_map=mapping_result,
         )
 
-        final_paragraphs_str = "\n\n".join(
+        final_paragraphs_str = "\n".join(
             line.strip() for line in original_text.splitlines() if line.strip()
         )
         if parser._use_truncation and duplicated:

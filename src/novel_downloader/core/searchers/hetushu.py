@@ -73,6 +73,9 @@ class HetushuSearcher(BaseSearcher):
             href = row.xpath(".//h4/a/@href")[0].strip()
             match = re.search(r"/book/(\d+)/", href)
             book_id = match.group(1) if match else ""
+            if not book_id:
+                continue
+            book_url = cls.BASE_URL + href
 
             # Title of the work
             title = row.xpath(".//h4/a/text()")[0].strip()
@@ -92,6 +95,7 @@ class HetushuSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    book_url=book_url,
                     cover_url=cover_url,
                     title=title,
                     author=author,
