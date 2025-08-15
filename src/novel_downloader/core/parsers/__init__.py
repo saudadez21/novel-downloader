@@ -18,6 +18,7 @@ __all__ = [
     "GuidayeParser",
     "HetushuParser",
     "I25zwParser",
+    "Jpxs123Parser",
     "LewennParser",
     "LinovelibParser",
     "PiaotiaParser",
@@ -43,6 +44,7 @@ from .esjzone import EsjzoneParser
 from .guidaye import GuidayeParser
 from .hetushu import HetushuParser
 from .i25zw import I25zwParser
+from .jpxs123 import Jpxs123Parser
 from .lewenn import LewennParser
 from .linovelib import LinovelibParser
 from .piaotia import PiaotiaParser

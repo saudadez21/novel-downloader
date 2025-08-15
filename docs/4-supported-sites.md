@@ -57,6 +57,7 @@ novel-cli search 关键词
 | [得奇小说网](https://www.deqixs.com/)                         | deqixs   | ❌     | ❌     | ❌     | ✅     | 简      |
 | [飘天文学网](https://www.piaotia.com/)                        | piaotia  | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [小说屋](http://www.xiaoshuoge.info/)                        | xiaoshuowu | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [精品小说网](https://www.jpxs123.com/)                        | jpxs123  | ❌     | ❌     | ❌     | ✅     | 简      |
 | [天天看小说](https://www.ttkan.co/)                          | ttkan     | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [精彩小说](https://biquyuedu.com/)                           | biquyuedu | ❌     | ❌     | ⚠️     | ❌     | 简      |
 | [25中文网](https://www.i25zw.com/)                           | i25zw     | ❌     | ❌     | ❌     | ✅     | 简      |
@@ -126,6 +127,13 @@ Book ID 通常来源于小说详情页 URL 中的路径段, 各资源站点的�
   * 示例 URL:
     * 书籍页面: `http://www.xiaoshuoge.info/html/987/987654/` -> Book ID: `987-987654`
     * 章节页面: `http://www.xiaoshuoge.info/html/987/987654/123456789.html` -> Chapter ID: `123456789`
+
+* **精品小说网 (jpxs123)**
+  * 示例 URL:
+    * 书籍页面: `https://www.jpxs123.com/xh/zhetian.html` -> Book ID: `xh-zhetian`
+    * 章节页面: `https://www.jpxs123.com/xh/zhetian/1.html` -> Chapter ID: `1`
+  * 注意事项:
+    * 该站点直接提供 txt 下载。
 
 * **25中文网 (i25zw)**
   * 示例 URL:
