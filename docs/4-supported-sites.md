@@ -60,6 +60,7 @@ novel-cli search 关键词
 | [精品小说网](https://www.jpxs123.com/)                        | jpxs123  | ❌     | ❌     | ❌     | ✅     | 简      |
 | [天天看小说](https://www.ttkan.co/)                          | ttkan     | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [精彩小说](https://biquyuedu.com/)                           | biquyuedu | ❌     | ❌     | ⚠️     | ❌     | 简      |
+| [书海阁小说网](https://www.shuhaige.net/)                     | shuhaige | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [25中文网](https://www.i25zw.com/)                           | i25zw     | ❌     | ❌     | ❌     | ✅     | 简      |
 | [全本小说网](https://quanben5.com/)                          | quanben5  | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [乐文小说网](https://www.lewenn.net/)                        | lewenn    | ❌     | ❌     | ⚠️     | ⚠️     | 简      |
@@ -134,6 +135,11 @@ Book ID 通常来源于小说详情页 URL 中的路径段, 各资源站点的�
     * 章节页面: `https://www.jpxs123.com/xh/zhetian/1.html` -> Chapter ID: `1`
   * 注意事项:
     * 该站点直接提供 txt 下载。
+
+* **书海阁小说网 (shuhaige)**
+  * 示例 URL:
+    * 书籍页面: `https://www.shuhaige.net/199178/` -> Book ID: `199178`
+    * 章节页面: `https://www.shuhaige.net/199178/86580492.html` -> Chapter ID: `86580492`
 
 * **25中文网 (i25zw)**
   * 示例 URL:

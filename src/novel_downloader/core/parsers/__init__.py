@@ -28,6 +28,7 @@ __all__ = [
     "Quanben5Parser",
     "SfacgParser",
     "ShencouParser",
+    "ShuhaigeParser",
     "TongrenquanParser",
     "TtkanParser",
     "XiaoshuowuParser",
@@ -55,6 +56,7 @@ from .quanben5 import Quanben5Parser
 from .registry import get_parser
 from .sfacg import SfacgParser
 from .shencou import ShencouParser
+from .shuhaige import ShuhaigeParser
 from .tongrenquan import TongrenquanParser
 from .ttkan import TtkanParser
 from .xiaoshuowu import XiaoshuowuParser
