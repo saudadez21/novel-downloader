@@ -61,6 +61,7 @@ novel-cli search 关键词
 | [天天看小说](https://www.ttkan.co/)                          | ttkan     | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [精彩小说](https://biquyuedu.com/)                           | biquyuedu | ❌     | ❌     | ⚠️     | ❌     | 简      |
 | [书海阁小说网](https://www.shuhaige.net/)                     | shuhaige | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [爱下电子书](https://ixdzs8.com/)                             | ixdzs8   | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [25中文网](https://www.i25zw.com/)                           | i25zw     | ❌     | ❌     | ❌     | ✅     | 简      |
 | [全本小说网](https://quanben5.com/)                          | quanben5  | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [乐文小说网](https://www.lewenn.net/)                        | lewenn    | ❌     | ❌     | ⚠️     | ⚠️     | 简      |
@@ -141,6 +142,11 @@ Book ID 通常来源于小说详情页 URL 中的路径段, 各资源站点的�
     * 书籍页面: `https://www.shuhaige.net/199178/` -> Book ID: `199178`
     * 章节页面: `https://www.shuhaige.net/199178/86580492.html` -> Chapter ID: `86580492`
 
+* **爱下电子书 (ixdzs8)**
+  * 示例 URL:
+    * 书籍页面: `https://ixdzs8.com/read/38804/` -> Book ID: `38804`
+    * 章节页面: `https://ixdzs8.com/read/38804/p1.html` -> Chapter ID: `p1`
+
 * **25中文网 (i25zw)**
   * 示例 URL:
     * 书籍页面: `https://www.i25zw.com/book/64371.html` -> Book ID: `64371`
@@ -180,7 +186,7 @@ Book ID 通常来源于小说详情页 URL 中的路径段, 各资源站点的�
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 | 支持语言 |
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
 | [同人圈](https://www.tongrenquan.org/)                      | tongrenquan | ❌     | ❌     | ❌     | ✅     | 简      |
-| [全本同人小说](https://www.qbtr.cc/)                         | qbtr      | ❌     | ❌     | ❌     | ✅     | 简      |
+| [全本同人小说](https://www.qbtr.cc/)                         | qbtr        | ❌     | ❌     | ❌     | ✅     | 简      |
 
 #### 使用示例
 
@@ -210,10 +216,10 @@ novel-cli download --site qbtr 9876
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 | 支持语言 |
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
 | [SF轻小说](https://m.sfacg.com)                              | sfacg      | ✅     | ✅     | ✅     | ⚠️     | 简      |
-| [哔哩轻小说](https://www.linovelib.com/)                     | linovelib   | ✅     | ✅     | ⚠️     | ⚠️     | 简      |
-| [ESJ Zone](https://www.esjzone.cc)                           | esjzone    | ✅     | ✅     | ✅     | ✅     | 简      |
+| [哔哩轻小说](https://www.linovelib.com/)                     | linovelib  | ✅     | ✅     | ⚠️     | ⚠️     | 简      |
+| [ESJ Zone](https://www.esjzone.cc)                           | esjzone   | ✅     | ✅     | ✅     | ✅     | 简      |
 | [神凑轻小说](https://www.shencou.com/)                        | shencou   | ✅     | ✅     | ⚠️     | ⚠️     | 简      |
-| [无限轻小说](https://www.8novel.com/)                        | 8novel   | ✅     | ✅     | ⚠️     | ✅     | 繁      |
+| [无限轻小说](https://www.8novel.com/)                         | 8novel    | ✅     | ✅     | ⚠️     | ✅     | 繁      |
 
 #### 使用示例
 

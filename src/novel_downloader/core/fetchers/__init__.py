@@ -20,6 +20,7 @@ __all__ = [
     "GuidayeSession",
     "HetushuSession",
     "I25zwSession",
+    "Ixdzs8Session",
     "Jpxs123Session",
     "LewennSession",
     "LinovelibSession",
@@ -47,6 +48,7 @@ from .esjzone import EsjzoneSession
 from .guidaye import GuidayeSession
 from .hetushu import HetushuSession
 from .i25zw import I25zwSession
+from .ixdzs8 import Ixdzs8Session
 from .jpxs123 import Jpxs123Session
 from .lewenn import LewennSession
 from .linovelib import LinovelibSession

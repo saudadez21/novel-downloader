@@ -14,6 +14,7 @@ __all__ = [
     "EsjzoneSearcher",
     "HetushuSearcher",
     "I25zwSearcher",
+    "Ixdzs8Searcher",
     "Jpxs123Searcher",
     "PiaotiaSearcher",
     "QbtrSearcher",
@@ -33,6 +34,7 @@ from .eightnovel import EightnovelSearcher
 from .esjzone import EsjzoneSearcher
 from .hetushu import HetushuSearcher
 from .i25zw import I25zwSearcher
+from .ixdzs8 import Ixdzs8Searcher
 from .jpxs123 import Jpxs123Searcher
 from .piaotia import PiaotiaSearcher
 from .qbtr import QbtrSearcher
