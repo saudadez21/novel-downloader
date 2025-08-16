@@ -62,6 +62,7 @@ novel-cli search 关键词
 | [精彩小说](https://biquyuedu.com/)                           | biquyuedu | ❌     | ❌     | ⚠️     | ❌     | 简      |
 | [书海阁小说网](https://www.shuhaige.net/)                     | shuhaige | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [爱下电子书](https://ixdzs8.com/)                             | ixdzs8   | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [小说路上](https://m.xs63b.com/)                            | xs63b    | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [25中文网](https://www.i25zw.com/)                           | i25zw     | ❌     | ❌     | ❌     | ✅     | 简      |
 | [全本小说网](https://quanben5.com/)                          | quanben5  | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [乐文小说网](https://www.lewenn.net/)                        | lewenn    | ❌     | ❌     | ⚠️     | ⚠️     | 简      |
@@ -146,6 +147,13 @@ Book ID 通常来源于小说详情页 URL 中的路径段, 各资源站点的�
   * 示例 URL:
     * 书籍页面: `https://ixdzs8.com/read/38804/` -> Book ID: `38804`
     * 章节页面: `https://ixdzs8.com/read/38804/p1.html` -> Chapter ID: `p1`
+
+* **小说路上 (xs63b)**
+  * 示例 URL:
+    * 书籍页面: `https://m.xs63b.com/xuanhuan/aoshijiuzhongtian/` -> Book ID: `xuanhuan-aoshijiuzhongtian`
+    * 章节页面: `https://m.xs63b.com/xuanhuan/aoshijiuzhongtian/8748062.html` -> Chapter ID: `8748062`
+  * 注意事项:
+    * 桌面端页面部分章节缺页, 移动端正常
 
 * **25中文网 (i25zw)**
   * 示例 URL:
