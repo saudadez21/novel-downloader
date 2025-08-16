@@ -58,7 +58,6 @@ class WanbengoSearcher(BaseSearcher):
         :param limit: Maximum number of results to return, or None for all.
         :return: List of SearchResult dicts.
         """
-        print(html_str)
         doc = html.fromstring(html_str)
         rows = doc.xpath(
             "//div[contains(@class,'so_list')]//div[contains(@class,'hot')]//div[contains(@class,'item')]"
