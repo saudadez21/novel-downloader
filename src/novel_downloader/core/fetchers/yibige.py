@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.fetchers.dxmwx
-------------------------------------
+novel_downloader.core.fetchers.yibige
+-------------------------------------
 
 """
 
@@ -14,16 +14,16 @@ from novel_downloader.models import FetcherConfig
 
 
 @register_fetcher(
-    site_keys=["dxmwx"],
+    site_keys=["yibige"],
 )
-class DxmwxSession(BaseSession):
+class YibigeSession(BaseSession):
     """
-    A session class for interacting with the Dxmwx (www.dxmwx.org) novel website.
+    A session class for interacting with the Yibige (www.yibige.org) novel website.
     """
 
-    BOOK_INFO_URL = "https://{base_url}/book/{book_id}.html"
-    BOOK_CATALOG_URL = "https://{base_url}/chapter/{book_id}.html"
-    CHAPTER_URL = "https://{base_url}/read/{book_id}_{chapter_id}.html"
+    BOOK_INFO_URL = "https://{base_url}/{book_id}/"
+    BOOK_CATALOG_URL = "https://{base_url}/{book_id}/index.html"
+    CHAPTER_URL = "https://{base_url}/{book_id}/{chapter_id}.html"
 
     def __init__(
         self,
@@ -31,10 +31,14 @@ class DxmwxSession(BaseSession):
         cookies: dict[str, str] | None = None,
         **kwargs: Any,
     ) -> None:
-        super().__init__("dxmwx", config, cookies, **kwargs)
+        super().__init__("yibige", config, cookies, **kwargs)
         self.base_url = (
-            "www.dxmwx.org" if config.locale_style == "simplified" else "tw.dxmwx.org"
+            "www.yibige.org" if config.locale_style == "simplified" else "tw.yibige.org"
         )
+        # 主站: www.yibige.org
+        # 新加坡: sg.yibige.org
+        # 臺灣正體: tw.yibige.org
+        # 香港繁體: hk.yibige.org
 
     async def get_book_info(
         self,

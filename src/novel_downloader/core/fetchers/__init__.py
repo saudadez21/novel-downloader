@@ -39,6 +39,7 @@ __all__ = [
     "XiguashuwuSession",
     "Xs63bSession",
     "YamiboSession",
+    "YibigeSession",
 ]
 
 from .aaatxt import AaatxtSession
@@ -70,3 +71,4 @@ from .xiaoshuowu import XiaoshuowuSession
 from .xiguashuwu import XiguashuwuSession
 from .xs63b import Xs63bSession
 from .yamibo import YamiboSession
+from .yibige import YibigeSession

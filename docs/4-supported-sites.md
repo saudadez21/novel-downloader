@@ -64,6 +64,7 @@ novel-cli search 关键词
 | [爱下电子书](https://ixdzs8.com/)                             | ixdzs8   | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [小说路上](https://m.xs63b.com/)                              | xs63b    | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [大熊猫文学网](https://www.dxmwx.org/)                        | dxmwx    | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
+| [一笔阁](https://www.yibige.org/)                            | yibige    | ❌     | ❌     | ⚠️     | ⚠️     | 简 / 繁 |
 | [25中文网](https://www.i25zw.com/)                           | i25zw     | ❌     | ❌     | ❌     | ✅     | 简      |
 | [全本小说网](https://quanben5.com/)                          | quanben5  | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [乐文小说网](https://www.lewenn.net/)                        | lewenn    | ❌     | ❌     | ⚠️     | ⚠️     | 简      |
@@ -160,6 +161,11 @@ Book ID 通常来源于小说详情页 URL 中的路径段, 各资源站点的�
   * 示例 URL:
     * 书籍页面: `https://www.dxmwx.org/book/55598.html` -> Book ID: `55598`
     * 章节页面: `https://www.dxmwx.org/read/55598_47170737.html` -> Chapter ID: `47170737`
+
+* **一笔阁 (yibige)**
+  * 示例 URL:
+    * 书籍页面: `https://www.yibige.org/6238/` -> Book ID: `6238`
+    * 章节页面: `https://www.yibige.org/6238/1.html` -> Chapter ID: `1`
 
 * **25中文网 (i25zw)**
   * 示例 URL:

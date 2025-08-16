@@ -14,6 +14,7 @@
   - 哔哩轻小说 (搜索功能还需要 `cf_clearance` cookie, 已实现 `haha`)
   - 神凑轻小说 (搜索功能需要 `cf_clearance` cookie)
   - 名著阅读 (搜索功能需要 `cf_clearance` cookie)
+  - 一笔阁 (搜索功能需要 `cf_clearance` cookie)
 
 - **功能与性能优化**
   - 完善广告过滤规则

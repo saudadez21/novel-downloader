@@ -37,6 +37,7 @@ __all__ = [
     "XiguashuwuParser",
     "Xs63bParser",
     "YamiboParser",
+    "YibigeParser",
 ]
 
 from .aaatxt import AaatxtParser
@@ -68,3 +69,4 @@ from .xiaoshuowu import XiaoshuowuParser
 from .xiguashuwu import XiguashuwuParser
 from .xs63b import Xs63bParser
 from .yamibo import YamiboParser
+from .yibige import YibigeParser
