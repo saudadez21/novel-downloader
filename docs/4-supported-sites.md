@@ -66,6 +66,7 @@ novel-cli search 关键词
 | [大熊猫文学网](https://www.dxmwx.org/)                        | dxmwx    | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [一笔阁](https://www.yibige.org/)                            | yibige    | ❌     | ❌     | ⚠️     | ⚠️     | 简 / 繁 |
 | [小说虎](https://www.xshbook.com/)                           | xshbook   | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [完本神站](https://www.wanbengo.com/)                        | wanbengo  | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [25中文网](https://www.i25zw.com/)                           | i25zw     | ❌     | ❌     | ❌     | ✅     | 简      |
 | [全本小说网](https://quanben5.com/)                          | quanben5  | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [乐文小说网](https://www.lewenn.net/)                        | lewenn    | ❌     | ❌     | ⚠️     | ⚠️     | 简      |
@@ -172,6 +173,11 @@ Book ID 通常来源于小说详情页 URL 中的路径段, 各资源站点的�
   * 示例 URL:
     * 书籍页面: `https://www.xshbook.com/95139/95139418/` -> Book ID: `95139-95139418`
     * 章节页面: `https://www.xshbook.com/95139/95139418/407988281.html` -> Chapter ID: `407988281`
+
+* **完本神站 (wanbengo)**
+  * 示例 URL:
+    * 书籍页面: `https://www.wanbengo.com/1/` -> Book ID: `1`
+    * 章节页面: `https://www.wanbengo.com/1/2.html` -> Chapter ID: `2`
 
 * **25中文网 (i25zw)**
   * 示例 URL:

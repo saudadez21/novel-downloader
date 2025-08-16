@@ -35,6 +35,7 @@ __all__ = [
     "ShuhaigeSession",
     "TongrenquanSession",
     "TtkanSession",
+    "WanbengoSession",
     "XiaoshuowuSession",
     "XiguashuwuSession",
     "Xs63bSession",
@@ -68,6 +69,7 @@ from .shencou import ShencouSession
 from .shuhaige import ShuhaigeSession
 from .tongrenquan import TongrenquanSession
 from .ttkan import TtkanSession
+from .wanbengo import WanbengoSession
 from .xiaoshuowu import XiaoshuowuSession
 from .xiguashuwu import XiguashuwuSession
 from .xs63b import Xs63bSession
