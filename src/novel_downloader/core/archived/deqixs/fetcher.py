@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.fetchers.deqixs
--------------------------------------
+novel_downloader.core.archived.deqixs.fetcher
+---------------------------------------------
 
 """
 
 from typing import Any
 
 from novel_downloader.core.fetchers.base import BaseSession
-from novel_downloader.core.fetchers.registry import register_fetcher
 from novel_downloader.models import FetcherConfig
 from novel_downloader.utils import async_sleep_with_random_delay
 
+# from novel_downloader.core.fetchers.registry import register_fetcher
 
-@register_fetcher(
-    site_keys=["deqixs"],
-)
+
+# @register_fetcher(
+#     site_keys=["deqixs"],
+# )
 class DeqixsSession(BaseSession):
     """
     A session class for interacting with the Deqixs (www.deqixs.com) novel website.

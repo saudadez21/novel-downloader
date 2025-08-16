@@ -14,7 +14,6 @@ __all__ = [
     "AaatxtSession",
     "BiqugeSession",
     "BiquyueduSession",
-    "DeqixsSession",
     "DxmwxSession",
     "EightnovelSession",
     "EsjzoneSession",
@@ -47,7 +46,6 @@ __all__ = [
 from .aaatxt import AaatxtSession
 from .biquge import BiqugeSession
 from .biquyuedu import BiquyueduSession
-from .deqixs import DeqixsSession
 from .dxmwx import DxmwxSession
 from .eightnovel import EightnovelSession
 from .esjzone import EsjzoneSession

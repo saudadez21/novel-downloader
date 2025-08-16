@@ -12,7 +12,6 @@ __all__ = [
     "AaatxtParser",
     "BiqugeParser",
     "BiquyueduParser",
-    "DeqixsParser",
     "DxmwxParser",
     "EightnovelParser",
     "EsjzoneParser",
@@ -45,7 +44,6 @@ __all__ = [
 from .aaatxt import AaatxtParser
 from .biquge import BiqugeParser
 from .biquyuedu import BiquyueduParser
-from .deqixs import DeqixsParser
 from .dxmwx import DxmwxParser
 from .eightnovel import EightnovelParser
 from .esjzone import EsjzoneParser

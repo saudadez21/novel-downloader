@@ -18,6 +18,8 @@
   - [其它小说](#其它小说)
     - [使用示例](#使用示例-3)
     - [Book ID 说明](#book-id-说明-3)
+  - [已归档站点](#已归档站点)
+    - [Book ID 说明](#book-id-说明-4)
   - [配置文件设置](#配置文件设置)
   - [Cookie 与登录](#cookie-与登录)
   - [注意事项](#注意事项)
@@ -54,7 +56,6 @@ novel-cli search 关键词
 | [和图书](https://www.hetushu.com/index.php)                  | hetushu   | ✅     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [笔趣阁](http://www.b520.cc)                                 | biquge    | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [铅笔小说](https://www.23qb.net), [备用](https://www.23qb.com/) | qianbi | ✅     | ❌     | ⚠️     | ✅     | 简      |
-| [得奇小说网](https://www.deqixs.com/)                         | deqixs   | ❌     | ❌     | ❌     | ✅     | 简      |
 | [飘天文学网](https://www.piaotia.com/)                        | piaotia  | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [小说屋](http://www.xiaoshuoge.info/)                        | xiaoshuowu | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [精品小说网](https://www.jpxs123.com/)                        | jpxs123  | ❌     | ❌     | ❌     | ✅     | 简      |
@@ -115,15 +116,6 @@ Book ID 通常来源于小说详情页 URL 中的路径段, 各资源站点的�
   * 示例 URL:
     * 书籍页面: `https://www.23qb.net/book/12282/` -> Book ID: `12282`
     * 章节页面: `https://www.23qb.net/book/12282/7908999.html` -> Chapter ID: `7908999`
-
-* **得奇小说网 (deqixs)**
-  * 示例 URL:
-    * 书籍页面: `https://www.deqixs.com/xiaoshuo/2026/` -> Book ID: `2026`
-    * 章节页面: `https://www.deqixs.com/xiaoshuo/2026/1969933.html` -> Chapter ID: `1969933`
-  * 注意事项:
-    * 该站点直接提供 txt 下载。
-  * 缺点:
-    * 每章节分页过多, 每页内容较少, 推荐适当降低请求间隔
 
 * **飘天文学网 (piaotia)**
   * 示例 URL:
@@ -342,6 +334,23 @@ novel-cli download --site yamibo 123456
   * 示例 URL:
     * 书籍页面: `https://www.xiguashuwu.com/book/1234/iszip/1/` -> Book ID: `1234`
     * 章节页面: `https://www.xiguashuwu.com/book/1234/482.html` -> Chapter ID: `482`
+
+### 已归档站点
+
+| 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 | 支持语言 |
+| ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
+| [得奇小说网](https://www.deqixs.com/)                         | deqixs   | ❌     | ❌     | ❌     | ✅     | 简      |
+
+#### Book ID 说明
+
+* **得奇小说网 (deqixs)**
+  * 示例 URL:
+    * 书籍页面: `https://www.deqixs.com/xiaoshuo/2026/` -> Book ID: `2026`
+    * 章节页面: `https://www.deqixs.com/xiaoshuo/2026/1969933.html` -> Chapter ID: `1969933`
+  * 注意事项:
+    * 该站点直接提供 txt 下载。
+  * 缺点:
+    * 每章节分页过多, 每页内容较少, 推荐适当降低请求间隔
 
 </details>
 
