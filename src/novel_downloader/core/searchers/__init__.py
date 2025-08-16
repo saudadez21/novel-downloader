@@ -27,6 +27,7 @@ __all__ = [
     "XiaoshuowuSearcher",
     "XiguashuwuSearcher",
     "Xs63bSearcher",
+    "XshbookSearcher",
 ]
 
 from .aaatxt import AaatxtSearcher
@@ -50,3 +51,4 @@ from .ttkan import TtkanSearcher
 from .xiaoshuowu import XiaoshuowuSearcher
 from .xiguashuwu import XiguashuwuSearcher
 from .xs63b import Xs63bSearcher
+from .xshbook import XshbookSearcher

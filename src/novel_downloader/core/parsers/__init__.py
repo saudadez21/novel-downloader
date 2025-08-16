@@ -36,6 +36,7 @@ __all__ = [
     "XiaoshuowuParser",
     "XiguashuwuParser",
     "Xs63bParser",
+    "XshbookParser",
     "YamiboParser",
     "YibigeParser",
 ]
@@ -68,5 +69,6 @@ from .ttkan import TtkanParser
 from .xiaoshuowu import XiaoshuowuParser
 from .xiguashuwu import XiguashuwuParser
 from .xs63b import Xs63bParser
+from .xshbook import XshbookParser
 from .yamibo import YamiboParser
 from .yibige import YibigeParser
