@@ -137,7 +137,7 @@ class I25zwParser(BaseParser):
             if text:
                 paragraphs.append(text)
 
-        content_text = "\n\n".join(paragraphs)
+        content_text = "\n".join(paragraphs)
         if not content_text.strip():
             return None
 

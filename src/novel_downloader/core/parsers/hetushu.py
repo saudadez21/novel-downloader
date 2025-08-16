@@ -138,7 +138,7 @@ class HetushuParser(BaseParser):
         paras = tree.xpath('//div[@id="content"]/div[not(@class)]/text()')
         paragraph_texts = [p.strip() for p in paras if p.strip()]
 
-        content = "\n\n".join(paragraph_texts)
+        content = "\n".join(paragraph_texts)
         if not content.strip():
             return None
 

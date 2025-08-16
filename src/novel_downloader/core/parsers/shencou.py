@@ -213,7 +213,7 @@ class ShencouParser(BaseParser):
                     _append_text(sib.tail)
                 continue
 
-        content = "\n\n".join(lines)
+        content = "\n".join(lines)
         if not content:
             return None
 

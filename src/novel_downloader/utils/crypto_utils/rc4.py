@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
 """
-novel_downloader.utils.crypto_utils
------------------------------------
+novel_downloader.utils.crypto_utils.rc4
+---------------------------------------
 
-Generic cryptographic utilities
 """
-
-from __future__ import annotations
 
 import base64
 

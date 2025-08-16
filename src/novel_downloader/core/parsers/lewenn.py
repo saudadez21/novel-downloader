@@ -143,7 +143,7 @@ class LewennParser(BaseParser):
             #     continue
             lines.append(ln.replace(chr(0xA0), ""))
 
-        content = "\n\n".join(lines)
+        content = "\n".join(lines)
         if not content.strip():
             return None
 

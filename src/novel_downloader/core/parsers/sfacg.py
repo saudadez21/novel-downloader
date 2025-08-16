@@ -160,7 +160,7 @@ class SfacgParser(BaseParser):
             raw_text_parts = tree.xpath(self._CHAPTER_TEXT_XPATH)
             content_lines = [txt.strip() for txt in raw_text_parts if txt.strip()]
 
-        content = "\n\n".join(content_lines).strip()
+        content = "\n".join(content_lines).strip()
         if not content:
             return None
 

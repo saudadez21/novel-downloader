@@ -22,10 +22,11 @@ logger = logging.getLogger(__name__)
 class TtkanSearcher(BaseSearcher):
     site_name = "ttkan"
     priority = 100
+    BASE_URL = "https://www.ttkan.co"
     SEARCH_URL = "https://www.ttkan.co/novel/search"
 
     @classmethod
-    def _fetch_html(cls, keyword: str) -> str:
+    async def _fetch_html(cls, keyword: str) -> str:
         """
         Fetch raw HTML from Ttkan's search page.
 
@@ -34,14 +35,13 @@ class TtkanSearcher(BaseSearcher):
         """
         params = {"q": keyword}
         try:
-            response = cls._http_get(cls.SEARCH_URL, params=params)
-            return response.text
+            async with (await cls._http_get(cls.SEARCH_URL, params=params)) as resp:
+                return await cls._response_to_str(resp)
         except Exception:
             logger.error(
                 "Failed to fetch HTML for keyword '%s' from '%s'",
                 keyword,
                 cls.SEARCH_URL,
-                exc_info=True,
             )
             return ""
 
@@ -72,6 +72,7 @@ class TtkanSearcher(BaseSearcher):
             book_id = href.strip("/").split("/")[-1] if href else ""
             if not book_id:
                 continue
+            book_url = cls.BASE_URL + href
 
             cover_nodes = item.xpath(".//amp-img/@src")
             cover_url = cover_nodes[0].strip() if cover_nodes else ""
@@ -93,6 +94,7 @@ class TtkanSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    book_url=book_url,
                     cover_url=cover_url,
                     title=title,
                     author=author_str,

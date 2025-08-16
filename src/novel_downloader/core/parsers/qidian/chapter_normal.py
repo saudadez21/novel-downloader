@@ -119,7 +119,7 @@ def _parse_browser_paragraph(html_str: str) -> str:
             if span.text_content().strip()
         ]
 
-        chapter_text = "\n\n".join(paragraph_texts)
+        chapter_text = "\n".join(paragraph_texts)
         return chapter_text
 
     except Exception as e:
@@ -150,7 +150,7 @@ def _parse_session_paragraph(
         paragraph_texts = [
             p.text_content().strip() for p in paras if p.text_content().strip()
         ]
-        return "\n\n".join(paragraph_texts)
+        return "\n".join(paragraph_texts)
 
     except Exception as e:
         logger.error("[Parser] _parse_paragraph failed: %s", e)

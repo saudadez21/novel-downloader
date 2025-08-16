@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.parsers.deqixs
-------------------------------------
+novel_downloader.core.archived.deqixs.parser
+--------------------------------------------
 
 """
 
 from typing import Any
 
 from lxml import html
-
 from novel_downloader.core.parsers.base import BaseParser
-from novel_downloader.core.parsers.registry import register_parser
 from novel_downloader.models import (
     BookInfoDict,
     ChapterDict,
@@ -18,16 +16,19 @@ from novel_downloader.models import (
     VolumeInfoDict,
 )
 
+# from novel_downloader.core.parsers.registry import register_parser
 
-@register_parser(
-    site_keys=["deqixs"],
-)
+
+# @register_parser(
+#     site_keys=["deqixs"],
+# )
 class DeqixsParser(BaseParser):
     """Parser for 得奇小说网 book pages."""
 
     ADS: set[str] = {
         "更新不易",
         "记得分享",
+        "(本章完)",
     }
 
     def parse_book_info(
@@ -130,7 +131,7 @@ class DeqixsParser(BaseParser):
                     continue
                 contents.append(text)
 
-        content = "\n\n".join(contents)
+        content = "\n".join(contents)
         if not content:
             return None
 

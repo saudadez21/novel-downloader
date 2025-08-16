@@ -44,7 +44,7 @@ def register_search_subcommand(subparsers: _SubParsersAction) -> None:  # type: 
         "--limit",
         "-l",
         type=int,
-        default=10,
+        default=20,
         metavar="N",
         help=t("help_search_limit"),
     )
@@ -54,6 +54,13 @@ def register_search_subcommand(subparsers: _SubParsersAction) -> None:  # type: 
         default=5,
         metavar="M",
         help=t("help_search_site_limit"),
+    )
+    parser.add_argument(
+        "--timeout",
+        type=float,
+        default=5.0,
+        metavar="SECS",
+        help=t("help_search_timeout", secs="5.0"),
     )
 
     parser.set_defaults(func=handle_search)
@@ -68,6 +75,7 @@ def handle_search(args: Namespace) -> None:
     keyword: str = args.keyword
     overall_limit = max(1, args.limit)
     per_site_limit = max(1, args.site_limit)
+    timeout = max(0.1, float(args.timeout))
     config_path: Path | None = Path(args.config) if args.config else None
 
     try:
@@ -76,21 +84,25 @@ def handle_search(args: Namespace) -> None:
         print(t("download_config_load_fail", err=str(e)))
         return
 
-    results = search(
-        keyword=keyword,
-        sites=sites,
-        limit=overall_limit,
-        per_site_limit=per_site_limit,
-    )
+    async def _run() -> None:
+        results = await search(
+            keyword=keyword,
+            sites=sites,
+            limit=overall_limit,
+            per_site_limit=per_site_limit,
+            timeout=timeout,
+        )
 
-    chosen = _prompt_user_select(results)
-    if chosen is None:
-        # user cancelled or no valid choice
-        return
+        chosen = _prompt_user_select(results)
+        if chosen is None:
+            # user cancelled or no valid choice
+            return
 
-    adapter = ConfigAdapter(config=config_data, site=chosen["site"])
-    books: list[BookConfig] = [{"book_id": chosen["book_id"]}]
-    asyncio.run(_download(adapter, chosen["site"], books))
+        adapter = ConfigAdapter(config=config_data, site=chosen["site"])
+        books: list[BookConfig] = [{"book_id": chosen["book_id"]}]
+        await _download(adapter, chosen["site"], books)
+
+    asyncio.run(_run())
 
 
 def _prompt_user_select(

@@ -133,7 +133,7 @@ class AaatxtParser(BaseParser):
                 continue
             texts.append(line)
 
-        content = "\n\n".join(texts)
+        content = "\n".join(texts)
         if not content:
             return None
 

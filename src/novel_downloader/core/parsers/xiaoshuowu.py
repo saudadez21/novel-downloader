@@ -187,7 +187,7 @@ class XiaoshuowuParser(BaseParser):
 
         if not paras:
             return None
-        content = "\n\n".join(paras)
+        content = "\n".join(paras)
 
         return {
             "id": chapter_id,

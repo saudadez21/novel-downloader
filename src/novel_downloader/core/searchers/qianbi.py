@@ -23,10 +23,11 @@ logger = logging.getLogger(__name__)
 class QianbiSearcher(BaseSearcher):
     site_name = "qianbi"
     priority = 10
+    BASE_URL = "https://www.23qb.com/"
     SEARCH_URL = "https://www.23qb.com/search.html"
 
     @classmethod
-    def _fetch_html(cls, keyword: str) -> str:
+    async def _fetch_html(cls, keyword: str) -> str:
         """
         Fetch raw HTML from Qianbi's search page.
 
@@ -35,14 +36,13 @@ class QianbiSearcher(BaseSearcher):
         """
         params = {"searchkey": keyword}
         try:
-            response = cls._http_get(cls.SEARCH_URL, params=params)
-            return response.text
+            async with (await cls._http_get(cls.SEARCH_URL, params=params)) as resp:
+                return await cls._response_to_str(resp)
         except Exception:
             logger.error(
                 "Failed to fetch HTML for keyword '%s' from '%s'",
                 keyword,
                 cls.SEARCH_URL,
-                exc_info=True,
             )
             return ""
 
@@ -109,6 +109,7 @@ class QianbiSearcher(BaseSearcher):
             SearchResult(
                 site=cls.site_name,
                 book_id=book_id,
+                book_url=url[0],
                 cover_url=cover_url,
                 title=title,
                 author=author,
@@ -144,6 +145,7 @@ class QianbiSearcher(BaseSearcher):
             book_id = href.replace("book/", "").strip("/")
             if not book_id:
                 continue
+            book_url = cls.BASE_URL + href
             cover_nodes = item.xpath(
                 './/div[contains(@class,"module-item-pic")]//img/@data-src'
             )
@@ -160,6 +162,7 @@ class QianbiSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    book_url=book_url,
                     cover_url=cover_url,
                     title=title,
                     author="-",  # Author is not present on the page

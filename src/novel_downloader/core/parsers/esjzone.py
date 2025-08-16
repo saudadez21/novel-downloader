@@ -190,7 +190,7 @@ class EsjzoneParser(BaseParser):
                     content_lines.append(f'<img src="{src}" />')
 
         content = (
-            "\n\n".join(content_lines).strip()
+            "\n".join(content_lines).strip()
             if content_lines
             else tree.xpath(self._CHAPTER_TEXT_XPATH).strip()
         )

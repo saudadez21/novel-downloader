@@ -183,7 +183,7 @@ class YamiboParser(BaseParser):
         tree = html.fromstring(html_list[0])
 
         content_lines = tree.xpath(self._CHAPTER_CONTENT_XPATH)
-        content = "\n\n".join(line.strip() for line in content_lines if line.strip())
+        content = "\n".join(line.strip() for line in content_lines if line.strip())
         if not content:
             return None
 

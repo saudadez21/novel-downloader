@@ -28,7 +28,7 @@ class HetushuSearcher(BaseSearcher):
     BASE_URL = "https://www.hetushu.com"
 
     @classmethod
-    def _fetch_html(cls, keyword: str) -> str:
+    async def _fetch_html(cls, keyword: str) -> str:
         """
         Fetch raw HTML from Hetushu's search page.
 
@@ -40,14 +40,15 @@ class HetushuSearcher(BaseSearcher):
             "Referer": "https://www.hetushu.com/",
         }
         try:
-            response = cls._http_get(cls.SEARCH_URL, params=params, headers=headers)
-            return response.text
+            async with (
+                await cls._http_get(cls.SEARCH_URL, params=params, headers=headers)
+            ) as resp:
+                return await cls._response_to_str(resp)
         except Exception:
             logger.error(
                 "Failed to fetch HTML for keyword '%s' from '%s'",
                 keyword,
                 cls.SEARCH_URL,
-                exc_info=True,
             )
             return ""
 
@@ -72,6 +73,9 @@ class HetushuSearcher(BaseSearcher):
             href = row.xpath(".//h4/a/@href")[0].strip()
             match = re.search(r"/book/(\d+)/", href)
             book_id = match.group(1) if match else ""
+            if not book_id:
+                continue
+            book_url = cls.BASE_URL + href
 
             # Title of the work
             title = row.xpath(".//h4/a/text()")[0].strip()
@@ -91,6 +95,7 @@ class HetushuSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    book_url=book_url,
                     cover_url=cover_url,
                     title=title,
                     author=author,

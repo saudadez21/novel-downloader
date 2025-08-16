@@ -14,12 +14,14 @@ __all__ = [
     "AaatxtSession",
     "BiqugeSession",
     "BiquyueduSession",
-    "DeqixsSession",
+    "DxmwxSession",
     "EightnovelSession",
     "EsjzoneSession",
     "GuidayeSession",
     "HetushuSession",
     "I25zwSession",
+    "Ixdzs8Session",
+    "Jpxs123Session",
     "LewennSession",
     "LinovelibSession",
     "PiaotiaSession",
@@ -29,21 +31,29 @@ __all__ = [
     "Quanben5Session",
     "SfacgSession",
     "ShencouSession",
+    "ShuhaigeSession",
     "TongrenquanSession",
     "TtkanSession",
+    "WanbengoSession",
     "XiaoshuowuSession",
+    "XiguashuwuSession",
+    "Xs63bSession",
+    "XshbookSession",
     "YamiboSession",
+    "YibigeSession",
 ]
 
 from .aaatxt import AaatxtSession
 from .biquge import BiqugeSession
 from .biquyuedu import BiquyueduSession
-from .deqixs import DeqixsSession
+from .dxmwx import DxmwxSession
 from .eightnovel import EightnovelSession
 from .esjzone import EsjzoneSession
 from .guidaye import GuidayeSession
 from .hetushu import HetushuSession
 from .i25zw import I25zwSession
+from .ixdzs8 import Ixdzs8Session
+from .jpxs123 import Jpxs123Session
 from .lewenn import LewennSession
 from .linovelib import LinovelibSession
 from .piaotia import PiaotiaSession
@@ -54,7 +64,13 @@ from .quanben5 import Quanben5Session
 from .registry import get_fetcher
 from .sfacg import SfacgSession
 from .shencou import ShencouSession
+from .shuhaige import ShuhaigeSession
 from .tongrenquan import TongrenquanSession
 from .ttkan import TtkanSession
+from .wanbengo import WanbengoSession
 from .xiaoshuowu import XiaoshuowuSession
+from .xiguashuwu import XiguashuwuSession
+from .xs63b import Xs63bSession
+from .xshbook import XshbookSession
 from .yamibo import YamiboSession
+from .yibige import YibigeSession

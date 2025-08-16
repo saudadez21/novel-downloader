@@ -132,7 +132,7 @@ class TtkanParser(BaseParser):
             if text:
                 lines.append(text)
 
-        content = "\n\n".join(lines).strip()
+        content = "\n".join(lines).strip()
         if not content:
             return None
 

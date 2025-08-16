@@ -22,10 +22,11 @@ logger = logging.getLogger(__name__)
 class EsjzoneSearcher(BaseSearcher):
     site_name = "esjzone"
     priority = 30
+    BASE_URL = "https://www.esjzone.cc"
     SEARCH_URL = "https://www.esjzone.cc/tags/{query}/"
 
     @classmethod
-    def _fetch_html(cls, keyword: str) -> str:
+    async def _fetch_html(cls, keyword: str) -> str:
         """
         Fetch raw HTML from Esjzone's search page.
 
@@ -34,14 +35,13 @@ class EsjzoneSearcher(BaseSearcher):
         """
         url = cls.SEARCH_URL.format(query=cls._quote(keyword))
         try:
-            response = cls._http_get(url)
-            return response.text
+            async with (await cls._http_get(url)) as resp:
+                return await cls._response_to_str(resp)
         except Exception:
             logger.error(
                 "Failed to fetch HTML for keyword '%s' from '%s'",
                 keyword,
                 url,
-                exc_info=True,
             )
             return ""
 
@@ -69,6 +69,7 @@ class EsjzoneSearcher(BaseSearcher):
             book_id = href.strip("/").replace("detail/", "").replace(".html", "")
             if not book_id:
                 continue
+            book_url = cls.BASE_URL + href
 
             latest_elems = card.xpath('.//div[contains(@class,"card-ep")]/a')
             latest_chapter = (
@@ -91,6 +92,7 @@ class EsjzoneSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    book_url=book_url,
                     cover_url=cover_url,
                     title=title,
                     author=author,

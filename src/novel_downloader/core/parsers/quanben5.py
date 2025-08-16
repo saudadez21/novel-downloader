@@ -102,7 +102,7 @@ class Quanben5Parser(BaseParser):
         # Extract all <p> text within the content container
         paragraphs = tree.xpath('//div[@id="content"]/p/text()')
         # Clean whitespace and join with double newlines
-        content = "\n\n".join(p.strip() for p in paragraphs if p.strip())
+        content = "\n".join(p.strip() for p in paragraphs if p.strip())
 
         if not content:
             return None

@@ -1,29 +1,30 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.fetchers.deqixs
--------------------------------------
+novel_downloader.core.fetchers.jpxs123
+--------------------------------------
 
 """
 
 from typing import Any
 
+from lxml import html
+
 from novel_downloader.core.fetchers.base import BaseSession
 from novel_downloader.core.fetchers.registry import register_fetcher
 from novel_downloader.models import FetcherConfig
-from novel_downloader.utils import async_sleep_with_random_delay
 
 
 @register_fetcher(
-    site_keys=["deqixs"],
+    site_keys=["jpxs123"],
 )
-class DeqixsSession(BaseSession):
+class Jpxs123Session(BaseSession):
     """
-    A session class for interacting with the Deqixs (www.deqixs.com) novel website.
+    A session class for interacting with the Jpxs123 (www.jpxs123.com) novel website.
     """
 
-    BASE_URL = "https://www.deqixs.com"
-    BOOK_INFO_URL = "https://www.deqixs.com/xiaoshuo/{book_id}/"
-    CHAPTER_URL = "https://www.deqixs.com/xiaoshuo/{book_id}/{chapter_id}.html"
+    BASE_URL = "https://www.jpxs123.com"
+    BOOK_INFO_URL = "https://www.jpxs123.com/{book_id}.html"
+    CHAPTER_URL = "https://www.jpxs123.com/{book_id}/{chapter_id}.html"
 
     def __init__(
         self,
@@ -31,7 +32,7 @@ class DeqixsSession(BaseSession):
         cookies: dict[str, str] | None = None,
         **kwargs: Any,
     ) -> None:
-        super().__init__("deqixs", config, cookies, **kwargs)
+        super().__init__("jpxs123", config, cookies, **kwargs)
 
     async def get_book_info(
         self,
@@ -44,8 +45,20 @@ class DeqixsSession(BaseSession):
         :param book_id: The book identifier.
         :return: The page content as a string.
         """
+        book_id = book_id.replace("-", "/")
         url = self.book_info_url(book_id=book_id)
-        return [await self.fetch(url, **kwargs)]
+        info_html = await self.fetch(url, **kwargs)
+        try:
+            info_tree = html.fromstring(info_html)
+            txt_link = info_tree.xpath(
+                '//div[@class="booktips"]//a[contains(text(), "txt下载")]/@href'
+            )
+            download_url = f"{self.BASE_URL}{txt_link[0]}" if txt_link else None
+        except Exception:
+            download_url = None
+
+        download_html = await self.fetch(download_url, **kwargs) if download_url else ""
+        return [info_html, download_html]
 
     async def get_book_chapter(
         self,
@@ -60,37 +73,9 @@ class DeqixsSession(BaseSession):
         :param chapter_id: The chapter identifier.
         :return: The chapter content as a string.
         """
-        html_pages: list[str] = []
-        idx = 1
-
-        while True:
-            chapter_suffix = chapter_id if idx == 1 else f"{chapter_id}-{idx}"
-            relative_path = f"/xiaoshuo/{book_id}/{chapter_suffix}.html"
-            full_url = self.BASE_URL + relative_path
-
-            if idx > 1 and relative_path not in html_pages[-1]:
-                break
-
-            try:
-                html = await self.fetch(full_url, **kwargs)
-            except Exception as exc:
-                self.logger.warning(
-                    "[async] get_book_chapter(%s page %d) failed: %s",
-                    chapter_id,
-                    idx,
-                    exc,
-                )
-                break
-
-            html_pages.append(html)
-            idx += 1
-            await async_sleep_with_random_delay(
-                self.request_interval,
-                mul_spread=1.1,
-                max_sleep=self.request_interval + 2,
-            )
-
-        return html_pages
+        book_id = book_id.replace("-", "/")
+        url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
+        return [await self.fetch(url, **kwargs)]
 
     @classmethod
     def book_info_url(cls, book_id: str) -> str:

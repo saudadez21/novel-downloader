@@ -22,10 +22,11 @@ logger = logging.getLogger(__name__)
 class BiqugeSearcher(BaseSearcher):
     site_name = "biquge"
     priority = 30
+    BASE_URL = "http://www.b520.cc/"
     SEARCH_URL = "http://www.b520.cc/modules/article/search.php"
 
     @classmethod
-    def _fetch_html(cls, keyword: str) -> str:
+    async def _fetch_html(cls, keyword: str) -> str:
         """
         Fetch raw HTML from Biquge's search page.
 
@@ -34,14 +35,13 @@ class BiqugeSearcher(BaseSearcher):
         """
         params = {"searchkey": keyword}
         try:
-            response = cls._http_get(cls.SEARCH_URL, params=params)
-            return response.text
+            async with (await cls._http_get(cls.SEARCH_URL, params=params)) as resp:
+                return await cls._response_to_str(resp)
         except Exception:
             logger.error(
                 "Failed to fetch HTML for keyword '%s' from '%s'",
                 keyword,
                 cls.SEARCH_URL,
-                exc_info=True,
             )
             return ""
 
@@ -68,6 +68,7 @@ class BiqugeSearcher(BaseSearcher):
             book_id = href.split("/")[0] if href else ""
             if not book_id:
                 continue
+            book_url = cls.BASE_URL + href
 
             latest_elem = row.xpath(".//td[2]/a")
             latest_chapter = (
@@ -85,6 +86,7 @@ class BiqugeSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    book_url=book_url,
                     cover_url="",
                     title=title,
                     author=author,

@@ -18,6 +18,8 @@
   - [其它小说](#其它小说)
     - [使用示例](#使用示例-3)
     - [Book ID 说明](#book-id-说明-3)
+  - [已归档站点](#已归档站点)
+    - [Book ID 说明](#book-id-说明-4)
   - [配置文件设置](#配置文件设置)
   - [Cookie 与登录](#cookie-与登录)
   - [注意事项](#注意事项)
@@ -54,11 +56,18 @@ novel-cli search 关键词
 | [和图书](https://www.hetushu.com/index.php)                  | hetushu   | ✅     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [笔趣阁](http://www.b520.cc)                                 | biquge    | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [铅笔小说](https://www.23qb.net), [备用](https://www.23qb.com/) | qianbi | ✅     | ❌     | ⚠️     | ✅     | 简      |
-| [得奇小说网](https://www.deqixs.com/)                         | deqixs   | ❌     | ❌     | ❌     | ✅     | 简      |
 | [飘天文学网](https://www.piaotia.com/)                        | piaotia  | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [小说屋](http://www.xiaoshuoge.info/)                        | xiaoshuowu | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [精品小说网](https://www.jpxs123.com/)                        | jpxs123  | ❌     | ❌     | ❌     | ✅     | 简      |
 | [天天看小说](https://www.ttkan.co/)                          | ttkan     | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [精彩小说](https://biquyuedu.com/)                           | biquyuedu | ❌     | ❌     | ⚠️     | ❌     | 简      |
+| [书海阁小说网](https://www.shuhaige.net/)                     | shuhaige | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [爱下电子书](https://ixdzs8.com/)                             | ixdzs8   | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [小说路上](https://m.xs63b.com/)                              | xs63b    | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [大熊猫文学网](https://www.dxmwx.org/)                        | dxmwx    | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
+| [一笔阁](https://www.yibige.org/)                            | yibige    | ❌     | ❌     | ⚠️     | ⚠️     | 简 / 繁 |
+| [小说虎](https://www.xshbook.com/)                           | xshbook   | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [完本神站](https://www.wanbengo.com/)                        | wanbengo  | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [25中文网](https://www.i25zw.com/)                           | i25zw     | ❌     | ❌     | ❌     | ✅     | 简      |
 | [全本小说网](https://quanben5.com/)                          | quanben5  | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [乐文小说网](https://www.lewenn.net/)                        | lewenn    | ❌     | ❌     | ⚠️     | ⚠️     | 简      |
@@ -108,13 +117,6 @@ Book ID 通常来源于小说详情页 URL 中的路径段, 各资源站点的�
     * 书籍页面: `https://www.23qb.net/book/12282/` -> Book ID: `12282`
     * 章节页面: `https://www.23qb.net/book/12282/7908999.html` -> Chapter ID: `7908999`
 
-* **得奇小说网 (deqixs)**
-  * 示例 URL:
-    * 书籍页面: `https://www.deqixs.com/xiaoshuo/2026/` -> Book ID: `2026`
-    * 章节页面: `https://www.deqixs.com/xiaoshuo/2026/1969933.html` -> Chapter ID: `1969933`
-  * 注意事项:
-    * 该站点直接提供 txt 下载。
-
 * **飘天文学网 (piaotia)**
   * 示例 URL:
     * 书籍页面: `https://www.piaotia.com/bookinfo/13/12345.html` -> Book ID: `13-12345`
@@ -124,6 +126,50 @@ Book ID 通常来源于小说详情页 URL 中的路径段, 各资源站点的�
   * 示例 URL:
     * 书籍页面: `http://www.xiaoshuoge.info/html/987/987654/` -> Book ID: `987-987654`
     * 章节页面: `http://www.xiaoshuoge.info/html/987/987654/123456789.html` -> Chapter ID: `123456789`
+
+* **精品小说网 (jpxs123)**
+  * 示例 URL:
+    * 书籍页面: `https://www.jpxs123.com/xh/zhetian.html` -> Book ID: `xh-zhetian`
+    * 章节页面: `https://www.jpxs123.com/xh/zhetian/1.html` -> Chapter ID: `1`
+  * 注意事项:
+    * 该站点直接提供 txt 下载。
+
+* **书海阁小说网 (shuhaige)**
+  * 示例 URL:
+    * 书籍页面: `https://www.shuhaige.net/199178/` -> Book ID: `199178`
+    * 章节页面: `https://www.shuhaige.net/199178/86580492.html` -> Chapter ID: `86580492`
+
+* **爱下电子书 (ixdzs8)**
+  * 示例 URL:
+    * 书籍页面: `https://ixdzs8.com/read/38804/` -> Book ID: `38804`
+    * 章节页面: `https://ixdzs8.com/read/38804/p1.html` -> Chapter ID: `p1`
+
+* **小说路上 (xs63b)**
+  * 示例 URL:
+    * 书籍页面: `https://m.xs63b.com/xuanhuan/aoshijiuzhongtian/` -> Book ID: `xuanhuan-aoshijiuzhongtian`
+    * 章节页面: `https://m.xs63b.com/xuanhuan/aoshijiuzhongtian/8748062.html` -> Chapter ID: `8748062`
+  * 注意事项:
+    * 桌面端页面部分章节缺页, 移动端正常
+
+* **大熊猫文学网 (dxmwx)**
+  * 示例 URL:
+    * 书籍页面: `https://www.dxmwx.org/book/55598.html` -> Book ID: `55598`
+    * 章节页面: `https://www.dxmwx.org/read/55598_47170737.html` -> Chapter ID: `47170737`
+
+* **一笔阁 (yibige)**
+  * 示例 URL:
+    * 书籍页面: `https://www.yibige.org/6238/` -> Book ID: `6238`
+    * 章节页面: `https://www.yibige.org/6238/1.html` -> Chapter ID: `1`
+
+* **小说虎 (xshbook)**
+  * 示例 URL:
+    * 书籍页面: `https://www.xshbook.com/95139/95139418/` -> Book ID: `95139-95139418`
+    * 章节页面: `https://www.xshbook.com/95139/95139418/407988281.html` -> Chapter ID: `407988281`
+
+* **完本神站 (wanbengo)**
+  * 示例 URL:
+    * 书籍页面: `https://www.wanbengo.com/1/` -> Book ID: `1`
+    * 章节页面: `https://www.wanbengo.com/1/2.html` -> Chapter ID: `2`
 
 * **25中文网 (i25zw)**
   * 示例 URL:
@@ -164,7 +210,7 @@ Book ID 通常来源于小说详情页 URL 中的路径段, 各资源站点的�
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 | 支持语言 |
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
 | [同人圈](https://www.tongrenquan.org/)                      | tongrenquan | ❌     | ❌     | ❌     | ✅     | 简      |
-| [全本同人小说](https://www.qbtr.cc/)                         | qbtr      | ❌     | ❌     | ❌     | ✅     | 简      |
+| [全本同人小说](https://www.qbtr.cc/)                         | qbtr        | ❌     | ❌     | ❌     | ✅     | 简      |
 
 #### 使用示例
 
@@ -194,10 +240,10 @@ novel-cli download --site qbtr 9876
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 | 支持语言 |
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
 | [SF轻小说](https://m.sfacg.com)                              | sfacg      | ✅     | ✅     | ✅     | ⚠️     | 简      |
-| [哔哩轻小说](https://www.linovelib.com/)                     | linovelib   | ✅     | ✅     | ⚠️     | ⚠️     | 简      |
-| [ESJ Zone](https://www.esjzone.cc)                           | esjzone    | ✅     | ✅     | ✅     | ✅     | 简      |
+| [哔哩轻小说](https://www.linovelib.com/)                     | linovelib  | ✅     | ✅     | ⚠️     | ⚠️     | 简      |
+| [ESJ Zone](https://www.esjzone.cc)                           | esjzone   | ✅     | ✅     | ✅     | ✅     | 简      |
 | [神凑轻小说](https://www.shencou.com/)                        | shencou   | ✅     | ✅     | ⚠️     | ⚠️     | 简      |
-| [无限轻小说](https://www.8novel.com/)                        | 8novel   | ✅     | ✅     | ⚠️     | ✅     | 繁      |
+| [无限轻小说](https://www.8novel.com/)                         | 8novel    | ✅     | ✅     | ⚠️     | ✅     | 繁      |
 
 #### 使用示例
 
@@ -261,6 +307,7 @@ novel-cli download --site esjzone 1234567890
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
 | [百合会](https://www.yamibo.com/site/novel)                  | yamibo     | ✅     | ❌     | ✅     | ⚠️     | 简      |
 | [3A电子书](http://www.aaatxt.com/)                           | aaatxt     | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [西瓜书屋](https://www.xiguashuwu.com/)                      | xiguashuwu | ❌     | ❌     | ⚠️     | ✅     | 简      |
 
 #### 使用示例
 
@@ -282,6 +329,28 @@ novel-cli download --site yamibo 123456
     * 章节页面: `http://www.aaatxt.com/yuedu/24514_1.html` -> Chapter ID: `24514_1`
   * 注意事项:
     * 该站点直接提供 txt 下载。
+
+* **西瓜书屋 (xiguashuwu)**
+  * 示例 URL:
+    * 书籍页面: `https://www.xiguashuwu.com/book/1234/iszip/1/` -> Book ID: `1234`
+    * 章节页面: `https://www.xiguashuwu.com/book/1234/482.html` -> Chapter ID: `482`
+
+### 已归档站点
+
+| 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 | 支持语言 |
+| ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
+| [得奇小说网](https://www.deqixs.com/)                         | deqixs   | ❌     | ❌     | ❌     | ✅     | 简      |
+
+#### Book ID 说明
+
+* **得奇小说网 (deqixs)**
+  * 示例 URL:
+    * 书籍页面: `https://www.deqixs.com/xiaoshuo/2026/` -> Book ID: `2026`
+    * 章节页面: `https://www.deqixs.com/xiaoshuo/2026/1969933.html` -> Chapter ID: `1969933`
+  * 注意事项:
+    * 该站点直接提供 txt 下载。
+  * 缺点:
+    * 每章节分页过多, 每页内容较少, 推荐适当降低请求间隔
 
 </details>
 

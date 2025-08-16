@@ -1,31 +1,32 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.searchers.deqixs
---------------------------------------
+novel_downloader.core.archived.deqixs.searcher
+----------------------------------------------
 
 """
 
 import logging
 
 from lxml import html
-
 from novel_downloader.core.searchers.base import BaseSearcher
-from novel_downloader.core.searchers.registry import register_searcher
 from novel_downloader.models import SearchResult
+
+# from novel_downloader.core.searchers.registry import register_searcher
 
 logger = logging.getLogger(__name__)
 
 
-@register_searcher(
-    site_keys=["deqixs"],
-)
+# @register_searcher(
+#     site_keys=["deqixs"],
+# )
 class DeqixsSearcher(BaseSearcher):
     site_name = "deqixs"
     priority = 20
+    BASE_URL = "https://www.deqixs.com"
     SEARCH_URL = "https://www.deqixs.com/tag/"
 
     @classmethod
-    def _fetch_html(cls, keyword: str) -> str:
+    async def _fetch_html(cls, keyword: str) -> str:
         """
         Fetch raw HTML from Deqixs's search page.
 
@@ -34,14 +35,13 @@ class DeqixsSearcher(BaseSearcher):
         """
         params = {"key": keyword}
         try:
-            response = cls._http_get(cls.SEARCH_URL, params=params)
-            return response.text
+            async with (await cls._http_get(cls.SEARCH_URL, params=params)) as resp:
+                return await cls._response_to_str(resp)
         except Exception:
             logger.error(
                 "Failed to fetch HTML for keyword '%s' from '%s'",
                 keyword,
                 cls.SEARCH_URL,
-                exc_info=True,
             )
             return ""
 
@@ -64,6 +64,9 @@ class DeqixsSearcher(BaseSearcher):
 
             href = row.xpath(".//h3/a/@href")[0]
             book_id = href.strip("/ ").split("/")[-1]
+            if not book_id:
+                continue
+            book_url = cls.BASE_URL + href
             img_src = row.xpath(".//a/img/@src")[0]
             cover_url = "https:" + img_src if img_src.startswith("//") else img_src
             title = row.xpath(".//h3/a/text()")[0].strip()
@@ -86,6 +89,7 @@ class DeqixsSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    book_url=book_url,
                     cover_url=cover_url,
                     title=title,
                     author=author,

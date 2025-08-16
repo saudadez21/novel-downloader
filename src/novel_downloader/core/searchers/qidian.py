@@ -28,7 +28,7 @@ class QidianSearcher(BaseSearcher):
     SEARCH_URL = "https://www.qidian.com/so/{query}.html"
 
     @classmethod
-    def _fetch_html(cls, keyword: str) -> str:
+    async def _fetch_html(cls, keyword: str) -> str:
         """
         Fetch raw HTML from Qidian's search page.
 
@@ -37,14 +37,13 @@ class QidianSearcher(BaseSearcher):
         """
         url = cls.SEARCH_URL.format(query=cls._quote(keyword))
         try:
-            response = cls._http_get(url)
-            return response.text
+            async with (await cls._http_get(url)) as resp:
+                return await cls._response_to_str(resp)
         except Exception:
             logger.error(
                 "Failed to fetch HTML for keyword '%s' from '%s'",
                 keyword,
                 url,
-                exc_info=True,
             )
             return ""
 
@@ -81,6 +80,7 @@ class QidianSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    book_url="",
                     cover_url="",
                     title=title,
                     author=author,

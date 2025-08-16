@@ -182,7 +182,7 @@ class LinovelibParser(BaseParser):
         return {
             "id": chapter_id,
             "title": title_text,
-            "content": "\n\n".join(contents),
+            "content": "\n".join(contents),
             "extra": {"site": "linovelib"},
         }
 

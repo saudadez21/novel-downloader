@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 novel_downloader.core.searchers.eightnovel
---------------------------------------
+------------------------------------------
 
 """
 
@@ -26,7 +26,7 @@ class EightnovelSearcher(BaseSearcher):
     SEARCH_URL = "https://www.8novel.com/search/"
 
     @classmethod
-    def _fetch_html(cls, keyword: str) -> str:
+    async def _fetch_html(cls, keyword: str) -> str:
         """
         Fetch raw HTML from 8novel's search page.
 
@@ -35,14 +35,13 @@ class EightnovelSearcher(BaseSearcher):
         """
         params = {"key": keyword}
         try:
-            response = cls._http_get(cls.SEARCH_URL, params=params)
-            return response.text
+            async with (await cls._http_get(cls.SEARCH_URL, params=params)) as resp:
+                return await cls._response_to_str(resp)
         except Exception:
             logger.error(
                 "Failed to fetch HTML for keyword '%s' from '%s'",
                 keyword,
                 cls.SEARCH_URL,
-                exc_info=True,
             )
             return ""
 
@@ -66,6 +65,9 @@ class EightnovelSearcher(BaseSearcher):
             # Extract book_id from href, e.g. '/novelbooks/6045'
             href = a.get("href", "").strip()
             book_id = href.rstrip("/").split("/")[-1]
+            if not book_id:
+                continue
+            book_url = cls.BASE_URL + href
 
             img_src = a.xpath(".//img/@src")
             cover_url = img_src[0] if img_src else ""
@@ -84,6 +86,7 @@ class EightnovelSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    book_url=book_url,
                     cover_url=cover_url,
                     title=title,
                     author="-",

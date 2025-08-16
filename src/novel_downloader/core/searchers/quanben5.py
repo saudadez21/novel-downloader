@@ -26,12 +26,13 @@ logger = logging.getLogger(__name__)
 class Quanben5Searcher(BaseSearcher):
     site_name = "quanben5"
     priority = 30
+    BASE_URL = "https://quanben5.com"
     SEARCH_URL = "https://quanben5.com/"
 
     STATIC_CHARS = "PXhw7UT1B0a9kQDKZsjIASmOezxYG4CHo5Jyfg2b8FLpEvRr3WtVnlqMidu6cN"
 
     @classmethod
-    def _fetch_html(cls, keyword: str) -> str:
+    async def _fetch_html(cls, keyword: str) -> str:
         """
         Fetch raw HTML from Quanben5's search page.
 
@@ -59,14 +60,13 @@ class Quanben5Searcher(BaseSearcher):
         }
 
         try:
-            response = cls._http_get(full_url, headers=headers)
-            return response.text
+            async with (await cls._http_get(full_url, headers=headers)) as resp:
+                return await cls._response_to_str(resp)
         except Exception:
             logger.error(
                 "Failed to fetch HTML for keyword '%s' from '%s'",
                 keyword,
                 cls.SEARCH_URL,
-                exc_info=True,
             )
             return ""
 
@@ -104,6 +104,7 @@ class Quanben5Searcher(BaseSearcher):
             if not m:
                 continue
             book_id = m.group(1)
+            book_url = cls.BASE_URL + href
 
             cover_nodes = row.xpath('.//div[@class="pic"]//img/@src')
             cover_url = cover_nodes[0].strip() if cover_nodes else ""
@@ -122,6 +123,7 @@ class Quanben5Searcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    book_url=book_url,
                     cover_url=cover_url,
                     title=title,
                     author=author,

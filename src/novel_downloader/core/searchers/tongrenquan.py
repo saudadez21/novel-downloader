@@ -28,7 +28,7 @@ class TongrenquanSearcher(BaseSearcher):
     BASE_URL = "https://www.tongrenquan.org"
 
     @classmethod
-    def _fetch_html(cls, keyword: str) -> str:
+    async def _fetch_html(cls, keyword: str) -> str:
         """
         Fetch raw HTML from Tongrenquan's search page.
 
@@ -45,14 +45,15 @@ class TongrenquanSearcher(BaseSearcher):
             "Content-Type": "application/x-www-form-urlencoded",
         }
         try:
-            response = cls._http_post(cls.SEARCH_URL, data=body, headers=headers)
-            return response.text
+            async with (
+                await cls._http_post(cls.SEARCH_URL, data=body, headers=headers)
+            ) as resp:
+                return await cls._response_to_str(resp)
         except Exception:
             logger.error(
                 "Failed to fetch HTML for keyword '%s' from '%s'",
                 keyword,
                 cls.SEARCH_URL,
-                exc_info=True,
             )
             return ""
 
@@ -77,6 +78,9 @@ class TongrenquanSearcher(BaseSearcher):
             href = link_elem.get("href", "").strip()
             m = re.match(r"^/([^/]+)/(\d+)\.html$", href)
             book_id = m.group(2) if m else ""
+            if not book_id:
+                continue
+            book_url = cls.BASE_URL + href
 
             src_nodes = row.xpath('.//div[@class="pic"]//img/@src')
             rel_src = src_nodes[0].strip() if src_nodes else ""
@@ -98,6 +102,7 @@ class TongrenquanSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    book_url=book_url,
                     cover_url=cover_url,
                     title=title,
                     author=author,

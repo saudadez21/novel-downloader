@@ -198,7 +198,7 @@ class EightnovelParser(BaseParser):
         if segments and segments[-1] and segments[-1][0] in ("8", "⑧", "⒏"):
             segments.pop()
 
-        content = "\n\n".join(segments).strip()
+        content = "\n".join(segments).strip()
         if not content.strip():
             return None
 

@@ -23,10 +23,11 @@ logger = logging.getLogger(__name__)
 class QbtrSearcher(BaseSearcher):
     site_name = "qbtr"
     priority = 30
+    BASE_URL = "https://www.qbtr.cc"
     SEARCH_URL = "https://www.qbtr.cc/e/search/index.php"
 
     @classmethod
-    def _fetch_html(cls, keyword: str) -> str:
+    async def _fetch_html(cls, keyword: str) -> str:
         """
         Fetch raw HTML from Qbtr's search page.
 
@@ -43,14 +44,15 @@ class QbtrSearcher(BaseSearcher):
             "Content-Type": "application/x-www-form-urlencoded",
         }
         try:
-            response = cls._http_post(cls.SEARCH_URL, data=body, headers=headers)
-            return response.text
+            async with (
+                await cls._http_post(cls.SEARCH_URL, data=body, headers=headers)
+            ) as resp:
+                return await cls._response_to_str(resp)
         except Exception:
             logger.error(
                 "Failed to fetch HTML for keyword '%s' from '%s'",
                 keyword,
                 cls.SEARCH_URL,
-                exc_info=True,
             )
             return ""
 
@@ -75,6 +77,9 @@ class QbtrSearcher(BaseSearcher):
             href = link_elem.get("href", "").strip()
             m = re.match(r"^/([^/]+)/(\d+)\.html$", href)
             book_id = f"{m.group(1)}-{m.group(2)}" if m else ""
+            if not book_id:
+                continue
+            book_url = cls.BASE_URL + href
 
             title = link_elem.text_content().strip()
 
@@ -92,6 +97,7 @@ class QbtrSearcher(BaseSearcher):
                 SearchResult(
                     site=cls.site_name,
                     book_id=book_id,
+                    book_url=book_url,
                     cover_url="",
                     title=title,
                     author=author,
