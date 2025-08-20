@@ -12,10 +12,13 @@ from typing import Any
 
 from nicegui import ui
 
-import novel_downloader.web.state
 from novel_downloader.core import search
 from novel_downloader.models import SearchResult
 from novel_downloader.web.layout import navbar
+from novel_downloader.web.state import (
+    register_portal,
+    task_manager,
+)
 
 
 @ui.page("/search")  # type: ignore[misc]
@@ -25,6 +28,7 @@ def _alias_search() -> None:
 
 def render() -> None:
     navbar("search")
+    register_portal()
     ui.label("搜索页面").classes("text-lg")
 
     with ui.row().classes("items-center gap-2 my-2 w-full"):
@@ -60,7 +64,7 @@ def render() -> None:
         async def handler() -> None:
             title = r["title"]
             ui.notify(f"已添加任务：{title}")
-            await novel_downloader.web.state.task_manager.add_task(
+            await task_manager.add_task(
                 title=title,
                 site=r["site"],
                 book_id=r["book_id"],

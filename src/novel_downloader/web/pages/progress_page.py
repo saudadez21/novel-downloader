@@ -8,7 +8,10 @@ novel_downloader.web.pages.progress_page
 from nicegui import ui
 
 from novel_downloader.web.layout import navbar
-from novel_downloader.web.state import task_manager
+from novel_downloader.web.state import (
+    register_portal,
+    task_manager,
+)
 from novel_downloader.web.task_manager import DownloadTask
 
 
@@ -69,6 +72,7 @@ def _task_row(t: DownloadTask, active: bool) -> None:
 @ui.page("/progress")  # type: ignore[misc]
 def render() -> None:
     navbar("progress")
+    register_portal()
     ui.label("正在下载 / 历史记录").classes("text-lg")
 
     @ui.refreshable  # type: ignore[misc]

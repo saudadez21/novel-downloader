@@ -56,6 +56,8 @@ novel-cli download 123456
 
 ### GUI 模式 (图形界面)
 
+**注意**: 对于需要登录的站点, 在点击 **下载** 后如果在短时间内切换页面, 可能导致登录弹窗未能正常显示, 从而造成任务卡住
+
 ```bash
 # 初始化默认配置 (生成 settings.toml)
 novel-cli config init
