@@ -29,6 +29,21 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+web = [
+    "nicegui",
+]
+
+font-recovery = [
+    "scipy",
+    "numpy",
+    "tinycss2",
+    "fonttools",
+    "brotli",
+    "opencv-python",
+    "pillow",
+    "huggingface_hub"
+]
+
 dev = [
     "black",
     "mypy",
@@ -43,19 +58,9 @@ dev = [
     "commitizen"
 ]
 
-font-recovery = [
-    "scipy",
-    "numpy",
-    "tinycss2",
-    "fonttools",
-    "brotli",
-    "opencv-python",
-    "pillow",
-    "huggingface_hub"
-]
-
 [project.scripts]
 novel-cli = "novel_downloader.cli.main:cli_main"
+novel-web = "novel_downloader.web.main:web_main"
 
 [project.urls]
 Homepage = "https://github.com/saudadez21/novel-downloader"
