@@ -18,8 +18,6 @@
 
 ```python
 SplitMode = Literal["book", "volume"]
-LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
-BrowserType = Literal["chromium", "firefox", "webkit"]
 ```
 
 描述: 常用枚举类型别名，限定函数或配置中可接受的字符串值

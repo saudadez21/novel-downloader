@@ -15,7 +15,6 @@ from novel_downloader.models import (
     DownloaderConfig,
     ExporterConfig,
     FetcherConfig,
-    LogLevel,
     ParserConfig,
     TextCleanerConfig,
 )
@@ -26,13 +25,6 @@ class ConfigAdapter:
     Adapter to map a raw configuration dictionary and site name
     into structured dataclass configuration models.
     """
-
-    _ALLOWED_LOG_LEVELS: tuple[LogLevel, ...] = (
-        "DEBUG",
-        "INFO",
-        "WARNING",
-        "ERROR",
-    )
 
     def __init__(self, config: dict[str, Any], site: str):
         """
@@ -211,20 +203,17 @@ class ConfigAdapter:
 
         return result
 
-    def get_log_level(self) -> LogLevel:
+    def get_log_level(self) -> str:
         """
         Retrieve the logging level from [general.debug].
 
         Reads from config["general"]["debug"]["log_level"], defaulting to "INFO"
         if not set or invalid.
 
-        :return: The configured LogLevel literal ("DEBUG", "INFO", "WARNING", "ERROR").
+        :return: The configured log level ("DEBUG", "INFO", "WARNING", "ERROR").
         """
         debug_cfg = self._config.get("general", {}).get("debug", {})
-        raw = debug_cfg.get("log_level") or "INFO"
-        if raw in self._ALLOWED_LOG_LEVELS:
-            return cast(LogLevel, raw)
-        return "INFO"
+        return debug_cfg.get("log_level") or "INFO"
 
     @property
     def site(self) -> str:

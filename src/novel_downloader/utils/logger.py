@@ -14,11 +14,9 @@ from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 
-from novel_downloader.models import LogLevel
-
 from .constants import LOGGER_DIR, LOGGER_NAME
 
-LOG_LEVELS: dict[LogLevel, int] = {
+LOG_LEVELS: dict[str, int] = {
     "DEBUG": logging.DEBUG,
     "INFO": logging.INFO,
     "WARNING": logging.WARNING,
@@ -28,7 +26,7 @@ LOG_LEVELS: dict[LogLevel, int] = {
 
 def setup_logging(
     log_filename_prefix: str | None = None,
-    log_level: LogLevel | None = None,
+    log_level: str | None = None,
     log_dir: str | Path | None = None,
 ) -> logging.Logger:
     """
@@ -48,12 +46,8 @@ def setup_logging(
     ft_logger.propagate = False
 
     # Determine console level (default INFO)
-    level_str: LogLevel = log_level or "INFO"
-    console_level = LOG_LEVELS.get(level_str)
-    if console_level is None:
-        raise ValueError(
-            f"Invalid log level: {level_str}. Must be one of {list(LOG_LEVELS.keys())}"
-        )
+    level_str: str = log_level or "INFO"
+    console_level: int = LOG_LEVELS.get(level_str) or logging.INFO
 
     # Resolve log file path
     log_path = Path(log_dir) if log_dir else LOGGER_DIR
