@@ -56,8 +56,6 @@ class ConfigAdapter:
             timeout=req.get("timeout", 30.0),
             max_connections=req.get("max_connections", 10),
             max_rps=req.get("max_rps", None),
-            headless=req.get("headless", False),
-            disable_images=req.get("disable_images", False),
             user_agent=req.get("user_agent", None),
             headers=req.get("headers", None),
             verify_ssl=req.get("verify_ssl", True),
@@ -114,16 +112,8 @@ class ConfigAdapter:
             cache_dir=gen.get("cache_dir", "./novel_cache"),
             use_truncation=site_cfg.get("use_truncation", True),
             decode_font=font_ocr.get("decode_font", False),
-            use_freq=font_ocr.get("use_freq", False),
-            use_ocr=font_ocr.get("use_ocr", True),
-            use_vec=font_ocr.get("use_vec", False),
-            ocr_version=font_ocr.get("ocr_version", "v1.0"),
             save_font_debug=font_ocr.get("save_font_debug", False),
             batch_size=font_ocr.get("batch_size", 32),
-            gpu_mem=font_ocr.get("gpu_mem", 500),
-            gpu_id=font_ocr.get("gpu_id", None),
-            ocr_weight=font_ocr.get("ocr_weight", 0.6),
-            vec_weight=font_ocr.get("vec_weight", 0.4),
         )
 
     def get_exporter_config(self) -> ExporterConfig:

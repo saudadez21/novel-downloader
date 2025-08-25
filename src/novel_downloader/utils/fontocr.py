@@ -1,11 +1,17 @@
 #!/usr/bin/env python3
 """
-novel_downloader.utils.fontocr.ocr_v4
--------------------------------------
+novel_downloader.utils.fontocr
+------------------------------
 
 This class provides utility methods for optical character recognition (OCR),
 primarily used for decrypting custom font encryption.
 """
+
+__all__ = [
+    "FontOCR",
+    "get_font_ocr",
+]
+__version__ = "4.0"
 
 import logging
 from collections.abc import Generator
@@ -20,7 +26,7 @@ T = TypeVar("T")
 logger = logging.getLogger(__name__)
 
 
-class FontOCRV4:
+class FontOCR:
     """
     Version 4 of the FontOCR utility.
 
@@ -42,7 +48,7 @@ class FontOCRV4:
         **kwargs: Any,
     ) -> None:
         """
-        Initialize a FontOCRV4 instance.
+        Initialize a FontOCR instance.
 
         :param batch_size: batch size for OCR inference (minimum 1)
         :param ocr_weight: weight factor for OCR-based prediction scores
@@ -182,7 +188,7 @@ class FontOCRV4:
             yield seq[i : i + size]
 
 
-_font_ocr: FontOCRV4 | None = None
+_font_ocr: FontOCR | None = None
 
 
 def get_font_ocr(
@@ -190,13 +196,13 @@ def get_font_ocr(
     model_dir: str | None = None,
     input_shape: tuple[int, int, int] | None = None,
     batch_size: int = 32,
-) -> FontOCRV4:
+) -> FontOCR:
     """
     Return the singleton FontOCR, initializing it on first use.
     """
     global _font_ocr
     if _font_ocr is None:
-        _font_ocr = FontOCRV4(
+        _font_ocr = FontOCR(
             model_name=model_name,
             model_dir=model_dir,
             input_shape=input_shape,

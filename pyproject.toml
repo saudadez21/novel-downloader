@@ -7,7 +7,7 @@ authors = [
 license = {file = "LICENSE"}
 readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">=3.11"
-keywords = ["novel", "web novel", "qidian", "biquge", "downloader", "parser", "fiction", "cli", "automation", "ebook"]
+keywords = ["novel", "web novel", "qidian", "biquge", "downloader", "cli", "ebook"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Environment :: Console",
@@ -22,6 +22,7 @@ classifiers = [
 dynamic = ["version"]
 dependencies = [
     "rich",
+    "nicegui",
     "requests",
     "aiohttp",
     "lxml",
@@ -29,19 +30,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-web = [
-    "nicegui",
-]
-
 font-recovery = [
-    "scipy",
     "numpy",
     "tinycss2",
     "fonttools",
-    "brotli",
-    "opencv-python",
     "pillow",
-    "huggingface_hub"
 ]
 
 dev = [
@@ -82,7 +75,6 @@ include = ["novel_downloader", "novel_downloader.*"]
 "novel_downloader.locales" = ["*.json"]
 "novel_downloader.resources.css_styles" = ["*.css"]
 "novel_downloader.resources.images" = ["*.png"]
-"novel_downloader.tui.styles" = ["*.tcss"]
 
 [tool.setuptools.dynamic]
 version = {attr = "novel_downloader.__version__"}

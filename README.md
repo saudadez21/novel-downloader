@@ -65,9 +65,6 @@ novel-cli config init
 # 编辑 ./settings.toml 完成 site/book_ids 等
 # 可查看 docs/3-settings-schema.md
 
-# 如果是第一次运行, 请先安装依赖
-pip install nicegui
-
 # 启动 Web 界面
 novel-web
 

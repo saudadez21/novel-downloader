@@ -30,8 +30,6 @@ class FetcherConfig:
     retry_times: int = 3
     backoff_factor: float = 2.0
     timeout: float = 30.0
-    headless: bool = False
-    disable_images: bool = False
     max_connections: int = 10
     max_rps: float | None = None  # Maximum requests per second
     user_agent: str | None = None
@@ -62,15 +60,7 @@ class ParserConfig:
     cache_dir: str = "./novel_cache"
     use_truncation: bool = True
     decode_font: bool = False
-    use_freq: bool = False
-    use_ocr: bool = True
-    use_vec: bool = False
-    ocr_version: str = "v1.0"
     batch_size: int = 32
-    gpu_mem: int = 500
-    gpu_id: int | None = None
-    ocr_weight: float = 0.6
-    vec_weight: float = 0.4
     save_font_debug: bool = False
 
 
