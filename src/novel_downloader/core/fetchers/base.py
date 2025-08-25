@@ -67,7 +67,7 @@ class BaseSession(FetcherProtocol, abc.ABC):
         self._session: ClientSession | None = None
         self._rate_limiter: TokenBucketRateLimiter | None = None
 
-        if config.max_rps is not None and config.max_rps > 0:
+        if config.max_rps > 0:
             self._rate_limiter = TokenBucketRateLimiter(config.max_rps)
 
         self.logger = logging.getLogger(f"{self.__class__.__name__}")

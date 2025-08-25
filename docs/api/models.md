@@ -72,13 +72,12 @@ class FetcherConfig:
     retry_times: int = 3
     backoff_factor: float = 2.0
     timeout: float = 30.0
-    headless: bool = False
-    disable_images: bool = False
     max_connections: int = 10
-    max_rps: float | None = None
+    max_rps: float = 1000.0
     user_agent: str | None = None
     headers: dict[str, str] | None = None
     verify_ssl: bool = True
+    locale_style: str = "simplified"
 ```
 
 描述: 网页内容抓取相关参数配置
@@ -123,16 +122,9 @@ down_cfg = DownloaderConfig(skip_existing=False, mode="browser")
 @dataclass
 class ParserConfig:
     cache_dir: str = "./novel_cache"
+    use_truncation: bool = True
     decode_font: bool = False
-    use_freq: bool = False
-    use_ocr: bool = True
-    use_vec: bool = False
-    ocr_version: str = "v1.0"
     batch_size: int = 32
-    gpu_mem: int = 500
-    gpu_id: int | None = None
-    ocr_weight: float = 0.6
-    vec_weight: float = 0.4
     save_font_debug: bool = False
 ```
 

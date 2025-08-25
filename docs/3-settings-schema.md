@@ -2,17 +2,27 @@
 
 > **提示**: 可根据实际需求在 `settings.toml` 中增删字段, 未列出的配置项可参考源码注释或自行扩展。
 
-### requests 配置
+### general 配置
 
-控制网络请求行为, 包括超时 / 重试 / 并发连接数等选项
+全局通用行为设置, 包括下载控制 / 目录结构 / 存储方式与调试选项等
 
-| 参数名              | 类型   | 默认值         | 说明                                       |
-| ------------------ | ------ | ------------- | ------------------------------------------ |
-| `retry_times`      | int    | 3             | 请求失败重试次数                         |
-| `backoff_factor`   | float  | 2.0           | 重试的退避因子 (每次重试等待时间将按倍数增加, 如 `2s`, `4s`, `8s`) |
-| `timeout`          | float  | 30.0          | 页面加载超时时间 (秒)                    |
-| `max_connections`  | int    | 10            | 最大并发连接数                           |
-| `max_rps`           | int \| null | null    | 最大请求速率 (requests per second), 为空则不限制 |
+#### 主配置项
+
+| 参数名                | 类型    | 默认值             | 说明                                 |
+| -------------------- | ------- | ----------------- | ------------------------------------ |
+| `retry_times`        | int     | 3                 | 请求失败重试次数                         |
+| `backoff_factor`     | float   | 2.0               | 重试的退避因子 (每次重试等待时间将按倍数增加, 如 `2s`, `4s`, `8s`) |
+| `timeout`            | float   | 30.0              | 页面加载超时时间 (秒)                    |
+| `max_connections`    | int     | 10                | 最大并发连接数                           |
+| `max_rps`            | float   | 1000.0            | 最大请求速率 (requests per second)  |
+| `request_interval`   | float   | 2.0               | 同一本书各章节请求间隔 (秒)                   |
+| `raw_data_dir`       | string  | `"./raw_data"`    | 原始章节 JSON / DB 存放目录             |
+| `output_dir`         | string  | `"./downloads"`   | 最终输出文件存放目录                   |
+| `cache_dir`          | string  | `"./novel_cache"` | 本地缓存目录 (字体 / 图片等)       |
+| `workers`            | int     | 2                 | 下载任务的协程数量                         |
+| `skip_existing`      | bool    | true              | 下载时是否跳过本地已存在的章节文件            |
+| `storage_backend`    | string  | `"sqlite"`        | 章节存储方式, 可选值：`json`、`sqlite`   |
+| `storage_batch_size` | int     | 30                | 使用 SQLite 时每批次提交的章节数 (提高写入性能) |
 
 > 注意: 部分站点在面对高频的访问频率时 (例如每秒 5 次), 可能因负载压力而返回 `503 Service Temporarily Unavailable` 错误。
 >
@@ -29,33 +39,14 @@ max_connections = 10
 max_rps = 1.0                  # 每秒最多 1 次请求, 可用于限制站点压力
 ```
 
----
-
-### general 配置
-
-全局通用行为设置, 包括下载控制 / 目录结构 / 存储方式与调试选项等
-
-#### 主配置项
-
-| 参数名                | 类型   | 默认值             | 说明                                 |
-| -------------------- | ------ | ----------------- | ------------------------------------ |
-| `request_interval`   | float  | 2.0               | 同一本书各章节请求间隔 (秒)                   |
-| `raw_data_dir`       | string | `"./raw_data"`    | 原始章节 JSON / DB 存放目录             |
-| `output_dir`         | string | `"./downloads"`   | 最终输出文件存放目录                   |
-| `cache_dir`          | string | `"./novel_cache"` | 本地缓存目录 (字体 / 图片等)       |
-| `workers`            | int    | 2                 | 下载任务的协程数量                         |
-| `skip_existing`      | bool   | true              | 下载时是否跳过本地已存在的章节文件            |
-| `storage_backend`    | string | `"sqlite"`        | 章节存储方式, 可选值：`json`、`sqlite`   |
-| `storage_batch_size` | int    | 30                | 使用 SQLite 时每批次提交的章节数 (提高写入性能) |
-
-#### 调试选项 `[general.debug]`
+### 调试选项 `[general.debug]`
 
 | 参数名                | 类型   | 默认值             | 说明                                 |
 | -------------------- | ------ | ----------------- | ------------------------------------ |
 | `debug.save_html`    | bool   | false             | 是否保存抓取到的原始 HTML 到磁盘        |
 | `debug.log_level`    | string | `"INFO"`          | 日志级别: DEBUG, INFO, WARNING, ERROR |
 
-#### 字体/OCR 设置 `[general.font_ocr]`
+### 字体/OCR 设置 `[general.font_ocr]`
 
 用于支持混淆字体破解与文本识别的高级配置
 
@@ -97,11 +88,11 @@ batch_size = 32
 
 每个站点配置位于 `[sites.<site>]` 下:
 
-| 参数名             | 类型   | 默认值             | 说明                                 |
-| ----------------- | ------ | ----------------- | ------------------------------------ |
-| `book_ids`        | array\<string\> 或 array\<table\>     | -             | 小说 ID 列表 (如 `1010868264`)                                 |
-| `login_required`  | bool              | false         | 是否需要登录才能访问                                           |
-| `use_truncation`  | bool              | true          | 是否启用基于章节长度的截断以避免重复内容                         |
+| 参数名             | 类型                                  | 默认值 | 说明                                   |
+| ----------------- | ------------------------------------- | ------ | ------------------------------------- |
+| `book_ids`        | array\<string\> 或 array\<table\>     | -      | 小说 ID 列表 (如 `1010868264`)         |
+| `login_required`  | bool                                  | false  | 是否需要登录才能访问                    |
+| `use_truncation`  | bool                                  | true   | 是否启用基于章节长度的截断以避免重复内容  |
 
 当需避免重复内容保存时, 请在 `settings.toml` 中将该站点 (例如 `[sites.qidian]`) 的 `use_truncation` 设置为 `true`。
 
@@ -141,9 +132,9 @@ book_id = "1111111111"
 | 字段名        | 类型           | 必需 | 说明                        |
 | ------------ | -------------- | --- | --------------------------- |
 | `book_id`    | string         | 是  | 小说的唯一标识 ID             |
-| `start_id`   | string         | 否  | 起始章节 ID, 从该章节开始下载 |
-| `end_id`     | string         | 否  | 结束章节 ID, 下载至该章节为止 |
-| `ignore_ids` | `list[string]` | 否  | 要跳过的章节 ID 列表         |
+| `start_id`   | string         | 否  | 起始章节 ID, 从该章节开始下载  |
+| `end_id`     | string         | 否  | 结束章节 ID, 下载至该章节为止  |
+| `ignore_ids` | `list[string]` | 否  | 要跳过的章节 ID 列表          |
 
 #### 示例: 起点中文网配置
 
@@ -240,18 +231,18 @@ include_picture = false
 
 #### 标题清理 `[cleaner.title]`
 
-| 参数名              | 类型 | 默认值 | 说明                                       |
-| ------------------ | ---- | ----- | ------------------------------------------ |
-| `remove_patterns` | string 数组 | `[]` | 通过正则匹配, 移除标题中不需要的内容 |
-| `replace` | 键值对 | `{}` | 每一项把 "源字符串" 替换成 "目标字符串" |
+| 参数名              | 类型        | 默认值 | 说明                                  |
+| ------------------ | ----------- | ------ | ------------------------------------ |
+| `remove_patterns`  | string 数组 | `[]`   | 通过正则匹配, 移除标题中不需要的内容    |
+| `replace`          | 键值对      | `{}`   | 每一项把 "源字符串" 替换成 "目标字符串" |
 
 #### 外部加载 `[cleaner.title.external]`
 
-  | 字段                | 类型     | 说明                          |
-  | ----------------- | ------ | --------------------------- |
-  | `enabled`         | bool | 是否启用外部文件   |
-  | `remove_patterns` | string | 指向 JSON 文件, 加载标题的正则删除模式列表   |
-  | `replace`         | string | 指向 JSON 文件, 加载标题的字面替换映射 |
+  | 字段               | 类型   | 说明                                    |
+  | ----------------- | ------ | --------------------------------------- |
+  | `enabled`         | bool   | 是否启用外部文件                         |
+  | `remove_patterns` | string | 指向 JSON 文件, 加载标题的正则删除模式列表 |
+  | `replace`         | string | 指向 JSON 文件, 加载标题的字面替换映射     |
 
 > `content` 同理, 对应的是正文规则
 

@@ -8,7 +8,7 @@ site name into structured dataclass-based config models.
 """
 
 import json
-from typing import Any, cast
+from typing import Any, TypeVar, cast
 
 from novel_downloader.models import (
     BookConfig,
@@ -18,6 +18,8 @@ from novel_downloader.models import (
     ParserConfig,
     TextCleanerConfig,
 )
+
+T = TypeVar("T")
 
 
 class ConfigAdapter:
@@ -35,6 +37,8 @@ class ConfigAdapter:
         """
         self._config = config
         self._site = site
+        self._site_cfg: dict[str, Any] = self._get_site_cfg()
+        self._gen_cfg: dict[str, Any] = config.get("general") or {}
 
     def get_fetcher_config(self) -> FetcherConfig:
         """
@@ -42,24 +46,21 @@ class ConfigAdapter:
 
         Reads from:
           - config["general"] for global defaults (e.g. request_interval)
-          - config["requests"] for HTTP-specific settings (timeouts, retries, etc.)
           - site-specific overrides under config["sites"][site]
 
         :return: A FetcherConfig instance with all fields populated.
         """
-        gen = self._config.get("general", {})
-        req = self._config.get("requests", {})
         return FetcherConfig(
-            request_interval=gen.get("request_interval", 2.0),
-            retry_times=req.get("retry_times", 3),
-            backoff_factor=req.get("backoff_factor", 2.0),
-            timeout=req.get("timeout", 30.0),
-            max_connections=req.get("max_connections", 10),
-            max_rps=req.get("max_rps", None),
-            user_agent=req.get("user_agent", None),
-            headers=req.get("headers", None),
-            verify_ssl=req.get("verify_ssl", True),
-            locale_style=gen.get("locale_style", "simplified"),
+            request_interval=self._get_gen_cfg("request_interval", 2.0),
+            retry_times=self._get_gen_cfg("retry_times", 3),
+            backoff_factor=self._get_gen_cfg("backoff_factor", 2.0),
+            timeout=self._get_gen_cfg("timeout", 30.0),
+            max_connections=self._get_gen_cfg("max_connections", 10),
+            max_rps=self._get_gen_cfg("max_rps", 1000.0),
+            user_agent=self._get_gen_cfg("user_agent", None),
+            headers=self._get_gen_cfg("headers", None),
+            verify_ssl=self._get_gen_cfg("verify_ssl", True),
+            locale_style=self._get_gen_cfg("locale_style", "simplified"),
         )
 
     def get_downloader_config(self) -> DownloaderConfig:
@@ -68,30 +69,27 @@ class ConfigAdapter:
 
         Reads from:
           - config["general"] for download directories, worker counts, etc.
-          - config["requests"] for retry and backoff settings
           - config["general"]["debug"] for debug toggles (e.g. save_html)
           - config["sites"][site] for login credentials and mode
 
         :return: A DownloaderConfig instance with all fields populated.
         """
         gen = self._config.get("general", {})
-        req = self._config.get("requests", {})
         debug = gen.get("debug", {})
-        site_cfg = self._get_site_cfg()
         return DownloaderConfig(
-            request_interval=gen.get("request_interval", 2.0),
-            retry_times=req.get("retry_times", 3),
-            backoff_factor=req.get("backoff_factor", 2.0),
+            request_interval=self._get_gen_cfg("request_interval", 2.0),
+            retry_times=self._get_gen_cfg("retry_times", 3),
+            backoff_factor=self._get_gen_cfg("backoff_factor", 2.0),
+            workers=self._get_gen_cfg("workers", 2),
+            skip_existing=self._get_gen_cfg("skip_existing", True),
+            login_required=self._site_cfg.get("login_required", False),
+            save_html=debug.get("save_html", False),
             raw_data_dir=gen.get("raw_data_dir", "./raw_data"),
             cache_dir=gen.get("cache_dir", "./novel_cache"),
-            workers=gen.get("workers", 2),
-            skip_existing=gen.get("skip_existing", True),
-            login_required=site_cfg.get("login_required", False),
-            save_html=debug.get("save_html", False),
             storage_batch_size=gen.get("storage_batch_size", 1),
-            username=site_cfg.get("username", ""),
-            password=site_cfg.get("password", ""),
-            cookies=site_cfg.get("cookies", ""),
+            username=self._site_cfg.get("username", ""),
+            password=self._site_cfg.get("password", ""),
+            cookies=self._site_cfg.get("cookies", ""),
         )
 
     def get_parser_config(self) -> ParserConfig:
@@ -107,10 +105,9 @@ class ConfigAdapter:
         """
         gen = self._config.get("general", {})
         font_ocr = gen.get("font_ocr", {})
-        site_cfg = self._get_site_cfg()
         return ParserConfig(
             cache_dir=gen.get("cache_dir", "./novel_cache"),
-            use_truncation=site_cfg.get("use_truncation", True),
+            use_truncation=self._site_cfg.get("use_truncation", True),
             decode_font=font_ocr.get("decode_font", False),
             save_font_debug=font_ocr.get("save_font_debug", False),
             batch_size=font_ocr.get("batch_size", 32),
@@ -135,13 +132,12 @@ class ConfigAdapter:
         fmt = out.get("formats", {})
         naming = out.get("naming", {})
         epub_opts = out.get("epub", {})
-        site_cfg = self._get_site_cfg()
         cleaner_cfg = self._dict_to_cleaner_cfg(cln)
         return ExporterConfig(
             cache_dir=gen.get("cache_dir", "./novel_cache"),
             raw_data_dir=gen.get("raw_data_dir", "./raw_data"),
             output_dir=gen.get("output_dir", "./downloads"),
-            clean_text=out.get("clean_text", True),
+            clean_text=cln.get("clean_text", True),
             make_txt=fmt.get("make_txt", True),
             make_epub=fmt.get("make_epub", False),
             make_md=fmt.get("make_md", False),
@@ -151,7 +147,7 @@ class ConfigAdapter:
             include_cover=epub_opts.get("include_cover", True),
             include_toc=epub_opts.get("include_toc", False),
             include_picture=epub_opts.get("include_picture", False),
-            split_mode=site_cfg.get("split_mode", "book"),
+            split_mode=self._site_cfg.get("split_mode", "book"),
             cleaner_cfg=cleaner_cfg,
         )
 
@@ -220,8 +216,12 @@ class ConfigAdapter:
         :param value: The new site key in config["sites"] to use.
         """
         self._site = value
+        self._site_cfg = self._get_site_cfg()
 
-    def _get_site_cfg(self, site: str | None = None) -> dict[str, Any]:
+    def _get_gen_cfg(self, key: str, default: T) -> T:
+        return self._site_cfg.get(key) or self._gen_cfg.get(key) or default
+
+    def _get_site_cfg(self) -> dict[str, Any]:
         """
         Retrieve the configuration for a specific site.
 
@@ -233,11 +233,10 @@ class ConfigAdapter:
         :param site: Optional override of the site name; defaults to self._site.
         :return: The site-specific or common configuration dict.
         """
-        site = site or self._site
         sites_cfg = self._config.get("sites") or {}
 
-        if site in sites_cfg:
-            return sites_cfg[site] or {}
+        if self._site in sites_cfg:
+            return sites_cfg[self._site] or {}
 
         return sites_cfg.get("common") or {}
 
@@ -280,10 +279,10 @@ class ConfigAdapter:
         title_repl = title_section.get("replace", {})
 
         title_ext = title_section.get("external", {})
-        title_ext_en = title_ext.get("enabled", False)
-        title_ext_rm_p = title_ext.get("remove_patterns", "")
-        title_ext_rp_p = title_ext.get("replace", "")
-        if title_ext_en:
+        if title_ext.get("enabled", False):
+            title_ext_rm_p = title_ext.get("remove_patterns", "")
+            title_ext_rp_p = title_ext.get("replace", "")
+
             title_remove_ext = cls._load_str_list(title_ext_rm_p)
             title_remove += title_remove_ext
 
@@ -296,11 +295,11 @@ class ConfigAdapter:
         content_repl = content_section.get("replace", {})
 
         content_ext = content_section.get("external", {})
-        content_ext_en = content_ext.get("enabled", False)
-        content_ext_rm_p = content_ext.get("remove_patterns", "")
-        content_ext_rp_p = content_ext.get("replace", "")
 
-        if content_ext_en:
+        if content_ext.get("enabled", False):
+            content_ext_rm_p = content_ext.get("remove_patterns", "")
+            content_ext_rp_p = content_ext.get("replace", "")
+
             content_remove_ext = cls._load_str_list(content_ext_rm_p)
             content_remove += content_remove_ext
 

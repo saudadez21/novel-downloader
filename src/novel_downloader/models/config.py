@@ -31,7 +31,7 @@ class FetcherConfig:
     backoff_factor: float = 2.0
     timeout: float = 30.0
     max_connections: int = 10
-    max_rps: float | None = None  # Maximum requests per second
+    max_rps: float = 1000.0
     user_agent: str | None = None
     headers: dict[str, str] | None = None
     verify_ssl: bool = True

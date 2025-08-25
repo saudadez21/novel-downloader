@@ -1,13 +1,10 @@
-# 网络请求层设置
-[requests]
+# 全局通用设置
+[general]
 retry_times = 3                    # 请求失败重试次数
 backoff_factor = 2.0
 timeout = 30.0                     # 页面加载超时时间 (秒)
 max_connections = 10               # 并发连接的最大数
-max_rps = 1.0                      # 最大请求速率 (requests per second), 如不设置则请注释掉或删掉本行
-
-# 全局通用设置
-[general]
+max_rps = 1.0                      # 最大请求速率 (requests per second), 如不设置则请设置一个较大的数或负数
 request_interval = 2.0             # 同一本书各章节请求间隔 (秒)
 raw_data_dir = "./raw_data"        # 原始章节 JSON/DB 存放目录
 output_dir = "./downloads"         # 最终输出文件存放目录
@@ -56,14 +53,9 @@ login_required = false
 login_required = false
 
 # 输出文件格式及相关选项
-[output]
-clean_text = true                  # 是否对章节文本做清理
-
 [output.formats]
 make_txt = true                    # 是否生成完整 TXT 文件
 make_epub = false                  # 是否生成 EPUB
-make_md = false                    # 是否生成 Markdown (未实现)
-make_pdf = false                   # 可能支持 PDF 输出 (未实现)
 
 [output.naming]
 append_timestamp = false           # 在文件名中追加时间戳
@@ -72,9 +64,10 @@ filename_template = "{title}_{author}"  # 文件命名规则
 [output.epub]
 include_cover = true               # 是否在 EPUB 中包含封面
 include_toc = false                # 是否自动生成目录
-include_picture = false            # 是否下载章节图片 (体积较大)
+include_picture = true             # 是否下载章节图片 (体积较大)
 
 [cleaner]
+clean_text = true                  # 是否对章节文本做清理
 remove_invisible = true
 
 [cleaner.title]
