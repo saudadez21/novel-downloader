@@ -16,7 +16,7 @@ from platformdirs import user_config_path
 # -----------------------------------------------------------------------------
 PACKAGE_NAME = "novel_downloader"  # Python package name
 APP_NAME = "NovelDownloader"  # Display name
-APP_DIR_NAME = "novel_downloader"  # Directory name for platformdirs
+APP_DIR_NAME = PACKAGE_NAME  # Directory name for platformdirs
 LOGGER_NAME = PACKAGE_NAME  # Root logger name
 
 # -----------------------------------------------------------------------------
@@ -39,13 +39,11 @@ CONFIG_DIR = BASE_CONFIG_DIR / "config"
 # -----------------------------------------------------------------------------
 STATE_FILE = DATA_DIR / "state.json"
 SETTING_FILE = CONFIG_DIR / "settings.json"
-DEFAULT_USER_DATA_DIR = DATA_DIR / "browser_data"
 
 
 # -----------------------------------------------------------------------------
 # Default preferences & headers
 # -----------------------------------------------------------------------------
-DEFAULT_USER_PROFILE_NAME = "Profile_1"
 DEFAULT_IMAGE_SUFFIX = ".jpg"
 
 DEFAULT_USER_AGENT = (
