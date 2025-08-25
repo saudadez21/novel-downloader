@@ -66,8 +66,9 @@ def setup_logging(
     log_filename = log_path / f"{log_filename_prefix}_{date_str}.log"
 
     # Create or retrieve logger
-    logger = logging.getLogger()
+    logger = logging.getLogger(LOGGER_NAME)
     logger.setLevel(logging.DEBUG)  # Capture everything, filter by handlers
+    logger.propagate = False
 
     # Clear existing handlers to avoid duplicate logs
     if logger.hasHandlers():

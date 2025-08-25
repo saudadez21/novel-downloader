@@ -142,10 +142,10 @@ async def _download(
     parser_cfg = adapter.get_parser_config()
     exporter_cfg = adapter.get_exporter_config()
     log_level = adapter.get_log_level()
+    setup_logging(log_level=log_level)
 
     parser = get_parser(site, parser_cfg)
     exporter = get_exporter(site, exporter_cfg)
-    setup_logging(log_level=log_level)
 
     async with get_fetcher(site, fetcher_cfg) as fetcher:
         if downloader_cfg.login_required and not await fetcher.load_state():

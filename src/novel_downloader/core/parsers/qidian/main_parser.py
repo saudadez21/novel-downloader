@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from novel_downloader.core.parsers.base import BaseParser
 from novel_downloader.core.parsers.registry import register_parser
@@ -27,9 +27,6 @@ from .chapter_router import parse_chapter
 from .utils import is_encrypted
 
 logger = logging.getLogger(__name__)
-
-if TYPE_CHECKING:
-    from novel_downloader.utils.fontocr import FontOCR
 
 
 @register_parser(
@@ -53,6 +50,7 @@ class QidianParser(BaseParser):
         super().__init__(config)
 
         # Extract and store parser flags from config
+        self._config = config
         self._use_truncation = config.use_truncation
         self._decode_font: bool = config.decode_font
 
@@ -64,28 +62,6 @@ class QidianParser(BaseParser):
             DATA_DIR / "qidian" / "session_state.cookies",
         ]
         self._fuid: str = fuid or find_cookie_value(state_files, "ywguid")
-
-        self._font_ocr: FontOCR | None = None
-        if self._decode_font:
-            try:
-                from novel_downloader.utils.fontocr import FontOCR
-            except ImportError:
-                logger.warning(
-                    "[QidianParser] FontOCR not available, font decoding will skip"
-                )
-            else:
-                self._font_ocr = FontOCR(
-                    cache_dir=self._base_cache_dir,
-                    use_freq=config.use_freq,
-                    use_ocr=config.use_ocr,
-                    use_vec=config.use_vec,
-                    batch_size=config.batch_size,
-                    gpu_mem=config.gpu_mem,
-                    gpu_id=config.gpu_id,
-                    ocr_weight=config.ocr_weight,
-                    vec_weight=config.vec_weight,
-                    font_debug=config.save_font_debug,
-                )
 
     def parse_book_info(
         self,

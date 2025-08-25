@@ -29,6 +29,10 @@ from .utils import (
     is_duplicated,
     vip_status,
 )
+from .utils.fontmap_recover import (
+    apply_font_mapping,
+    generate_font_map,
+)
 
 if TYPE_CHECKING:
     from .main_parser import QidianParser
@@ -57,7 +61,7 @@ def parse_encrypted_chapter(
     :return: Formatted chapter text or empty string if not parsable.
     """
     try:
-        if not (parser._decode_font and parser._font_ocr):
+        if not parser._decode_font:
             return None
         ssr_data = find_ssr_page_context(html_str)
         chapter_info = extract_chapter_info(ssr_data)
@@ -152,13 +156,17 @@ def parse_encrypted_chapter(
                 encoding="utf-8",
             )
 
-        mapping_result = parser._font_ocr.generate_font_map(
+        mapping_result = generate_font_map(
             fixed_font_path=fixed_path,
             random_font_path=rand_path,
             char_set=char_set,
             refl_set=refl_set,
-            chapter_id=chapter_id,
+            cache_dir=parser._base_cache_dir,
+            batch_size=parser._config.batch_size,
         )
+        if not mapping_result:
+            return None
+
         if parser.save_font_debug:
             mapping_json_path = debug_dir / "font_mapping.json"
             mapping_json_path.write_text(
@@ -167,7 +175,7 @@ def parse_encrypted_chapter(
             )
 
         # Reconstruct final readable text
-        original_text = parser._font_ocr.apply_font_mapping(
+        original_text = apply_font_mapping(
             text=paragraphs_str,
             font_map=mapping_result,
         )
@@ -371,17 +379,18 @@ def render_paragraphs(
             refl_list.append(curr_str)
         return curr_str
 
-    paragraphs_str = ""
+    paragraphs_out: list[str] = []
     for paragraph in main_paragraphs:
         class_list = paragraph.get("attrs", {}).get("class", [])
         p_class_str = next((c for c in class_list if c.startswith("p")), None)
         curr_datas = paragraph.get("data", [])
 
-        ordered_cache = {}
+        buf_parts: list[str] = []
+        ordered_cache: dict[str, str] = {}
         for data in curr_datas:
             # 文本节点直接加
             if isinstance(data, str):
-                paragraphs_str += data
+                buf_parts.append(data)
                 continue
 
             if isinstance(data, dict):
@@ -401,7 +410,7 @@ def render_paragraphs(
 
                     if tag_class in rules.get("sy", {}):
                         curr_rule = rules["sy"][tag_class]
-                        paragraphs_str += apply_rule(data, curr_rule)
+                        buf_parts.append(apply_rule(data, curr_rule))
                     continue
 
                 if not p_class_str:
@@ -420,8 +429,10 @@ def render_paragraphs(
         # 最后按 orders 顺序拼接
         for ord_selector, _ in orders:
             if ord_selector in ordered_cache:
-                paragraphs_str += ordered_cache[ord_selector]
+                buf_parts.append(ordered_cache[ord_selector])
 
-        paragraphs_str += "\n\n"
+        para = "".join(buf_parts).strip()
+        if para:
+            paragraphs_out.append(para)
 
-    return paragraphs_str, refl_list
+    return "\n\n".join(paragraphs_out), refl_list
