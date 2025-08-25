@@ -14,7 +14,6 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from novel_downloader.utils.cache import cached_load_config
 from novel_downloader.utils.constants import SETTING_FILE
 
 logger = logging.getLogger(__name__)
@@ -117,7 +116,6 @@ def _load_by_extension(path: Path) -> dict[str, Any]:
         raise ValueError(f"Unsupported config file extension: {ext}")
 
 
-@cached_load_config
 def load_config(
     config_path: str | Path | None = None,
 ) -> dict[str, Any]:
