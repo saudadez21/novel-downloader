@@ -8,9 +8,8 @@ novel_downloader.utils
 __all__ = [
     "ChapterStorage",
     "TextCleaner",
-    "resolve_cookies",
-    "parse_cookie_expires",
-    "find_cookie_value",
+    "parse_cookies",
+    "get_cookie_value",
     "rc4_crypt",
     "sanitize_filename",
     "save_as_json",
@@ -30,9 +29,8 @@ __all__ = [
 
 from .chapter_storage import ChapterStorage
 from .cookies import (
-    find_cookie_value,
-    parse_cookie_expires,
-    resolve_cookies,
+    get_cookie_value,
+    parse_cookies,
 )
 from .crypto_utils import rc4_crypt
 from .file_utils import (

@@ -19,8 +19,8 @@ from novel_downloader.models import (
     ChapterDict,
     ParserConfig,
 )
-from novel_downloader.utils import find_cookie_value
 from novel_downloader.utils.constants import DATA_DIR
+from novel_downloader.utils.cookies import get_cookie_value
 
 from .book_info_parser import parse_book_info
 from .chapter_router import parse_chapter
@@ -61,7 +61,7 @@ class QidianParser(BaseParser):
         state_files = [
             DATA_DIR / "qidian" / "session_state.cookies",
         ]
-        self._fuid: str = fuid or find_cookie_value(state_files, "ywguid")
+        self._fuid: str = fuid or get_cookie_value(state_files, "ywguid")
 
     def parse_book_info(
         self,

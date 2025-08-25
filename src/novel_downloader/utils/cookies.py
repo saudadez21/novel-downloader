@@ -8,12 +8,11 @@ Utility for normalizing cookie input from user configuration.
 
 import json
 from collections.abc import Mapping
-from email.utils import parsedate_to_datetime
 from http.cookies import SimpleCookie
 from pathlib import Path
 
 
-def resolve_cookies(cookies: str | Mapping[str, str]) -> dict[str, str]:
+def parse_cookies(cookies: str | Mapping[str, str]) -> dict[str, str]:
     """
     Parse cookies from a string or dictionary into a standard dictionary.
 
@@ -35,20 +34,7 @@ def resolve_cookies(cookies: str | Mapping[str, str]) -> dict[str, str]:
     raise TypeError("Unsupported cookie format: must be str or dict-like")
 
 
-def parse_cookie_expires(value: str | None) -> int:
-    if not value:
-        return -1
-    try:
-        return int(value)
-    except (ValueError, TypeError):
-        try:
-            dt = parsedate_to_datetime(value)
-            return int(dt.timestamp())
-        except Exception:
-            return -1
-
-
-def find_cookie_value(state_files: list[Path], key: str) -> str:
+def get_cookie_value(state_files: list[Path], key: str) -> str:
     for state_file in state_files:
         try:
             with state_file.open("r", encoding="utf-8") as f:

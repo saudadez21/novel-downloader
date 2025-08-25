@@ -23,7 +23,6 @@ from novel_downloader.core.interfaces import FetcherProtocol
 from novel_downloader.models import FetcherConfig, LoginField
 from novel_downloader.utils import (
     async_sleep_with_random_delay,
-    parse_cookie_expires,
 )
 from novel_downloader.utils.constants import (
     DATA_DIR,
@@ -282,12 +281,6 @@ class BaseSession(FetcherProtocol, abc.ABC):
                     {
                         "name": cookie.key,
                         "value": cookie.value,
-                        "domain": cookie.get("domain", ""),
-                        "path": cookie.get("path", "/"),
-                        "expires": parse_cookie_expires(cookie.get("expires")),
-                        "httpOnly": bool(cookie.get("httponly", False)),
-                        "secure": bool(cookie.get("secure", False)),
-                        "sameSite": cookie.get("samesite") or "Lax",
                     }
                 )
             storage_state = {

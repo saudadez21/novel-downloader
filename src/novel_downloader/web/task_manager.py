@@ -28,7 +28,7 @@ from novel_downloader.models import (
     DownloaderConfig,
     LoginField,
 )
-from novel_downloader.utils.cookies import resolve_cookies
+from novel_downloader.utils.cookies import parse_cookies
 from novel_downloader.web import state as web_state
 
 Status = Literal["queued", "running", "completed", "cancelled", "failed"]
@@ -236,7 +236,7 @@ class TaskManager:
                 if (not val) and getattr(fld, "default", None):
                     val = fld.default
                 if getattr(fld, "type", "") == "cookie" and isinstance(val, str):
-                    val = resolve_cookies(val)
+                    val = parse_cookies(val)
                 data[fld.name] = val
             fut.set_result(data)
             dialog.close()

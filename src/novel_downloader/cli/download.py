@@ -23,7 +23,7 @@ from novel_downloader.core import (
     get_parser,
 )
 from novel_downloader.models import BookConfig, LoginField
-from novel_downloader.utils.cookies import resolve_cookies
+from novel_downloader.utils.cookies import parse_cookies
 from novel_downloader.utils.i18n import t
 from novel_downloader.utils.logger import setup_logging
 
@@ -203,7 +203,7 @@ async def _prompt_login_fields(
                 value = getpass.getpass(t("login_enter_password"))
             elif field.type == "cookie":
                 value = input(t("login_enter_cookie"))
-                value = resolve_cookies(value)
+                value = parse_cookies(value)
             else:
                 value = input(t("login_enter_value"))
 

@@ -497,7 +497,7 @@ storage.close()
 ---
 
 ```python
-def resolve_cookies(cookies: str | Mapping[str, str]) -> dict[str, str]:
+def parse_cookies(cookies: str | Mapping[str, str]) -> dict[str, str]:
 ```
 
 描述: 解析 Cookie 字符串或映射为标准字典
@@ -513,7 +513,7 @@ def resolve_cookies(cookies: str | Mapping[str, str]) -> dict[str, str]:
 示例:
 
 ```python
-ck = resolve_cookies("k1=v1; k2=v2")
+ck = parse_cookies("k1=v1; k2=v2")
 ```
 
 ### 加密/解密工具
