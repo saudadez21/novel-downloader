@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 """
-novel_downloader.config.loader
-------------------------------
+novel_downloader.config.file_io
+-------------------------------
 
 Provides functionality to load Toml configuration files into Python
 dictionaries, with robust error handling and fallback support.
 """
-
-__all__ = ["load_config"]
 
 import json
 import logging
@@ -19,7 +17,7 @@ from novel_downloader.utils.constants import SETTING_FILE
 logger = logging.getLogger(__name__)
 
 
-def resolve_file_path(
+def _resolve_file_path(
     user_path: str | Path | None,
     local_filename: str | list[str],
     fallback_path: Path,
@@ -125,7 +123,7 @@ def load_config(
     :param config_path: Optional path to the Toml configuration file.
     :return:            Parsed configuration as a dict.
     """
-    path = resolve_file_path(
+    path = _resolve_file_path(
         user_path=config_path,
         local_filename=[
             "settings.toml",
@@ -146,6 +144,31 @@ def load_config(
     return {}
 
 
+def save_config(
+    config: dict[str, Any],
+    output_path: str | Path = SETTING_FILE,
+) -> None:
+    """
+    Save configuration data to disk in JSON format.
+
+    :param config: Dictionary containing configuration data to save.
+    :param output_path: Destination path to save the config (default: SETTING_FILE).
+    :raises Exception: If writing to the file fails.
+    """
+    output = Path(output_path).expanduser().resolve()
+    output.parent.mkdir(parents=True, exist_ok=True)
+
+    try:
+        with output.open("w", encoding="utf-8") as f:
+            json.dump(config, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        logger.error("[config] Failed to write config JSON '%s': %s", output, e)
+        raise
+
+    logger.info("[config] Configuration successfully saved to JSON: %s", output)
+    return
+
+
 def save_config_file(
     source_path: str | Path,
     output_path: str | Path = SETTING_FILE,
@@ -156,9 +179,9 @@ def save_config_file(
 
     :param source_path: The user-provided TOML file path.
     :param output_path: Destination path to save the config (default: SETTING_FILE).
+    :raises Exception: If writing to the file fails.
     """
     source = Path(source_path).expanduser().resolve()
-    output = Path(output_path).expanduser().resolve()
 
     if not source.is_file():
         raise FileNotFoundError(f"Source file not found: {source}")
@@ -169,14 +192,5 @@ def save_config_file(
         logger.error("[config] Failed to load config file: %s", e)
         raise ValueError(f"Invalid config file: {source}") from e
 
-    output.parent.mkdir(parents=True, exist_ok=True)
-
-    try:
-        with output.open("w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
-    except Exception as e:
-        logger.error("[config] Failed to write config JSON '%s': %s", output, e)
-        raise
-
-    logger.info("[config] Configuration successfully saved to JSON: %s", output)
+    save_config(data, output_path)
     return

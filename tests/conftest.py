@@ -77,9 +77,9 @@ def dummy_logger(monkeypatch):
             logs.append(("debug", msg % args))
 
     # patch the logger in the loader module
-    from novel_downloader.config import loader
+    from novel_downloader.config import file_io
 
-    monkeypatch.setattr(loader, "logger", DummyLogger())
+    monkeypatch.setattr(file_io, "logger", DummyLogger())
     return logs
 
 
