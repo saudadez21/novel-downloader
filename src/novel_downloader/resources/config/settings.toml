@@ -23,16 +23,8 @@ log_level = "INFO"                 # 日志级别: DEBUG, INFO, WARNING, ERROR
 
 [general.font_ocr]
 decode_font = false                # 是否尝试本地解码混淆字体
-use_freq = false                   # 是否使用频率分析
-ocr_version = "v2.0"               # "v1.0" / "v2.0"
-use_ocr = true                     # 是否使用 OCR 辅助识别文本
-use_vec = false                    # 是否使用 Vector 辅助识别文本
-save_font_debug = false            # 是否保存字体解码调试数据
 batch_size = 32
-gpu_mem = 500                      # GPU 显存限制 (MB)
-# gpu_id =                         # 使用哪个 GPU
-ocr_weight = 0.5
-vec_weight = 0.5
+save_font_debug = false            # 是否保存字体解码调试数据
 
 # 各站点的特定配置
 [sites.qidian]  # 起点中文网

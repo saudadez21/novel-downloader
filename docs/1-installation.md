@@ -54,15 +54,15 @@ pip install novel-downloader[font-recovery]
 
 - CPU 版:
     ```bash
-    python -m pip install paddlepaddle==3.0.0 -i https://www.paddlepaddle.org.cn/packages/stable/cpu/
+    python -m pip install paddlepaddle==3.1.1 -i https://www.paddlepaddle.org.cn/packages/stable/cpu/
     ```
 
 - GPU 版 (请根据 CUDA 版本选用对应 paddlepaddle-gpu):
     ```bash
-    python -m pip install paddlepaddle-gpu==3.0.0 -i https://www.paddlepaddle.org.cn/packages/stable/cu118/
+    python -m pip install paddlepaddle-gpu==3.1.1 -i https://www.paddlepaddle.org.cn/packages/stable/cu118/
     ```
 
-当调用 `novel_downloader.utils.fontocr.ocr_v1` 时需要安装:
+安装 `paddleocr`:
 
 ```bash
 pip install paddleocr
@@ -71,8 +71,8 @@ pip install paddleocr
 当前使用版本示例:
 
 ```bash
-paddleocr==2.10.0
-paddlepaddle==3.0.0
+paddleocr==3.2.0
+paddlepaddle==3.1.1
 ```
 
 > 提示: 仅在启用 `use_ocr` 时才需要上述依赖。
