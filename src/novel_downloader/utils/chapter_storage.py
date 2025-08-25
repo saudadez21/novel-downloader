@@ -7,6 +7,8 @@ Storage module for managing novel chapters in
 either JSON file form or an SQLite database.
 """
 
+__all__ = ["ChapterStorage"]
+
 import contextlib
 import json
 import sqlite3

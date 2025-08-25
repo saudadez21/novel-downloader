@@ -49,11 +49,6 @@ class QidianParser(BaseParser):
         """
         super().__init__(config)
 
-        # Extract and store parser flags from config
-        self._config = config
-        self._use_truncation = config.use_truncation
-        self._decode_font: bool = config.decode_font
-
         self._fixed_font_dir: Path = self._base_cache_dir / "fixed_fonts"
         self._fixed_font_dir.mkdir(parents=True, exist_ok=True)
         self._debug_dir: Path = Path.cwd() / "debug"

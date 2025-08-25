@@ -44,6 +44,8 @@ class BaseParser(ParserProtocol, abc.ABC):
         self._config = config
         self._book_id: str | None = None
 
+        self._decode_font: bool = config.decode_font
+        self._use_truncation = config.use_truncation
         self._base_cache_dir = Path(config.cache_dir)
         self._cache_dir = self._base_cache_dir
 

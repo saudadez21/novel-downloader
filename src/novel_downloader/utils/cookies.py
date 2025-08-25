@@ -6,6 +6,8 @@ novel_downloader.utils.cookies
 Utility for normalizing cookie input from user configuration.
 """
 
+__all__ = ["parse_cookies", "get_cookie_value"]
+
 import json
 from collections.abc import Mapping
 from http.cookies import SimpleCookie

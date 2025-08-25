@@ -5,6 +5,8 @@ novel_downloader.utils.state
 State management for user preferences and runtime flags.
 """
 
+__all__ = ["StateManager", "state_mgr"]
+
 import json
 from pathlib import Path
 from typing import Any
