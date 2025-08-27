@@ -63,7 +63,6 @@ filename_template = "{title}_{author}"  # 文件命名规则
 
 [output.epub]
 include_cover = true               # 是否在 EPUB 中包含封面
-include_toc = false                # 是否自动生成目录
 include_picture = true             # 是否下载章节图片 (体积较大)
 
 [cleaner]

@@ -194,7 +194,6 @@ book_id = "1012584111"
 | 参数名                         | 类型    | 默认值                         | 说明                                       |
 | ----------------------------- | ------- | ----------------------------- | ------------------------------------------ |
 | `include_cover`               | bool    | true                          | 是否在 EPUB 文件中包含封                    |
-| `include_toc`                 | bool    | true                          | 是否自动生成章节目录                        |
 | `include_picture`             | bool    | false                         | 是否下载并嵌入章节中的图片 (可能增加文件体积) |
 
 #### 示例配置
@@ -215,7 +214,6 @@ filename_template = "{title}_{author}"
 
 [output.epub]
 include_cover = true
-include_toc = false
 include_picture = false
 ```
 
