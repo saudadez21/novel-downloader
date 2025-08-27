@@ -10,14 +10,12 @@ Pure utility functions for EPUB assembly, including:
 """
 
 import hashlib
+from html import escape
 from pathlib import Path
-
-from lxml import etree, html
 
 from .constants import (
     CONTAINER_TEMPLATE,
     IMAGE_FOLDER,
-    PRETTY_PRINT_FLAG,
     ROOT_PATH,
 )
 
@@ -67,42 +65,43 @@ def build_book_intro(
 
     :return: A HTML string for inclusion in `intro.xhtml`
     """
-    root = html.Element("div")
+    lines = []
 
-    # Main heading
-    h1 = etree.SubElement(root, "h1")
-    h1.text = "书籍简介"
+    lines.append("<div>")
+    lines.append("<h1>书籍简介</h1>")
+    lines.append('<div class="intro-info">')
+    lines.append("<ul>")
 
-    # Metadata list
-    info_div = etree.SubElement(root, "div", {"class": "intro-info"})
-    ul = etree.SubElement(info_div, "ul")
-    _add_li(ul, "书名", f"《{book_name}》" if book_name else "")
-    _add_li(ul, "作者", author)
-    _add_li(ul, "分类", ", ".join(subject) if subject else "")
-    _add_li(ul, "字数", word_count)
-    _add_li(ul, "状态", serial_status)
+    name_val = f"《{book_name}》" if book_name else ""
+    subj_val = ", ".join(subject) if subject else ""
 
-    # Summary section
+    li_lines = [
+        _li_line("书名", name_val),
+        _li_line("作者", author),
+        _li_line("分类", subj_val),
+        _li_line("字数", word_count),
+        _li_line("状态", serial_status),
+    ]
+    for li in li_lines:
+        if li:
+            lines.append(li)
+
+    lines.append("</ul>")
+    lines.append("</div>")
+
     if summary:
-        # force page break before summary
-        etree.SubElement(root, "p", {"class": "new-page-after"})
-        h2 = etree.SubElement(root, "h2")
-        h2.text = "简介"
-
-        summary_div = etree.SubElement(root, "div", {"class": "intro-summary"})
+        lines.append('<p class="new-page-after"></p>')
+        lines.append("<h2>简介</h2>")
+        lines.append('<div class="intro-summary">')
         for line in summary.splitlines():
-            line = line.strip()
-            if not line:
+            s = line.strip()
+            if not s:
                 continue
-            p = etree.SubElement(summary_div, "p")
-            p.text = line
+            lines.append(f"<p>{escape(s, quote=True)}</p>")
+        lines.append("</div>")
 
-    html_string: str = html.tostring(
-        root,
-        pretty_print=PRETTY_PRINT_FLAG,
-        encoding="unicode",
-    )
-    return html_string
+    lines.append("</div>")
+    return "\n".join(lines)
 
 
 def build_volume_intro(
@@ -122,77 +121,45 @@ def build_volume_intro(
     :param volume_intro_text: multiline intro text for this volume
     :return: A HTML string for inclusion in `vol_<n>.xhtml`
     """
-    root = html.Element("div")
-
-    # Break the title into two lines if possible
     line1, line2 = _split_volume_title(volume_title)
 
-    header = etree.SubElement(root, "div", {"class": "vol-header"})
-
-    # Top decorative border
-    header.append(_make_vol_border_img(flip=False))
-
-    # Main title
-    h1 = etree.SubElement(header, "h1", {"class": "vol-title-main"})
-    h1.text = line1
-
-    # Bottom decorative border (flipped)
-    header.append(_make_vol_border_img(flip=True))
-
-    # Subtitle (if any)
+    lines = []
+    lines.append("<div>")
+    lines.append('<div class="vol-header">')
+    lines.append(_vol_border_div_str(flip=False))
+    lines.append(f'<h1 class="vol-title-main">{escape(line1, quote=True)}</h1>')
+    lines.append(_vol_border_div_str(flip=True))
     if line2:
-        h2 = etree.SubElement(header, "h2", {"class": "vol-title-sub"})
-        h2.text = line2
+        lines.append(f'<h2 class="vol-title-sub">{escape(line2, quote=True)}</h2>')
+    lines.append("</div>")
 
-    # Intro text paragraphs
     if volume_intro_text:
-        etree.SubElement(root, "p", {"class": "new-page-after"})
-
-        vol_div = etree.SubElement(root, "div", {"class": "vol-intro-text"})
+        lines.append('<p class="new-page-after"></p>')
+        lines.append('<div class="vol-intro-text">')
         for line in volume_intro_text.splitlines():
-            line = line.strip()
-            if not line:
+            s = line.strip()
+            if not s:
                 continue
-            p = etree.SubElement(vol_div, "p")
-            p.text = line
+            lines.append(f"<p>{escape(s, quote=True)}</p>")
+        lines.append("</div>")
 
-    html_string: str = html.tostring(
-        root,
-        pretty_print=PRETTY_PRINT_FLAG,
-        encoding="unicode",
+    lines.append("</div>")
+    return "\n".join(lines)
+
+
+def _li_line(label: str, value: str) -> str:
+    if not value:
+        return ""
+    return f"<li>{escape(label, quote=True)}: {escape(value, quote=True)}</li>"
+
+
+def _vol_border_div_str(flip: bool = False) -> str:
+    classes = "vol-border" + (" flip" if flip else "")
+    return (
+        f'<div class="{classes}">'
+        f'<img src="../{IMAGE_FOLDER}/volume_border.png" alt="">'
+        f"</div>"
     )
-    return html_string
-
-
-def _add_li(ul: etree._Element, label: str, value: str) -> None:
-    """
-    Append a `<li>` with 'label: value' if value is nonempty.
-    """
-    if value:
-        li = etree.SubElement(ul, "li")
-        li.text = f"{label}: {value}"
-
-
-def _make_vol_border_img(flip: bool = False) -> html.HtmlElement:
-    """
-    Return a `<div>` containing the `volume_border.png` image,
-    styled by the given class name.
-    """
-    classes = ["vol-border"]
-    if flip:
-        classes.append("flip")
-    cls = " ".join(classes)
-
-    div = html.Element("div", {"class": cls})
-    etree.SubElement(
-        div,
-        "img",
-        {
-            "src": f"../{IMAGE_FOLDER}/volume_border.png",
-            "alt": "",
-        },
-    )
-    return div
 
 
 def _split_volume_title(volume_title: str) -> tuple[str, str]:
@@ -202,10 +169,10 @@ def _split_volume_title(volume_title: str) -> tuple[str, str]:
     :param volume_title: Original volume title string.
     :return: Tuple of (line1, line2)
     """
-    if " " in volume_title:
-        parts = volume_title.split(" ", 1)
-    elif "-" in volume_title:
+    if "-" in volume_title:
         parts = volume_title.split("-", 1)
+    elif " " in volume_title:
+        parts = volume_title.split(" ", 1)
     else:
         return volume_title, ""
 

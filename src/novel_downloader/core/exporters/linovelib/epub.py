@@ -41,7 +41,7 @@ _IMG_HEADERS["Referer"] = "https://www.linovelib.com/"
 def export_whole_book(
     exporter: LinovelibExporter,
     book_id: str,
-) -> None:
+) -> Path | None:
     """
     Export a single novel (identified by `book_id`) to an EPUB file.
 
@@ -73,7 +73,7 @@ def export_whole_book(
     # --- Load book_info.json ---
     book_info = exporter._load_book_info(book_id)
     if not book_info:
-        return
+        return None
 
     book_name = book_info.get("book_name", book_id)
     book_author = book_info.get("author", "")
@@ -152,7 +152,7 @@ def export_whole_book(
                 )
                 continue
 
-            chap_title = cleaner.clean_title(chap_meta.get("title", ""))
+            chap_title = chap_meta.get("title", "")
             data = chap_map.get(chap_id)
             if not data:
                 exporter.logger.info(
@@ -177,7 +177,7 @@ def export_whole_book(
                 paragraphs=content,
                 extras={},
             )
-            curr_vol.add_chapter(
+            curr_vol.chapters.append(
                 Chapter(
                     id=f"c_{chap_id}",
                     filename=f"c{chap_id}.xhtml",
@@ -195,20 +195,19 @@ def export_whole_book(
         author=book_info.get("author"),
         ext="epub",
     )
-    finalize_export(
+    return finalize_export(
         book=book,
         out_dir=out_dir,
         filename=out_name,
         logger=exporter.logger,
         tag=TAG,
     )
-    return
 
 
 def export_by_volume(
     exporter: LinovelibExporter,
     book_id: str,
-) -> None:
+) -> Path | None:
     """
     Export each volume of a novel as a separate EPUB file.
 
@@ -241,7 +240,7 @@ def export_by_volume(
     # --- Load book_info.json ---
     book_info = exporter._load_book_info(book_id)
     if not book_info:
-        return
+        return None
 
     book_name = book_info.get("book_name", book_id)
     book_author = book_info.get("author", "")
@@ -302,7 +301,7 @@ def export_by_volume(
                 )
                 continue
 
-            chap_title = cleaner.clean_title(chap_meta.get("title", ""))
+            chap_title = chap_meta.get("title", "")
             data = chap_map.get(chap_id)
             if not data:
                 exporter.logger.info(
@@ -348,4 +347,4 @@ def export_by_volume(
             logger=exporter.logger,
             tag=TAG,
         )
-    return
+    return None

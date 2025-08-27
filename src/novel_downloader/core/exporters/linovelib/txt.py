@@ -9,6 +9,7 @@ into a single `.txt` file. Intended for use by `LinovelibExporter`.
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from novel_downloader.core.exporters.txt_util import (
@@ -24,7 +25,7 @@ if TYPE_CHECKING:
 def linovelib_export_as_txt(
     exporter: LinovelibExporter,
     book_id: str,
-) -> None:
+) -> Path | None:
     """
     Export a novel as a single text file by merging all chapter data.
 
@@ -53,7 +54,7 @@ def linovelib_export_as_txt(
     # --- Load book_info.json ---
     book_info = exporter._load_book_info(book_id)
     if not book_info:
-        return
+        return None
 
     # --- Compile chapters ---
     parts: list[str] = []
@@ -84,7 +85,7 @@ def linovelib_export_as_txt(
                 )
                 continue
 
-            chap_title = cleaner.clean_title(chap_meta.get("title", ""))
+            chap_title = chap_meta.get("title", "")
             data = chap_map.get(chap_id)
             if not data:
                 exporter.logger.info(
@@ -130,4 +131,4 @@ def linovelib_export_as_txt(
         exporter.logger.info("%s Novel saved to: %s", TAG, out_path)
     else:
         exporter.logger.error("%s Failed to write novel to %s", TAG, out_path)
-    return
+    return result

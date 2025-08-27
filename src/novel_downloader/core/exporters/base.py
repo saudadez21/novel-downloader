@@ -64,10 +64,7 @@ class BaseExporter(ExporterProtocol, abc.ABC):
 
         self.logger = logging.getLogger(f"{self.__class__.__name__}")
 
-    def export(
-        self,
-        book_id: str,
-    ) -> None:
+    def export(self, book_id: str) -> dict[str, Path]:
         """
         Export the book in the formats specified in config.
         If a method is not implemented or fails, log the error and continue.
@@ -75,39 +72,46 @@ class BaseExporter(ExporterProtocol, abc.ABC):
         :param book_id: The book identifier (used for filename, lookup, etc.)
         """
         TAG = "[Exporter]"
+        results: dict[str, Path] = {}
+
         actions = [
-            ("make_txt", self.export_as_txt),
-            ("make_epub", self.export_as_epub),
-            ("make_md", self.export_as_md),
-            ("make_pdf", self.export_as_pdf),
+            ("make_txt", "txt", self.export_as_txt),
+            ("make_epub", "epub", self.export_as_epub),
+            ("make_md", "md", self.export_as_md),
+            ("make_pdf", "pdf", self.export_as_pdf),
         ]
 
-        for flag_name, export_method in actions:
+        for flag_name, fmt_key, export_method in actions:
             if getattr(self._config, flag_name, False):
                 try:
                     self.logger.info(
                         "%s Attempting to export book_id '%s' as %s...",
                         TAG,
                         book_id,
-                        flag_name,
+                        fmt_key,
                     )
-                    export_method(book_id)
-                    self.logger.info("%s Successfully saved as %s.", TAG, flag_name)
+                    path = export_method(book_id)
+
+                    if isinstance(path, Path):
+                        results[fmt_key] = path
+                        self.logger.info("%s Successfully saved as %s.", TAG, fmt_key)
+
                 except NotImplementedError as e:
                     self.logger.warning(
                         "%s Export method for %s not implemented: %s",
                         TAG,
-                        flag_name,
+                        fmt_key,
                         str(e),
                     )
                 except Exception as e:
                     self.logger.error(
-                        "%s Error while saving as %s: %s", TAG, flag_name, str(e)
+                        "%s Error while saving as %s: %s", TAG, fmt_key, str(e)
                     )
-        return
+
+        return results
 
     @abc.abstractmethod
-    def export_as_txt(self, book_id: str) -> None:
+    def export_as_txt(self, book_id: str) -> Path | None:
         """
         Persist the assembled book as a .txt file.
 
@@ -117,7 +121,7 @@ class BaseExporter(ExporterProtocol, abc.ABC):
         """
         ...
 
-    def export_as_epub(self, book_id: str) -> None:
+    def export_as_epub(self, book_id: str) -> Path | None:
         """
         Optional: Persist the assembled book as a EPUB (.epub) file.
 
@@ -126,7 +130,7 @@ class BaseExporter(ExporterProtocol, abc.ABC):
         """
         raise NotImplementedError("EPUB export not supported by this Exporter.")
 
-    def export_as_md(self, book_id: str) -> None:
+    def export_as_md(self, book_id: str) -> Path | None:
         """
         Optional: Persist the assembled book as a Markdown file.
 
@@ -135,7 +139,7 @@ class BaseExporter(ExporterProtocol, abc.ABC):
         """
         raise NotImplementedError("Markdown export not supported by this Exporter.")
 
-    def export_as_pdf(self, book_id: str) -> None:
+    def export_as_pdf(self, book_id: str) -> Path | None:
         """
         Optional: Persist the assembled book as a PDF file.
 

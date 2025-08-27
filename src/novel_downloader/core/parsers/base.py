@@ -49,6 +49,8 @@ class BaseParser(ParserProtocol, abc.ABC):
         self._base_cache_dir = Path(config.cache_dir)
         self._cache_dir = self._base_cache_dir
 
+        self._initialize()
+
     @abc.abstractmethod
     def parse_book_info(
         self,
@@ -104,6 +106,12 @@ class BaseParser(ParserProtocol, abc.ABC):
         Hook called when a new book ID is set.
         Subclasses can override this to initialize
         book-related folders or states.
+        """
+        pass
+
+    def _initialize(self) -> None:
+        """
+        Hook for subclasses to load regex, JSON, etc.
         """
         pass
 

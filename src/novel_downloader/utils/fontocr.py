@@ -75,7 +75,7 @@ class FontOCR:
         """
         Run OCR on input images.
 
-        :param images: list of PIL.Image objects to predict
+        :param images: list of np.ndarray objects to predict
         :param top_k: number of top candidates to return per image
         :return: list of lists containing (character, score)
         """

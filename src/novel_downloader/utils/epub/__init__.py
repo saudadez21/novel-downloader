@@ -14,7 +14,7 @@ Usage example:
 
 ```python
 builder = EpubBuilder(title="My Novel", author="Author Name", uid="uuid-1234")
-builder.add_chapter(Chapter(id="ch1", title="Chapter 1", content="<p>xxx</p>"))
+builder.chapters.append(Chapter(id="ch1", title="Chapter 1", content="<p>xxx</p>"))
 builder.export("output/my_novel.epub")
 ```
 """

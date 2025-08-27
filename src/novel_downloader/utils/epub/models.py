@@ -65,12 +65,6 @@ class NavPoint:
     src: str
     children: list[NavPoint] = field(default_factory=list)
 
-    def add_child(self, point: NavPoint) -> None:
-        """
-        Append a child nav point under this one.
-        """
-        self.children.append(point)
-
 
 @dataclass
 class EpubResource:
@@ -101,10 +95,6 @@ class Chapter(EpubResource):
     css: list[StyleSheet] = field(default_factory=list)
     media_type: str = field(init=False, default="application/xhtml+xml")
 
-    def __post_init__(self) -> None:
-        if not self.filename:
-            object.__setattr__(self, "filename", f"{self.id}.xhtml")
-
     def to_xhtml(self, lang: str = "zh-CN") -> str:
         """
         Generate the XHTML for a chapter.
@@ -128,7 +118,3 @@ class Volume:
     intro: str = ""
     cover: Path | None = None
     chapters: list[Chapter] = field(default_factory=list)
-
-    def add_chapter(self, chapter: Chapter) -> None:
-        """Append a chapter to this volume."""
-        self.chapters.append(chapter)

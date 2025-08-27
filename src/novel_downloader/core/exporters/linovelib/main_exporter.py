@@ -5,11 +5,16 @@ novel_downloader.core.exporters.linovelib.main_exporter
 
 """
 
+from pathlib import Path
 
 from novel_downloader.core.exporters.base import BaseExporter
 from novel_downloader.core.exporters.registry import register_exporter
 from novel_downloader.models import ExporterConfig
 
+from .epub import (
+    export_by_volume,
+    export_whole_book,
+)
 from .txt import linovelib_export_as_txt
 
 
@@ -29,7 +34,7 @@ class LinovelibExporter(BaseExporter):
         """
         super().__init__(config, "linovelib")
 
-    def export_as_txt(self, book_id: str) -> None:
+    def export_as_txt(self, book_id: str) -> Path | None:
         """
         Compile and export a novel as a single .txt file.
 
@@ -38,23 +43,13 @@ class LinovelibExporter(BaseExporter):
         self._init_chapter_storages(book_id)
         return linovelib_export_as_txt(self, book_id)
 
-    def export_as_epub(self, book_id: str) -> None:
+    def export_as_epub(self, book_id: str) -> Path | None:
         """
         Persist the assembled book as a EPUB (.epub) file.
 
         :param book_id: The book identifier.
         :raises NotImplementedError: If the method is not overridden.
         """
-        try:
-            from .epub import (
-                export_by_volume,
-                export_whole_book,
-            )
-        except ImportError as err:
-            raise NotImplementedError(
-                "EPUB export not supported. Please install 'ebooklib'"
-            ) from err
-
         self._init_chapter_storages(book_id)
 
         exporters = {

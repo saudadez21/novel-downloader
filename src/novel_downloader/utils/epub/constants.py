@@ -11,7 +11,6 @@ EPUB-specific constants used by the builder, including:
 - Template strings for container.xml and cover image HTML
 """
 
-PRETTY_PRINT_FLAG = True
 ROOT_PATH = "OEBPS"
 IMAGE_FOLDER = "Images"
 TEXT_FOLDER = "Text"
@@ -24,11 +23,6 @@ NCX_NS = "http://www.daisy.org/z3986/2005/ncx/"
 OPF_NS = "http://www.idpf.org/2007/opf"
 DC_NS = "http://purl.org/dc/elements/1.1/"
 
-OPF_PKG_ATTRIB = {
-    "version": "3.0",
-    "unique-identifier": "id",
-    "prefix": "rendition: http://www.idpf.org/vocab/rendition/#",
-}
 CHAP_DOC_TYPE = (
     '<?xml version="1.0" encoding="utf-8"?>\n'
     "<!DOCTYPE html PUBLIC "
@@ -75,3 +69,54 @@ CHAP_TMPLATE = f"""\
   <body>{{content}}</body>
 </html>
 """
+
+NAV_TEMPLATE = f"""\
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE html>
+<html xmlns="{XHTML_NS}" xmlns:epub="{EPUB_NS}" lang="{{lang}}" xml:lang="{{lang}}">
+  <head>
+    <title>{{title}}</title>
+  </head>
+  <body>
+    <nav epub:type="toc" id="{{id}}" role="doc-toc">
+      <h2>{{title}}</h2>
+      <ol>
+{{items}}
+      </ol>
+    </nav>
+  </body>
+</html>
+"""
+
+NCX_TEMPLATE = f"""\
+<?xml version='1.0' encoding='utf-8'?>
+<ncx xmlns="{NCX_NS}" version="2005-1">
+  <head>
+    <meta name="dtb:uid" content="{{uid}}"/>
+    <meta name="dtb:depth" content="{{depth}}"/>
+    <meta name="dtb:totalPageCount" content="0"/>
+    <meta name="dtb:maxPageNumber" content="0"/>
+  </head>
+  <docTitle>
+    <text>{{title}}</text>
+  </docTitle>
+  <navMap>
+{{navpoints}}
+  </navMap>
+</ncx>
+"""
+
+OPF_TEMPLATE = f"""\
+<?xml version='1.0' encoding='utf-8'?>
+<package xmlns="{OPF_NS}" xmlns:dc="{DC_NS}" xmlns:opf="{OPF_NS}" version="3.0" unique-identifier="id" prefix="rendition: http://www.idpf.org/vocab/rendition/#">
+  <metadata>
+{{metadata}}
+  </metadata>
+  <manifest>
+{{manifest_items}}
+  </manifest>
+  <spine{{spine_toc}}>
+{{spine_items}}
+  </spine>
+{{guide_section}}</package>
+"""  # noqa: E501
