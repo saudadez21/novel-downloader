@@ -11,7 +11,8 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Any
+from contextlib import suppress
+from typing import TYPE_CHECKING, TypedDict
 
 import tinycss2
 from lxml import html
@@ -39,6 +40,25 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 IGNORED_CLASS_LISTS = {"title", "review"}
+
+
+class Rule(TypedDict, total=False):
+    delete_all: bool
+    delete_first: bool
+    transform_flip_x: bool
+    append_start_char: str
+    append_end_char: str
+    append_start_attr: str
+    append_end_attr: str
+
+
+class Rules(TypedDict):
+    # e.g., orders = ["i", "em", "span"]
+    orders: list[str]
+    # e.g., sy["sy-3"] -> Rule
+    sy: dict[str, Rule]
+    # e.g., p_rules["p3"]["i"] -> Rule
+    p_rules: dict[str, dict[str, Rule]]
 
 
 def parse_encrypted_chapter(
@@ -119,27 +139,9 @@ def parse_encrypted_chapter(
             except Exception as e:
                 logger.error("[Parser] decryption failed for '%s': %s", chapter_id, e)
                 return None
-        main_paragraphs = extract_paragraphs_recursively(raw_html)
 
-        if parser.save_font_debug:
-            main_paragraphs_path = debug_dir / "main_paragraphs_debug.json"
-            main_paragraphs_path.write_text(
-                json.dumps(main_paragraphs, ensure_ascii=False, indent=2),
-                encoding="utf-8",
-            )
-
-        paragraphs_rules = parse_rule(css_str)
-        if parser.save_font_debug:
-            paragraphs_rules_path = debug_dir / "paragraphs_rules_debug.json"
-            paragraphs_rules_path.write_text(
-                json.dumps(paragraphs_rules, ensure_ascii=False, indent=2),
-                encoding="utf-8",
-            )
-
-        paragraphs_str, refl_list = render_paragraphs(
-            main_paragraphs,
-            paragraphs_rules,
-        )
+        css_rules = parse_css_rules(css_str)
+        paragraphs_str, refl_list = render_visible_text(raw_html, css_rules)
         if parser.save_font_debug:
             paragraphs_str_path = debug_dir / f"{chapter_id}_debug.txt"
             paragraphs_str_path.write_text(paragraphs_str, encoding="utf-8")
@@ -210,226 +212,217 @@ def parse_encrypted_chapter(
     return None
 
 
-def extract_paragraphs_recursively(html_str: str) -> list[dict[str, Any]]:
-    def parse_element(elem: html.HtmlElement) -> dict[str, Any]:
-        class_attr = elem.attrib.get("class", "")
-        class_list = class_attr.split() if isinstance(class_attr, str) else class_attr
-        if "review" in class_list:
-            return {}
-
-        # Build attrs with class as list
-        attrs = {k: v.split() if k == "class" else v for k, v in elem.attrib.items()}
-
-        node: dict[str, Any] = {
-            "tag": elem.tag,
-            "attrs": attrs,
-            "data": [],
-        }
-
-        # Append entire elem.text if present (no splitting)
-        if elem.text:
-            node["data"].append(elem.text)
-
-        # Recurse into children
-        for child in elem.iterchildren(tag=None):
-            child_dict = parse_element(child)
-            if child_dict:
-                node["data"].append(child_dict)
-
-            # Append entire tail string (no split)
-            if child.tail:
-                node["data"].append(child.tail)
-
-        return node
-
-    tree = html.fromstring(html_str)
-    return [parse_element(p) for p in tree.findall(".//p")]
-
-
-def parse_rule(css_str: str) -> dict[str, Any]:
+def _only_tag(selector: str) -> str | None:
     """
-    Parse a CSS string and extract style rules for rendering.
-
-    Handles:
-    - font-size:0 (mark for deletion)
-    - scaleX(-1) (mark as mirrored)
-    - ::before / ::after with content or attr()
-    - class + tag selector mapping
-    - custom rendering order via 'order'
-
-    :param css_str: Raw CSS stylesheet string.
-    :return: Dict with "rules" and "orders" for rendering.
+    Normalize a selector into just its tag name for ordering.
+    Handles forms like 'i', 'em::before', '.p3 i', '.p2 span::after'.
+    Returns None if can't extract a tag.
     """
+    sel = selector.strip()
+    # If it has spaces, take the rightmost simple selector
+    last = sel.split()[-1]
+    # Drop ::pseudo
+    last = last.split("::", 1)[0]
+    # If it's like 'span[attr=..]' keep 'span'
+    last = last.split("[", 1)[0]
+    # If it starts with '.', it's not a tag
+    if not last or last.startswith("."):
+        return None
+    return last
 
-    rules: dict[str, Any] = {}
-    orders = []
 
+def parse_css_rules(css_str: str) -> Rules:
+    """
+    Smaller, stricter CSS parsing tuned to the selectors you actually consume.
+    Produces normalized Rules with:
+      - orders: list[str] of tag names sorted by numeric 'order'
+      - sy:     '.sy-*' class rules
+      - p_rules: '.p* <tag>' rules, indexed by p-class then tag
+    """
+    rules: Rules = {"orders": [], "sy": {}, "p_rules": {}}
     stylesheet = tinycss2.parse_stylesheet(
         css_str, skip_comments=True, skip_whitespace=True
     )
 
+    # Gather (tag, order_value) then sort once
+    order_pairs: list[tuple[str, int]] = []
+
     for rule in stylesheet:
-        if rule.type != "qualified-rule":
+        if getattr(rule, "type", None) != "qualified-rule":
             continue
 
-        selector = tinycss2.serialize(rule.prelude).strip()
-        declarations = tinycss2.parse_declaration_list(rule.content)
+        selector_raw = tinycss2.serialize(rule.prelude).strip()
+        decls = tinycss2.parse_declaration_list(rule.content)
 
-        parsed = {}
-        order_val = None
+        new_rule: Rule = {}
+        order_val: int | None = None
 
-        for decl in declarations:
+        for decl in decls:
             if decl.type != "declaration":
                 continue
-            name = decl.lower_name
+            name = (decl.lower_name or "").strip()
             value = tinycss2.serialize(decl.value).strip()
 
             if name == "font-size" and value == "0":
-                if "::first-letter" in selector:
-                    parsed["delete-first"] = True
+                if "::first-letter" in selector_raw:
+                    new_rule["delete_first"] = True
                 else:
-                    parsed["delete-all"] = True
-            elif name == "transform" and value.lower() == "scalex(-1)":
-                parsed["transform-x_-1"] = True
+                    new_rule["delete_all"] = True
+            elif name == "transform" and value.lower().replace(" ", "") == "scalex(-1)":
+                new_rule["transform_flip_x"] = True
             elif name == "order":
-                order_val = value
+                with suppress(ValueError, TypeError):
+                    order_val = int(value)
             elif name == "content":
-                if "::after" in selector:
+                if "::after" in selector_raw:
                     if "attr(" in value:
-                        parsed["append-end-attr"] = value.split("attr(")[1].split(")")[
-                            0
-                        ]
+                        attr = value.split("attr(", 1)[1].split(")", 1)[0]
+                        new_rule["append_end_attr"] = attr
                     else:
-                        parsed["append-end-char"] = value.strip("\"'")
-                elif "::before" in selector:
+                        new_rule["append_end_char"] = value.strip("\"'")
+                elif "::before" in selector_raw:
                     if "attr(" in value:
-                        parsed["append-start-attr"] = value.split("attr(")[1].split(
-                            ")"
-                        )[0]
+                        attr = value.split("attr(", 1)[1].split(")", 1)[0]
+                        new_rule["append_start_attr"] = attr
                     else:
-                        parsed["append-start-char"] = value.strip("\"'")
+                        new_rule["append_start_char"] = value.strip("\"'")
 
-        # Store in structure
-        if selector.startswith(".sy-"):
-            rules.setdefault("sy", {})[selector[1:]] = parsed
-        elif selector.startswith(".p") and " " in selector:
-            class_str, tag_part = selector.split(" ", 1)
-            class_str = class_str.lstrip(".")
-            tag_part = tag_part.split("::")[0]
-            rules.setdefault(class_str, {}).setdefault(tag_part, {}).update(parsed)
+        # classify selector
+        if selector_raw.startswith(".sy-"):
+            # e.g. ".sy-3"
+            key = selector_raw.lstrip(".")
+            old = rules["sy"].get(key)
+            rules["sy"][key] = {**(old or {}), **(new_rule or {})}
 
-        if order_val:
-            orders.append((selector, order_val))
+        elif selector_raw.startswith(".p") and " " in selector_raw:
+            # e.g. ".p3 i", ".p2 span::before"
+            p_cls, right = selector_raw.split(" ", 1)
+            p_cls = p_cls.lstrip(".")
+            tag = _only_tag(right)
+            if tag:
+                prev = rules["p_rules"].setdefault(p_cls, {}).get(tag)
+                rules["p_rules"][p_cls][tag] = {**(prev or {}), **(new_rule or {})}
 
-    orders.sort(key=lambda x: int(x[1]))
-    return {"rules": rules, "orders": orders}
+        # orders (bare tag name with order)
+        if order_val is not None:
+            tag_for_order = _only_tag(selector_raw)
+            if tag_for_order:
+                order_pairs.append((tag_for_order, order_val))
+
+    # normalize orders
+    order_pairs.sort(key=lambda t: t[1])
+    seen: set[str] = set()
+    for tag, _n in order_pairs:
+        if tag not in seen:
+            seen.add(tag)
+            rules["orders"].append(tag)
+    return rules
 
 
-def render_paragraphs(
-    main_paragraphs: list[dict[str, Any]],
-    rules: dict[str, Any],
-) -> tuple[str, list[str]]:
+def render_visible_text(html_str: str, rules: Rules) -> tuple[str, list[str]]:
     """
-    Applies the parsed CSS rules to the paragraph structure and
-    reconstructs the visible text.
-
-    Handles special class styles like .sy-*, text order control,
-    mirrored characters, etc.
-
-    :param main_paragraphs: A list of paragraph dictionaries, each with 'attrs'
-                            and 'data' fields representing structured content.
-    :param rules: A dictionary with keys 'orders' and 'rules', parsed from CSS.
-                  - rules['orders']: List of (selector, id) tuples.
-                  - rules['rules']: Nested dict containing transformation rules.
-
-    :return:
-        - A reconstructed paragraph string with line breaks.
-        - A list of mirrored (reflected) characters for later OCR processing.
+    Single-pass renderer over the HTML using pre-parsed Rules.
+    Mirrors original semantics:
+      - text nodes appended as-is
+      - skip .review
+      - special <y class="sy-*"> handled via sy rules
+      - per-<p class="p*> piece ordering using rules.orders
+      - capture reflected chars for OCR mapping
     """
-    orders: list[tuple[str, str]] = rules.get("orders", [])
-    rules = rules.get("rules", {})
+    tree = html.fromstring(html_str)
+    paragraphs_out: list[str] = []
     refl_list: list[str] = []
 
-    def apply_rule(data: dict[str, Any], rule: dict[str, Any]) -> str:
-        if rule.get("delete-all", False):
+    def _class_list(el: html.HtmlElement) -> list[str]:
+        cls = el.attrib.get("class", "")
+        return cls.split() if isinstance(cls, str) else (cls or [])
+
+    def _tag_name(el: html.HtmlElement) -> str:
+        t = el.tag
+        if isinstance(t, str):
+            return t.split("}", 1)[-1]
+        ln = getattr(t, "localname", None)
+        return ln if isinstance(ln, str) else str(t).split("}", 1)[-1]
+
+    def _apply_rule(el: html.HtmlElement, rule: Rule) -> str:
+        if rule.get("delete_all", False):
             return ""
 
-        curr_str = ""
-        if isinstance(data.get("data"), list) and data["data"]:
-            first_data = data["data"][0]
-            if isinstance(first_data, str):
-                curr_str += first_data
+        # Text payload behavior: take element.text only
+        s = el.text or ""
 
-        if rule.get("delete-first", False):
-            curr_str = "" if len(curr_str) <= 1 else curr_str[1:]
+        if rule.get("delete_first", False):
+            s = "" if len(s) <= 1 else s[1:]
 
-        curr_str += rule.get("append-end-char", "")
+        # end char / attr
+        end_char = rule.get("append_end_char")
+        if end_char:
+            s += end_char
+        end_attr = rule.get("append_end_attr")
+        if end_attr:
+            s += el.attrib.get(end_attr, "")
 
-        attr_name = rule.get("append-end-attr", "")
-        if attr_name:
-            curr_str += data.get("attrs", {}).get(attr_name, "")
+        # start char / attr
+        start_char = rule.get("append_start_char")
+        if start_char:
+            s = start_char + s
+        start_attr = rule.get("append_start_attr")
+        if start_attr:
+            s = el.attrib.get(start_attr, "") + s
 
-        curr_str = rule.get("append-start-char", "") + curr_str
+        if rule.get("transform_flip_x", False) and s:
+            refl_list.append(s)
+        return s
 
-        attr_name = rule.get("append-start-attr", "")
-        if attr_name:
-            curr_str = data.get("attrs", {}).get(attr_name, "") + curr_str
+    for p in tree.findall(".//p"):
+        p_classes = _class_list(p)
+        if any(c in IGNORED_CLASS_LISTS for c in p_classes):
+            continue
 
-        if rule.get("transform-x_-1", False):
-            refl_list.append(curr_str)
-        return curr_str
-
-    paragraphs_out: list[str] = []
-    for paragraph in main_paragraphs:
-        class_list = paragraph.get("attrs", {}).get("class", [])
-        p_class_str = next((c for c in class_list if c.startswith("p")), None)
-        curr_datas = paragraph.get("data", [])
+        # identify the 'p*' class expected by rule tables
+        p_key = next((c for c in p_classes if c.startswith("p")), None)
 
         buf_parts: list[str] = []
         ordered_cache: dict[str, str] = {}
-        for data in curr_datas:
-            # 文本节点直接加
-            if isinstance(data, str):
-                buf_parts.append(data)
+
+        # leading text node on <p>
+        if p.text:
+            buf_parts.append(p.text)
+
+        for child in p:
+            child_tag = _tag_name(child)
+            # skip span.review entirely (but keep its tail)
+            if child_tag == "span":
+                child_cls = _class_list(child)
+                if "review" in child_cls:
+                    if child.tail:
+                        buf_parts.append(child.tail)
+                    continue
+
+            if child_tag == "y":
+                # <y class="sy-*">
+                y_cls = next(
+                    (c for c in _class_list(child) if c.startswith("sy-")), None
+                )
+                rule = rules["sy"].get(y_cls) if y_cls else None
+                if rule:
+                    buf_parts.append(_apply_rule(child, rule))
+                if child.tail:
+                    buf_parts.append(child.tail)
                 continue
 
-            if isinstance(data, dict):
-                tag = data.get("tag", "")
-                attrs = data.get("attrs", {})
+            # Per-tag ordered pieces for this paragraph class
+            if p_key is not None and child_tag in rules["orders"]:
+                rule = rules["p_rules"].get(p_key, {}).get(child_tag) or {}
+                ordered_cache[child_tag] = _apply_rule(child, rule)
 
-                # 跳过 span.review
-                if tag == "span" and "class" in attrs and "review" in attrs["class"]:
-                    continue
+            if child.tail:
+                buf_parts.append(child.tail)
 
-                # sy 类型标签处理
-                if tag == "y":
-                    tag_class_list = attrs.get("class", [])
-                    tag_class = next(
-                        (c for c in tag_class_list if c.startswith("sy-")), None
-                    )
-
-                    if tag_class in rules.get("sy", {}):
-                        curr_rule = rules["sy"][tag_class]
-                        buf_parts.append(apply_rule(data, curr_rule))
-                    continue
-
-                if not p_class_str:
-                    if any(cls in IGNORED_CLASS_LISTS for cls in class_list):
-                        continue
-                    logger.debug(f"[parser] not find p_class_str: {class_list}")
-                    continue
-                # 普通标签处理，根据 orders 顺序匹配
-                for ord_selector, _ in orders:
-                    if data.get("tag") != ord_selector:
-                        continue
-                    curr_rule = rules.get(p_class_str, {}).get(ord_selector)
-                    curr_rule = curr_rule if curr_rule else {}
-                    ordered_cache[ord_selector] = apply_rule(data, curr_rule)
-                    break
-        # 最后按 orders 顺序拼接
-        for ord_selector, _ in orders:
-            if ord_selector in ordered_cache:
-                buf_parts.append(ordered_cache[ord_selector])
+        # append ordered pieces by tag order
+        for tag in rules["orders"]:
+            if tag in ordered_cache:
+                buf_parts.append(ordered_cache[tag])
 
         para = "".join(buf_parts).strip()
         if para:
