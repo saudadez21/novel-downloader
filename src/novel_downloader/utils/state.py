@@ -2,6 +2,7 @@
 """
 novel_downloader.utils.state
 ----------------------------
+
 State management for user preferences and runtime flags.
 """
 

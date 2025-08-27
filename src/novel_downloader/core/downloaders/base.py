@@ -8,6 +8,7 @@ common interface and reusable logic for all downloader implementations.
 """
 
 import abc
+import asyncio
 import json
 import logging
 from collections.abc import AsyncIterator, Awaitable, Callable, Sequence
@@ -81,6 +82,7 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
         books: list[BookConfig],
         *,
         progress_hook: Callable[[int, int], Awaitable[None]] | None = None,
+        cancel_event: asyncio.Event | None = None,
         **kwargs: Any,
     ) -> None:
         """
@@ -89,6 +91,7 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
         :param books: List of BookConfig entries.
         :param progress_hook: Optional async callback after each chapter.
                                 args: completed_count, total_count.
+        :param cancel_event: Optional asyncio.Event to allow cancellation.
         """
         if not await self._ensure_ready():
             book_ids = [b["book_id"] for b in books]
@@ -100,10 +103,20 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
             return
 
         for book in books:
+            # stop early if cancellation requested
+            if cancel_event and cancel_event.is_set():
+                self.logger.info(
+                    "[%s] download cancelled before book: %s",
+                    self._site,
+                    book["book_id"],
+                )
+                break
+
             try:
                 await self._download_one(
                     book,
                     progress_hook=progress_hook,
+                    cancel_event=cancel_event,
                     **kwargs,
                 )
             except Exception as e:
@@ -116,6 +129,7 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
         book: BookConfig,
         *,
         progress_hook: Callable[[int, int], Awaitable[None]] | None = None,
+        cancel_event: asyncio.Event | None = None,
         **kwargs: Any,
     ) -> None:
         """
@@ -124,6 +138,7 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
         :param book: BookConfig with at least 'book_id'.
         :param progress_hook: Optional async callback after each chapter.
                                 args: completed_count, total_count.
+        :param cancel_event: Optional asyncio.Event to allow cancellation.
         """
         if not await self._ensure_ready():
             self.logger.warning(
@@ -134,10 +149,20 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
                 book.get("end_id", "-"),
             )
 
+        # if already cancelled before starting
+        if cancel_event and cancel_event.is_set():
+            self.logger.info(
+                "[%s] download cancelled before start of book: %s",
+                self._site,
+                book["book_id"],
+            )
+            return
+
         try:
             await self._download_one(
                 book,
                 progress_hook=progress_hook,
+                cancel_event=cancel_event,
                 **kwargs,
             )
         except Exception as e:
@@ -173,6 +198,7 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
         book: BookConfig,
         *,
         progress_hook: Callable[[int, int], Awaitable[None]] | None = None,
+        cancel_event: asyncio.Event | None = None,
         **kwargs: Any,
     ) -> None:
         """

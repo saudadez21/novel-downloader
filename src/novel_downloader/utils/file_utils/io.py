@@ -4,11 +4,6 @@ novel_downloader.utils.file_utils.io
 ------------------------------------
 
 File I/O utilities for reading and writing text, JSON, and binary data.
-
-Includes:
-- Safe, atomic file saving with optional overwrite and auto-renaming
-- JSON pretty-printing with size-aware formatting
-- Simple helpers for reading files with fallback and logging
 """
 
 __all__ = [

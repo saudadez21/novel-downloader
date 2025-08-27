@@ -4,12 +4,6 @@ novel_downloader.utils.time_utils
 ---------------------------------
 
 Utility functions for time and date-related operations.
-
-Includes:
-- calculate_time_difference:
-    Computes time delta between two timezone-aware datetime strings.
-- sleep_with_random_delay:
-    Sleeps for a random duration, useful for human-like delays or rate limiting.
 """
 
 __all__ = [

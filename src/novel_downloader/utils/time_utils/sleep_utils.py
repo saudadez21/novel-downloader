@@ -4,10 +4,6 @@ novel_downloader.utils.time_utils.sleep_utils
 ---------------------------------------------
 
 Utilities for adding randomized delays in scripts and bots.
-
-Includes:
-- sleep_with_random_delay(): Sleep between base and base+spread seconds,
-  optionally capped with a max_sleep limit.
 """
 
 __all__ = ["sleep_with_random_delay", "async_sleep_with_random_delay"]

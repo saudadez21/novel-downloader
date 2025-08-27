@@ -6,13 +6,17 @@ novel_downloader.core.downloaders.qidian
 """
 
 import asyncio
-from collections.abc import AsyncIterator, Awaitable, Callable
-from contextlib import asynccontextmanager
+from collections.abc import Awaitable, Callable
 from pathlib import Path
 from typing import Any
 
 from novel_downloader.core.downloaders.base import BaseDownloader
 from novel_downloader.core.downloaders.registry import register_downloader
+from novel_downloader.core.downloaders.signals import (
+    STOP,
+    Progress,
+    StopToken,
+)
 from novel_downloader.core.interfaces import (
     FetcherProtocol,
     ParserProtocol,
@@ -58,6 +62,7 @@ class QidianDownloader(BaseDownloader):
         book: BookConfig,
         *,
         progress_hook: Callable[[int, int], Awaitable[None]] | None = None,
+        cancel_event: asyncio.Event | None = None,
         **kwargs: Any,
     ) -> None:
         """
@@ -66,6 +71,8 @@ class QidianDownloader(BaseDownloader):
         :param book: BookConfig with at least 'book_id'.
         """
         TAG = "[Downloader]"
+        NUM_WORKERS = 1
+
         book_id = book["book_id"]
         start_id = book.get("start_id")
         end_id = book.get("end_id")
@@ -74,120 +81,187 @@ class QidianDownloader(BaseDownloader):
         raw_base = self._raw_data_dir / book_id
         raw_base.mkdir(parents=True, exist_ok=True)
         html_dir = self._debug_dir / book_id / "html"
+
         chapter_storage = ChapterStorage(
             raw_base=raw_base,
             priorities=self._priorities,
         )
         chapter_storage.connect()
 
-        # load or fetch metadata
-        book_info = await self.load_book_info(book_id=book_id, html_dir=html_dir)
-        if not book_info:
-            return
+        def cancelled() -> bool:
+            return bool(cancel_event and cancel_event.is_set())
 
-        vols = book_info["volumes"]
-        total_chapters = sum(len(v["chapters"]) for v in vols)
-        if total_chapters == 0:
-            self.logger.warning("%s 书籍没有章节可下载: %s", TAG, book_id)
-            return
-
-        # concurrency primitives
-        sem = asyncio.Semaphore(self.workers)
-        cid_q: asyncio.Queue[str | None] = asyncio.Queue()
-        save_q: asyncio.Queue[ChapterDict | None] = asyncio.Queue()
-        default_batch: list[ChapterDict] = []
-        encrypted_batch: list[ChapterDict] = []
-        completed = 0
-
-        def _select(batch_item: ChapterDict) -> tuple[list[ChapterDict], int]:
-            if batch_item.get("extra", {}).get("encrypted", False):
-                return encrypted_batch, self.ENCRYPTED_SOURCE_ID
-            return default_batch, self.DEFAULT_SOURCE_ID
-
-        async def _flush(batch: list[ChapterDict], src: int) -> None:
-            nonlocal completed
-            if not batch:
+        try:
+            # ---- metadata ---
+            book_info = await self.load_book_info(book_id=book_id, html_dir=html_dir)
+            if not book_info:
                 return
-            try:
-                chapter_storage.upsert_chapters(batch, src)
-            except Exception as e:
-                self.logger.error(
-                    "[Storage] batch upsert failed (size=%d, source=%d): %s",
-                    len(batch),
-                    src,
-                    e,
-                    exc_info=True,
+
+            vols = book_info["volumes"]
+            total_chapters = sum(len(v["chapters"]) for v in vols)
+            if total_chapters == 0:
+                self.logger.warning("%s 书籍没有章节可下载: %s", TAG, book_id)
+                return
+
+            progress = Progress(total_chapters, progress_hook)
+
+            # ---- queues & batching ---
+            cid_q: asyncio.Queue[str | StopToken] = asyncio.Queue()
+            save_q: asyncio.Queue[ChapterDict | StopToken] = asyncio.Queue()
+            default_batch: list[ChapterDict] = []
+            encrypted_batch: list[ChapterDict] = []
+
+            def select_batch(chap: ChapterDict) -> tuple[list[ChapterDict], int]:
+                # set extra.encrypted (by parser); default to plain if absent.
+                if chap.get("extra", {}).get("encrypted", False):
+                    return encrypted_batch, self.ENCRYPTED_SOURCE_ID
+                return default_batch, self.DEFAULT_SOURCE_ID
+
+            async def flush_batch(batch: list[ChapterDict], src: int) -> None:
+                if not batch:
+                    return
+                try:
+                    chapter_storage.upsert_chapters(batch, src)
+                except Exception as e:
+                    self.logger.error(
+                        "[Storage] batch upsert failed (size=%d, src=%d): %s",
+                        len(batch),
+                        src,
+                        e,
+                        exc_info=True,
+                    )
+                else:
+                    await progress.bump(len(batch))
+                finally:
+                    batch.clear()
+
+            async def flush_all() -> None:
+                await flush_batch(default_batch, self.DEFAULT_SOURCE_ID)
+                await flush_batch(encrypted_batch, self.ENCRYPTED_SOURCE_ID)
+
+            # ---- workers ---
+            sem = asyncio.Semaphore(self.workers)
+
+            async def storage_worker() -> None:
+                """
+                Consumes parsed chapters, batches by source, flushes on threshold.
+
+                Terminates after receiving STOP from each chapter worker.
+
+                On cancel: drains queue, flushes once, then waits for remaining STOPs.
+                """
+                stop_count = 0
+                while True:
+                    chap = await save_q.get()
+                    if isinstance(chap, StopToken):
+                        stop_count += 1
+                        if stop_count == NUM_WORKERS:
+                            await flush_all()
+                            return
+                        continue
+
+                    batch, src = select_batch(chap)
+                    batch.append(chap)
+                    if len(batch) >= self.storage_batch_size:
+                        await flush_batch(batch, src)
+
+                    if cancelled():
+                        # Drain whatever is already parsed
+                        try:
+                            while True:
+                                nxt = save_q.get_nowait()
+                                if isinstance(nxt, StopToken):
+                                    stop_count += 1
+                                else:
+                                    nbatch, nsrc = select_batch(nxt)
+                                    nbatch.append(nxt)
+                        except asyncio.QueueEmpty:
+                            pass
+                        await flush_all()
+                        # Wait for remaining STOPs to arrive
+                        while stop_count < NUM_WORKERS:
+                            nxt = await save_q.get()
+                            if nxt is STOP:
+                                stop_count += 1
+                        return
+
+            async def chapter_worker() -> None:
+                """
+                Single worker: fetch + parse with retry, then enqueue ChapterDict.
+
+                Exits on STOP. If cancelled, does not start a new fetch; signals STOP.
+                """
+                while True:
+                    cid = await cid_q.get()
+                    if isinstance(cid, StopToken):
+                        await save_q.put(STOP)
+                        return
+
+                    if not cid or cid in ignore_set:
+                        continue
+
+                    if cancelled():
+                        await save_q.put(STOP)
+                        return
+
+                    async with sem:
+                        chap = await self._process_chapter(book_id, cid, html_dir)
+                    if chap and not cancelled():
+                        await save_q.put(chap)
+
+                    await async_sleep_with_random_delay(
+                        self.request_interval,
+                        mul_spread=1.1,
+                        max_sleep=self.request_interval + 2,
+                    )
+
+            async def producer() -> None:
+                """
+                Enqueue chapter IDs respecting start/end/skip_existing.
+
+                Always emits STOP x NUM_WORKERS at the end (even if cancelled early).
+                """
+                try:
+                    async for cid in self._chapter_ids(vols, start_id, end_id):
+                        if cancelled():
+                            break
+                        if self.skip_existing and (
+                            chapter_storage.exists(cid, self.DEFAULT_SOURCE_ID)
+                            or chapter_storage.exists(cid, self.ENCRYPTED_SOURCE_ID)
+                        ):
+                            # Already have either variant; count as done.
+                            await progress.bump(1)
+                        else:
+                            await cid_q.put(cid)
+                finally:
+                    for _ in range(NUM_WORKERS):
+                        await cid_q.put(STOP)
+
+            # ---- run tasks ---
+            async with asyncio.TaskGroup() as tg:
+                tg.create_task(storage_worker())
+                for _ in range(NUM_WORKERS):
+                    tg.create_task(chapter_worker())
+                tg.create_task(producer())
+
+            # ---- done ---
+            if cancelled():
+                self.logger.info(
+                    "%s Novel '%s' cancelled: flushed %d/%d chapters.",
+                    TAG,
+                    book_info.get("book_name", "unknown"),
+                    progress.done,
+                    progress.total,
                 )
             else:
-                completed += len(batch)
-                if progress_hook:
-                    await progress_hook(completed, total_chapters)
-            finally:
-                batch.clear()
-
-        async def storage_worker(q: asyncio.Queue[ChapterDict | None]) -> None:
-            while True:
-                chap = await q.get()
-                q.task_done()
-                if chap is None:
-                    # final flush before exit
-                    await _flush(default_batch, self.DEFAULT_SOURCE_ID)
-                    await _flush(encrypted_batch, self.ENCRYPTED_SOURCE_ID)
-                    break
-                batch, src = _select(chap)
-                batch.append(chap)
-                if len(batch) >= self.storage_batch_size:
-                    await _flush(batch, src)
-
-        async def producer() -> None:
-            nonlocal completed
-            async for cid in self._chapter_ids(vols, start_id, end_id):
-                if self.skip_existing and chapter_storage.exists(
-                    cid, self.DEFAULT_SOURCE_ID
-                ):
-                    completed += 1
-                    if progress_hook:
-                        await progress_hook(completed, total_chapters)
-                else:
-                    await cid_q.put(cid)
-
-        @asynccontextmanager
-        async def task_group_ctx() -> AsyncIterator[None]:
-            async with asyncio.TaskGroup() as tg:
-                tg.create_task(
-                    self._chapter_worker(
-                        book_id,
-                        ignore_set,
-                        cid_q,
-                        save_q,
-                        sem,
-                    )
+                self.logger.info(
+                    "%s Novel '%s' download completed.",
+                    TAG,
+                    book_info.get("book_name", "unknown"),
                 )
-                tg.create_task(storage_worker(save_q))
-                yield
 
-        # run producer + workers, send None sentinels to shut down loops
-        async with task_group_ctx():
-            await producer()
-
-            # signal fetcher to exit
-            await cid_q.put(None)
-            await cid_q.join()
-
-            # signal storage to exit
-            await save_q.put(None)
-            await save_q.join()
-
-            # final flush for both batches
-            await _flush(default_batch, self.DEFAULT_SOURCE_ID)
-            await _flush(encrypted_batch, self.ENCRYPTED_SOURCE_ID)
-
-        chapter_storage.close()
-        self.logger.info(
-            "%s Novel '%s' download completed.",
-            TAG,
-            book_info.get("book_name", "unknown"),
-        )
+        finally:
+            chapter_storage.close()
 
     @staticmethod
     def _check_restricted(html_list: list[str]) -> bool:
@@ -208,40 +282,6 @@ class QidianDownloader(BaseDownloader):
             return True
         return '"cES":2' in html_list[0]
 
-    async def _chapter_worker(
-        self,
-        book_id: str,
-        ignore_set: set[str],
-        cid_q: asyncio.Queue[str | None],
-        save_q: asyncio.Queue[ChapterDict | None],
-        sem: asyncio.Semaphore,
-    ) -> None:
-        """
-        Worker that processes one chapter at a time:
-        fetch + parse with retry, then enqueue to save_q.
-        """
-        html_dir = self._debug_dir / book_id / "html"
-        while True:
-            cid = await cid_q.get()
-            if cid is None:
-                cid_q.task_done()
-                break
-            if not cid or cid in ignore_set:
-                cid_q.task_done()
-                continue
-
-            async with sem:
-                chap = await self._process_chapter(book_id, cid, html_dir)
-            if chap:
-                await save_q.put(chap)
-
-            cid_q.task_done()
-            await async_sleep_with_random_delay(
-                self.request_interval,
-                mul_spread=1.1,
-                max_sleep=self.request_interval + 2,
-            )
-
     async def _process_chapter(
         self,
         book_id: str,
@@ -250,7 +290,8 @@ class QidianDownloader(BaseDownloader):
     ) -> ChapterDict | None:
         """
         Fetch, debug-save, parse a single chapter with retries.
-        Returns ChapterDict or None on failure.
+
+        :return: ChapterDict on success, or None on failure.
         """
         for attempt in range(self.retry_times + 1):
             try:

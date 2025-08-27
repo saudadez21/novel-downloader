@@ -4,12 +4,6 @@ novel_downloader.utils.time_utils.datetime_utils
 ------------------------------------------------
 
 Time utility functions for timezone-aware date calculations.
-
-Includes:
-- _parse_utc_offset():
-    Converts UTC offset string (e.g. 'UTC+8') to a timezone object.
-- calculate_time_difference():
-    Computes timedelta between two datetime strings, with optional timezones.
 """
 
 __all__ = [
