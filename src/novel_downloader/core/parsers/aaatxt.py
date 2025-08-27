@@ -25,14 +25,14 @@ from novel_downloader.models import (
 class AaatxtParser(BaseParser):
     """Parser for 3A电子书 book pages."""
 
-    ADS: list[str] = [
+    ADS: set[str] = {
         "按键盘上方向键",
         "未阅读完",
         "加入书签",
         "已便下次继续阅读",
         "更多原创手机电子书",
         "免费TXT小说下载",
-    ]
+    }
 
     def parse_book_info(
         self,
@@ -126,11 +126,11 @@ class AaatxtParser(BaseParser):
         texts = []
         for txt in tree.xpath("//div[@class='chapter']//text()"):
             line = txt.strip()
-            if not line:
+            # Skip empty/instruction/ad lines
+            if not line or self._is_ad_line(txt):
                 continue
-            # Skip instruction/ad lines
-            if any(substr in txt for substr in self.ADS):
-                continue
+            # if any(bad in txt for bad in self.ADS):
+            # continue
             texts.append(line)
 
         content = "\n".join(texts)

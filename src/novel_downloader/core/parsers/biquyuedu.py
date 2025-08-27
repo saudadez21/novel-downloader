@@ -26,7 +26,11 @@ from novel_downloader.models import (
 class BiquyueduParser(BaseParser):
     """Parser for 精彩小说 book pages."""
 
-    PROMO_FILTER = re.compile(r"(笔趣阁|请记住本书首发域名|www\.biquyuedu\.com)")
+    ADS: set[str] = {
+        "笔趣阁",
+        "请记住本书首发域名",
+        "www.biquyuedu.com",
+    }
 
     def parse_book_info(
         self,
@@ -139,7 +143,7 @@ class BiquyueduParser(BaseParser):
         paragraphs = [
             txt.replace("\xa0", "").strip()
             for txt in raw_texts
-            if not self.PROMO_FILTER.search(txt)
+            if not self._is_ad_line(txt)
         ]
 
         content = "\n".join(paragraphs)

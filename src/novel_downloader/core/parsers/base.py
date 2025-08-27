@@ -14,6 +14,8 @@ a standard parsing interface for:
 """
 
 import abc
+import re
+from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
@@ -32,6 +34,8 @@ class BaseParser(ParserProtocol, abc.ABC):
     Subclasses must implement actual parsing logic for specific sites.
     """
 
+    ADS: set[str] = set()
+
     def __init__(
         self,
         config: ParserConfig,
@@ -49,7 +53,7 @@ class BaseParser(ParserProtocol, abc.ABC):
         self._base_cache_dir = Path(config.cache_dir)
         self._cache_dir = self._base_cache_dir
 
-        self._initialize()
+        self._ad_pattern = self._compile_ads_pattern()
 
     @abc.abstractmethod
     def parse_book_info(
@@ -109,11 +113,34 @@ class BaseParser(ParserProtocol, abc.ABC):
         """
         pass
 
-    def _initialize(self) -> None:
+    def _compile_ads_pattern(self) -> re.Pattern[str] | None:
         """
-        Hook for subclasses to load regex, JSON, etc.
+        Compile a regex pattern from the ADS list, or return None if no ADS.
         """
-        pass
+        if not self.ADS:
+            return None
+
+        return re.compile("|".join(map(re.escape, self.ADS)))
+
+    def _is_ad_line(self, line: str) -> bool:
+        """
+        Check if a line contains any ad text.
+
+        :param line: Single text line.
+        :return: True if line matches ad pattern, else False.
+        """
+        return bool(self._ad_pattern and self._ad_pattern.search(line))
+
+    def _filter_ads(self, lines: Iterable[str]) -> list[str]:
+        """
+        Filter out lines containing any ad text defined in ADS.
+
+        :param lines: Iterable of text lines (e.g. chapter content).
+        :return: List of lines with ads removed.
+        """
+        if not self._ad_pattern:
+            return list(lines)
+        return [line for line in lines if not self._ad_pattern.search(line)]
 
     @staticmethod
     def _first_str(xs: list[str], replaces: list[tuple[str, str]] | None = None) -> str:

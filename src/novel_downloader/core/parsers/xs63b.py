@@ -43,7 +43,7 @@ class Xs63bParser(BaseParser):
     CHAPTER_TITLE_SELECTOR = "//h1[@id='_52mb_h1']/text()"
     CHAPTER_PARAGRAPHS = "//div[@id='nr1']//p"
 
-    ADS = ["如章节缺失", "本章未完", "下一页继续阅读", "xs63b.com"]
+    ADS = {"如章节缺失", "本章未完", "下一页继续阅读", "xs63b.com"}
 
     def parse_book_info(
         self,
@@ -153,10 +153,10 @@ class Xs63bParser(BaseParser):
 
                 txt = (p.text_content() or "").replace("\xa0", " ")
                 txt = re.sub(r"[ \t]+", " ", txt).strip()
-                if not txt:
+                if not txt or self._is_ad_line(txt):
                     continue
-                if any(bad in txt for bad in self.ADS):
-                    continue
+                # if any(bad in txt for bad in self.ADS):
+                # continue
 
                 paragraphs.append(txt)
 

@@ -135,10 +135,10 @@ class LewennParser(BaseParser):
 
         lines: list[str] = []
         for ln in raw_lines:
-            if not ln:
+            if not ln or self._is_ad_line(ln):
                 continue
-            if any(substr in ln for substr in self.ADS):
-                continue
+            # if any(bad in ln for bad in self.ADS):
+            # continue
             # if ln.startswith("(") and ln.endswith(")"):
             #     continue
             lines.append(ln.replace(chr(0xA0), ""))

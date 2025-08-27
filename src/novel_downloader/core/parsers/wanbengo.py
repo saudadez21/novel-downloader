@@ -52,7 +52,7 @@ class WanbengoParser(BaseParser):
     _TAGS_RE = re.compile(r"<[^>]+>")
 
     # fmt: off
-    _AD_KEYWORDS = {
+    ADS = {
         "完本神站", "本站网址", "报错", "键盘", "客户端", "收藏", "书架",
         "猜你喜欢", "上一章", "下一章", "章节目录", "LastRead", "贴吧",
         "倾心打造", "全文无错", "分享本站", "点此章节报错", "温馨提示", "域名",
@@ -191,14 +191,14 @@ class WanbengoParser(BaseParser):
         m = re.search(r"/([^/]+)\.html$", href or "")
         return m.group(1) if m else (href.strip("/").split("/")[-1] if href else "")
 
-    @classmethod
-    def _is_noise_line(cls, s: str) -> bool:
+    def _is_noise_line(self, s: str) -> bool:
         """Heuristic to drop obvious ad/footer/noise lines."""
         if not s.strip():
             return True
-        if any(kw in s for kw in cls._AD_KEYWORDS):
+        # if any(bad in s for bad in self.ADS):
+        if self._is_ad_line(s):
             return True
-        if cls._PUNCT_ONLY.match(s):
+        if self._PUNCT_ONLY.match(s):
             return True
         return False
 

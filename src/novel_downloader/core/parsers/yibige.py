@@ -29,6 +29,18 @@ class YibigeParser(BaseParser):
     X_TITLE = "//div[@class='bookname']/h1/text()"
     X_P_NODES = "//div[@id='content']//p"
 
+    ADS = {
+        "首发无广告",
+        "请分享",
+        "读之阁",
+        "小说网",
+        "首发地址",
+        "手机阅读",
+        "一笔阁",
+        "site_con_ad(",
+        "chapter_content(",
+    }
+
     def parse_book_info(
         self,
         html_list: list[str],
@@ -171,19 +183,11 @@ class YibigeParser(BaseParser):
         s = re.sub(r"[ \t]+", " ", s)  # collapse spaces/tabs
         return s.strip()
 
-    @staticmethod
-    def _is_ad(s: str) -> bool:
+    def _is_ad(self, s: str) -> bool:
         """Very small heuristic filter for footer junk inside #content."""
-        bad = [
-            "首发无广告",
-            "请分享",
-            "读之阁",
-            "小说网",
-            "首发地址",
-            "手机阅读",
-            "一笔阁",
-            "site_con_ad(",
-            "chapter_content(",
-        ]
+        if self._is_ad_line(s):
+            return True
+
         ss = s.replace(" ", "")
-        return any(b in s or b in ss for b in bad)
+        # return any(b in s or b in ss for b in self.ADS)
+        return self._is_ad_line(ss)
