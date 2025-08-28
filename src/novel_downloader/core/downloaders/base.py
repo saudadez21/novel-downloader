@@ -3,8 +3,7 @@
 novel_downloader.core.downloaders.base
 --------------------------------------
 
-Defines the abstract base class `BaseDownloader`, which provides a
-common interface and reusable logic for all downloader implementations.
+Abstract base class providing common workflow and utilities for novel downloaders
 """
 
 import abc
@@ -26,7 +25,7 @@ from novel_downloader.models import (
     DownloaderConfig,
     VolumeInfoDict,
 )
-from novel_downloader.utils import calculate_time_difference
+from novel_downloader.utils import time_diff
 
 
 class BaseDownloader(DownloaderProtocol, abc.ABC):
@@ -246,7 +245,7 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
             return None
 
         if max_age_days is not None:
-            days, *_ = calculate_time_difference(
+            days, *_ = time_diff(
                 raw.get("update_time", ""),
                 "UTC+8",
             )

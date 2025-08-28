@@ -3,6 +3,7 @@
 novel_downloader.utils.crypto_utils.rc4
 ---------------------------------------
 
+RC4 stream cipher for simple text encryption and decryption.
 """
 
 import base64

@@ -3,6 +3,8 @@
 novel_downloader.core.parsers.qidian.utils.fontmap_recover
 ----------------------------------------------------------
 
+Tools for generating and applying font character mappings
+to recover obfuscated Qidian text.
 """
 
 __all__ = [

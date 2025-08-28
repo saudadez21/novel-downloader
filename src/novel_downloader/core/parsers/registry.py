@@ -3,6 +3,7 @@
 novel_downloader.core.parsers.registry
 --------------------------------------
 
+Registry and factory helpers for creating site-specific parsers.
 """
 
 __all__ = ["register_parser", "get_parser"]

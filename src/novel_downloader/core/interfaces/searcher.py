@@ -3,6 +3,7 @@
 novel_downloader.core.interfaces.searcher
 -----------------------------------------
 
+Protocol defining the interface for site search implementations.
 """
 
 from typing import Protocol

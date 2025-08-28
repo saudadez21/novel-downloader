@@ -3,8 +3,7 @@
 novel_downloader.core.interfaces.fetcher
 ----------------------------------------
 
-Defines the Async FetcherProtocol interface for fetching raw HTML or JSON
-for book info pages, individual chapters, managing request lifecycle
+Protocol defining the interface for asynchronous fetching, login, and session management
 """
 
 import types

@@ -4,23 +4,10 @@
 
 - [数据模型](#数据模型)
   - [目录](#目录)
-  - [基础类型](#基础类型)
   - [章节类型](#章节类型)
   - [配置模型](#配置模型)
   - [图书配置](#图书配置)
   - [登录字段](#登录字段)
-
----
-
-### 基础类型
-
-> `novel_downloader.utils.models`
-
-```python
-SplitMode = Literal["book", "volume"]
-```
-
-描述: 常用枚举类型别名，限定函数或配置中可接受的字符串值
 
 ---
 
@@ -153,7 +140,7 @@ class ExporterConfig:
     filename_template: str = "{title}_{author}"
     include_cover: bool = True
     include_picture: bool = True
-    split_mode: SplitMode = "book"
+    split_mode: str = "book"
 ```
 
 描述: 导出文件格式和切分策略配置

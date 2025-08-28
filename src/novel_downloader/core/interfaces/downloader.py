@@ -3,8 +3,7 @@
 novel_downloader.core.interfaces.downloader
 -------------------------------------------
 
-This module defines the DownloaderProtocol, a structural interface
-that outlines the expected behavior of any downloader class.
+Protocol defining the interface for asynchronous book downloaders.
 """
 
 import asyncio

@@ -3,9 +3,7 @@
 novel_downloader.core.exporters.qidian
 --------------------------------------
 
-This module provides the `QidianExporter` class for handling the saving process
-of novels sourced from Qidian (起点中文网). It implements the platform-specific
-logic required to structure and export novel content into desired formats.
+Exporter implementation for Qidian novels, supporting plain and encrypted sources.
 """
 
 __all__ = ["QidianExporter"]

@@ -11,7 +11,7 @@ from typing import Any
 from novel_downloader.core.fetchers.base import BaseSession
 from novel_downloader.core.fetchers.registry import register_fetcher
 from novel_downloader.models import FetcherConfig
-from novel_downloader.utils import async_sleep_with_random_delay
+from novel_downloader.utils import async_jitter_sleep
 
 
 @register_fetcher(
@@ -61,7 +61,7 @@ class LinovelibSession(BaseSession):
 
         vol_htmls = []
         for vol_id in vol_ids:
-            await async_sleep_with_random_delay(
+            await async_jitter_sleep(
                 self.request_interval,
                 mul_spread=1.1,
                 max_sleep=self.request_interval + 2,
@@ -125,7 +125,7 @@ class LinovelibSession(BaseSession):
 
             html_pages.append(html)
             idx += 1
-            await async_sleep_with_random_delay(
+            await async_jitter_sleep(
                 self.request_interval,
                 mul_spread=1.1,
                 max_sleep=self.request_interval + 2,

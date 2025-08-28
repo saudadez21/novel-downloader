@@ -5,23 +5,10 @@ novel_downloader.models.config
 
 Defines structured configuration models using dataclasses for each
 major component in the novel_downloader pipeline.
-
-Each config section corresponds to a specific stage of the pipeline:
-- RequesterConfig: network settings for requests and DrissionPage
-- DownloaderConfig: chapter download behavior and local raw data paths
-- ParserConfig: font decoding, cache handling, and debug options
-- SaverConfig: output formatting, export formats, and filename templates
-
-These models are used to map loaded YAML or JSON config data into
-strongly typed Python objects for safer and cleaner access.
 """
 
 from dataclasses import dataclass, field
 from typing import NotRequired, TypedDict
-
-from .types import (
-    SplitMode,
-)
 
 
 @dataclass
@@ -87,7 +74,7 @@ class ExporterConfig:
     filename_template: str = "{title}_{author}"
     include_cover: bool = True
     include_picture: bool = True
-    split_mode: SplitMode = "book"
+    split_mode: str = "book"
     cleaner_cfg: TextCleanerConfig = field(default_factory=TextCleanerConfig)
 
 

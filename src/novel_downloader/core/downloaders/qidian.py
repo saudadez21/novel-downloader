@@ -3,6 +3,8 @@
 novel_downloader.core.downloaders.qidian
 ----------------------------------------
 
+Downloader implementation for Qidian novels,
+with handling for restricted and encrypted chapters
 """
 
 import asyncio
@@ -28,7 +30,7 @@ from novel_downloader.models import (
 )
 from novel_downloader.utils import (
     ChapterStorage,
-    async_sleep_with_random_delay,
+    async_jitter_sleep,
 )
 
 
@@ -209,7 +211,7 @@ class QidianDownloader(BaseDownloader):
                     if chap and not cancelled():
                         await save_q.put(chap)
 
-                    await async_sleep_with_random_delay(
+                    await async_jitter_sleep(
                         self.request_interval,
                         mul_spread=1.1,
                         max_sleep=self.request_interval + 2,
@@ -324,7 +326,7 @@ class QidianDownloader(BaseDownloader):
                         "[ChapterWorker] Retry %s (%s): %s", cid, attempt + 1, e
                     )
                     backoff = self.backoff_factor * (2**attempt)
-                    await async_sleep_with_random_delay(
+                    await async_jitter_sleep(
                         base=backoff,
                         mul_spread=1.2,
                         max_sleep=backoff + 3,

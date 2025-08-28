@@ -7,7 +7,7 @@ Time utility functions for timezone-aware date calculations.
 """
 
 __all__ = [
-    "calculate_time_difference",
+    "time_diff",
 ]
 
 import logging
@@ -95,7 +95,7 @@ def _parse_datetime_flexible(dt_str: str) -> datetime:
     )
 
 
-def calculate_time_difference(
+def time_diff(
     from_time_str: str,
     tz_str: str = "UTC",
     to_time_str: str | None = None,

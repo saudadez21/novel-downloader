@@ -3,7 +3,7 @@
 novel_downloader.core.exporters
 -------------------------------
 
-This module defines exporter classes for different novel platforms.
+Exporter implementations for saving books in various formats across different sources
 """
 
 __all__ = [

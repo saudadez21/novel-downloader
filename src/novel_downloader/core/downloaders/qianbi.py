@@ -3,6 +3,7 @@
 novel_downloader.core.downloaders.qianbi
 ----------------------------------------
 
+Downloader implementation for Qianbi novels, with chapter ID repair logic.
 """
 
 import asyncio
@@ -29,7 +30,7 @@ from novel_downloader.models import (
 )
 from novel_downloader.utils import (
     ChapterStorage,
-    async_sleep_with_random_delay,
+    async_jitter_sleep,
 )
 
 
@@ -206,7 +207,7 @@ class QianbiDownloader(BaseDownloader):
                         await save_q.put(chap)
 
                     # polite pacing
-                    await async_sleep_with_random_delay(
+                    await async_jitter_sleep(
                         self.request_interval,
                         mul_spread=1.1,
                         max_sleep=self.request_interval + 2,
@@ -293,7 +294,7 @@ class QianbiDownloader(BaseDownloader):
                         )
                         continue
                     storage.upsert_chapter(data, self.DEFAULT_SOURCE_ID)
-                    await async_sleep_with_random_delay(
+                    await async_jitter_sleep(
                         self.request_interval,
                         mul_spread=1.1,
                         max_sleep=self.request_interval + 2,
@@ -344,7 +345,7 @@ class QianbiDownloader(BaseDownloader):
                 if attempt < self.retry_times:
                     self.logger.info(f"[ChapterWorker] Retry {cid} ({attempt+1}): {e}")
                     backoff = self.backoff_factor * (2**attempt)
-                    await async_sleep_with_random_delay(
+                    await async_jitter_sleep(
                         base=backoff, mul_spread=1.2, max_sleep=backoff + 3
                     )
                 else:

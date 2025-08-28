@@ -3,8 +3,8 @@
 novel_downloader.core.parsers
 -----------------------------
 
-This package defines all site-specific parsing modules
-for the novel_downloader framework.
+Parser implementations for extracting book metadata and
+chapter content from various sources
 """
 
 __all__ = [

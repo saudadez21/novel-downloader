@@ -3,14 +3,7 @@
 novel_downloader.core.parsers.base
 ----------------------------------
 
-This module defines the BaseParser abstract class, which implements the
-ParserProtocol interface and provides a structured foundation for
-site-specific parsers.
-
-BaseParser manages internal parser state and enforces
-a standard parsing interface for:
-- Book info pages (e.g. metadata, chapter list)
-- Chapter pages (e.g. textual content)
+Abstract base class providing common behavior for site-specific parsers.
 """
 
 import abc

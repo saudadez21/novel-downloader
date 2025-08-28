@@ -3,6 +3,7 @@
 novel_downloader.models
 -----------------------
 
+Data models and configuration classes.
 """
 
 __all__ = [
@@ -18,7 +19,6 @@ __all__ = [
     "VolumeInfoDict",
     "LoginField",
     "SearchResult",
-    "SplitMode",
 ]
 
 from .book import (
@@ -37,6 +37,3 @@ from .config import (
 )
 from .login import LoginField
 from .search import SearchResult
-from .types import (
-    SplitMode,
-)

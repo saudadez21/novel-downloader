@@ -3,10 +3,7 @@
 novel_downloader.core.fetchers.base
 -----------------------------------
 
-This module defines the BaseSession class, which provides asynchronous
-HTTP request capabilities using aiohttp. It maintains a persistent
-client session and supports retries, headers, timeout configurations,
-cookie handling, and defines abstract methods for subclasses.
+Abstract base class providing common HTTP session handling for fetchers.
 """
 
 import abc
@@ -22,7 +19,7 @@ from aiohttp import ClientResponse, ClientSession, ClientTimeout, TCPConnector
 from novel_downloader.core.interfaces import FetcherProtocol
 from novel_downloader.models import FetcherConfig, LoginField
 from novel_downloader.utils import (
-    async_sleep_with_random_delay,
+    async_jitter_sleep,
 )
 from novel_downloader.utils.constants import (
     DATA_DIR,
@@ -181,7 +178,7 @@ class BaseSession(FetcherProtocol, abc.ABC):
                     return await self._response_to_str(resp, encoding)
             except aiohttp.ClientError:
                 if attempt < self.retry_times:
-                    await async_sleep_with_random_delay(
+                    await async_jitter_sleep(
                         self.backoff_factor,
                         mul_spread=1.1,
                         max_sleep=self.backoff_factor + 2,

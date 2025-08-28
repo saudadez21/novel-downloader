@@ -3,6 +3,7 @@
 novel_downloader.core.parsers.qidian.utils
 ------------------------------------------
 
+Utility functions and helpers for parsing and decrypting Qidian novel pages
 """
 
 __all__ = [

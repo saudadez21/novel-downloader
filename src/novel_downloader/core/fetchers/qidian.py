@@ -19,7 +19,7 @@ from novel_downloader.core.fetchers.base import BaseSession
 from novel_downloader.core.fetchers.registry import register_fetcher
 from novel_downloader.models import FetcherConfig, LoginField
 from novel_downloader.utils import (
-    async_sleep_with_random_delay,
+    async_jitter_sleep,
     rc4_crypt,
 )
 
@@ -178,7 +178,7 @@ class QidianSession(BaseSession):
                     return text
             except aiohttp.ClientError:
                 if attempt < self.retry_times:
-                    await async_sleep_with_random_delay(
+                    await async_jitter_sleep(
                         self.backoff_factor,
                         mul_spread=1.1,
                         max_sleep=self.backoff_factor + 2,

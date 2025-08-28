@@ -3,6 +3,7 @@
 novel_downloader.core.fetchers.registry
 ---------------------------------------
 
+Registry and factory helpers for creating site-specific fetchers.
 """
 
 __all__ = ["register_fetcher", "get_fetcher"]

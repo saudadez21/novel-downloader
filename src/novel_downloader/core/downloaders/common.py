@@ -3,6 +3,7 @@
 novel_downloader.core.downloaders.common
 ----------------------------------------
 
+Concrete downloader implementation with a generic async pipeline for common novel sites
 """
 
 import asyncio
@@ -22,7 +23,7 @@ from novel_downloader.models import (
 )
 from novel_downloader.utils import (
     ChapterStorage,
-    async_sleep_with_random_delay,
+    async_jitter_sleep,
 )
 
 
@@ -181,7 +182,7 @@ class CommonDownloader(BaseDownloader):
                         await save_q.put(chap)
 
                     # polite pacing
-                    await async_sleep_with_random_delay(
+                    await async_jitter_sleep(
                         self.request_interval,
                         mul_spread=1.1,
                         max_sleep=self.request_interval + 2,
@@ -262,7 +263,7 @@ class CommonDownloader(BaseDownloader):
                         "[ChapterWorker] Retry %s (%s): %s", cid, attempt + 1, e
                     )
                     backoff = self.backoff_factor * (2**attempt)
-                    await async_sleep_with_random_delay(
+                    await async_jitter_sleep(
                         base=backoff, mul_spread=1.2, max_sleep=backoff + 3
                     )
                 else:

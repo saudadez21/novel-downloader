@@ -3,9 +3,7 @@
 novel_downloader.core.exporters.base
 ------------------------------------
 
-This module provides an abstract base class `BaseExporter` that defines
-the common interface and reusable logic for saving assembled novel
-content into various output formats.
+Abstract base class providing common structure and utilities for book exporters
 """
 
 import abc

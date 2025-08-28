@@ -3,6 +3,7 @@
 novel_downloader.utils
 ----------------------
 
+A collection of helper functions and classes.
 """
 
 __all__ = [
@@ -18,9 +19,9 @@ __all__ = [
     "content_prefix",
     "truncate_half_lines",
     "diff_inline_display",
-    "calculate_time_difference",
-    "async_sleep_with_random_delay",
-    "sleep_with_random_delay",
+    "time_diff",
+    "async_jitter_sleep",
+    "jitter_sleep",
 ]
 
 from .chapter_storage import ChapterStorage
@@ -42,7 +43,7 @@ from .text_utils import (
     truncate_half_lines,
 )
 from .time_utils import (
-    async_sleep_with_random_delay,
-    calculate_time_difference,
-    sleep_with_random_delay,
+    async_jitter_sleep,
+    jitter_sleep,
+    time_diff,
 )

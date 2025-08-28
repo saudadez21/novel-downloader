@@ -3,6 +3,7 @@
 novel_downloader.core.searchers
 -------------------------------
 
+Site-specific searcher implementations for discovering novels across multiple sources
 """
 
 __all__ = [

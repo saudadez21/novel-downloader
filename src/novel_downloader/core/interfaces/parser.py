@@ -3,8 +3,7 @@
 novel_downloader.core.interfaces.parser
 ---------------------------------------
 
-Defines the ParserProtocol interface for extracting book metadata,
-parsing individual chapter content, and setting parser context via book_id.
+Protocol defining the interface for parsing book metadata and chapter content.
 """
 
 from typing import Any, Protocol, runtime_checkable

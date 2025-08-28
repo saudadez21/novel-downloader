@@ -83,7 +83,7 @@ print(result)
 ---
 
 ```python
-def calculate_time_difference(
+def time_diff(
     from_time_str: str,
     tz_str: str = "UTC",
     to_time_str: str | None = None,
@@ -107,13 +107,13 @@ def calculate_time_difference(
 示例:
 
 ```python
-d, h, m, s = calculate_time_difference("2025-06-01 00:00:00", "UTC+8")
+d, h, m, s = time_diff("2025-06-01 00:00:00", "UTC+8")
 ```
 
 ---
 
 ```python
-def sleep_with_random_delay(
+def jitter_sleep(
     base: float,
     *,
     add_spread: float = 0.0,
@@ -134,13 +134,13 @@ def sleep_with_random_delay(
 示例:
 
 ```python
-sleep_with_random_delay(2.0, add_spread=0.5, mul_spread=1.5)
+jitter_sleep(2.0, add_spread=0.5, mul_spread=1.5)
 ```
 
 ---
 
 ```python
-async def async_sleep_with_random_delay(
+async def async_jitter_sleep(
     base: float,
     *,
     add_spread: float = 0.0,
@@ -156,7 +156,7 @@ async def async_sleep_with_random_delay(
 示例:
 
 ```python
-await async_sleep_with_random_delay(3.0, mul_spread=1.1, max_sleep=5.0)
+await async_jitter_sleep(3.0, mul_spread=1.1, max_sleep=5.0)
 ```
 
 ### 章节存储

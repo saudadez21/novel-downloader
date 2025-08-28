@@ -3,15 +3,7 @@
 novel_downloader.core.interfaces
 --------------------------------
 
-This package centralizes the protocol definitions used across the
-system to promote interface-based design and type-safe dependency
-injection.
-
-Included protocols:
-- DownloaderProtocol
-- FetcherProtocol
-- ParserProtocol
-- ExporterProtocol
+Protocol interfaces defining the contracts for core components.
 """
 
 __all__ = [

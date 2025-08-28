@@ -3,8 +3,7 @@
 novel_downloader.core.interfaces.exporter
 -----------------------------------------
 
-Defines the ExporterProtocol interface for persisting completed books in
-TXT, EPUB, Markdown, and PDF formats.
+Protocol defining the interface for exporting books to text, EPUB, and other formats.
 """
 
 from pathlib import Path

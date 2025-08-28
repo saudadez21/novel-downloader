@@ -13,7 +13,7 @@ from typing import Any
 from novel_downloader.core.fetchers.base import BaseSession
 from novel_downloader.core.fetchers.registry import register_fetcher
 from novel_downloader.models import FetcherConfig
-from novel_downloader.utils import async_sleep_with_random_delay
+from novel_downloader.utils import async_jitter_sleep
 
 
 @register_fetcher(
@@ -98,7 +98,7 @@ class Xs63bSession(BaseSession):
             jsstr = self._parse_jsstr(html)
             chapter_url = self._build_chapter_url(book_id, jsarr, jsstr)
 
-            await async_sleep_with_random_delay(
+            await async_jitter_sleep(
                 self.request_interval,
                 mul_spread=1.1,
                 max_sleep=self.request_interval + 2,

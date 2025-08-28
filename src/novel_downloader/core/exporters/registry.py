@@ -3,6 +3,7 @@
 novel_downloader.core.exporters.registry
 ----------------------------------------
 
+Registry and factory helpers for creating site-specific or common exporters.
 """
 
 __all__ = ["register_exporter", "get_exporter"]

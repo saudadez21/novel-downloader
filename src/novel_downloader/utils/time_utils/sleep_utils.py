@@ -6,7 +6,7 @@ novel_downloader.utils.time_utils.sleep_utils
 Utilities for adding randomized delays in scripts and bots.
 """
 
-__all__ = ["sleep_with_random_delay", "async_sleep_with_random_delay"]
+__all__ = ["jitter_sleep", "async_jitter_sleep"]
 
 import asyncio
 import logging
@@ -16,7 +16,7 @@ import time
 logger = logging.getLogger(__name__)
 
 
-def sleep_with_random_delay(
+def jitter_sleep(
     base: float,
     add_spread: float = 0.0,
     mul_spread: float = 1.0,
@@ -59,7 +59,7 @@ def sleep_with_random_delay(
     return
 
 
-async def async_sleep_with_random_delay(
+async def async_jitter_sleep(
     base: float,
     add_spread: float = 0.0,
     mul_spread: float = 1.0,

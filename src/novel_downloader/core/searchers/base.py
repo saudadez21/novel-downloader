@@ -3,6 +3,7 @@
 novel_downloader.core.searchers.base
 ------------------------------------
 
+Abstract base class providing common utilities for site-specific searchers.
 """
 
 import abc

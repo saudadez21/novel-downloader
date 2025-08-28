@@ -3,6 +3,7 @@
 novel_downloader.core.exporters.linovelib.main_exporter
 -------------------------------------------------------
 
+Exporter implementation for Linovelib novels, supporting TXT and EPUB outputs.
 """
 
 from pathlib import Path

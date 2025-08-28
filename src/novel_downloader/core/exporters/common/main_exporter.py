@@ -3,9 +3,7 @@
 novel_downloader.core.exporters.common.main_exporter
 ----------------------------------------------------
 
-This module implements the `CommonExporter` class, a concrete exporter for handling
-novel data. It defines the logic to compile, structure, and export novel content
-in plain text format based on the platform's metadata and chapter files.
+Common exporter implementation for saving novels as TXT and EPUB files.
 """
 
 from pathlib import Path

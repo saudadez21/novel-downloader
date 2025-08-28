@@ -3,11 +3,7 @@
 novel_downloader.core.downloaders
 ---------------------------------
 
-This subpackage contains concrete downloader implementations for
-specific novel platforms.
-
-Each downloader is responsible for orchestrating the full lifecycle
-of retrieving, parsing, and saving novel content for a given source.
+Downloader implementations for retrieving novels from different sources
 """
 
 __all__ = [

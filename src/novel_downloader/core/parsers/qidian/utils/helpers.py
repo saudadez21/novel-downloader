@@ -4,10 +4,6 @@ novel_downloader.core.parsers.qidian.utils.helpers
 --------------------------------------------------
 
 Shared utility functions for parsing Qidian pages.
-
-This module provides reusable helpers to:
-- Extract SSR-rendered JSON page context and structured chapter metadata.
-- Identify VIP chapters, encrypted content, and viewability conditions.
 """
 
 import json
