@@ -11,10 +11,10 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from contextlib import suppress
 from typing import TYPE_CHECKING, TypedDict
 
-import tinycss2
 from lxml import html
 
 from novel_downloader.models import ChapterDict
@@ -39,7 +39,8 @@ if TYPE_CHECKING:
     from .main_parser import QidianParser
 
 logger = logging.getLogger(__name__)
-IGNORED_CLASS_LISTS = {"title", "review"}
+_RE_ATTR = re.compile(r"attr\(\s*([^)]+?)\s*\)", re.I)
+_RE_SCALEX = re.compile(r"scalex\(\s*-?1\s*\)", re.I)
 
 
 class Rule(TypedDict, total=False):
@@ -231,201 +232,237 @@ def _only_tag(selector: str) -> str | None:
     return last
 
 
+def _parse_decls(block: str) -> list[tuple[str, str]]:
+    """
+    Parse 'name:value;...' inside a block. Tolerates quotes and attr().
+    """
+    decls: list[tuple[str, str]] = []
+    i = 0
+    n = len(block)
+    name: list[str] = []
+    val: list[str] = []
+    in_name = True
+    quote = None  # track ' or "
+    while i < n:
+        c = block[i]
+        if quote:
+            # inside quotes
+            if c == "\\" and i + 1 < n:
+                # keep escaped char
+                (name if in_name else val).append(c)
+                i += 1
+                (name if in_name else val).append(block[i])
+            elif c == quote:
+                (name if in_name else val).append(c)
+                quote = None
+            else:
+                (name if in_name else val).append(c)
+        else:
+            if c in ("'", '"'):
+                (name if in_name else val).append(c)
+                quote = c
+            elif in_name and c == ":":
+                in_name = False
+            elif c == ";":
+                nm = "".join(name).strip().lower()
+                vl = "".join(val).strip()
+                if nm:
+                    decls.append((nm, vl))
+                name.clear()
+                val.clear()
+                in_name = True
+            else:
+                (name if in_name else val).append(c)
+        i += 1
+
+    if name or val:
+        nm = "".join(name).strip().lower()
+        vl = "".join(val).strip()
+        if nm:
+            decls.append((nm, vl))
+    return decls
+
+
 def parse_css_rules(css_str: str) -> Rules:
     """
-    Smaller, stricter CSS parsing tuned to the selectors you actually consume.
     Produces normalized Rules with:
       - orders: list[str] of tag names sorted by numeric 'order'
-      - sy:     '.sy-*' class rules
+      - sy: '.sy-*' class rules
       - p_rules: '.p* <tag>' rules, indexed by p-class then tag
     """
     rules: Rules = {"orders": [], "sy": {}, "p_rules": {}}
-    stylesheet = tinycss2.parse_stylesheet(
-        css_str, skip_comments=True, skip_whitespace=True
-    )
-
-    # Gather (tag, order_value) then sort once
     order_pairs: list[tuple[str, int]] = []
 
-    for rule in stylesheet:
-        if getattr(rule, "type", None) != "qualified-rule":
-            continue
+    i = 0
+    while True:
+        b1 = css_str.find("{", i)
+        if b1 == -1:
+            break
+        selector = css_str[i:b1].strip().lower()
+        b2 = css_str.find("}", b1 + 1)
+        if b2 == -1:
+            break
+        block = css_str[b1 + 1 : b2]
+        i = b2 + 1
 
-        selector_raw = tinycss2.serialize(rule.prelude).strip()
-        decls = tinycss2.parse_declaration_list(rule.content)
+        decls = _parse_decls(block)
 
         new_rule: Rule = {}
         order_val: int | None = None
 
-        for decl in decls:
-            if decl.type != "declaration":
-                continue
-            name = (decl.lower_name or "").strip()
-            value = tinycss2.serialize(decl.value).strip()
-
-            if name == "font-size" and value == "0":
-                if "::first-letter" in selector_raw:
+        for name, value in decls:
+            v = value.strip()
+            if name == "font-size" and v == "0":
+                if "::first-letter" in selector:
                     new_rule["delete_first"] = True
                 else:
                     new_rule["delete_all"] = True
-            elif name == "transform" and value.lower().replace(" ", "") == "scalex(-1)":
-                new_rule["transform_flip_x"] = True
+            elif name == "transform":
+                if _RE_SCALEX.search(v.replace(" ", "")):
+                    new_rule["transform_flip_x"] = True
             elif name == "order":
                 with suppress(ValueError, TypeError):
-                    order_val = int(value)
+                    order_val = int(v)
             elif name == "content":
-                if "::after" in selector_raw:
-                    if "attr(" in value:
-                        attr = value.split("attr(", 1)[1].split(")", 1)[0]
-                        new_rule["append_end_attr"] = attr
+                # normalize: remove outer quotes
+                if "::after" in selector:
+                    m = _RE_ATTR.search(v)
+                    if m:
+                        new_rule["append_end_attr"] = m.group(1)
                     else:
-                        new_rule["append_end_char"] = value.strip("\"'")
-                elif "::before" in selector_raw:
-                    if "attr(" in value:
-                        attr = value.split("attr(", 1)[1].split(")", 1)[0]
-                        new_rule["append_start_attr"] = attr
+                        s = v.strip().strip("\"'")
+                        new_rule["append_end_char"] = s
+                elif "::before" in selector:
+                    m = _RE_ATTR.search(v)
+                    if m:
+                        new_rule["append_start_attr"] = m.group(1)
                     else:
-                        new_rule["append_start_char"] = value.strip("\"'")
+                        s = v.strip().strip("\"'")
+                        new_rule["append_start_char"] = s
 
-        # classify selector
-        if selector_raw.startswith(".sy-"):
-            # e.g. ".sy-3"
-            key = selector_raw.lstrip(".")
+        # classification
+        if selector.startswith(".sy-"):
+            key = selector.lstrip(".")
             old = rules["sy"].get(key)
-            rules["sy"][key] = {**(old or {}), **(new_rule or {})}
+            rules["sy"][key] = {**old, **new_rule} if old else (new_rule or {})
 
-        elif selector_raw.startswith(".p") and " " in selector_raw:
-            # e.g. ".p3 i", ".p2 span::before"
-            p_cls, right = selector_raw.split(" ", 1)
+        elif selector.startswith(".p") and " " in selector:
+            p_cls, right = selector.split(" ", 1)
             p_cls = p_cls.lstrip(".")
             tag = _only_tag(right)
             if tag:
                 prev = rules["p_rules"].setdefault(p_cls, {}).get(tag)
-                rules["p_rules"][p_cls][tag] = {**(prev or {}), **(new_rule or {})}
+                rules["p_rules"][p_cls][tag] = (
+                    {**prev, **new_rule} if prev else (new_rule or {})
+                )
 
-        # orders (bare tag name with order)
         if order_val is not None:
-            tag_for_order = _only_tag(selector_raw)
+            tag_for_order = _only_tag(selector)
             if tag_for_order:
                 order_pairs.append((tag_for_order, order_val))
 
     # normalize orders
     order_pairs.sort(key=lambda t: t[1])
-    seen: set[str] = set()
-    for tag, _n in order_pairs:
+    seen = set()
+    orders: list[str] = []
+    for tag, _num in order_pairs:
         if tag not in seen:
             seen.add(tag)
-            rules["orders"].append(tag)
+            orders.append(tag)
+    rules["orders"] = orders
     return rules
 
 
 def render_visible_text(html_str: str, rules: Rules) -> tuple[str, list[str]]:
     """
-    Single-pass renderer over the HTML using pre-parsed Rules.
-    Mirrors original semantics:
-      - text nodes appended as-is
-      - skip .review
-      - special <y class="sy-*"> handled via sy rules
-      - per-<p class="p*> piece ordering using rules.orders
-      - capture reflected chars for OCR mapping
+    Renderer the HTML using pre-parsed Rules.
     """
     tree = html.fromstring(html_str)
     paragraphs_out: list[str] = []
     refl_list: list[str] = []
+    orders = rules.get("orders") or []
+    p_rules = rules.get("p_rules") or {}
+    sy_rules = rules.get("sy") or {}
 
     def _class_list(el: html.HtmlElement) -> list[str]:
-        cls = el.attrib.get("class", "")
-        return cls.split() if isinstance(cls, str) else (cls or [])
-
-    def _tag_name(el: html.HtmlElement) -> str:
-        t = el.tag
-        if isinstance(t, str):
-            return t.split("}", 1)[-1]
-        ln = getattr(t, "localname", None)
-        return ln if isinstance(ln, str) else str(t).split("}", 1)[-1]
+        cls = el.get("class")
+        return cls.split() if cls else []
 
     def _apply_rule(el: html.HtmlElement, rule: Rule) -> str:
-        if rule.get("delete_all", False):
+        if rule.get("delete_all"):
             return ""
 
-        # Text payload behavior: take element.text only
-        s = el.text or ""
+        parts: list[str] = []
+        if "append_start_char" in rule:
+            parts.append(rule["append_start_char"])
+        if "append_start_attr" in rule:
+            parts.append(el.get(rule["append_start_attr"], ""))
 
-        if rule.get("delete_first", False):
-            s = "" if len(s) <= 1 else s[1:]
+        text = el.text or ""
+        if rule.get("delete_first") and text:
+            text = text[1:]
+        parts.append(text)
 
-        # end char / attr
-        end_char = rule.get("append_end_char")
-        if end_char:
-            s += end_char
-        end_attr = rule.get("append_end_attr")
-        if end_attr:
-            s += el.attrib.get(end_attr, "")
+        if "append_end_char" in rule:
+            parts.append(rule["append_end_char"])
+        if "append_end_attr" in rule:
+            parts.append(el.get(rule["append_end_attr"], ""))
 
-        # start char / attr
-        start_char = rule.get("append_start_char")
-        if start_char:
-            s = start_char + s
-        start_attr = rule.get("append_start_attr")
-        if start_attr:
-            s = el.attrib.get(start_attr, "") + s
+        s = "".join(parts)
 
-        if rule.get("transform_flip_x", False) and s:
+        if rule.get("transform_flip_x") and s:
             refl_list.append(s)
+
         return s
 
     for p in tree.findall(".//p"):
         p_classes = _class_list(p)
-        if any(c in IGNORED_CLASS_LISTS for c in p_classes):
-            continue
-
-        # identify the 'p*' class expected by rule tables
         p_key = next((c for c in p_classes if c.startswith("p")), None)
+        has_ordered_rules = p_key in p_rules
 
         buf_parts: list[str] = []
-        ordered_cache: dict[str, str] = {}
 
-        # leading text node on <p>
-        if p.text:
+        if p.text and not has_ordered_rules:
             buf_parts.append(p.text)
 
-        for child in p:
-            child_tag = _tag_name(child)
-            # skip span.review entirely (but keep its tail)
-            if child_tag == "span":
-                child_cls = _class_list(child)
-                if "review" in child_cls:
-                    if child.tail:
-                        buf_parts.append(child.tail)
-                    continue
+        ordered_cache: dict[str, list[str]] = {}
 
-            if child_tag == "y":
-                # <y class="sy-*">
+        for child in p:
+            tag = str(child.tag)
+
+            # Handle inline <y class="sy-*"> spans
+            if tag == "y" and not has_ordered_rules:
                 y_cls = next(
                     (c for c in _class_list(child) if c.startswith("sy-")), None
                 )
-                rule = rules["sy"].get(y_cls) if y_cls else None
-                if rule:
-                    buf_parts.append(_apply_rule(child, rule))
+                if y_cls and y_cls in sy_rules:
+                    buf_parts.append(_apply_rule(child, sy_rules[y_cls]))
+                else:
+                    buf_parts.append(child.text or "")
                 if child.tail:
                     buf_parts.append(child.tail)
                 continue
 
-            # Per-tag ordered pieces for this paragraph class
-            if p_key is not None and child_tag in rules["orders"]:
-                rule = rules["p_rules"].get(p_key, {}).get(child_tag) or {}
-                ordered_cache[child_tag] = _apply_rule(child, rule)
+            # Handle ordered paragraphs: only cache tags that appear in `orders`
+            if p_key and has_ordered_rules and tag in orders:
+                rule = p_rules[p_key].get(tag, {})
+                ordered_cache.setdefault(tag, []).append(_apply_rule(child, rule))
+                continue
 
-            if child.tail:
-                buf_parts.append(child.tail)
+            # Non-ordered, non-<y> nodes: include text + tails as-is
+            if not has_ordered_rules:
+                buf_parts.append(child.text or "")
+                if child.tail:
+                    buf_parts.append(child.tail)
 
-        # append ordered pieces by tag order
-        for tag in rules["orders"]:
-            if tag in ordered_cache:
-                buf_parts.append(ordered_cache[tag])
+        # If ordered, flush in global orders with all duplicates preserved
+        if has_ordered_rules:
+            for tag in orders:
+                if tag in ordered_cache:
+                    buf_parts.extend(ordered_cache[tag])
 
-        para = "".join(buf_parts).strip()
+        para = "".join(buf_parts)
         if para:
             paragraphs_out.append(para)
 
-    return "\n\n".join(paragraphs_out), refl_list
+    return "\n".join(paragraphs_out), refl_list

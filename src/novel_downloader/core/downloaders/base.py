@@ -40,7 +40,7 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
     """
 
     DEFAULT_SOURCE_ID = 0
-    DEFAULT_PRIORITIES_MAP = {
+    PRIORITIES_MAP = {
         DEFAULT_SOURCE_ID: 0,
     }
 
@@ -50,7 +50,6 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
         parser: ParserProtocol,
         config: DownloaderConfig,
         site: str,
-        priorities: dict[int, int] | None = None,
     ):
         """
         Initialize the downloader for a specific site.
@@ -59,15 +58,11 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
         :param parser: Parser component for extracting chapter content.
         :param config: Downloader configuration settings.
         :param site: Identifier for the target website or source.
-        :param priorities: Mapping of source_id to priority value.
-                           Lower numbers indicate higher priority.
-                           E.X. {0: 10, 1: 100} means source 0 is preferred.
         """
         self._fetcher = fetcher
         self._parser = parser
         self._config = config
         self._site = site
-        self._priorities = priorities or self.DEFAULT_PRIORITIES_MAP
 
         self._raw_data_dir = Path(config.raw_data_dir) / site
         self._raw_data_dir.mkdir(parents=True, exist_ok=True)

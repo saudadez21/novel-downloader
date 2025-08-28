@@ -32,7 +32,7 @@ class BaseExporter(ExporterProtocol, abc.ABC):
     """
 
     DEFAULT_SOURCE_ID = 0
-    DEFAULT_PRIORITIES_MAP = {
+    PRIORITIES_MAP = {
         DEFAULT_SOURCE_ID: 0,
     }
 
@@ -40,20 +40,15 @@ class BaseExporter(ExporterProtocol, abc.ABC):
         self,
         config: ExporterConfig,
         site: str,
-        priorities: dict[int, int] | None = None,
     ):
         """
         Initialize the exporter with given configuration.
 
         :param config: Exporter configuration settings.
         :param site: Identifier for the target website or source.
-        :param priorities: Mapping of source_id to priority value.
-                           Lower numbers indicate higher priority.
-                           E.X. {0: 10, 1: 100} means source 0 is preferred.
         """
         self._config = config
         self._site = site
-        self._priorities = priorities or self.DEFAULT_PRIORITIES_MAP
         self._storage_cache: dict[str, ChapterStorage] = {}
 
         self._raw_data_dir = Path(config.raw_data_dir) / site
@@ -239,7 +234,7 @@ class BaseExporter(ExporterProtocol, abc.ABC):
             return
         self._storage_cache[book_id] = ChapterStorage(
             raw_base=self._raw_data_dir / book_id,
-            priorities=self._priorities,
+            priorities=self.PRIORITIES_MAP,
         )
         self._storage_cache[book_id].connect()
 

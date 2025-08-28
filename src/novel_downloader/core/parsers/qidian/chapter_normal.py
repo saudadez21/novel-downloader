@@ -65,17 +65,15 @@ def parse_normal_chapter(
         seq = chapter_info.get("seq", None)
         volume = chapter_info.get("extra", {}).get("volumeName", "")
 
-        chapter_text = _parse_browser_paragraph(html_str)
+        chapter_text = _parse_paragraph(
+            html_str=raw_html,
+            is_vip=vip_status(ssr_data),
+            chapter_id=chapter_id,
+            fkp=fkp,
+            fuid=parser._fuid,
+        )
         if not chapter_text:
-            chapter_text = _parse_session_paragraph(
-                html_str=raw_html,
-                is_vip=vip_status(ssr_data),
-                chapter_id=chapter_id,
-                fkp=fkp,
-                fuid=parser._fuid,
-            )
-            if not chapter_text:
-                return None
+            return None
 
         if parser._use_truncation and duplicated:
             chapter_text = truncate_half_lines(chapter_text)
@@ -103,55 +101,26 @@ def parse_normal_chapter(
     return None
 
 
-def _parse_browser_paragraph(html_str: str) -> str:
-    try:
-        tree = html.fromstring(html_str)
-        main = tree.xpath('//div[@id="app"]//div[@id="reader-content"]//main')
-        if not main:
-            return ""
-        main = main[0]
-
-        content_spans = main.xpath('.//span[contains(@class, "content-text")]')
-
-        paragraph_texts = [
-            span.text_content().strip()
-            for span in content_spans
-            if span.text_content().strip()
-        ]
-
-        chapter_text = "\n".join(paragraph_texts)
-        return chapter_text
-
-    except Exception as e:
-        logger.error("[Parser] _parse_paragraph failed: %s", e)
-    return ""
-
-
-def _parse_session_paragraph(
+def _parse_paragraph(
     html_str: str,
     is_vip: bool,
     chapter_id: str,
     fkp: str,
     fuid: str,
 ) -> str:
-    try:
-        raw_html = html_str
+    raw_html = html_str
 
-        if is_vip:
-            try:
-                decryptor = get_decryptor()
-                raw_html = decryptor.decrypt(raw_html, chapter_id, fkp, fuid)
-            except Exception as e:
-                logger.error("[Parser] decryption failed for '%s': %s", chapter_id, e)
-                return ""
+    if is_vip:
+        try:
+            decryptor = get_decryptor()
+            raw_html = decryptor.decrypt(raw_html, chapter_id, fkp, fuid)
+        except Exception as e:
+            logger.error("[Parser] decryption failed for '%s': %s", chapter_id, e)
+            return ""
 
-        tree = html.fromstring(raw_html)
-        paras = tree.xpath(".//p")
-        paragraph_texts = [
-            p.text_content().strip() for p in paras if p.text_content().strip()
-        ]
-        return "\n".join(paragraph_texts)
-
-    except Exception as e:
-        logger.error("[Parser] _parse_paragraph failed: %s", e)
-    return ""
+    tree = html.fromstring(raw_html)
+    paras = tree.xpath(".//p")
+    paragraph_texts = [
+        p.text_content().strip() for p in paras if p.text_content().strip()
+    ]
+    return "\n".join(paragraph_texts)

@@ -29,6 +29,8 @@ class BaseParser(ParserProtocol, abc.ABC):
 
     ADS: set[str] = set()
 
+    _SPACE_RE = re.compile(r"\s+")
+
     def __init__(
         self,
         config: ParserConfig,
@@ -134,6 +136,14 @@ class BaseParser(ParserProtocol, abc.ABC):
         if not self._ad_pattern:
             return list(lines)
         return [line for line in lines if not self._ad_pattern.search(line)]
+
+    @classmethod
+    def _norm_space(cls, s: str) -> str:
+        """
+        collapse any run of whitespace (incl. newlines, full-width spaces)
+        to a single space
+        """
+        return cls._SPACE_RE.sub(" ", s).strip()
 
     @staticmethod
     def _first_str(xs: list[str], replaces: list[tuple[str, str]] | None = None) -> str:

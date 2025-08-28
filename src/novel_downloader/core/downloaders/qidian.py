@@ -57,7 +57,7 @@ class QidianDownloader(BaseDownloader):
         config: DownloaderConfig,
     ):
         config.request_interval = max(1.0, config.request_interval)
-        super().__init__(fetcher, parser, config, "qidian", self.PRIORITIES_MAP)
+        super().__init__(fetcher, parser, config, "qidian")
 
     async def _download_one(
         self,
@@ -86,7 +86,7 @@ class QidianDownloader(BaseDownloader):
 
         chapter_storage = ChapterStorage(
             raw_base=raw_base,
-            priorities=self._priorities,
+            priorities=self.PRIORITIES_MAP,
         )
         chapter_storage.connect()
 

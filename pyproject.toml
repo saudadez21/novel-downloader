@@ -32,7 +32,6 @@ dependencies = [
 [project.optional-dependencies]
 font-recovery = [
     "numpy",
-    "tinycss2",
     "fonttools",
     "pillow",
 ]

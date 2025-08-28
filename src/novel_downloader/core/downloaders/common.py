@@ -61,7 +61,7 @@ class CommonDownloader(BaseDownloader):
 
         chapter_storage = ChapterStorage(
             raw_base=raw_base,
-            priorities=self._priorities,
+            priorities=self.PRIORITIES_MAP,
         )
         chapter_storage.connect()
 

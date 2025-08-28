@@ -29,8 +29,4 @@ class QidianExporter(CommonExporter):
         self,
         config: ExporterConfig,
     ):
-        super().__init__(
-            config,
-            site="qidian",
-            priorities=self.PRIORITIES_MAP,
-        )
+        super().__init__(config, site="qidian")
