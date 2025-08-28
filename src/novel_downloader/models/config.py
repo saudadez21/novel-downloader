@@ -86,7 +86,7 @@ class ExporterConfig:
     append_timestamp: bool = True
     filename_template: str = "{title}_{author}"
     include_cover: bool = True
-    include_picture: bool = False
+    include_picture: bool = True
     split_mode: SplitMode = "book"
     cleaner_cfg: TextCleanerConfig = field(default_factory=TextCleanerConfig)
 

@@ -17,6 +17,7 @@ from novel_downloader.core.exporters.epub_util import (
     finalize_export,
     inline_remote_images,
     prepare_builder,
+    remove_all_images,
 )
 from novel_downloader.utils import (
     download,
@@ -158,7 +159,11 @@ def common_export_as_epub(
             content = cleaner.clean_content(data.get("content", ""))
             extra = data.get("extra", {})
             author_note = cleaner.clean_content(extra.get("author_say", ""))
-            content = inline_remote_images(book, content, img_dir)
+            content = (
+                inline_remote_images(book, content, img_dir)
+                if config.include_picture
+                else remove_all_images(content)
+            )
 
             chap_html = build_epub_chapter(
                 title=title,

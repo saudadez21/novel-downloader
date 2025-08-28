@@ -145,7 +145,7 @@ class ConfigAdapter:
             append_timestamp=naming.get("append_timestamp", True),
             filename_template=naming.get("filename_template", "{title}_{author}"),
             include_cover=epub_opts.get("include_cover", True),
-            include_picture=epub_opts.get("include_picture", False),
+            include_picture=epub_opts.get("include_picture", True),
             split_mode=self._site_cfg.get("split_mode", "book"),
             cleaner_cfg=cleaner_cfg,
         )

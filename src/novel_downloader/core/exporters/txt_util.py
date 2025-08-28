@@ -13,7 +13,7 @@ __all__ = [
 
 import re
 
-_IMG_TAG_RE = re.compile(r"<img[^>]*>")
+_IMG_TAG_RE = re.compile(r"<img[^>]*>", re.IGNORECASE)
 
 
 def build_txt_header(fields: list[tuple[str, str]]) -> str:

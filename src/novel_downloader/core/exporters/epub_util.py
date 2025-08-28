@@ -11,6 +11,7 @@ __all__ = [
     "prepare_builder",
     "finalize_export",
     "inline_remote_images",
+    "remove_all_images",
     "build_epub_chapter",
 ]
 
@@ -28,7 +29,7 @@ from novel_downloader.utils.constants import (
 from novel_downloader.utils.epub import EpubBuilder, StyleSheet
 
 _IMAGE_WRAPPER = '<div class="duokan-image-single illus">{img}</div>'
-_IMG_INLINE_RE = re.compile(r"<img [^>]+/>")
+_IMG_TAG_RE = re.compile(r"<img[^>]*>", re.IGNORECASE)
 _IMG_SRC_RE = re.compile(
     r'<img[^>]*\bsrc=["\'](https?://[^"\']+)["\'][^>]*>',
     re.IGNORECASE,
@@ -137,6 +138,15 @@ def inline_remote_images(
     return _IMG_SRC_RE.sub(_replace, content)
 
 
+def remove_all_images(content: str) -> str:
+    """
+    Remove all <img> tags from the given content.
+
+    :param content: HTML/text of the chapter containing <img> tags.
+    """
+    return _IMG_TAG_RE.sub("", content)
+
+
 def build_epub_chapter(
     title: str,
     paragraphs: str,
@@ -165,7 +175,7 @@ def build_epub_chapter(
                 continue
 
             # case 2: single <img> line
-            if line.startswith("<img ") and line.endswith("/>"):
+            if _IMG_TAG_RE.fullmatch(line):
                 out.append(_IMAGE_WRAPPER.format(img=line))
                 continue
 
@@ -173,7 +183,7 @@ def build_epub_chapter(
             if "<img " in line:
                 pieces = []
                 last = 0
-                for m in _IMG_INLINE_RE.finditer(line):
+                for m in _IMG_TAG_RE.finditer(line):
                     pieces.append(escape(line[last : m.start()]))
                     pieces.append(m.group(0))
                     last = m.end()
