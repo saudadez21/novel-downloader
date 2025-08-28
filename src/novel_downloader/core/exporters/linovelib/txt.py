@@ -16,7 +16,7 @@ from novel_downloader.core.exporters.txt_util import (
     build_txt_chapter,
     build_txt_header,
 )
-from novel_downloader.utils import get_cleaner, save_as_txt
+from novel_downloader.utils import get_cleaner, write_file
 
 if TYPE_CHECKING:
     from .main_exporter import LinovelibExporter
@@ -126,7 +126,12 @@ def linovelib_export_as_txt(
     out_path = out_dir / out_name
 
     # --- Save final text ---
-    result = save_as_txt(content=final_text, filepath=out_path)
+    result = write_file(
+        content=final_text,
+        filepath=out_path,
+        write_mode="w",
+        on_exist="overwrite",
+    )
     if result:
         exporter.logger.info("%s Novel saved to: %s", TAG, out_path)
     else:

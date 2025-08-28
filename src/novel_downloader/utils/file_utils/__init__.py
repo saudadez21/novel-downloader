@@ -8,20 +8,10 @@ High-level file I/O utility re-exports for convenience.
 
 __all__ = [
     "sanitize_filename",
-    "save_as_json",
-    "save_as_txt",
-    "read_text_file",
-    "read_json_file",
-    "read_binary_file",
+    "write_file",
     "normalize_txt_line_endings",
 ]
 
-from .io import (
-    read_binary_file,
-    read_json_file,
-    read_text_file,
-    save_as_json,
-    save_as_txt,
-)
+from .io import write_file
 from .normalize import normalize_txt_line_endings
 from .sanitize import sanitize_filename

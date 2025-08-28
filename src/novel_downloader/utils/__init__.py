@@ -12,11 +12,7 @@ __all__ = [
     "get_cookie_value",
     "rc4_crypt",
     "sanitize_filename",
-    "save_as_json",
-    "save_as_txt",
-    "read_text_file",
-    "read_json_file",
-    "read_binary_file",
+    "write_file",
     "download",
     "get_cleaner",
     "content_prefix",
@@ -34,12 +30,8 @@ from .cookies import (
 )
 from .crypto_utils import rc4_crypt
 from .file_utils import (
-    read_binary_file,
-    read_json_file,
-    read_text_file,
     sanitize_filename,
-    save_as_json,
-    save_as_txt,
+    write_file,
 )
 from .network import download
 from .text_utils import (
