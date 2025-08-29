@@ -23,13 +23,6 @@ NCX_NS = "http://www.daisy.org/z3986/2005/ncx/"
 OPF_NS = "http://www.idpf.org/2007/opf"
 DC_NS = "http://purl.org/dc/elements/1.1/"
 
-CHAP_DOC_TYPE = (
-    '<?xml version="1.0" encoding="utf-8"?>\n'
-    "<!DOCTYPE html PUBLIC "
-    '"-//W3C//DTD XHTML 1.1//EN" '
-    '"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">'
-)
-
 IMAGE_MEDIA_TYPES: dict[str, str] = {
     "png": "image/png",
     "jpg": "image/jpeg",
@@ -39,13 +32,15 @@ IMAGE_MEDIA_TYPES: dict[str, str] = {
     "webp": "image/webp",
 }
 
-CONTAINER_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>
+CONTAINER_TEMPLATE = """\
+<?xml version="1.0" encoding="UTF-8"?>
 <container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
     <rootfiles>
         <rootfile full-path="{root_path}/content.opf"
             media-type="application/oebps-package+xml"/>
     </rootfiles>
-</container>"""
+</container>
+"""
 
 COVER_IMAGE_TEMPLATE = (
     f'<div style="text-align: center; margin: 0; padding: 0;">'
@@ -60,7 +55,8 @@ CSS_TMPLATE = (
 )
 
 CHAP_TMPLATE = f"""\
-{CHAP_DOC_TYPE}
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="{XHTML_NS}" xmlns:epub="{EPUB_NS}" lang="{{lang}}" xml:lang="{{lang}}">
   <head>
     <title>{{title}}</title>

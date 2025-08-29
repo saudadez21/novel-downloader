@@ -7,7 +7,6 @@ novel_downloader.core.parsers.linovelib
 
 import json
 from itertools import islice
-from pathlib import PurePosixPath
 from typing import Any
 
 from lxml import html
@@ -27,7 +26,9 @@ from novel_downloader.utils.constants import LINOVELIB_FONT_MAP_PATH
     site_keys=["linovelib"],
 )
 class LinovelibParser(BaseParser):
-    """Parser for 哔哩轻小说 book pages."""
+    """
+    Parser for 哔哩轻小说 book pages.
+    """
 
     # Book info XPaths
     _BOOK_NAME_XPATH = '//div[@class="book-info"]/h1[@class="book-name"]/text()'
@@ -98,10 +99,9 @@ class LinovelibParser(BaseParser):
             for a in chapter_elements:
                 title = a.text.strip()
                 url = a.attrib.get("href", "").strip()
-                chap_path = PurePosixPath(url.rstrip("/"))
-                chapters.append(
-                    {"title": title, "url": url, "chapterId": chap_path.stem}
-                )
+                # '/novel/4668/276082.html' -> '276082'
+                cid = url.split("/")[-1].split(".")[0]
+                chapters.append({"title": title, "url": url, "chapterId": cid})
 
             volumes.append(
                 {

@@ -24,7 +24,9 @@ from novel_downloader.models import (
     site_keys=["xs63b"],
 )
 class Xs63bParser(BaseParser):
-    """Parser for 小说路上 book pages."""
+    """
+    Parser for 小说路上 book pages.
+    """
 
     TITLE_SELECTOR = "//div[@class='block_txt2']//h2/text()"
     AUTHOR_SELECTOR = "//p[contains(., '作者')]/a/text()"
@@ -42,6 +44,10 @@ class Xs63bParser(BaseParser):
 
     CHAPTER_TITLE_SELECTOR = "//h1[@id='_52mb_h1']/text()"
     CHAPTER_PARAGRAPHS = "//div[@id='nr1']//p"
+
+    _RE_STRIP_DIV = re.compile(r"^<div[^>]*>|</div>$", re.I)
+    _RE_STRIP_JIANJIE = re.compile(r"^\s*简介\s*[:：]\s*", re.I)
+    _RE_SPACES = re.compile(r"[ \t]+")
 
     ADS = {"如章节缺失", "本章未完", "下一页继续阅读", "xs63b.com"}
 
@@ -66,17 +72,15 @@ class Xs63bParser(BaseParser):
         author = self._first_str(info_tree.xpath(self.AUTHOR_SELECTOR))
         book_type = self._first_str(info_tree.xpath(self.TYPE_SELECTOR))
 
-        serial_status = (
-            self._first_str(info_tree.xpath(self.STATUS_SELECTOR))
-            .replace("状态：", "")
-            .strip()
+        serial_status = self._first_str(
+            info_tree.xpath(self.STATUS_SELECTOR),
+            replaces=[("状态：", "")],
         )
-        serial_status = re.sub(r"\s+", " ", serial_status)
+        serial_status = self._norm_space(serial_status)
 
-        update_time = (
-            self._first_str(info_tree.xpath(self.UPDATE_SELECTOR))
-            .replace("更新：", "")
-            .strip()
+        update_time = self._first_str(
+            info_tree.xpath(self.UPDATE_SELECTOR),
+            replaces=[("更新：", "")],
         )
         cover_url = self._first_str(info_tree.xpath(self.COVER_SELECTOR))
 
@@ -85,10 +89,10 @@ class Xs63bParser(BaseParser):
         nodes = info_tree.xpath(self.SUMMARY_SELECTOR)
         if nodes:
             node_html = html.tostring(nodes[0], method="html", encoding="unicode")
-            node_html = re.sub(r"^<div[^>]*>|</div>$", "", node_html).strip()
+            node_html = self._RE_STRIP_DIV.sub("", node_html).strip()
             first_seg = node_html.split("<br", 1)[0]
             text = html.fromstring(f"<div>{first_seg}</div>").text_content()
-            text = re.sub(r"^\s*简介\s*[:：]\s*", "", text).strip()
+            text = self._RE_STRIP_JIANJIE.sub("", text).strip()
             if author:
                 text = text.split(f"{author}的作品集")[0].strip()
             summary = text
@@ -101,8 +105,8 @@ class Xs63bParser(BaseParser):
             title = (a.text_content() or "").strip()
             if not href or not title:
                 continue
-            m = re.search(r"/(\d+)\.html", href)
-            chap_id = m.group(1) if m else href.rstrip("/").split("/")[-1].split(".")[0]
+            # 'https://www.xs63b.com/xuanhuan/wanyuzhiwang/29546477.html' -> '29546477'
+            chap_id = href.rsplit("/", 1)[-1].split(".")[0]
             chapters.append({"title": title, "url": href, "chapterId": chap_id})
 
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
@@ -152,11 +156,9 @@ class Xs63bParser(BaseParser):
                     continue
 
                 txt = (p.text_content() or "").replace("\xa0", " ")
-                txt = re.sub(r"[ \t]+", " ", txt).strip()
+                txt = self._RE_SPACES.sub(" ", txt).strip()
                 if not txt or self._is_ad_line(txt):
                     continue
-                # if any(bad in txt for bad in self.ADS):
-                # continue
 
                 paragraphs.append(txt)
 

@@ -25,26 +25,14 @@ from novel_downloader.models import (
     site_keys=["dxmwx"],
 )
 class DxmwxParser(BaseParser):
-    """Parser for 大熊猫文学网 book pages."""
+    """
+    Parser for 大熊猫文学网 book pages.
+    """
 
-    X_BOOK_NAME = "//span[contains(@style,'font-size: 24px')]/text()"
-    X_AUTHOR = "//div[contains(@style,'height: 28px') and contains(., '著')]//a/text()"
-    X_TAGS = "//span[@class='typebut']//a/text()"
-    X_COVER = "//img[@class='imgwidth']/@src"
-    X_SUMMARY_NODE = (
-        "//div[contains(@style,'min-height') and "
-        "contains(@style,'padding-left') and contains(@style,'padding-right')][1]"
-    )
-    X_UPDATE = (
-        "normalize-space(string(//span[starts-with(normalize-space(.), '更新时间：')]))"
-    )
-
-    X_CHAPTER_ANCHORS = (
-        "//div[contains(@style,'height:40px') and contains(@style,'border-bottom')]//a"
-    )
-
-    X_TITLE = "//h1[@id='ChapterTitle']/text()"
-    X_CONTENT_P = "//div[@id='Lab_Contents']//p"
+    _RE_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
+    _RE_SPACES = re.compile(r"[ \t\u3000]+")
+    _RE_NEWLINES = re.compile(r"\n{2,}")
+    _RE_TITLE_WS = re.compile(r"\s+")
 
     def parse_book_info(
         self,
@@ -63,17 +51,56 @@ class DxmwxParser(BaseParser):
         info_tree = html.fromstring(html_list[0])
         catalog_tree = html.fromstring(html_list[1])
 
-        book_name = self._first_str(info_tree.xpath(self.X_BOOK_NAME))
-        author = self._first_str(info_tree.xpath(self.X_AUTHOR))
-        tags = [t.strip() for t in info_tree.xpath(self.X_TAGS) if t.strip()]
-        cover_url = self._abs_url(self._first_str(info_tree.xpath(self.X_COVER)))
+        book_name = self._first_str(
+            info_tree.xpath("//span[contains(@style,'font-size: 24px')]/text()")
+        )
+        author = self._first_str(
+            info_tree.xpath(
+                "//div[contains(@style,'height: 28px') and contains(., '著')]//a/text()"
+            )
+        )
+        tags = [
+            t.strip()
+            for t in info_tree.xpath("//span[@class='typebut']//a/text()")
+            if t.strip()
+        ]
+        cover_url = "https://www.dxmwx.org" + self._first_str(
+            info_tree.xpath("//img[@class='imgwidth']/@src")
+        )
 
-        raw = info_tree.xpath(self.X_UPDATE)
-        update_time = self.normalize_update_date(raw.replace("更新时间：", "").strip())
+        raw_update = self._first_str(
+            info_tree.xpath(
+                "normalize-space(string(//span[starts-with(normalize-space(.), '更新时间：')]))"  # noqa: E501
+            )
+        )
+        raw_update = raw_update.replace("更新时间：", "").strip()
+        update_time = self._normalize_update_date(raw_update)
 
-        summary = self._extract_summary(info_tree)
+        nodes = info_tree.xpath(
+            "//div[contains(@style,'min-height') and "
+            "contains(@style,'padding-left') and contains(@style,'padding-right')][1]"
+        )
+        summary = ""
+        if nodes:
+            texts = [
+                t.replace("\xa0", " ").strip() for t in nodes[0].xpath(".//text()")
+            ]
+            lines = [t for t in texts if t]
+            summary = "\n".join(lines)
+            summary = re.sub(r"^\s*[:：]\s*", "", summary)
+            summary = self._clean_spaces(summary)
 
-        chapters = self._extract_chapters(catalog_tree)
+        chapters: list[ChapterInfoDict] = []
+        for a in catalog_tree.xpath(
+            "//div[contains(@style,'height:40px') and contains(@style,'border-bottom')]//a"  # noqa: E501
+        ):
+            href = a.get("href") or ""
+            title = (a.text_content() or "").strip()
+            if not href or not title:
+                continue
+            # "/read/57215_50197663.html" -> "50197663"
+            chap_id = href.split("read/", 1)[-1].split(".html", 1)[0].split("_")[-1]
+            chapters.append({"title": title, "url": href, "chapterId": chap_id})
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 
         return {
@@ -105,14 +132,16 @@ class DxmwxParser(BaseParser):
 
         tree = html.fromstring(html_list[0])
 
-        title = self._first_str(tree.xpath(self.X_TITLE))
-        title = re.sub(r"\s+", " ", title).strip()
+        title = self._first_str(tree.xpath("//h1[@id='ChapterTitle']/text()"))
+        title = self._RE_TITLE_WS.sub(" ", title).strip()
+        if not title:
+            title = f"第 {chapter_id} 章"
 
         paragraphs: list[str] = []
-        for p in tree.xpath(self.X_CONTENT_P):
+        for p in tree.xpath("//div[@id='Lab_Contents']//p"):
             text = self._clean_spaces(p.text_content())
             if not text:
-                continue  # skips <p/> spacers and empty lines
+                continue
             if "点这里听书" in text or "大熊猫文学" in text:
                 continue
             paragraphs.append(text)
@@ -128,64 +157,19 @@ class DxmwxParser(BaseParser):
             "extra": {"site": "dxmwx"},
         }
 
-    @staticmethod
-    def _clean_spaces(s: str) -> str:
+    @classmethod
+    def _clean_spaces(cls, s: str) -> str:
         s = s.replace("\xa0", " ")
-        s = re.sub(r"[ \t\u3000]+", " ", s)
-        s = re.sub(r"\n{2,}", "\n", s)
+        s = cls._RE_SPACES.sub(" ", s)
+        s = cls._RE_NEWLINES.sub("\n", s)
         return s.strip()
 
-    @staticmethod
-    def _chapter_id_from_href(href: str) -> str:
-        # "/read/57215_50197663.html" -> "50197663"
-        return href.split("read/", 1)[-1].split(".html", 1)[0].split("_")[-1]
-
-    @staticmethod
-    def _abs_url(url: str) -> str:
-        # Site uses absolute paths like "/images/..".
-        if url.startswith("http://") or url.startswith("https://"):
-            return url
-        if url.startswith("/"):
-            return "https://www.dxmwx.org" + url
-        return url
-
-    def _extract_summary(self, info_tree: html.HtmlElement) -> str:
-        """
-        Extract the entire summary block.
-        """
-        nodes = info_tree.xpath(self.X_SUMMARY_NODE)
-        if not nodes:
-            return ""
-        texts = [t.replace("\xa0", " ").strip() for t in nodes[0].xpath(".//text()")]
-        lines = [t for t in texts if t]
-        text = "\n".join(lines)
-        # normalize
-        text = re.sub(r"^\s*[:：]\s*", "", text)
-        return self._clean_spaces(text)
-
-    def _extract_chapters(
-        self, catalog_tree: html.HtmlElement
-    ) -> list[ChapterInfoDict]:
-        chapters: list[ChapterInfoDict] = []
-        for a in catalog_tree.xpath(self.X_CHAPTER_ANCHORS):
-            href = a.get("href") or ""
-            title = (a.text_content() or "").strip()
-            if not href or not title:
-                continue
-            chap_id = self._chapter_id_from_href(href)
-            chapters.append({"title": title, "url": href, "chapterId": chap_id})
-        return chapters
-
-    @staticmethod
-    def normalize_update_date(raw: str) -> str:
-        """
-        Return a YYYY-MM-DD string.
-        1) If raw contains a 'YYYY-MM-DD', return it.
-        2) Otherwise, fall back to today's date (local) as 'YYYY-MM-DD'.
-        """
+    @classmethod
+    def _normalize_update_date(cls, raw: str) -> str:
+        """Return a YYYY-MM-DD string."""
         if not raw:
             return datetime.now().strftime("%Y-%m-%d")
-        m = re.search(r"\d{4}-\d{2}-\d{2}", raw)
+        m = cls._RE_DATE.search(raw)
         if m:
             return m.group(0)
         return datetime.now().strftime("%Y-%m-%d")

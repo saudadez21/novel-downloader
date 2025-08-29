@@ -24,7 +24,14 @@ from novel_downloader.models import (
     site_keys=["piaotia"],
 )
 class PiaotiaParser(BaseParser):
-    """Parser for 飘天文学网 book pages."""
+    """
+    Parser for 飘天文学网 book pages.
+    """
+
+    _RE_DEVICE_DIV = re.compile(
+        r'<div\s+id=[\'"“”]?device[\'"“”]?[^>]*>',
+        flags=re.IGNORECASE,
+    )
 
     def parse_book_info(
         self,
@@ -45,44 +52,35 @@ class PiaotiaParser(BaseParser):
         catalog_tree = html.fromstring(html_list[1])
 
         book_name = self._first_str(info_tree.xpath("//span[@style]//h1/text()"))
-        author = (
-            self._first_str(
-                info_tree.xpath(
-                    '//td[contains(text(),"作") and contains(text(),"者")]/text()'
-                )
-            )
-            .split("：")[-1]
-            .strip()
+        author = self._first_str(
+            info_tree.xpath(
+                '//td[contains(text(),"作") and contains(text(),"者")]/text()'
+            ),
+            replaces=[(chr(0xA0), ""), (" ", ""), ("作者：", "")],
         )
 
         # Category as tag
-        category = (
-            self._first_str(
-                info_tree.xpath(
-                    '//td[contains(text(),"类") and contains(text(),"别")]/text()'
-                )
-            )
-            .split("：")[-1]
-            .strip()
+        category = self._first_str(
+            info_tree.xpath(
+                '//td[contains(text(),"类") and contains(text(),"别")]/text()'
+            ),
+            replaces=[(chr(0xA0), ""), (" ", ""), ("类别：", "")],
         )
         tags = [category] if category else []
 
-        word_count = (
-            self._first_str(info_tree.xpath('//td[contains(text(),"全文长度")]/text()'))
-            .split("：")[-1]
-            .strip()
+        word_count = self._first_str(
+            info_tree.xpath('//td[contains(text(),"全文长度")]/text()'),
+            replaces=[(chr(0xA0), ""), (" ", ""), ("全文长度：", "")],
         )
 
-        update_time = (
-            self._first_str(info_tree.xpath('//td[contains(text(),"最后更新")]/text()'))
-            .split("：")[-1]
-            .strip()
+        update_time = self._first_str(
+            info_tree.xpath('//td[contains(text(),"最后更新")]/text()'),
+            replaces=[(chr(0xA0), ""), (" ", ""), ("最后更新：", "")],
         )
 
-        serial_status = (
-            self._first_str(info_tree.xpath('//td[contains(text(),"文章状态")]/text()'))
-            .split("：")[-1]
-            .strip()
+        serial_status = self._first_str(
+            info_tree.xpath('//td[contains(text(),"文章状态")]/text()'),
+            replaces=[(chr(0xA0), ""), (" ", ""), ("文章状态：", "")],
         )
 
         cover_url = self._first_str(info_tree.xpath('//td[@width="80%"]//img/@src'))
@@ -143,12 +141,7 @@ class PiaotiaParser(BaseParser):
         if not html_list:
             return None
 
-        raw = re.sub(
-            r'<div\s+id=[\'"“”]?device[\'"“”]?[^>]*>',
-            "",
-            html_list[0],
-            flags=re.IGNORECASE,
-        )
+        raw = self._RE_DEVICE_DIV.sub("", html_list[0])
         raw = raw.replace(
             '<script language="javascript">GetMode();</script>',
             '<div id="main" class="colors1 sidebar">',

@@ -5,7 +5,6 @@ novel_downloader.core.parsers.biquyuedu
 
 """
 
-import re
 from typing import Any
 
 from lxml import etree, html
@@ -24,7 +23,9 @@ from novel_downloader.models import (
     site_keys=["biquyuedu"],
 )
 class BiquyueduParser(BaseParser):
-    """Parser for 精彩小说 book pages."""
+    """
+    Parser for 精彩小说 book pages.
+    """
 
     ADS: set[str] = {
         "笔趣阁",
@@ -73,29 +74,16 @@ class BiquyueduParser(BaseParser):
         summary = intro_text.replace("简介：", "", 1).split("作者：", 1)[0].strip()
 
         # --- Chapters ---
-        chapters: list[ChapterInfoDict] = []
-        dl_elems = tree.xpath("//div[@class='listmain']//dl")
-        dl_elems = tree.xpath("//div[@class='listmain']//dl")
-        if dl_elems:
-            dl = dl_elems[0]
-
-            dds = dl.xpath("./dd[preceding-sibling::dt[1][contains(text(),'全文')]]/a")
-            if not dds:
-                dds = dl.xpath("./dt[1]/following-sibling::dd/a")
-
-            # Build chapter list
-            for a in dds:
-                url = a.get("href", "").strip()
-                title = (a.get("title") or a.text_content()).strip()
-                m = re.search(r"/(\d+)\.html$", url)
-                chapter_id = m.group(1) if m else ""
-                chapters.append(
-                    {
-                        "title": title,
-                        "url": url,
-                        "chapterId": chapter_id,
-                    }
-                )
+        chapters: list[ChapterInfoDict] = [
+            {
+                "title": (a.get("title") or a.text_content() or "").strip(),
+                "url": (a.get("href") or "").strip(),
+                "chapterId": (a.get("href") or "").rsplit("/", 1)[-1].split(".", 1)[0],
+            }
+            for a in tree.xpath(
+                "//div[@class='listmain']//dl/dd[preceding-sibling::dt[1][contains(text(),'全文')]]/a"
+            )
+        ]
 
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 

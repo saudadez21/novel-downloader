@@ -5,7 +5,6 @@ novel_downloader.core.parsers.biquge
 
 """
 
-import re
 from typing import Any
 
 from lxml import html
@@ -24,7 +23,9 @@ from novel_downloader.models import (
     site_keys=["biquge", "bqg"],
 )
 class BiqugeParser(BaseParser):
-    """Parser for 笔趣阁 book pages."""
+    """
+    Parser for 笔趣阁 book pages.
+    """
 
     def parse_book_info(
         self,
@@ -41,45 +42,37 @@ class BiqugeParser(BaseParser):
             return None
 
         tree = html.fromstring(html_list[0])
-        book_name = tree.xpath('string(//div[@id="info"]/h1)').strip()
-        author_text = (
-            tree.xpath('string(//div[@id="info"]/p[1])').replace("\xa0", "").strip()
-        )
-        m = re.search(r"作者[:：]?\s*(.+)", author_text)
-        author = m.group(1).strip() if m else ""
-        cover_list = tree.xpath('//div[@id="fmimg"]/img/@src')
-        cover_url = cover_list[0].strip() if cover_list else ""
-        ut_text = tree.xpath('string(//div[@id="info"]/p[3])').strip()
-        update_time = ut_text.replace("最后更新：", "").strip()
-        summary = tree.xpath('string(//div[@id="intro"])').strip()
 
-        bt = tree.xpath('//div[@class="con_top"]/a[2]/text()')
-        book_type = bt[0].strip() if bt else ""
+        book_name = self._first_str(tree.xpath('//div[@id="info"]/h1/text()'))
+
+        author = self._first_str(
+            tree.xpath('//div[@id="info"]/p[1]/text()'),
+            replaces=[("\xa0", ""), ("作者：", "")],
+        )
+
+        cover_url = self._first_str(tree.xpath('//div[@id="fmimg"]/img/@src'))
+
+        update_time = self._first_str(
+            tree.xpath('//div[@id="info"]/p[3]/text()'),
+            replaces=[("最后更新：", "")],
+        )
+
+        intro_elem = tree.xpath('//div[@id="intro"]')
+        summary = "".join(intro_elem[0].itertext()).strip() if intro_elem else ""
+
+        book_type = self._first_str(tree.xpath('//div[@class="con_top"]/a[2]/text()'))
         tags = [book_type] if book_type else []
 
-        chapters: list[ChapterInfoDict] = []
-        dt_list = tree.xpath('//div[@id="list"]/dl/dt[contains(., "正文")]')
-        if dt_list:
-            vol_dt = dt_list[0]
-            for sib in vol_dt.itersiblings():
-                if sib.tag == "dt":
-                    break
-                if sib.tag == "dd":
-                    a = sib.xpath("./a")
-                    if not a:
-                        continue
-                    a = a[0]
-                    title = a.text.strip()
-                    url = a.get("href", "").strip()
-                    # extract "3899817" from "/8_8187/3899817.html"
-                    chapterId = url.split("/")[-1].split(".", 1)[0]
-                    chapters.append(
-                        {
-                            "title": title,
-                            "url": url,
-                            "chapterId": chapterId,
-                        }
-                    )
+        chapters: list[ChapterInfoDict] = [
+            {
+                "title": (a.text or "").strip(),
+                "url": (a.get("href") or "").strip(),
+                "chapterId": (a.get("href") or "").rsplit("/", 1)[-1].split(".", 1)[0],
+            }
+            for a in tree.xpath(
+                '//div[@id="list"]/dl/dt[contains(., "正文")]/following-sibling::dd/a'
+            )
+        ]
 
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 
@@ -109,21 +102,22 @@ class BiqugeParser(BaseParser):
         """
         if not html_list:
             return None
-        tree = html.fromstring(html_list[0], parser=None)
+        tree = html.fromstring(html_list[0])
 
-        # 提取标题
-        title_elem = tree.xpath('//div[@class="bookname"]/h1')
-        title = "".join(title_elem[0].itertext()).strip() if title_elem else ""
+        title = self._first_str(tree.xpath('//div[@class="bookname"]/h1/text()'))
         if not title:
             title = f"第 {chapter_id} 章"
 
-        # 提取内容
         content_elem = tree.xpath('//div[@id="content"]')
-        paragraphs = content_elem[0].xpath(".//p") if content_elem else []
-        paragraph_texts = [
-            "".join(p.itertext()).strip() for p in paragraphs if p is not None
+        if not content_elem:
+            return None
+        paragraphs = [
+            "".join(p.itertext()).strip() for p in content_elem[0].xpath(".//p")
         ]
-        content = "\n".join([p for p in paragraph_texts if p])
+        if paragraphs and "www.shuhaige.net" in paragraphs[-1]:
+            paragraphs.pop()
+
+        content = "\n".join(paragraphs)
         if not content.strip():
             return None
 

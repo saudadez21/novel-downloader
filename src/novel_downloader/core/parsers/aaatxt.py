@@ -23,7 +23,9 @@ from novel_downloader.models import (
     site_keys=["aaatxt"],
 )
 class AaatxtParser(BaseParser):
-    """Parser for 3A电子书 book pages."""
+    """
+    Parser for 3A电子书 book pages.
+    """
 
     ADS: set[str] = {
         "按键盘上方向键",

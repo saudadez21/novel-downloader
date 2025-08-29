@@ -41,10 +41,10 @@ def build_txt_chapter(
     - Title appears first (stripped of surrounding whitespace).
     - Each non-blank line in `paragraphs` becomes its own paragraph.
 
-    :param title:      Chapter title.
+    :param title: Chapter title.
     :param paragraphs: Raw multi-line string. Blank lines are ignored.
-    :param extras:     Optional dict mapping section titles to multi-line strings.
-    :return:           A string where title, paragraphs, and extras are joined by lines.
+    :param extras: Optional dict mapping section titles to multi-line strings.
+    :return: A string where title, paragraphs, and extras are joined by lines.
     """
     parts: list[str] = [title.strip()]
 

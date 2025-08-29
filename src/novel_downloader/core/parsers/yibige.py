@@ -5,7 +5,6 @@ novel_downloader.core.parsers.yibige
 
 """
 
-import re
 from typing import Any
 
 from lxml import html
@@ -24,10 +23,9 @@ from novel_downloader.models import (
     site_keys=["yibige"],
 )
 class YibigeParser(BaseParser):
-    """Parser for 一笔阁 book pages."""
-
-    X_TITLE = "//div[@class='bookname']/h1/text()"
-    X_P_NODES = "//div[@id='content']//p"
+    """
+    Parser for 一笔阁 book pages.
+    """
 
     ADS = {
         "首发无广告",
@@ -59,19 +57,21 @@ class YibigeParser(BaseParser):
         info_tree = html.fromstring(html_list[0])
         catalog_tree = html.fromstring(html_list[1])
 
-        # --- Basic metadata (single XPath each) ---
-        book_name = self._first_str(info_tree.xpath("//div[@id='info']/h1/text()"))
-        author = self._first_str(info_tree.xpath("//div[@id='info']/p[a]/a/text()"))
-        cover_url = self._first_str(info_tree.xpath("//div[@id='fmimg']//img/@src"))
-
-        # Time + status line like: "时间：2025-04-09 22:42:42 连载中"
-        time_line = self._first_str(
-            info_tree.xpath("//div[@id='info']/p[contains(., '时间：')]/text()")
+        # --- From <meta> data ---
+        book_name = self._meta(info_tree, "og:novel:book_name") or self._first_str(
+            info_tree.xpath("//div[@id='info']/h1/text()")
         )
-        m_time = re.search(r"(\d{4}-\d{2}-\d{2}(?:\s+\d{2}:\d{2}:\d{2})?)", time_line)
-        update_time = m_time.group(1) if m_time else ""
-        m_status = re.search(r"(连载中|已完结|完结)", time_line)
-        serial_status = m_status.group(1) if m_status else "连载中"
+
+        author = self._meta(info_tree, "og:novel:author") or self._first_str(
+            info_tree.xpath("//div[@id='info']/p[a]/a/text()")
+        )
+
+        cover_url = self._meta(info_tree, "og:image") or self._first_str(
+            info_tree.xpath("//div[@id='fmimg']//img/@src")
+        )
+
+        update_time = self._meta(info_tree, "og:novel:update_time").replace("T", " ")
+        serial_status = self._meta(info_tree, "og:novel:status") or "连载中"
 
         word_count = self._first_str(
             info_tree.xpath("//div[@id='info']/p[contains(., '字数：')]/text()[1]"),
@@ -81,14 +81,25 @@ class YibigeParser(BaseParser):
         # Summary: first paragraph under #intro
         summary = self._first_str(info_tree.xpath("//div[@id='intro']//p[1]/text()"))
 
-        # Tags/Category: breadcrumb second link
-        book_type = self._first_str(
-            info_tree.xpath("//div[@class='con_top']/a[2]/text()")
-        )
-        tags = [book_type] if book_type else []
+        # Category and tags
+        book_type = self._meta(info_tree, "og:novel:category")
+        tags_set = set(self._meta_all(info_tree, "book:tag"))
+        if book_type:
+            tags_set.add(book_type)
+        tags = list(tags_set)
 
         # --- Chapters from the catalog page ---
-        chapters = self._extract_chapters(catalog_tree)
+        chapters: list[ChapterInfoDict] = []
+        for a in catalog_tree.xpath("//div[@id='list']/dl/dd/a"):
+            href = (a.get("href") or "").strip()
+            if not href:
+                continue
+            title = (a.text_content() or "").strip()
+            if not title:
+                continue
+            # /6238/2496.html -> 2496
+            chap_id = href.split("/")[-1].split(".")[0]
+            chapters.append({"title": title, "url": href, "chapterId": chap_id})
 
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 
@@ -122,11 +133,11 @@ class YibigeParser(BaseParser):
             return None
         tree = html.fromstring(html_list[0])
 
-        title = self._first_str(tree.xpath(self.X_TITLE))
+        title = self._first_str(tree.xpath("//div[@class='bookname']/h1/text()"))
 
         paragraphs: list[str] = []
-        for p in tree.xpath(self.X_P_NODES):
-            txt = self._clean_text(p.text_content())
+        for p in tree.xpath("//div[@id='content']//p"):
+            txt = self._norm_space(p.text_content())
             if not txt or self._is_ad(txt):
                 continue
             paragraphs.append(txt)
@@ -142,52 +153,27 @@ class YibigeParser(BaseParser):
             "extra": {"site": "yibige"},
         }
 
-    def _extract_chapters(
-        self, catalog_tree: html.HtmlElement
-    ) -> list[ChapterInfoDict]:
-        """
-        Grab every chapter link under #list > dl > dd > a, and compute chapterId.
-        """
-        chapters: list[ChapterInfoDict] = []
-        for a in catalog_tree.xpath("//div[@id='list']/dl/dd/a"):
-            href = (a.get("href") or "").strip()
-            if not href:
-                continue
-            title = (a.text_content() or "").strip()
-            if not title:
-                continue
-            chap_id = self._chapter_id_from_href(href)
-            chapters.append({"title": title, "url": href, "chapterId": chap_id})
-        return chapters
-
-    @staticmethod
-    def _chapter_id_from_href(href: str) -> str:
-        """
-        /6238/2496.html -> 2496
-        /1921/1.html    -> 1
-        """
-        last = href.strip("/").split("/")[-1]
-        return last.split(".")[0]
-
-    @staticmethod
-    def _clean_text(s: str) -> str:
-        """Normalize whitespace and remove zero-width/nbsp."""
-        if not s:
-            return ""
-        s = (
-            s.replace("\xa0", " ")
-            .replace("\u200b", "")
-            .replace("\ufeff", "")
-            .replace("\u3000", " ")
-        )
-        s = re.sub(r"[ \t]+", " ", s)  # collapse spaces/tabs
-        return s.strip()
-
     def _is_ad(self, s: str) -> bool:
-        """Very small heuristic filter for footer junk inside #content."""
+        """
+        Filter for footer junk inside #content.
+        """
         if self._is_ad_line(s):
             return True
 
         ss = s.replace(" ", "")
         # return any(b in s or b in ss for b in self.ADS)
         return self._is_ad_line(ss)
+
+    @classmethod
+    def _meta(cls, tree: html.HtmlElement, prop: str) -> str:
+        """
+        Get a single meta property content
+        """
+        return cls._first_str(tree.xpath(f"//meta[@property='{prop}']/@content"))
+
+    @staticmethod
+    def _meta_all(tree: html.HtmlElement, prop: str) -> list[str]:
+        """
+        Get all meta property content values
+        """
+        return tree.xpath(f"//meta[@property='{prop}']/@content") or []

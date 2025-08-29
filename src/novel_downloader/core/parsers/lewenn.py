@@ -23,7 +23,9 @@ from novel_downloader.models import (
     site_keys=["lewenn", "lewen"],
 )
 class LewennParser(BaseParser):
-    """Parser for 乐文小说网 book pages."""
+    """
+    Parser for 乐文小说网 book pages.
+    """
 
     BASE_URL = "https://www.lewenn.net"
 
@@ -137,8 +139,6 @@ class LewennParser(BaseParser):
         for ln in raw_lines:
             if not ln or self._is_ad_line(ln):
                 continue
-            # if any(bad in ln for bad in self.ADS):
-            # continue
             # if ln.startswith("(") and ln.endswith(")"):
             #     continue
             lines.append(ln.replace(chr(0xA0), ""))

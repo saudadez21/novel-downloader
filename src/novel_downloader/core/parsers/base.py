@@ -138,12 +138,14 @@ class BaseParser(ParserProtocol, abc.ABC):
         return [line for line in lines if not self._ad_pattern.search(line)]
 
     @classmethod
-    def _norm_space(cls, s: str) -> str:
+    def _norm_space(cls, s: str, c: str = " ") -> str:
         """
         collapse any run of whitespace (incl. newlines, full-width spaces)
-        to a single space
+
+        :param s: Input string to normalize.
+        :param c: Replacement character to use for collapsed whitespace.
         """
-        return cls._SPACE_RE.sub(" ", s).strip()
+        return cls._SPACE_RE.sub(c, s).strip()
 
     @staticmethod
     def _first_str(xs: list[str], replaces: list[tuple[str, str]] | None = None) -> str:

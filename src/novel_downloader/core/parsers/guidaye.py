@@ -24,7 +24,9 @@ from novel_downloader.models import (
     site_keys=["guidaye"],
 )
 class GuidayeParser(BaseParser):
-    """Parser for 名著阅读 book pages."""
+    """
+    Parser for 名著阅读 book pages.
+    """
 
     BASE_URL = "https://b.guidaye.com"
 
@@ -115,14 +117,12 @@ class GuidayeParser(BaseParser):
         """
         if not html_list:
             return None
-        tree = html.fromstring(html_list[0], parser=None)
+        tree = html.fromstring(html_list[0])
 
         # Title from entry-title
         title = self._first_str(tree.xpath('//h1[@class="entry-title"]/text()'))
 
         # Extract paragraphs within entry-content
-        # raw_texts = tree.xpath('//div[@class="entry-content"]//text()')
-        # lines = [t.replace("\u00A0", " ").strip() for t in raw_texts if t.strip()]
         full_text = tree.xpath('string(//div[@class="entry-content"])')
         full_text = full_text.replace("\u00A0", " ")
 

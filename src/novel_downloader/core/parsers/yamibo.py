@@ -23,38 +23,11 @@ from novel_downloader.models import (
     site_keys=["yamibo"],
 )
 class YamiboParser(BaseParser):
-    """Parser for 百合会 book pages."""
+    """
+    Parser for 百合会 book pages.
+    """
 
     BASE_URL = "https://www.yamibo.com"
-    # Book info XPaths
-    _BOOK_NAME_XPATH = 'string(//h3[contains(@class, "col-md-12")])'
-    _AUTHOR_XPATH = 'string(//h5[contains(@class, "text-warning")])'
-    _COVER_URL_XPATH = '//img[contains(@class, "img-responsive")]/@src'
-    _UPDATE_TIME_XPATH = '//p[contains(text(), "更新时间：")]'
-    _SERIAL_STATUS_XPATH = '//p[contains(text(), "作品状态：")]'
-    _TYPE_XPATH = '//p[contains(text(), "作品分类：")]'
-    _SUMMARY_XPATH = 'string(//div[@id="w0-collapse1"]/div)'
-
-    _VOLUME_NODE_XPATH = (
-        '//div[contains(@class, "panel-info") and contains(@class, "panel-default")]'
-    )
-    _VOLUME_TITLE_XPATH = './/div[contains(@class, "panel-heading")]//a/text()'
-    _CHAPTER_NODE_XPATH = (
-        './/div[contains(@class, "panel-body")]//a[contains(@href, "view-chapter")]'
-    )
-    _CHAPTER_FLAT_XPATH = (
-        '//div[@class="panel-body"]//a[contains(@href, "view-chapter")]'
-    )
-
-    # Chapter field XPaths
-    _CHAPTER_TITLE_XPATH = "string(//section[contains(@class, 'col-md-9')]//h3)"
-    _CHAPTER_TIME_XPATH = (
-        "//div[contains(@class, 'row')]//div[contains(text(), '更新时间')]"
-    )
-    _CHAPTER_WORD_COUNT_XPATH = (
-        "//div[contains(@class, 'row')]//div[contains(text(), '章节字数')]"
-    )
-    _CHAPTER_CONTENT_XPATH = "//div[@id='w0-collapse1']//p//text()"
 
     def parse_book_info(
         self,
@@ -72,86 +45,64 @@ class YamiboParser(BaseParser):
 
         tree = html.fromstring(html_list[0])
 
-        book_name = tree.xpath(self._BOOK_NAME_XPATH).strip()
-        author = tree.xpath(self._AUTHOR_XPATH).strip()
-
-        cover = tree.xpath(self._COVER_URL_XPATH)
-        cover_url = f"{self.BASE_URL}{cover[0]}" if cover else ""
-
-        update_node = tree.xpath(self._UPDATE_TIME_XPATH)
-        update_time = (
-            update_node[0].xpath("string()").replace("更新时间：", "").strip()
-            if update_node
-            else ""
+        book_name = self._first_str(
+            tree.xpath('//h3[contains(@class,"col-md-12")]/text()')
+        )
+        author = self._first_str(
+            tree.xpath('//h5[contains(@class,"text-warning")]/text()')
+        )
+        cover_url = self.BASE_URL + self._first_str(
+            tree.xpath('//img[contains(@class,"img-responsive")]/@src')
         )
 
-        serial_node = tree.xpath(self._SERIAL_STATUS_XPATH)
-        serial_status = (
-            serial_node[0].xpath("string()").replace("作品状态：", "").strip()
-            if serial_node
-            else ""
+        update_time = self._first_str(
+            tree.xpath('//p[contains(text(),"更新时间：")]/text()'),
+            replaces=[("更新时间：", "")],
         )
-
-        type_node = tree.xpath(self._TYPE_XPATH)
-        book_type = (
-            type_node[0].xpath("string()").replace("作品分类：", "").strip()
-            if type_node
-            else ""
+        serial_status = self._first_str(
+            tree.xpath('//p[contains(text(),"作品状态：")]/text()'),
+            replaces=[("作品状态：", "")],
         )
+        book_type = self._first_str(
+            tree.xpath('//p[contains(text(),"作品分类：")]/text()'),
+            replaces=[("作品分类：", "")],
+        )
+        summary = self._first_str([tree.xpath('string(//div[@id="w0-collapse1"]/div)')])
 
-        summary = tree.xpath(self._SUMMARY_XPATH).strip()
-
+        # volumes & chapters
         volumes: list[VolumeInfoDict] = []
-        volume_nodes = tree.xpath(self._VOLUME_NODE_XPATH)
-
-        if volume_nodes:
-            for volume_node in volume_nodes:
-                title_node = volume_node.xpath(self._VOLUME_TITLE_XPATH)
-                volume_name = title_node[0].strip() if title_node else "未命名卷"
-
-                chapter_nodes = volume_node.xpath(self._CHAPTER_NODE_XPATH)
-                chapters: list[ChapterInfoDict] = []
-                for chap in chapter_nodes:
-                    title = chap.xpath("string()").strip()
-                    url = chap.get("href", "")
-                    chapter_id = url.split("id=")[-1] if "id=" in url else ""
-                    chapters.append(
-                        {
-                            "title": title,
-                            "url": url,
-                            "chapterId": chapter_id,
-                        }
+        for volume_node in tree.xpath(
+            '//div[contains(@class,"panel-info") and contains(@class,"panel-default")]'
+        ):
+            volume_name = (
+                self._first_str(
+                    volume_node.xpath(
+                        './/div[contains(@class,"panel-heading")]//a/text()'
                     )
-
-                volumes.append(
-                    {
-                        "volume_name": volume_name,
-                        "chapters": chapters,
-                    }
                 )
+                or "未命名卷"
+            )
+            chapters: list[ChapterInfoDict] = []
+            for chap in volume_node.xpath(
+                './/div[contains(@class,"panel-body")]//a[contains(@href,"view-chapter")]'
+            ):
+                title = self._first_str([chap.xpath("string()")])
+                url = chap.get("href", "")
+                chapter_id = url.split("id=")[-1]
+                chapters.append({"title": title, "url": url, "chapterId": chapter_id})
+            volumes.append({"volume_name": volume_name, "chapters": chapters})
 
-        else:
-            # fallback: flat list
-            chapter_nodes = tree.xpath(self._CHAPTER_FLAT_XPATH)
+        # fallback: flat chapter list
+        if not volumes:
             chapters = []
-            for chap in chapter_nodes:
-                title = chap.xpath("string()").strip()
+            for chap in tree.xpath(
+                '//div[@class="panel-body"]//a[contains(@href,"view-chapter")]'
+            ):
+                title = self._first_str([chap.xpath("string()")])
                 url = chap.get("href", "")
                 chapter_id = url.split("id=")[-1] if "id=" in url else ""
-                chapters.append(
-                    {
-                        "title": title,
-                        "url": url,
-                        "chapterId": chapter_id,
-                    }
-                )
-
-            volumes = [
-                {
-                    "volume_name": "单卷",
-                    "chapters": chapters,
-                }
-            ]
+                chapters.append({"title": title, "url": url, "chapterId": chapter_id})
+            volumes = [{"volume_name": "单卷", "chapters": chapters}]
 
         return {
             "book_name": book_name,
@@ -182,21 +133,28 @@ class YamiboParser(BaseParser):
             return None
         tree = html.fromstring(html_list[0])
 
-        content_lines = tree.xpath(self._CHAPTER_CONTENT_XPATH)
+        content_lines = tree.xpath("//div[@id='w0-collapse1']//p//text()")
         content = "\n".join(line.strip() for line in content_lines if line.strip())
         if not content:
             return None
 
-        title = tree.xpath(self._CHAPTER_TITLE_XPATH).strip()
-
-        update_node = tree.xpath(self._CHAPTER_TIME_XPATH)
-        updated_at = (
-            update_node[0].text.strip().replace("更新时间：", "") if update_node else ""
+        title = self._first_str(
+            [tree.xpath("string(//section[contains(@class,'col-md-9')]//h3)")]
         )
 
-        word_node = tree.xpath(self._CHAPTER_WORD_COUNT_XPATH)
-        word = word_node[0].text.strip().replace("章节字数：", "") if word_node else ""
-        word_count = int(word) if word.isdigit() else 0
+        updated_at = self._first_str(
+            tree.xpath(
+                "//div[contains(@class,'row')]//div[contains(text(),'更新时间')]/text()"
+            ),
+            replaces=[("更新时间：", "")],
+        )
+        word_str = self._first_str(
+            tree.xpath(
+                "//div[contains(@class,'row')]//div[contains(text(),'章节字数')]/text()"
+            ),
+            replaces=[("章节字数：", "")],
+        )
+        word_count = int(word_str) if word_str.isdigit() else 0
 
         return {
             "id": chapter_id,

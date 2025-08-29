@@ -5,8 +5,6 @@ novel_downloader.core.parsers.tongrenquan
 
 """
 
-import re
-from datetime import datetime
 from typing import Any
 
 from lxml import html
@@ -25,7 +23,9 @@ from novel_downloader.models import (
     site_keys=["tongrenquan"],
 )
 class TongrenquanParser(BaseParser):
-    """Parser for 同人圈 book pages."""
+    """
+    Parser for 同人圈 book pages.
+    """
 
     BASE_URL = "https://www.tongrenquan.org"
 
@@ -48,14 +48,16 @@ class TongrenquanParser(BaseParser):
         # Metadata
         book_name = self._first_str(tree.xpath('//div[@class="infos"]/h1/text()'))
         author = self._first_str(
-            tree.xpath('//div[@class="date"]/span/text()'), replaces=[("作者：", "")]
+            tree.xpath('//div[@class="date"]/span/text()'),
+            replaces=[("作者：", "")],
         )
         cover_url = self.BASE_URL + self._first_str(
             tree.xpath('//div[@class="pic"]//img/@src')
         )
-        date_text = tree.xpath('string(//div[@class="date"])')
-        m_date = re.search(r"日期[：:]\s*([\d-]+)", date_text)
-        update_time = m_date.group(1) if m_date else datetime.now().strftime("%Y-%m-%d")
+        update_time = self._first_str(
+            tree.xpath('//div[@class="date"]/text()'),
+            replaces=[("日期：", "")],
+        )
 
         # Summary (collapse text within the <p> tag)
         paras = tree.xpath('//div[@class="infos"]/p//text()')
@@ -67,8 +69,8 @@ class TongrenquanParser(BaseParser):
             url = a.get("href", "").strip()
             title = a.text_content().strip()
             # General pattern: /category/bookId/chapterId.html
-            m = re.search(r"^/[^/]+/\d+/(\d+)\.html$", url)
-            chapter_id = m.group(1) if m else ""
+            # '/tongren/7562/462.html' -> '462'
+            chapter_id = url.rstrip(".html").split("/")[-1]
             chapters.append({"title": title, "url": url, "chapterId": chapter_id})
 
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]

@@ -24,7 +24,9 @@ from novel_downloader.models import (
     site_keys=["qbtr"],
 )
 class QbtrParser(BaseParser):
-    """Parser for 全本同人小说 book pages."""
+    """
+    Parser for 全本同人小说 book pages.
+    """
 
     BASE_URL = "https://www.qbtr.cc"
 

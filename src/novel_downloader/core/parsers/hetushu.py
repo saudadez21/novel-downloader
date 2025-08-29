@@ -24,7 +24,9 @@ from novel_downloader.models import (
     site_keys=["hetushu"],
 )
 class HetushuParser(BaseParser):
-    """Parser for 和图书 book pages."""
+    """
+    Parser for 和图书 book pages.
+    """
 
     BASE_URL = "https://www.hetushu.com"
 

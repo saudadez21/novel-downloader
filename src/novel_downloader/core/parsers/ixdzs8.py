@@ -26,7 +26,9 @@ from novel_downloader.models import (
     site_keys=["ixdzs8"],
 )
 class Ixdzs8Parser(BaseParser):
-    """Parser for 爱下电子书 book pages."""
+    """
+    Parser for 爱下电子书 book pages.
+    """
 
     def parse_book_info(
         self,
@@ -175,7 +177,7 @@ class Ixdzs8Parser(BaseParser):
         """
         if not html_list:
             return None
-        tree = html.fromstring(html_list[0], parser=None)
+        tree = html.fromstring(html_list[0])
 
         title = ""
         for xp in (

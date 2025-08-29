@@ -23,7 +23,9 @@ from novel_downloader.models import (
     site_keys=["qianbi"],
 )
 class QianbiParser(BaseParser):
-    """Parser for 铅笔小说 book pages."""
+    """
+    Parser for 铅笔小说 book pages.
+    """
 
     def parse_book_info(
         self,
@@ -134,20 +136,20 @@ class QianbiParser(BaseParser):
             return None
         tree = html.fromstring(html_list[0])
 
+        # Content paragraphs
         paras = tree.xpath('//div[@class="article-content"]/p/text()')
         content_text = "\n".join(p.strip() for p in paras if p.strip())
         if not content_text:
             return None
 
-        title = tree.xpath('//h1[@class="article-title"]/text()')
-        title_text = title[0].strip() if title else ""
+        title_text = self._first_str(tree.xpath('//h1[@class="article-title"]/text()'))
+        volume_text = self._first_str(tree.xpath('//h3[@class="text-muted"]/text()'))
 
-        volume = tree.xpath('//h3[@class="text-muted"]/text()')
-        volume_text = volume[0].strip() if volume else ""
-
-        next_href = tree.xpath('//div[@class="footer"]/a[@class="f-right"]/@href')
+        next_href = self._first_str(
+            tree.xpath('//div[@class="footer"]/a[@class="f-right"]/@href')
+        )
         next_chapter_id = (
-            next_href[0].split("/")[-1].replace(".html", "") if next_href else ""
+            next_href.split("/")[-1].replace(".html", "") if next_href else ""
         )
 
         return {

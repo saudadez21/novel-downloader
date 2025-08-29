@@ -5,8 +5,6 @@ novel_downloader.core.parsers.shencou
 
 """
 
-import re
-from datetime import datetime
 from typing import Any
 
 from lxml import etree, html
@@ -24,7 +22,9 @@ from novel_downloader.models import (
     site_keys=["shencou"],
 )
 class ShencouParser(BaseParser):
-    """Parser for 神凑轻小说 book pages."""
+    """
+    Parser for 神凑轻小说 book pages.
+    """
 
     def parse_book_info(
         self,
@@ -57,23 +57,27 @@ class ShencouParser(BaseParser):
         )
 
         # word count
-        word_txt = info_tree.xpath('string(//td[contains(text(),"全文长度")])')
-        m_wc = re.search(r"全文长度[：:]\s*([\d,]+)字", word_txt)
-        word_count = m_wc.group(1) if m_wc else ""
+        word_count = self._first_str(
+            info_tree.xpath('//td[contains(text(),"全文长度")]/text()'),
+            replaces=[("全文长度：", "")],
+        )
 
         # update time
-        upd_txt = info_tree.xpath('string(//td[contains(text(),"最后更新")])')
-        m_upd = re.search(r"最后更新[：:]\s*([\d-]+)", upd_txt)
-        update_time = m_upd.group(1) if m_upd else datetime.now().strftime("%Y-%m-%d")
+        update_time = self._first_str(
+            info_tree.xpath('//td[contains(text(),"最后更新")]/text()'),
+            replaces=[("最后更新：", "")],
+        )
 
         # serial status
-        status_txt = info_tree.xpath('string(//td[contains(text(),"写作进度")])')
-        m_status = re.search(r"写作进度[：:]\s*(.+)", status_txt)
-        serial_status = m_status.group(1).strip() if m_status else ""
+        serial_status = self._first_str(
+            info_tree.xpath('//td[contains(text(),"写作进度")]/text()'),
+            replaces=[("写作进度：", "")],
+        )
 
         # summary
-        raw_detail = info_tree.xpath('string(//td[@width="80%" and @valign="top"])')
-        raw_detail = re.sub(r"\s+", " ", raw_detail).strip()
+        raw_detail = self._norm_space(
+            info_tree.xpath('string(//td[@width="80%" and @valign="top"])')
+        )
         summary = ""
         if "内容简介：" in raw_detail and "本书公告：" in raw_detail:
             intro = raw_detail.split("内容简介：", 1)[1]
@@ -100,9 +104,8 @@ class ShencouParser(BaseParser):
                 for a in elem.xpath(".//ol/li/a"):
                     url = a.get("href").strip()
                     title = a.text_content().strip()
-                    # chapter IDs are numeric filenames
-                    m_ch = re.match(r"^(\d+)\.html$", url)
-                    chap_id = m_ch.group(1) if m_ch else url
+                    # '203740.html' -> '203740'
+                    chap_id = url.split(".")[0]
                     curr_vol["chapters"].append(
                         {
                             "title": title,

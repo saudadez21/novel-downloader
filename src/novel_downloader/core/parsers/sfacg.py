@@ -23,7 +23,9 @@ from novel_downloader.models import (
     site_keys=["sfacg"],
 )
 class SfacgParser(BaseParser):
-    """ """
+    """
+    Parser for sfacg book pages.
+    """
 
     # Book info XPaths
     _BOOK_NAME_XPATH = '//ul[@class="book_info"]//span[@class="book_newtitle"]/text()'

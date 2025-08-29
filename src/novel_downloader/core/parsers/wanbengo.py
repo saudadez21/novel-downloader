@@ -27,7 +27,9 @@ from novel_downloader.models import (
     site_keys=["wanbengo"],
 )
 class WanbengoParser(BaseParser):
-    """Parser for 完本神站 book pages."""
+    """
+    Parser for 完本神站 book pages.
+    """
 
     BASE = "https://www.wanbengo.com"
 

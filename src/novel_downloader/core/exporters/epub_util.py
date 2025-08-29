@@ -156,10 +156,10 @@ def build_epub_chapter(
     Build a formatted chapter epub HTML including title, body paragraphs,
     and optional extra sections.
 
-    :param title:      Chapter title.
+    :param title: Chapter title.
     :param paragraphs: Raw multi-line string. Blank lines are ignored.
-    :param extras:     Optional dict mapping section titles to multi-line strings.
-    :return:           A HTML include title, paragraphs, and extras.
+    :param extras: Optional dict mapping section titles to multi-line strings.
+    :return: A HTML include title, paragraphs, and extras.
     """
 
     def _render_block(text: str) -> str:

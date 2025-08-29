@@ -60,34 +60,23 @@ class XiaoshuowuParser(BaseParser):
         )
         tags = [cat_val] if cat_val else []
 
-        word_count = (
-            self._first_str(
-                info_tree.xpath(
-                    '//table[@class="hide"]//td[contains(text(),"全文字数")]/text()'
-                )
-            )
-            .split("：")[-1]
-            .strip()
+        word_count = self._first_str(
+            info_tree.xpath(
+                '//table[@class="hide"]//td[contains(text(),"全文字数")]/text()'
+            ),
+            replaces=[("全文字数：", "")],
         )
-
-        update_time = (
-            self._first_str(
-                info_tree.xpath(
-                    '//table[@class="hide"]//td[contains(text(),"最后更新")]/text()'
-                )
-            )
-            .split("：")[-1]
-            .strip()
+        update_time = self._first_str(
+            info_tree.xpath(
+                '//table[@class="hide"]//td[contains(text(),"最后更新")]/text()'
+            ),
+            replaces=[("最后更新：", "")],
         )
-
-        serial_status = (
-            self._first_str(
-                info_tree.xpath(
-                    '//table[@class="hide"]//td[contains(text(),"连载状态")]/text()'
-                )
-            )
-            .split("：")[-1]
-            .strip()
+        serial_status = self._first_str(
+            info_tree.xpath(
+                '//table[@class="hide"]//td[contains(text(),"连载状态")]/text()'
+            ),
+            replaces=[("连载状态：", "")],
         )
 
         cover_url = self._first_str(

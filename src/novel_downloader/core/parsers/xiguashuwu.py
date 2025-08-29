@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 )
 class XiguashuwuParser(BaseParser):
     """
-    Parser for xiguashuwu.com book pages.
+    Parser for 西瓜书屋 book pages.
     """
 
     BASE_URL = "https://www.xiguashuwu.com"
@@ -80,21 +80,20 @@ class XiguashuwuParser(BaseParser):
             return None
         info_tree = html.fromstring(html_list[0])
 
-        book_name = info_tree.xpath('string(//p[@class="title"])').strip()
+        book_name = self._first_str(info_tree.xpath('//p[@class="title"]/text()'))
 
-        raw_author = info_tree.xpath('string(//p[@class="author"])').strip()
-        author = raw_author.replace("作者：", "").strip()
+        author = self._first_str(info_tree.xpath('//p[@class="author"]//a/text()'))
 
         cover_rel = info_tree.xpath(
             '//div[@class="BGsectionOne-top-left"]//img/@_src'
         ) or info_tree.xpath('//div[@class="BGsectionOne-top-left"]//img/@src')
-        cover_url = (self.BASE_URL + cover_rel[0].strip()) if cover_rel else ""
+        cover_url = self.BASE_URL + self._first_str(cover_rel)
 
-        tag_nodes = info_tree.xpath('//p[@class="category"]/span[1]/a/text()')
-        tags = [tag_nodes[0].strip()] if tag_nodes else []
+        tags = [
+            self._first_str(info_tree.xpath('//p[@class="category"]/span[1]/a/text()'))
+        ]
 
-        update_nodes = info_tree.xpath('//p[@class="time"]/span/text()')
-        update_time = update_nodes[0].strip() if update_nodes else ""
+        update_time = self._first_str(info_tree.xpath('//p[@class="time"]/span/text()'))
 
         paras = info_tree.xpath('//section[@id="intro"]//p')
         summary = "\n".join(p.xpath("string()").strip() for p in paras).strip()
@@ -253,8 +252,8 @@ class XiguashuwuParser(BaseParser):
             logger.warning("Failed to parse chapter page 3+: %s", e)
             return []
 
-    @staticmethod
-    def _extract_chapter_title(tree: html.HtmlElement) -> str:
+    @classmethod
+    def _extract_chapter_title(cls, tree: html.HtmlElement) -> str:
         """
         Extract the chapter title from the HTML tree.
 
@@ -264,8 +263,7 @@ class XiguashuwuParser(BaseParser):
         :param tree: Parsed HTML element tree of the chapter page.
         :return: Chapter title as a string, or an empty string if not found.
         """
-        title = tree.xpath('//h1[@id="chapterTitle"]/text()')
-        return title[0].strip() if title else ""
+        return cls._first_str(tree.xpath('//h1[@id="chapterTitle"]/text()'))
 
     def _char_from_img(self, url: str) -> str:
         """
