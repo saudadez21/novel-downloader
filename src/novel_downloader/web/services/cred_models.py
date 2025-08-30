@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-downloader.webui.services.cred_models
--------------------------------------
+novel_downloader.web.services.cred_models
+-----------------------------------------
 
 Lightweight data models for the credential broker
 """

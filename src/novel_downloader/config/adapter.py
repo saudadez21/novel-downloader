@@ -146,9 +146,9 @@ class ConfigAdapter:
         Extract the list of target books from the site configuration.
 
         The site config may specify book_ids as:
-          - a single string or integer
-          - a dict with book_id and optional start_id, end_id, ignore_ids
-          - a list of the above types
+          * a single string or integer
+          * a dict with book_id and optional start_id, end_id, ignore_ids
+          * a list of the above types
 
         :return: A list of BookConfig dicts.
         :raises ValueError: if the raw book_ids is neither a str/int, dict, nor list.

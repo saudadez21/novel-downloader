@@ -68,17 +68,17 @@ def _parse_datetime_flexible(dt_str: str) -> datetime:
     """
     Parse a date/time string in any of several common formats:
 
-      • ISO 8601:             'YYYY-MM-DDTHH:MM:SSZ'
-      • ISO w/ offset:        'YYYY-MM-DDTHH:MM:SS+HH:MM'
-      • 'YYYY-MM-DD HH:MM:SS'
-      • 'YYYY-MM-DD'          (time defaults to 00:00:00)
-      • 'YYYY/MM/DD HH:MM:SS'
-      • 'YYYY/MM/DD HH:MM'
-      • 'YYYY/MM/DD'
-      • 'MM/DD/YYYY HH:MM[:SS] AM/PM'
-      • 'MM/DD/YYYY'
-      • 'DD.MM.YYYY HH:MM'
-      • 'DD.MM.YYYY'
+      * ISO 8601:             'YYYY-MM-DDTHH:MM:SSZ'
+      * ISO w/ offset:        'YYYY-MM-DDTHH:MM:SS+HH:MM'
+      * 'YYYY-MM-DD HH:MM:SS'
+      * 'YYYY-MM-DD'          (time defaults to 00:00:00)
+      * 'YYYY/MM/DD HH:MM:SS'
+      * 'YYYY/MM/DD HH:MM'
+      * 'YYYY/MM/DD'
+      * 'MM/DD/YYYY HH:MM[:SS] AM/PM'
+      * 'MM/DD/YYYY'
+      * 'DD.MM.YYYY HH:MM'
+      * 'DD.MM.YYYY'
 
     :param dt_str: Date/time string to parse.
     :return: A naive datetime object.
@@ -89,10 +89,7 @@ def _parse_datetime_flexible(dt_str: str) -> datetime:
         if re.fullmatch(pattern, s):
             return datetime.strptime(s, fmt)
 
-    supported = "\n".join(f"  • {fmt}" for _, fmt in _DATETIME_FORMATS)
-    raise ValueError(
-        f"Invalid date/time format: '{dt_str}'\n" f"Supported formats are:\n{supported}"
-    )
+    raise ValueError(f"Invalid date/time format: '{dt_str}'")
 
 
 def time_diff(

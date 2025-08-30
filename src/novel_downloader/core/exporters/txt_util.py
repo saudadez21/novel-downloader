@@ -37,9 +37,9 @@ def build_txt_chapter(
     Build a formatted chapter text block including title, body paragraphs,
     and optional extra sections.
 
-    - Strips any `<img...>` tags from paragraphs.
-    - Title appears first (stripped of surrounding whitespace).
-    - Each non-blank line in `paragraphs` becomes its own paragraph.
+      * Strips any `<img...>` tags from paragraphs.
+      * Title appears first (stripped of surrounding whitespace).
+      * Each non-blank line in `paragraphs` becomes its own paragraph.
 
     :param title: Chapter title.
     :param paragraphs: Raw multi-line string. Blank lines are ignored.

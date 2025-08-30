@@ -105,7 +105,7 @@ Commands:
 **Synopsis**
 
 ```bash
-novel-cli download [-h] [--site SITE] [--config CONFIG] [--start START] [--end END] [book_ids ...]
+novel-cli download [-h] [--site SITE] [--config CONFIG] [--start START] [--end END] [--no-export] [book_ids ...]
 ```
 
 **Options**
@@ -114,6 +114,7 @@ novel-cli download [-h] [--site SITE] [--config CONFIG] [--start START] [--end E
 * `--site SITE`: 站点键 (如 `qidian`, `biquge`, ...), 默认 `qidian`
 * `--start START`: 起始章节**唯一 ID** (仅用于第一个 `book_id`)
 * `--end`: 结束章节**唯一 ID**, **包含** (仅用于第一个 `book_id`)
+* `--no-export`: 仅下载, 不进行导出。启用后将跳过导出步骤
 
 > `--start` / `--end` 用于临时下载部分章节, 仅影响**第一个**命令行提供的 `book_id`。
 >
@@ -132,6 +133,9 @@ novel-cli download --site biquge 8_8187
 
 # 只下载起点小说的一部分章节
 novel-cli download --start 10001 --end 10200 1234567890
+
+# 仅下载, 跳过导出步骤
+novel-cli download --no-export 1234567890
 
 # 从配置文件中读取 ID
 novel-cli download

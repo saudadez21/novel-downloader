@@ -18,7 +18,7 @@ from .search import register_search_subcommand
 
 
 def cli_main() -> None:
-    parser = argparse.ArgumentParser(description=t("cli_help"))
+    parser = argparse.ArgumentParser(description=t("help_cli"))
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     register_clean_subcommand(subparsers)

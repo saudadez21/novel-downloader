@@ -32,10 +32,10 @@ def linovelib_export_as_txt(
     Steps:
       1. Read metadata from `book_info.json`.
       2. For each volume:
-         - Clean & append the volume title.
-         - Clean & append optional volume intro.
-         - Batch-fetch all chapters in this volume to minimize SQLite overhead.
-         - For each chapter: clean title & content, then append.
+        * Clean & append the volume title.
+        * Clean & append optional volume intro.
+        * Batch-fetch all chapters in this volume to minimize SQLite overhead.
+        * For each chapter: clean title & content, then append.
       3. Build a header block with metadata.
       4. Concatenate header + all chapter blocks, then save as `{book_name}.txt`.
 

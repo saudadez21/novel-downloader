@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.searchers.biquge
---------------------------------------
+novel_downloader.core.searchers.b520
+------------------------------------
 
 """
 

@@ -26,9 +26,9 @@ def _resolve_file_path(
     Resolve the file path to use based on a prioritized lookup order.
 
     Priority:
-        1. A user-specified path (if provided and exists)
-        2. A file in the current working directory with the given name
-        3. A globally registered fallback path
+      1. A user-specified path (if provided and exists)
+      2. A file in the current working directory with the given name
+      3. A globally registered fallback path
 
     :param user_path: Optional user-specified file path.
     :param local_filename: File name to check in the current working directory.

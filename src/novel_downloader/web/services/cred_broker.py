@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-downloader.webui.services.cred_broker
--------------------------------------
+novel_downloader.web.services.cred_broker
+-----------------------------------------
 
 In-memory credential request broker
 """

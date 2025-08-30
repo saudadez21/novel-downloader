@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.web.pages.search_page
---------------------------------------
+novel_downloader.web.pages.search
+---------------------------------
 
 Search UI with a settings dropdown, persistent state, and paginated results.
 """

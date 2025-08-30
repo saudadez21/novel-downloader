@@ -23,27 +23,27 @@ from rich.console import Console
 from rich.prompt import Confirm, Prompt
 from rich.table import Table
 
-_console = Console()
+_CONSOLE = Console()
 
 
 def info(message: str) -> None:
     """Print a neutral informational message."""
-    _console.print(message)
+    _CONSOLE.print(message)
 
 
 def success(message: str) -> None:
     """Print a success message in a friendly color."""
-    _console.print(f"[green]{message}[/]")
+    _CONSOLE.print(f"[green]{message}[/]")
 
 
 def warn(message: str) -> None:
     """Print a warning message."""
-    _console.print(f"[yellow]{message}[/]")
+    _CONSOLE.print(f"[yellow]{message}[/]")
 
 
 def error(message: str) -> None:
     """Print an error message."""
-    _console.print(f"[red]{message}[/]")
+    _CONSOLE.print(f"[red]{message}[/]")
 
 
 def confirm(message: str, *, default: bool = False) -> bool:
@@ -110,7 +110,7 @@ def render_table(
         table.add_column(col, overflow="fold")
     for row in rows:
         table.add_row(*[str(x) for x in row])
-    _console.print(table)
+    _CONSOLE.print(table)
 
 
 def select_index(prompt_text: str, total: int) -> int | None:
@@ -141,16 +141,16 @@ def print_progress(
     total: int,
     *,
     prefix: str = "Progress",
-    unit: str = "chapters",
+    unit: str = "item",
 ) -> None:
     """
-    Print a lightweight progress line (no live progress bar to keep hook simple).
+    Print a lightweight progress line.
 
     :param done: Completed count.
     :param total: Total count.
     :param prefix: Text prefix shown before numbers.
-    :param unit: Logical unit name (e.g., 'chapters').
+    :param unit: Logical unit name (e.g., 'item').
     """
     total = max(1, total)
     pct = done / total * 100.0
-    _console.print(f"[dim]{prefix}[/] {done}/{total} {unit} ({pct:.2f}%)")
+    _CONSOLE.print(f"[dim]{prefix}[/] {done}/{total} {unit} ({pct:.2f}%)")

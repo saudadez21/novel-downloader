@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.searchers.xshbook
----------------------------------------
+novel_downloader.core.archived.xshbook.searcher
+-----------------------------------------------
 
 """
 

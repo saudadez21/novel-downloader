@@ -1,5 +1,5 @@
 {
-  "cli_help": "Novel Downloader CLI tool.",
+  "help_cli": "Novel Downloader CLI tool.",
   "help_config": "Path to config file",
   "help_download": "Download full novels by book IDs.",
   "help_clean": "Clean cache and configuration files",
@@ -33,6 +33,8 @@
   "download_book_ids": "One or more book IDs to process",
   "download_option_start": "Start chapter ID (applies to the first book ID only)",
   "download_option_end": "End chapter ID (applies to the first book ID only)",
+  "download_option_no_export": "Do not export after download; download only.",
+  "download_export_skipped": "Download-only mode: export step will be skipped.",
 
   "login_description": "Description",
   "login_hint": "Hint",

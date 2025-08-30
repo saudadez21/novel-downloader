@@ -36,6 +36,12 @@ def register_download_subcommand(subparsers: _SubParsersAction) -> None:  # type
     parser.add_argument("--start", type=str, help=t("download_option_start"))
     parser.add_argument("--end", type=str, help=t("download_option_end"))
 
+    parser.add_argument(
+        "--no-export",
+        action="store_true",
+        help=t("download_option_no_export"),
+    )
+
     parser.set_defaults(func=handle_download)
 
 
@@ -46,6 +52,7 @@ def handle_download(args: Namespace) -> None:
     book_ids: list[BookConfig] = _cli_args_to_book_configs(
         args.book_ids, args.start, args.end
     )
+    no_export: bool = getattr(args, "no_export", False)
 
     ui.info(t("download_site_info", site=site))
 
@@ -75,7 +82,7 @@ def handle_download(args: Namespace) -> None:
         ui.info(t("download_edit_config"))
         return
 
-    asyncio.run(_download(adapter, site, valid_books))
+    asyncio.run(_download(adapter, site, valid_books, no_export=no_export))
 
 
 def _cli_args_to_book_configs(
@@ -129,14 +136,18 @@ def _filter_valid_book_configs(
 
 
 async def _download(
-    adapter: ConfigAdapter, site: str, valid_books: list[BookConfig]
+    adapter: ConfigAdapter,
+    site: str,
+    valid_books: list[BookConfig],
+    *,
+    no_export: bool = False,
 ) -> None:
     """
     Perform the download flow:
-    - Init components
-    - Login if required
-    - Download each requested book
-    - Export with configured exporter
+      * Init components
+      * Login if required
+      * Download each requested book
+      * Export with configured exporter
     """
     downloader_cfg = adapter.get_downloader_config()
     fetcher_cfg = adapter.get_fetcher_config()
@@ -147,7 +158,11 @@ async def _download(
     setup_logging(log_level=log_level)
 
     parser = get_parser(site, parser_cfg)
-    exporter = get_exporter(site, exporter_cfg)
+    exporter = None
+    if not no_export:
+        exporter = get_exporter(site, exporter_cfg)
+    else:
+        ui.info(t("download_export_skipped"))
 
     async with get_fetcher(site, fetcher_cfg) as fetcher:
         if downloader_cfg.login_required and not await fetcher.load_state():
@@ -164,7 +179,9 @@ async def _download(
         for book in valid_books:
             ui.info(t("download_downloading", book_id=book["book_id"], site=site))
             await downloader.download(book, progress_hook=_print_progress)
-            await asyncio.to_thread(exporter.export, book["book_id"])
+
+            if not no_export and exporter is not None:
+                await asyncio.to_thread(exporter.export, book["book_id"])
 
         if downloader_cfg.login_required and fetcher.is_logged_in:
             await fetcher.save_state()

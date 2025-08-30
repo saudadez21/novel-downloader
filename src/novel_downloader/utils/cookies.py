@@ -19,8 +19,8 @@ def parse_cookies(cookies: str | Mapping[str, str]) -> dict[str, str]:
     Parse cookies from a string or dictionary into a standard dictionary.
 
     Supports input like:
-      - `"key1=value1; key2=value2"`
-      - `{"key1": "value1", "key2": "value2"}`
+      * `"key1=value1; key2=value2"`
+      * `{"key1": "value1", "key2": "value2"}`
 
     :param cookies: Cookie string or dict-like object (e.g., from config)
     :return: A normalized cookie dictionary (key -> value)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.web.pages.progress_page
-----------------------------------------
+novel_downloader.web.pages.progress
+-----------------------------------
 
 Layout for active/history tasks with compact cards and status chips.
 """

@@ -91,7 +91,7 @@ def _handle_set_lang(args: Namespace) -> None:
 
 
 def _handle_set_config(args: Namespace) -> None:
-    """Persist a user-supplied YAML config path into the app config."""
+    """Persist a user-supplied TOML config path into the app config."""
     try:
         save_config_file(args.path)
         ui.success(t("config_set_config", path=args.path))

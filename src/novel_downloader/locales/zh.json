@@ -1,5 +1,5 @@
 {
-  "cli_help": "小说下载器 CLI 工具",
+  "help_cli": "小说下载器 CLI 工具",
   "help_config": "配置文件路径",
   "help_download": "按书籍 ID 下载小说",
   "help_clean": "清理缓存和配置文件",
@@ -33,6 +33,8 @@
   "download_book_ids": "要处理的一个或多个小说 ID",
   "download_option_start": "起始章节 ID (仅用于第一个书籍 ID)",
   "download_option_end": "结束章节 ID (仅用于第一个书籍 ID)",
+  "download_option_no_export": "仅下载 (不进行导出)",
+  "download_export_skipped": "仅下载模式: 将跳过导出步骤",
 
   "login_description": "说明",
   "login_hint": "提示",
