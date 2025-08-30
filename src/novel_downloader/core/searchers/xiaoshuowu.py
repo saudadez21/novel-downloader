@@ -6,7 +6,6 @@ novel_downloader.core.searchers.xiaoshuowu
 """
 
 import logging
-import re
 
 from lxml import html
 
@@ -24,17 +23,9 @@ class XiaoshuowuSearcher(BaseSearcher):
     site_name = "xiaoshuowu"
     priority = 30
     SEARCH_URL = "http://www.xiaoshuoge.info/modules/article/search.php"
-    BOOK_ID_PATTERN = re.compile(r"/book/(\d+)/")
-    CATA_ID_PATTERN = re.compile(r"/html/(\d+)/(\d+)/")
 
     @classmethod
     async def _fetch_html(cls, keyword: str) -> str:
-        """
-        Fetch raw HTML from Xiaoshuowu's search page.
-
-        :param keyword: The search term to query on Xiaoshuowu.
-        :return: HTML text of the search results page, or an empty string on fail.
-        """
         params = {"q": keyword}
         try:
             async with (await cls._http_get(cls.SEARCH_URL, params=params)) as resp:
@@ -61,57 +52,55 @@ class XiaoshuowuSearcher(BaseSearcher):
         results: list[SearchResult] = []
 
         for idx, row in enumerate(rows):
+            href = cls._first_str(row.xpath(".//span[@class='c_subject']/a/@href"))
+            if not href:
+                continue
+
             if limit is not None and idx >= limit:
                 break
 
-            # Title & Book ID
-            title_elem = row.xpath('.//span[@class="c_subject"]/a')
-            title = title_elem[0].text_content().strip() if title_elem else ""
+            # 'http://www.xiaoshuoge.info/book/374339/' -> "374339"
+            book_id = href.split("book/")[-1].strip("/")
+            book_url = cls._abs_url(href)
 
-            cover_nodes = row.xpath('.//div[@class="fl"]//img/@src')
-            cover_url = cover_nodes[0].strip() if cover_nodes else ""
+            cover_rel = cls._first_str(row.xpath(".//div[@class='fl']//img/@src"))
+            cover_url = cls._abs_url(cover_rel) if cover_rel else ""
 
-            book_id = ""
-            book_url = ""
-            cata_elem = row.xpath(
-                './/span[@class="c_subject"]/following-sibling::a[normalize-space(text())="目录"]'
+            title = cls._first_str(row.xpath(".//span[@class='c_subject']/a/text()"))
+
+            author = (
+                cls._first_str(
+                    row.xpath(
+                        ".//div[@class='c_tag'][1]/span[@class='c_label'][contains(.,'作者')]/following-sibling::span[@class='c_value'][1]/text()"
+                    )
+                )
+                or "-"
             )
-            if cata_elem:
-                book_url = cata_elem[0].get("href", "")
-                m = cls.CATA_ID_PATTERN.search(book_url)
-                if m:
-                    book_id = f"{m.group(1)}-{m.group(2)}"
-            if not book_id and title_elem:
-                book_url = title_elem[0].get("href", "")
-                m2 = cls.BOOK_ID_PATTERN.search(book_url)
-                if m2:
-                    book_id = m2.group(1)
-            if not book_id or not book_url:
-                continue
-
-            author_nodes = row.xpath(
-                './/span[@class="c_label"][normalize-space(text())="作者："]'
-                '/following-sibling::span[@class="c_value"][1]/text()'
+            word_count = (
+                cls._first_str(
+                    row.xpath(
+                        ".//div[@class='c_tag'][1]/span[@class='c_label'][contains(.,'字数')]/following-sibling::span[@class='c_value'][1]/text()"
+                    )
+                )
+                or "-"
             )
-            author = author_nodes[0].strip() if author_nodes else ""
 
-            wc_nodes = row.xpath(
-                './/span[@class="c_label"][normalize-space(text())="字数："]'
-                '/following-sibling::span[@class="c_value"][1]/text()'
+            latest_chapter = (
+                cls._first_str(
+                    row.xpath(
+                        ".//div[@class='c_tag'][last()]/span[@class='c_label'][contains(.,'最新')]/following-sibling::span[@class='c_value'][1]//a//text()"
+                    )
+                )
+                or "-"
             )
-            word_count = wc_nodes[0].strip() if wc_nodes else ""
-
-            latest_nodes = row.xpath(
-                './/span[@class="c_label"][normalize-space(text())="最新章节："]'
-                '/following-sibling::span[@class="c_value"][1]//text()'
+            update_date = (
+                cls._first_str(
+                    row.xpath(
+                        ".//div[@class='c_tag'][last()]/span[@class='c_label'][contains(.,'更新')]/following-sibling::span[@class='c_value'][1]/text()"
+                    )
+                )
+                or "-"
             )
-            latest_chapter = latest_nodes[0].strip() if latest_nodes else ""
-
-            update_nodes = row.xpath(
-                './/span[@class="c_label"][normalize-space(text())="更新："]'
-                '/following-sibling::span[@class="c_value"][1]/text()'
-            )
-            update_date = update_nodes[0].strip() if update_nodes else ""
 
             # Priority
             prio = cls.priority + idx

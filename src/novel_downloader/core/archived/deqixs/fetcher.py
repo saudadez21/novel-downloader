@@ -9,7 +9,7 @@ from typing import Any
 
 from novel_downloader.core.fetchers.base import BaseSession
 from novel_downloader.models import FetcherConfig
-from novel_downloader.utils import async_sleep_with_random_delay
+from novel_downloader.utils import async_jitter_sleep
 
 # from novel_downloader.core.fetchers.registry import register_fetcher
 
@@ -19,7 +19,7 @@ from novel_downloader.utils import async_sleep_with_random_delay
 # )
 class DeqixsSession(BaseSession):
     """
-    A session class for interacting with the Deqixs (www.deqixs.com) novel website.
+    A session class for interacting with the 得奇小说网 (www.deqixs.com) novel website.
     """
 
     BASE_URL = "https://www.deqixs.com"
@@ -85,7 +85,7 @@ class DeqixsSession(BaseSession):
 
             html_pages.append(html)
             idx += 1
-            await async_sleep_with_random_delay(
+            await async_jitter_sleep(
                 self.request_interval,
                 mul_spread=1.1,
                 max_sleep=self.request_interval + 2,

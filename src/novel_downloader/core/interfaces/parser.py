@@ -3,8 +3,7 @@
 novel_downloader.core.interfaces.parser
 ---------------------------------------
 
-Defines the ParserProtocol interface for extracting book metadata,
-parsing individual chapter content, and setting parser context via book_id.
+Protocol defining the interface for parsing book metadata and chapter content.
 """
 
 from typing import Any, Protocol, runtime_checkable
@@ -40,10 +39,10 @@ class ParserProtocol(Protocol):
         **kwargs: Any,
     ) -> ChapterDict | None:
         """
-        Parse and return the text content of one chapter.
+        Parse chapter page and extract the content of one chapter.
 
         :param html_list: The HTML list of the chapter pages.
         :param chapter_id: Identifier of the chapter being parsed.
-        :return: The chapter's text.
+        :return: The chapter's data.
         """
         ...

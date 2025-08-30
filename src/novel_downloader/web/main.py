@@ -9,14 +9,21 @@ This entry point starts the local server and registers the app's pages.
 """
 
 import argparse
+from pathlib import Path
 
-from nicegui import ui
+from nicegui import app, ui
 
-from novel_downloader.web.pages import (
-    download_page,  # noqa: F401
-    progress_page,  # noqa: F401
-    search_page,  # noqa: F401
-)
+import novel_downloader.web.pages  # noqa: F401
+from novel_downloader.config import get_config_value
+from novel_downloader.utils.logger import setup_logging
+
+
+def mount_exports() -> None:
+    output_dir = get_config_value(["general", "output_dir"], "./downloads")
+    out = Path(output_dir).expanduser().resolve()
+    out.mkdir(parents=True, exist_ok=True)
+    # serves /download/<filename> from the export dir
+    app.add_static_files("/download", local_directory=out)
 
 
 def web_main() -> None:
@@ -48,12 +55,10 @@ def web_main() -> None:
 
     host = "127.0.0.1" if args.listen == "local" else "0.0.0.0"
 
-    @ui.page("/")  # type: ignore[misc]
-    def _index() -> None:
-        from novel_downloader.web.pages.search_page import render
+    log_level = get_config_value(["general", "debug", "log_level"], "INFO")
+    setup_logging(log_level=log_level)
 
-        render()
-
+    app.on_startup(mount_exports)
     ui.run(host=host, port=args.port, reload=args.reload)
 
 

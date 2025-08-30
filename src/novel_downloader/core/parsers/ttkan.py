@@ -5,7 +5,6 @@ novel_downloader.core.parsers.ttkan
 
 """
 
-import re
 from datetime import datetime
 from typing import Any
 
@@ -25,19 +24,15 @@ from novel_downloader.models import (
     site_keys=["ttkan"],
 )
 class TtkanParser(BaseParser):
-    """Parser for 天天看小說 book pages."""
+    """
+    Parser for 天天看小說 book pages.
+    """
 
     def parse_book_info(
         self,
         html_list: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        """
-        Parse a book info page and extract metadata and chapter structure.
-
-        :param html_list: Raw HTML of the book info page.
-        :return: Parsed metadata and chapter structure as a dictionary.
-        """
         if not html_list:
             return None
 
@@ -75,8 +70,8 @@ class TtkanParser(BaseParser):
         for a in tree.xpath('//div[@class="full_chapters"]/div[1]/a'):
             url = a.get("href", "").strip()
             title = a.text_content().strip()
-            m = re.search(r"_(\d+)\.html", url)
-            chap_id = m.group(1) if m else ""
+            # '/novel/pagea/wushenzhuzai-anmoshi_6094.html' -> '6094'
+            chap_id = url.rstrip(".html").split("_")[-1]
             chapters.append(
                 {
                     "chapterId": chap_id,
@@ -109,13 +104,6 @@ class TtkanParser(BaseParser):
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        """
-        Parse a single chapter page and extract clean text or simplified HTML.
-
-        :param html_list: Raw HTML of the chapter page.
-        :param chapter_id: Identifier of the chapter being parsed.
-        :return: Cleaned chapter content as plain text or minimal HTML.
-        """
         if not html_list:
             return None
         tree = html.fromstring(html_list[0])

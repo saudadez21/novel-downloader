@@ -13,7 +13,7 @@ from lxml import html
 from novel_downloader.core.fetchers.base import BaseSession
 from novel_downloader.core.fetchers.registry import register_fetcher
 from novel_downloader.models import FetcherConfig, LoginField
-from novel_downloader.utils import async_sleep_with_random_delay
+from novel_downloader.utils import async_jitter_sleep
 
 
 @register_fetcher(
@@ -21,7 +21,7 @@ from novel_downloader.utils import async_sleep_with_random_delay
 )
 class YamiboSession(BaseSession):
     """
-    A session class for interacting with the Yamibo (www.yamibo.com) novel website.
+    A session class for interacting with the 百合会 (www.yamibo.com) novel website.
     """
 
     BASE_URL = "https://www.yamibo.com"
@@ -69,7 +69,7 @@ class YamiboSession(BaseSession):
             ):
                 self._is_logged_in = True
                 return True
-            await async_sleep_with_random_delay(
+            await async_jitter_sleep(
                 self.backoff_factor,
                 mul_spread=1.1,
                 max_sleep=self.backoff_factor + 2,
@@ -87,7 +87,7 @@ class YamiboSession(BaseSession):
         Fetch the raw HTML of the book info page asynchronously.
 
         :param book_id: The book identifier.
-        :return: The page content as a string.
+        :return: The page content as string list.
         """
         url = self.book_info_url(book_id=book_id)
         return [await self.fetch(url, **kwargs)]
@@ -103,7 +103,7 @@ class YamiboSession(BaseSession):
 
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :return: The chapter content as a string.
+        :return: The page content as string list.
         """
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
         return [await self.fetch(url, **kwargs)]

@@ -3,10 +3,7 @@
 novel_downloader.core.fetchers.base
 -----------------------------------
 
-This module defines the BaseSession class, which provides asynchronous
-HTTP request capabilities using aiohttp. It maintains a persistent
-client session and supports retries, headers, timeout configurations,
-cookie handling, and defines abstract methods for subclasses.
+Abstract base class providing common HTTP session handling for fetchers.
 """
 
 import abc
@@ -22,8 +19,7 @@ from aiohttp import ClientResponse, ClientSession, ClientTimeout, TCPConnector
 from novel_downloader.core.interfaces import FetcherProtocol
 from novel_downloader.models import FetcherConfig, LoginField
 from novel_downloader.utils import (
-    async_sleep_with_random_delay,
-    parse_cookie_expires,
+    async_jitter_sleep,
 )
 from novel_downloader.utils.constants import (
     DATA_DIR,
@@ -67,7 +63,7 @@ class BaseSession(FetcherProtocol, abc.ABC):
         self._session: ClientSession | None = None
         self._rate_limiter: TokenBucketRateLimiter | None = None
 
-        if config.max_rps is not None and config.max_rps > 0:
+        if config.max_rps > 0:
             self._rate_limiter = TokenBucketRateLimiter(config.max_rps)
 
         self.logger = logging.getLogger(f"{self.__class__.__name__}")
@@ -82,6 +78,7 @@ class BaseSession(FetcherProtocol, abc.ABC):
     ) -> bool:
         """
         Attempt to log in asynchronously.
+
         :returns: True if login succeeded.
         """
         return False
@@ -96,7 +93,7 @@ class BaseSession(FetcherProtocol, abc.ABC):
         Fetch the raw HTML (or JSON) of the book info page asynchronously.
 
         :param book_id: The book identifier.
-        :return: The page content as a string.
+        :return: The page content as string list.
         """
         ...
 
@@ -112,7 +109,7 @@ class BaseSession(FetcherProtocol, abc.ABC):
 
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :return: The chapter content as a string.
+        :return: The page content as string list.
         """
         ...
 
@@ -182,7 +179,7 @@ class BaseSession(FetcherProtocol, abc.ABC):
                     return await self._response_to_str(resp, encoding)
             except aiohttp.ClientError:
                 if attempt < self.retry_times:
-                    await async_sleep_with_random_delay(
+                    await async_jitter_sleep(
                         self.backoff_factor,
                         mul_spread=1.1,
                         max_sleep=self.backoff_factor + 2,
@@ -282,12 +279,6 @@ class BaseSession(FetcherProtocol, abc.ABC):
                     {
                         "name": cookie.key,
                         "value": cookie.value,
-                        "domain": cookie.get("domain", ""),
-                        "path": cookie.get("path", "/"),
-                        "expires": parse_cookie_expires(cookie.get("expires")),
-                        "httpOnly": bool(cookie.get("httponly", False)),
-                        "secure": bool(cookie.get("secure", False)),
-                        "sameSite": cookie.get("samesite") or "Lax",
                     }
                 )
             storage_state = {

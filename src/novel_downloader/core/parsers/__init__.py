@@ -3,8 +3,8 @@
 novel_downloader.core.parsers
 -----------------------------
 
-This package defines all site-specific parsing modules
-for the novel_downloader framework.
+Parser implementations for extracting book metadata and
+chapter content from various sources
 """
 
 __all__ = [
@@ -42,7 +42,7 @@ __all__ = [
 ]
 
 from .aaatxt import AaatxtParser
-from .biquge import BiqugeParser
+from .b520 import BiqugeParser
 from .biquyuedu import BiquyueduParser
 from .dxmwx import DxmwxParser
 from .eightnovel import EightnovelParser

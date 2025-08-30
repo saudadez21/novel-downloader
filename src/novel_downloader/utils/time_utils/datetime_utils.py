@@ -4,16 +4,10 @@ novel_downloader.utils.time_utils.datetime_utils
 ------------------------------------------------
 
 Time utility functions for timezone-aware date calculations.
-
-Includes:
-- _parse_utc_offset():
-    Converts UTC offset string (e.g. 'UTC+8') to a timezone object.
-- calculate_time_difference():
-    Computes timedelta between two datetime strings, with optional timezones.
 """
 
 __all__ = [
-    "calculate_time_difference",
+    "time_diff",
 ]
 
 import logging
@@ -53,7 +47,7 @@ def _parse_utc_offset(tz_str: str) -> timezone:
     Parse a timezone string like 'UTC+8' or 'UTC-5' into a datetime.timezone object.
 
     :param tz_str: Timezone in 'UTC±<hours>' format, e.g. 'UTC', 'UTC+8', 'UTC-05'
-    :return:       Corresponding timezone object
+    :return: Corresponding timezone object
     :raises ValueError: if tz_str is not a valid UTC offset format
     """
     tz_str_clean = tz_str.upper().strip()
@@ -74,20 +68,20 @@ def _parse_datetime_flexible(dt_str: str) -> datetime:
     """
     Parse a date/time string in any of several common formats:
 
-      • ISO 8601:             'YYYY-MM-DDTHH:MM:SSZ'
-      • ISO w/ offset:        'YYYY-MM-DDTHH:MM:SS+HH:MM'
-      • 'YYYY-MM-DD HH:MM:SS'
-      • 'YYYY-MM-DD'          (time defaults to 00:00:00)
-      • 'YYYY/MM/DD HH:MM:SS'
-      • 'YYYY/MM/DD HH:MM'
-      • 'YYYY/MM/DD'
-      • 'MM/DD/YYYY HH:MM[:SS] AM/PM'
-      • 'MM/DD/YYYY'
-      • 'DD.MM.YYYY HH:MM'
-      • 'DD.MM.YYYY'
+      * ISO 8601:             'YYYY-MM-DDTHH:MM:SSZ'
+      * ISO w/ offset:        'YYYY-MM-DDTHH:MM:SS+HH:MM'
+      * 'YYYY-MM-DD HH:MM:SS'
+      * 'YYYY-MM-DD'          (time defaults to 00:00:00)
+      * 'YYYY/MM/DD HH:MM:SS'
+      * 'YYYY/MM/DD HH:MM'
+      * 'YYYY/MM/DD'
+      * 'MM/DD/YYYY HH:MM[:SS] AM/PM'
+      * 'MM/DD/YYYY'
+      * 'DD.MM.YYYY HH:MM'
+      * 'DD.MM.YYYY'
 
     :param dt_str: Date/time string to parse.
-    :return:       A naive datetime object.
+    :return: A naive datetime object.
     :raises ValueError: If dt_str does not match the expected formats.
     """
     s = dt_str.strip()
@@ -95,13 +89,10 @@ def _parse_datetime_flexible(dt_str: str) -> datetime:
         if re.fullmatch(pattern, s):
             return datetime.strptime(s, fmt)
 
-    supported = "\n".join(f"  • {fmt}" for _, fmt in _DATETIME_FORMATS)
-    raise ValueError(
-        f"Invalid date/time format: '{dt_str}'\n" f"Supported formats are:\n{supported}"
-    )
+    raise ValueError(f"Invalid date/time format: '{dt_str}'")
 
 
-def calculate_time_difference(
+def time_diff(
     from_time_str: str,
     tz_str: str = "UTC",
     to_time_str: str | None = None,
@@ -111,10 +102,10 @@ def calculate_time_difference(
     Calculate the difference between two datetime values.
 
     :param from_time_str: Date-time string "YYYY-MM-DD HH:MM:SS" for the start.
-    :param tz_str:        Timezone of from_time_str, e.g. 'UTC+8'. Defaults to 'UTC'.
-    :param to_time_str:   Optional date-time string for the end; if None, uses now().
-    :param to_tz_str:     Timezone of to_time_str. Defaults to 'UTC'.
-    :return:              Tuple (days, hours, minutes, seconds).
+    :param tz_str: Timezone of from_time_str, e.g. 'UTC+8'. Defaults to 'UTC'.
+    :param to_time_str: Optional date-time string for the end; if None, uses now().
+    :param to_tz_str: Timezone of to_time_str. Defaults to 'UTC'.
+    :return: Tuple (days, hours, minutes, seconds).
     """
     try:
         # parse start time

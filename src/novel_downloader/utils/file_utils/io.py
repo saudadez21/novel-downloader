@@ -3,21 +3,10 @@
 novel_downloader.utils.file_utils.io
 ------------------------------------
 
-File I/O utilities for reading and writing text, JSON, and binary data.
-
-Includes:
-- Safe, atomic file saving with optional overwrite and auto-renaming
-- JSON pretty-printing with size-aware formatting
-- Simple helpers for reading files with fallback and logging
+File I/O utilities for reading and writing data.
 """
 
-__all__ = [
-    "save_as_txt",
-    "save_as_json",
-    "read_text_file",
-    "read_json_file",
-    "read_binary_file",
-]
+__all__ = ["write_file"]
 
 import json
 import logging
@@ -46,7 +35,7 @@ def _get_non_conflicting_path(path: Path) -> Path:
     return new_path
 
 
-def _write_file(
+def write_file(
     content: str | bytes | dict[Any, Any] | list[Any] | Any,
     filepath: str | Path,
     write_mode: str = "w",
@@ -114,103 +103,4 @@ def _write_file(
         return path
     except Exception as exc:
         logger.warning("[file] Error writing %r: %s", path, exc)
-        return None
-
-
-def save_as_txt(
-    content: str,
-    filepath: str | Path,
-    *,
-    encoding: str = "utf-8",
-    on_exist: Literal["overwrite", "skip", "rename"] = "overwrite",
-) -> Path | None:
-    """
-    Save plain text content to the given file path.
-
-    :param content: Text content to write.
-    :param filepath: Destination file path.
-    :param encoding: Text encoding to use (default: 'utf-8').
-    :param on_exist: How to handle existing files: 'overwrite', 'skip', or 'rename'.
-    :return: Path if writing succeeds, None otherwise.
-    """
-    return _write_file(
-        content=content,
-        filepath=filepath,
-        write_mode="w",
-        on_exist=on_exist,
-        dump_json=False,
-        encoding=encoding,
-    )
-
-
-def save_as_json(
-    content: Any,
-    filepath: str | Path,
-    *,
-    encoding: str = "utf-8",
-    on_exist: Literal["overwrite", "skip", "rename"] = "overwrite",
-) -> Path | None:
-    """
-    Save JSON-serializable content to the given file path.
-
-    :param content: Data to write as JSON.
-    :param filepath: Destination file path.
-    :param encoding: Text encoding to use (default: 'utf-8').
-    :param on_exist: How to handle existing files: 'overwrite', 'skip', or 'rename'.
-    :return: Path if writing succeeds, None otherwise.
-    """
-    return _write_file(
-        content=content,
-        filepath=filepath,
-        write_mode="w",
-        on_exist=on_exist,
-        dump_json=True,
-        encoding=encoding,
-    )
-
-
-def read_text_file(filepath: str | Path, encoding: str = "utf-8") -> str | None:
-    """
-    Read a UTF-8 text file.
-
-    :param filepath: Path to file.
-    :param encoding: Encoding to use.
-    :return: Text content or None on failure.
-    """
-    path = Path(filepath)
-    try:
-        return path.read_text(encoding=encoding)
-    except Exception as e:
-        logger.warning("[file] Failed to read %r: %s", path, e)
-        return None
-
-
-def read_json_file(filepath: str | Path, encoding: str = "utf-8") -> Any | None:
-    """
-    Read a JSON file and parse it into Python objects.
-
-    :param filepath: Path to file.
-    :param encoding: Encoding to use.
-    :return: Python object or None on failure.
-    """
-    path = Path(filepath)
-    try:
-        return json.loads(path.read_text(encoding=encoding))
-    except Exception as e:
-        logger.warning("[file] Failed to read %r: %s", path, e)
-        return None
-
-
-def read_binary_file(filepath: str | Path) -> bytes | None:
-    """
-    Read a binary file and return its content as bytes.
-
-    :param filepath: Path to file.
-    :return: Bytes or None on failure.
-    """
-    path = Path(filepath)
-    try:
-        return path.read_bytes()
-    except Exception as e:
-        logger.warning("[file] Failed to read %r: %s", path, e)
         return None

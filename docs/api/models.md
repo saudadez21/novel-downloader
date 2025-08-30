@@ -4,25 +4,10 @@
 
 - [数据模型](#数据模型)
   - [目录](#目录)
-  - [基础类型](#基础类型)
   - [章节类型](#章节类型)
   - [配置模型](#配置模型)
   - [图书配置](#图书配置)
   - [登录字段](#登录字段)
-
----
-
-### 基础类型
-
-> `novel_downloader.utils.models`
-
-```python
-SplitMode = Literal["book", "volume"]
-LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
-BrowserType = Literal["chromium", "firefox", "webkit"]
-```
-
-描述: 常用枚举类型别名，限定函数或配置中可接受的字符串值
 
 ---
 
@@ -32,20 +17,10 @@ BrowserType = Literal["chromium", "firefox", "webkit"]
 
 ```python
 class ChapterDict(TypedDict, total=True):
-    """
-    TypedDict for a novel chapter.
-
-    Fields:
-        id      -- Unique chapter identifier
-        title   -- Chapter title
-        content -- Chapter text
-        extra   -- Arbitrary metadata (e.g. author remarks, timestamps)
-    """
-
     id: str
     title: str
     content: str
-    extra: dict[str, Any]
+    extra: dict[str, Any]  # Arbitrary metadata (e.g. author remarks, timestamps)
 ```
 
 描述: 章节数据的结构化类型定义
@@ -74,22 +49,15 @@ class FetcherConfig:
     retry_times: int = 3
     backoff_factor: float = 2.0
     timeout: float = 30.0
-    headless: bool = False
-    disable_images: bool = False
     max_connections: int = 10
-    max_rps: float | None = None
+    max_rps: float = 1000.0
     user_agent: str | None = None
     headers: dict[str, str] | None = None
     verify_ssl: bool = True
+    locale_style: str = "simplified"
 ```
 
 描述: 网页内容抓取相关参数配置
-
-示例:
-
-```python
-fetcher_cfg = FetcherConfig(mode="browser", headless=True)
-```
 
 ---
 
@@ -106,18 +74,9 @@ class DownloaderConfig:
     login_required: bool = False
     save_html: bool = False
     storage_batch_size: int = 1
-    username: str = ""
-    password: str = ""
-    cookies: str = ""
 ```
 
 描述: 下载流程相关参数配置
-
-示例:
-
-```python
-down_cfg = DownloaderConfig(skip_existing=False, mode="browser")
-```
 
 ---
 
@@ -125,26 +84,13 @@ down_cfg = DownloaderConfig(skip_existing=False, mode="browser")
 @dataclass
 class ParserConfig:
     cache_dir: str = "./novel_cache"
+    use_truncation: bool = True
     decode_font: bool = False
-    use_freq: bool = False
-    use_ocr: bool = True
-    use_vec: bool = False
-    ocr_version: str = "v1.0"
     batch_size: int = 32
-    gpu_mem: int = 500
-    gpu_id: int | None = None
-    ocr_weight: float = 0.6
-    vec_weight: float = 0.4
     save_font_debug: bool = False
 ```
 
 描述: 章节解析与 OCR/向量匹配相关配置
-
-示例:
-
-```python
-parser_cfg = ParserConfig(use_freq=True, gpu_id=0)
-```
 
 ---
 
@@ -162,18 +108,11 @@ class ExporterConfig:
     append_timestamp: bool = True
     filename_template: str = "{title}_{author}"
     include_cover: bool = True
-    include_toc: bool = False
-    include_picture: bool = False
-    split_mode: SplitMode = "book"
+    include_picture: bool = True
+    split_mode: str = "book"
 ```
 
 描述: 导出文件格式和切分策略配置
-
-示例:
-
-```python
-exp_cfg = ExporterConfig(make_epub=True)
-```
 
 ---
 

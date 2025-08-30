@@ -23,18 +23,9 @@ from novel_downloader.models import (
     site_keys=["esjzone"],
 )
 class EsjzoneParser(BaseParser):
-    """Parser for esjzone book pages."""
-
-    # Book info XPaths
-    _BOOK_NAME_XPATH = '//h2[contains(@class, "text-normal")]/text()'
-    _AUTHOR_XPATH = '//li[strong[text()="作者:"]]/a/text()'
-    _COVER_URL_XPATH = '//div[contains(@class,"product-gallery")]//img/@src'
-    _UPDATE_TIME_XPATH = '//li[strong[text()="更新日期:"]]/text()'
-    _WORD_COUNT_XPATH = '//span[@id="txt"]/text()'
-    _TYPE_XPATH = '//li[strong[text()="類型:"]]/text()'
-    _ALT_NAME_XPATH = '//li[strong[text()="其他書名:"]]/text()'
-    _WEB_URL_XPATH = '//li[strong[text()="Web生肉:"]]/a/@href'
-    _SUMMARY_XPATH = '//div[@class="description"]/p//text()'
+    """
+    Parser for esjzone book pages.
+    """
 
     # Chapter XPaths
     _CHAPTER_TEXT_XPATH = 'string(//div[contains(@class, "forum-content")])'
@@ -43,7 +34,6 @@ class EsjzoneParser(BaseParser):
         '//i[contains(@class, "icon-clock")]/following-sibling::text()',
         '//i[contains(@class, "icon-pen-tool")]/following-sibling::text()',
     ]
-
     _CHECK_FORUM_XPATH = '//div[@class="page-title"]//ul[@class="breadcrumbs"]/li[not(@class="slash")]//text()'  # noqa: E501
 
     def parse_book_info(
@@ -65,17 +55,30 @@ class EsjzoneParser(BaseParser):
 
         tree = html.fromstring(html_list[0])
 
-        book_name = self._get_text(tree, self._BOOK_NAME_XPATH)
-        author = self._get_text(tree, self._AUTHOR_XPATH)
-        cover_url = self._get_text(tree, self._COVER_URL_XPATH)
-        update_time = self._get_text(tree, self._UPDATE_TIME_XPATH)
-        word_count = self._get_text(tree, self._WORD_COUNT_XPATH, clean_comma=True)
-        book_type = self._get_text(tree, self._TYPE_XPATH)
-        alt_name = self._get_text(tree, self._ALT_NAME_XPATH)
-        web_url = self._get_text(tree, self._WEB_URL_XPATH)
+        # --- Basic metadata ---
+        book_name = self._first_str(
+            tree.xpath('//h2[contains(@class,"text-normal")]/text()')
+        )
+        author = self._first_str(tree.xpath('//li[strong[text()="作者:"]]/a/text()'))
+        cover_url = self._first_str(
+            tree.xpath('//div[contains(@class,"product-gallery")]//img/@src')
+        )
+        update_time = self._first_str(
+            tree.xpath('//li[strong[text()="更新日期:"]]/text()')
+        )  # noqa: E501
+        word_count = self._first_str(
+            tree.xpath('//span[@id="txt"]/text()'), replaces=[(",", "")]
+        )
+        book_type = self._first_str(tree.xpath('//li[strong[text()="類型:"]]/text()'))
+        alt_name = self._first_str(
+            tree.xpath('//li[strong[text()="其他書名:"]]/text()')
+        )  # noqa: E501
+        web_url = self._first_str(tree.xpath('//li[strong[text()="Web生肉:"]]/a/@href'))
+
+        # Summary paragraphs
         paras = tree.xpath('//div[@class="description"]/p')
         texts = [p.xpath("string()").strip() for p in paras]
-        summary = "\n".join(texts).strip()
+        summary = "\n".join(t for t in texts if t)
 
         current_vol: VolumeInfoDict = {
             "volume_name": "單卷",
@@ -161,16 +164,9 @@ class EsjzoneParser(BaseParser):
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        """
-        Parse a single chapter page and extract clean text or simplified HTML.
-
-        :param html_list: Raw HTML of the chapter page.
-        :param chapter_id: Identifier of the chapter being parsed.
-        :return: Cleaned chapter content as plain text or minimal HTML.
-        """
         if not html_list or self._is_forum_page(html_list):
             return None
-        tree = html.fromstring(html_list[0], parser=None)
+        tree = html.fromstring(html_list[0])
 
         content_lines: list[str] = []
         content_nodes = tree.xpath(self._CHAPTER_CONTENT_NODES_XPATH)
@@ -228,16 +224,3 @@ class EsjzoneParser(BaseParser):
         breadcrumb: list[str] = tree.xpath(self._CHECK_FORUM_XPATH)
         breadcrumb = [s.strip() for s in breadcrumb if s.strip()]
         return breadcrumb == ["Home", "論壇"]
-
-    @staticmethod
-    def _get_text(
-        tree: html.HtmlElement,
-        xpath: str,
-        join: bool = False,
-        clean_comma: bool = False,
-    ) -> str:
-        data = tree.xpath(xpath)
-        if not data:
-            return ""
-        text = "\n".join(data) if join else data[0].strip()
-        return text.replace(",", "") if clean_comma else text

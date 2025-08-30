@@ -27,7 +27,9 @@ from novel_downloader.models import (
     site_keys=["wanbengo"],
 )
 class WanbengoParser(BaseParser):
-    """Parser for 完本神站 book pages."""
+    """
+    Parser for 完本神站 book pages.
+    """
 
     BASE = "https://www.wanbengo.com"
 
@@ -50,9 +52,11 @@ class WanbengoParser(BaseParser):
         re.I | re.S,
     )
     _TAGS_RE = re.compile(r"<[^>]+>")
+    _SCRUB_RUNS_RE = re.compile(r"[_?]{2,}")
+    _SCRUB_TAIL_RE = re.compile(r"\s*（未完待续.*?$")
 
     # fmt: off
-    _AD_KEYWORDS = {
+    ADS = {
         "完本神站", "本站网址", "报错", "键盘", "客户端", "收藏", "书架",
         "猜你喜欢", "上一章", "下一章", "章节目录", "LastRead", "贴吧",
         "倾心打造", "全文无错", "分享本站", "点此章节报错", "温馨提示", "域名",
@@ -68,12 +72,6 @@ class WanbengoParser(BaseParser):
         html_list: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        """
-        Parse a book info page and extract metadata and chapter structure.
-
-        :param html_list: Raw HTML of the book info page.
-        :return: Parsed metadata and chapter structure as a dictionary.
-        """
         if not html_list:
             return None
 
@@ -83,22 +81,23 @@ class WanbengoParser(BaseParser):
         author = self._first_str(tree.xpath(self.X_AUTHOR))
         cover_url = self._first_str(tree.xpath(self.X_COVER))
         serial_status = (
-            self._clean_text(self._first_str(tree.xpath(self.X_STATUS))) or "连载中"
+            self._norm_space(self._first_str(tree.xpath(self.X_STATUS))) or "连载中"
         )
-        word_count = self._clean_text("".join(tree.xpath(self.X_WORDS)))
-        summary = self._clean_text("".join(tree.xpath(self.X_SUMMARY)))
+        word_count = self._norm_space("".join(tree.xpath(self.X_WORDS)))
+        summary = self._norm_space("".join(tree.xpath(self.X_SUMMARY)))
 
-        book_type = self._clean_text("".join(tree.xpath(self.X_TAG)))
+        book_type = self._norm_space("".join(tree.xpath(self.X_TAG)))
         tags = [book_type] if book_type else []
 
         update_time = self._extract_update_date(tree.xpath(self.X_UPDATE_TXT))
 
         chapters: list[ChapterInfoDict] = []
         for a in tree.xpath(self.X_CHAPTERS):
-            title = self._clean_text("".join(a.xpath(".//text()")))
+            title = self._norm_space("".join(a.xpath(".//text()")))
             href = a.get("href") or ""
             url = urljoin(self.BASE, href)
-            cid = self._chapter_id_from_href(href)
+            # "/129/103950.html" -> "103950"
+            cid = url.rstrip(".html").split("/")[-1]
             chapters.append({"title": title, "url": url, "chapterId": cid})
 
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
@@ -122,13 +121,6 @@ class WanbengoParser(BaseParser):
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        """
-        Parse a single chapter page and extract clean text or simplified HTML.
-
-        :param html_list: Raw HTML of the chapter page.
-        :param chapter_id: Identifier of the chapter being parsed.
-        :return: Cleaned chapter content as plain text or minimal HTML.
-        """
         if not html_list:
             return None
 
@@ -148,12 +140,11 @@ class WanbengoParser(BaseParser):
             s = unescape(s).replace("\xa0", " ")
             if self._is_noise_line(s):
                 continue
-            s = self._scrub_ascii_gibberish(s.strip())
-            s = re.sub(r"\s{2,}", " ", s).strip()
+            s = self._norm_space(self._scrub_ascii_gibberish(s.strip()))
             if s:
                 lines.append(s)
 
-        content = "\n".join(lines).strip()
+        content = "\n".join(lines)
         if not content:
             return None
 
@@ -163,12 +154,6 @@ class WanbengoParser(BaseParser):
             "content": content,
             "extra": {"site": "wanbengo"},
         }
-
-    @staticmethod
-    def _clean_text(s: str) -> str:
-        s = s.replace("\xa0", " ").replace("&nbsp;", " ")
-        s = re.sub(r"[ \t]+", " ", s)
-        return s.strip()
 
     @staticmethod
     def _extract_update_date(texts: list[str]) -> str:
@@ -183,34 +168,24 @@ class WanbengoParser(BaseParser):
             return m.group(1)
         return datetime.now().strftime("%Y-%m-%d")
 
-    @staticmethod
-    def _chapter_id_from_href(href: str) -> str:
-        """
-        "/129/103950.html" -> "103950"
-        """
-        m = re.search(r"/([^/]+)\.html$", href or "")
-        return m.group(1) if m else (href.strip("/").split("/")[-1] if href else "")
-
-    @classmethod
-    def _is_noise_line(cls, s: str) -> bool:
+    def _is_noise_line(self, s: str) -> bool:
         """Heuristic to drop obvious ad/footer/noise lines."""
         if not s.strip():
             return True
-        if any(kw in s for kw in cls._AD_KEYWORDS):
+        if self._is_ad_line(s):
             return True
-        if cls._PUNCT_ONLY.match(s):
+        if self._PUNCT_ONLY.match(s):
             return True
         return False
 
-    @staticmethod
-    def _scrub_ascii_gibberish(s: str) -> str:
+    @classmethod
+    def _scrub_ascii_gibberish(cls, s: str) -> str:
         """
         Remove common injected ASCII junk like long runs of '?' or '_'
         while keeping normal text intact.
         """
         s = s.replace("()?()", "").replace("[(．)]", "")
         s = s.replace("．", ".")
-        s = re.sub(r"[_?]{2,}", "", s)  # drop runs like ???? or ____
-        s = re.sub(r"\s*161&\?&\?1\s*", " ", s)
-        s = re.sub(r"\s*（未完待续.*?$", "", s)
+        s = cls._SCRUB_RUNS_RE.sub("", s)  # drop runs like ???? or ____
+        s = cls._SCRUB_TAIL_RE.sub("", s)
         return s.strip()

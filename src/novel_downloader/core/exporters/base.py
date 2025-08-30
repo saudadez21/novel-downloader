@@ -3,9 +3,7 @@
 novel_downloader.core.exporters.base
 ------------------------------------
 
-This module provides an abstract base class `BaseExporter` that defines
-the common interface and reusable logic for saving assembled novel
-content into various output formats.
+Abstract base class providing common structure and utilities for book exporters
 """
 
 import abc
@@ -34,7 +32,7 @@ class BaseExporter(ExporterProtocol, abc.ABC):
     """
 
     DEFAULT_SOURCE_ID = 0
-    DEFAULT_PRIORITIES_MAP = {
+    PRIORITIES_MAP = {
         DEFAULT_SOURCE_ID: 0,
     }
 
@@ -42,20 +40,15 @@ class BaseExporter(ExporterProtocol, abc.ABC):
         self,
         config: ExporterConfig,
         site: str,
-        priorities: dict[int, int] | None = None,
     ):
         """
         Initialize the exporter with given configuration.
 
         :param config: Exporter configuration settings.
         :param site: Identifier for the target website or source.
-        :param priorities: Mapping of source_id to priority value.
-                           Lower numbers indicate higher priority.
-                           E.X. {0: 10, 1: 100} means source 0 is preferred.
         """
         self._config = config
         self._site = site
-        self._priorities = priorities or self.DEFAULT_PRIORITIES_MAP
         self._storage_cache: dict[str, ChapterStorage] = {}
 
         self._raw_data_dir = Path(config.raw_data_dir) / site
@@ -64,50 +57,53 @@ class BaseExporter(ExporterProtocol, abc.ABC):
 
         self.logger = logging.getLogger(f"{self.__class__.__name__}")
 
-    def export(
-        self,
-        book_id: str,
-    ) -> None:
+    def export(self, book_id: str) -> dict[str, Path]:
         """
         Export the book in the formats specified in config.
-        If a method is not implemented or fails, log the error and continue.
 
         :param book_id: The book identifier (used for filename, lookup, etc.)
         """
         TAG = "[Exporter]"
+        results: dict[str, Path] = {}
+
         actions = [
-            ("make_txt", self.export_as_txt),
-            ("make_epub", self.export_as_epub),
-            ("make_md", self.export_as_md),
-            ("make_pdf", self.export_as_pdf),
+            ("make_txt", "txt", self.export_as_txt),
+            ("make_epub", "epub", self.export_as_epub),
+            ("make_md", "md", self.export_as_md),
+            ("make_pdf", "pdf", self.export_as_pdf),
         ]
 
-        for flag_name, export_method in actions:
+        for flag_name, fmt_key, export_method in actions:
             if getattr(self._config, flag_name, False):
                 try:
                     self.logger.info(
                         "%s Attempting to export book_id '%s' as %s...",
                         TAG,
                         book_id,
-                        flag_name,
+                        fmt_key,
                     )
-                    export_method(book_id)
-                    self.logger.info("%s Successfully saved as %s.", TAG, flag_name)
+                    path = export_method(book_id)
+
+                    if isinstance(path, Path):
+                        results[fmt_key] = path
+                        self.logger.info("%s Successfully saved as %s.", TAG, fmt_key)
+
                 except NotImplementedError as e:
                     self.logger.warning(
                         "%s Export method for %s not implemented: %s",
                         TAG,
-                        flag_name,
+                        fmt_key,
                         str(e),
                     )
                 except Exception as e:
                     self.logger.error(
-                        "%s Error while saving as %s: %s", TAG, flag_name, str(e)
+                        "%s Error while saving as %s: %s", TAG, fmt_key, str(e)
                     )
-        return
+
+        return results
 
     @abc.abstractmethod
-    def export_as_txt(self, book_id: str) -> None:
+    def export_as_txt(self, book_id: str) -> Path | None:
         """
         Persist the assembled book as a .txt file.
 
@@ -117,7 +113,7 @@ class BaseExporter(ExporterProtocol, abc.ABC):
         """
         ...
 
-    def export_as_epub(self, book_id: str) -> None:
+    def export_as_epub(self, book_id: str) -> Path | None:
         """
         Optional: Persist the assembled book as a EPUB (.epub) file.
 
@@ -126,7 +122,7 @@ class BaseExporter(ExporterProtocol, abc.ABC):
         """
         raise NotImplementedError("EPUB export not supported by this Exporter.")
 
-    def export_as_md(self, book_id: str) -> None:
+    def export_as_md(self, book_id: str) -> Path | None:
         """
         Optional: Persist the assembled book as a Markdown file.
 
@@ -135,7 +131,7 @@ class BaseExporter(ExporterProtocol, abc.ABC):
         """
         raise NotImplementedError("Markdown export not supported by this Exporter.")
 
-    def export_as_pdf(self, book_id: str) -> None:
+    def export_as_pdf(self, book_id: str) -> Path | None:
         """
         Optional: Persist the assembled book as a PDF file.
 
@@ -237,7 +233,7 @@ class BaseExporter(ExporterProtocol, abc.ABC):
             return
         self._storage_cache[book_id] = ChapterStorage(
             raw_base=self._raw_data_dir / book_id,
-            priorities=self._priorities,
+            priorities=self.PRIORITIES_MAP,
         )
         self._storage_cache[book_id].connect()
 

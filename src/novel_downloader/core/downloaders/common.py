@@ -3,22 +3,27 @@
 novel_downloader.core.downloaders.common
 ----------------------------------------
 
+Concrete downloader implementation with a generic async pipeline for common novel sites
 """
 
 import asyncio
-from collections.abc import AsyncIterator, Awaitable, Callable
-from contextlib import asynccontextmanager
+from collections.abc import Awaitable, Callable
 from pathlib import Path
 from typing import Any
 
 from novel_downloader.core.downloaders.base import BaseDownloader
+from novel_downloader.core.downloaders.signals import (
+    STOP,
+    Progress,
+    StopToken,
+)
 from novel_downloader.models import (
     BookConfig,
     ChapterDict,
 )
 from novel_downloader.utils import (
     ChapterStorage,
-    async_sleep_with_random_delay,
+    async_jitter_sleep,
 )
 
 
@@ -32,169 +37,203 @@ class CommonDownloader(BaseDownloader):
         book: BookConfig,
         *,
         progress_hook: Callable[[int, int], Awaitable[None]] | None = None,
+        cancel_event: asyncio.Event | None = None,
         **kwargs: Any,
     ) -> None:
         """
-        The full download logic for a single book.
+        Sentinel-based pipeline with graceful cancellation:
 
-        :param book: BookConfig with at least 'book_id'.
+        Producer -> ChapterWorkers -> StorageWorker.
+
+        On cancel: stop producing, workers finish at most one chapter,
+        storage drains, flushes, and exits.
         """
         TAG = "[Downloader]"
-        book_id = book["book_id"]
+
+        book_id = self._normalize_book_id(book["book_id"])
         start_id = book.get("start_id")
         end_id = book.get("end_id")
         ignore_set = set(book.get("ignore_ids", []))
 
-        book_id = self._normalize_book_id(book_id)
-
-        # prepare storage & dirs
         raw_base = self._raw_data_dir / book_id
         raw_base.mkdir(parents=True, exist_ok=True)
         html_dir = self._debug_dir / book_id / "html"
+
         chapter_storage = ChapterStorage(
             raw_base=raw_base,
-            priorities=self._priorities,
+            priorities=self.PRIORITIES_MAP,
         )
         chapter_storage.connect()
 
-        # load or fetch metadata
-        book_info = await self.load_book_info(book_id=book_id, html_dir=html_dir)
-        if not book_info:
-            return
+        def cancelled() -> bool:
+            return bool(cancel_event and cancel_event.is_set())
 
-        vols = book_info["volumes"]
-        total_chapters = sum(len(v["chapters"]) for v in vols)
-        if total_chapters == 0:
-            self.logger.warning("%s 书籍没有章节可下载: %s", TAG, book_id)
-            return
-
-        # concurrency primitives
-        sem = asyncio.Semaphore(self.workers)
-        cid_q: asyncio.Queue[str | None] = asyncio.Queue()
-        save_q: asyncio.Queue[ChapterDict | None] = asyncio.Queue()
-        batch: list[ChapterDict] = []
-        completed = 0
-
-        async def _flush_batch() -> None:
-            nonlocal batch, completed
-            if not batch:
+        try:
+            # --- metadata ---
+            book_info = await self.load_book_info(book_id=book_id, html_dir=html_dir)
+            if not book_info:
                 return
 
-            try:
-                chapter_storage.upsert_chapters(batch, self.DEFAULT_SOURCE_ID)
-            except Exception as e:
-                self.logger.error(
-                    "[Storage] batch upsert failed (size=%d): %s",
-                    len(batch),
-                    e,
-                    exc_info=True,
+            vols = book_info["volumes"]
+            total_chapters = sum(len(v["chapters"]) for v in vols)
+            if total_chapters == 0:
+                self.logger.warning("%s 书籍没有章节可下载: %s", TAG, book_id)
+                return
+
+            progress = Progress(total_chapters, progress_hook)
+
+            # --- queues & batching ---
+            cid_q: asyncio.Queue[str | StopToken] = asyncio.Queue()
+            save_q: asyncio.Queue[ChapterDict | StopToken] = asyncio.Queue()
+            batch: list[ChapterDict] = []
+
+            async def flush_batch() -> None:
+                if not batch:
+                    return
+                try:
+                    chapter_storage.upsert_chapters(batch, self.DEFAULT_SOURCE_ID)
+                except Exception as e:
+                    self.logger.error(
+                        "[Storage] batch upsert failed (size=%d): %s",
+                        len(batch),
+                        e,
+                        exc_info=True,
+                    )
+                else:
+                    await progress.bump(len(batch))
+                finally:
+                    batch.clear()
+
+            # --- stage: storage worker ---
+            async def storage_worker() -> None:
+                """
+                Consumes parsed chapters, writes in batches.
+
+                Terminates after receiving STOP from each chapter worker.
+
+                On cancel: keeps consuming (to avoid blocking producers),
+                flushes, and exits once all STOPs are seen.
+                """
+                stop_count = 0
+                while True:
+                    item = await save_q.get()
+                    if isinstance(item, StopToken):
+                        stop_count += 1
+                        if stop_count == self.workers:
+                            # All chapter workers have exited.
+                            await flush_batch()
+                            return
+                        # else keep waiting for remaining STOPs
+                        continue
+
+                    # Normal chapter
+                    batch.append(item)
+                    if len(batch) >= self.storage_batch_size:
+                        await flush_batch()
+
+                    if cancelled():
+                        # Drain whatever is already in the queue
+                        try:
+                            while True:
+                                nxt = save_q.get_nowait()
+                                if isinstance(nxt, StopToken):
+                                    stop_count += 1
+                                else:
+                                    batch.append(nxt)
+                        except asyncio.QueueEmpty:
+                            pass
+                        # Final flush of everything
+                        await flush_batch()
+                        # Wait for remaining STOPs so chapter workers can finish.
+                        while stop_count < self.workers:
+                            nxt = await save_q.get()
+                            if isinstance(nxt, StopToken):
+                                stop_count += 1
+                        return
+
+            # --- stage: chapter worker ---
+            sem = asyncio.Semaphore(self.workers)
+
+            async def chapter_worker() -> None:
+                """
+                Fetch + parse with retry, then enqueue to save_q.
+
+                Exits on STOP, or early if cancel is set before starting a new fetch.
+                """
+                while True:
+                    cid = await cid_q.get()
+                    if isinstance(cid, StopToken):
+                        # Propagate one STOP to storage and exit.
+                        await save_q.put(STOP)
+                        return
+
+                    if not cid or cid in ignore_set:
+                        # Ignore silently and continue.
+                        continue
+
+                    # If cancelled, don't start a new network call; let storage finish.
+                    if cancelled():
+                        await save_q.put(STOP)
+                        return
+
+                    async with sem:
+                        chap = await self._process_chapter(book_id, cid, html_dir)
+                    if chap:
+                        await save_q.put(chap)
+
+                    # polite pacing
+                    await async_jitter_sleep(
+                        self.request_interval,
+                        mul_spread=1.1,
+                        max_sleep=self.request_interval + 2,
+                    )
+
+            # --- stage: producer ---
+            async def producer() -> None:
+                """
+                Enqueue chapter IDs (respecting start/end/skip_existing).
+
+                Always sends STOP x workers at the end (even if cancelled early),
+                so chapter workers can exit deterministically.
+                """
+                try:
+                    async for cid in self._chapter_ids(vols, start_id, end_id):
+                        if cancelled():
+                            break
+                        if self.skip_existing and chapter_storage.exists(cid):
+                            # Count as completed but don't enqueue.
+                            await progress.bump(1)
+                        else:
+                            await cid_q.put(cid)
+                finally:
+                    for _ in range(self.workers):
+                        await cid_q.put(STOP)
+
+            # --- run the pipeline ---
+            async with asyncio.TaskGroup() as tg:
+                tg.create_task(storage_worker())
+                for _ in range(self.workers):
+                    tg.create_task(chapter_worker())
+                tg.create_task(producer())
+
+            # --- done ---
+            if cancelled():
+                self.logger.info(
+                    "%s Novel '%s' cancelled: flushed %d/%d chapters.",
+                    TAG,
+                    book_info.get("book_name", "unknown"),
+                    progress.done,
+                    progress.total,
                 )
             else:
-                completed += len(batch)
-                if progress_hook:
-                    await progress_hook(completed, total_chapters)
-            finally:
-                batch.clear()
+                self.logger.info(
+                    "%s Novel '%s' download completed.",
+                    TAG,
+                    book_info.get("book_name", "unknown"),
+                )
 
-        async def storage_worker(q: asyncio.Queue[ChapterDict | None]) -> None:
-            while True:
-                item = await q.get()
-                q.task_done()
-                if item is None:
-                    # final flush before exit
-                    if batch:
-                        await _flush_batch()
-                    break
-                batch.append(item)
-                if len(batch) >= self.storage_batch_size:
-                    await _flush_batch()
-
-        async def producer() -> None:
-            nonlocal completed
-            async for cid in self._chapter_ids(vols, start_id, end_id):
-                if self.skip_existing and chapter_storage.exists(cid):
-                    completed += 1
-                    if progress_hook:
-                        await progress_hook(completed, total_chapters)
-                else:
-                    await cid_q.put(cid)
-
-        @asynccontextmanager
-        async def task_group_ctx() -> AsyncIterator[asyncio.TaskGroup]:
-            async with asyncio.TaskGroup() as tg:
-                # start chapter workers
-                for _ in range(self.workers):
-                    tg.create_task(
-                        self._chapter_worker(
-                            book_id,
-                            ignore_set,
-                            cid_q,
-                            save_q,
-                            sem,
-                        )
-                    )
-                # start storage worker
-                tg.create_task(storage_worker(save_q))
-                yield tg
-
-        # run producer + workers
-        async with task_group_ctx():
-            # produce all CidTask
-            await producer()
-
-            # signal chapter workers to exit
-            for _ in range(self.workers):
-                await cid_q.put(None)
-            await cid_q.join()
-
-            # signal storage worker to exit
-            await save_q.put(None)
-            await save_q.join()
-
-            # final flush to catch any remaining items
-            await _flush_batch()
-
-        chapter_storage.close()
-        self.logger.info(
-            "%s Novel '%s' download completed.",
-            TAG,
-            book_info.get("book_name", "unknown"),
-        )
-
-    async def _chapter_worker(
-        self,
-        book_id: str,
-        ignore_set: set[str],
-        cid_q: asyncio.Queue[str | None],
-        save_q: asyncio.Queue[ChapterDict | None],
-        sem: asyncio.Semaphore,
-    ) -> None:
-        """
-        Worker that processes one chapter at a time:
-        fetch + parse with retry, then enqueue to save_q.
-        """
-        html_dir = self._debug_dir / book_id / "html"
-        while True:
-            cid = await cid_q.get()
-            if cid is None:
-                cid_q.task_done()
-                break
-            if not cid or cid in ignore_set:
-                cid_q.task_done()
-                continue
-
-            async with sem:
-                chap = await self._process_chapter(book_id, cid, html_dir)
-
-            if chap:
-                await save_q.put(chap)
-
-            cid_q.task_done()
-            await async_sleep_with_random_delay(
-                self.request_interval,
-                mul_spread=1.1,
-                max_sleep=self.request_interval + 2,
-            )
+        finally:
+            chapter_storage.close()
 
     async def _process_chapter(
         self,
@@ -224,7 +263,7 @@ class CommonDownloader(BaseDownloader):
                         "[ChapterWorker] Retry %s (%s): %s", cid, attempt + 1, e
                     )
                     backoff = self.backoff_factor * (2**attempt)
-                    await async_sleep_with_random_delay(
+                    await async_jitter_sleep(
                         base=backoff, mul_spread=1.2, max_sleep=backoff + 3
                     )
                 else:

@@ -13,7 +13,7 @@ from typing import Any
 from novel_downloader.core.fetchers.base import BaseSession
 from novel_downloader.core.fetchers.registry import register_fetcher
 from novel_downloader.models import FetcherConfig
-from novel_downloader.utils import async_sleep_with_random_delay
+from novel_downloader.utils import async_jitter_sleep
 
 
 @register_fetcher(
@@ -21,7 +21,7 @@ from novel_downloader.utils import async_sleep_with_random_delay
 )
 class Xs63bSession(BaseSession):
     """
-    A session class for interacting with the Xs63b (m.xs63b.com) novel website.
+    A session class for interacting with the 小说路上 (m.xs63b.com) novel website.
     """
 
     BOOK_INFO_URL = "https://m.xs63b.com/{book_id}/"
@@ -50,7 +50,7 @@ class Xs63bSession(BaseSession):
         Order: [info, catalog]
 
         :param book_id: The book identifier.
-        :return: The page content as a string.
+        :return: The page content as string list.
         """
         book_id = book_id.replace("-", "/")
         info_url = self.book_info_url(book_id=book_id)
@@ -71,9 +71,11 @@ class Xs63bSession(BaseSession):
         """
         Fetch the raw HTML of a single chapter asynchronously.
 
+        Order: [page1, ..., pageN]
+
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :return: The chapter content as a string.
+        :return: The page content as string list.
         """
         book_id = book_id.replace("-", "/")
         html_pages: list[str] = []
@@ -98,7 +100,7 @@ class Xs63bSession(BaseSession):
             jsstr = self._parse_jsstr(html)
             chapter_url = self._build_chapter_url(book_id, jsarr, jsstr)
 
-            await async_sleep_with_random_delay(
+            await async_jitter_sleep(
                 self.request_interval,
                 mul_spread=1.1,
                 max_sleep=self.request_interval + 2,

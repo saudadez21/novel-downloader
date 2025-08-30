@@ -12,7 +12,7 @@ from typing import Any
 from novel_downloader.core.fetchers.base import BaseSession
 from novel_downloader.core.fetchers.registry import register_fetcher
 from novel_downloader.models import FetcherConfig, LoginField
-from novel_downloader.utils import async_sleep_with_random_delay
+from novel_downloader.utils import async_jitter_sleep
 
 
 @register_fetcher(
@@ -20,7 +20,7 @@ from novel_downloader.utils import async_sleep_with_random_delay
 )
 class EsjzoneSession(BaseSession):
     """
-    A session class for interacting with the esjzone (www.esjzone.cc) novel website.
+    A session class for interacting with the ESJ Zone (www.esjzone.cc) novel website.
     """
 
     BOOKCASE_URL = "https://www.esjzone.cc/my/favorite"
@@ -68,7 +68,7 @@ class EsjzoneSession(BaseSession):
             ):
                 self._is_logged_in = True
                 return True
-            await async_sleep_with_random_delay(
+            await async_jitter_sleep(
                 self.backoff_factor,
                 mul_spread=1.1,
                 max_sleep=self.backoff_factor + 2,
@@ -86,7 +86,7 @@ class EsjzoneSession(BaseSession):
         Fetch the raw HTML of the book info page asynchronously.
 
         :param book_id: The book identifier.
-        :return: The page content as a string.
+        :return: The page content as string list.
         """
         url = self.book_info_url(book_id=book_id)
         return [await self.fetch(url, **kwargs)]
@@ -102,7 +102,7 @@ class EsjzoneSession(BaseSession):
 
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :return: The chapter content as a string.
+        :return: The page content as string list.
         """
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
         return [await self.fetch(url, **kwargs)]

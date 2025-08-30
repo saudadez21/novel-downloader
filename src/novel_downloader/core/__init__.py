@@ -12,6 +12,7 @@ downloading and processing online novel content, including:
 - Parser: Extracts structured data from HTML or SSR content.
 - Fetcher: Sends HTTP requests and manages sessions, including login if required.
 - Exporter: Responsible for exporting downloaded data into various output formats.
+- search: Provides unified search functionality across supported novel sites.
 """
 
 __all__ = [

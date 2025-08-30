@@ -7,7 +7,6 @@ novel_downloader.core.parsers.linovelib
 
 import json
 from itertools import islice
-from pathlib import PurePosixPath
 from typing import Any
 
 from lxml import html
@@ -27,7 +26,9 @@ from novel_downloader.utils.constants import LINOVELIB_FONT_MAP_PATH
     site_keys=["linovelib"],
 )
 class LinovelibParser(BaseParser):
-    """Parser for 哔哩轻小说 book pages."""
+    """
+    Parser for 哔哩轻小说 book pages.
+    """
 
     # Book info XPaths
     _BOOK_NAME_XPATH = '//div[@class="book-info"]/h1[@class="book-name"]/text()'
@@ -56,12 +57,6 @@ class LinovelibParser(BaseParser):
         html_list: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        """
-        Parse a book info page and extract metadata and chapter structure.
-
-        :param html_list: Raw HTML of the book info page.
-        :return: Parsed metadata and chapter structure as a dictionary.
-        """
         if not html_list:
             return None
         tree = html.fromstring(html_list[0])
@@ -98,10 +93,9 @@ class LinovelibParser(BaseParser):
             for a in chapter_elements:
                 title = a.text.strip()
                 url = a.attrib.get("href", "").strip()
-                chap_path = PurePosixPath(url.rstrip("/"))
-                chapters.append(
-                    {"title": title, "url": url, "chapterId": chap_path.stem}
-                )
+                # '/novel/4668/276082.html' -> '276082'
+                cid = url.split("/")[-1].split(".")[0]
+                chapters.append({"title": title, "url": url, "chapterId": cid})
 
             volumes.append(
                 {
@@ -132,13 +126,6 @@ class LinovelibParser(BaseParser):
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        """
-        Parse chapter pages and extract clean text or simplified HTML.
-
-        :param html_list: Raw HTML of the chapter page.
-        :param chapter_id: Identifier of the chapter being parsed.
-        :return: Cleaned chapter content as plain text or minimal HTML.
-        """
         if not html_list:
             return None
         title_text: str = ""

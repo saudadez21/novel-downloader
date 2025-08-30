@@ -3,8 +3,7 @@
 novel_downloader.core.interfaces.fetcher
 ----------------------------------------
 
-Defines the Async FetcherProtocol interface for fetching raw HTML or JSON
-for book info pages, individual chapters, managing request lifecycle
+Protocol defining the interface for asynchronous fetching, login, and session management
 """
 
 import types
@@ -32,6 +31,7 @@ class FetcherProtocol(Protocol):
     ) -> bool:
         """
         Attempt to log in asynchronously.
+
         :returns: True if login succeeded.
         """
         ...
@@ -45,7 +45,7 @@ class FetcherProtocol(Protocol):
         Fetch the raw HTML (or JSON) of the book info page asynchronously.
 
         :param book_id: The book identifier.
-        :return: The page content as a string.
+        :return: The page content as string list.
         """
         ...
 
@@ -60,7 +60,7 @@ class FetcherProtocol(Protocol):
 
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :return: The chapter content as string.
+        :return: The page content as string list.
         """
         ...
 

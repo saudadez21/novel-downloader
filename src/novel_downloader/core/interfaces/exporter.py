@@ -3,10 +3,10 @@
 novel_downloader.core.interfaces.exporter
 -----------------------------------------
 
-Defines the ExporterProtocol interface for persisting completed books in
-TXT, EPUB, Markdown, and PDF formats.
+Protocol defining the interface for exporting books to text, EPUB, and other formats.
 """
 
+from pathlib import Path
 from typing import Protocol, runtime_checkable
 
 
@@ -18,7 +18,7 @@ class ExporterProtocol(Protocol):
     It may also optionally implement an EPUB (or other format) exporter.
     """
 
-    def export(self, book_id: str) -> None:
+    def export(self, book_id: str) -> dict[str, Path]:
         """
         Export the book in the formats specified in config.
         If a method is not implemented or fails, log the error and continue.
@@ -27,7 +27,7 @@ class ExporterProtocol(Protocol):
         """
         ...
 
-    def export_as_txt(self, book_id: str) -> None:
+    def export_as_txt(self, book_id: str) -> Path | None:
         """
         Persist the assembled book as a .txt file.
 
@@ -35,7 +35,7 @@ class ExporterProtocol(Protocol):
         """
         ...
 
-    def export_as_epub(self, book_id: str) -> None:
+    def export_as_epub(self, book_id: str) -> Path | None:
         """
         Optional: Persist the assembled book as an .epub file.
 
@@ -43,7 +43,7 @@ class ExporterProtocol(Protocol):
         """
         ...
 
-    def export_as_md(self, book_id: str) -> None:
+    def export_as_md(self, book_id: str) -> Path | None:
         """
         Optional: Persist the assembled book as a Markdown (.md) file.
 
@@ -51,7 +51,7 @@ class ExporterProtocol(Protocol):
         """
         ...
 
-    def export_as_pdf(self, book_id: str) -> None:
+    def export_as_pdf(self, book_id: str) -> Path | None:
         """
         Optional: Persist the assembled book as a PDF file.
 

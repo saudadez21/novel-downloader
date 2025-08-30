@@ -17,7 +17,7 @@ from novel_downloader.models import FetcherConfig
 )
 class GuidayeSession(BaseSession):
     """
-    A session class for interacting with the Guidaye (b.guidaye.com) novel website.
+    A session class for interacting with the 名著阅读 (b.guidaye.com) novel website.
     """
 
     BOOK_INFO_URL = "https://b.guidaye.com/{book_id}/"
@@ -40,7 +40,7 @@ class GuidayeSession(BaseSession):
         Fetch the raw HTML of the book info page asynchronously.
 
         :param book_id: The book identifier.
-        :return: The page content as a string.
+        :return: The page content as string list.
         """
         book_id = book_id.replace("-", "/")
         url = self.book_info_url(book_id=book_id)
@@ -57,7 +57,7 @@ class GuidayeSession(BaseSession):
 
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :return: The chapter content as a string.
+        :return: The page content as string list.
         """
         book_id = book_id.replace("-", "/")
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)

@@ -13,7 +13,7 @@ __all__ = [
 
 import re
 
-_IMG_TAG_RE = re.compile(r"<img[^>]*>")
+_IMG_TAG_RE = re.compile(r"<img[^>]*>", re.IGNORECASE)
 
 
 def build_txt_header(fields: list[tuple[str, str]]) -> str:
@@ -37,14 +37,14 @@ def build_txt_chapter(
     Build a formatted chapter text block including title, body paragraphs,
     and optional extra sections.
 
-    - Strips any `<img...>` tags from paragraphs.
-    - Title appears first (stripped of surrounding whitespace).
-    - Each non-blank line in `paragraphs` becomes its own paragraph.
+      * Strips any `<img...>` tags from paragraphs.
+      * Title appears first (stripped of surrounding whitespace).
+      * Each non-blank line in `paragraphs` becomes its own paragraph.
 
-    :param title:      Chapter title.
+    :param title: Chapter title.
     :param paragraphs: Raw multi-line string. Blank lines are ignored.
-    :param extras:     Optional dict mapping section titles to multi-line strings.
-    :return:           A string where title, paragraphs, and extras are joined by lines.
+    :param extras: Optional dict mapping section titles to multi-line strings.
+    :return: A string where title, paragraphs, and extras are joined by lines.
     """
     parts: list[str] = [title.strip()]
 

@@ -23,28 +23,24 @@ from novel_downloader.models import (
     site_keys=["aaatxt"],
 )
 class AaatxtParser(BaseParser):
-    """Parser for 3A电子书 book pages."""
+    """
+    Parser for 3A电子书 book pages.
+    """
 
-    ADS: list[str] = [
+    ADS: set[str] = {
         "按键盘上方向键",
         "未阅读完",
         "加入书签",
         "已便下次继续阅读",
         "更多原创手机电子书",
         "免费TXT小说下载",
-    ]
+    }
 
     def parse_book_info(
         self,
         html_list: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        """
-        Parse a book info page and extract metadata and chapter structure.
-
-        :param html_list: Raw HTML of the book info page.
-        :return: Parsed metadata and chapter structure as a dictionary.
-        """
         if not html_list:
             return None
 
@@ -108,13 +104,6 @@ class AaatxtParser(BaseParser):
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        """
-        Parse a single chapter page and extract clean text or simplified HTML.
-
-        :param html_list: Raw HTML of the chapter page.
-        :param chapter_id: Identifier of the chapter being parsed.
-        :return: Cleaned chapter content as plain text or minimal HTML.
-        """
         if not html_list:
             return None
 
@@ -126,10 +115,8 @@ class AaatxtParser(BaseParser):
         texts = []
         for txt in tree.xpath("//div[@class='chapter']//text()"):
             line = txt.strip()
-            if not line:
-                continue
-            # Skip instruction/ad lines
-            if any(substr in txt for substr in self.ADS):
+            # Skip empty/instruction/ad lines
+            if not line or self._is_ad_line(txt):
                 continue
             texts.append(line)
 

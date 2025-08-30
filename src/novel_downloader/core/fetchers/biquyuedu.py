@@ -17,7 +17,7 @@ from novel_downloader.models import FetcherConfig
 )
 class BiquyueduSession(BaseSession):
     """
-    A session class for interacting with the Biquyuedu (biquyuedu.com) novel website.
+    A session class for interacting with the 精彩小说 (biquyuedu.com) novel website.
     """
 
     BOOK_INFO_URL = "https://biquyuedu.com/novel/{book_id}.html"
@@ -40,7 +40,7 @@ class BiquyueduSession(BaseSession):
         Fetch the raw HTML of the book info page asynchronously.
 
         :param book_id: The book identifier.
-        :return: The page content as a string.
+        :return: The page content as string list.
         """
         url = self.book_info_url(book_id=book_id)
         return [await self.fetch(url, **kwargs)]
@@ -56,7 +56,7 @@ class BiquyueduSession(BaseSession):
 
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :return: The chapter content as a string.
+        :return: The page content as string list.
         """
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
         return [await self.fetch(url, **kwargs)]

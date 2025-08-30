@@ -10,7 +10,7 @@ from typing import Any
 from novel_downloader.core.fetchers.base import BaseSession
 from novel_downloader.core.fetchers.registry import register_fetcher
 from novel_downloader.models import FetcherConfig
-from novel_downloader.utils import async_sleep_with_random_delay
+from novel_downloader.utils import async_jitter_sleep
 
 
 @register_fetcher(
@@ -18,7 +18,7 @@ from novel_downloader.utils import async_sleep_with_random_delay
 )
 class XiguashuwuSession(BaseSession):
     """
-    A session class for interacting with the Xiguashuwu (www.xiguashuwu.com) novel.
+    A session class for interacting with the 西瓜书屋 (www.xiguashuwu.com) novel.
     """
 
     BASE_URL = "https://www.xiguashuwu.com"
@@ -42,10 +42,10 @@ class XiguashuwuSession(BaseSession):
         """
         Fetch the raw HTML of the book info page asynchronously.
 
-        Order: [info, catalogs]
+        Order: [info, catalogs1, ..., catalogsN]
 
         :param book_id: The book identifier.
-        :return: The page content as a string.
+        :return: The page content as string list.
         """
         info_url = self.book_info_url(book_id=book_id)
         info_html = await self.fetch(info_url, **kwargs)
@@ -85,7 +85,7 @@ class XiguashuwuSession(BaseSession):
             if not any(pat in html for pat in next_patterns):
                 break
 
-            await async_sleep_with_random_delay(
+            await async_jitter_sleep(
                 self.request_interval,
                 mul_spread=1.1,
                 max_sleep=self.request_interval + 2,
@@ -101,9 +101,11 @@ class XiguashuwuSession(BaseSession):
         """
         Fetch the raw HTML of a single chapter asynchronously.
 
+        Order: [page1, ..., pageN]
+
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :return: The chapter content as a string.
+        :return: The page content as string list.
         """
         html_pages: list[str] = []
         idx = 1
@@ -128,7 +130,7 @@ class XiguashuwuSession(BaseSession):
 
             html_pages.append(html)
             idx += 1
-            await async_sleep_with_random_delay(
+            await async_jitter_sleep(
                 self.request_interval,
                 mul_spread=1.1,
                 max_sleep=self.request_interval + 2,

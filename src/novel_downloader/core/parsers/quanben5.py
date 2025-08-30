@@ -5,7 +5,6 @@ novel_downloader.core.parsers.quanben5
 
 """
 
-import re
 from datetime import datetime
 from typing import Any
 
@@ -25,19 +24,15 @@ from novel_downloader.models import (
     site_keys=["quanben5"],
 )
 class Quanben5Parser(BaseParser):
-    """Parser for 全本小说网 book pages."""
+    """
+    Parser for 全本小说网 book pages.
+    """
 
     def parse_book_info(
         self,
         html_list: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        """
-        Parse a book info page and extract metadata and chapter structure.
-
-        :param html_list: Raw HTML of the book info page.
-        :return: Parsed metadata and chapter structure as a dictionary.
-        """
         if not html_list:
             return None
 
@@ -61,8 +56,8 @@ class Quanben5Parser(BaseParser):
             link = li.xpath(".//a")[0]
             href = link.get("href", "").strip()
             title = self._first_str(link.xpath(".//span/text()"))
-            match = re.search(r"/(\d+)\.html$", href)
-            chapter_id = match.group(1) if match else ""
+            # '/n/toutian/83840.html' -> '83840'
+            chapter_id = href.rstrip(".html").split("/")[-1]
             chapters.append({"title": title, "url": href, "chapterId": chapter_id})
 
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
@@ -84,13 +79,6 @@ class Quanben5Parser(BaseParser):
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        """
-        Parse a single chapter page and extract clean text or simplified HTML.
-
-        :param html_list: Raw HTML of the chapter page.
-        :param chapter_id: Identifier of the chapter being parsed.
-        :return: Cleaned chapter content as plain text or minimal HTML.
-        """
         if not html_list:
             return None
 

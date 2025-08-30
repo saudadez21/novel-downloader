@@ -3,8 +3,7 @@
 novel_downloader.core.exporters.common
 --------------------------------------
 
-This module provides the `CommonExporter` class for
-handling the saving process of novels.
+Shared exporter implementation for producing standard TXT and EPUB outputs.
 """
 
 __all__ = ["CommonExporter"]

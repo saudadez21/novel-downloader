@@ -18,7 +18,7 @@ from novel_downloader.models import FetcherConfig
 )
 class DxmwxSession(BaseSession):
     """
-    A session class for interacting with the Dxmwx (www.dxmwx.org) novel website.
+    A session class for interacting with the 大熊猫文学网 (www.dxmwx.org) novel website.
     """
 
     BOOK_INFO_URL = "https://{base_url}/book/{book_id}.html"
@@ -47,7 +47,7 @@ class DxmwxSession(BaseSession):
         Order: [info, catalog]
 
         :param book_id: The book identifier.
-        :return: The page content as a string.
+        :return: The page content as string list.
         """
         info_url = self.book_info_url(base_url=self.base_url, book_id=book_id)
         catalog_url = self.book_catalog_url(base_url=self.base_url, book_id=book_id)
@@ -69,7 +69,7 @@ class DxmwxSession(BaseSession):
 
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :return: The chapter content as a string.
+        :return: The page content as string list.
         """
         url = self.chapter_url(
             base_url=self.base_url, book_id=book_id, chapter_id=chapter_id

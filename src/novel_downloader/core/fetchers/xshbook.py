@@ -17,7 +17,7 @@ from novel_downloader.models import FetcherConfig
 )
 class XshbookSession(BaseSession):
     """
-    A session class for interacting with the Xshbook (www.xshbook.com) novel website.
+    A session class for interacting with the 小说虎 (www.xshbook.com) novel website.
     """
 
     BOOK_INFO_URL = "https://www.xshbook.com/{book_id}/"
@@ -40,7 +40,7 @@ class XshbookSession(BaseSession):
         Fetch the raw HTML of the book info page asynchronously.
 
         :param book_id: The book identifier.
-        :return: The page content as a string.
+        :return: The page content as string list.
         """
         book_id = book_id.replace("-", "/")
         url = self.book_info_url(book_id=book_id)
@@ -57,7 +57,7 @@ class XshbookSession(BaseSession):
 
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :return: The chapter content as a string.
+        :return: The page content as string list.
         """
         book_id = book_id.replace("-", "/")
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)

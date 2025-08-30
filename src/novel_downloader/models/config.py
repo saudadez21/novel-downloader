@@ -5,23 +5,10 @@ novel_downloader.models.config
 
 Defines structured configuration models using dataclasses for each
 major component in the novel_downloader pipeline.
-
-Each config section corresponds to a specific stage of the pipeline:
-- RequesterConfig: network settings for requests and DrissionPage
-- DownloaderConfig: chapter download behavior and local raw data paths
-- ParserConfig: font decoding, cache handling, and debug options
-- SaverConfig: output formatting, export formats, and filename templates
-
-These models are used to map loaded YAML or JSON config data into
-strongly typed Python objects for safer and cleaner access.
 """
 
 from dataclasses import dataclass, field
 from typing import NotRequired, TypedDict
-
-from .types import (
-    SplitMode,
-)
 
 
 @dataclass
@@ -30,10 +17,8 @@ class FetcherConfig:
     retry_times: int = 3
     backoff_factor: float = 2.0
     timeout: float = 30.0
-    headless: bool = False
-    disable_images: bool = False
     max_connections: int = 10
-    max_rps: float | None = None  # Maximum requests per second
+    max_rps: float = 1000.0
     user_agent: str | None = None
     headers: dict[str, str] | None = None
     verify_ssl: bool = True
@@ -52,9 +37,6 @@ class DownloaderConfig:
     login_required: bool = False
     save_html: bool = False
     storage_batch_size: int = 1
-    username: str = ""
-    password: str = ""
-    cookies: str = ""
 
 
 @dataclass
@@ -62,15 +44,7 @@ class ParserConfig:
     cache_dir: str = "./novel_cache"
     use_truncation: bool = True
     decode_font: bool = False
-    use_freq: bool = False
-    use_ocr: bool = True
-    use_vec: bool = False
-    ocr_version: str = "v1.0"
     batch_size: int = 32
-    gpu_mem: int = 500
-    gpu_id: int | None = None
-    ocr_weight: float = 0.6
-    vec_weight: float = 0.4
     save_font_debug: bool = False
 
 
@@ -96,9 +70,8 @@ class ExporterConfig:
     append_timestamp: bool = True
     filename_template: str = "{title}_{author}"
     include_cover: bool = True
-    include_toc: bool = False
-    include_picture: bool = False
-    split_mode: SplitMode = "book"
+    include_picture: bool = True
+    split_mode: str = "book"
     cleaner_cfg: TextCleanerConfig = field(default_factory=TextCleanerConfig)
 
 

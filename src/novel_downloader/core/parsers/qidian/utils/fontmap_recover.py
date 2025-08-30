@@ -3,6 +3,8 @@
 novel_downloader.core.parsers.qidian.utils.fontmap_recover
 ----------------------------------------------------------
 
+Tools for generating and applying font character mappings
+to recover obfuscated Qidian text.
 """
 
 __all__ = [
@@ -31,16 +33,20 @@ def generate_font_map(
     batch_size: int = 32,
 ) -> dict[str, str]:
     """
-    Generates a mapping from encrypted (randomized) font characters to
-    their real recognized characters by rendering and OCR-based matching.
+    Build a mapping from scrambled font chars to real chars.
 
-    :param fixed_font_path: Path to the reference (fixed) font.
-    :param random_font_path: Path to the obfuscated (random) font.
-    :param char_set: Characters to process normally.
-    :param refl_set: Characters to process as horizontally flipped.
-    :param chapter_id: Chapter ID
+    Uses OCR to compare rendered glyphs from a known (fixed) font and an
+    obfuscated (random) font. Results are cached in JSON so repeated runs
+    are faster.
 
-    :returns mapping_result: { obf_char: real_char, ... }
+    :param fixed_font_path: fixed font file.
+    :param random_font_path: random font file.
+    :param char_set: Characters to match directly.
+    :param refl_set: Characters to match in flipped form.
+    :param cache_dir: Directory to save/load cached results.
+    :param batch_size: How many chars to OCR per batch.
+
+    :return: { obf_char: real_char, ... }
     """
     try:
         from novel_downloader.utils.fontocr import get_font_ocr
@@ -130,8 +136,8 @@ def apply_font_mapping(text: str, font_map: dict[str, str]) -> str:
     Replace each character in `text` using `font_map`,
     leaving unmapped characters unchanged.
 
-    :param text:    The input string, possibly containing obfuscated font chars.
+    :param text: The input string, possibly containing obfuscated font chars.
     :param font_map: A dict mapping obfuscated chars to real chars.
-    :return:        The de-obfuscated text.
+    :return: The de-obfuscated text.
     """
     return "".join(font_map.get(ch, ch) for ch in text)

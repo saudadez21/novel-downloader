@@ -5,7 +5,6 @@ novel_downloader.core.parsers.jpxs123
 
 """
 
-import re
 from typing import Any
 
 from lxml import html
@@ -24,7 +23,9 @@ from novel_downloader.models import (
     site_keys=["jpxs123"],
 )
 class Jpxs123Parser(BaseParser):
-    """Parser for 精品小说网 book pages."""
+    """
+    Parser for 精品小说网 book pages.
+    """
 
     BASE_URL = "https://www.jpxs123.com"
 
@@ -33,12 +34,6 @@ class Jpxs123Parser(BaseParser):
         html_list: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        """
-        Parse a book info page and extract metadata and chapter structure.
-
-        :param html_list: Raw HTML of the book info page.
-        :return: Parsed metadata and chapter structure as a dictionary.
-        """
         if not html_list:
             return None
 
@@ -73,8 +68,7 @@ class Jpxs123Parser(BaseParser):
             url = a.get("href", "").strip()
             title = a.text_content().strip()
             # General regex: /{category}/{bookId}/{chapterId}.html
-            m = re.search(r"^/[^/]+/\d+/(\d+)\.html$", url)
-            cid = m.group(1) if m else ""
+            cid = url.split("/")[-1].split(".")[0]
             chapters.append({"title": title, "url": url, "chapterId": cid})
 
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
@@ -105,13 +99,6 @@ class Jpxs123Parser(BaseParser):
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        """
-        Parse a single chapter page and extract clean text or simplified HTML.
-
-        :param html_list: Raw HTML of the chapter page.
-        :param chapter_id: Identifier of the chapter being parsed.
-        :return: Cleaned chapter content as plain text or minimal HTML.
-        """
         if not html_list:
             return None
 

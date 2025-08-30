@@ -6,7 +6,6 @@ novel_downloader.core.searchers.i25zw
 """
 
 import logging
-import re
 
 from lxml import html
 
@@ -27,12 +26,6 @@ class I25zwSearcher(BaseSearcher):
 
     @classmethod
     async def _fetch_html(cls, keyword: str) -> str:
-        """
-        Fetch raw HTML from I25zw's search page.
-
-        :param keyword: The search term to query on I25zw.
-        :return: HTML text of the search results page, or an empty string on fail.
-        """
         payload = {
             "searchkey": keyword,
             "searchtype": "all",
@@ -51,44 +44,37 @@ class I25zwSearcher(BaseSearcher):
 
     @classmethod
     def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
-        """
-        Parse raw HTML from I25zw search results into list of SearchResult.
-
-        :param html_str: Raw HTML string from I25zw search results page.
-        :param limit: Maximum number of results to return, or None for all.
-        :return: List of SearchResult dicts.
-        """
         doc = html.fromstring(html_str)
         rows = doc.xpath("//div[@id='alistbox']")
         results: list[SearchResult] = []
 
         for idx, row in enumerate(rows):
+            book_url = cls._first_str(row.xpath(".//div[@class='pic']/a/@href"))
+            if not book_url:
+                continue
+
             if limit is not None and idx >= limit:
                 break
-            prio = cls.priority + idx
 
-            # Extract book_id from picture link or title link
-            pic_href = row.xpath(".//div[@class='pic']/a/@href")
-            if not pic_href:
-                continue
-            m = re.search(r"/book/(\d+)\.html", pic_href[0])
-            book_id = m.group(1) if m else ""
-            book_url = pic_href[0]
+            # 'https://www.i25zw.com/book/309209.html' -> "309209"
+            book_id = book_url.split("/")[-1].split(".")[0]
 
-            # Title text
-            title_nodes = row.xpath(".//div[@class='title']/h2/a/text()")
-            title = title_nodes[0].strip() if title_nodes else ""
+            title = cls._first_str(row.xpath(".//div[@class='title']/h2/a/text()"))
 
-            # Author
-            auth_nodes = row.xpath(".//div[@class='title']/span/text()")
-            author = auth_nodes[0].replace("作者：", "").strip() if auth_nodes else ""
+            author = cls._first_str(
+                row.xpath(".//div[@class='title']/span/text()"),
+                replaces=[("作者：", "")],
+            )
 
-            cover_nodes = row.xpath(".//div[@class='pic']//img/@src")
-            cover_url = cover_nodes[0].strip() if cover_nodes else ""
+            cover_rel = cls._first_str(row.xpath(".//div[@class='pic']//img/@src"))
+            cover_url = cls._abs_url(cover_rel) if cover_rel else ""
 
             # Latest chapter
-            latest_nodes = row.xpath(".//div[@class='sys']//li/a/text()")
-            latest_chapter = latest_nodes[0].strip() if latest_nodes else ""
+            latest_chapter = (
+                cls._first_str(row.xpath(".//div[@class='sys']//li[1]/a/text()")) or "-"
+            )
+
+            prio = cls.priority + idx
 
             results.append(
                 SearchResult(
@@ -104,5 +90,4 @@ class I25zwSearcher(BaseSearcher):
                     priority=prio,
                 )
             )
-
         return results

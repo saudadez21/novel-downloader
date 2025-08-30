@@ -19,8 +19,8 @@ from novel_downloader.models import (
     ChapterDict,
     ParserConfig,
 )
-from novel_downloader.utils import find_cookie_value
 from novel_downloader.utils.constants import DATA_DIR
+from novel_downloader.utils.cookies import get_cookie_value
 
 from .book_info_parser import parse_book_info
 from .chapter_router import parse_chapter
@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 )
 class QidianParser(BaseParser):
     """
-    Parser for Qidian site.
+    Parser for 起点中文网 site.
     """
 
     def __init__(
@@ -49,11 +49,6 @@ class QidianParser(BaseParser):
         """
         super().__init__(config)
 
-        # Extract and store parser flags from config
-        self._config = config
-        self._use_truncation = config.use_truncation
-        self._decode_font: bool = config.decode_font
-
         self._fixed_font_dir: Path = self._base_cache_dir / "fixed_fonts"
         self._fixed_font_dir.mkdir(parents=True, exist_ok=True)
         self._debug_dir: Path = Path.cwd() / "debug"
@@ -61,7 +56,7 @@ class QidianParser(BaseParser):
         state_files = [
             DATA_DIR / "qidian" / "session_state.cookies",
         ]
-        self._fuid: str = fuid or find_cookie_value(state_files, "ywguid")
+        self._fuid: str = fuid or get_cookie_value(state_files, "ywguid")
 
     def parse_book_info(
         self,

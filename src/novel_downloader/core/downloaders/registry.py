@@ -3,6 +3,7 @@
 novel_downloader.core.downloaders.registry
 ------------------------------------------
 
+Registry and factory helpers for creating site-specific or common downloaders
 """
 
 __all__ = ["register_downloader", "get_downloader"]

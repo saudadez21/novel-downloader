@@ -42,15 +42,13 @@ source .venv/bin/activate
 
 ### 字体解密 (`decode_font` 参数)
 
-起点一个月内更新的章节可能有字体加密
-
-如果开启尝试解密字体功能 (`decode_font` 参数), 需要安装额外库 (注意: 解密字体准确率大约 98+%, 并且 cpu 状态下一章约需要一分钟, GPU 状态下一章约需要 1 秒):
+如果开启解密字体功能 (`decode_font` 参数), 需要安装额外库 (注意: OCR 准确率大约 98+%):
 
 ```bash
 pip install novel-downloader[font-recovery]
 ```
 
-如果启用 `use_ocr` 参数, 则需安装 [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) 及相关依赖 (请根据 paddlepaddle [文档](https://www.paddlepaddle.org.cn/install/quick?docurl=/documentation/docs/zh/develop/install/pip/windows-pip.html) 选择合适版本和 CUDA 支持) :
+然后安装 [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) 及相关依赖 (请根据 paddlepaddle [文档](https://www.paddlepaddle.org.cn/install/quick?docurl=/documentation/docs/zh/develop/install/pip/windows-pip.html) 选择合适版本和 CUDA 支持):
 
 - CPU 版:
     ```bash
@@ -62,7 +60,7 @@ pip install novel-downloader[font-recovery]
     python -m pip install paddlepaddle-gpu==3.1.1 -i https://www.paddlepaddle.org.cn/packages/stable/cu118/
     ```
 
-安装 `paddleocr`:
+根据 PaddleOCR [文档](https://www.paddleocr.ai/latest/version3.x/installation.html) 安装 `paddleocr`:
 
 ```bash
 pip install paddleocr
@@ -74,8 +72,6 @@ pip install paddleocr
 paddleocr==3.2.0
 paddlepaddle==3.1.1
 ```
-
-> 提示: 仅在启用 `use_ocr` 时才需要上述依赖。
 
 #### OCR 速度基准 (随机中文图片, 512 张)
 

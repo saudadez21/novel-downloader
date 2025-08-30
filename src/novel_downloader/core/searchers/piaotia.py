@@ -6,7 +6,6 @@ novel_downloader.core.searchers.piaotia
 """
 
 import logging
-import re
 
 from lxml import html
 
@@ -27,12 +26,6 @@ class PiaotiaSearcher(BaseSearcher):
 
     @classmethod
     async def _fetch_html(cls, keyword: str) -> str:
-        """
-        Fetch raw HTML from Piaotia's search page.
-
-        :param keyword: The search term to query on Piaotia.
-        :return: HTML text of the search results page, or an empty string on fail.
-        """
         # data = {
         #     "searchtype": "articlename",
         #     # "searchtype": "author",
@@ -64,43 +57,29 @@ class PiaotiaSearcher(BaseSearcher):
 
     @classmethod
     def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
-        """
-        Parse raw HTML from Piaotia search results into list of SearchResult.
-
-        :param html_str: Raw HTML string from Piaotia search results page.
-        :param limit: Maximum number of results to return, or None for all.
-        :return: List of SearchResult dicts.
-        """
         doc = html.fromstring(html_str)
         rows = doc.xpath('//table[@class="grid"]//tr[td]')
         results: list[SearchResult] = []
 
         for idx, row in enumerate(rows):
+            href = cls._first_str(row.xpath("./td[1]/a[1]/@href"))
+            if not href:
+                continue
+
             if limit is not None and idx >= limit:
                 break
-            # Title and book_id
-            link = row.xpath("./td[1]/a")[0]
-            book_url = link.get("href", "").strip()
-            title = link.text_content().strip()
 
-            match = re.search(r"/bookinfo/([^/]+/[^/]+)\.html", book_url)
-            book_id = (
-                match.group(1) if match else book_url.rstrip(".html").split("/")[-1]
-            )
-            if not book_id:
-                continue
-            book_id = book_id.replace("/", "-")
+            # "https://www.piaotia.com/bookinfo/14/14767.html" -> "14-14767"
+            book_id = href.rstrip(".html").split("bookinfo/")[-1].replace("/", "-")
+            book_url = cls._abs_url(href)
 
-            latest_elems = row.xpath("./td[2]/a")
-            latest_chapter = (
-                latest_elems[0].text_content().strip() if latest_elems else "-"
-            )
+            title = cls._first_str(row.xpath("./td[1]/a[1]//text()"))
 
-            author_nodes = row.xpath("./td[3]/text()")
-            author = author_nodes[0].strip() if author_nodes else ""
+            latest_chapter = cls._first_str(row.xpath("./td[2]/a[1]//text()")) or "-"
 
-            word_count = row.xpath("./td[4]")[0].text_content().strip()
-            update_date = row.xpath("./td[5]")[0].text_content().strip()
+            author = cls._first_str(row.xpath("./td[3]//text()")) or "-"
+            word_count = cls._first_str(row.xpath("./td[4]//text()")) or "-"
+            update_date = cls._first_str(row.xpath("./td[5]//text()")) or "-"
 
             # Compute priority incrementally
             prio = cls.priority + idx

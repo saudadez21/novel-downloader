@@ -13,6 +13,7 @@ import re
 import urllib.parse
 from typing import Any
 
+import requests
 from lxml import html
 
 from novel_downloader.core.parsers.base import BaseParser
@@ -23,7 +24,10 @@ from novel_downloader.models import (
     ChapterInfoDict,
     VolumeInfoDict,
 )
-from novel_downloader.utils.constants import XIGUASHUWU_FONT_MAP_PATH
+from novel_downloader.utils.constants import (
+    DEFAULT_USER_HEADERS,
+    XIGUASHUWU_FONT_MAP_PATH,
+)
 from novel_downloader.utils.crypto_utils.aes_util import aes_cbc_decrypt
 
 logger = logging.getLogger(__name__)
@@ -34,13 +38,15 @@ logger = logging.getLogger(__name__)
 )
 class XiguashuwuParser(BaseParser):
     """
-    Parser for xiguashuwu.com book pages.
+    Parser for 西瓜书屋 book pages.
     """
 
     BASE_URL = "https://www.xiguashuwu.com"
+    _CONF_THRESHOLD = 0.60
     _FONT_MAP: dict[str, str] = json.loads(
         XIGUASHUWU_FONT_MAP_PATH.read_text(encoding="utf-8")
     )
+    _GLYPH_CACHE: dict[str, str] = {}
 
     _CODEURL_PATTERN = re.compile(
         r"""var\s+codeurl\s*=\s*['"]?(\d+)['"]?;?""", re.IGNORECASE
@@ -74,21 +80,20 @@ class XiguashuwuParser(BaseParser):
             return None
         info_tree = html.fromstring(html_list[0])
 
-        book_name = info_tree.xpath('string(//p[@class="title"])').strip()
+        book_name = self._first_str(info_tree.xpath('//p[@class="title"]/text()'))
 
-        raw_author = info_tree.xpath('string(//p[@class="author"])').strip()
-        author = raw_author.replace("作者：", "").strip()
+        author = self._first_str(info_tree.xpath('//p[@class="author"]//a/text()'))
 
         cover_rel = info_tree.xpath(
             '//div[@class="BGsectionOne-top-left"]//img/@_src'
         ) or info_tree.xpath('//div[@class="BGsectionOne-top-left"]//img/@src')
-        cover_url = (self.BASE_URL + cover_rel[0].strip()) if cover_rel else ""
+        cover_url = self.BASE_URL + self._first_str(cover_rel)
 
-        tag_nodes = info_tree.xpath('//p[@class="category"]/span[1]/a/text()')
-        tags = [tag_nodes[0].strip()] if tag_nodes else []
+        tags = [
+            self._first_str(info_tree.xpath('//p[@class="category"]/span[1]/a/text()'))
+        ]
 
-        update_nodes = info_tree.xpath('//p[@class="time"]/span/text()')
-        update_time = update_nodes[0].strip() if update_nodes else ""
+        update_time = self._first_str(info_tree.xpath('//p[@class="time"]/span/text()'))
 
         paras = info_tree.xpath('//section[@id="intro"]//p')
         summary = "\n".join(p.xpath("string()").strip() for p in paras).strip()
@@ -196,8 +201,7 @@ class XiguashuwuParser(BaseParser):
             logger.warning("Failed to parse chapter page 1: %s", e)
             return []
 
-    @classmethod
-    def _parse_chapter_page2(cls, html_str: str) -> list[str]:
+    def _parse_chapter_page2(self, html_str: str) -> list[str]:
         """
         Parse page 2 of the chapter: content order shuffled by JavaScript,
         and text replaced with images.
@@ -208,16 +212,16 @@ class XiguashuwuParser(BaseParser):
         try:
             tree = html.fromstring(html_str)
             # Extract ordering metadata
-            order_raw = cls._parse_client_meta(tree)
-            codeurl = cls._parse_codeurl(html_str)
-            nrid = cls._parse_nrid(html_str)
-            order_list = cls._restore_order(order_raw, codeurl)
+            order_raw = self._parse_client_meta(tree)
+            codeurl = self._parse_codeurl(html_str)
+            nrid = self._parse_nrid(html_str)
+            order_list = self._restore_order(order_raw, codeurl)
 
             # Extract paragraphs in raw order
             content_divs = tree.xpath(f'//*[@id="{nrid}"]')
             if not content_divs:
                 return []
-            paragraphs = cls._rebuild_paragraphs(content_divs[0])
+            paragraphs = self._rebuild_paragraphs(content_divs[0])
 
             # Reorder paragraphs
             reordered: list[str] = []
@@ -229,8 +233,7 @@ class XiguashuwuParser(BaseParser):
             logger.warning("Failed to parse chapter page 2: %s", e)
             return []
 
-    @classmethod
-    def _parse_chapter_page3plus(cls, html_str: str) -> list[str]:
+    def _parse_chapter_page3plus(self, html_str: str) -> list[str]:
         """
         Parse pages 3 and beyond of the chapter: AES-encrypted text
         replaced with images.
@@ -239,18 +242,18 @@ class XiguashuwuParser(BaseParser):
         :return: List of decrypted text lines in reading order.
         """
         try:
-            newcon = cls._parse_newcon(html_str)
-            d_key = cls._parse_d_key(html_str)
-            full_html = cls._decrypt_d(newcon, d_key)
+            newcon = self._parse_newcon(html_str)
+            d_key = self._parse_d_key(html_str)
+            full_html = self._decrypt_d(newcon, d_key)
             tree = html.fromstring(full_html)
-            paragraphs = cls._rebuild_paragraphs(tree)
+            paragraphs = self._rebuild_paragraphs(tree)
             return paragraphs
         except Exception as e:
             logger.warning("Failed to parse chapter page 3+: %s", e)
             return []
 
-    @staticmethod
-    def _extract_chapter_title(tree: html.HtmlElement) -> str:
+    @classmethod
+    def _extract_chapter_title(cls, tree: html.HtmlElement) -> str:
         """
         Extract the chapter title from the HTML tree.
 
@@ -260,17 +263,58 @@ class XiguashuwuParser(BaseParser):
         :param tree: Parsed HTML element tree of the chapter page.
         :return: Chapter title as a string, or an empty string if not found.
         """
-        title = tree.xpath('//h1[@id="chapterTitle"]/text()')
-        return title[0].strip() if title else ""
+        return cls._first_str(tree.xpath('//h1[@id="chapterTitle"]/text()'))
 
-    @classmethod
-    def _char_from_img(cls, src: str) -> str:
+    def _char_from_img(self, url: str) -> str:
         """
         Given an <img> src URL, return the mapped character if this image
-        represents a single glyph; otherwise return empty string.
+        represents a single glyph.
         """
-        fname = src.split("/")[-1].split("?", 1)[0]
-        return cls._FONT_MAP.get(fname, f'<img src="{src}" />')
+        fname = url.split("/")[-1].split("?", 1)[0]
+        char = self._FONT_MAP.get(fname)
+        if char:
+            return char
+        if url in self._GLYPH_CACHE:
+            return self._GLYPH_CACHE[url]
+        if self._decode_font:
+            char = self._recognize_glyph_from_url(url)
+            if char:
+                self._GLYPH_CACHE[url] = char
+                return char
+        return f'<img src="{url}" />'
+
+    @classmethod
+    def _recognize_glyph_from_url(cls, url: str) -> str | None:
+        """
+        Download the glyph image at `url` and run the font OCR on it.
+
+        :param url: Fully-qualified <img src="..."> URL to a single-glyph image.
+        :return: The recognized character (top-1) if OCR succeeds, otherwise None.
+        """
+        try:
+            import io
+
+            import numpy as np
+            from PIL import Image
+
+            from novel_downloader.utils.fontocr import get_font_ocr
+
+            resp = requests.get(url, headers=DEFAULT_USER_HEADERS, timeout=15)
+            resp.raise_for_status()
+
+            im = Image.open(io.BytesIO(resp.content)).convert("RGB")
+            img_np = np.asarray(im)
+
+            ocr = get_font_ocr(batch_size=1)
+            char, score = ocr.predict([img_np], top_k=1)[0][0]
+
+            return char if score >= cls._CONF_THRESHOLD else None
+
+        except ImportError:
+            logger.warning("[Parser] FontOCR not available, font decoding will skip")
+        except Exception as e:
+            logger.warning("[Parser] Failed to ocr glyph image %s: %s", url, e)
+        return None
 
     @classmethod
     def _parse_codeurl(cls, text: str) -> int:
@@ -358,8 +402,7 @@ class XiguashuwuParser(BaseParser):
 
         return plaintext.decode("utf-8")
 
-    @classmethod
-    def _rebuild_paragraphs(cls, content_div: html.HtmlElement) -> list[str]:
+    def _rebuild_paragraphs(self, content_div: html.HtmlElement) -> list[str]:
         """
         Given a content container element, reconstruct each paragraph by
         interleaving normal text nodes and <img>-based glyphs.
@@ -381,8 +424,8 @@ class XiguashuwuParser(BaseParser):
                 tag = child.tag.lower()
                 if tag == "img":
                     src = (child.get("src") or "").strip()
-                    full = src if src.startswith("http") else cls.BASE_URL + src
-                    parts.append(cls._char_from_img(full))
+                    full = src if src.startswith("http") else self.BASE_URL + src
+                    parts.append(self._char_from_img(full))
                 # Append any tail text after this child
                 if child.tail and child.tail.strip():
                     parts.append(child.tail.strip())

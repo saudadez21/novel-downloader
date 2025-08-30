@@ -17,7 +17,8 @@ from novel_downloader.models import FetcherConfig
 )
 class ShuhaigeSession(BaseSession):
     """
-    A session class for interacting with the Shuhaige (www.shuhaige.net) novel website.
+    A session class for interacting with the
+    书海阁小说网 (www.shuhaige.net) novel website.
     """
 
     BOOK_INFO_URL = "https://www.shuhaige.net/{book_id}/"
@@ -40,7 +41,7 @@ class ShuhaigeSession(BaseSession):
         Fetch the raw HTML of the book info page asynchronously.
 
         :param book_id: The book identifier.
-        :return: The page content as a string.
+        :return: The page content as string list.
         """
         url = self.book_info_url(book_id=book_id)
         return [await self.fetch(url, **kwargs)]
@@ -56,7 +57,7 @@ class ShuhaigeSession(BaseSession):
 
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :return: The chapter content as a string.
+        :return: The page content as string list.
         """
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
         return [await self.fetch(url, **kwargs)]

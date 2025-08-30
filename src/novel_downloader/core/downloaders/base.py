@@ -3,11 +3,11 @@
 novel_downloader.core.downloaders.base
 --------------------------------------
 
-Defines the abstract base class `BaseDownloader`, which provides a
-common interface and reusable logic for all downloader implementations.
+Abstract base class providing common workflow and utilities for novel downloaders
 """
 
 import abc
+import asyncio
 import json
 import logging
 from collections.abc import AsyncIterator, Awaitable, Callable, Sequence
@@ -25,7 +25,7 @@ from novel_downloader.models import (
     DownloaderConfig,
     VolumeInfoDict,
 )
-from novel_downloader.utils import calculate_time_difference
+from novel_downloader.utils import time_diff
 
 
 class BaseDownloader(DownloaderProtocol, abc.ABC):
@@ -40,7 +40,7 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
     """
 
     DEFAULT_SOURCE_ID = 0
-    DEFAULT_PRIORITIES_MAP = {
+    PRIORITIES_MAP = {
         DEFAULT_SOURCE_ID: 0,
     }
 
@@ -50,7 +50,6 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
         parser: ParserProtocol,
         config: DownloaderConfig,
         site: str,
-        priorities: dict[int, int] | None = None,
     ):
         """
         Initialize the downloader for a specific site.
@@ -59,15 +58,11 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
         :param parser: Parser component for extracting chapter content.
         :param config: Downloader configuration settings.
         :param site: Identifier for the target website or source.
-        :param priorities: Mapping of source_id to priority value.
-                           Lower numbers indicate higher priority.
-                           E.X. {0: 10, 1: 100} means source 0 is preferred.
         """
         self._fetcher = fetcher
         self._parser = parser
         self._config = config
         self._site = site
-        self._priorities = priorities or self.DEFAULT_PRIORITIES_MAP
 
         self._raw_data_dir = Path(config.raw_data_dir) / site
         self._raw_data_dir.mkdir(parents=True, exist_ok=True)
@@ -81,6 +76,7 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
         books: list[BookConfig],
         *,
         progress_hook: Callable[[int, int], Awaitable[None]] | None = None,
+        cancel_event: asyncio.Event | None = None,
         **kwargs: Any,
     ) -> None:
         """
@@ -89,6 +85,7 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
         :param books: List of BookConfig entries.
         :param progress_hook: Optional async callback after each chapter.
                                 args: completed_count, total_count.
+        :param cancel_event: Optional asyncio.Event to allow cancellation.
         """
         if not await self._ensure_ready():
             book_ids = [b["book_id"] for b in books]
@@ -100,10 +97,20 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
             return
 
         for book in books:
+            # stop early if cancellation requested
+            if cancel_event and cancel_event.is_set():
+                self.logger.info(
+                    "[%s] download cancelled before book: %s",
+                    self._site,
+                    book["book_id"],
+                )
+                break
+
             try:
                 await self._download_one(
                     book,
                     progress_hook=progress_hook,
+                    cancel_event=cancel_event,
                     **kwargs,
                 )
             except Exception as e:
@@ -116,6 +123,7 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
         book: BookConfig,
         *,
         progress_hook: Callable[[int, int], Awaitable[None]] | None = None,
+        cancel_event: asyncio.Event | None = None,
         **kwargs: Any,
     ) -> None:
         """
@@ -124,6 +132,7 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
         :param book: BookConfig with at least 'book_id'.
         :param progress_hook: Optional async callback after each chapter.
                                 args: completed_count, total_count.
+        :param cancel_event: Optional asyncio.Event to allow cancellation.
         """
         if not await self._ensure_ready():
             self.logger.warning(
@@ -134,10 +143,20 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
                 book.get("end_id", "-"),
             )
 
+        # if already cancelled before starting
+        if cancel_event and cancel_event.is_set():
+            self.logger.info(
+                "[%s] download cancelled before start of book: %s",
+                self._site,
+                book["book_id"],
+            )
+            return
+
         try:
             await self._download_one(
                 book,
                 progress_hook=progress_hook,
+                cancel_event=cancel_event,
                 **kwargs,
             )
         except Exception as e:
@@ -173,6 +192,7 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
         book: BookConfig,
         *,
         progress_hook: Callable[[int, int], Awaitable[None]] | None = None,
+        cancel_event: asyncio.Event | None = None,
         **kwargs: Any,
     ) -> None:
         """
@@ -220,7 +240,7 @@ class BaseDownloader(DownloaderProtocol, abc.ABC):
             return None
 
         if max_age_days is not None:
-            days, *_ = calculate_time_difference(
+            days, *_ = time_diff(
                 raw.get("update_time", ""),
                 "UTC+8",
             )

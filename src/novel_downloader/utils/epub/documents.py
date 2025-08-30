@@ -13,18 +13,10 @@ from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
-from lxml import etree
-from lxml.builder import ElementMaker
-
 from .constants import (
-    DC_NS,
-    EPUB_NS,
-    NCX_NS,
-    OPF_NS,
-    OPF_PKG_ATTRIB,
-    PRETTY_PRINT_FLAG,
-    XHTML_NS,
-    XML_NS,
+    NAV_TEMPLATE,
+    NCX_TEMPLATE,
+    OPF_TEMPLATE,
 )
 from .models import (
     ChapterEntry,
@@ -34,21 +26,6 @@ from .models import (
     SpineEntry,
     VolumeEntry,
 )
-
-NAV = ElementMaker(
-    namespace=XHTML_NS,
-    nsmap={None: XHTML_NS, "epub": EPUB_NS},
-)
-NCX = ElementMaker(namespace=NCX_NS, nsmap={None: NCX_NS})
-PKG = ElementMaker(
-    namespace=OPF_NS,
-    nsmap={
-        None: OPF_NS,
-        "dc": DC_NS,
-        "opf": OPF_NS,
-    },
-)
-DC = ElementMaker(namespace=DC_NS)
 
 
 @dataclass
@@ -60,12 +37,7 @@ class NavDocument(EpubResource):
     media_type: str = field(init=False, default="application/xhtml+xml")
     content_items: list[ChapterEntry | VolumeEntry] = field(default_factory=list)
 
-    def add_chapter(
-        self,
-        id: str,
-        label: str,
-        src: str,
-    ) -> None:
+    def add_chapter(self, id: str, label: str, src: str) -> None:
         """
         Add a top-level chapter entry to the navigation.
 
@@ -100,55 +72,29 @@ class NavDocument(EpubResource):
 
         :return: A string containing the full XHTML for nav.xhtml.
         """
-        # build the root <html> with both lang attributes
-        html_el = NAV.html(
-            # head/title
-            NAV.head(NAV.title(self.title)),
-            # body/nav/ol subtree
-            NAV.body(
-                NAV.nav(
-                    NAV.h2(self.title),
-                    NAV.ol(*self._render_items(self.content_items)),
-                    # namespaced + regular attributes
-                    **{
-                        f"{{{EPUB_NS}}}type": "toc",
-                        "id": self.id,
-                        "role": "doc-toc",
-                    },
-                )
-            ),
-            # html attributes
+        items_str = self._render_items_str(self.content_items)
+        raw = NAV_TEMPLATE.format(
             lang=self.language,
-            **{f"{{{XML_NS}}}lang": self.language},
+            id=self.id,
+            title=self.title,
+            items=items_str,
         )
-
-        xml_bytes = etree.tostring(
-            html_el,
-            xml_declaration=True,
-            encoding="utf-8",
-            pretty_print=PRETTY_PRINT_FLAG,
-            doctype="<!DOCTYPE html>",
-        )
-        xml_string: str = xml_bytes.decode("utf-8")
-        return xml_string
+        return raw
 
     @classmethod
-    def _render_items(
-        cls,
-        items: Sequence[ChapterEntry | VolumeEntry],
-    ) -> list[etree._Element]:
-        """
-        Recursively build <li> elements (and nested <ol>) for each TOC entry.
-        """
-        elements: list[etree._Element] = []
+    def _render_items_str(cls, items: Sequence[ChapterEntry | VolumeEntry]) -> str:
+        lines: list[str] = []
         for item in items:
             if isinstance(item, VolumeEntry) and item.chapters:
-                li = NAV.li(NAV.a(item.label, href=item.src))
-                li.append(NAV.ol(*cls._render_items(item.chapters)))
+                lines.append(f'<li><a href="{item.src}">{item.label}</a>')
+                lines.append("  <ol>")
+                child = cls._render_items_str(item.chapters)
+                lines.extend(child.splitlines())
+                lines.append("  </ol>")
+                lines.append("</li>")
             else:
-                li = NAV.li(NAV.a(item.label, href=item.src))
-            elements.append(li)
-        return elements
+                lines.append(f'<li><a href="{item.src}">{item.label}</a></li>')
+        return "\n".join(lines)
 
 
 @dataclass
@@ -190,29 +136,19 @@ class NCXDocument(EpubResource):
 
         :return: A string containing the full NCX XML document.
         """
-        root = NCX.ncx(version="2005-1")
-        head = NCX.head(
-            NCX.meta(name="dtb:uid", content=self.uid),
-            NCX.meta(name="dtb:depth", content=str(self._depth(self.nav_points))),
-            NCX.meta(name="dtb:totalPageCount", content="0"),
-            NCX.meta(name="dtb:maxPageNumber", content="0"),
+        order = 1
+        lines: list[str] = []
+        for pt in self.nav_points:
+            order, block = self._render_navpoint_str(pt, order)
+            lines.extend(block)
+        navpoints = "\n".join(lines)
+        raw = NCX_TEMPLATE.format(
+            uid=self.uid,
+            depth=self._depth(self.nav_points),
+            title=self.title,
+            navpoints=navpoints,
         )
-        root.append(head)
-        root.append(NCX.docTitle(NCX.text(self.title)))
-
-        navMap = NCX.navMap()
-        root.append(navMap)
-
-        self._render_navpoints(navMap, self.nav_points, start=1)
-
-        xml_bytes = etree.tostring(
-            root,
-            xml_declaration=True,
-            encoding="utf-8",
-            pretty_print=PRETTY_PRINT_FLAG,
-        )
-        xml_string: str = xml_bytes.decode("utf-8")
-        return xml_string
+        return raw
 
     @classmethod
     def _depth(cls, points: list[NavPoint]) -> int:
@@ -221,32 +157,21 @@ class NCXDocument(EpubResource):
         return 1 + max(cls._depth(child.children) for child in points)
 
     @classmethod
-    def _render_navpoints(
-        cls,
-        parent: etree._Element,
-        points: list[NavPoint],
-        start: int,
-    ) -> int:
-        """
-        Recursively append <navPoint> elements under `parent`,
-        assigning playOrder starting from `start`.
-        Returns the next unused playOrder.
-        """
-        play = start
-        for pt in points:
-            np = etree.SubElement(
-                parent,
-                "navPoint",
-                id=pt.id,
-                playOrder=str(play),
-            )
-            play += 1
-            navLabel = etree.SubElement(np, "navLabel")
-            lbl_text = etree.SubElement(navLabel, "text")
-            lbl_text.text = pt.label
-            etree.SubElement(np, "content", src=pt.src)
-            play = cls._render_navpoints(np, pt.children, play)
-        return play
+    def _render_navpoint_str(cls, pt: NavPoint, order: int) -> tuple[int, list[str]]:
+        lines: list[str] = []
+        # open navPoint
+        lines.append(f'<navPoint id="{pt.id}" playOrder="{order}">')
+        order += 1
+        # label and content
+        lines.append(f"<navLabel><text>{pt.label}</text></navLabel>")
+        lines.append(f'<content src="{pt.src}"/>')
+        # children
+        for child in pt.children:
+            order, child_lines = cls._render_navpoint_str(child, order)
+            lines.extend(child_lines)
+        # close
+        lines.append("</navPoint>")
+        return order, lines
 
 
 @dataclass
@@ -318,86 +243,55 @@ class OpfDocument(EpubResource):
         """
         now_iso = datetime.now(UTC).replace(microsecond=0).isoformat()
 
-        # <package> root
-        package = PKG.package(**OPF_PKG_ATTRIB)
-
-        # <metadata>
-        metadata = PKG.metadata()
-        package.append(metadata)
-
-        # modified timestamp
-        modified = PKG.meta(property="dcterms:modified")
-        modified.text = now_iso
-        metadata.append(modified)
-
-        # mandatory DC elements
-        id_el = DC.identifier(id="id")
-        id_el.text = self.uid
-        title_el = DC.title()
-        title_el.text = self.title
-        lang_el = DC.language()
-        lang_el.text = self.language
-        metadata.extend([id_el, title_el, lang_el])
-
-        # optional DC elements
+        # metadata block
+        meta_lines: list[str] = []
+        meta_lines.append(f'<meta property="dcterms:modified">{now_iso}</meta>')
+        meta_lines.append(f'<dc:identifier id="id">{self.uid}</dc:identifier>')
+        meta_lines.append(f"<dc:title>{self.title}</dc:title>")
+        meta_lines.append(f"<dc:language>{self.language}</dc:language>")
         if self.author:
-            creator = DC.creator(id="creator")
-            creator.text = self.author
-            metadata.append(creator)
+            meta_lines.append(f'<dc:creator id="creator">{self.author}</dc:creator>')
         if self.description:
-            desc = DC.description()
-            desc.text = self.description
-            metadata.append(desc)
+            meta_lines.append(f"<dc:description>{self.description}</dc:description>")
         if self.subject:
-            subj = DC.subject()
-            subj.text = ",".join(self.subject)
-            metadata.append(subj)
+            joined = ",".join(self.subject)
+            meta_lines.append(f"<dc:subject>{joined}</dc:subject>")
         if self.include_cover and self._cover_item:
-            cover_meta = PKG.meta(name="cover", content=self._cover_item.id)
-            metadata.append(cover_meta)
+            meta_lines.append(f'<meta name="cover" content="{self._cover_item.id}"/>')
+        metadata = "\n".join(meta_lines)
 
-        # <manifest>
-        manifest_el = PKG.manifest()
+        # manifest block
+        man_lines: list[str] = []
         for item in self.manifest:
-            attrs = {
-                "id": item.id,
-                "href": item.href,
-                "media-type": item.media_type,
-            }
-            if item.properties:
-                attrs["properties"] = item.properties
-            manifest_el.append(PKG.item(**attrs))
-        package.append(manifest_el)
-
-        # <spine>
-        spine_attrs = {}
-        if self._toc_item:
-            spine_attrs["toc"] = self._toc_item.id
-        spine_el = PKG.spine(**spine_attrs)
-        for ref in self.spine:
-            attrs = {"idref": ref.idref}
-            if ref.properties:
-                attrs["properties"] = ref.properties
-            spine_el.append(PKG.itemref(**attrs))
-        package.append(spine_el)
-
-        # optional <guide> for cover
-        if self.include_cover and self._cover_doc:
-            guide_el = PKG.guide()
-            guide_el.append(
-                PKG.reference(
-                    type="cover",
-                    title="Cover",
-                    href=self._cover_doc.href,
-                )
+            props = f' properties="{item.properties}"' if item.properties else ""
+            man_lines.append(
+                f'<item id="{item.id}" href="{item.href}" media-type="{item.media_type}"{props}/>'  # noqa: E501
             )
-            package.append(guide_el)
+        manifest_items = "\n".join(man_lines)
 
-        xml_bytes = etree.tostring(
-            package,
-            xml_declaration=True,
-            encoding="utf-8",
-            pretty_print=PRETTY_PRINT_FLAG,
+        # spine block
+        toc_attr = f' toc="{self._toc_item.id}"' if self._toc_item else ""
+        spine_lines: list[str] = []
+        for ref in self.spine:
+            props = f' properties="{ref.properties}"' if ref.properties else ""
+            spine_lines.append(f'    <itemref idref="{ref.idref}"{props}/>')
+        spine_items = "\n".join(spine_lines)
+
+        # guide block
+        if self.include_cover and self._cover_doc:
+            guide_section = (
+                "  <guide>\n"
+                f'    <reference type="cover" title="Cover" href="{self._cover_doc.href}"/>\n'  # noqa: E501
+                "  </guide>\n"
+            )
+        else:
+            guide_section = ""
+
+        raw = OPF_TEMPLATE.format(
+            metadata=metadata,
+            manifest_items=manifest_items,
+            spine_toc=toc_attr,
+            spine_items=spine_items,
+            guide_section=guide_section,
         )
-        xml_string: str = xml_bytes.decode("utf-8")
-        return xml_string
+        return raw

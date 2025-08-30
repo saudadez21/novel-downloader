@@ -2890,7 +2890,7 @@ def load_json(path: Path) -> dict[str, Any]:
 # --------------------------------------------------
 # Download & image helpers
 # --------------------------------------------------
-def sleep_with_random_delay(
+def jitter_sleep(
     base: float,
     add_spread: float = 0.0,
     mul_spread: float = 1.0,
@@ -2923,7 +2923,7 @@ def download_image(
     resp = SESSION.get(url, timeout=10)
     resp.raise_for_status()
     dest.write_bytes(resp.content)
-    sleep_with_random_delay(1.0, add_spread=0.5)
+    jitter_sleep(1.0, add_spread=0.5)
     return dest
 
 # -------------------------------------------------------------------

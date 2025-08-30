@@ -14,11 +14,9 @@ from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 
-from novel_downloader.models import LogLevel
-
 from .constants import LOGGER_DIR, LOGGER_NAME
 
-LOG_LEVELS: dict[LogLevel, int] = {
+LOG_LEVELS: dict[str, int] = {
     "DEBUG": logging.DEBUG,
     "INFO": logging.INFO,
     "WARNING": logging.WARNING,
@@ -28,19 +26,16 @@ LOG_LEVELS: dict[LogLevel, int] = {
 
 def setup_logging(
     log_filename_prefix: str | None = None,
-    log_level: LogLevel | None = None,
+    log_level: str | None = None,
     log_dir: str | Path | None = None,
 ) -> logging.Logger:
     """
     Create and configure a logger for both console and rotating file output.
 
     :param log_filename_prefix: Prefix for the log file name.
-                                If None, will use the last part of `logger_name`.
-    :param log_level: Minimum log level to show in console:
-                      "DEBUG", "INFO", "WARNING", or "ERROR".
-                      Defaults to "INFO" if not specified.
+    :param log_level: Minimum log level to show in console
+                        ("DEBUG", "INFO", "WARNING", "ERROR")
     :param log_dir: Directory where log files will be saved.
-                    Defaults to "./logs" if not specified.
     :return: A fully configured logger instance.
     """
     ft_logger = logging.getLogger("fontTools.ttLib.tables._p_o_s_t")
@@ -48,12 +43,8 @@ def setup_logging(
     ft_logger.propagate = False
 
     # Determine console level (default INFO)
-    level_str: LogLevel = log_level or "INFO"
-    console_level = LOG_LEVELS.get(level_str)
-    if console_level is None:
-        raise ValueError(
-            f"Invalid log level: {level_str}. Must be one of {list(LOG_LEVELS.keys())}"
-        )
+    level_str: str = log_level or "INFO"
+    console_level: int = LOG_LEVELS.get(level_str) or logging.INFO
 
     # Resolve log file path
     log_path = Path(log_dir) if log_dir else LOGGER_DIR

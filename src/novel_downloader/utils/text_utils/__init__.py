@@ -3,13 +3,7 @@
 novel_downloader.utils.text_utils
 ---------------------------------
 
-Utility modules for text formatting, font mapping, cleaning, and diff display.
-
-Submodules:
-- diff_display: Generate inline diffs with aligned character markers
-- numeric_conversion: Convert between Chinese and Arabic numerals
-- text_cleaner: Text cleaning and normalization utilities
-- truncate_utils: Text truncation and content prefix generation
+Utility modules for text formatting, cleaning, and diff display.
 """
 
 __all__ = [

@@ -19,7 +19,7 @@ from urllib3.util.retry import Retry
 
 from .constants import DEFAULT_HEADERS
 from .file_utils import sanitize_filename
-from .file_utils.io import _get_non_conflicting_path, _write_file
+from .file_utils.io import _get_non_conflicting_path, write_file
 
 logger = logging.getLogger(__name__)
 _DEFAULT_CHUNK_SIZE = 8192  # 8KB per chunk for streaming downloads
@@ -150,7 +150,7 @@ def download(
                 save_path.unlink(missing_ok=True)
                 return None
         else:
-            return _write_file(
+            return write_file(
                 content=resp.content,
                 filepath=save_path,
                 write_mode="wb",

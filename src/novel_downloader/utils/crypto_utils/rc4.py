@@ -3,6 +3,7 @@
 novel_downloader.utils.crypto_utils.rc4
 ---------------------------------------
 
+RC4 stream cipher for simple text encryption and decryption.
 """
 
 import base64
@@ -19,16 +20,11 @@ def rc4_crypt(
     Encrypt or decrypt data using RC4 and Base64.
 
     :param key: RC4 key (will be encoded using the specified encoding).
-    :type key: str
     :param data: Plain-text (for 'encrypt') or Base64 cipher-text (for 'decrypt').
-    :type data: str
     :param mode: Operation mode, either 'encrypt' or 'decrypt'. Defaults to 'encrypt'.
-    :type mode: str, optional
     :param encoding: Character encoding for key and returned string. Defaults 'utf-8'.
-    :type encoding: str, optional
 
     :return: Base64 cipher-text (for encryption) or decoded plain-text (for decryption).
-    :rtype: str
 
     :raises ValueError: If mode is not 'encrypt' or 'decrypt'.
     """

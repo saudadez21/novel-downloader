@@ -24,7 +24,9 @@ from novel_downloader.models import (
     site_keys=["qbtr"],
 )
 class QbtrParser(BaseParser):
-    """Parser for 全本同人小说 book pages."""
+    """
+    Parser for 全本同人小说 book pages.
+    """
 
     BASE_URL = "https://www.qbtr.cc"
 
@@ -33,12 +35,6 @@ class QbtrParser(BaseParser):
         html_list: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        """
-        Parse a book info page and extract metadata and chapter structure.
-
-        :param html_list: Raw HTML of the book info page.
-        :return: Parsed metadata and chapter structure as a dictionary.
-        """
         if not html_list:
             return None
 
@@ -102,13 +98,6 @@ class QbtrParser(BaseParser):
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        """
-        Parse a single chapter page and extract clean text or simplified HTML.
-
-        :param html_list: Raw HTML of the chapter page.
-        :param chapter_id: Identifier of the chapter being parsed.
-        :return: Cleaned chapter content as plain text or minimal HTML.
-        """
         if not html_list:
             return None
 

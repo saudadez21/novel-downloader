@@ -48,7 +48,7 @@ try:
         AES-CBC decrypt + PKCS#7 unpad (PyCryptodome).
 
         :param key: AES key (16/24/32 bytes)
-        :param iv:  Initialization vector (16 bytes)
+        :param iv: Initialization vector (16 bytes)
         :param data: Ciphertext, length multiple of 16
         :return: Plaintext bytes (unpadded)
         :raises TypeError, ValueError: on invalid inputs
@@ -76,7 +76,7 @@ except ImportError:
         AES-CBC decrypt + PKCS#7 unpad (handled by AES_CBC internally).
 
         :param key: AES key (16/24/32 bytes)
-        :param iv:  Initialization vector (16 bytes)
+        :param iv: Initialization vector (16 bytes)
         :param data: Ciphertext, length multiple of 16
         :return: Plaintext bytes (unpadded)
         :raises TypeError, ValueError: on invalid inputs

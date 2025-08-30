@@ -6,8 +6,6 @@ novel_downloader.core.searchers.tongrenquan
 """
 
 import logging
-import re
-from urllib.parse import urljoin
 
 from lxml import html
 
@@ -29,12 +27,6 @@ class TongrenquanSearcher(BaseSearcher):
 
     @classmethod
     async def _fetch_html(cls, keyword: str) -> str:
-        """
-        Fetch raw HTML from Tongrenquan's search page.
-
-        :param keyword: The search term to query on Tongrenquan.
-        :return: HTML text of the search results page, or an empty string on fail.
-        """
         keyboard = cls._quote(keyword, encoding="gbk", errors="replace")
         show = "title"
         classid = "0"
@@ -59,41 +51,44 @@ class TongrenquanSearcher(BaseSearcher):
 
     @classmethod
     def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
-        """
-        Parse raw HTML from Tongrenquan search results into list of SearchResult.
-
-        :param html_str: Raw HTML string from Tongrenquan search results page.
-        :param limit: Maximum number of results to return, or None for all.
-        :return: List of SearchResult dicts.
-        """
         doc = html.fromstring(html_str)
         rows = doc.xpath('//div[@class="books m-cols"]/div[@class="bk"]')
         results: list[SearchResult] = []
 
         for idx, row in enumerate(rows):
+            href = cls._first_str(row.xpath(".//h3/a[1]/@href"))
+            if not href:
+                continue
+
             if limit is not None and idx >= limit:
                 break
-            # Title and book_id
-            link_elem = row.xpath(".//h3/a")[0]
-            href = link_elem.get("href", "").strip()
-            m = re.match(r"^/([^/]+)/(\d+)\.html$", href)
-            book_id = m.group(2) if m else ""
-            if not book_id:
-                continue
-            book_url = cls.BASE_URL + href
 
-            src_nodes = row.xpath('.//div[@class="pic"]//img/@src')
-            rel_src = src_nodes[0].strip() if src_nodes else ""
-            cover_url = urljoin(cls.BASE_URL, rel_src) if rel_src else ""
+            # '/tongren/9302.html' -> "9302"
+            book_id = href.split("/")[-1].split(".")[0]
+            book_url = cls._abs_url(href)
 
-            title = link_elem.text_content().strip()
+            cover_rel = cls._first_str(
+                row.xpath("./div[@class='pic']/a[1]/img[1]/@src")
+            )
+            cover_url = cls._abs_url(cover_rel) if cover_rel else ""
 
-            author_text = row.xpath('string(.//div[@class="booknews"]/text())').strip()
-            author = author_text.replace("作者：", "").strip()
+            title = cls._first_str(
+                row.xpath("./div[@class='bk_right']/h3/a[1]//text()")
+            )
 
-            update_date = row.xpath(
-                'string(.//div[@class="booknews"]/label[@class="date"])'
-            ).strip()
+            author = (
+                cls._first_str(
+                    row.xpath("./div[@class='bk_right']/div[@class='booknews']/text()"),
+                    replaces=[("作者：", "")],
+                )
+                or "-"
+            )
+
+            update_date = cls._first_str(
+                row.xpath(
+                    "./div[@class='bk_right']/div[@class='booknews']/label[@class='date']/text()"
+                )
+            )
 
             # Compute priority
             prio = cls.priority + idx

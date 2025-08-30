@@ -9,13 +9,14 @@ into a single `.txt` file. Intended for use by `CommonExporter`.
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from novel_downloader.core.exporters.txt_util import (
     build_txt_chapter,
     build_txt_header,
 )
-from novel_downloader.utils import get_cleaner, save_as_txt
+from novel_downloader.utils import get_cleaner, write_file
 
 if TYPE_CHECKING:
     from .main_exporter import CommonExporter
@@ -24,13 +25,12 @@ if TYPE_CHECKING:
 def common_export_as_txt(
     exporter: CommonExporter,
     book_id: str,
-) -> None:
+) -> Path | None:
     """
     Export a novel as a single text file by merging all chapter data.
 
     Steps:
-      1. Load book metadata (title, author, summary, word count, update time,
-         volumes, and chapters).
+      1. Load book metadata.
       2. For each volume:
          a. Append the volume title.
          b. Batch-fetch all chapters in that volume to minimize SQLite calls.
@@ -55,7 +55,7 @@ def common_export_as_txt(
     # --- Load book_info.json ---
     book_info = exporter._load_book_info(book_id)
     if not book_info:
-        return
+        return None
 
     # --- Compile chapters ---
     parts: list[str] = []
@@ -84,7 +84,7 @@ def common_export_as_txt(
                 )
                 continue
 
-            chap_title = cleaner.clean_title(chap_meta.get("title", ""))
+            chap_title = chap_meta.get("title", "")
             data = chap_map.get(chap_id)
             if not data:
                 exporter.logger.info(
@@ -133,9 +133,14 @@ def common_export_as_txt(
     out_path = out_dir / out_name
 
     # --- Save final text ---
-    result = save_as_txt(content=final_text, filepath=out_path)
+    result = write_file(
+        content=final_text,
+        filepath=out_path,
+        write_mode="w",
+        on_exist="overwrite",
+    )
     if result:
         exporter.logger.info("%s Novel saved to: %s", TAG, out_path)
     else:
         exporter.logger.error("%s Failed to write novel to %s", TAG, out_path)
-    return
+    return result

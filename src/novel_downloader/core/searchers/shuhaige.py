@@ -7,7 +7,6 @@ novel_downloader.core.searchers.shuhaige
 
 import logging
 import time
-from urllib.parse import urljoin
 
 from lxml import html
 
@@ -29,12 +28,6 @@ class ShuhaigeSearcher(BaseSearcher):
 
     @classmethod
     async def _fetch_html(cls, keyword: str) -> str:
-        """
-        Fetch raw HTML from Shuhaige's search page.
-
-        :param keyword: The search term to query on Shuhaige.
-        :return: HTML text of the search results page, or an empty string on fail.
-        """
         data = {
             "searchtype": "all",
             "searchkey": keyword,
@@ -65,48 +58,51 @@ class ShuhaigeSearcher(BaseSearcher):
 
     @classmethod
     def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
-        """
-        Parse raw HTML from Shuhaige search results into list of SearchResult.
-
-        :param html_str: Raw HTML string from Shuhaige search results page.
-        :param limit: Maximum number of results to return, or None for all.
-        :return: List of SearchResult dicts.
-        """
         doc = html.fromstring(html_str)
         rows = doc.xpath('//div[@id="sitembox"]/dl')
         results: list[SearchResult] = []
 
         for idx, row in enumerate(rows):
+            href = cls._first_str(row.xpath("./dt/a[1]/@href")) or cls._first_str(
+                row.xpath("./dd/h3/a[1]/@href")
+            )
+            if not href:
+                continue
+
             if limit is not None and idx >= limit:
                 break
 
-            # Book main link & cover
-            cover_a = row.xpath("./dt/a")[0]
-            book_url = urljoin(cls.BASE_URL, cover_a.get("href"))
-            cover_img = cover_a.xpath("./img")[0]
-            cover_url = cover_img.get("src")
-            title = cover_img.get("alt")
+            book_id = href.strip("/").split("/")[0]
+            book_url = cls._abs_url(href)
 
-            # Book ID from URL
-            book_id = cover_a.get("href").strip("/").split("/")[0]
+            title = cls._first_str(row.xpath("./dd/h3/a[1]//text()")) or cls._first_str(
+                row.xpath("./dt/a[1]/img[1]/@alt")
+            )
 
-            # h3 title link (sometimes same as cover link)
-            h3_title = row.xpath("./dd/h3/a/text()")
-            if h3_title:
-                title = h3_title[0].strip()
+            cover_rel = cls._first_str(row.xpath("./dt/a[1]/img[1]/@src"))
+            cover_url = cls._abs_url(cover_rel) if cover_rel else ""
 
-            # Other info: author, status, category, word count
-            other_dd = row.xpath('./dd[@class="book_other"]')[0]
-            author = other_dd.xpath(".//span")[0].text.strip()
-            # status = other_dd.xpath('.//span')[1].text.strip()
-            # category = other_dd.xpath('.//span')[2].text.strip()
-            word_count = other_dd.xpath(".//span")[3].text.strip()
+            author = (
+                cls._first_str(row.xpath("./dd[@class='book_other'][1]/span[1]/text()"))
+                or "-"
+            )
+            word_count = (
+                cls._first_str(row.xpath("./dd[@class='book_other'][1]/span[4]/text()"))
+                or "-"
+            )
 
-            # Latest chapter & update date
-            latest_dd = row.xpath('./dd[@class="book_other"]')[-1]
-            latest_chapter_link = latest_dd.xpath(".//a")[0]
-            latest_chapter = latest_chapter_link.text.strip()
-            update_date = latest_dd.xpath(".//span/text()")[0].strip()
+            latest_chapter = (
+                cls._first_str(
+                    row.xpath("./dd[@class='book_other'][last()]/a[1]//text()")
+                )
+                or "-"
+            )
+            update_date = (
+                cls._first_str(
+                    row.xpath("./dd[@class='book_other'][last()]/span[1]//text()")
+                )
+                or "-"
+            )
 
             # Compute priority
             prio = cls.priority + idx

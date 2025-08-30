@@ -5,7 +5,6 @@ novel_downloader.core.parsers.i25zw
 
 """
 
-import re
 from typing import Any
 
 from lxml import html
@@ -24,19 +23,15 @@ from novel_downloader.models import (
     site_keys=["i25zw"],
 )
 class I25zwParser(BaseParser):
-    """Parser for 25中文网 book-info pages."""
+    """
+    Parser for 25中文网 book-info pages.
+    """
 
     def parse_book_info(
         self,
         html_list: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        """
-        Parse a book info page and extract metadata and chapter structure.
-
-        :param html_list: Raw HTML of the book info pages.
-        :return: Parsed metadata and chapter structure as a dictionary.
-        """
         if len(html_list) < 2:
             return None
 
@@ -79,8 +74,8 @@ class I25zwParser(BaseParser):
         for a in dds:
             url = a.get("href", "").strip()
             title = a.text_content().strip()
-            m = re.search(r"/(\d+)\.html$", url)
-            chapter_id = m.group(1) if m else ""
+            # '/311006/252845677.html' -> '252845677'
+            chapter_id = url.split("/")[-1].split(".")[0]
             chapters.append(
                 {
                     "title": title,
@@ -109,13 +104,6 @@ class I25zwParser(BaseParser):
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        """
-        Parse a single chapter page and extract clean text or simplified HTML.
-
-        :param html_list: Raw HTML of the chapter page.
-        :param chapter_id: Identifier of the chapter being parsed.
-        :return: Cleaned chapter content as plain text or minimal HTML.
-        """
         if not html_list:
             return None
 

@@ -27,12 +27,6 @@ class Xs63bSearcher(BaseSearcher):
 
     @classmethod
     async def _fetch_html(cls, keyword: str) -> str:
-        """
-        Fetch raw HTML from Xs63b's search page.
-
-        :param keyword: The search term to query on Xs63b.
-        :return: HTML text of the search results page, or an empty string on fail.
-        """
         headers = {
             "Host": "www.xs63b.com",
             "Origin": "https://www.xs63b.com",
@@ -59,33 +53,30 @@ class Xs63bSearcher(BaseSearcher):
 
     @classmethod
     def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
-        """
-        Parse raw HTML from Xs63b search results into list of SearchResult.
-
-        :param html_str: Raw HTML string from Xs63b search results page.
-        :param limit: Maximum number of results to return, or None for all.
-        :return: List of SearchResult dicts.
-        """
         doc = html.fromstring(html_str)
         rows = doc.xpath("//div[@class='toplist']/ul/li")
         results: list[SearchResult] = []
 
         for idx, row in enumerate(rows):
+            href = cls._first_str(row.xpath(".//p[@class='s1']/a[1]/@href"))
+            if not href:
+                continue
+
             if limit is not None and idx >= limit:
                 break
 
-            # title & URL (strip <em> highlights using XPath string())
-            a_node = row.xpath(".//p[@class='s1']/a")
-            book_url = a_node[0].get("href") if a_node else ""
-            title = str(row.xpath("string(.//p[@class='s1']//a)")).strip()
+            # 'https://www.xs63b.com/{catalog}/{name}/' -> "{catalog}-{name}"
+            book_id = href.split("xs63b.com", 1)[-1].strip(" /").replace("/", "-")
+            book_url = cls._abs_url(href)
 
-            latest_chapter = cls._first_str(
-                row.xpath(".//p[@class='s2']//a/text()")
-            ).strip()
-            author = cls._first_str(row.xpath(".//p[@class='s3']/text()"))
-            word_count = cls._first_str(row.xpath(".//p[@class='s4']/text()"))
-            update_date = cls._first_str(row.xpath(".//p[@class='s6']/text()"))
-            book_id = cls._book_id_from_url(book_url)
+            title = "".join(row.xpath(".//p[@class='s1']//a//text()"))
+
+            latest_chapter = (
+                cls._first_str(row.xpath(".//p[@class='s2']//a/text()")) or "-"
+            )
+            author = cls._first_str(row.xpath(".//p[@class='s3']/text()")) or "-"
+            word_count = cls._first_str(row.xpath(".//p[@class='s4']/text()")) or "-"
+            update_date = cls._first_str(row.xpath(".//p[@class='s6']/text()")) or "-"
 
             # Compute priority
             prio = cls.priority + idx
@@ -111,8 +102,3 @@ class Xs63bSearcher(BaseSearcher):
         doc = html.fromstring(html_str)
         vals = doc.xpath("//div[@id='search']//input[@name='_token']/@value")
         return vals[0].strip() if vals else ""
-
-    @classmethod
-    def _book_id_from_url(cls, url: str) -> str:
-        tail = url.split("xs63b.com", 1)[-1]
-        return tail.strip(" /").replace("/", "-")

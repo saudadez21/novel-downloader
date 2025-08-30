@@ -3,45 +3,36 @@
 novel_downloader.utils
 ----------------------
 
+A collection of helper functions and classes.
 """
 
 __all__ = [
     "ChapterStorage",
     "TextCleaner",
-    "resolve_cookies",
-    "parse_cookie_expires",
-    "find_cookie_value",
+    "parse_cookies",
+    "get_cookie_value",
     "rc4_crypt",
     "sanitize_filename",
-    "save_as_json",
-    "save_as_txt",
-    "read_text_file",
-    "read_json_file",
-    "read_binary_file",
+    "write_file",
     "download",
     "get_cleaner",
     "content_prefix",
     "truncate_half_lines",
     "diff_inline_display",
-    "calculate_time_difference",
-    "async_sleep_with_random_delay",
-    "sleep_with_random_delay",
+    "time_diff",
+    "async_jitter_sleep",
+    "jitter_sleep",
 ]
 
 from .chapter_storage import ChapterStorage
 from .cookies import (
-    find_cookie_value,
-    parse_cookie_expires,
-    resolve_cookies,
+    get_cookie_value,
+    parse_cookies,
 )
 from .crypto_utils import rc4_crypt
 from .file_utils import (
-    read_binary_file,
-    read_json_file,
-    read_text_file,
     sanitize_filename,
-    save_as_json,
-    save_as_txt,
+    write_file,
 )
 from .network import download
 from .text_utils import (
@@ -52,7 +43,7 @@ from .text_utils import (
     truncate_half_lines,
 )
 from .time_utils import (
-    async_sleep_with_random_delay,
-    calculate_time_difference,
-    sleep_with_random_delay,
+    async_jitter_sleep,
+    jitter_sleep,
+    time_diff,
 )

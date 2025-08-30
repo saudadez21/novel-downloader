@@ -9,16 +9,6 @@ from typing import Any, NotRequired, TypedDict
 
 
 class ChapterDict(TypedDict):
-    """
-    TypedDict for a novel chapter.
-
-    Fields:
-        id      -- Unique chapter identifier
-        title   -- Chapter title
-        content -- Chapter text
-        extra   -- Arbitrary metadata (e.g. author remarks, timestamps)
-    """
-
     id: str
     title: str
     content: str

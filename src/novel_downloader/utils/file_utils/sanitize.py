@@ -5,10 +5,6 @@ novel_downloader.utils.file_utils.sanitize
 
 Utility functions for cleaning and validating filenames for safe use
 on different operating systems.
-
-This module provides a cross-platform `sanitize_filename` function
-that replaces or removes illegal characters from filenames, trims
-lengths, and avoids reserved names on Windows systems.
 """
 
 __all__ = ["sanitize_filename"]

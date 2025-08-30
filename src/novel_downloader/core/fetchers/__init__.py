@@ -3,10 +3,7 @@
 novel_downloader.core.fetchers
 ------------------------------
 
-This package provides fetcher implementations for different novel platforms.
-Each submodule corresponds to a specific site and encapsulates the logic needed
-to perform network interactions, such as logging in, sending requests,
-or interacting with browser/session-based sources.
+Fetcher implementations for retrieving raw data and HTML from various novel sources
 """
 
 __all__ = [
@@ -44,7 +41,7 @@ __all__ = [
 ]
 
 from .aaatxt import AaatxtSession
-from .biquge import BiqugeSession
+from .b520 import BiqugeSession
 from .biquyuedu import BiquyueduSession
 from .dxmwx import DxmwxSession
 from .eightnovel import EightnovelSession

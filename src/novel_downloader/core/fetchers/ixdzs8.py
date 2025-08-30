@@ -19,7 +19,7 @@ from novel_downloader.models import FetcherConfig
 )
 class Ixdzs8Session(BaseSession):
     """
-    A session class for interacting with the Ixdzs8 (ixdzs8.com) novel website.
+    A session class for interacting with the 爱下电子书 (ixdzs8.com) novel website.
     """
 
     BOOK_INFO_URL = "https://ixdzs8.com/read/{book_id}/"
@@ -43,8 +43,10 @@ class Ixdzs8Session(BaseSession):
         """
         Fetch the raw HTML of the book info page asynchronously.
 
+        Order: [info, catalog]
+
         :param book_id: The book identifier.
-        :return: The page content as a string.
+        :return: The page content as string list.
         """
         url = self.book_info_url(book_id=book_id)
         data = {"bid": book_id}
@@ -66,7 +68,7 @@ class Ixdzs8Session(BaseSession):
 
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :return: The chapter content as a string.
+        :return: The page content as string list.
         """
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
         return [await self.fetch_verified_html(url, **kwargs)]

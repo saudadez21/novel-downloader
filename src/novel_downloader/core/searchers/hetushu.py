@@ -6,8 +6,6 @@ novel_downloader.core.searchers.hetushu
 """
 
 import logging
-import re
-from urllib.parse import urljoin
 
 from lxml import html
 
@@ -29,12 +27,6 @@ class HetushuSearcher(BaseSearcher):
 
     @classmethod
     async def _fetch_html(cls, keyword: str) -> str:
-        """
-        Fetch raw HTML from Hetushu's search page.
-
-        :param keyword: The search term to query on Hetushu.
-        :return: HTML text of the search results page, or an empty string on fail.
-        """
         params = {"keyword": keyword}
         headers = {
             "Referer": "https://www.hetushu.com/",
@@ -54,39 +46,31 @@ class HetushuSearcher(BaseSearcher):
 
     @classmethod
     def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
-        """
-        Parse raw HTML from Hetushu search results into list of SearchResult.
-
-        :param html_str: Raw HTML string from Hetushu search results page.
-        :param limit: Maximum number of results to return, or None for all.
-        :return: List of SearchResult dicts.
-        """
         doc = html.fromstring(html_str)
         rows = doc.xpath('//dl[@class="list" and @id="body"]/dd')
         results: list[SearchResult] = []
 
         for idx, row in enumerate(rows):
+            href = cls._first_str(row.xpath(".//h4/a/@href"))
+            if not href:
+                continue
+
             if limit is not None and idx >= limit:
                 break
 
-            # Extract the href and derive book_id
-            href = row.xpath(".//h4/a/@href")[0].strip()
-            match = re.search(r"/book/(\d+)/", href)
-            book_id = match.group(1) if match else ""
-            if not book_id:
-                continue
-            book_url = cls.BASE_URL + href
+            # "/book/7631/index.html" -> "7631"
+            book_id = href.rstrip("/index.html").split("/")[-1]
+            book_url = cls._abs_url(href)
 
-            # Title of the work
-            title = row.xpath(".//h4/a/text()")[0].strip()
+            title = cls._first_str(row.xpath(".//h4/a/text()"))
 
             # Author from the adjacent <span>, strip "/" delimiters
-            author = row.xpath(".//h4/span/text()")[0].strip().strip("/").strip()
+            # e.x. " / 风行云亦行 / "
+            author_raw = cls._first_str(row.xpath(".//h4/span/text()"))
+            author = author_raw.strip("/").strip()
 
-            cover_nodes = row.xpath(".//a/img/@src")
-            cover_url = (
-                urljoin(cls.BASE_URL, cover_nodes[0].strip()) if cover_nodes else ""
-            )
+            cover_rel = cls._first_str(row.xpath(".//a/img/@src"))
+            cover_url = cls._abs_url(cover_rel) if cover_rel else ""
 
             # Compute priority
             prio = cls.priority + idx

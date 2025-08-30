@@ -27,12 +27,6 @@ class TtkanSearcher(BaseSearcher):
 
     @classmethod
     async def _fetch_html(cls, keyword: str) -> str:
-        """
-        Fetch raw HTML from Ttkan's search page.
-
-        :param keyword: The search term to query on Ttkan.
-        :return: HTML text of the search results page, or an empty string on fail.
-        """
         params = {"q": keyword}
         try:
             async with (await cls._http_get(cls.SEARCH_URL, params=params)) as resp:
@@ -47,13 +41,6 @@ class TtkanSearcher(BaseSearcher):
 
     @classmethod
     def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
-        """
-        Parse raw HTML from Ttkan search results into list of SearchResult.
-
-        :param html_str: Raw HTML string from Ttkan search results page.
-        :param limit: Maximum number of results to return, or None for all.
-        :return: List of SearchResult dicts.
-        """
         doc = html.fromstring(html_str)
         items = doc.xpath(
             '//div[contains(@class,"frame_body")]//div[@class="pure-g"]/div[contains(@class,"novel_cell")]'
@@ -63,31 +50,29 @@ class TtkanSearcher(BaseSearcher):
         results: list[SearchResult] = []
 
         for idx, item in enumerate(items):
+            href = cls._first_str(item.xpath(".//a[@href][1]/@href"))
+            if not href:
+                continue
+
             if limit is not None and len(results) >= limit:
                 break
 
             # link -> /novel/chapters/<book_id>
-            hrefs = item.xpath(".//a[@href]/@href")
-            href = hrefs[0].strip() if hrefs else ""
-            book_id = href.strip("/").split("/")[-1] if href else ""
-            if not book_id:
-                continue
-            book_url = cls.BASE_URL + href
+            book_id = href.strip("/").split("/")[-1]
+            book_url = cls._abs_url(href)
 
-            cover_nodes = item.xpath(".//amp-img/@src")
-            cover_url = cover_nodes[0].strip() if cover_nodes else ""
+            cover_rel = cls._first_str(item.xpath(".//amp-img/@src"))
+            cover_url = cls._abs_url(cover_rel) if cover_rel else ""
 
-            # title -> <h3> inside that link
-            titles = item.xpath(".//h3/text()")
-            title = titles[0].strip() if titles else ""
+            title = cls._first_str(item.xpath(".//h3/text()"))
 
-            # author -> <li> whose text starts with "作者："
-            author = item.xpath('.//li[starts-with(normalize-space(.),"作者")]/text()')
-            author_str = ""
-            if author:
-                txt = author[0].strip()
-                # split off the "作者：" label
-                author_str = txt.split("：", 1)[1].strip() if "：" in txt else txt
+            author = (
+                cls._first_str(
+                    item.xpath(".//li[starts-with(normalize-space(.),'作者')]/text()"),
+                    replaces=[("作者：", "")],
+                )
+                or "-"
+            )
 
             prio = cls.priority + idx
             results.append(
@@ -97,7 +82,7 @@ class TtkanSearcher(BaseSearcher):
                     book_url=book_url,
                     cover_url=cover_url,
                     title=title,
-                    author=author_str,
+                    author=author,
                     latest_chapter="-",
                     update_date="-",
                     word_count="-",
