@@ -55,7 +55,7 @@ login_required = false
 # 输出文件格式及相关选项
 [output.formats]
 make_txt = true                    # 是否生成完整 TXT 文件
-make_epub = false                  # 是否生成 EPUB
+make_epub = true                   # 是否生成 EPUB
 
 [output.naming]
 append_timestamp = false           # 在文件名中追加时间戳

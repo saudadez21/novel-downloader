@@ -17,20 +17,10 @@
 
 ```python
 class ChapterDict(TypedDict, total=True):
-    """
-    TypedDict for a novel chapter.
-
-    Fields:
-        id      -- Unique chapter identifier
-        title   -- Chapter title
-        content -- Chapter text
-        extra   -- Arbitrary metadata (e.g. author remarks, timestamps)
-    """
-
     id: str
     title: str
     content: str
-    extra: dict[str, Any]
+    extra: dict[str, Any]  # Arbitrary metadata (e.g. author remarks, timestamps)
 ```
 
 描述: 章节数据的结构化类型定义
@@ -69,12 +59,6 @@ class FetcherConfig:
 
 描述: 网页内容抓取相关参数配置
 
-示例:
-
-```python
-fetcher_cfg = FetcherConfig(mode="browser", headless=True)
-```
-
 ---
 
 ```python
@@ -94,12 +78,6 @@ class DownloaderConfig:
 
 描述: 下载流程相关参数配置
 
-示例:
-
-```python
-down_cfg = DownloaderConfig(skip_existing=False, mode="browser")
-```
-
 ---
 
 ```python
@@ -113,12 +91,6 @@ class ParserConfig:
 ```
 
 描述: 章节解析与 OCR/向量匹配相关配置
-
-示例:
-
-```python
-parser_cfg = ParserConfig(use_freq=True, gpu_id=0)
-```
 
 ---
 
@@ -141,12 +113,6 @@ class ExporterConfig:
 ```
 
 描述: 导出文件格式和切分策略配置
-
-示例:
-
-```python
-exp_cfg = ExporterConfig(make_epub=True)
-```
 
 ---
 

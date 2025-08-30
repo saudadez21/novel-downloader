@@ -1,90 +1,130 @@
 ## CLI 使用示例
 
-### 1. 下载小说
-
 支持的站点列表详见: [站点支持文档](./4-supported-sites.md)
 
-#### 1.1 显式指定配置文件 (优先级最高)
+### 目录
+
+- [CLI 使用示例](#cli-使用示例)
+  - [目录](#目录)
+  - [快速开始](#快速开始)
+  - [配置优先级](#配置优先级)
+    - [常见方式](#常见方式)
+  - [登录/鉴权](#登录鉴权)
+  - [全局用法与帮助](#全局用法与帮助)
+  - [子命令总览](#子命令总览)
+    - [1. download 子命令](#1-download-子命令)
+    - [2. search 子命令](#2-search-子命令)
+    - [3. export 子命令](#3-export-子命令)
+    - [4. config 子命令](#4-config-子命令)
+    - [5. clean 子命令](#5-clean-子命令)
+  - [附录 A: 术语与约定](#附录-a-术语与约定)
+
+### 快速开始
 
 ```bash
-# 使用自定义配置文件, 下载起点小说 '123456' 和 '654321'
-novel-cli --config "/path/to/custom.toml" download 123456 654321
+# 下载指定书籍 (默认站点: qidian)
+novel-cli download 1234567890
+
+# 指定站点下载 (例如 biquge)
+novel-cli download --site biquge 8_8187
+
+# 导出为 EPUB
+novel-cli export --format epub 88888
 ```
-
-#### 1.2 使用当前目录下的 `settings.toml`
-
-```bash
-# 在包含 ./settings.toml 的目录中运行 CLI 即可
-cd novel-folder
-novel-cli download 123456 654321
-```
-
-#### 1.3 使用已注册的全局配置
-
-```bash
-# 如果当前目录下没有 settings.toml, CLI 会尝试使用已注册的全局配置
-# 注册命令示例:
-# novel-cli config set-config ./path/to/settings.toml
-novel-cli download 123456 654321
-```
-
-> **登录提示说明**
-> 如果启用了 `login_required: true`, CLI 将检测当前是否已登录;
-> 若未登录, 将提示你在命令行中手动输入当前站点的有效 Cookie 信息或账户信息
 
 ---
 
-### 2. 全局选项
+### 配置优先级
+
+1. 命令行 `--config PATH`
+2. 当前目录 `./settings.toml`
+3. 已注册的全局配置 (通过 `config set-config` 设置)
+
+#### 常见方式
+
+* **显式指定配置 (优先级最高)**
+
+  ```bash
+  novel-cli --config "/path/to/settings.toml" download 123456 654321
+  ```
+
+* **使用当前目录的 `settings.toml`**
+
+  ```bash
+  cd novel-folder
+  novel-cli download 123456 654321
+  ```
+
+* **使用已注册的全局配置**
+
+  ```bash
+  # 先注册一次全局配置
+  novel-cli config set-config ./path/to/settings.toml
+  # 任意目录直接使用
+  novel-cli download 123456 654321
+  ```
+
+---
+
+### 登录/鉴权
+
+当配置启用 `login_required: true` 时, CLI 会检测登录状态; 若未登录, 将提示在命令行输入当前站点的有效 Cookie 或账号信息。
+
+---
+
+### 全局用法与帮助
 
 ```text
 novel-cli COMMAND [ARGS]...
 
 Options:
-  --help      显示此帮助信息并退出
+  --help    显示此帮助信息并退出
 ```
+
+> 所有子命令均支持 `--help` 查看对应帮助文本。
 
 ---
 
-### 3. 子命令一览
+### 子命令总览
 
 ```text
 Commands:
-    clean               清理缓存和配置文件
-    config              配置文件路径
-    download            下载小说
-    search              搜索小说
-    export              导出已下载的小说
+  download    下载小说
+  search      搜索小说
+  export      导出已下载的小说
+  config      管理配置与语言
+  clean       清理缓存与配置
 ```
 
 ---
 
-### 4. download 子命令
+#### 1. download 子命令
 
-按书籍 ID 下载完整小说, 支持从命令行或配置文件读取 ID:
+按书籍 ID 下载完整小说, 支持从命令行或配置文件读取 ID
+
+**Synopsis**
 
 ```bash
 novel-cli download [-h] [--site SITE] [--config CONFIG] [--start START] [--end END] [book_ids ...]
 ```
 
-**参数说明**:
+**Options**
 
-* `book_ids`: 要下载的书籍 ID (可选, 省略时将从配置文件读取)
-* `--site [qidian|biquge|...]`: 站点名称缩写, 默认 `qidian`
-* `--config`: 指定配置文件路径, 覆盖默认 `settings.toml` 配置
-* `--start`: 下载起始章节 ID (仅用于第一个书籍 ID)
-* `--end`: 下载结束章节 ID (包含在内, 仅用于第一个书籍 ID)
-* `--help`: 显示帮助信息
+* `book_ids ...`: 要下载的书籍 ID (可选, 省略时将从配置文件读取)
+* `--site SITE`: 站点键 (如 `qidian`, `biquge`, ...), 默认 `qidian`
+* `--start START`: 起始章节**唯一 ID** (仅用于第一个 `book_id`)
+* `--end`: 结束章节**唯一 ID**, **包含** (仅用于第一个 `book_id`)
 
-> CLI 中的 `--start` / `--end` 用于临时下载部分章节, 仅影响**第一个**命令行提供的 `book_id`。
+> `--start` / `--end` 用于临时下载部分章节, 仅影响**第一个**命令行提供的 `book_id`。
 >
-> `--start` 和 `--end` 接收的是章节的 **唯一 ID**, 并非 "第几章" 的序号。可参考 [`supported-sites.md`](./4-supported-sites.md) 内说明。
+> `--start` 和 `--end` 接收**章节唯一 ID**, 并非 "第几章" 的序号。可参考 [`supported-sites.md`](./4-supported-sites.md) 内说明。
 >
-> 若要配置更复杂的范围或忽略章节, 请使用配置文件中的结构化 `book_ids` 格式 (参见 [配置文件说明](./3-settings-schema.md))。
+> 需要复杂范围/忽略章节等, 请在配置文件使用结构化 `book_ids`; 参见 [配置文件说明](./3-settings-schema.md)。
 
-**示例**:
+**Examples**
 
 ```bash
-# 下载指定书籍 (默认 起点)
+# 下载指定起点小说的书籍
 novel-cli download 1234567890
 
 # 指定站点 (如 biquge)
@@ -97,27 +137,26 @@ novel-cli download --start 10001 --end 10200 1234567890
 novel-cli download
 ```
 
-查看完整支持站点列表: [`supported-sites.md`](./4-supported-sites.md)
-
 ---
 
-### 5. search 子命令
+#### 2. search 子命令
 
-按关键字搜索小说, 并根据用户选择开始下载:
+按关键字搜索小说
+
+**Synopsis**
 
 ```bash
 novel-cli search [-h] [--site SITE] [--config CONFIG] [--limit N] [--site-limit M] keyword
 ```
 
-**参数说明**:
+**Options**
 
-* `keyword`: 要搜索的关键字
-* `--site SITE`, `-s SITE`: 要搜索的站点键, 可多次指定, 默认搜索全部已支持站点
-* `--limit N`: 总体搜索结果数量上限, 默认为 `10`, 最小为 `1`
-* `--site-limit M`: 单站点搜索结果数量上限, 默认为 `5`, 最小为 `1`
-* `--config CONFIG`: 可选指定配置文件路径
+* `keyword`: 搜索关键字
+* `--site SITE`, `-s SITE`: 指定搜索站点, 可多次使用以指定多个站点, 不指定则搜索全部支持站点
+* `--limit N`: 总体结果上限 (最小 1), 默认为 `10`
+* `--site-limit M`: 单站点结果上限 (最小 1), 默认为 `5`
 
-**示例**:
+**Examples**
 
 ```bash
 # 搜索所有站点 (默认全部)
@@ -138,25 +177,26 @@ novel-cli search -s biquge -s qianbi 三体
 
 ---
 
-### 6. export 子命令
+#### 3. export 子命令
 
-导出已下载的小说为指定格式的文件:
+导出已下载的小说为指定格式
+
+**Synopsis**
 
 ```bash
-novel-cli export [OPTIONS] book_ids [book_ids ...]
+novel-cli export [-h] [--format FORMAT] [--site SITE] [--config CONFIG] book_id [book_ids ...]
 ```
 
-**参数说明**:
+**Options**
 
-* `book_ids`: 要导出的一个或多个小说 ID
-* `--format`: 导出格式, 可选值为 `txt`, `epub`, `all`, 默认 `all`
-* `--site SITE`: 网站来源 (如 `biquge`, `qidian`), 默认 `qidian`
-* `--config CONFIG`: 可选指定配置文件路径
+* `book_ids`: 要导出的一个或多个书籍 ID
+* `--format FORMAT`: 导出格式: `txt` / `epub` / `all`, 默认 `all`
+* `--site SITE`: 站点键 (如 `biquge`, `qidian`, ...), 默认 `qidian`
 
-**示例:**
+**Examples**
 
 ```bash
-# 导出为默认格式 (txt + epub)
+# 导出指定起点小说为默认格式 (txt + epub)
 novel-cli export 12345 23456
 
 # 指定导出格式为 EPUB
@@ -164,38 +204,35 @@ novel-cli export --format epub 88888
 
 # 指定站点来源并导出多本书
 novel-cli export --site biquge 12345 23456
-
-# 使用指定配置文件导出
-novel-cli export --config ./settings.toml 4321
 ```
 
-> **注意**: 必须提供至少一个 `book_ids`
+> 必须提供至少一个 `book_id`。
 
 ---
 
-### 7. config 子命令
+#### 4. config 子命令
 
-用于初始化和管理下载器设置, 包括切换语言、设置 Cookie、更新规则等:
+初始化和管理下载器设置, 包括切换语言等
+
+**Synopsis**
 
 ```bash
 novel-cli config COMMAND [ARGS]...
 ```
 
-**参数说明**:
+**Subcommands**
 
-* `init [--force]`: 在当前目录初始化默认配置文件
-* `set-lang LANG`: 在中文 (zh) 和英文 (en) 之间切换界面语言
-* `set-config PATH`: 设置并保存自定义 YAML 配置文件
-* `update-rules PATH`: 从 TOML/YAML/JSON 文件更新站点解析规则
-* `set-cookies [SITE] [COOKIES]`: 为指定站点设置 Cookie, 可省略参数交互输入
+* `init [--force]`: 在当前目录初始化默认配置文件 (`./settings.toml`); `--force` 覆盖已存在文件
+* `set-lang LANG`: 切换 CLI 语言 (`zh` / `en`)
+* `set-config PATH`: 注册自定义 TOML 为**全局配置**
 
-**示例:**
+**Examples**
 
 ```bash
 # 切换界面语言为英文
 novel-cli config set-lang en
 
-# 使用新的 settings.toml
+# 注册新的 settings.toml
 novel-cli config set-config ./settings.toml
 
 # 初始化默认配置到当前目录
@@ -207,26 +244,26 @@ novel-cli config init --force
 
 ---
 
-### 8. clean 子命令
+#### 5. clean 子命令
 
-清理下载器生成的本地缓存和全局配置文件:
+清理本地缓存与全局配置
+
+**Synopsis**
 
 ```bash
 novel-cli clean [OPTIONS]
 ```
 
-**参数说明**:
+**Options**
 
 * `--logs`: 清理日志目录 (`logs/`)
 * `--cache`: 清理脚本缓存与浏览器数据 (`js_script/`、`browser_data/`)
-* `--data`: 清理状态文件与 cookies (`state.json`)
+* `--data`: 清理状态文件与 Cookies
 * `--config`: 清理全局设置
-* `--models`: 清理模型缓存目录
-* `--all`: 清除所有配置、缓存、状态 (包括设置文件)
+* `--all`: **清除所有**配置、缓存、状态
 * `--yes`: 跳过确认提示
-* `--help`: 显示帮助信息并退出
 
-**示例:**
+**Examples**
 
 ```bash
 # 清理缓存目录和浏览器数据
@@ -242,10 +279,12 @@ novel-cli clean --all
 novel-cli clean --all --yes
 ```
 
-> **注意**: `--all` 会删除包括设置文件在内的所有本地数据, 请慎重使用!
+> **注意**: `--all` 会删除包括设置文件在内的所有本地数据, 请谨慎使用。
 
 ---
 
-> **提示**
->
-> * 所有子命令均支持 `--help` 查看帮助文本
+### 附录 A: 术语与约定
+
+* **SITE (站点键) **: 在命令中用于指明站点的短名称 (如 `qidian`, `biquge`, `qianbi`) 。完整列表见 [站点支持文档](./4-supported-sites.md)。
+* **章节唯一 ID**: 站点侧用于标识章节的 ID, **不是**连续的 "第 N 章" 序号; 在 `--start`/`--end` 中应传入此 ID。
+* **配置文件路径**: 若未显式传入 `--config`, CLI 会按「配置优先级」自动解析。
