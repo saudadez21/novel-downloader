@@ -9,10 +9,11 @@ Provides functionality to load Toml configuration files into Python dict
 import json
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeVar
 
 from novel_downloader.utils.constants import SETTING_FILE
 
+T = TypeVar("T")
 logger = logging.getLogger(__name__)
 
 
@@ -141,6 +142,21 @@ def load_config(
     except Exception as e:
         logger.warning("[config] Failed to load config file: %s", e)
     return {}
+
+
+def get_config_value(keys: list[str], default: T) -> T:
+    """
+    Safely retrieve a nested config value.
+    """
+    cur = load_config()
+    for i, k in enumerate(keys):
+        if not isinstance(cur, dict):
+            return default
+        if i == len(keys) - 1:
+            val = cur.get(k, default)
+            return val if isinstance(val, type(default)) else default
+        cur = cur.get(k, {})
+    return default
 
 
 def save_config(
