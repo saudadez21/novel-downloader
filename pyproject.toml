@@ -7,7 +7,7 @@ authors = [
 license = {file = "LICENSE"}
 readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">=3.11"
-keywords = ["novel", "web novel", "qidian", "biquge", "downloader", "cli", "ebook"]
+keywords = ["novel", "web novel", "qidian", "biquge", "ebook"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Environment :: Console",
@@ -26,7 +26,7 @@ dependencies = [
     "requests",
     "aiohttp",
     "lxml",
-    "platformdirs"
+    "platformdirs",
 ]
 
 [project.optional-dependencies]
