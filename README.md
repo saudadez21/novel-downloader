@@ -1,12 +1,12 @@
 # novel-downloader
 
-基于 [aiohttp](https://github.com/aio-libs/aiohttp) 的异步小说下载工具 / 库。支持断点续传、广告过滤与 TXT/EPUB 导出，提供 CLI 与 Web 图形界面。
+基于 [aiohttp](https://github.com/aio-libs/aiohttp) 的异步小说下载工具 / 库。支持断点续传、广告过滤与 TXT/EPUB 导出, 提供 CLI 与 Web 图形界面。
 
 > 运行要求: **Python 3.11+** (开发环境: Python 3.12)
 
 ## 功能特性
 
-* **稳定断点续传**: 中断后自动续传未完成任务
+* **可恢复下载**: 运行时自动检测本地已完成的部分, 跳过已下载内容
 * **多格式导出**: 合并所有章节为
   * `TXT`
   * `EPUB` (可选打包章节插图)
@@ -26,7 +26,7 @@
 pip install novel-downloader
 ```
 
-启用字体解密能力 (`decode_font`):
+启用字体解密功能 (`decode_font`):
 
 ```bash
 pip install "novel-downloader[font-recovery]"
@@ -45,7 +45,7 @@ pip install "novel-downloader[font-recovery]"
 novel-cli config init
 ```
 
-编辑生成的 `./settings.toml`，可修改 `request_interval`、`book_ids` 等配置 (参考 [settings.toml 配置说明](docs/3-settings-schema.md))
+编辑生成的 `./settings.toml`, 可修改 `request_interval`、`book_ids` 等配置 (参考 [settings.toml 配置说明](docs/3-settings-schema.md))
 
 ### 2. 命令行 (CLI)
 
