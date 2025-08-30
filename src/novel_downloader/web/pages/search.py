@@ -39,11 +39,11 @@ _SUPPORT_SITES = {
     "shuhaige": "书海阁小说网",
     "tongrenquan": "同人圈",
     "ttkan": "天天看小说",
-    "wanbengo": "完本神站",
+    # "wanbengo": "完本神站",
     "xiaoshuowu": "小说屋",
     "xiguashuwu": "西瓜书屋",
     "xs63b": "小说路上",
-    "xshbook": "小说虎",
+    # "xshbook": "小说虎",
 }
 
 _DEFAULT_TIMEOUT = 10.0
