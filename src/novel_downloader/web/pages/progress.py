@@ -6,6 +6,7 @@ novel_downloader.web.pages.progress_page
 Layout for active/history tasks with compact cards and status chips.
 """
 
+
 from nicegui import ui
 
 from novel_downloader.web.components import navbar
@@ -62,6 +63,14 @@ def _progress_block(t: DownloadTask) -> None:
             )
         else:
             ui.label(f"{t.chapters_done}/? · {suffix}").classes("text-xs text-grey-7")
+
+        if t.status == "completed" and t.exported_paths:
+            with ui.row().classes("w-full gap-2 mt-1"):
+                for key, p in t.exported_paths.items():
+                    url = f"/download/{p.name}?v={t.task_id}"
+                    ui.button(key, on_click=lambda e, url=url: ui.download(url)).props(
+                        "outline size=sm"
+                    )
 
 
 def _task_card(t: DownloadTask, *, active: bool) -> None:

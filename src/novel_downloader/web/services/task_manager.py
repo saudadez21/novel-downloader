@@ -192,7 +192,13 @@ class TaskManager:
                     task.status = "cancelled"
                     return
 
-                await asyncio.to_thread(exporter.export, task.book_id)
+                if task.is_cancelled():
+                    task.status = "cancelled"
+                    return
+
+                task.exported_paths = await asyncio.to_thread(
+                    exporter.export, task.book_id
+                )
 
                 if downloader_cfg.login_required and fetcher.is_logged_in:
                     await fetcher.save_state()
