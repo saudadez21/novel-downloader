@@ -17,7 +17,7 @@ from novel_downloader.models import FetcherConfig
 )
 class Quanben5Session(BaseSession):
     """
-    A session class for interacting with the Quanben5 (quanben5.com) novel website.
+    A session class for interacting with the 全本小说网 (quanben5.com) novel website.
     """
 
     BOOK_INFO_URL = "https://{base_url}/n/{book_id}/xiaoshuo.html"
@@ -45,7 +45,7 @@ class Quanben5Session(BaseSession):
         Fetch the raw HTML of the book info page asynchronously.
 
         :param book_id: The book identifier.
-        :return: The page content as a string.
+        :return: The page content as string list.
         """
         url = self.book_info_url(base_url=self.base_url, book_id=book_id)
         return [await self.fetch(url, **kwargs)]
@@ -61,7 +61,7 @@ class Quanben5Session(BaseSession):
 
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :return: The chapter content as a string.
+        :return: The page content as string list.
         """
         url = self.chapter_url(
             base_url=self.base_url, book_id=book_id, chapter_id=chapter_id

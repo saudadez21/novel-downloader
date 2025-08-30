@@ -42,7 +42,7 @@ __all__ = [
 ]
 
 from .aaatxt import AaatxtParser
-from .biquge import BiqugeParser
+from .b520 import BiqugeParser
 from .biquyuedu import BiquyueduParser
 from .dxmwx import DxmwxParser
 from .eightnovel import EightnovelParser

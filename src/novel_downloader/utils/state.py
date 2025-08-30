@@ -18,7 +18,6 @@ from novel_downloader.utils.constants import STATE_FILE
 class StateManager:
     """
     Manages persistent state for user preferences and runtime flags.
-    Stores data in JSON at STATE_FILE.
     """
 
     def __init__(self, path: Path = STATE_FILE) -> None:

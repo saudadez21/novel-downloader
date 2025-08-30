@@ -41,7 +41,7 @@ __all__ = [
 ]
 
 from .aaatxt import AaatxtSession
-from .biquge import BiqugeSession
+from .b520 import BiqugeSession
 from .biquyuedu import BiquyueduSession
 from .dxmwx import DxmwxSession
 from .eightnovel import EightnovelSession

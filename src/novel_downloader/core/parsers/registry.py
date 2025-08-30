@@ -27,7 +27,7 @@ def register_parser(
     Decorator to register a parser class under given keys.
 
     :param site_keys: Sequence of site identifiers
-    :param backends:  Sequence of backend types
+    :param backends: Sequence of backend types
     :return: A class decorator that populates _PARSER_MAP.
     """
 

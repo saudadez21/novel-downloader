@@ -21,7 +21,7 @@ from novel_downloader.utils import async_jitter_sleep
 )
 class YamiboSession(BaseSession):
     """
-    A session class for interacting with the Yamibo (www.yamibo.com) novel website.
+    A session class for interacting with the 百合会 (www.yamibo.com) novel website.
     """
 
     BASE_URL = "https://www.yamibo.com"
@@ -87,7 +87,7 @@ class YamiboSession(BaseSession):
         Fetch the raw HTML of the book info page asynchronously.
 
         :param book_id: The book identifier.
-        :return: The page content as a string.
+        :return: The page content as string list.
         """
         url = self.book_info_url(book_id=book_id)
         return [await self.fetch(url, **kwargs)]
@@ -103,7 +103,7 @@ class YamiboSession(BaseSession):
 
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :return: The chapter content as a string.
+        :return: The page content as string list.
         """
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
         return [await self.fetch(url, **kwargs)]

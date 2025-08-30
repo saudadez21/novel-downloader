@@ -33,7 +33,7 @@ class ConfigAdapter:
         Initialize the adapter.
 
         :param config: The fully loaded configuration dictionary.
-        :param site:   The current site name (e.g. "qidian").
+        :param site: The current site name (e.g. "qidian").
         """
         self._config = config
         self._site = site
@@ -43,10 +43,6 @@ class ConfigAdapter:
     def get_fetcher_config(self) -> FetcherConfig:
         """
         Build a FetcherConfig from the raw configuration.
-
-        Reads from:
-          - config["general"] for global defaults (e.g. request_interval)
-          - site-specific overrides under config["sites"][site]
 
         :return: A FetcherConfig instance with all fields populated.
         """
@@ -66,11 +62,6 @@ class ConfigAdapter:
     def get_downloader_config(self) -> DownloaderConfig:
         """
         Build a DownloaderConfig using both general and site-specific settings.
-
-        Reads from:
-          - config["general"] for download directories, worker counts, etc.
-          - config["general"]["debug"] for debug toggles (e.g. save_html)
-          - config["sites"][site] for login credentials and mode
 
         :return: A DownloaderConfig instance with all fields populated.
         """
@@ -93,11 +84,6 @@ class ConfigAdapter:
         """
         Build a ParserConfig from general, OCR, and site-specific settings.
 
-        Reads from:
-          - config["general"]["cache_dir"] for where to cache intermediate parses
-          - config["general"]["font_ocr"] for font-decoding and OCR options
-          - config["sites"][site] for parsing mode and truncation behavior
-
         :return: A ParserConfig instance with all fields populated.
         """
         gen = self._config.get("general", {})
@@ -113,13 +99,6 @@ class ConfigAdapter:
     def get_exporter_config(self) -> ExporterConfig:
         """
         Build an ExporterConfig from output and general settings.
-
-        Reads from:
-          - config["general"] for cache and raw data directories
-          - config["output"]["formats"] for which formats to generate
-          - config["output"]["naming"] for filename templates
-          - config["output"]["epub"] for EPUB-specific options
-          - config["sites"][site] for export split mode
 
         :return: An ExporterConfig instance with all fields populated.
         """
@@ -150,10 +129,9 @@ class ConfigAdapter:
     def get_login_config(self) -> dict[str, str]:
         """
         Return the subset of login fields present in current site config:
-
-        * `username`
-        * `password`
-        * `cookies`
+            * `username`
+            * `password`
+            * `cookies`
         """
         out: dict[str, str] = {}
         for key in ("username", "password", "cookies"):
@@ -204,9 +182,6 @@ class ConfigAdapter:
     def get_log_level(self) -> str:
         """
         Retrieve the logging level from [general.debug].
-
-        Reads from config["general"]["debug"]["log_level"], defaulting to "INFO"
-        if not set or invalid.
 
         :return: The configured log level ("DEBUG", "INFO", "WARNING", "ERROR").
         """

@@ -29,10 +29,6 @@ logger = logging.getLogger(__name__)
 class FontOCR:
     """
     Version 4 of the FontOCR utility.
-
-    This class provides character recognition using a hybrid approach combining:
-    - OCR model inference
-    - Feature vector similarity matching
     """
 
     def __init__(

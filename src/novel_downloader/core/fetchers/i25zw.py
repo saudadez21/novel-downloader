@@ -18,7 +18,7 @@ from novel_downloader.models import FetcherConfig
 )
 class I25zwSession(BaseSession):
     """
-    A session class for interacting with the I25zw (www.i25zw.com) novel website.
+    A session class for interacting with the 25中文网 (www.i25zw.com) novel website.
     """
 
     BOOK_INFO_URL = "https://www.i25zw.com/book/{book_id}.html"
@@ -44,7 +44,7 @@ class I25zwSession(BaseSession):
         Order: [info, catalog]
 
         :param book_id: The book identifier.
-        :return: The page content as a string.
+        :return: The page content as string list.
         """
         info_url = self.book_info_url(book_id=book_id)
         catalog_url = self.book_catalog_url(book_id=book_id)
@@ -66,7 +66,7 @@ class I25zwSession(BaseSession):
 
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :return: The chapter content as a string.
+        :return: The page content as string list.
         """
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
         return [await self.fetch(url, **kwargs)]

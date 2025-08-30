@@ -164,11 +164,12 @@ def common_export_as_epub(
                 if config.include_picture
                 else remove_all_images(content)
             )
+            extras = {"作者说": author_note} if author_note else {}
 
             chap_html = build_epub_chapter(
                 title=title,
                 paragraphs=content,
-                extras={"作者说": author_note},
+                extras=extras,
             )
             curr_vol.chapters.append(
                 Chapter(

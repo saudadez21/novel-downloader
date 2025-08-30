@@ -30,8 +30,7 @@ def common_export_as_txt(
     Export a novel as a single text file by merging all chapter data.
 
     Steps:
-      1. Load book metadata (title, author, summary, word count, update time,
-         volumes, and chapters).
+      1. Load book metadata.
       2. For each volume:
          a. Append the volume title.
          b. Batch-fetch all chapters in that volume to minimize SQLite calls.

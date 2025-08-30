@@ -18,7 +18,7 @@ from novel_downloader.models import FetcherConfig
 )
 class ShencouSession(BaseSession):
     """
-    A session class for interacting with the Shencou (www.shencou.com) novel website.
+    A session class for interacting with the 神凑轻小说 (www.shencou.com) novel website.
     """
 
     BOOK_INFO_URL = "https://www.shencou.com/books/read_{book_id}.html"
@@ -44,7 +44,7 @@ class ShencouSession(BaseSession):
         Order: [info, catalog]
 
         :param book_id: The book identifier.
-        :return: The page content as a string.
+        :return: The page content as string list.
         """
         book_id = book_id.replace("-", "/")
         info_url = self.book_info_url(book_id=book_id)
@@ -67,7 +67,7 @@ class ShencouSession(BaseSession):
 
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :return: The chapter content as a string.
+        :return: The page content as string list.
         """
         book_id = book_id.replace("-", "/")
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)

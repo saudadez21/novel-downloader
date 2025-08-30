@@ -27,7 +27,7 @@ def register_fetcher(
     Decorator to register a fetcher class under given keys.
 
     :param site_keys: Sequence of site identifiers
-    :param backends:  Sequence of backend types
+    :param backends: Sequence of backend types
     :return: A class decorator that populates _FETCHER_MAP.
     """
 

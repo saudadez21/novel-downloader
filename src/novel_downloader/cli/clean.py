@@ -57,7 +57,7 @@ def handle_clean(args: Namespace) -> None:
         if args.config:
             targets.append(CONFIG_DIR)
 
-    if not targets and not args.hf_cache and not args.hf_cache_all:
+    if not targets:
         print(t("clean_nothing"))
         return
 

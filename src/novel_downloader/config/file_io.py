@@ -3,8 +3,7 @@
 novel_downloader.config.file_io
 -------------------------------
 
-Provides functionality to load Toml configuration files into Python
-dictionaries, with robust error handling and fallback support.
+Provides functionality to load Toml configuration files into Python dict
 """
 
 import json
@@ -121,7 +120,7 @@ def load_config(
     Load configuration data from a Toml file.
 
     :param config_path: Optional path to the Toml configuration file.
-    :return:            Parsed configuration as a dict.
+    :return: Parsed configuration as a dict.
     """
     path = _resolve_file_path(
         user_path=config_path,

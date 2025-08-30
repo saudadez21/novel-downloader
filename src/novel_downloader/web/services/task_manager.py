@@ -9,12 +9,12 @@ Single-worker FIFO task manager for download jobs
 import asyncio
 import contextlib
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Literal
 from uuid import uuid4
 
 from novel_downloader.config import ConfigAdapter, load_config
 from novel_downloader.core import (
-    FetcherProtocol,
     get_downloader,
     get_exporter,
     get_fetcher,
@@ -48,7 +48,7 @@ class DownloadTask:
     chapters_total: int = 0
     chapters_done: int = 0
     error: str | None = None
-    result: dict[str, str] | None = None
+    exported_paths: dict[str, Path] | None = None
 
     _cancel_event: asyncio.Event = field(default_factory=asyncio.Event, repr=False)
 
@@ -154,15 +154,15 @@ class TaskManager:
 
             async with get_fetcher(task.site, fetcher_cfg) as fetcher:
                 # login if required
-                if downloader_cfg.login_required:
-                    loaded = await fetcher.load_state()
-                    if not loaded or not fetcher.is_logged_in:
-                        login_ok = await self._handle_login(task, fetcher, login_cfg)
-                        if not login_ok:
-                            task.status = "failed"
-                            task.error = "登录失败或已取消"
-                            return
-                        await fetcher.save_state()
+                if downloader_cfg.login_required and not await fetcher.load_state():
+                    login_data = await self._prompt_login_fields(
+                        task, fetcher.login_fields, login_cfg
+                    )
+                    if not await fetcher.login(**login_data):
+                        task.status = "failed"
+                        task.error = "登录失败或已取消"
+                        return
+                    await fetcher.save_state()
 
                 downloader = get_downloader(
                     fetcher=fetcher,
@@ -203,16 +203,15 @@ class TaskManager:
             task.status = "failed"
             task.error = str(e)
 
-    async def _handle_login(
+    async def _prompt_login_fields(
         self,
         task: DownloadTask,
-        fetcher: FetcherProtocol,
+        fields: list[LoginField],
         login_config: dict[str, str] | None = None,
-    ) -> bool:
+    ) -> dict[str, Any]:
         """
         Prompt UI login; supports text/password/cookie fields.
         """
-        fields: list[LoginField] = fetcher.login_fields or []
 
         prefill = (login_config or {}).copy()
         req = await create_cred_request(
@@ -228,12 +227,12 @@ class TaskManager:
         except TimeoutError:
             await complete_request(req.req_id, None)
             cleanup_request(req.req_id)
-            return False
+            return prefill
 
         if task.is_cancelled():
             await complete_request(req.req_id, None)
             cleanup_request(req.req_id)
-            return False
+            return prefill
 
         # merge values: prefill -> UI (UI wins)
         ui_vals: dict[str, str] = req.result or {}
@@ -253,11 +252,7 @@ class TaskManager:
                         # keep raw string if parsing fails
                         merged[f.name] = parse_cookies(raw)
 
-        try:
-            ok = await fetcher.login(**merged)
-        except Exception:
-            return False
-        return bool(ok or fetcher.is_logged_in)
+        return merged
 
 
 manager = TaskManager()

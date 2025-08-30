@@ -15,7 +15,6 @@ from typing import Any
 
 from novel_downloader.config import ConfigAdapter, load_config
 from novel_downloader.core import (
-    FetcherProtocol,
     get_downloader,
     get_exporter,
     get_fetcher,
@@ -89,6 +88,7 @@ def _cli_args_to_book_configs(
 ) -> list[BookConfig]:
     """
     Convert CLI book_ids and optional --start/--end into a list of BookConfig.
+
     Only the first book_id uses start/end; others are minimal.
     """
     if not book_ids:
@@ -149,9 +149,7 @@ async def _download(
 
     async with get_fetcher(site, fetcher_cfg) as fetcher:
         if downloader_cfg.login_required and not await fetcher.load_state():
-            login_data = await _prompt_login_fields(
-                fetcher, fetcher.login_fields, login_cfg
-            )
+            login_data = await _prompt_login_fields(fetcher.login_fields, login_cfg)
             if not await fetcher.login(**login_data):
                 print(t("download_login_failed"))
                 return
@@ -177,7 +175,6 @@ async def _download(
 
 
 async def _prompt_login_fields(
-    fetcher: FetcherProtocol,
     fields: list[LoginField],
     login_config: dict[str, str] | None = None,
 ) -> dict[str, Any]:

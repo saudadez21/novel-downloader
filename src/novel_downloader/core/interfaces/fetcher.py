@@ -31,6 +31,7 @@ class FetcherProtocol(Protocol):
     ) -> bool:
         """
         Attempt to log in asynchronously.
+
         :returns: True if login succeeded.
         """
         ...
@@ -44,7 +45,7 @@ class FetcherProtocol(Protocol):
         Fetch the raw HTML (or JSON) of the book info page asynchronously.
 
         :param book_id: The book identifier.
-        :return: The page content as a string.
+        :return: The page content as string list.
         """
         ...
 
@@ -59,7 +60,7 @@ class FetcherProtocol(Protocol):
 
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :return: The chapter content as string.
+        :return: The page content as string list.
         """
         ...
 

@@ -78,6 +78,7 @@ class BaseSession(FetcherProtocol, abc.ABC):
     ) -> bool:
         """
         Attempt to log in asynchronously.
+
         :returns: True if login succeeded.
         """
         return False
@@ -92,7 +93,7 @@ class BaseSession(FetcherProtocol, abc.ABC):
         Fetch the raw HTML (or JSON) of the book info page asynchronously.
 
         :param book_id: The book identifier.
-        :return: The page content as a string.
+        :return: The page content as string list.
         """
         ...
 
@@ -108,7 +109,7 @@ class BaseSession(FetcherProtocol, abc.ABC):
 
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :return: The chapter content as a string.
+        :return: The page content as string list.
         """
         ...
 

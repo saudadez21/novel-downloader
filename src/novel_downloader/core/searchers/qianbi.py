@@ -128,8 +128,8 @@ class QianbiSearcher(BaseSearcher):
         Parse a multi-item search result page.
 
         :param html_str: Raw HTML of the search-results page.
-        :param limit:    Maximum number of items to return, or None for all.
-        :return:         List of SearchResult.
+        :param limit: Maximum number of items to return, or None for all.
+        :return: List of SearchResult.
         """
         doc = html.fromstring(html_str)
         items = doc.xpath('//div[contains(@class,"module-search-item")]')

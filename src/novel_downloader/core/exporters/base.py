@@ -60,7 +60,6 @@ class BaseExporter(ExporterProtocol, abc.ABC):
     def export(self, book_id: str) -> dict[str, Path]:
         """
         Export the book in the formats specified in config.
-        If a method is not implemented or fails, log the error and continue.
 
         :param book_id: The book identifier (used for filename, lookup, etc.)
         """

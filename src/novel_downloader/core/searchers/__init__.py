@@ -32,7 +32,7 @@ __all__ = [
 ]
 
 from .aaatxt import AaatxtSearcher
-from .biquge import BiqugeSearcher
+from .b520 import BiqugeSearcher
 from .dxmwx import DxmwxSearcher
 from .eightnovel import EightnovelSearcher
 from .esjzone import EsjzoneSearcher

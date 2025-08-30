@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 @register_searcher(
-    site_keys=["biquge", "bqg"],
+    site_keys=["biquge", "bqg", "b520"],
 )
 class BiqugeSearcher(BaseSearcher):
     site_name = "biquge"

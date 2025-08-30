@@ -38,12 +38,6 @@ class PiaotiaParser(BaseParser):
         html_list: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        """
-        Parse a book info page and extract metadata and chapter structure.
-
-        :param html_list: Raw HTML of the book info pages.
-        :return: Parsed metadata and chapter structure as a dictionary.
-        """
         if len(html_list) < 2:
             return None
 
@@ -124,7 +118,7 @@ class PiaotiaParser(BaseParser):
         **kwargs: Any,
     ) -> ChapterDict | None:
         """
-        Parse a single chapter page and extract clean text or simplified HTML.
+        Parse chapter page and extract the content of one chapter.
 
         p.s. 结构好混乱:
         1. `<head>` 没有对应的 `</head>`, 同理 `</body>` 没有对应的 `<body>`
@@ -134,9 +128,9 @@ class PiaotiaParser(BaseParser):
             `<div id=”device” style=”background-color...”>`,
             并也没有对应的 `</div>`
 
-        :param html_list: Raw HTML of the chapter page.
+        :param html_list: The HTML list of the chapter pages.
         :param chapter_id: Identifier of the chapter being parsed.
-        :return: Cleaned chapter content as plain text or minimal HTML.
+        :return: The chapter's data.
         """
         if not html_list:
             return None

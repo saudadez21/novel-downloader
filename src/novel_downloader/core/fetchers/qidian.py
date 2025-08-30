@@ -29,7 +29,7 @@ from novel_downloader.utils import (
 )
 class QidianSession(BaseSession):
     """
-    A session class for interacting with the Qidian (www.qidian.com) novel website.
+    A session class for interacting with the 起点中文网 (www.qidian.com) novel website.
     """
 
     HOMEPAGE_URL = "https://www.qidian.com/"
@@ -89,7 +89,7 @@ class QidianSession(BaseSession):
         Fetch the raw HTML of the book info page asynchronously.
 
         :param book_id: The book identifier.
-        :return: The page content as a string.
+        :return: The page content as string list.
         """
         url = self.book_info_url(book_id=book_id)
         return [await self.fetch(url, **kwargs)]
@@ -105,7 +105,7 @@ class QidianSession(BaseSession):
 
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :return: The chapter content as a string.
+        :return: The page content as string list.
         """
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
         return [await self.fetch(url, **kwargs)]
@@ -158,9 +158,9 @@ class QidianSession(BaseSession):
         a cookie-based token used for request validation.
 
         The method:
-        1. Reads the existing cookie (if any);
-        2. Generates a new value tied to *url*;
-        3. Updates the live ``requests.Session``;
+          1. Reads the existing cookie (if any);
+          2. Generates a new value tied to *url*;
+          3. Updates the live ``requests.Session``;
         """
         if self._rate_limiter:
             await self._rate_limiter.wait()
@@ -253,12 +253,9 @@ class QidianSession(BaseSession):
         Patch a timestamp-bearing token with fresh timing and checksum info.
 
         :param new_uri: URI used in checksum generation.
-        :type new_uri: str
         :param key: RC4 key extracted from front-end JavaScript (optional).
-        :type key: str, optional
 
         :return: Updated token with new timing and checksum values.
-        :rtype: str
         """
         if not self._fp_val or not self._ab_val:
             self._update_fp_val()
@@ -305,8 +302,6 @@ class QidianSession(BaseSession):
     def _check_cookies(self, cookies: dict[str, str]) -> bool:
         """
         Check if the provided cookies contain all required keys.
-
-        Logs any missing keys as warnings.
 
         :param cookies: The cookie dictionary to validate.
         :return: True if all required keys are present, False otherwise.

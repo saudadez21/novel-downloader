@@ -20,7 +20,7 @@ from novel_downloader.utils import async_jitter_sleep
 )
 class EsjzoneSession(BaseSession):
     """
-    A session class for interacting with the esjzone (www.esjzone.cc) novel website.
+    A session class for interacting with the ESJ Zone (www.esjzone.cc) novel website.
     """
 
     BOOKCASE_URL = "https://www.esjzone.cc/my/favorite"
@@ -86,7 +86,7 @@ class EsjzoneSession(BaseSession):
         Fetch the raw HTML of the book info page asynchronously.
 
         :param book_id: The book identifier.
-        :return: The page content as a string.
+        :return: The page content as string list.
         """
         url = self.book_info_url(book_id=book_id)
         return [await self.fetch(url, **kwargs)]
@@ -102,7 +102,7 @@ class EsjzoneSession(BaseSession):
 
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :return: The chapter content as a string.
+        :return: The page content as string list.
         """
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
         return [await self.fetch(url, **kwargs)]

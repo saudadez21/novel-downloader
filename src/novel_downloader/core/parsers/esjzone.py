@@ -164,13 +164,6 @@ class EsjzoneParser(BaseParser):
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        """
-        Parse a single chapter page and extract clean text or simplified HTML.
-
-        :param html_list: Raw HTML of the chapter page.
-        :param chapter_id: Identifier of the chapter being parsed.
-        :return: Cleaned chapter content as plain text or minimal HTML.
-        """
         if not html_list or self._is_forum_page(html_list):
             return None
         tree = html.fromstring(html_list[0])

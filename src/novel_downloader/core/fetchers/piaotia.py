@@ -18,7 +18,7 @@ from novel_downloader.models import FetcherConfig
 )
 class PiaotiaSession(BaseSession):
     """
-    A session class for interacting with the Piaotia (www.piaotia.com) novel website.
+    A session class for interacting with the 飘天文学网 (www.piaotia.com) novel website.
     """
 
     BOOK_INFO_URL = "https://www.piaotia.com/bookinfo/{book_id}.html"
@@ -44,7 +44,7 @@ class PiaotiaSession(BaseSession):
         Order: [info, catalog]
 
         :param book_id: The book identifier.
-        :return: The page content as a string.
+        :return: The page content as string list.
         """
         book_id = book_id.replace("-", "/")
         info_url = self.book_info_url(book_id=book_id)
@@ -67,7 +67,7 @@ class PiaotiaSession(BaseSession):
 
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :return: The chapter content as a string.
+        :return: The page content as string list.
         """
         book_id = book_id.replace("-", "/")
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)

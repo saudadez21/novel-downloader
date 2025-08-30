@@ -21,7 +21,7 @@ from novel_downloader.utils import async_jitter_sleep
 )
 class Xs63bSession(BaseSession):
     """
-    A session class for interacting with the Xs63b (m.xs63b.com) novel website.
+    A session class for interacting with the 小说路上 (m.xs63b.com) novel website.
     """
 
     BOOK_INFO_URL = "https://m.xs63b.com/{book_id}/"
@@ -50,7 +50,7 @@ class Xs63bSession(BaseSession):
         Order: [info, catalog]
 
         :param book_id: The book identifier.
-        :return: The page content as a string.
+        :return: The page content as string list.
         """
         book_id = book_id.replace("-", "/")
         info_url = self.book_info_url(book_id=book_id)
@@ -71,9 +71,11 @@ class Xs63bSession(BaseSession):
         """
         Fetch the raw HTML of a single chapter asynchronously.
 
+        Order: [page1, ..., pageN]
+
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :return: The chapter content as a string.
+        :return: The page content as string list.
         """
         book_id = book_id.replace("-", "/")
         html_pages: list[str] = []

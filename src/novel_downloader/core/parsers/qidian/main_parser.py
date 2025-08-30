@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 )
 class QidianParser(BaseParser):
     """
-    Parser for Qidian site.
+    Parser for 起点中文网 site.
     """
 
     def __init__(

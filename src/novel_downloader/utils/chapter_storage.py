@@ -3,8 +3,7 @@
 novel_downloader.utils.chapter_storage
 --------------------------------------
 
-Storage module for managing novel chapters in
-an SQLite database.
+Storage module for managing novel chapters in an SQLite database.
 """
 
 __all__ = ["ChapterStorage"]

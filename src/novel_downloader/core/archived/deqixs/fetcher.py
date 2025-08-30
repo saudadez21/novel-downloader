@@ -19,7 +19,7 @@ from novel_downloader.utils import async_jitter_sleep
 # )
 class DeqixsSession(BaseSession):
     """
-    A session class for interacting with the Deqixs (www.deqixs.com) novel website.
+    A session class for interacting with the 得奇小说网 (www.deqixs.com) novel website.
     """
 
     BASE_URL = "https://www.deqixs.com"

@@ -165,9 +165,9 @@ def _prompt_user_select_v1(
     """
     Display a numbered list of results and prompt the user to pick one.
 
-    :param results:      A list of SearchResult dicts.
+    :param results: A list of SearchResult dicts.
     :param max_attempts: How many bad inputs to tolerate before giving up.
-    :return:             The chosen SearchResult, or None if cancelled/failed.
+    :return: The chosen SearchResult, or None if cancelled/failed.
     """
     if not results:
         print(t("no_results"))

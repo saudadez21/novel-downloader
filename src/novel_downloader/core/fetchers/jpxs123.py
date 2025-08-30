@@ -19,7 +19,7 @@ from novel_downloader.models import FetcherConfig
 )
 class Jpxs123Session(BaseSession):
     """
-    A session class for interacting with the Jpxs123 (www.jpxs123.com) novel website.
+    A session class for interacting with the 精品小说网 (www.jpxs123.com) novel website.
     """
 
     BASE_URL = "https://www.jpxs123.com"
@@ -42,8 +42,10 @@ class Jpxs123Session(BaseSession):
         """
         Fetch the raw HTML of the book info page asynchronously.
 
+        Order: [info, download]
+
         :param book_id: The book identifier.
-        :return: The page content as a string.
+        :return: The page content as string list.
         """
         book_id = book_id.replace("-", "/")
         url = self.book_info_url(book_id=book_id)
@@ -71,7 +73,7 @@ class Jpxs123Session(BaseSession):
 
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :return: The chapter content as a string.
+        :return: The page content as string list.
         """
         book_id = book_id.replace("-", "/")
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)

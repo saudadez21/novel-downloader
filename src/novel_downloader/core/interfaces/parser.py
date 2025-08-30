@@ -39,10 +39,10 @@ class ParserProtocol(Protocol):
         **kwargs: Any,
     ) -> ChapterDict | None:
         """
-        Parse and return the text content of one chapter.
+        Parse chapter page and extract the content of one chapter.
 
         :param html_list: The HTML list of the chapter pages.
         :param chapter_id: Identifier of the chapter being parsed.
-        :return: The chapter's text.
+        :return: The chapter's data.
         """
         ...

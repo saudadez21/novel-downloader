@@ -22,10 +22,10 @@ def _char_width_space(
 
     Fullwidth (F) or Wide (W) characters map to `asian_char`, else `normal_char`.
 
-    :param c:           A single character.
+    :param c: A single character.
     :param normal_char: Replacement for narrow chars (default U+0020).
-    :param asian_char:  Replacement for wide chars (default U+3000).
-    :return:            The appropriate space character.
+    :param asian_char: Replacement for wide chars (default U+3000).
+    :return: The appropriate space character.
     """
     return asian_char if unicodedata.east_asian_width(c) in ("F", "W") else normal_char
 
@@ -37,7 +37,7 @@ def diff_inline_display(old_str: str, new_str: str) -> str:
 
     :param old_str: Original string (prefixed '-' will be trimmed).
     :param new_str: Modified string (prefixed '+' will be trimmed).
-    :return:        A multiline diff display with aligned markers.
+    :return: A multiline diff display with aligned markers.
     """
     space_1 = " "
     space_2 = "\u3000"

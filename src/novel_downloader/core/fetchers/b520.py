@@ -13,11 +13,11 @@ from novel_downloader.models import FetcherConfig
 
 
 @register_fetcher(
-    site_keys=["biquge", "bqg"],
+    site_keys=["biquge", "bqg", "b520"],
 )
 class BiqugeSession(BaseSession):
     """
-    A session class for interacting with the Biquge (www.b520.cc) novel website.
+    A session class for interacting with the 笔趣阁 (www.b520.cc) novel website.
     """
 
     BOOK_INFO_URL = "http://www.b520.cc/{book_id}/"
@@ -40,7 +40,7 @@ class BiqugeSession(BaseSession):
         Fetch the raw HTML of the book info page asynchronously.
 
         :param book_id: The book identifier.
-        :return: The page content as a string.
+        :return: The page content as string list.
         """
         url = self.book_info_url(book_id=book_id)
         return [await self.fetch(url, **kwargs)]
@@ -56,7 +56,7 @@ class BiqugeSession(BaseSession):
 
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :return: The chapter content as a string.
+        :return: The page content as string list.
         """
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
         return [await self.fetch(url, encoding="gbk", **kwargs)]

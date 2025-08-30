@@ -17,6 +17,7 @@ from .txt import common_export_as_txt
 class CommonExporter(BaseExporter):
     """
     CommonExporter is a exporter that processes and exports novels.
+
     It extends the BaseExporter interface and provides
     logic for exporting full novels as plain text (.txt) files
     and EPUB (.epub) files.

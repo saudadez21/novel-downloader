@@ -19,7 +19,7 @@ from novel_downloader.utils import async_jitter_sleep
 )
 class LinovelibSession(BaseSession):
     """
-    A session class for interacting with Linovelib (www.linovelib.com) novel website.
+    A session class for interacting with 哔哩轻小说 (www.linovelib.com) novel website.
     """
 
     BASE_URL = "https://www.linovelib.com"
@@ -46,8 +46,10 @@ class LinovelibSession(BaseSession):
         """
         Fetch the raw HTML of the book info page.
 
+        Order: [info, vol1_html, ..., volN_html]
+
         :param book_id: The book identifier.
-        :return: A list of HTML strings: [info_html, vol1_html, ..., volN_html]
+        :return: The page content as string list.
         """
         url = self.book_info_url(book_id=book_id)
         info_html = await self.fetch(url, **kwargs)
@@ -97,9 +99,11 @@ class LinovelibSession(BaseSession):
         """
         Fetch the raw HTML of a single chapter asynchronously.
 
+        Order: [page1, ..., pageN]
+
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :return: The chapter content as a string.
+        :return: The page content as string list.
         """
         html_pages: list[str] = []
         idx = 1

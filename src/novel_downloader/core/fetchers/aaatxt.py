@@ -17,7 +17,7 @@ from novel_downloader.models import FetcherConfig
 )
 class AaatxtSession(BaseSession):
     """
-    A session class for interacting with the 3atxt (www.aaatxt.com) novel website.
+    A session class for interacting with the 3A电子书 (www.aaatxt.com) novel website.
     """
 
     BOOK_INFO_URL = "http://www.aaatxt.com/shu/{book_id}.html"
@@ -40,7 +40,7 @@ class AaatxtSession(BaseSession):
         Fetch the raw HTML of the book info page asynchronously.
 
         :param book_id: The book identifier.
-        :return: The page content as a string.
+        :return: The page content as string list.
         """
         url = self.book_info_url(book_id=book_id)
         return [await self.fetch(url, **kwargs)]
@@ -56,7 +56,7 @@ class AaatxtSession(BaseSession):
 
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :return: The chapter content as a string.
+        :return: The page content as string list.
         """
         url = self.chapter_url(chapter_id=chapter_id)
         return [await self.fetch(url, encoding="gb2312", **kwargs)]

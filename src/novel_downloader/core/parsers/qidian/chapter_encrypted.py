@@ -216,7 +216,9 @@ def parse_encrypted_chapter(
 def _only_tag(selector: str) -> str | None:
     """
     Normalize a selector into just its tag name for ordering.
+
     Handles forms like 'i', 'em::before', '.p3 i', '.p2 span::after'.
+
     Returns None if can't extract a tag.
     """
     sel = selector.strip()

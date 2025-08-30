@@ -17,7 +17,7 @@ from novel_downloader.models import FetcherConfig
 )
 class TtkanSession(BaseSession):
     """
-    A session class for interacting with the Ttkan (www.ttkan.co) novel website.
+    A session class for interacting with the 天天看小说 (www.ttkan.co) novel website.
     """
 
     BOOK_INFO_URL = "https://{lang}.ttkan.co/novel/chapters/{book_id}"
@@ -41,7 +41,7 @@ class TtkanSession(BaseSession):
         Fetch the raw HTML of the book info page asynchronously.
 
         :param book_id: The book identifier.
-        :return: The page content as a string.
+        :return: The page content as string list.
         """
         url = self.book_info_url(book_id=book_id)
         return [await self.fetch(url, **kwargs)]
@@ -57,7 +57,7 @@ class TtkanSession(BaseSession):
 
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :return: The chapter content as a string.
+        :return: The page content as string list.
         """
         url = self.chapter_url(
             book_id=book_id,

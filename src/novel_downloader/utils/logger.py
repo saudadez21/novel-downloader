@@ -33,12 +33,9 @@ def setup_logging(
     Create and configure a logger for both console and rotating file output.
 
     :param log_filename_prefix: Prefix for the log file name.
-                                If None, will use the last part of `logger_name`.
-    :param log_level: Minimum log level to show in console:
-                      "DEBUG", "INFO", "WARNING", or "ERROR".
-                      Defaults to "INFO" if not specified.
+    :param log_level: Minimum log level to show in console
+                        ("DEBUG", "INFO", "WARNING", "ERROR")
     :param log_dir: Directory where log files will be saved.
-                    Defaults to "./logs" if not specified.
     :return: A fully configured logger instance.
     """
     ft_logger = logging.getLogger("fontTools.ttLib.tables._p_o_s_t")

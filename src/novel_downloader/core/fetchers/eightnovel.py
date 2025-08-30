@@ -19,7 +19,7 @@ from novel_downloader.models import FetcherConfig
 )
 class EightnovelSession(BaseSession):
     """
-    A session class for interacting with the 8novel (www.8novel.com) novel website.
+    A session class for interacting with the 无限轻小说 (www.8novel.com) novel website.
     """
 
     BOOK_INFO_URL = "https://www.8novel.com/novelbooks/{book_id}/"
@@ -50,7 +50,7 @@ class EightnovelSession(BaseSession):
         Fetch the raw HTML of the book info page asynchronously.
 
         :param book_id: The book identifier.
-        :return: The page content as a string.
+        :return: The page content as string list.
         """
         url = self.book_info_url(book_id=book_id)
         return [await self.fetch(url, **kwargs)]
@@ -64,9 +64,11 @@ class EightnovelSession(BaseSession):
         """
         Fetch the raw HTML of a single chapter asynchronously.
 
+        Order: [chap_info, content]
+
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :return: The chapter content as a string.
+        :return: The page content as string list.
         """
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
         chapter_html = await self.fetch(url, **kwargs)
