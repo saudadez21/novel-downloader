@@ -37,9 +37,6 @@ class DownloaderConfig:
     login_required: bool = False
     save_html: bool = False
     storage_batch_size: int = 1
-    username: str = ""
-    password: str = ""
-    cookies: str = ""
 
 
 @dataclass

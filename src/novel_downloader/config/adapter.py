@@ -87,9 +87,6 @@ class ConfigAdapter:
             raw_data_dir=gen.get("raw_data_dir", "./raw_data"),
             cache_dir=gen.get("cache_dir", "./novel_cache"),
             storage_batch_size=gen.get("storage_batch_size", 1),
-            username=self._site_cfg.get("username", ""),
-            password=self._site_cfg.get("password", ""),
-            cookies=self._site_cfg.get("cookies", ""),
         )
 
     def get_parser_config(self) -> ParserConfig:
@@ -149,6 +146,22 @@ class ConfigAdapter:
             split_mode=self._site_cfg.get("split_mode", "book"),
             cleaner_cfg=cleaner_cfg,
         )
+
+    def get_login_config(self) -> dict[str, str]:
+        """
+        Return the subset of login fields present in current site config:
+
+        * `username`
+        * `password`
+        * `cookies`
+        """
+        out: dict[str, str] = {}
+        for key in ("username", "password", "cookies"):
+            val = self._site_cfg.get(key, "")
+            val = val.strip()
+            if val:
+                out[key] = val
+        return out
 
     def get_book_ids(self) -> list[BookConfig]:
         """

@@ -7,11 +7,8 @@ novel_downloader.web.pages.download_page
 
 from nicegui import ui
 
-from novel_downloader.web.layout import navbar
-from novel_downloader.web.state import (
-    register_portal,
-    task_manager,
-)
+from novel_downloader.web.components import navbar
+from novel_downloader.web.services import manager, setup_dialog
 
 _SUPPORT_SITES = {
     "qidian": "起点中文网 (qidian)",
@@ -49,10 +46,10 @@ _DEFAULT_SITE = "qidian"
 
 
 @ui.page("/download")  # type: ignore[misc]
-def render() -> None:
+def page_download() -> None:
     navbar("download")
-    register_portal()
     ui.label("下载界面").classes("text-lg")
+    setup_dialog()
 
     with ui.card().classes("max-w-[600px]"):
         site = ui.select(
@@ -69,9 +66,9 @@ def render() -> None:
             if not bid:
                 ui.notify("请输入书籍ID", type="warning")
                 return
-            title = f"{site.value} {bid}"
-            ui.notify(f"已添加任务：{title}")
-            await task_manager.add_task(title=title, site=str(site.value), book_id=bid)
+            title = f"{site.value} (id = {bid})"
+            ui.notify(f"已添加任务: {title}")
+            await manager.add_task(title=title, site=str(site.value), book_id=bid)
 
         with ui.row().classes("justify-end w-full"):
             ui.button(

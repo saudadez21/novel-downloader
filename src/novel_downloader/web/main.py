@@ -12,11 +12,7 @@ import argparse
 
 from nicegui import ui
 
-from novel_downloader.web.pages import (
-    download_page,  # noqa: F401
-    progress_page,  # noqa: F401
-    search_page,  # noqa: F401
-)
+import novel_downloader.web.pages  # noqa: F401
 
 
 def web_main() -> None:
@@ -47,12 +43,6 @@ def web_main() -> None:
     args = p.parse_args()
 
     host = "127.0.0.1" if args.listen == "local" else "0.0.0.0"
-
-    @ui.page("/")  # type: ignore[misc]
-    def _index() -> None:
-        from novel_downloader.web.pages.search_page import render
-
-        render()
 
     ui.run(host=host, port=args.port, reload=args.reload)
 

@@ -1,21 +1,18 @@
 #!/usr/bin/env python3
 """
-novel_downloader.web.task_manager
----------------------------------
+novel_downloader.web.services.task_manager
+------------------------------------------
 
+Single-worker FIFO task manager for download jobs
 """
 
-from __future__ import annotations
-
 import asyncio
-import time
-import uuid
-from dataclasses import asdict, dataclass, field
+import contextlib
+from dataclasses import dataclass, field
 from typing import Any, Literal
+from uuid import uuid4
 
-from nicegui import ui
-
-from novel_downloader.config import ConfigAdapter
+from novel_downloader.config import ConfigAdapter, load_config
 from novel_downloader.core import (
     FetcherProtocol,
     get_downloader,
@@ -25,11 +22,16 @@ from novel_downloader.core import (
 )
 from novel_downloader.models import (
     BookConfig,
-    DownloaderConfig,
     LoginField,
 )
 from novel_downloader.utils.cookies import parse_cookies
-from novel_downloader.web import state as web_state
+
+from .cred_broker import (
+    REQUEST_TIMEOUT,
+    cleanup_request,
+    complete_request,
+    create_cred_request,
+)
 
 Status = Literal["queued", "running", "completed", "cancelled", "failed"]
 
@@ -39,15 +41,15 @@ class DownloadTask:
     title: str
     site: str
     book_id: str
-    created_ts: float = field(default_factory=time.time)
-    task_id: str = field(default_factory=lambda: uuid.uuid4().hex)
-    client_id: str | None = None
 
     # runtime state
+    task_id: str = field(default_factory=lambda: uuid4().hex)
     status: Status = "queued"
     chapters_total: int = 0
     chapters_done: int = 0
     error: str | None = None
+    result: dict[str, str] | None = None
+
     _cancel_event: asyncio.Event = field(default_factory=asyncio.Event, repr=False)
 
     def progress(self) -> float:
@@ -57,15 +59,18 @@ class DownloadTask:
 
     def cancel(self) -> None:
         self._cancel_event.set()
+        self.status = "cancelled"
+
+    def is_cancelled(self) -> bool:
+        return self._cancel_event.is_set()
 
 
 class TaskManager:
     """
-    Single-worker FIFO queue.
+    A cooperative, single-worker queue that executes download tasks in order.
     """
 
-    def __init__(self, settings: dict[str, Any]):
-        self.settings = settings
+    def __init__(self) -> None:
         self.pending: list[DownloadTask] = []
         self.running: DownloadTask | None = None
         self.completed: list[DownloadTask] = []
@@ -73,14 +78,14 @@ class TaskManager:
         self._worker_task: asyncio.Task[None] | None = None
         self._lock = asyncio.Lock()
 
+        self._settings = load_config()
+
     # ---------- public API ----------
     async def add_task(self, *, title: str, site: str, book_id: str) -> DownloadTask:
-        try:
-            client_id = ui.context.client.id
-        except Exception:
-            client_id = None
-
-        t = DownloadTask(title=title, site=site, book_id=book_id, client_id=client_id)
+        """
+        Enqueue a new task and ensure the worker is running; return the created task.
+        """
+        t = DownloadTask(title=title, site=site, book_id=book_id)
         async with self._lock:
             self.pending.append(t)
             self._new_item.set()
@@ -89,11 +94,12 @@ class TaskManager:
         return t
 
     async def cancel_task(self, task_id: str) -> bool:
+        """Cancel a task by id (pending or currently running)"""
         async with self._lock:
             # cancel pending
             for i, t in enumerate(self.pending):
                 if t.task_id == task_id:
-                    t.status = "cancelled"
+                    t.cancel()
                     self.completed.insert(0, t)
                     del self.pending[i]
                     return True
@@ -104,6 +110,9 @@ class TaskManager:
         return False
 
     def snapshot(self) -> dict[str, Any]:
+        """
+        Return a shallow copy of the current queue state (running, pending, completed).
+        """
         return {
             "running": self.running,
             "pending": list(self.pending),
@@ -133,23 +142,22 @@ class TaskManager:
     async def _run_task(self, task: DownloadTask) -> None:
         task.status = "running"
         try:
-            adapter = ConfigAdapter(config=self.settings, site=task.site)
+            adapter = ConfigAdapter(config=self._settings, site=task.site)
             downloader_cfg = adapter.get_downloader_config()
             fetcher_cfg = adapter.get_fetcher_config()
             parser_cfg = adapter.get_parser_config()
             exporter_cfg = adapter.get_exporter_config()
+            login_cfg = adapter.get_login_config()
 
             parser = get_parser(task.site, parser_cfg)
             exporter = get_exporter(task.site, exporter_cfg)
 
             async with get_fetcher(task.site, fetcher_cfg) as fetcher:
                 # login if required
-                if getattr(downloader_cfg, "login_required", False):
+                if downloader_cfg.login_required:
                     loaded = await fetcher.load_state()
-                    if not loaded or not getattr(fetcher, "is_logged_in", False):
-                        login_ok = await self._handle_login(
-                            fetcher, downloader_cfg, task.client_id
-                        )
+                    if not loaded or not fetcher.is_logged_in:
+                        login_ok = await self._handle_login(task, fetcher, login_cfg)
                         if not login_ok:
                             task.status = "failed"
                             task.error = "登录失败或已取消"
@@ -178,6 +186,7 @@ class TaskManager:
                     await downloader.download(
                         book_cfg,
                         progress_hook=_progress_hook,
+                        cancel_event=task._cancel_event,
                     )
                 except asyncio.CancelledError:
                     task.status = "cancelled"
@@ -185,9 +194,7 @@ class TaskManager:
 
                 await asyncio.to_thread(exporter.export, task.book_id)
 
-                if getattr(downloader_cfg, "login_required", False) and getattr(
-                    fetcher, "is_logged_in", False
-                ):
+                if downloader_cfg.login_required and fetcher.is_logged_in:
                     await fetcher.save_state()
 
                 task.status = "completed"
@@ -198,87 +205,59 @@ class TaskManager:
 
     async def _handle_login(
         self,
+        task: DownloadTask,
         fetcher: FetcherProtocol,
-        downloader_cfg: DownloaderConfig,
-        client_id: str | None,
+        login_config: dict[str, str] | None = None,
     ) -> bool:
-        """Prompt UI login; supports text/password/cookie fields."""
-        fields: list[LoginField] = getattr(fetcher, "login_fields", []) or []
+        """
+        Prompt UI login; supports text/password/cookie fields.
+        """
+        fields: list[LoginField] = fetcher.login_fields or []
 
-        cfg_dict: dict[str, str] = {}
+        prefill = (login_config or {}).copy()
+        req = await create_cred_request(
+            task_id=task.task_id,
+            title=task.title,
+            fields=fields,
+            prefill=prefill,
+        )
+
+        # wait for UI to submit or cancel
         try:
-            cfg_dict = asdict(downloader_cfg)
+            await asyncio.wait_for(req.event.wait(), timeout=REQUEST_TIMEOUT)
+        except TimeoutError:
+            await complete_request(req.req_id, None)
+            cleanup_request(req.req_id)
+            return False
+
+        if task.is_cancelled():
+            await complete_request(req.req_id, None)
+            cleanup_request(req.req_id)
+            return False
+
+        # merge values: prefill -> UI (UI wins)
+        ui_vals: dict[str, str] = req.result or {}
+        cleanup_request(req.req_id)
+
+        merged: dict[str, Any] = {
+            k: v.strip() for k, v in prefill.items() if isinstance(v, str)
+        }
+        merged.update({k: v.strip() for k, v in ui_vals.items() if isinstance(v, str)})
+
+        # parse cookie fields into dicts
+        for f in fields:
+            if f.type == "cookie":
+                raw = merged.get(f.name, "")
+                if isinstance(raw, str) and raw:
+                    with contextlib.suppress(Exception):
+                        # keep raw string if parsing fails
+                        merged[f.name] = parse_cookies(raw)
+
+        try:
+            ok = await fetcher.login(**merged)
         except Exception:
-            try:
-                cfg_dict = dict(downloader_cfg)  # type: ignore
-            except Exception:
-                cfg_dict = {}
-
-        portal = web_state.get_portal(client_id)
-        if portal is None:
             return False
+        return bool(ok or fetcher.is_logged_in)
 
-        fut: asyncio.Future[
-            dict[str, Any] | None
-        ] = asyncio.get_event_loop().create_future()
-        inputs: dict[str, Any] = {}
 
-        def _close_with_result(ok: bool) -> None:
-            if fut.done():
-                return
-            if not ok:
-                fut.set_result(None)
-                dialog.close()
-                return
-            data: dict[str, Any] = {}
-            for fld in fields:
-                val = inputs[fld.name].value
-                if (not val) and getattr(fld, "default", None):
-                    val = fld.default
-                if getattr(fld, "type", "") == "cookie" and isinstance(val, str):
-                    val = parse_cookies(val)
-                data[fld.name] = val
-            fut.set_result(data)
-            dialog.close()
-
-        with portal:
-            with ui.dialog() as dialog, ui.card().classes("w-[540px] max-w-full"):
-                ui.label("需要登录").classes("text-base font-medium")
-                ui.separator()
-                with ui.column().classes("w-full gap-2"):
-                    for fld in fields:
-                        prefill = (cfg_dict.get(fld.name, "") or "").strip()
-                        label = f"{fld.label} ({fld.name})" if fld.label else fld.name
-                        hint = (
-                            getattr(fld, "description", None)
-                            or getattr(fld, "placeholder", None)
-                            or ""
-                        )
-                        if getattr(fld, "type", "") == "password":
-                            el = ui.input(
-                                label,
-                                password=True,
-                                password_toggle_button=True,
-                                value=prefill,
-                            )
-                        elif getattr(fld, "type", "") == "cookie":
-                            el = ui.textarea(label, value=prefill).props("rows=3")
-                        else:
-                            el = ui.input(label, value=prefill)
-                        if hint:
-                            el.props(f"hint={hint} persistent-hint")
-                        inputs[fld.name] = el
-                with ui.row().classes("justify-end w-full mt-2"):
-                    ui.button("取消", on_click=lambda: _close_with_result(False))
-                    ui.button(
-                        "登录",
-                        color="primary",
-                        on_click=lambda: _close_with_result(True),
-                    ).props("unelevated")
-
-            dialog.open()
-        values = await fut
-        if values is None:
-            return False
-        ok = await fetcher.login(**values)
-        return bool(ok)
+manager = TaskManager()

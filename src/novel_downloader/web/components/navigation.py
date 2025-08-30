@@ -1,16 +1,22 @@
 #!/usr/bin/env python3
 """
-novel_downloader.web.layout
----------------------------
+novel_downloader.web.components.navigation
+------------------------------------------
 
+A tiny NiceGUI component that renders the app's top navigation bar
 """
 
 from nicegui import ui
 
 
 def navbar(active: str) -> None:
+    """
+    Render the site-wide navigation header.
+
+    :param active: Key of the current page to highlight.
+    """
     with (
-        ui.header().classes("px-3 items-center justify-between"),
+        ui.header().classes("px-3 items-center justify-between bg-primary text-white"),
         ui.row().classes("items-center gap-2 flex-wrap"),
     ):
         _nav_btn("搜索", "/", active == "search", icon="search")

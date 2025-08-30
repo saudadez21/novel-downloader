@@ -90,9 +90,6 @@ class DownloaderConfig:
     login_required: bool = False
     save_html: bool = False
     storage_batch_size: int = 1
-    username: str = ""
-    password: str = ""
-    cookies: str = ""
 ```
 
 描述: 下载流程相关参数配置

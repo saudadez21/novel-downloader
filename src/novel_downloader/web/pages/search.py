@@ -14,22 +14,15 @@ from nicegui import ui
 
 from novel_downloader.core import search
 from novel_downloader.models import SearchResult
-from novel_downloader.web.layout import navbar
-from novel_downloader.web.state import (
-    register_portal,
-    task_manager,
-)
+from novel_downloader.web.components import navbar
+from novel_downloader.web.services import manager, setup_dialog
 
 
-@ui.page("/search")  # type: ignore[misc]
-def _alias_search() -> None:
-    render()
-
-
-def render() -> None:
+@ui.page("/")  # type: ignore[misc]
+def page_search() -> None:
     navbar("search")
-    register_portal()
     ui.label("搜索页面").classes("text-lg")
+    setup_dialog()
 
     with ui.row().classes("items-center gap-2 my-2 w-full"):
         query_in = (
@@ -64,7 +57,7 @@ def render() -> None:
         async def handler() -> None:
             title = r["title"]
             ui.notify(f"已添加任务：{title}")
-            await task_manager.add_task(
+            await manager.add_task(
                 title=title,
                 site=r["site"],
                 book_id=r["book_id"],

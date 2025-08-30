@@ -10,7 +10,6 @@ import asyncio
 import getpass
 from argparse import Namespace, _SubParsersAction
 from collections.abc import Iterable
-from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
@@ -141,6 +140,7 @@ async def _download(
     fetcher_cfg = adapter.get_fetcher_config()
     parser_cfg = adapter.get_parser_config()
     exporter_cfg = adapter.get_exporter_config()
+    login_cfg = adapter.get_login_config()
     log_level = adapter.get_log_level()
     setup_logging(log_level=log_level)
 
@@ -150,7 +150,7 @@ async def _download(
     async with get_fetcher(site, fetcher_cfg) as fetcher:
         if downloader_cfg.login_required and not await fetcher.load_state():
             login_data = await _prompt_login_fields(
-                fetcher, fetcher.login_fields, downloader_cfg
+                fetcher, fetcher.login_fields, login_cfg
             )
             if not await fetcher.login(**login_data):
                 print(t("download_login_failed"))
@@ -179,10 +179,10 @@ async def _download(
 async def _prompt_login_fields(
     fetcher: FetcherProtocol,
     fields: list[LoginField],
-    cfg: Any = None,
+    login_config: dict[str, str] | None = None,
 ) -> dict[str, Any]:
+    login_config = login_config or {}
     result: dict[str, Any] = {}
-    cfg_dict = asdict(cfg) if cfg else {}
 
     for field in fields:
         print(f"\n{field.label} ({field.name})")
@@ -191,7 +191,7 @@ async def _prompt_login_fields(
         if field.placeholder:
             print(f"{t('login_hint')}: {field.placeholder}")
 
-        existing_value = cfg_dict.get(field.name, "").strip()
+        existing_value = login_config.get(field.name, "").strip()
         if existing_value:
             result[field.name] = existing_value
             print(t("login_use_config"))
