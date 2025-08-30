@@ -1,42 +1,35 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.searchers.wanbengo
-----------------------------------------
+novel_downloader.core.searchers.xshbook
+---------------------------------------
 
 """
 
 import logging
-from urllib.parse import urljoin
 
 from lxml import html
-
 from novel_downloader.core.searchers.base import BaseSearcher
-from novel_downloader.core.searchers.registry import register_searcher
 from novel_downloader.models import SearchResult
+
+# from novel_downloader.core.searchers.registry import register_searcher
 
 logger = logging.getLogger(__name__)
 
 
-@register_searcher(
-    site_keys=["wanbengo"],
-)
-class WanbengoSearcher(BaseSearcher):
-    site_name = "wanbengo"
+# @register_searcher(
+#     site_keys=["xshbook"],
+# )
+class XshbookSearcher(BaseSearcher):
+    site_name = "xshbook"
     priority = 30
-    BASE_URL = "https://www.wanbengo.com"
+    BASE_URL = "https://www.xshbook.com"
     SEARCH_URL = "https://www.sososhu.com/"
 
     @classmethod
     async def _fetch_html(cls, keyword: str) -> str:
-        """
-        Fetch raw HTML from Wanbengo's search page.
-
-        :param keyword: The search term to query on Wanbengo.
-        :return: HTML text of the search results page, or an empty string on fail.
-        """
         params = {
             "q": keyword,
-            "site": "wbsz",
+            "site": "xshbook",
         }
         try:
             async with (await cls._http_get(cls.SEARCH_URL, params=params)) as resp:
@@ -51,13 +44,6 @@ class WanbengoSearcher(BaseSearcher):
 
     @classmethod
     def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
-        """
-        Parse raw HTML from Wanbengo search results into list of SearchResult.
-
-        :param html_str: Raw HTML string from Wanbengo search results page.
-        :param limit: Maximum number of results to return, or None for all.
-        :return: List of SearchResult dicts.
-        """
         doc = html.fromstring(html_str)
         rows = doc.xpath(
             "//div[contains(@class,'so_list')]//div[contains(@class,'hot')]//div[contains(@class,'item')]"
@@ -70,10 +56,7 @@ class WanbengoSearcher(BaseSearcher):
             a_nodes = row.xpath(".//dl/dt/a[1]")
             a = a_nodes[0] if a_nodes else None
             href = a.get("href") if a is not None else ""
-            book_url = href or ""
-            if book_url and not book_url.startswith("http"):
-                book_url = urljoin(cls.BASE_URL, book_url)
-            book_url = cls._restore_url(book_url)
+            book_url = cls._abs_url(href)
             book_id = cls._book_id_from_url(book_url) if book_url else ""
             if not book_id:
                 continue
@@ -104,11 +87,7 @@ class WanbengoSearcher(BaseSearcher):
         return results
 
     @staticmethod
-    def _restore_url(url: str) -> str:
-        return url.replace("www.wbsz.org", "www.wanbengo.com")
-
-    @staticmethod
     def _book_id_from_url(url: str) -> str:
-        tail = url.split("wanbengo.com", 1)[-1]
+        tail = url.split("xshbook.com", 1)[-1]
         tail = tail.strip("/")
         return tail.replace("/", "-")

@@ -6,7 +6,6 @@ novel_downloader.core.searchers.xiguashuwu
 """
 
 import logging
-import re
 
 from lxml import html
 
@@ -28,12 +27,6 @@ class XiguashuwuSearcher(BaseSearcher):
 
     @classmethod
     async def _fetch_html(cls, keyword: str) -> str:
-        """
-        Fetch raw HTML from Xiguashuwu's search page.
-
-        :param keyword: The search term to query on Xiguashuwu.
-        :return: HTML text of the search results page, or an empty string on fail.
-        """
         url = cls.SEARCH_URL.format(query=cls._quote(keyword))
         headers = {
             "Referer": "https://www.xiguashuwu.com/search/",
@@ -51,39 +44,39 @@ class XiguashuwuSearcher(BaseSearcher):
 
     @classmethod
     def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
-        """
-        Parse raw HTML from Xiguashuwu search results into list of SearchResult.
-
-        :param html_str: Raw HTML string from Xiguashuwu search results page.
-        :param limit: Maximum number of results to return, or None for all.
-        :return: List of SearchResult dicts.
-        """
         doc = html.fromstring(html_str)
         rows = doc.xpath('//div[@class="SHsectionThree-middle"]/p')
         results: list[SearchResult] = []
 
         for idx, row in enumerate(rows):
+            href = cls._first_str(
+                row.xpath(".//a[starts-with(@href,'/book/')][1]/@href")
+            ) or cls._first_str(row.xpath(".//a[1]/@href"))
+            if not href:
+                continue
+
             if limit is not None and idx >= limit:
                 break
 
-            # Book link: /book/{book_id}/...
-            book_link = row.xpath(".//a[1]/@href")
-            if not book_link:
-                continue
-            # Extract numeric book_id from URL
-            m = re.search(r"/book/(\d+)/", book_link[0])
-            if not m:
-                continue
-            book_id = m.group(1)
-            book_url = cls.BASE_URL + book_link[0]
+            # '/book/184974/iszip/0/' -> "184974"
+            book_id = href.split("/book/")[-1].split("/")[0]
+            book_url = cls._abs_url(href)
 
-            # Title text
-            title = row.xpath(".//a[1]/text()")
-            title = title[0].strip() if title else "-"
+            title = (
+                cls._first_str(
+                    row.xpath(".//a[starts-with(@href,'/book/')][1]//text()")
+                )
+                or cls._first_str(row.xpath(".//a[1]//text()"))
+                or "-"
+            )
 
-            # Author text (second <a>)
-            author = row.xpath(".//a[2]/text()")
-            author = author[0].strip() if author else "-"
+            author = (
+                cls._first_str(
+                    row.xpath(".//a[starts-with(@href,'/writer/')][1]//text()")
+                )
+                or cls._first_str(row.xpath(".//a[2]//text()"))
+                or "-"
+            )
 
             results.append(
                 SearchResult(

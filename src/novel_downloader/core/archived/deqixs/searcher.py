@@ -27,12 +27,6 @@ class DeqixsSearcher(BaseSearcher):
 
     @classmethod
     async def _fetch_html(cls, keyword: str) -> str:
-        """
-        Fetch raw HTML from Deqixs's search page.
-
-        :param keyword: The search term to query on Deqixs.
-        :return: HTML text of the search results page, or an empty string on fail.
-        """
         params = {"key": keyword}
         try:
             async with (await cls._http_get(cls.SEARCH_URL, params=params)) as resp:
@@ -47,13 +41,6 @@ class DeqixsSearcher(BaseSearcher):
 
     @classmethod
     def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
-        """
-        Parse raw HTML from Deqixs search results into list of SearchResult.
-
-        :param html_str: Raw HTML string from Deqixs search results page.
-        :param limit: Maximum number of results to return, or None for all.
-        :return: List of SearchResult dicts.
-        """
         doc = html.fromstring(html_str)
         rows = doc.xpath("//div[@class='container']/div[@class='item']")
         results: list[SearchResult] = []

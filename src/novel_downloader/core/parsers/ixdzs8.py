@@ -7,7 +7,6 @@ novel_downloader.core.parsers.ixdzs8
 
 import contextlib
 import json
-import re
 from typing import Any
 
 from lxml import html
@@ -41,85 +40,54 @@ class Ixdzs8Parser(BaseParser):
         # Parse HTML
         tree = html.fromstring(html_list[0])
 
-        book_id = ""
-        hrefs = tree.xpath("//a/@href") + tree.xpath(
-            "//link[@property='og:novel:read_url']/@content"
-        )
-        for h in hrefs:
-            m = re.search(r"/read/(\d+)(?:/|$)", h)
-            if m:
-                book_id = m.group(1)
-                break
-
-        book_name = self._clean_text(
-            "".join(tree.xpath("//div[@class='n-text']/h1/text()"))
-        )
-        author = self._clean_text(
-            "".join(
-                tree.xpath(
-                    "//div[@class='n-text']/p[a[contains(@class,'bauthor')]]/a/text()"
-                )
-            )
-        )
-        cover_url = self._clean_text(
-            "".join(tree.xpath("//div[@class='n-img']//img/@src"))
+        book_name = self._meta(tree, "og:novel:book_name") or self._first_str(
+            tree.xpath("//div[@class='n-text']/h1/text()")
         )
 
-        category = self._clean_text(
-            "".join(
-                tree.xpath(
-                    "//div[@class='n-text']/p[a[contains(@class,'nsort')]]/a/text()"
-                )
-            )
-        )
-        serial_status = self._clean_text(
-            "".join(
-                tree.xpath(
-                    "//div[@class='n-text']/p[a[contains(@class,'nsort')]]/span/text()"
-                )
-            )
+        author = self._meta(tree, "og:novel:author") or self._first_str(
+            tree.xpath("//div[@class='n-text']//a[contains(@class,'bauthor')]/text()")
         )
 
-        word_count = self._clean_text(
-            "".join(
-                tree.xpath(
-                    "//div[@class='n-text']//span[contains(@class,'nsize')]/text()"
-                )
-            )
+        cover_url = self._meta(tree, "og:image")
+        if not cover_url:
+            cover_url = self._first_str(tree.xpath("//div[@class='n-img']//img/@src"))
+
+        serial_status = self._meta(tree, "og:novel:status")
+
+        # 2022-08-25T18:08:03+08:00 -> 2022-08-25 18:08:03
+        iso_time = self._meta(tree, "og:novel:update_time")
+        update_time = ""
+        if iso_time:
+            update_time = iso_time.replace("T", " ").split("+", 1)[0].strip()
+
+        word_count = self._first_str(
+            tree.xpath("//div[@class='n-text']//span[contains(@class,'nsize')]/text()")
         )
 
-        update_time = self._clean_text(
-            "".join(
-                tree.xpath(
-                    "//div[@class='n-text']/p[starts-with(normalize-space(),'最新:')]/following-sibling::p[1]/text()"
-                )
-            )
+        raw_summary = self._meta(tree, "og:description")
+        summary = ""
+        if raw_summary:
+            s = raw_summary.replace("&nbsp;", "")
+            s = s.replace("<br />", "\n")
+            summary = "\n".join(
+                self._norm_space(line) for line in s.splitlines()
+            ).strip()
+
+        tags = [
+            self._norm_space(t)
+            for t in tree.xpath("//div[contains(@class,'tags')]//em/a/text()")
+            if t and t.strip()
+        ]
+        category = self._meta(tree, "og:novel:category") or self._first_str(
+            tree.xpath("//div[@class='n-text']/p[a[contains(@class,'nsort')]]/a/text()")
         )
-        if update_time.startswith("更新:"):
-            update_time = update_time.replace("更新:", "", 1).strip()
-        if not update_time:
-            update_time = self._clean_text(
-                "".join(tree.xpath("//meta[@property='og:novel:update_time']/@content"))
-            )
-
-        intro_node = tree.xpath("//p[@id='intro' or contains(@class,'pintro')]")
-        if intro_node:
-            summary_raw = intro_node[0].text_content()
-        else:
-            summary_raw = "".join(
-                tree.xpath("//meta[@property='og:description']/@content")
-            )
-        summary = self._clean_text(summary_raw)
-
-        tags = []
         if category:
             tags.append(category)
-        tags.extend(
-            [
-                self._clean_text(t)
-                for t in tree.xpath("//div[contains(@class,'tags')]//em/a/text()")
-            ]
-        )
+
+        book_path = self._meta(tree, "og:novel:read_url") or self._meta(tree, "og:url")
+        book_id = ""
+        if book_path:
+            book_id = book_path.strip("/").split("/")[-1]
 
         data = {}
         with contextlib.suppress(Exception):
@@ -131,12 +99,12 @@ class Ixdzs8Parser(BaseParser):
             ordernum = str(chap.get("ordernum", "")).strip()
             if not ordernum:
                 continue
-            title = self._clean_text(chap.get("title", "") or "")
+            title = self._norm_space(chap.get("title", "") or "") or "未命名章节"
             url = f"/read/{book_id}/p{ordernum}.html" if book_id else ""
             chapters.append(
                 {
                     "url": url,
-                    "title": title or "未命名章节",
+                    "title": title,
                     "chapterId": f"p{ordernum}",
                 }
             )
@@ -166,36 +134,30 @@ class Ixdzs8Parser(BaseParser):
             return None
         tree = html.fromstring(html_list[0])
 
-        title = ""
-        for xp in (
-            "//div[@class='page-d-top']/h1/text()",
-            "//article[contains(@class,'page-content')]//h3/text()",
-            "string(//title)",
-        ):
-            t = "".join(tree.xpath(xp)).strip()
-            if t:
-                if xp == "string(//title)":
-                    # Strip site suffix (e.g., "_书名-站点")
-                    t = re.split(r"[_|\-—]", t, maxsplit=1)[0].strip()
-                title = self._clean_text(t)
-                break
+        title = self._first_str(tree.xpath("//div[@class='page-d-top']/h1/text()"))
+        if not title:
+            title = self._first_str(
+                tree.xpath("//article[contains(@class,'page-content')]//h3/text()")
+            )
+        title = self._norm_space(title)
 
-        # Collect content paragraphs within the reading section (skip ads)
+        # paragraphs within the reading section; skip ad containers
         ps = tree.xpath(
             "//article[contains(@class,'page-content')]//section//p[not(contains(@class,'abg'))]"
         )
 
         paragraphs: list[str] = []
         for p in ps:
-            txt = p.text_content()
-            txt = self._clean_text(txt)
-            if txt:
-                paragraphs.append(txt)
+            raw = p.text_content()
+            txt = self._norm_space(raw)
+            if not txt or self._is_ad_line(txt):
+                continue
+            paragraphs.append(txt)
 
         if not paragraphs:
             return None
 
-        # 1) Replace FIRST line with .replace(title, "")
+        # Replace FIRST line with .replace(title, "")
         first = paragraphs[0].replace(title, "")
         first = first.replace(title.replace(" ", ""), "").strip()
         if first:
@@ -205,7 +167,7 @@ class Ixdzs8Parser(BaseParser):
 
         if paragraphs:
             last = paragraphs[-1]
-            if ("(本章完)" in last) or ("（本章完）" in last):
+            if "本章完" in last:
                 paragraphs.pop()
 
         content = "\n".join(paragraphs)
@@ -219,9 +181,6 @@ class Ixdzs8Parser(BaseParser):
             "extra": {"site": "ixdzs8"},
         }
 
-    @staticmethod
-    def _clean_text(s: str) -> str:
-        # Collapse whitespace and HTML artifacts.
-        s = s.replace("\xa0", " ").replace("\u3000", " ")
-        s = re.sub(r"\s+", " ", s, flags=re.S).strip()
-        return s
+    @classmethod
+    def _meta(cls, tree: html.HtmlElement, prop: str) -> str:
+        return cls._first_str(tree.xpath(f"//meta[@property='{prop}']/@content"))

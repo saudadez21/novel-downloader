@@ -6,7 +6,6 @@ novel_downloader.core.searchers.qianbi
 """
 
 import logging
-import re
 
 from lxml import html
 
@@ -28,12 +27,6 @@ class QianbiSearcher(BaseSearcher):
 
     @classmethod
     async def _fetch_html(cls, keyword: str) -> str:
-        """
-        Fetch raw HTML from Qianbi's search page.
-
-        :param keyword: The search term to query on Qianbi.
-        :return: HTML text of the search results page, or an empty string on fail.
-        """
         params = {"searchkey": keyword}
         try:
             async with (await cls._http_get(cls.SEARCH_URL, params=params)) as resp:
@@ -48,13 +41,6 @@ class QianbiSearcher(BaseSearcher):
 
     @classmethod
     def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
-        """
-        Parse raw HTML from Qianbi search results into list of SearchResult.
-
-        :param html_str: Raw HTML string from Qianbi search results page.
-        :param limit: Maximum number of results to return, or None for all.
-        :return: List of SearchResult dicts.
-        """
         if html_str.find('<meta property="og:url"') != -1:
             return cls._parse_detail_html(html_str)
         return cls._parse_search_list_html(html_str, limit)
@@ -68,48 +54,47 @@ class QianbiSearcher(BaseSearcher):
         :return: A single-element list with the book's SearchResult.
         """
         doc = html.fromstring(html_str)
-        url = doc.xpath('//meta[@property="og:url"]/@content')
-        if not url:
+
+        book_url = cls._first_str(doc.xpath("//meta[@property='og:url']/@content"))
+        if not book_url:
             return []
 
-        # extract book_id via regex
-        m = re.search(r"/book/(\d+)/", url[0])
-        book_id = m.group(1) if m else ""
-        if not book_id:
-            return []
+        # 'https://www.23qb.com/book/9268/' -> "9268"
+        book_id = book_url.split("book/", 1)[-1].strip("/")
 
-        cover_nodes = doc.xpath('//div[contains(@class,"novel-cover")]//img/@data-src')
-        if not cover_nodes:
-            cover_nodes = doc.xpath('//div[contains(@class,"novel-cover")]//img/@src')
-        cover_url = cover_nodes[0].strip() if cover_nodes else ""
-
-        # title from <h1 class="page-title">
-        title = (doc.xpath('//h1[@class="page-title"]/text()') or [""])[0].strip()
-        author = (doc.xpath('//a[contains(@href,"/author/")]/@title') or [""])[
-            0
-        ].strip()
-
-        latest_elem = doc.xpath(
-            '//div[@class="module-row-info"]//a[@class="module-row-text"]'
+        cover_rel = cls._first_str(
+            doc.xpath("//div[contains(@class,'novel-cover')]//img/@data-src")
+        ) or cls._first_str(
+            doc.xpath("//div[contains(@class,'novel-cover')]//img/@src")
         )
+        cover_url = cls._abs_url(cover_rel) if cover_rel else ""
+
+        title = cls._first_str(doc.xpath("//h1[@class='page-title']/text()"))
+        author = cls._first_str(doc.xpath("//a[contains(@href, '/author/')]/@title"))
+
         latest_chapter = (
-            latest_elem[0].get("title", "-").strip() if latest_elem else "-"
+            cls._first_str(
+                doc.xpath(
+                    "//div[@class='module-row-info']//a[@class='module-row-text']/@title"
+                )
+            )
+            or "-"
+        )
+        update_date = (
+            cls._first_str(
+                doc.xpath("//div[@class='module-heading newchapter']/time/text()"),
+                replaces=[("更新时间：", "")],
+            )
+            or "-"
         )
 
-        time_text = doc.xpath('//div[@class="module-heading newchapter"]/time/text()')
-        if time_text:
-            update_date = time_text[0].replace("更新时间：", "-").strip()
-        else:
-            update_date = "-"
-
-        wc_text = doc.xpath('//span[contains(text(), "字")]/text()')
-        word_count = wc_text[0].strip() if wc_text else ""
+        word_count = cls._first_str(doc.xpath("//span[contains(text(), '字')]/text()"))
 
         return [
             SearchResult(
                 site=cls.site_name,
                 book_id=book_id,
-                book_url=url[0],
+                book_url=book_url,
                 cover_url=cover_url,
                 title=title,
                 author=author,
@@ -136,24 +121,29 @@ class QianbiSearcher(BaseSearcher):
         results: list[SearchResult] = []
 
         for idx, item in enumerate(items):
+            href = cls._first_str(
+                item.xpath(".//div[@class='novel-info-header']/h3/a/@href")
+            )
+            if not href:
+                continue
+
             if limit is not None and idx >= limit:
                 break
-            # Title and book_id
-            link = item.xpath('.//div[@class="novel-info-header"]/h3/a')[0]
-            title = link.text_content().strip()
-            href = link.get("href", "").strip("/")
-            book_id = href.replace("book/", "").strip("/")
-            if not book_id:
-                continue
-            book_url = cls.BASE_URL + href
-            cover_nodes = item.xpath(
-                './/div[contains(@class,"module-item-pic")]//img/@data-src'
+
+            # '/book/9138/' -> "9138"
+            book_id = href.rstrip("/").split("/")[-1]
+            book_url = cls._abs_url(href)
+
+            title = cls._first_str(
+                item.xpath(".//div[@class='novel-info-header']/h3/a//text()")
             )
-            if not cover_nodes:
-                cover_nodes = item.xpath(
-                    './/div[contains(@class,"module-item-pic")]//img/@src'
-                )
-            cover_url = cover_nodes[0].strip() if cover_nodes else ""
+
+            cover_rel = cls._first_str(
+                item.xpath(".//div[contains(@class,'module-item-pic')]//img/@data-src")
+            ) or cls._first_str(
+                item.xpath(".//div[contains(@class,'module-item-pic')]//img/@src")
+            )
+            cover_url = cls._abs_url(cover_rel) if cover_rel else ""
 
             # Compute priority
             prio = cls.priority + idx

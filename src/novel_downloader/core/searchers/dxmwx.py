@@ -6,7 +6,6 @@ novel_downloader.core.searchers.dxmwx
 """
 
 import logging
-from urllib.parse import urljoin
 
 from lxml import html
 
@@ -28,12 +27,6 @@ class DxmwxSearcher(BaseSearcher):
 
     @classmethod
     async def _fetch_html(cls, keyword: str) -> str:
-        """
-        Fetch raw HTML from Dxmwx's search page.
-
-        :param keyword: The search term to query on Dxmwx.
-        :return: HTML text of the search results page, or an empty string on fail.
-        """
         url = cls.SEARCH_URL.format(query=cls._quote(keyword))
         try:
             async with (await cls._http_get(url)) as resp:
@@ -48,13 +41,6 @@ class DxmwxSearcher(BaseSearcher):
 
     @classmethod
     def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
-        """
-        Parse raw HTML from Dxmwx search results into list of SearchResult.
-
-        :param html_str: Raw HTML string from Dxmwx search results page.
-        :param limit: Maximum number of results to return, or None for all.
-        :return: List of SearchResult dicts.
-        """
         doc = html.fromstring(html_str)
         rows = doc.xpath(
             "//div[@id='ListContents']/div[contains(@style,'position: relative')]"
@@ -62,35 +48,38 @@ class DxmwxSearcher(BaseSearcher):
         results: list[SearchResult] = []
 
         for idx, row in enumerate(rows):
+            href = cls._first_str(
+                row.xpath(".//div[contains(@class,'margin0h5')]//a[1]/@href")
+            )
+            if not href:
+                continue
+
             if limit is not None and idx >= limit:
                 break
+
+            book_url = cls._abs_url(href)
+            # "/book/10409.html" -> "10409"
+            book_id = href.split("/")[-1].split(".", 1)[0]
 
             title = cls._first_str(
                 row.xpath(".//div[contains(@class,'margin0h5')]//a[1]/text()")
             )
-            href = cls._first_str(
-                row.xpath(".//div[contains(@class,'margin0h5')]//a[1]/@href")
-            )
-            book_url = cls._abs_url(href)
-            book_id = cls._book_id_from_book_url(href)
 
             author = cls._first_str(
                 row.xpath(".//div[contains(@class,'margin0h5')]//a[2]/text()")
             )
 
-            cover_url = cls._abs_url(
-                cls._first_str(
-                    row.xpath(".//div[contains(@class,'imgwidth')]//img/@src")
+            cover_src = cls._first_str(
+                row.xpath(".//div[contains(@class,'imgwidth')]//img/@src")
+            )
+            cover_url = cls._abs_url(cover_src) if cover_src else ""
+
+            latest_chapter = cls._first_str(
+                row.xpath(
+                    ".//a[span and span[contains(normalize-space(.),'最新章节')]]"
+                    "/span/following-sibling::text()[1]"
                 )
             )
-
-            latest_a_nodes = row.xpath(
-                ".//a[span and span[contains(normalize-space(.), '最新章节')]]"
-            )
-            latest_chapter = ""
-            if latest_a_nodes:
-                txt = latest_a_nodes[0].text_content()
-                latest_chapter = txt.replace("最新章节", "").strip()
 
             update_date = cls._first_str(
                 row.xpath(".//span[contains(@class,'lefth5')]/text()")
@@ -114,16 +103,3 @@ class DxmwxSearcher(BaseSearcher):
                 )
             )
         return results
-
-    @staticmethod
-    def _book_id_from_book_url(href: str) -> str:
-        # "/book/10409.html" -> "10409"
-        return href.split("/book/", 1)[-1].split(".html", 1)[0]
-
-    @classmethod
-    def _abs_url(cls, url: str) -> str:
-        return (
-            url
-            if url.startswith(("http://", "https://"))
-            else urljoin(cls.BASE_URL, url)
-        )

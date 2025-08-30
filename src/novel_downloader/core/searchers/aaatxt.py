@@ -6,7 +6,6 @@ novel_downloader.core.searchers.aaatxt
 """
 
 import logging
-import re
 
 from lxml import html
 
@@ -27,12 +26,6 @@ class AaatxtSearcher(BaseSearcher):
 
     @classmethod
     async def _fetch_html(cls, keyword: str) -> str:
-        """
-        Fetch raw HTML from Aaatxt's search page.
-
-        :param keyword: The search term to query on Aaatxt.
-        :return: HTML text of the search results page, or an empty string on fail.
-        """
         # gbk / gb2312
         params = {
             "keyword": cls._quote(keyword, encoding="gb2312", errors="replace"),
@@ -56,45 +49,46 @@ class AaatxtSearcher(BaseSearcher):
 
     @classmethod
     def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
-        """
-        Parse raw HTML from Aaatxt search results into list of SearchResult.
-
-        :param html_str: Raw HTML string from Aaatxt search results page.
-        :param limit: Maximum number of results to return, or None for all.
-        :return: List of SearchResult dicts.
-        """
         doc = html.fromstring(html_str)
         rows = doc.xpath("//div[@class='sort']//div[@class='list']/table")
         results: list[SearchResult] = []
 
         for idx, row in enumerate(rows):
+            href = cls._first_str(row.xpath(".//td[@class='name']/h3/a/@href"))
+            if not href:
+                continue
+
             if limit is not None and idx >= limit:
                 break
-            # Cover and URL
-            cover_url = row.xpath(".//td[@class='cover']/a/img/@src")[0]
-            book_url = row.xpath(".//td[@class='name']/h3/a/@href")[0]
-            book_id = book_url.rstrip(".html").split("/")[-1]
-            title = row.xpath(".//td[@class='name']/h3/a/text()")[0].strip()
 
-            # Parse size and uploader from the size cell
-            size_cell = row.xpath(".//td[@class='size']")[0].text_content().strip()
-            # Extract word count using regex (e.g., '465K')
-            m_wc = re.search(r"大小:([^\s\xa0]+)", size_cell)
-            word_count = m_wc.group(1) if m_wc else "-"
+            book_id = href.split("/")[-1].split(".")[0]
+            book_url = cls._abs_url(href)
 
-            # Extract author/uploader (after '上传:')
-            m_auth = re.search(r"上传:([^\s\xa0]+)", size_cell)
-            author = m_auth.group(1) if m_auth else "-"
+            cover_rel = cls._first_str(row.xpath(".//td[@class='cover']/a/img/@src"))
+            cover_url = cls._abs_url(cover_rel) if cover_rel else ""
 
-            # Intro for update date
-            intro = row.xpath(".//td[@class='intro']")[0].text_content()
+            title = cls._first_str(row.xpath(".//td[@class='name']/h3/a//text()"))
+
+            size_text = row.xpath("string(.//td[@class='size'])")
+            size_norm = size_text.replace("\u00a0", " ").replace("&nbsp;", " ").strip()
+            tokens = [t for t in size_norm.split() if t]
+
+            word_count = "-"
+            author = "-"
+            for tok in tokens:
+                if tok.startswith("大小:"):
+                    word_count = tok.split(":", 1)[1].strip()
+                elif tok.startswith("上传:"):
+                    author = tok.split(":", 1)[1].strip()
+
+            intro_text = row.xpath("string(.//td[@class='intro'])")
+            intro_norm = intro_text.replace("\u00a0", " ").replace("&nbsp;", " ")
             update_date = "-"
-            if "更新:" in intro:
-                parts = intro.split("更新:", 1)
-                date_part = parts[1].strip()
-                match = re.match(r"(\d{4}-\d{2}-\d{2})", date_part)
-                if match:
-                    update_date = match.group(1)
+            for marker in ("更新:", "更新："):
+                if marker in intro_norm:
+                    tail = intro_norm.split(marker, 1)[1].strip()
+                    update_date = tail.split()[0] if tail else "-"
+                    break
 
             results.append(
                 SearchResult(

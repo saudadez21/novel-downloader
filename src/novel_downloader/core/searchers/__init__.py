@@ -24,11 +24,9 @@ __all__ = [
     "ShuhaigeSearcher",
     "TongrenquanSearcher",
     "TtkanSearcher",
-    "WanbengoSearcher",
     "XiaoshuowuSearcher",
     "XiguashuwuSearcher",
     "Xs63bSearcher",
-    "XshbookSearcher",
 ]
 
 from .aaatxt import AaatxtSearcher
@@ -48,8 +46,6 @@ from .registry import search
 from .shuhaige import ShuhaigeSearcher
 from .tongrenquan import TongrenquanSearcher
 from .ttkan import TtkanSearcher
-from .wanbengo import WanbengoSearcher
 from .xiaoshuowu import XiaoshuowuSearcher
 from .xiguashuwu import XiguashuwuSearcher
 from .xs63b import Xs63bSearcher
-from .xshbook import XshbookSearcher

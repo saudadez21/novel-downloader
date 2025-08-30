@@ -27,12 +27,6 @@ class BiqugeSearcher(BaseSearcher):
 
     @classmethod
     async def _fetch_html(cls, keyword: str) -> str:
-        """
-        Fetch raw HTML from Biquge's search page.
-
-        :param keyword: The search term to query on Biquge.
-        :return: HTML text of the search results page, or an empty string on fail.
-        """
         params = {"searchkey": keyword}
         try:
             async with (await cls._http_get(cls.SEARCH_URL, params=params)) as resp:
@@ -47,38 +41,29 @@ class BiqugeSearcher(BaseSearcher):
 
     @classmethod
     def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
-        """
-        Parse raw HTML from Biquge search results into list of SearchResult.
-
-        :param html_str: Raw HTML string from Biquge search results page.
-        :param limit: Maximum number of results to return, or None for all.
-        :return: List of SearchResult dicts.
-        """
         doc = html.fromstring(html_str)
         rows = doc.xpath('//table[@class="grid"]//tr[position()>1]')
         results: list[SearchResult] = []
 
         for idx, row in enumerate(rows):
+            href = cls._first_str(row.xpath(".//td[1]/a[1]/@href"))
+            if not href:
+                continue
+
             if limit is not None and idx >= limit:
                 break
-            # Title and book_id
-            title_elem = row.xpath(".//td[1]/a")[0]
-            title = title_elem.text_content().strip()
-            href = title_elem.get("href", "").strip("/")
-            book_id = href.split("/")[0] if href else ""
-            if not book_id:
-                continue
-            book_url = cls.BASE_URL + href
 
-            latest_elem = row.xpath(".//td[2]/a")
-            latest_chapter = (
-                latest_elem[0].text_content().strip() if latest_elem else "-"
-            )
+            book_id = href.strip("/").split("/")[-1]
+            book_url = cls._abs_url(href)
 
-            author = row.xpath(".//td[3]")[0].text_content().strip()
+            title = cls._first_str(row.xpath(".//td[1]/a[1]/text()"))
 
-            word_count = row.xpath(".//td[4]")[0].text_content().strip()
-            update_date = row.xpath(".//td[5]")[0].text_content().strip()
+            latest_chapter = cls._first_str(row.xpath(".//td[2]/a[1]/text()")) or "-"
+
+            author = cls._first_str(row.xpath(".//td[3]//text()"))
+            word_count = cls._first_str(row.xpath(".//td[4]//text()"))
+            update_date = cls._first_str(row.xpath(".//td[5]//text()"))
+
             # Compute priority
             prio = cls.priority + idx
 

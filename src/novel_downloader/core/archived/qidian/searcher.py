@@ -8,7 +8,6 @@ novel_downloader.core.searchers.qidian
 import logging
 
 from lxml import html
-
 from novel_downloader.core.searchers.base import BaseSearcher
 from novel_downloader.models import SearchResult
 
@@ -29,12 +28,6 @@ class QidianSearcher(BaseSearcher):
 
     @classmethod
     async def _fetch_html(cls, keyword: str) -> str:
-        """
-        Fetch raw HTML from Qidian's search page.
-
-        :param keyword: The search term to query on Qidian.
-        :return: HTML text of the search results page, or an empty string on fail.
-        """
         url = cls.SEARCH_URL.format(query=cls._quote(keyword))
         try:
             async with (await cls._http_get(url)) as resp:
@@ -49,13 +42,6 @@ class QidianSearcher(BaseSearcher):
 
     @classmethod
     def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
-        """
-        Parse raw HTML from Qidian search results into list of SearchResult.
-
-        :param html_str: Raw HTML string from Qidian search results page.
-        :param limit: Maximum number of results to return, or None for all.
-        :return: List of SearchResult dicts.
-        """
         doc = html.fromstring(html_str)
         items = doc.xpath(
             '//div[@id="result-list"]//li[contains(@class, "res-book-item")]'

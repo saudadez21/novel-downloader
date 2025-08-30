@@ -27,12 +27,6 @@ class EsjzoneSearcher(BaseSearcher):
 
     @classmethod
     async def _fetch_html(cls, keyword: str) -> str:
-        """
-        Fetch raw HTML from Esjzone's search page.
-
-        :param keyword: The search term to query on Esjzone.
-        :return: HTML text of the search results page, or an empty string on fail.
-        """
         url = cls.SEARCH_URL.format(query=cls._quote(keyword))
         try:
             async with (await cls._http_get(url)) as resp:
@@ -47,38 +41,41 @@ class EsjzoneSearcher(BaseSearcher):
 
     @classmethod
     def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
-        """
-        Parse raw HTML from Esjzone search results into list of SearchResult.
-
-        :param html_str: Raw HTML string from Esjzone search results page.
-        :param limit: Maximum number of results to return, or None for all.
-        :return: List of SearchResult dicts.
-        """
         doc = html.fromstring(html_str)
         cards = doc.xpath('//div[contains(@class,"card-body")]')
         results: list[SearchResult] = []
 
         for idx, card in enumerate(cards):
+            href = cls._first_str(
+                card.xpath(".//h5[contains(@class,'card-title')]/a[1]/@href")
+            )
+            if not href:
+                continue
+
             if limit is not None and idx >= limit:
                 break
-            # Title and book_id
-            link = card.xpath('.//h5[@class="card-title"]/a')[0]
-            title = link.text_content().strip()
-            href = link.get("href", "")
-            # href format: /detail/<book_id>.html
-            book_id = href.strip("/").replace("detail/", "").replace(".html", "")
-            if not book_id:
-                continue
-            book_url = cls.BASE_URL + href
 
-            latest_elems = card.xpath('.//div[contains(@class,"card-ep")]/a')
+            # href format: /detail/<book_id>.html
+            book_id = href.split("/")[-1].split(".")[0]
+            book_url = cls._abs_url(href)
+
+            title = cls._first_str(
+                card.xpath(".//h5[contains(@class,'card-title')]/a[1]//text()")
+            )
+
             latest_chapter = (
-                latest_elems[0].text_content().strip() if latest_elems else "-"
+                cls._first_str(
+                    card.xpath(".//div[contains(@class,'card-ep')]//a[1]//text()")
+                )
+                or "-"
             )
 
             # Author
-            author_link = card.xpath('.//div[@class="card-author"]/a')[0]
-            author = author_link.text_content().strip()
+            author = cls._first_str(
+                card.xpath(".//div[contains(@class,'card-author')]//a[1]//text()")
+            ) or cls._first_str(
+                card.xpath(".//div[contains(@class,'card-author')]//text()")
+            )
 
             cover_data = card.xpath(
                 './preceding-sibling::a[contains(@class,"card-img-tiles")]'

@@ -6,7 +6,6 @@ novel_downloader.core.searchers.ixdzs8
 """
 
 import logging
-import re
 
 from lxml import html
 
@@ -28,12 +27,6 @@ class Ixdzs8Searcher(BaseSearcher):
 
     @classmethod
     async def _fetch_html(cls, keyword: str) -> str:
-        """
-        Fetch raw HTML from Ixdzs8's search page.
-
-        :param keyword: The search term to query on Ixdzs8.
-        :return: HTML text of the search results page, or an empty string on fail.
-        """
         params = {"q": keyword}
         try:
             async with (await cls._http_get(cls.SEARCH_URL, params=params)) as resp:
@@ -48,77 +41,51 @@ class Ixdzs8Searcher(BaseSearcher):
 
     @classmethod
     def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
-        """
-        Parse raw HTML from Ixdzs8 search results into list of SearchResult.
-
-        :param html_str: Raw HTML string from Ixdzs8 search results page.
-        :param limit: Maximum number of results to return, or None for all.
-        :return: List of SearchResult dicts.
-        """
         doc = html.fromstring(html_str)
         rows = doc.xpath("//ul[contains(@class,'u-list')]/li[contains(@class,'burl')]")
         results: list[SearchResult] = []
 
         for idx, row in enumerate(rows):
+            book_path = cls._first_str(row.xpath("./@data-url"))
+            if not book_path:
+                book_path = cls._first_str(
+                    row.xpath(".//h3[contains(@class,'bname')]/a/@href")
+                )
+            if not book_path:
+                continue
+
             if limit is not None and idx >= limit:
                 break
 
-            # Book path & ID
-            book_path = (row.get("data-url") or "").strip()
-            if not book_path:
-                book_path = "".join(
-                    row.xpath(".//h3[contains(@class,'bname')]//a/@href")
-                ).strip()
-            # Ensure leading slash
-            if (
-                book_path
-                and not book_path.startswith("/")
-                and book_path.startswith("read/")
-            ):
-                book_path = "/" + book_path
-            m = re.search(r"/read/(\d+)/?", book_path)
-            book_id = m.group(1) if m else ""
+            book_id = book_path.strip("/").split("/")[-1]
+            book_url = cls._abs_url(book_path)
 
-            # Absolute book URL
-            book_url = (
-                f"{cls.BASE_URL}{book_path}"
-                if book_path.startswith("/")
-                else (book_path or "")
+            cover_rel = cls._first_str(
+                row.xpath(".//div[contains(@class,'l-img')]//img/@src")
+            )
+            cover_url = cls._abs_url(cover_rel) if cover_rel else ""
+
+            title = cls._first_str(
+                row.xpath(".//h3[contains(@class,'bname')]/a/@title")
+            ) or cls._first_str(row.xpath(".//h3[contains(@class,'bname')]/a/text()"))
+
+            author = cls._first_str(
+                row.xpath(".//span[contains(@class,'bauthor')]//a/text()")
+            )
+            word_count = cls._first_str(
+                row.xpath(".//span[contains(@class,'size')]/text()")
             )
 
-            # Cover, title, author, counts
-            cover_url = cls._clean_text(
-                "".join(row.xpath(".//div[contains(@class,'l-img')]//img/@src"))
-            )
-            title = cls._clean_text(
-                "".join(row.xpath(".//h3[contains(@class,'bname')]/a/@title"))
-            )
-            author = cls._clean_text(
-                "".join(row.xpath(".//span[contains(@class,'bauthor')]//a/text()"))
-            )
-            word_count = cls._clean_text(
-                "".join(row.xpath(".//span[contains(@class,'size')]/text()"))
-            )
-
-            # Latest chapter title and update time
-            latest_chapter = cls._clean_text(
-                "".join(
-                    row.xpath(
-                        ".//p[contains(@class,'l-last')]//span[contains(@class,'l-chapter')]/text()"
-                    )
+            latest_chapter = cls._first_str(
+                row.xpath(
+                    ".//p[contains(@class,'l-last')]//span[contains(@class,'l-chapter')]/text()"
                 )
             )
-            update_date = cls._clean_text(
-                "".join(
-                    row.xpath(
-                        ".//p[contains(@class,'l-last')]//span[contains(@class,'l-time')]/text()"
-                    )
+            update_date = cls._first_str(
+                row.xpath(
+                    ".//p[contains(@class,'l-last')]//span[contains(@class,'l-time')]/text()"
                 )
             )
-
-            # Fallbacks
-            if not title and book_id:
-                title = f"Book {book_id}"
 
             # Compute priority
             prio = cls.priority + idx
@@ -138,9 +105,3 @@ class Ixdzs8Searcher(BaseSearcher):
                 )
             )
         return results
-
-    @staticmethod
-    def _clean_text(s: str) -> str:
-        return re.sub(
-            r"\s+", " ", (s or "").replace("\xa0", " ").replace("\u3000", " ")
-        ).strip()

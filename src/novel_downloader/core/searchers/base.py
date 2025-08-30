@@ -8,7 +8,7 @@ Abstract base class providing common utilities for site-specific searchers.
 
 import abc
 from typing import Any, ClassVar
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, urljoin
 
 import aiohttp
 
@@ -19,6 +19,7 @@ from novel_downloader.utils.constants import DEFAULT_USER_HEADERS
 
 class BaseSearcher(abc.ABC, SearcherProtocol):
     site_name: str
+    BASE_URL: str = ""
     _session: ClassVar[aiohttp.ClientSession | None] = None
 
     @classmethod
@@ -33,13 +34,24 @@ class BaseSearcher(abc.ABC, SearcherProtocol):
     @classmethod
     @abc.abstractmethod
     async def _fetch_html(cls, keyword: str) -> str:
-        """Get raw HTML from search API or page"""
+        """
+        Fetch raw HTML from search API or page
+
+        :param keyword: The search term to query.
+        :return: HTML text of the search results page, or an empty string on fail.
+        """
         pass
 
     @classmethod
     @abc.abstractmethod
     def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
-        """Parse HTML into standard search result list"""
+        """
+        Parse raw HTML from search API or page into list of SearchResult.
+
+        :param html_str: Raw HTML string from search results page.
+        :param limit: Maximum number of results to return, or None for all.
+        :return: List of SearchResult dicts.
+        """
         pass
 
     @classmethod
@@ -146,3 +158,11 @@ class BaseSearcher(abc.ABC, SearcherProtocol):
     def _build_url(base: str, params: dict[str, str]) -> str:
         query_string = "&".join(f"{k}={v}" for k, v in params.items())
         return f"{base}?{query_string}"
+
+    @classmethod
+    def _abs_url(cls, url: str) -> str:
+        return (
+            url
+            if url.startswith(("http://", "https://"))
+            else urljoin(cls.BASE_URL, url)
+        )

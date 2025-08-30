@@ -27,12 +27,6 @@ class EightnovelSearcher(BaseSearcher):
 
     @classmethod
     async def _fetch_html(cls, keyword: str) -> str:
-        """
-        Fetch raw HTML from 8novel's search page.
-
-        :param keyword: The search term to query on 8novel.
-        :return: HTML text of the search results page, or an empty string on fail.
-        """
         params = {"key": keyword}
         try:
             async with (await cls._http_get(cls.SEARCH_URL, params=params)) as resp:
@@ -47,37 +41,28 @@ class EightnovelSearcher(BaseSearcher):
 
     @classmethod
     def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
-        """
-        Parse raw HTML from 8novel search results into list of SearchResult.
-
-        :param html_str: Raw HTML string from 8novel search results page.
-        :param limit: Maximum number of results to return, or None for all.
-        :return: List of SearchResult dicts.
-        """
         doc = html.fromstring(html_str)
         anchors = doc.xpath("//div[contains(@class,'picsize')]/a")
         results: list[SearchResult] = []
 
         for idx, a in enumerate(anchors):
+            href = cls._first_str(a.xpath("./@href"))
+            if not href:
+                continue
+
             if limit is not None and idx >= limit:
                 break
 
-            # Extract book_id from href, e.g. '/novelbooks/6045'
-            href = a.get("href", "").strip()
+            # '/novelbooks/6045' -> "6045"
             book_id = href.rstrip("/").split("/")[-1]
-            if not book_id:
-                continue
-            book_url = cls.BASE_URL + href
+            book_url = cls._abs_url(href)
 
-            img_src = a.xpath(".//img/@src")
-            cover_url = img_src[0] if img_src else ""
-            if cover_url.startswith("/"):
-                cover_url = cls.BASE_URL + cover_url
+            cover_rel = cls._first_str(a.xpath(".//img/@src"))
+            cover_url = cls._abs_url(cover_rel) if cover_rel else ""
 
-            title = a.get("title", "").strip()
+            title = cls._first_str(a.xpath("./@title"))
 
-            eps = a.xpath(".//eps")
-            word_count = eps[0].text_content().strip() if eps else "-"
+            word_count = cls._first_str(a.xpath(".//eps//text()")) or "-"
 
             # Compute priority
             prio = cls.priority + idx

@@ -6,7 +6,6 @@ novel_downloader.core.searchers.qbtr
 """
 
 import logging
-import re
 
 from lxml import html
 
@@ -28,12 +27,6 @@ class QbtrSearcher(BaseSearcher):
 
     @classmethod
     async def _fetch_html(cls, keyword: str) -> str:
-        """
-        Fetch raw HTML from Qbtr's search page.
-
-        :param keyword: The search term to query on Qbtr.
-        :return: HTML text of the search results page, or an empty string on fail.
-        """
         keyboard = cls._quote(keyword, encoding="gbk", errors="replace")
         show = "title"
         classid = "0"
@@ -58,37 +51,40 @@ class QbtrSearcher(BaseSearcher):
 
     @classmethod
     def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
-        """
-        Parse raw HTML from Qbtr search results into list of SearchResult.
-
-        :param html_str: Raw HTML string from Qbtr search results page.
-        :param limit: Maximum number of results to return, or None for all.
-        :return: List of SearchResult dicts.
-        """
         doc = html.fromstring(html_str)
         rows = doc.xpath('//div[@class="books m-cols"]/div[@class="bk"]')
         results: list[SearchResult] = []
 
         for idx, row in enumerate(rows):
+            href = cls._first_str(row.xpath(".//h3/a[1]/@href"))
+            if not href:
+                continue
+
             if limit is not None and idx >= limit:
                 break
-            # Title and book_id
-            link_elem = row.xpath(".//h3/a")[0]
-            href = link_elem.get("href", "").strip()
-            m = re.match(r"^/([^/]+)/(\d+)\.html$", href)
-            book_id = f"{m.group(1)}-{m.group(2)}" if m else ""
-            if not book_id:
-                continue
-            book_url = cls.BASE_URL + href
 
-            title = link_elem.text_content().strip()
+            # '/tongren/8850.html' -> "tongren-8850"
+            book_id = href.strip("/").split(".")[0].replace("/", "-")
+            book_url = cls._abs_url(href)
 
-            author_text = row.xpath('string(.//div[@class="booknews"]/text())').strip()
-            author = author_text.replace("作者：", "").strip()
+            title = cls._first_str(row.xpath(".//h3/a[1]//text()"))
 
-            update_date = row.xpath(
-                'string(.//div[@class="booknews"]/label[@class="date"])'
-            ).strip()
+            author = (
+                cls._first_str(
+                    row.xpath(".//div[contains(@class,'booknews')]/text()"),
+                    replaces=[("作者：", "")],
+                )
+                or "-"
+            )
+
+            update_date = (
+                cls._first_str(
+                    row.xpath(
+                        ".//div[contains(@class,'booknews')]/label[contains(@class,'date')]/text()"
+                    )
+                )
+                or "-"
+            )
 
             # Compute priority
             prio = cls.priority + idx

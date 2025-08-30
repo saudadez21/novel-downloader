@@ -8,7 +8,6 @@ novel_downloader.core.searchers.quanben5
 import json
 import logging
 import random
-import re
 import time
 
 from lxml import html
@@ -33,12 +32,6 @@ class Quanben5Searcher(BaseSearcher):
 
     @classmethod
     async def _fetch_html(cls, keyword: str) -> str:
-        """
-        Fetch raw HTML from Quanben5's search page.
-
-        :param keyword: The search term to query on Quanben5.
-        :return: HTML text of the search results page, or an empty string on fail.
-        """
         t = str(int(time.time() * 1000))
         uri_keyword = cls._quote(keyword)
         b_raw = cls._base64(uri_keyword)
@@ -72,18 +65,13 @@ class Quanben5Searcher(BaseSearcher):
 
     @classmethod
     def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
-        """
-        Parse raw HTML from Quanben5 search results into list of SearchResult.
-
-        :param html_str: Raw HTML string from Quanben5 search results page.
-        :param limit: Maximum number of results to return, or None for all.
-        :return: List of SearchResult dicts.
-        """
+        # Unwrap JSONP: search({...});
         prefix, suffix = "search(", ");"
-        if html_str.startswith(prefix) and html_str.endswith(suffix):
-            json_str = html_str[len(prefix) : -len(suffix)]
-        else:
-            json_str = html_str
+        json_str = (
+            html_str[len(prefix) : -len(suffix)]
+            if html_str.startswith(prefix) and html_str.endswith(suffix)
+            else html_str
+        )
 
         try:
             data = json.loads(json_str)
@@ -91,29 +79,36 @@ class Quanben5Searcher(BaseSearcher):
             return []
 
         content_html = data.get("content", "")
+        if not content_html:
+            return []
+
         doc = html.fromstring(content_html)
         rows = doc.xpath('//div[@class="pic_txt_list"]')
         results: list[SearchResult] = []
 
         for idx, row in enumerate(rows):
+            href = cls._first_str(row.xpath(".//h3/a/@href"))
+            if not href:
+                continue
+
             if limit is not None and idx >= limit:
                 break
 
-            href = row.xpath("string(.//h3/a/@href)")
-            m = re.match(r"/n/([^/]+)/", href or "")
-            if not m:
-                continue
-            book_id = m.group(1)
-            book_url = cls.BASE_URL + href
+            # '/n/douposanqian/' -> "douposanqian"
+            book_id = href.rstrip("/").split("/")[-1]
+            book_url = cls._abs_url(href)
 
-            cover_nodes = row.xpath('.//div[@class="pic"]//img/@src')
-            cover_url = cover_nodes[0].strip() if cover_nodes else ""
+            cover_rel = cls._first_str(row.xpath(".//div[@class='pic']//img/@src"))
+            cover_url = cls._abs_url(cover_rel) if cover_rel else ""
 
-            title_parts = row.xpath('.//span[@class="name"]//text()')
-            title = "".join(p.strip() for p in title_parts if p.strip())
+            title = "".join(
+                t.strip()
+                for t in row.xpath(".//h3/a/span[@class='name']//text()")
+                if t and t.strip()
+            )
 
             author = cls._first_str(
-                row.xpath('.//p[@class="info"]//span[@class="author"]/text()')
+                row.xpath(".//p[@class='info']//span[contains(@class,'author')]/text()")
             )
 
             # Bump priority by result index
