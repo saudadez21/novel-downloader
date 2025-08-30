@@ -1,3 +1,16 @@
+## v2.0.0 (2025-08-30)
+
+### Feat
+
+- **web**: implement basic GUI interface (#65)
+- **core**: async search; add 9 sites; add AES notes/helpers; archive deqixs.com (#64)
+
+### Refactor
+
+- **core**: optimize structure; simplify config; maintainable parsers; refresh web UI (#68)
+- **ocr**: generalize FontOCR class, add lazy-loading, simplify Qidian parser (#66)
+- remove TUI and browser mode; unify downloader/exporter; add support for 10+ sites (#63)
+
 ## v1.5.0 (2025-07-21)
 
 ### Feat
