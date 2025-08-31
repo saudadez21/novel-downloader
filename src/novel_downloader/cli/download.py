@@ -155,7 +155,7 @@ async def _download(
     exporter_cfg = adapter.get_exporter_config()
     login_cfg = adapter.get_login_config()
     log_level = adapter.get_log_level()
-    setup_logging(log_level=log_level)
+    setup_logging(console_level=log_level)
 
     parser = get_parser(site, parser_cfg)
     exporter = None

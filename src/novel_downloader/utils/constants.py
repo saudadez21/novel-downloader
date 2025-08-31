@@ -16,14 +16,12 @@ from platformdirs import user_config_path
 # -----------------------------------------------------------------------------
 PACKAGE_NAME = "novel_downloader"  # Python package name
 APP_NAME = "NovelDownloader"  # Display name
-APP_DIR_NAME = PACKAGE_NAME  # Directory name for platformdirs
-LOGGER_NAME = PACKAGE_NAME  # Root logger name
 
 # -----------------------------------------------------------------------------
 # Base directories
 # -----------------------------------------------------------------------------
 # Base config directory (e.g. ~/AppData/Local/novel_downloader/)
-BASE_CONFIG_DIR = Path(user_config_path(APP_DIR_NAME, appauthor=False))
+BASE_CONFIG_DIR = Path(user_config_path(PACKAGE_NAME, appauthor=False))
 WORK_DIR = Path.cwd()
 PACKAGE_ROOT: Path = Path(__file__).parent.parent
 LOCALES_DIR: Path = PACKAGE_ROOT / "locales"

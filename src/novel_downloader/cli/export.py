@@ -56,7 +56,7 @@ def handle_export(args: Namespace) -> None:
     exporter_cfg = adapter.get_exporter_config()
     log_level = adapter.get_log_level()
     exporter = get_exporter(site, exporter_cfg)
-    setup_logging(log_level=log_level)
+    setup_logging(console_level=log_level)
 
     for book_id in book_ids:
         ui.info(t("export_processing", book_id=book_id, format=export_format))
