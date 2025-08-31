@@ -126,14 +126,14 @@ def linovelib_export_as_txt(
     out_path = out_dir / out_name
 
     # --- Save final text ---
-    result = write_file(
-        content=final_text,
-        filepath=out_path,
-        write_mode="w",
-        on_exist="overwrite",
-    )
-    if result:
+    try:
+        result = write_file(
+            content=final_text,
+            filepath=out_path,
+            on_exist="overwrite",
+        )
         exporter.logger.info("%s Novel saved to: %s", TAG, out_path)
-    else:
-        exporter.logger.error("%s Failed to write novel to %s", TAG, out_path)
+    except Exception as e:
+        exporter.logger.error("%s Failed to write novel to %s: %s", TAG, out_path, e)
+        return None
     return result

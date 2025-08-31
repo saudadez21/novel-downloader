@@ -19,7 +19,7 @@ from urllib3.util.retry import Retry
 
 from .constants import DEFAULT_HEADERS
 from .file_utils import sanitize_filename
-from .file_utils.io import _get_non_conflicting_path, write_file
+from .file_utils.io import _unique_path, write_file
 
 logger = logging.getLogger(__name__)
 _DEFAULT_CHUNK_SIZE = 8192  # 8KB per chunk for streaming downloads
@@ -57,7 +57,7 @@ def _build_filepath(
         file_path = file_path.with_suffix(suffix)
 
     if on_exist == "rename":
-        file_path = _get_non_conflicting_path(file_path)
+        file_path = _unique_path(file_path)
     return file_path
 
 
@@ -153,7 +153,6 @@ def download(
             return write_file(
                 content=resp.content,
                 filepath=save_path,
-                write_mode="wb",
                 on_exist=on_exist,
             )
     return None
