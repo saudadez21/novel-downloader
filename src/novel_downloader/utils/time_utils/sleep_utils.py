@@ -54,7 +54,6 @@ def jitter_sleep(
     if max_sleep is not None:
         duration = min(duration, max_sleep)
 
-    logger.debug("[time] Sleeping for %.2f seconds", duration)
     time.sleep(duration)
     return
 
@@ -96,5 +95,4 @@ async def async_jitter_sleep(
     if max_sleep is not None:
         duration = min(duration, max_sleep)
 
-    logger.debug("[async time] Sleeping for %.2f seconds", duration)
     await asyncio.sleep(duration)

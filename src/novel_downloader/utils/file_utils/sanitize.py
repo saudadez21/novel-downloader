@@ -9,13 +9,9 @@ on different operating systems.
 
 __all__ = ["sanitize_filename"]
 
-import logging
 import os
 import re
 
-logger = logging.getLogger(__name__)
-
-# Windows 保留名称列表 (忽略大小写)
 _WIN_RESERVED_NAMES = {
     "CON",
     "PRN",
@@ -47,7 +43,7 @@ def sanitize_filename(filename: str, max_length: int | None = 255) -> str:
 
     name = pattern.sub("_", filename).strip(" .")
 
-    stem, dot, ext = name.partition(".")
+    stem, dot, ext = name.rpartition(".")
     if os.name == "nt" and stem.upper() in _WIN_RESERVED_NAMES:
         stem = f"_{stem}"
     cleaned = f"{stem}{dot}{ext}" if ext else stem
@@ -59,7 +55,4 @@ def sanitize_filename(filename: str, max_length: int | None = 255) -> str:
         else:
             cleaned = cleaned[:max_length]
 
-    if not cleaned:
-        cleaned = "_untitled"
-    logger.debug("[file] Sanitized filename: %r -> %r", filename, cleaned)
-    return cleaned
+    return cleaned or "_untitled"

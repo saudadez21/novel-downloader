@@ -122,7 +122,6 @@ def parse_encrypted_chapter(
         fixed_path = download(
             url=fixedFontWoff2_url,
             target_dir=parser._fixed_font_dir,
-            stream=True,
         )
         if fixed_path is None:
             raise ValueError("fixed_path is None: failed to download font")

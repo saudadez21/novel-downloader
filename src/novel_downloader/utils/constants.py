@@ -21,7 +21,7 @@ APP_NAME = "NovelDownloader"  # Display name
 # Base directories
 # -----------------------------------------------------------------------------
 # Base config directory (e.g. ~/AppData/Local/novel_downloader/)
-BASE_CONFIG_DIR = Path(user_config_path(PACKAGE_NAME, appauthor=False))
+BASE_CONFIG_DIR = user_config_path(PACKAGE_NAME, appauthor=False)
 WORK_DIR = Path.cwd()
 PACKAGE_ROOT: Path = Path(__file__).parent.parent
 LOCALES_DIR: Path = PACKAGE_ROOT / "locales"
