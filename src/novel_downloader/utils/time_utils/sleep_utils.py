@@ -16,6 +16,50 @@ import time
 logger = logging.getLogger(__name__)
 
 
+def _calc_sleep_duration(
+    base: float,
+    add_spread: float,
+    mul_spread: float,
+    max_sleep: float | None = None,
+    *,
+    log_prefix: str = "sleep",
+) -> float | None:
+    """
+    Compute the jittered sleep duration (in seconds) or return None if params invalid.
+
+      duration = base * uniform(1.0, mul_spread) + uniform(0, add_spread)
+
+    then optionally capped by max_sleep.
+    """
+    if base < 0 or add_spread < 0 or mul_spread < 1.0:
+        logger.warning(
+            "[%s] Invalid parameters: base=%s, add_spread=%s, mul_spread=%s",
+            log_prefix,
+            base,
+            add_spread,
+            mul_spread,
+        )
+        return None
+
+    multiplicative_jitter = random.uniform(1.0, mul_spread)
+    additive_jitter = random.uniform(0.0, add_spread)
+    duration = base * multiplicative_jitter + additive_jitter
+
+    if max_sleep is not None:
+        duration = min(duration, max_sleep)
+
+    logger.debug(
+        "[%s] base=%.3f mul=%.3f add=%.3f max=%s -> duration=%.3f",
+        log_prefix,
+        base,
+        multiplicative_jitter,
+        additive_jitter,
+        max_sleep,
+        duration,
+    )
+    return duration
+
+
 def jitter_sleep(
     base: float,
     add_spread: float = 0.0,
@@ -26,36 +70,21 @@ def jitter_sleep(
     """
     Sleep for a random duration by combining multiplicative and additive jitter.
 
-    The total sleep time is computed as:
-
-        duration = base * uniform(1.0, mul_spread) + uniform(0, add_spread)
-
-    If `max_sleep` is provided, the duration will be capped at that value.
-
     :param base: Base sleep time in seconds. Must be >= 0.
     :param add_spread: Maximum extra seconds to add after scaling base.
     :param mul_spread: Maximum multiplier factor for base; drawn from [1.0, mul_spread].
     :param max_sleep: Optional upper limit for the final sleep duration.
     """
-    if base < 0 or add_spread < 0 or mul_spread < 1.0:
-        logger.warning(
-            "[sleep] Invalid parameters: base=%s, add_spread=%s, mul_spread=%s",
-            base,
-            add_spread,
-            mul_spread,
-        )
+    duration = _calc_sleep_duration(
+        base,
+        add_spread,
+        mul_spread,
+        max_sleep,
+        log_prefix="sleep",
+    )
+    if duration is None:
         return
-
-    # Calculate the raw duration
-    multiplicative_jitter = random.uniform(1.0, mul_spread)
-    additive_jitter = random.uniform(0, add_spread)
-    duration = base * multiplicative_jitter + additive_jitter
-
-    if max_sleep is not None:
-        duration = min(duration, max_sleep)
-
     time.sleep(duration)
-    return
 
 
 async def async_jitter_sleep(
@@ -68,31 +97,14 @@ async def async_jitter_sleep(
     """
     Async sleep for a random duration by combining multiplicative and additive jitter.
 
-    The total sleep time is computed as:
-
-        duration = base * uniform(1.0, mul_spread) + uniform(0, add_spread)
-
-    If `max_sleep` is provided, the duration will be capped at that value.
-
     :param base: Base sleep time in seconds. Must be >= 0.
     :param add_spread: Maximum extra seconds to add after scaling base.
     :param mul_spread: Maximum multiplier factor for base; drawn from [1.0, mul_spread].
     :param max_sleep: Optional upper limit for the final sleep duration.
     """
-    if base < 0 or add_spread < 0 or mul_spread < 1.0:
-        logger.warning(
-            "[async sleep] Invalid parameters: base=%s, add_spread=%s, mul_spread=%s",
-            base,
-            add_spread,
-            mul_spread,
-        )
+    duration = _calc_sleep_duration(
+        base, add_spread, mul_spread, max_sleep, log_prefix="async sleep"
+    )
+    if duration is None:
         return
-
-    multiplicative_jitter = random.uniform(1.0, mul_spread)
-    additive_jitter = random.uniform(0, add_spread)
-    duration = base * multiplicative_jitter + additive_jitter
-
-    if max_sleep is not None:
-        duration = min(duration, max_sleep)
-
     await asyncio.sleep(duration)
