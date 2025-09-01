@@ -11,8 +11,6 @@ __all__ = [
     "truncate_half_lines",
 ]
 
-import math
-
 
 def content_prefix(
     text: str,
@@ -41,22 +39,13 @@ def content_prefix(
 
 def truncate_half_lines(text: str) -> str:
     """
-    Keep the first half of the lines (rounded up), preserving line breaks.
+    Keep the first half of the lines.
 
     :param text: Full input text
     :return: Truncated text with first half of lines
     """
     lines = text.splitlines()
     non_empty_lines = [line for line in lines if line.strip()]
-    keep_count = math.ceil(len(non_empty_lines) / 2)
-
-    result_lines = []
-    count = 0
-    for line in lines:
-        result_lines.append(line)
-        if line.strip():
-            count += 1
-        if count >= keep_count:
-            break
-
+    keep_count = (len(non_empty_lines) + 1) // 2
+    result_lines = non_empty_lines[:keep_count]
     return "\n".join(result_lines)

@@ -36,9 +36,9 @@ def parse_args() -> argparse.Namespace:
     """
     Parse command-line arguments.
 
-    - `site`: which site to log in to (must be one of SITE_MAP keys)
-    - `--data-dir`: where to store cookie files
-    - `--timeout`: navigation timeout in milliseconds
+      * `site`: which site to log in to (must be one of SITE_MAP keys)
+      * `--data-dir`: where to store cookie files
+      * `--timeout`: navigation timeout in milliseconds
     """
     p = argparse.ArgumentParser(
         description="Log in to a novel site and save session cookies."

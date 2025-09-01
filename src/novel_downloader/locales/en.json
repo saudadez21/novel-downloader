@@ -39,9 +39,9 @@
   "login_description": "Description",
   "login_hint": "Hint",
   "login_use_config": "Using value from config.",
-  "login_enter_password": "Enter password: ",
-  "login_enter_cookie": "Enter cookies: ",
-  "login_enter_value": "Enter value: ",
+  "login_enter_password": "Enter password",
+  "login_enter_cookie": "Enter cookies",
+  "login_enter_value": "Enter value",
   "login_required_field": "This field is required. Please enter a value.",
 
   "clean_logs": "Clean log directory",

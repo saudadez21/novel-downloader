@@ -13,7 +13,7 @@ import json
 import sqlite3
 import types
 from pathlib import Path
-from typing import Any, Self, cast
+from typing import Any, Self
 
 from novel_downloader.models import ChapterDict
 
@@ -313,8 +313,7 @@ class ChapterStorage:
     @staticmethod
     def _load_dict(data: str) -> dict[str, Any]:
         try:
-            parsed = json.loads(data)
-            return cast(dict[str, Any], parsed)
+            return json.loads(data) or {}
         except Exception:
             return {}
 

@@ -7,12 +7,12 @@ A small set of Rich-based helpers to keep CLI presentation and prompts
 consistent across subcommands.
 
 Public API:
-- info, success, warn, error
-- confirm
-- prompt, prompt_password
-- render_table
-- select_index
-- print_progress
+  * info, success, warn, error
+  * confirm
+  * prompt, prompt_password
+  * render_table
+  * select_index
+  * print_progress
 """
 
 from __future__ import annotations
@@ -71,7 +71,7 @@ def prompt(message: str, *, default: str | None = None) -> str:
     :return: The user's input.
     """
     try:
-        result: str = Prompt.ask(message, default=default or "")
+        result: str = Prompt.ask(message, default=default or "", show_default=False)
         return result
     except (KeyboardInterrupt, EOFError):
         warn("Cancelled.")

@@ -469,10 +469,8 @@ def download(
     retries: int = 3,
     backoff: float = 0.5,
     headers: dict[str, str] | None = None,
-    stream: bool = False,
     on_exist: Literal["overwrite", "skip", "rename"] = "overwrite",
     default_suffix: str = "",
-    chunk_size: int = _DEFAULT_CHUNK_SIZE,
 ) -> Path | None:
 ```
 

@@ -11,7 +11,6 @@ __all__ = [
     "TextCleaner",
     "parse_cookies",
     "get_cookie_value",
-    "rc4_crypt",
     "sanitize_filename",
     "write_file",
     "download",
@@ -29,7 +28,6 @@ from .cookies import (
     get_cookie_value,
     parse_cookies,
 )
-from .crypto_utils import rc4_crypt
 from .file_utils import (
     sanitize_filename,
     write_file,

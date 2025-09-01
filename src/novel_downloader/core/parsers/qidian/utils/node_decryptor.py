@@ -36,10 +36,10 @@ class QidianNodeDecryptor:
       3. Download the remote Fock module JS if not already present.
 
     Calling `decrypt()` will:
-      - Write a temp JSON input file with [ciphertext, chapter_id, fkp, fuid].
-      - Spawn `node qidian_decrypt_node.js <in> <out>`.
-      - Read and return the decrypted text.
-      - Clean up the temp files.
+      * Write a temp JSON input file with [ciphertext, chapter_id, fkp, fuid].
+      * Spawn `node qidian_decrypt_node.js <in> <out>`.
+      * Read and return the decrypted text.
+      * Clean up the temp files.
     """
 
     QIDIAN_FOCK_JS_URL: str = (

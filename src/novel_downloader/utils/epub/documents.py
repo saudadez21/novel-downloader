@@ -4,9 +4,9 @@ novel_downloader.utils.epub.documents
 -------------------------------------
 
 Defines the classes that render EPUB navigation and packaging documents:
-- NavDocument: builds the XHTML nav.xhtml (EPUB 3)
-- NCXDocument: builds the NCX XML navigation map (EPUB 2)
-- OpfDocument: builds the content.opf package document
+  * NavDocument: builds the XHTML nav.xhtml (EPUB 3)
+  * NCXDocument: builds the NCX XML navigation map (EPUB 2)
+  * OpfDocument: builds the content.opf package document
 """
 
 from collections.abc import Sequence
@@ -234,10 +234,10 @@ class OpfDocument(EpubResource):
         Generate the content.opf XML, which defines metadata, manifest, and spine.
 
         This function outputs a complete OPF package document that includes:
-        - <metadata>: title, author, language, identifiers, etc.
-        - <manifest>: all resource entries
-        - <spine>: the reading order of the content
-        - <guide>: optional references like cover page
+          * <metadata>: title, author, language, identifiers, etc.
+          * <manifest>: all resource entries
+          * <spine>: the reading order of the content
+          * <guide>: optional references like cover page
 
         :return: A string containing the full OPF XML content.
         """

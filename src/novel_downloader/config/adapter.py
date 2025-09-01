@@ -8,7 +8,7 @@ site name into structured dataclass-based config models.
 """
 
 import json
-from typing import Any, TypeVar, cast
+from typing import Any, TypeVar
 
 from novel_downloader.models import (
     BookConfig,
@@ -233,7 +233,7 @@ class ConfigAdapter:
         Convert a dictionary to a BookConfig with normalized types.
 
         :param data: A dict that must contain at least "book_id".
-        :return: A BookConfig dict with all values cast to strings or lists of strings.
+        :return: A BookConfig dict with all values to strings or lists of strings.
         :raises ValueError: if the "book_id" field is missing.
         """
         if "book_id" not in data:
@@ -305,8 +305,7 @@ class ConfigAdapter:
     def _load_str_list(path: str) -> list[str]:
         try:
             with open(path, encoding="utf-8") as f:
-                parsed = json.load(f)
-            return cast(list[str], parsed)
+                return json.load(f) or []
         except Exception:
             return []
 
@@ -314,7 +313,6 @@ class ConfigAdapter:
     def _load_str_dict(path: str) -> dict[str, str]:
         try:
             with open(path, encoding="utf-8") as f:
-                parsed = json.load(f)
-            return cast(dict[str, str], parsed)
+                return json.load(f) or {}
         except Exception:
             return {}

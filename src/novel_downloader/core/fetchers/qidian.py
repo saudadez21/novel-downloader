@@ -18,10 +18,8 @@ import aiohttp
 from novel_downloader.core.fetchers.base import BaseSession
 from novel_downloader.core.fetchers.registry import register_fetcher
 from novel_downloader.models import FetcherConfig, LoginField
-from novel_downloader.utils import (
-    async_jitter_sleep,
-    rc4_crypt,
-)
+from novel_downloader.utils import async_jitter_sleep
+from novel_downloader.utils.crypto_utils.rc4 import rc4_init, rc4_stream
 
 
 @register_fetcher(
@@ -54,6 +52,8 @@ class QidianSession(BaseSession):
         **kwargs: Any,
     ) -> None:
         super().__init__("qidian", config, cookies, **kwargs)
+        self._s_init = rc4_init(self._d2("dGcwOUl0Myo5aA=="))
+        self._cookie_key = self._d("d190c2Zw")
         self._fp_key = self._d("ZmluZ2VycHJpbnQ=")
         self._ab_key = self._d("YWJub3JtYWw=")
         self._ck_key = self._d("Y2hlY2tzdW0=")
@@ -165,12 +165,10 @@ class QidianSession(BaseSession):
         if self._rate_limiter:
             await self._rate_limiter.wait()
 
-        cookie_key = self._d("d190c2Zw")
-
         for attempt in range(self.retry_times + 1):
             try:
                 refreshed_token = self._build_payload_token(url)
-                self.update_cookies({cookie_key: refreshed_token})
+                self.update_cookies({self._cookie_key: refreshed_token})
 
                 async with self.session.get(url, **kwargs) as resp:
                     resp.raise_for_status()
@@ -227,40 +225,30 @@ class QidianSession(BaseSession):
         """
         return cls.CHAPTER_URL.format(book_id=book_id, chapter_id=chapter_id)
 
-    def _update_fp_val(
-        self,
-        *,
-        key: str = "",
-    ) -> None:
-        """"""
-        enc_token = self._get_cookie_value(self._d("d190c2Zw"))
+    def _update_fp_val(self) -> None:
+        """
+        Decrypt the payload from cookie and update `_fp_val` and `_ab_val`.
+        """
+        enc_token = self._get_cookie_value(self._cookie_key)
         if not enc_token:
             return
-        if not key:
-            key = self._get_key()
-        decrypted_json: str = rc4_crypt(key, enc_token, mode="decrypt")
+
+        cipher_bytes = base64.b64decode(enc_token)
+        plain_bytes = rc4_stream(self._s_init, cipher_bytes)
+        decrypted_json = plain_bytes.decode("utf-8", errors="replace")
         payload: dict[str, Any] = json.loads(decrypted_json)
         self._fp_val = payload.get(self._fp_key, "")
         self._ab_val = payload.get(self._ab_key, "0" * 32)
 
-    def _build_payload_token(
-        self,
-        new_uri: str,
-        *,
-        key: str = "",
-    ) -> str:
+    def _build_payload_token(self, new_uri: str) -> str:
         """
         Patch a timestamp-bearing token with fresh timing and checksum info.
 
         :param new_uri: URI used in checksum generation.
-        :param key: RC4 key extracted from front-end JavaScript (optional).
-
         :return: Updated token with new timing and checksum values.
         """
         if not self._fp_val or not self._ab_val:
             self._update_fp_val()
-        if not key:
-            key = self._get_key()
 
         # rebuild timing fields
         loadts = int(time.time() * 1000)  # ms since epoch
@@ -278,9 +266,9 @@ class QidianSession(BaseSession):
             self._ab_key: self._ab_val,
             self._ck_key: ck_val,
         }
-        return rc4_crypt(
-            key, json.dumps(new_payload, separators=(",", ":")), mode="encrypt"
-        )
+        plain_bytes = json.dumps(new_payload, separators=(",", ":")).encode("utf-8")
+        cipher_bytes = rc4_stream(self._s_init, plain_bytes)
+        return base64.b64encode(cipher_bytes).decode("utf-8")
 
     async def _check_login_status(self) -> bool:
         """
@@ -335,8 +323,5 @@ class QidianSession(BaseSession):
         return base64.b64decode(b).decode()
 
     @staticmethod
-    def _get_key() -> str:
-        encoded = "Lj1qYxMuaXBjMg=="
-        decoded = base64.b64decode(encoded)
-        key = "".join([chr(b ^ 0x5A) for b in decoded])
-        return key
+    def _d2(b: str) -> bytes:
+        return base64.b64decode(b)

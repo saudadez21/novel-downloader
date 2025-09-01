@@ -8,99 +8,74 @@ File I/O utilities for reading and writing data.
 
 __all__ = ["write_file"]
 
-import json
-import logging
 import tempfile
 from pathlib import Path
-from typing import Any, Literal
+from typing import Literal
 
 from .sanitize import sanitize_filename
 
-logger = logging.getLogger(__name__)
 
-_JSON_INDENT_THRESHOLD = 50 * 1024  # bytes
-
-
-def _get_non_conflicting_path(path: Path) -> Path:
+def _unique_path(path: Path, max_tries: int = 100) -> Path:
     """
-    If the path exists, generate a new one by appending _1, _2, etc.
+    Return a unique file path by appending _1, _2, ... if needed.
+
+    Falls back to a UUID suffix if all attempts fail.
     """
-    counter = 1
-    new_path = path
-    while new_path.exists():
-        stem = path.stem
-        suffix = path.suffix
-        new_path = path.with_name(f"{stem}_{counter}{suffix}")
-        counter += 1
-    return new_path
+    if not path.exists():
+        return path
+
+    stem = path.stem
+    suffix = path.suffix
+
+    for counter in range(1, max_tries + 1):
+        candidate = path.with_name(f"{stem}_{counter}{suffix}")
+        if not candidate.exists():
+            return candidate
+
+    # fallback: append a random/unique suffix
+    import uuid
+
+    return path.with_name(f"{stem}_{uuid.uuid4().hex}{suffix}")
 
 
 def write_file(
-    content: str | bytes | dict[Any, Any] | list[Any] | Any,
+    content: str | bytes,
     filepath: str | Path,
-    write_mode: str = "w",
     *,
     on_exist: Literal["overwrite", "skip", "rename"] = "overwrite",
-    dump_json: bool = False,
     encoding: str = "utf-8",
-) -> Path | None:
+) -> Path:
     """
-    Write content to a file safely with optional atomic behavior
-    and JSON serialization.
+    Write content to a file safely with atomic replacement.
 
-    :param content: The content to write; can be text, bytes, or a
-        JSON-serializable object.
-    :param filepath: Destination path (str or Path).
-    :param mode: File mode ('w', 'wb'). Auto-determined if None.
-    :param on_exist: Behavior if file exists: 'overwrite', 'skip',
-        or 'rename'.
-    :param dump_json: If True, serialize content as JSON.
+    :param content: The content to write; can be text or bytes.
+    :param filepath: Destination path.
+    :param on_exist: Behavior if file exists.
     :param encoding: Text encoding for writing.
-    :return: Path if writing succeeds, None otherwise.
+    :return: The final path where the content was written.
+    :raise: Any I/O error such as PermissionError or OSError
     """
     path = Path(filepath)
     path = path.with_name(sanitize_filename(path.name))
     path.parent.mkdir(parents=True, exist_ok=True)
 
     if path.exists():
-        if on_exist == "skip":
-            logger.debug("[file] '%s' exists, skipping", path)
-            return path
-        if on_exist == "rename":
-            path = _get_non_conflicting_path(path)
-            logger.debug("[file] Renaming target to avoid conflict: %s", path)
-        else:
-            logger.debug("[file] '%s' exists, will overwrite", path)
+        match on_exist:
+            case "skip":
+                return path
+            case "rename":
+                path = _unique_path(path)
 
-    # Prepare content and write mode
-    content_to_write: str | bytes
-    if dump_json:
-        # Serialize original object to JSON string
-        json_str = json.dumps(content, ensure_ascii=False, indent=2)
-        if len(json_str.encode(encoding)) > _JSON_INDENT_THRESHOLD:
-            json_str = json.dumps(content, ensure_ascii=False, separators=(",", ":"))
-        content_to_write = json_str
-        write_mode = "w"
-    else:
-        if isinstance(content, (str | bytes)):
-            content_to_write = content
-        else:
-            raise TypeError("Non-JSON content must be str or bytes.")
-        write_mode = "wb" if isinstance(content, bytes) else "w"
+    write_mode = "wb" if isinstance(content, bytes) else "w"
 
-    try:
-        with tempfile.NamedTemporaryFile(
-            mode=write_mode,
-            encoding=None if "b" in write_mode else encoding,
-            newline=None if "b" in write_mode else "\n",
-            delete=False,
-            dir=path.parent,
-        ) as tmp:
-            tmp.write(content_to_write)
-            tmp_path = Path(tmp.name)
-        tmp_path.replace(path)
-        logger.debug("[file] '%s' written successfully", path)
-        return path
-    except Exception as exc:
-        logger.warning("[file] Error writing %r: %s", path, exc)
-        return None
+    with tempfile.NamedTemporaryFile(
+        mode=write_mode,
+        encoding=None if "b" in write_mode else encoding,
+        newline=None if "b" in write_mode else "\n",
+        delete=False,
+        dir=path.parent,
+    ) as tmp:
+        tmp.write(content)
+        tmp_path = Path(tmp.name)
+    tmp_path.replace(path)
+    return path

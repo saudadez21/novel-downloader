@@ -4,14 +4,14 @@ novel_downloader.utils.epub.models
 ----------------------------------
 
 Defines the core EPUB data models and resource classes used by the builder:
-- Typed entries for table of contents (ChapterEntry, VolumeEntry)
-- Manifest and spine record types (ManifestEntry, SpineEntry)
-- Hierarchical NavPoint for NCX navigation
-- Base resource class (EpubResource) and specializations:
-    - StyleSheet
-    - ImageResource
-    - Chapter (with XHTML serialization)
-- Volume container for grouping chapters with optional intro and cover
+  * Typed entries for table of contents (ChapterEntry, VolumeEntry)
+  * Manifest and spine record types (ManifestEntry, SpineEntry)
+  * Hierarchical NavPoint for NCX navigation
+  * Base resource class (EpubResource) and specializations:
+    * StyleSheet
+    * ImageResource
+    * Chapter (with XHTML serialization)
+  * Volume container for grouping chapters with optional intro and cover
 """
 
 from __future__ import annotations

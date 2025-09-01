@@ -4,14 +4,14 @@ novel_downloader.utils.epub.builder
 -----------------------------------
 
 Orchestrates the end-to-end EPUB build process by:
-- Managing metadata (title, author, description, language, etc.)
-- Collecting and deduplicating resources (chapters, images, stylesheets)
-- Registering everything in the OPF manifest and spine
-- Generating nav.xhtml, toc.ncx, content.opf, and the zipped .epub file
+  * Managing metadata (title, author, description, language, etc.)
+  * Collecting and deduplicating resources (chapters, images, stylesheets)
+  * Registering everything in the OPF manifest and spine
+  * Generating nav.xhtml, toc.ncx, content.opf, and the zipped .epub file
 
 Provides:
-- methods to add chapters, volumes, images, and styles
-- a clean `export()` entry point that writes the final EPUB archive
+  * methods to add chapters, volumes, images, and styles
+  * a clean `export()` entry point that writes the final EPUB archive
 """
 
 import zipfile

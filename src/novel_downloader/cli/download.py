@@ -155,7 +155,7 @@ async def _download(
     exporter_cfg = adapter.get_exporter_config()
     login_cfg = adapter.get_login_config()
     log_level = adapter.get_log_level()
-    setup_logging(log_level=log_level)
+    setup_logging(console_level=log_level)
 
     parser = get_parser(site, parser_cfg)
     exporter = None
@@ -214,8 +214,8 @@ async def _prompt_login_fields(
             ui.info(t("login_use_config"))
             continue
 
-        value: str | dict[str, str]
-        while True:
+        value: str | dict[str, str] = ""
+        for _ in range(5):
             if field.type == "password":
                 value = ui.prompt_password(t("login_enter_password"))
             elif field.type == "cookie":

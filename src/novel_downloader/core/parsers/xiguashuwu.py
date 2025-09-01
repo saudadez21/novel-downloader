@@ -29,6 +29,7 @@ from novel_downloader.utils.constants import (
     XIGUASHUWU_FONT_MAP_PATH,
 )
 from novel_downloader.utils.crypto_utils.aes_util import aes_cbc_decrypt
+from novel_downloader.utils.fontocr import get_font_ocr
 
 logger = logging.getLogger(__name__)
 
@@ -292,26 +293,19 @@ class XiguashuwuParser(BaseParser):
         :return: The recognized character (top-1) if OCR succeeds, otherwise None.
         """
         try:
-            import io
-
-            import numpy as np
-            from PIL import Image
-
-            from novel_downloader.utils.fontocr import get_font_ocr
+            ocr = get_font_ocr()
+            if not ocr:
+                return None
 
             resp = requests.get(url, headers=DEFAULT_USER_HEADERS, timeout=15)
             resp.raise_for_status()
 
-            im = Image.open(io.BytesIO(resp.content)).convert("RGB")
-            img_np = np.asarray(im)
+            img_np = ocr.load_image_array_from_bytes(resp.content)
 
-            ocr = get_font_ocr(batch_size=1)
-            char, score = ocr.predict([img_np], top_k=1)[0][0]
+            char, score = ocr.predict([img_np])[0]
 
             return char if score >= cls._CONF_THRESHOLD else None
 
-        except ImportError:
-            logger.warning("[Parser] FontOCR not available, font decoding will skip")
         except Exception as e:
             logger.warning("[Parser] Failed to ocr glyph image %s: %s", url, e)
         return None

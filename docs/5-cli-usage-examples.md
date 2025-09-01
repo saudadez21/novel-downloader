@@ -289,6 +289,6 @@ novel-cli clean --all --yes
 
 ### 附录 A: 术语与约定
 
-* **SITE (站点键) **: 在命令中用于指明站点的短名称 (如 `qidian`, `biquge`, `qianbi`) 。完整列表见 [站点支持文档](./4-supported-sites.md)。
+* **SITE (站点键)**: 在命令中用于指明站点的短名称 (如 `qidian`, `biquge`, `qianbi`) 。完整列表见 [站点支持文档](./4-supported-sites.md)。
 * **章节唯一 ID**: 站点侧用于标识章节的 ID, **不是**连续的 "第 N 章" 序号; 在 `--start`/`--end` 中应传入此 ID。
 * **配置文件路径**: 若未显式传入 `--config`, CLI 会按「配置优先级」自动解析。

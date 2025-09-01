@@ -15,8 +15,8 @@ from novel_downloader.models import BookInfoDict, ChapterDict
 class ParserProtocol(Protocol):
     """
     A parser must be able to:
-      - extract book metadata from an HTML string,
-      - extract a single chapter's text from an HTML string
+      * extract book metadata from an HTML string,
+      * extract a single chapter's text from an HTML string
     """
 
     def parse_book_info(
