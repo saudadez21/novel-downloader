@@ -42,7 +42,7 @@ class TextCleaner(Cleaner):
     TextCleaner removes invisible characters, strips unwanted patterns,
     and applies literal replacements in a single pass using a combined regex.
 
-    For regex that never matches, reference:
+    For regex that never matches (r"$^"), reference:
 
     https://stackoverflow.com/questions/2930182/regex-to-not-match-anything
     """
@@ -74,20 +74,23 @@ class TextCleaner(Cleaner):
 
         # Build a single combined regex for title:
         #   all delete‐patterns OR all escaped replacement‐keys
-        title_parts = title_remove + [re.escape(k) for k in self._title_repl_map]
-        title_parts.sort(
-            key=len, reverse=True
-        )  # longer first to avoid prefix collisions
-        title_pattern = "|".join(title_parts) if title_parts else r"$^"
-        self._title_combined_rx: Pattern[str] = re.compile(title_pattern)
+        self._title_combined_rx: re.Pattern[str] | None = None
+        if title_remove or self._title_repl_map:
+            title_parts = title_remove + [re.escape(k) for k in self._title_repl_map]
+            # longer first to avoid prefix collisions
+            title_parts.sort(key=len, reverse=True)
+            self._title_combined_rx = re.compile("|".join(title_parts))
 
         # Build a single combined regex for content (multiline mode)
-        content_parts = content_remove + [re.escape(k) for k in self._content_repl_map]
-        content_parts.sort(key=len, reverse=True)
-        content_pattern = "|".join(content_parts) if content_parts else r"$^"
-        self._content_combined_rx: Pattern[str] = re.compile(
-            content_pattern, flags=re.MULTILINE
-        )
+        self._content_combined_rx: re.Pattern[str] | None = None
+        if content_remove or self._content_repl_map:
+            content_parts = content_remove + [
+                re.escape(k) for k in self._content_repl_map
+            ]
+            content_parts.sort(key=len, reverse=True)
+            self._content_combined_rx = re.compile(
+                "|".join(content_parts), flags=re.MULTILINE
+            )
 
     def clean_title(self, text: str) -> str:
         """
@@ -147,7 +150,7 @@ class TextCleaner(Cleaner):
     def _do_clean(
         self,
         text: str,
-        combined_rx: Pattern[str],
+        combined_rx: Pattern[str] | None,
         repl_map: dict[str, str],
     ) -> str:
         """
@@ -159,17 +162,22 @@ class TextCleaner(Cleaner):
         :param repl_map: Mapping from matched token to replacement text.
         :return: Cleaned text.
         """
+        if not self._remove_invisible and not combined_rx:
+            return text.strip()
+
         # Strip invisible chars if configured
         if self._remove_invisible:
             text = self._remove_bom_and_invisible(text)
 
         # Single‐pass removal & replacement
-        def _sub(match: Match[str]) -> str:
-            token = match.group(0)
-            # If token in repl_map -> replacement; else -> delete (empty string)
-            return repl_map.get(token, "")
+        if combined_rx:
 
-        text = combined_rx.sub(_sub, text)
+            def _sub(match: Match[str]) -> str:
+                # If token in repl_map -> replacement; else -> delete (empty string)
+                return repl_map.get(match.group(0), "")
+
+            text = combined_rx.sub(_sub, text)
+
         return text.strip()
 
 
