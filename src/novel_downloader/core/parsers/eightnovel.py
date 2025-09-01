@@ -195,8 +195,8 @@ class EightnovelParser(BaseParser):
     def _build_id_title_map(cls, html_str: str) -> dict[str, str]:
         """
         Extracts two comma-split lists from html_str:
-        - A numeric list of IDs (one element longer)
-        - A list of titles
+          * A numeric list of IDs (one element longer)
+          * A list of titles
         """
         id_list = None
         title_list = None

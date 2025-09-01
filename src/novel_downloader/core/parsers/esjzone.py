@@ -128,9 +128,9 @@ class EsjzoneParser(BaseParser):
                 or tag == "summary"
             ):
                 # Handle possible volume title markers:
-                # - <h2>: standard volume header
-                # - <p class="non">: alternative volume header style
-                # - <summary>: fallback for stray <summary> tags outside <details>
+                # * <h2>: standard volume header
+                # * <p class="non">: alternative volume header style
+                # * <summary>: fallback for stray <summary> tags outside <details>
                 _start_volume(node.xpath("string()"))
 
             elif tag == "a":

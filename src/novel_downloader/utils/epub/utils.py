@@ -4,9 +4,9 @@ novel_downloader.utils.epub.utils
 ---------------------------------
 
 Pure utility functions for EPUB assembly, including:
-- Computing file hashes
-- Generating META-INF/container.xml
-- Constructing HTML snippets for the book intro and volume intro
+  * Computing file hashes
+  * Generating META-INF/container.xml
+  * Constructing HTML snippets for the book intro and volume intro
 """
 
 import hashlib
@@ -59,9 +59,9 @@ def build_book_intro(
     Build the HTML snippet for the overall book introduction.
 
     This includes:
-      - A main heading ("Book Introduction")
-      - A list of metadata items (title, author, categories, word count, status)
-      - A "Summary" subheading and one or more paragraphs of summary text
+      * A main heading ("Book Introduction")
+      * A list of metadata items (title, author, categories, word count, status)
+      * A "Summary" subheading and one or more paragraphs of summary text
 
     :return: A HTML string for inclusion in `intro.xhtml`
     """
@@ -112,10 +112,10 @@ def build_volume_intro(
     Build the HTML snippet for a single-volume introduction.
 
     This includes:
-      - A decorative border image (top and bottom)
-      - A primary heading (volume main title)
-      - An optional secondary line (subtitle)
-      - One or more paragraphs of intro text
+      * A decorative border image (top and bottom)
+      * A primary heading (volume main title)
+      * An optional secondary line (subtitle)
+      * One or more paragraphs of intro text
 
     :param volume_title: e.g. "Volume 1 - The Beginning"
     :param volume_intro_text: multiline intro text for this volume

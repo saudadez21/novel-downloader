@@ -32,8 +32,8 @@ def sanitize_filename(filename: str, max_length: int | None = 255) -> str:
 
     This function checks the operating system environment and applies the appropriate
     filtering rules:
-      - On Windows, it replaces characters: <>:"/\\|?*
-      - On POSIX systems, it replaces the forward slash '/'
+      * On Windows, it replaces characters: <>:"/\\|?*
+      * On POSIX systems, it replaces the forward slash '/'
 
     :param filename: The input filename to sanitize.
     :param max_length: Optional maximum length of the output filename. Defaults to 255.

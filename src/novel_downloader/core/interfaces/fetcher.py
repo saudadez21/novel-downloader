@@ -16,8 +16,8 @@ from novel_downloader.models import LoginField
 class FetcherProtocol(Protocol):
     """
     An async requester must be able to fetch raw HTML/data for:
-      - a book's info page,
-      - a specific chapter page,
+      * a book's info page,
+      * a specific chapter page,
     and manage login/shutdown asynchronously.
     """
 

@@ -4,11 +4,11 @@ novel_downloader.utils.epub.constants
 -------------------------------------
 
 EPUB-specific constants used by the builder, including:
-- Directory names for OEBPS structure
-- XML namespace URIs
-- Package attributes and document-type declarations
-- Media type mappings for images
-- Template strings for container.xml and cover image HTML
+  * Directory names for OEBPS structure
+  * XML namespace URIs
+  * Package attributes and document-type declarations
+  * Media type mappings for images
+  * Template strings for container.xml and cover image HTML
 """
 
 ROOT_PATH = "OEBPS"

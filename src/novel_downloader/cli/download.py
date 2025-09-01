@@ -214,8 +214,8 @@ async def _prompt_login_fields(
             ui.info(t("login_use_config"))
             continue
 
-        value: str | dict[str, str]
-        while True:
+        value: str | dict[str, str] = ""
+        for _ in range(5):
             if field.type == "password":
                 value = ui.prompt_password(t("login_enter_password"))
             elif field.type == "cookie":

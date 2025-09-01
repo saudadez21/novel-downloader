@@ -1,28 +1,23 @@
 #!/usr/bin/env python3
 """
-novel_downloader.utils.fontocr
-------------------------------
+novel_downloader.utils.fontocr.core
+-----------------------------------
 
 This class provides utility methods for optical character recognition (OCR),
 primarily used for decrypting custom font encryption.
 """
 
-__all__ = [
-    "FontOCR",
-    "get_font_ocr",
-]
-__version__ = "4.0"
-
+import io
 import logging
-from collections.abc import Generator
-from typing import Any, TypeVar
+from pathlib import Path
+from typing import Any
 
 import numpy as np
-from paddleocr import TextRecognition  # takes 5 ~ 12 sec to init
+from fontTools.ttLib import TTFont
+from paddleocr import TextRecognition
 from PIL import Image, ImageDraw, ImageFont
 from PIL.Image import Transpose
 
-T = TypeVar("T")
 logger = logging.getLogger(__name__)
 
 
@@ -39,22 +34,20 @@ class FontOCR:
         device: str | None = None,
         precision: str = "fp32",
         cpu_threads: int = 10,
-        batch_size: int = 32,
-        threshold: float = 0.0,
         **kwargs: Any,
     ) -> None:
         """
         Initialize a FontOCR instance.
 
-        :param batch_size: batch size for OCR inference (minimum 1)
-        :param ocr_weight: weight factor for OCR-based prediction scores
-        :param vec_weight: weight factor for vector-based similarity scores
-        :param threshold: minimum confidence threshold for predictions [0.0-1.0]
+        :param model_name: If set to None, PP-OCRv5_server_rec is used.
+        :param model_dir: Model storage path.
+        :param input_shape: Input image size for the model in the format (C, H, W).
+        :param device: Device for inference.
+        :param precision: Precision for TensorRT.
+        :param cpu_threads: Number of threads to use for inference on CPUs.
         :param kwargs: reserved for future extensions
         """
-        self._batch_size = batch_size
-        self._threshold = threshold
-        self._ocr_model = TextRecognition(
+        self._ocr_model = TextRecognition(  # takes 5 ~ 12 sec to init
             model_name=model_name,
             model_dir=model_dir,
             input_shape=input_shape,
@@ -66,18 +59,18 @@ class FontOCR:
     def predict(
         self,
         images: list[np.ndarray],
-        top_k: int = 1,
-    ) -> list[list[tuple[str, float]]]:
+        batch_size: int = 1,
+    ) -> list[tuple[str, float]]:
         """
         Run OCR on input images.
 
         :param images: list of np.ndarray objects to predict
-        :param top_k: number of top candidates to return per image
-        :return: list of lists containing (character, score)
+        :param batch_size: batch size for OCR inference (minimum 1)
+        :return: list of tuple containing (character, score)
         """
         return [
-            [(pred.get("rec_text"), pred.get("rec_score"))]
-            for pred in self._ocr_model.predict(images, batch_size=self._batch_size)
+            (pred.get("rec_text"), pred.get("rec_score"))
+            for pred in self._ocr_model.predict(images, batch_size=batch_size)
         ]
 
     @staticmethod
@@ -86,7 +79,7 @@ class FontOCR:
         render_font: ImageFont.FreeTypeFont,
         is_reflect: bool = False,
         size: int = 64,
-    ) -> Image.Image | None:
+    ) -> Image.Image:
         """
         Render a single character into an RGB square image.
 
@@ -107,10 +100,6 @@ class FontOCR:
         if is_reflect:
             img = img.transpose(Transpose.FLIP_LEFT_RIGHT)
 
-        img_np = np.array(img)
-        if np.unique(img_np).size == 1:
-            return None
-
         return img
 
     @staticmethod
@@ -119,7 +108,7 @@ class FontOCR:
         render_font: ImageFont.FreeTypeFont,
         is_reflect: bool = False,
         size: int = 64,
-    ) -> np.ndarray | None:
+    ) -> np.ndarray:
         """
         Render a single character into an RGB square image.
 
@@ -140,11 +129,7 @@ class FontOCR:
         if is_reflect:
             img = img.transpose(Transpose.FLIP_LEFT_RIGHT)
 
-        img_np = np.array(img)
-        if np.unique(img_np).size == 1:
-            return None
-
-        return img_np
+        return np.array(img)
 
     @staticmethod
     def render_text_image(
@@ -176,32 +161,56 @@ class FontOCR:
         return img
 
     @staticmethod
-    def _chunked(seq: list[T], size: int) -> Generator[list[T], None, None]:
+    def load_image_array_from_bytes(data: bytes) -> np.ndarray:
         """
-        Yield successive chunks of `seq` of length `size`.
+        Decode image bytes into an RGB NumPy array.
+
+        Reads common image formats (e.g. PNG/JPEG/WebP) from an
+        in-memory byte buffer using Pillow, converts the image to RGB,
+        and returns a NumPy array suitable for OCR inference.
+
+        :param data: Image file content as raw bytes.
+        :return: NumPy array of shape (H, W, 3), dtype=uint8, in RGB order.
+        :raises PIL.UnidentifiedImageError, OSError: If input bytes cannot be decoded.
         """
-        for i in range(0, len(seq), size):
-            yield seq[i : i + size]
+        with Image.open(io.BytesIO(data)) as im:
+            im = im.convert("RGB")
+            return np.asarray(im)
 
+    @staticmethod
+    def load_render_font(
+        font_path: Path | str, char_size: int = 52
+    ) -> ImageFont.FreeTypeFont:
+        """
+        Load a FreeType font face at the given pixel size for rendering helpers.
 
-_font_ocr: FontOCR | None = None
+        :param font_path: Path to a TTF/OTF font file.
+        :param char_size: Target glyph size in pixels (e.g. 52).
+        :return: A PIL `ImageFont.FreeTypeFont` instance.
+        :raises OSError: If the font file cannot be opened by PIL.
+        """
+        return ImageFont.truetype(str(font_path), char_size)
 
+    @staticmethod
+    def extract_font_charset(font_path: Path | str) -> set[str]:
+        """
+        Extract the set of Unicode characters encoded by a TrueType/OpenType font.
 
-def get_font_ocr(
-    model_name: str | None = None,
-    model_dir: str | None = None,
-    input_shape: tuple[int, int, int] | None = None,
-    batch_size: int = 32,
-) -> FontOCR:
-    """
-    Return the singleton FontOCR, initializing it on first use.
-    """
-    global _font_ocr
-    if _font_ocr is None:
-        _font_ocr = FontOCR(
-            model_name=model_name,
-            model_dir=model_dir,
-            input_shape=input_shape,
-            batch_size=batch_size,
-        )
-    return _font_ocr
+        This reads the font's best available character map (cmap) and returns the
+        corresponding set of characters.
+
+        :param font_path: Path to a TTF/OTF font file.
+        :return: A set of Unicode characters present in the font's cmap.
+        """
+        with TTFont(font_path) as font_ttf:
+            cmap = font_ttf.getBestCmap() or {}
+
+        charset: set[str] = set()
+        for cp in cmap:
+            # guard against invalid/surrogate code points
+            if 0 <= cp <= 0x10FFFF and not (0xD800 <= cp <= 0xDFFF):
+                try:
+                    charset.add(chr(cp))
+                except ValueError:
+                    continue
+        return charset

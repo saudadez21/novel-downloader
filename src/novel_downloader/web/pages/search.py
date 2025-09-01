@@ -145,9 +145,9 @@ def _build_settings_dropdown(
     Create settings button + anchored menu with initial values from state.
 
     Returns a tuple of getter functions:
-      - get_sites(): list of site keys, or None if none selected
-      - get_psl(): per-site limit (int)
-      - get_timeout(): timeout (float)
+      * get_sites(): list of site keys, or None if none selected
+      * get_psl(): per-site limit (int)
+      * get_timeout(): timeout (float)
     """
     site_cbs: dict[str, Any] = {}
 

@@ -53,13 +53,14 @@ class TextCleaner(Cleaner):
         """
         Initialize TextCleaner with the given configuration.
 
-        :param config: TextCleanerConfig instance containing:
+        Configuration fields (from ``TextCleanerConfig``):
+          * remove_invisible: whether to strip BOM/zero-width chars
+          * title_remove_patterns: list of regex patterns to delete from titles
+          * content_remove_patterns: list of regex patterns to delete from content
+          * title_replacements: dict of literal replacements for titles
+          * content_replacements: dict of literal replacements for content
 
-            - remove_invisible: whether to strip BOM/zero-width chars
-            - title_remove_patterns: list of regex patterns to delete from titles
-            - content_remove_patterns: list of regex patterns to delete from content
-            - title_replacements: dict of literal replacements for titles
-            - content_replacements: dict of literal replacements for content
+        :param config: A ``TextCleanerConfig`` instance.
         """
         self._remove_invisible = config.remove_invisible
 
@@ -132,11 +133,11 @@ class TextCleaner(Cleaner):
         Remove BOM and zero-width/invisible characters from the text.
 
         Matches:
-          - U+FEFF (BOM)
-          - U+200B ZERO WIDTH SPACE
-          - U+200C ZERO WIDTH NON-JOINER
-          - U+200D ZERO WIDTH JOINER
-          - U+2060 WORD JOINER
+          * U+FEFF (BOM)
+          * U+200B ZERO WIDTH SPACE
+          * U+200C ZERO WIDTH NON-JOINER
+          * U+200D ZERO WIDTH JOINER
+          * U+2060 WORD JOINER
 
         :param text: Input string possibly containing invisible chars.
         :return: String with those characters stripped.

@@ -6,9 +6,8 @@ novel_downloader.utils.epub
 Top-level package for EPUB export utilities.
 
 Key components:
-
-- EpubBuilder : orchestrates metadata, manifest, spine, navigation, and resources
-- Chapter, Volume : represent and render content sections and volume intros
+  * EpubBuilder : orchestrates metadata, manifest, spine, navigation, and resources
+  * Chapter, Volume : represent and render content sections and volume intros
 
 Usage example:
 
