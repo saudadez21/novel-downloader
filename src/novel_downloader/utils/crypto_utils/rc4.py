@@ -50,23 +50,5 @@ def rc4_cipher(key: bytes, data: bytes) -> bytes:
     :param data: plaintext or ciphertext as bytes
     :return: XORed bytes (encrypt/decrypt are identical)
     """
-    # Key-Scheduling Algorithm (KSA)
-    S = list(range(256))
-    j = 0
-    klen = len(key)
-    for i in range(256):
-        j = (j + S[i] + key[i % klen]) & 0xFF
-        S[i], S[j] = S[j], S[i]
-
-    # Pseudo-Random Generation Algorithm (PRGA)
-    i = 0
-    j = 0
-    out = bytearray(len(data))
-    for idx, ch in enumerate(data):
-        i = (i + 1) & 0xFF
-        j = (j + S[i]) & 0xFF
-        S[i], S[j] = S[j], S[i]
-        K = S[(S[i] + S[j]) & 0xFF]
-        out[idx] = ch ^ K
-
-    return bytes(out)
+    S = rc4_init(key)
+    return rc4_stream(S, data)

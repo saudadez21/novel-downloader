@@ -181,8 +181,14 @@ class QidianParser(BaseParser):
             return None
         try:
             ssr_data = self._find_ssr_page_context(html_list[0])
+            chapter_info = self._extract_chapter_info(ssr_data)
+            if not chapter_info:
+                logger.warning(
+                    "[Parser] ssr_chapterInfo not found for chapter '%s'", chapter_id
+                )
+                return None
 
-            if not self._can_view_chapter(ssr_data):
+            if not self._can_view_chapter(chapter_info):
                 logger.warning(
                     "[Parser] Chapter '%s' is not purchased or inaccessible.",
                     chapter_id,
@@ -192,9 +198,9 @@ class QidianParser(BaseParser):
             if self._is_encrypted(ssr_data):
                 if not self._decode_font:
                     return None
-                return self.parse_encrypted_chapter(html_list[0], chapter_id)
+                return self.parse_encrypted_chapter(chapter_info, chapter_id)
 
-            return self.parse_normal_chapter(html_list[0], chapter_id)
+            return self.parse_normal_chapter(chapter_info, chapter_id)
 
         except Exception as e:
             logger.warning("[Parser] parse error for chapter '%s': %s", chapter_id, e)
@@ -202,38 +208,31 @@ class QidianParser(BaseParser):
 
     def parse_normal_chapter(
         self,
-        html_str: str,
+        chapter_info: dict[str, Any],
         chapter_id: str,
     ) -> ChapterDict | None:
         """
         Extract structured chapter info from a normal Qidian page.
 
-        :param html_str: Chapter HTML.
+        :param chapter_info: Parsed chapter info block from ssr data.
         :param chapter_id: Chapter identifier (string).
         :return: a dictionary with keys like 'id', 'title', 'content', etc.
         """
-        ssr_data = self._find_ssr_page_context(html_str)
-        chapter_info = self._extract_chapter_info(ssr_data)
-        if not chapter_info:
-            logger.warning(
-                "[Parser] ssr_chapterInfo not found for chapter '%s'", chapter_id
-            )
-            return None
+        duplicated = self._is_duplicated(chapter_info)
 
         title = chapter_info.get("chapterName", "Untitled")
-        duplicated = self._is_duplicated(ssr_data)
         raw_html = chapter_info.get("content", "")
         chapter_id = chapter_info.get("chapterId", chapter_id)
         fkp = chapter_info.get("fkp", "")
-        author_say = chapter_info.get("authorSay", "")
+        author_say = chapter_info.get("authorSay", "").strip()
         update_time = chapter_info.get("updateTime", "")
         update_timestamp = chapter_info.get("updateTimestamp", 0)
         modify_time = chapter_info.get("modifyTime", 0)
         word_count = chapter_info.get("actualWords", 0)
-        seq = chapter_info.get("seq", None)
+        seq = chapter_info.get("seq")
         volume = chapter_info.get("extra", {}).get("volumeName", "")
 
-        if self._is_vip(ssr_data):
+        if self._is_vip(chapter_info):
             decryptor = get_decryptor()
             raw_html = decryptor.decrypt(raw_html, chapter_id, fkp, self._fuid)
 
@@ -251,7 +250,7 @@ class QidianParser(BaseParser):
             "title": title,
             "content": chapter_text,
             "extra": {
-                "author_say": author_say.strip() if author_say else "",
+                "author_say": author_say,
                 "updated_at": update_time,
                 "update_timestamp": update_timestamp,
                 "modify_time": modify_time,
@@ -265,52 +264,41 @@ class QidianParser(BaseParser):
 
     def parse_encrypted_chapter(
         self,
-        html_str: str,
+        chapter_info: dict[str, Any],
         chapter_id: str,
     ) -> ChapterDict | None:
         """
         Extract and return the formatted textual content of an encrypted chapter.
 
         Steps:
-          1. Load SSR JSON context for CSS, fonts, and metadata.
-          3. Decode and save randomFont bytes; download fixedFont via download_font().
-          4. Extract paragraph structures and save debug JSON.
-          5. Parse CSS rules and save debug JSON.
-          6. Render encrypted paragraphs, then run OCR font-mapping.
-          7. Extracts paragraph texts and formats them.
+          1. Decode and save randomFont bytes; download fixedFont via download().
+          2. Parse CSS rules and save debug JSON.
+          3. Render encrypted paragraphs, then run OCR font-mapping.
+          4. Extracts paragraph texts and formats them.
 
-        :param html_str: Raw HTML content of the chapter page.
+        :param chapter_info: Parsed chapter info block from ssr data.
         :return: Formatted chapter text or empty string if not parsable.
         """
-        if not self._decode_font:
-            return None
-        ssr_data = self._find_ssr_page_context(html_str)
-        chapter_info = self._extract_chapter_info(ssr_data)
-        if not chapter_info:
-            logger.warning(
-                "[Parser] ssr_chapterInfo not found for chapter '%s'", chapter_id
-            )
-            return None
-
-        debug_dir = self._debug_dir / "font_debug" / "qidian" / chapter_id
+        debug_dir = self._debug_dir / "qidian" / "font_debug" / chapter_id
         if self._save_font_debug:
             debug_dir.mkdir(parents=True, exist_ok=True)
+
+        duplicated = self._is_duplicated(chapter_info)
 
         css_str = chapter_info["css"]
         randomFont_str = chapter_info["randomFont"]
         fixedFontWoff2_url = chapter_info["fixedFontWoff2"]
 
         title = chapter_info.get("chapterName", "Untitled")
-        duplicated = self._is_duplicated(ssr_data)
         raw_html = chapter_info.get("content", "")
         chapter_id = chapter_info.get("chapterId", chapter_id)
         fkp = chapter_info.get("fkp", "")
-        author_say = chapter_info.get("authorSay", "")
+        author_say = chapter_info.get("authorSay", "").strip()
         update_time = chapter_info.get("updateTime", "")
         update_timestamp = chapter_info.get("updateTimestamp", 0)
         modify_time = chapter_info.get("modifyTime", 0)
         word_count = chapter_info.get("actualWords", 0)
-        seq = chapter_info.get("seq", None)
+        seq = chapter_info.get("seq")
         volume = chapter_info.get("extra", {}).get("volumeName", "")
 
         # extract + save font
@@ -330,7 +318,7 @@ class QidianParser(BaseParser):
             return None
 
         # Extract and render paragraphs from HTML with CSS rules
-        if self._is_vip(ssr_data):
+        if self._is_vip(chapter_info):
             decryptor = get_decryptor()
             raw_html = decryptor.decrypt(
                 raw_html,
@@ -392,7 +380,7 @@ class QidianParser(BaseParser):
             "title": str(title),
             "content": final_paragraphs_str,
             "extra": {
-                "author_say": author_say.strip() if author_say else "",
+                "author_say": author_say,
                 "updated_at": update_time,
                 "update_timestamp": update_timestamp,
                 "modify_time": modify_time,
@@ -441,34 +429,31 @@ class QidianParser(BaseParser):
         return any(m in html_str for m in markers)
 
     @classmethod
-    def _is_vip(cls, ssr_data: dict[str, Any]) -> bool:
+    def _is_vip(cls, chapter_info: dict[str, Any]) -> bool:
         """
         :return: True if VIP, False otherwise.
         """
-        chapter_info = cls._extract_chapter_info(ssr_data)
         vip_flag = chapter_info.get("vipStatus", 0)
         fens_flag = chapter_info.get("fEnS", 0)
         return bool(vip_flag == 1 and fens_flag != 0)
 
     @classmethod
-    def _can_view_chapter(cls, ssr_data: dict[str, Any]) -> bool:
+    def _can_view_chapter(cls, chapter_info: dict[str, Any]) -> bool:
         """
         A chapter is not viewable if it is marked as VIP
         and has not been purchased.
 
         :return: True if viewable, False otherwise.
         """
-        chapter_info = cls._extract_chapter_info(ssr_data)
         is_buy = chapter_info.get("isBuy", 0)
         vip_status = chapter_info.get("vipStatus", 0)
         return not (vip_status == 1 and is_buy == 0)
 
     @classmethod
-    def _is_duplicated(cls, ssr_data: dict[str, Any]) -> bool:
+    def _is_duplicated(cls, chapter_info: dict[str, Any]) -> bool:
         """
         Check if chapter is marked as duplicated (eFW = 1).
         """
-        chapter_info = cls._extract_chapter_info(ssr_data)
         efw_flag = chapter_info.get("eFW", 0)
         return bool(efw_flag == 1)
 

@@ -7,8 +7,8 @@ Scans Python sources for `t(...)` usages and validates against locale JSON files
 Checks performed:
   1) Missing translation keys.
   2) Two-way placeholder validation:
-     - Params used in the call but not present as `{name}` in the template.
-     - Placeholders present in the template but not provided as params in the call.
+    * Params used in the call but not present as `{name}` in the template.
+    * Placeholders present in the template but not provided as params in the call.
   3) Unused translation keys (present in locale files but never referenced).
 
 Usage:
@@ -130,8 +130,8 @@ def validate_usage(
     """
     Validate a single (key, params) usage against a given language.
 
-    - Report missing key.
-    - Compare call params vs. template placeholders and report both sides:
+      * Report missing key.
+      * Compare call params vs. template placeholders and report both sides:
         * [MISSING PLACEHOLDER] when call uses a param not present in template.
         * [MISSING PARAM] when template expects a placeholder not supplied by the call.
 
@@ -173,9 +173,9 @@ def process_file(
 ) -> bool:
     """
     Process a single Python source file:
-      - Find all t(...) usages via AST.
-      - Validate each usage against every loaded locale.
-      - Record used keys into `used_keys_out`.
+      * Find all t(...) usages via AST.
+      * Validate each usage against every loaded locale.
+      * Record used keys into `used_keys_out`.
 
     :return: True if all usages in this file are valid in all locales, False otherwise.
     """

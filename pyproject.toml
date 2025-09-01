@@ -31,6 +31,7 @@ dependencies = [
 
 [project.optional-dependencies]
 font-recovery = [
+    "brotli",
     "numpy",
     "fonttools",
     "pillow",

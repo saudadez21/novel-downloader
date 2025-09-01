@@ -26,10 +26,10 @@ def find_invalid_links(base_dir: Path):
 
     :return: List of errors. Each error is a dict with:
 
-        - 'file': Path to the .md file
-        - 'line': Line number
-        - 'raw_link': Original link text (may include anchor/query)
-        - 'target': Resolved path that was not found
+      * 'file': Path to the .md file
+      * 'line': Line number
+      * 'raw_link': Original link text (may include anchor/query)
+      * 'target': Resolved path that was not found
     """
     errors = []
 
