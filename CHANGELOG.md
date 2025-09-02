@@ -1,3 +1,10 @@
+## v2.0.1 (2025-09-02)
+
+### Refactor
+
+- **config**: unify key resolution & preserve falsy values; simplify cleaner merge (#71)
+- **utils**: generalize RC4; drop unused params; optimize fontocr/sleep/text_clean (#70)
+
 ## v2.0.0 (2025-08-30)
 
 ### Feat
