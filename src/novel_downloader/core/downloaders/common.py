@@ -12,19 +12,9 @@ from pathlib import Path
 from typing import Any
 
 from novel_downloader.core.downloaders.base import BaseDownloader
-from novel_downloader.core.downloaders.signals import (
-    STOP,
-    Progress,
-    StopToken,
-)
-from novel_downloader.models import (
-    BookConfig,
-    ChapterDict,
-)
-from novel_downloader.utils import (
-    ChapterStorage,
-    async_jitter_sleep,
-)
+from novel_downloader.core.downloaders.signals import STOP, Progress, StopToken
+from novel_downloader.models import BookConfig, ChapterDict
+from novel_downloader.utils import ChapterStorage, async_jitter_sleep
 
 
 class CommonDownloader(BaseDownloader):

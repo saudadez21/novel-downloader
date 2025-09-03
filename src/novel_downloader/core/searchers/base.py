@@ -12,12 +12,11 @@ from urllib.parse import quote_plus, urljoin
 
 import aiohttp
 
-from novel_downloader.core.interfaces import SearcherProtocol
 from novel_downloader.models import SearchResult
 from novel_downloader.utils.constants import DEFAULT_USER_HEADERS
 
 
-class BaseSearcher(abc.ABC, SearcherProtocol):
+class BaseSearcher(abc.ABC):
     site_name: str
     BASE_URL: str = ""
     _session: ClassVar[aiohttp.ClientSession | None] = None

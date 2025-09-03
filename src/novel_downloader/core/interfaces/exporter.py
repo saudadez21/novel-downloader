@@ -6,8 +6,9 @@ novel_downloader.core.interfaces.exporter
 Protocol defining the interface for exporting books to text, EPUB, and other formats.
 """
 
+import types
 from pathlib import Path
-from typing import Protocol, runtime_checkable
+from typing import Protocol, Self, runtime_checkable
 
 
 @runtime_checkable
@@ -57,4 +58,21 @@ class ExporterProtocol(Protocol):
 
         :param book_id: The book identifier.
         """
+        ...
+
+    def close(self) -> None:
+        """
+        Shutdown and clean up the exporter.
+        """
+        ...
+
+    def __enter__(self) -> Self:
+        ...
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        tb: types.TracebackType | None,
+    ) -> None:
         ...

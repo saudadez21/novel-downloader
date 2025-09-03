@@ -12,11 +12,10 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
-from novel_downloader.core.interfaces import ParserProtocol
 from novel_downloader.models import BookInfoDict, ChapterDict, ParserConfig
 
 
-class BaseParser(ParserProtocol, abc.ABC):
+class BaseParser(abc.ABC):
     """
     BaseParser defines the interface for extracting book metadata and chapter content
     from raw HTML.
@@ -99,15 +98,6 @@ class BaseParser(ParserProtocol, abc.ABC):
         """
         self._book_id = value
         self._cache_dir = self._base_cache_dir / value
-        self._on_book_id_set()
-
-    def _on_book_id_set(self) -> None:
-        """
-        Hook called when a new book ID is set.
-        Subclasses can override this to initialize
-        book-related folders or states.
-        """
-        pass
 
     def _compile_ads_pattern(self) -> re.Pattern[str] | None:
         """

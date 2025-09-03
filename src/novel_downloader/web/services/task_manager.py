@@ -205,6 +205,8 @@ class TaskManager:
 
                 task.status = "completed"
 
+            exporter.close()
+
         except Exception as e:
             task.status = "failed"
             task.error = str(e)

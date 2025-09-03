@@ -186,6 +186,9 @@ async def _download(
         if downloader_cfg.login_required and fetcher.is_logged_in:
             await fetcher.save_state()
 
+    if exporter is not None:
+        exporter.close()
+
 
 async def _prompt_login_fields(
     fields: list[LoginField],
