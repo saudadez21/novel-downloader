@@ -13,7 +13,7 @@ from novel_downloader.models import FetcherConfig
 
 
 @register_fetcher(
-    site_keys=["biquge", "bqg", "b520"],
+    site_keys=["biquge", "b520"],
 )
 class BiqugeSession(BaseSession):
     """

@@ -7,6 +7,7 @@ Abstract base class providing common structure and utilities for book exporters
 """
 
 import abc
+import contextlib
 import json
 import logging
 import types
@@ -14,9 +15,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Self, cast
 
-from novel_downloader.core.interfaces import ExporterProtocol
 from novel_downloader.models import BookInfoDict, ChapterDict, ExporterConfig
-from novel_downloader.utils import ChapterStorage
+from novel_downloader.utils import ChapterStorage, get_cleaner
 
 
 class SafeDict(dict[str, Any]):
@@ -24,7 +24,7 @@ class SafeDict(dict[str, Any]):
         return f"{{{key}}}"
 
 
-class BaseExporter(ExporterProtocol, abc.ABC):
+class BaseExporter(abc.ABC):
     """
     BaseExporter defines the interface and common structure for
     saving assembled book content into various formats
@@ -49,11 +49,18 @@ class BaseExporter(ExporterProtocol, abc.ABC):
         """
         self._config = config
         self._site = site
+        self._include_cover = config.include_cover
+        self._include_picture = config.include_picture
         self._storage_cache: dict[str, ChapterStorage] = {}
 
         self._raw_data_dir = Path(config.raw_data_dir) / site
         self._output_dir = Path(config.output_dir)
         self._output_dir.mkdir(parents=True, exist_ok=True)
+
+        self._cleaner = get_cleaner(
+            enabled=config.clean_text,
+            config=config.cleaner_cfg,
+        )
 
         self.logger = logging.getLogger(f"{self.__class__.__name__}")
 
@@ -93,12 +100,10 @@ class BaseExporter(ExporterProtocol, abc.ABC):
                         "%s Export method for %s not implemented: %s",
                         TAG,
                         fmt_key,
-                        str(e),
+                        e,
                     )
-                except Exception as e:
-                    self.logger.error(
-                        "%s Error while saving as %s: %s", TAG, fmt_key, str(e)
-                    )
+                except Exception:
+                    self.logger.exception("%s Error while saving as %s", TAG, fmt_key)
 
         return results
 
@@ -157,38 +162,11 @@ class BaseExporter(ExporterProtocol, abc.ABC):
         :param extra_fields: Any additional fields used in the filename template.
         :return: Formatted filename with extension.
         """
-        # Merge all fields with defaults
         context = SafeDict(title=title, author=author or "", **extra_fields)
-
-        name = self.filename_template.format_map(context)
-
+        name = self._config.filename_template.format_map(context)
         if self._config.append_timestamp:
             name += f"_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-
         return f"{name}.{ext}"
-
-    @property
-    def site(self) -> str:
-        """
-        Get the site identifier.
-
-        :return: The site string.
-        """
-        return self._site
-
-    @property
-    def output_dir(self) -> Path:
-        """
-        Access the output directory for saving files.
-        """
-        return self._output_dir
-
-    @property
-    def filename_template(self) -> str:
-        """
-        Access the filename template.
-        """
-        return self._config.filename_template
 
     def _get_chapter(
         self,
@@ -245,18 +223,10 @@ class BaseExporter(ExporterProtocol, abc.ABC):
                 self.logger.warning("Failed to close storage %s: %s", storage, e)
         self._storage_cache.clear()
 
-    def _on_close(self) -> None:
-        """
-        Hook method called at the beginning of close().
-        Override in subclass if needed.
-        """
-        pass
-
     def close(self) -> None:
         """
         Shutdown and clean up the exporter.
         """
-        self._on_close()
         self._close_chapter_storages()
 
     def __enter__(self) -> Self:
@@ -271,4 +241,5 @@ class BaseExporter(ExporterProtocol, abc.ABC):
         self.close()
 
     def __del__(self) -> None:
-        self.close()
+        with contextlib.suppress(Exception):
+            self.close()

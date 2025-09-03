@@ -8,15 +8,18 @@ Exporter implementation for Qidian novels, supporting plain and encrypted source
 
 __all__ = ["QidianExporter"]
 
+from typing import Any
+
+from novel_downloader.core.exporters.common import CommonExporter
 from novel_downloader.core.exporters.registry import register_exporter
 from novel_downloader.models import ExporterConfig
-
-from .common import CommonExporter
 
 
 @register_exporter(site_keys=["qidian", "qd"])
 class QidianExporter(CommonExporter):
-    """ """
+    """
+    Exporter for Qidian (起点) novels.
+    """
 
     DEFAULT_SOURCE_ID = 0
     ENCRYPTED_SOURCE_ID = 1
@@ -25,8 +28,38 @@ class QidianExporter(CommonExporter):
         ENCRYPTED_SOURCE_ID: 1,
     }
 
-    def __init__(
-        self,
-        config: ExporterConfig,
-    ):
+    def __init__(self, config: ExporterConfig):
         super().__init__(config, site="qidian")
+
+    def _render_txt_extras(self, extras: dict[str, Any]) -> str:
+        """
+        render "作者说" for TXT:
+          * Clean content
+          * Strip leading/trailing blanks
+          * Drop multiple blank lines (keep only non-empty lines)
+        """
+        note = self._cleaner.clean_content(extras.get("author_say") or "").strip()
+        if not note:
+            return ""
+
+        # collapse blank lines
+        body = "\n".join(s for line in note.splitlines() if (s := line.strip()))
+        return f"作者说\n\n{body}"
+
+    def _render_epub_extras(self, extras: dict[str, Any]) -> str:
+        """
+        render "作者说" for EPUB:
+          * Clean content
+          * Keep as HTML-safe via _render_html_block
+          * Wrap with `<hr/>` + `<h3>作者说</h3>`
+        """
+        note = self._cleaner.clean_content(extras.get("author_say") or "").strip()
+        if not note:
+            return ""
+
+        parts = [
+            "<hr />",
+            "<h3>作者说</h3>",
+            self._render_html_block(note),
+        ]
+        return "\n".join(parts)

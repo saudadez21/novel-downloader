@@ -137,13 +137,13 @@ class FetcherProtocol(Protocol):
     def login_fields(self) -> list[LoginField]:
         ...
 
+    async def __aenter__(self) -> Self:
+        ...
+
     async def __aexit__(
         self,
         exc_type: type[BaseException] | None,
         exc_val: BaseException | None,
         tb: types.TracebackType | None,
     ) -> None:
-        ...
-
-    async def __aenter__(self) -> Self:
         ...

@@ -55,22 +55,22 @@ def handle_export(args: Namespace) -> None:
     adapter = ConfigAdapter(config=config_data, site=site)
     exporter_cfg = adapter.get_exporter_config()
     log_level = adapter.get_log_level()
-    exporter = get_exporter(site, exporter_cfg)
     setup_logging(console_level=log_level)
 
-    for book_id in book_ids:
-        ui.info(t("export_processing", book_id=book_id, format=export_format))
+    with get_exporter(site, exporter_cfg) as exporter:
+        for book_id in book_ids:
+            ui.info(t("export_processing", book_id=book_id, format=export_format))
 
-        if export_format in {"txt", "all"}:
-            try:
-                exporter.export_as_txt(book_id)
-                ui.success(t("export_success_txt", book_id=book_id))
-            except Exception as e:
-                ui.error(t("export_failed_txt", book_id=book_id, err=str(e)))
+            if export_format in {"txt", "all"}:
+                try:
+                    exporter.export_as_txt(book_id)
+                    ui.success(t("export_success_txt", book_id=book_id))
+                except Exception as e:
+                    ui.error(t("export_failed_txt", book_id=book_id, err=str(e)))
 
-        if export_format in {"epub", "all"}:
-            try:
-                exporter.export_as_epub(book_id)
-                ui.success(t("export_success_epub", book_id=book_id))
-            except Exception as e:
-                ui.error(t("export_failed_epub", book_id=book_id, err=str(e)))
+            if export_format in {"epub", "all"}:
+                try:
+                    exporter.export_as_epub(book_id)
+                    ui.success(t("export_success_epub", book_id=book_id))
+                except Exception as e:
+                    ui.error(t("export_failed_epub", book_id=book_id, err=str(e)))

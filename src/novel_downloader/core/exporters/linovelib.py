@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+"""
+novel_downloader.core.exporters.linovelib
+-----------------------------------------
+
+Exporter implementation for handling Linovelib novels.
+"""
+
+from pathlib import Path
+
+from novel_downloader.core.exporters.common import CommonExporter
+from novel_downloader.core.exporters.registry import register_exporter
+from novel_downloader.models import ExporterConfig
+from novel_downloader.utils import download
+from novel_downloader.utils.constants import (
+    DEFAULT_HEADERS,
+    DEFAULT_IMAGE_SUFFIX,
+)
+
+_IMG_HEADERS = DEFAULT_HEADERS.copy()
+_IMG_HEADERS["Referer"] = "https://www.linovelib.com/"
+
+
+@register_exporter(site_keys=["linovelib"])
+class LinovelibExporter(CommonExporter):
+    """
+    Exporter for 哔哩轻小说 novels.
+    """
+
+    def __init__(self, config: ExporterConfig):
+        super().__init__(config, "linovelib")
+
+    @staticmethod
+    def _download_image(
+        img_url: str,
+        target_dir: Path,
+        filename: str | None = None,
+        *,
+        on_exist: str = "overwrite",
+    ) -> Path | None:
+        """
+        Download image from url to target dir with given name
+        """
+        return download(
+            img_url,
+            target_dir,
+            filename=filename,
+            headers=_IMG_HEADERS,
+            on_exist="overwrite",
+            default_suffix=DEFAULT_IMAGE_SUFFIX,
+        )

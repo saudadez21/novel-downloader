@@ -14,24 +14,10 @@ from typing import Any
 
 from novel_downloader.core.downloaders.base import BaseDownloader
 from novel_downloader.core.downloaders.registry import register_downloader
-from novel_downloader.core.downloaders.signals import (
-    STOP,
-    Progress,
-    StopToken,
-)
-from novel_downloader.core.interfaces import (
-    FetcherProtocol,
-    ParserProtocol,
-)
-from novel_downloader.models import (
-    BookConfig,
-    ChapterDict,
-    DownloaderConfig,
-)
-from novel_downloader.utils import (
-    ChapterStorage,
-    async_jitter_sleep,
-)
+from novel_downloader.core.downloaders.signals import STOP, Progress, StopToken
+from novel_downloader.core.interfaces import FetcherProtocol, ParserProtocol
+from novel_downloader.models import BookConfig, ChapterDict, DownloaderConfig
+from novel_downloader.utils import ChapterStorage, async_jitter_sleep
 
 
 @register_downloader(site_keys=["qidian", "qd"])

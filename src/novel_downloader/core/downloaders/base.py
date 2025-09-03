@@ -14,11 +14,7 @@ from collections.abc import AsyncIterator, Awaitable, Callable, Sequence
 from pathlib import Path
 from typing import Any, cast
 
-from novel_downloader.core.interfaces import (
-    DownloaderProtocol,
-    FetcherProtocol,
-    ParserProtocol,
-)
+from novel_downloader.core.interfaces import FetcherProtocol, ParserProtocol
 from novel_downloader.models import (
     BookConfig,
     BookInfoDict,
@@ -28,7 +24,7 @@ from novel_downloader.models import (
 from novel_downloader.utils import time_diff
 
 
-class BaseDownloader(DownloaderProtocol, abc.ABC):
+class BaseDownloader(abc.ABC):
     """
     Abstract base class for novel downloaders.
 
