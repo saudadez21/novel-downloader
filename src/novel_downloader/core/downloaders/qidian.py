@@ -43,8 +43,8 @@ class QidianDownloader(BaseDownloader):
         config: DownloaderConfig,
         site: str,
     ):
-        config.request_interval = max(1.0, config.request_interval)
         super().__init__(fetcher, parser, config, site)
+        self._request_interval = max(1.0, config.request_interval)
 
     async def _download_one(
         self,
@@ -129,7 +129,7 @@ class QidianDownloader(BaseDownloader):
                 await flush_batch(encrypted_batch, self.ENCRYPTED_SOURCE_ID)
 
             # ---- workers ---
-            sem = asyncio.Semaphore(self.workers)
+            sem = asyncio.Semaphore(self._workers)
 
             async def storage_worker() -> None:
                 """
@@ -151,7 +151,7 @@ class QidianDownloader(BaseDownloader):
 
                     batch, src = select_batch(chap)
                     batch.append(chap)
-                    if len(batch) >= self.storage_batch_size:
+                    if len(batch) >= self._storage_batch_size:
                         await flush_batch(batch, src)
 
                     if cancelled():
@@ -199,9 +199,9 @@ class QidianDownloader(BaseDownloader):
                         await save_q.put(chap)
 
                     await async_jitter_sleep(
-                        self.request_interval,
+                        self._request_interval,
                         mul_spread=1.1,
-                        max_sleep=self.request_interval + 2,
+                        max_sleep=self._request_interval + 2,
                     )
 
             async def producer() -> None:
@@ -214,7 +214,7 @@ class QidianDownloader(BaseDownloader):
                     async for cid in self._chapter_ids(vols, start_id, end_id):
                         if cancelled():
                             break
-                        if self.skip_existing and (
+                        if self._skip_existing and (
                             chapter_storage.exists(cid, self.DEFAULT_SOURCE_ID)
                             or chapter_storage.exists(cid, self.ENCRYPTED_SOURCE_ID)
                         ):
@@ -282,7 +282,7 @@ class QidianDownloader(BaseDownloader):
 
         :return: ChapterDict on success, or None on failure.
         """
-        for attempt in range(self.retry_times + 1):
+        for attempt in range(self._retry_times + 1):
             try:
                 html_list = await self.fetcher.get_book_chapter(book_id, cid)
                 if self._check_restricted(html_list):
@@ -308,11 +308,11 @@ class QidianDownloader(BaseDownloader):
                 return chap
 
             except Exception as e:
-                if attempt < self.retry_times:
+                if attempt < self._retry_times:
                     self.logger.info(
                         "[ChapterWorker] Retry %s (%s): %s", cid, attempt + 1, e
                     )
-                    backoff = self.backoff_factor * (2**attempt)
+                    backoff = self._backoff_factor * (2**attempt)
                     await async_jitter_sleep(
                         base=backoff,
                         mul_spread=1.2,

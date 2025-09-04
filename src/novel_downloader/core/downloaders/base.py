@@ -57,8 +57,16 @@ class BaseDownloader(abc.ABC):
         """
         self._fetcher = fetcher
         self._parser = parser
-        self._config = config
         self._site = site
+
+        self._save_html = config.save_html
+        self._skip_existing = config.skip_existing
+        self._login_required = config.login_required
+        self._request_interval = config.request_interval
+        self._retry_times = config.retry_times
+        self._backoff_factor = config.backoff_factor
+        self._workers = config.workers
+        self._storage_batch_size = max(1, config.storage_batch_size)
 
         self._raw_data_dir = Path(config.raw_data_dir) / site
         self._raw_data_dir.mkdir(parents=True, exist_ok=True)
@@ -83,7 +91,7 @@ class BaseDownloader(abc.ABC):
                                 args: completed_count, total_count.
         :param cancel_event: Optional asyncio.Event to allow cancellation.
         """
-        if not await self._ensure_ready():
+        if not self._check_login():
             book_ids = [b["book_id"] for b in books]
             self.logger.warning(
                 "[%s] login failed, skipping download of books: %s",
@@ -112,8 +120,6 @@ class BaseDownloader(abc.ABC):
             except Exception as e:
                 self._handle_download_exception(book, e)
 
-        await self._finalize()
-
     async def download(
         self,
         book: BookConfig,
@@ -130,7 +136,7 @@ class BaseDownloader(abc.ABC):
                                 args: completed_count, total_count.
         :param cancel_event: Optional asyncio.Event to allow cancellation.
         """
-        if not await self._ensure_ready():
+        if not self._check_login():
             self.logger.warning(
                 "[%s] login failed, skipping download of book: %s (%s-%s)",
                 self._site,
@@ -157,8 +163,6 @@ class BaseDownloader(abc.ABC):
             )
         except Exception as e:
             self._handle_download_exception(book, e)
-
-        await self._finalize()
 
     async def load_book_info(
         self,
@@ -195,23 +199,6 @@ class BaseDownloader(abc.ABC):
         Subclasses must implement this to define how to download a single book.
         """
         ...
-
-    async def _prepare(self) -> None:
-        """
-        Optional hook called before downloading.
-
-        Subclasses can override this method to perform pre-download setup.
-        """
-        return
-
-    async def _finalize(self) -> None:
-        """
-        Optional hook called after downloading is complete.
-
-        Subclasses can override this method to perform post-download tasks,
-        such as saving state or releasing resources.
-        """
-        return
 
     def _load_book_info(
         self,
@@ -279,7 +266,7 @@ class BaseDownloader(abc.ABC):
         :param filename: used as filename prefix
         :param html_list: list of HTML strings to save
         """
-        if not self.save_html:
+        if not self._save_html:
             return
 
         html_dir.mkdir(parents=True, exist_ok=True)
@@ -319,38 +306,6 @@ class BaseDownloader(abc.ABC):
     def parser(self) -> ParserProtocol:
         return self._parser
 
-    @property
-    def save_html(self) -> bool:
-        return self._config.save_html
-
-    @property
-    def skip_existing(self) -> bool:
-        return self._config.skip_existing
-
-    @property
-    def login_required(self) -> bool:
-        return self._config.login_required
-
-    @property
-    def request_interval(self) -> float:
-        return self._config.request_interval
-
-    @property
-    def retry_times(self) -> int:
-        return self._config.retry_times
-
-    @property
-    def backoff_factor(self) -> float:
-        return self._config.backoff_factor
-
-    @property
-    def workers(self) -> int:
-        return self._config.workers
-
-    @property
-    def storage_batch_size(self) -> int:
-        return max(1, self._config.storage_batch_size)
-
     def _handle_download_exception(self, book: BookConfig, error: Exception) -> None:
         """
         Handle download errors in a consistent way.
@@ -369,10 +324,8 @@ class BaseDownloader(abc.ABC):
             error,
         )
 
-    async def _ensure_ready(self) -> bool:
+    def _check_login(self) -> bool:
         """
-        Run pre-download preparation and check login if needed.
+        Check login if needed.
         """
-        await self._prepare()
-
-        return self.fetcher.is_logged_in if self.login_required else True
+        return self.fetcher.is_logged_in if self._login_required else True

@@ -124,7 +124,7 @@ class QianbiDownloader(BaseDownloader):
                     item = await save_q.get()
                     if isinstance(item, StopToken):
                         stop_count += 1
-                        if stop_count == self.workers:
+                        if stop_count == self._workers:
                             # All chapter workers have exited.
                             await flush_batch()
                             return
@@ -133,7 +133,7 @@ class QianbiDownloader(BaseDownloader):
 
                     # Normal chapter
                     batch.append(item)
-                    if len(batch) >= self.storage_batch_size:
+                    if len(batch) >= self._storage_batch_size:
                         await flush_batch()
 
                     if cancelled():
@@ -150,14 +150,14 @@ class QianbiDownloader(BaseDownloader):
                         # Final flush of everything
                         await flush_batch()
                         # Wait for remaining STOPs so chapter workers can finish.
-                        while stop_count < self.workers:
+                        while stop_count < self._workers:
                             nxt = await save_q.get()
                             if isinstance(nxt, StopToken):
                                 stop_count += 1
                         return
 
             # --- stage: chapter worker ---
-            sem = asyncio.Semaphore(self.workers)
+            sem = asyncio.Semaphore(self._workers)
 
             async def chapter_worker() -> None:
                 """
@@ -188,9 +188,9 @@ class QianbiDownloader(BaseDownloader):
 
                     # polite pacing
                     await async_jitter_sleep(
-                        self.request_interval,
+                        self._request_interval,
                         mul_spread=1.1,
-                        max_sleep=self.request_interval + 2,
+                        max_sleep=self._request_interval + 2,
                     )
 
             # --- stage: producer ---
@@ -204,19 +204,19 @@ class QianbiDownloader(BaseDownloader):
                     async for cid in self._chapter_ids(vols, start_id, end_id):
                         if cancelled():
                             break
-                        if self.skip_existing and chapter_storage.exists(cid):
+                        if self._skip_existing and chapter_storage.exists(cid):
                             # Count as completed but don't enqueue.
                             await progress.bump(1)
                         else:
                             await cid_q.put(cid)
                 finally:
-                    for _ in range(self.workers):
+                    for _ in range(self._workers):
                         await cid_q.put(STOP)
 
             # --- run the pipeline ---
             async with asyncio.TaskGroup() as tg:
                 tg.create_task(storage_worker())
-                for _ in range(self.workers):
+                for _ in range(self._workers):
                     tg.create_task(chapter_worker())
                 tg.create_task(producer())
 
@@ -275,9 +275,9 @@ class QianbiDownloader(BaseDownloader):
                         continue
                     storage.upsert_chapter(data, self.DEFAULT_SOURCE_ID)
                     await async_jitter_sleep(
-                        self.request_interval,
+                        self._request_interval,
                         mul_spread=1.1,
-                        max_sleep=self.request_interval + 2,
+                        max_sleep=self._request_interval + 2,
                     )
 
                 next_cid = data.get("extra", {}).get("next_chapter_id")
@@ -311,7 +311,7 @@ class QianbiDownloader(BaseDownloader):
 
         :return: ChapterDict on success, or None on failure.
         """
-        for attempt in range(self.retry_times + 1):
+        for attempt in range(self._retry_times + 1):
             try:
                 html_list = await self.fetcher.get_book_chapter(book_id, cid)
                 self._save_html_pages(html_dir, cid, html_list)
@@ -322,9 +322,9 @@ class QianbiDownloader(BaseDownloader):
                     raise ValueError("Empty parse result")
                 return chap
             except Exception as e:
-                if attempt < self.retry_times:
+                if attempt < self._retry_times:
                     self.logger.info(f"[ChapterWorker] Retry {cid} ({attempt+1}): {e}")
-                    backoff = self.backoff_factor * (2**attempt)
+                    backoff = self._backoff_factor * (2**attempt)
                     await async_jitter_sleep(
                         base=backoff, mul_spread=1.2, max_sleep=backoff + 3
                     )
