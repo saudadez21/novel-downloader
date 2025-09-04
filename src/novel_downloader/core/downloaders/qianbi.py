@@ -14,12 +14,10 @@ from typing import Any
 from novel_downloader.core.downloaders.base import BaseDownloader
 from novel_downloader.core.downloaders.registry import register_downloader
 from novel_downloader.core.downloaders.signals import STOP, Progress, StopToken
-from novel_downloader.core.interfaces import FetcherProtocol, ParserProtocol
 from novel_downloader.models import (
     BookConfig,
     BookInfoDict,
     ChapterDict,
-    DownloaderConfig,
 )
 from novel_downloader.utils import ChapterStorage, async_jitter_sleep
 
@@ -34,14 +32,6 @@ class QianbiDownloader(BaseDownloader):
     """
 
     DEFAULT_SOURCE_ID = 0
-
-    def __init__(
-        self,
-        fetcher: FetcherProtocol,
-        parser: ParserProtocol,
-        config: DownloaderConfig,
-    ):
-        super().__init__(fetcher, parser, config, "qianbi")
 
     async def _download_one(
         self,

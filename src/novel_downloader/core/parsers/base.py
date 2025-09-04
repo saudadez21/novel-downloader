@@ -39,14 +39,13 @@ class BaseParser(abc.ABC):
 
         :param config: ParserConfig object controlling parsing behavior.
         """
-        self._config = config
         self._book_id: str | None = None
 
         self._save_font_debug = config.save_font_debug
         self._decode_font: bool = config.decode_font
+        self._batch_size = config.batch_size
         self._use_truncation = config.use_truncation
         self._base_cache_dir = Path(config.cache_dir)
-        self._cache_dir = self._base_cache_dir
 
         self._ad_pattern = self._compile_ads_pattern()
 
@@ -79,25 +78,6 @@ class BaseParser(abc.ABC):
         :return: The chapter's data.
         """
         ...
-
-    @property
-    def book_id(self) -> str | None:
-        """
-        Current book ID in context.
-
-        :return: The current book identifier.
-        """
-        return self._book_id
-
-    @book_id.setter
-    def book_id(self, value: str) -> None:
-        """
-        Set current book ID and update debug paths if needed.
-
-        :param value: Book identifier.
-        """
-        self._book_id = value
-        self._cache_dir = self._base_cache_dir / value
 
     def _compile_ads_pattern(self) -> re.Pattern[str] | None:
         """

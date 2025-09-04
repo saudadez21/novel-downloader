@@ -10,7 +10,6 @@ from typing import Any
 
 from novel_downloader.core.fetchers.base import BaseSession
 from novel_downloader.core.fetchers.registry import register_fetcher
-from novel_downloader.models import FetcherConfig
 
 
 @register_fetcher(
@@ -21,22 +20,11 @@ class QianbiSession(BaseSession):
     A session class for interacting with the 铅笔小说 (www.23qb.com) novel website.
     """
 
-    BASE_URLS = [
-        "www.23qb.com",
-        "www.23qb.net",
-    ]
+    site_name: str = "qianbi"
 
     BOOK_INFO_URL = "https://www.23qb.com/book/{book_id}/"
     BOOK_CATALOG_URL = "https://www.23qb.com/book/{book_id}/catalog"
     CHAPTER_URL = "https://www.23qb.com/book/{book_id}/{chapter_id}.html"
-
-    def __init__(
-        self,
-        config: FetcherConfig,
-        cookies: dict[str, str] | None = None,
-        **kwargs: Any,
-    ) -> None:
-        super().__init__("qianbi", config, cookies, **kwargs)
 
     async def get_book_info(
         self,
@@ -66,13 +54,6 @@ class QianbiSession(BaseSession):
         chapter_id: str,
         **kwargs: Any,
     ) -> list[str]:
-        """
-        Fetch the raw HTML of a single chapter asynchronously.
-
-        :param book_id: The book identifier.
-        :param chapter_id: The chapter identifier.
-        :return: The page content as string list.
-        """
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
         return [await self.fetch(url, **kwargs)]
 

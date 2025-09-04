@@ -11,8 +11,7 @@ from typing import Any
 
 from novel_downloader.core.fetchers.base import BaseSession
 from novel_downloader.core.fetchers.registry import register_fetcher
-from novel_downloader.models import FetcherConfig, LoginField
-from novel_downloader.utils import async_jitter_sleep
+from novel_downloader.models import LoginField
 
 
 @register_fetcher(
@@ -23,6 +22,8 @@ class EsjzoneSession(BaseSession):
     A session class for interacting with the ESJ Zone (www.esjzone.cc) novel website.
     """
 
+    site_name: str = "esjzone"
+
     BOOKCASE_URL = "https://www.esjzone.cc/my/favorite"
     BOOK_INFO_URL = "https://www.esjzone.cc/detail/{book_id}.html"
     CHAPTER_URL = "https://www.esjzone.cc/forum/{book_id}/{chapter_id}.html"
@@ -30,13 +31,7 @@ class EsjzoneSession(BaseSession):
     API_LOGIN_URL_1 = "https://www.esjzone.cc/my/login"
     API_LOGIN_URL_2 = "https://www.esjzone.cc/inc/mem_login.php"
 
-    def __init__(
-        self,
-        config: FetcherConfig,
-        cookies: dict[str, str] | None = None,
-        **kwargs: Any,
-    ) -> None:
-        super().__init__("esjzone", config, cookies, **kwargs)
+    _TOKEN_RE = re.compile(r"<JinJing>(.*?)</JinJing>")
 
     async def login(
         self,
@@ -68,11 +63,7 @@ class EsjzoneSession(BaseSession):
             ):
                 self._is_logged_in = True
                 return True
-            await async_jitter_sleep(
-                self.backoff_factor,
-                mul_spread=1.1,
-                max_sleep=self.backoff_factor + 2,
-            )
+            await self._sleep()
 
         self._is_logged_in = False
         return False
@@ -82,12 +73,6 @@ class EsjzoneSession(BaseSession):
         book_id: str,
         **kwargs: Any,
     ) -> list[str]:
-        """
-        Fetch the raw HTML of the book info page asynchronously.
-
-        :param book_id: The book identifier.
-        :return: The page content as string list.
-        """
         url = self.book_info_url(book_id=book_id)
         return [await self.fetch(url, **kwargs)]
 
@@ -97,13 +82,6 @@ class EsjzoneSession(BaseSession):
         chapter_id: str,
         **kwargs: Any,
     ) -> list[str]:
-        """
-        Fetch the raw HTML of a single chapter asynchronously.
-
-        :param book_id: The book identifier.
-        :param chapter_id: The chapter identifier.
-        :return: The page content as string list.
-        """
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
         return [await self.fetch(url, **kwargs)]
 
@@ -228,8 +206,7 @@ class EsjzoneSession(BaseSession):
         return not any(kw in resp_text[0] for kw in keywords)
 
     def _extract_token(self, text: str) -> str:
-        match = re.search(r"<JinJing>(.+?)</JinJing>", text)
-        return match.group(1) if match else ""
+        return m.group(1) if (m := self._TOKEN_RE.search(text)) else ""
 
     @staticmethod
     def _filter_cookies(

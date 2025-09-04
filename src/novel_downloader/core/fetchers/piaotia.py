@@ -10,7 +10,6 @@ from typing import Any
 
 from novel_downloader.core.fetchers.base import BaseSession
 from novel_downloader.core.fetchers.registry import register_fetcher
-from novel_downloader.models import FetcherConfig
 
 
 @register_fetcher(
@@ -21,17 +20,11 @@ class PiaotiaSession(BaseSession):
     A session class for interacting with the 飘天文学网 (www.piaotia.com) novel website.
     """
 
+    site_name: str = "piaotia"
+
     BOOK_INFO_URL = "https://www.piaotia.com/bookinfo/{book_id}.html"
     BOOK_CATALOG_URL = "https://www.piaotia.com/html/{book_id}/index.html"
     CHAPTER_URL = "https://www.piaotia.com/html/{book_id}/{chapter_id}.html"
-
-    def __init__(
-        self,
-        config: FetcherConfig,
-        cookies: dict[str, str] | None = None,
-        **kwargs: Any,
-    ) -> None:
-        super().__init__("piaotia", config, cookies, **kwargs)
 
     async def get_book_info(
         self,
@@ -62,13 +55,6 @@ class PiaotiaSession(BaseSession):
         chapter_id: str,
         **kwargs: Any,
     ) -> list[str]:
-        """
-        Fetch the raw HTML of a single chapter asynchronously.
-
-        :param book_id: The book identifier.
-        :param chapter_id: The chapter identifier.
-        :return: The page content as string list.
-        """
         book_id = book_id.replace("-", "/")
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
         return [await self.fetch(url, **kwargs)]

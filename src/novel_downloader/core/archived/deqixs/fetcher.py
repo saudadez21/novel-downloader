@@ -8,8 +8,6 @@ novel_downloader.core.archived.deqixs.fetcher
 from typing import Any
 
 from novel_downloader.core.fetchers.base import BaseSession
-from novel_downloader.models import FetcherConfig
-from novel_downloader.utils import async_jitter_sleep
 
 # from novel_downloader.core.fetchers.registry import register_fetcher
 
@@ -25,14 +23,6 @@ class DeqixsSession(BaseSession):
     BASE_URL = "https://www.deqixs.com"
     BOOK_INFO_URL = "https://www.deqixs.com/xiaoshuo/{book_id}/"
     CHAPTER_URL = "https://www.deqixs.com/xiaoshuo/{book_id}/{chapter_id}.html"
-
-    def __init__(
-        self,
-        config: FetcherConfig,
-        cookies: dict[str, str] | None = None,
-        **kwargs: Any,
-    ) -> None:
-        super().__init__("deqixs", config, cookies, **kwargs)
 
     async def get_book_info(
         self,
@@ -85,11 +75,7 @@ class DeqixsSession(BaseSession):
 
             html_pages.append(html)
             idx += 1
-            await async_jitter_sleep(
-                self.request_interval,
-                mul_spread=1.1,
-                max_sleep=self.request_interval + 2,
-            )
+            await self._sleep()
 
         return html_pages
 

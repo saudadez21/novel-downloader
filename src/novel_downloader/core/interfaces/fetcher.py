@@ -21,6 +21,25 @@ class FetcherProtocol(Protocol):
     and manage login/shutdown asynchronously.
     """
 
+    async def init(
+        self,
+        **kwargs: Any,
+    ) -> None:
+        """
+        Perform async initialization, such as
+        launching a browser or creating a session.
+
+        This should be called before using any other method
+        if initialization is required.
+        """
+        ...
+
+    async def close(self) -> None:
+        """
+        Shutdown and clean up any resources.
+        """
+        ...
+
     async def login(
         self,
         username: str = "",
@@ -61,50 +80,6 @@ class FetcherProtocol(Protocol):
         :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
         :return: The page content as string list.
-        """
-        ...
-
-    async def get_bookcase(
-        self,
-        **kwargs: Any,
-    ) -> list[str]:
-        """
-        Optional: Retrieve the HTML content of the authenticated
-        user's bookcase page asynchronously.
-
-        :return: The HTML markup of the bookcase page.
-        """
-        ...
-
-    async def fetch(
-        self,
-        url: str,
-        **kwargs: Any,
-    ) -> str:
-        """
-        Perform a generic HTTP request and return the response body as text.
-
-        :param url: The URL to request.
-        :return: The response content as a string (HTML or JSON or plain text).
-        """
-        ...
-
-    async def init(
-        self,
-        **kwargs: Any,
-    ) -> None:
-        """
-        Perform async initialization, such as
-        launching a browser or creating a session.
-
-        This should be called before using any other method
-        if initialization is required.
-        """
-        ...
-
-    async def close(self) -> None:
-        """
-        Shutdown and clean up any resources.
         """
         ...
 

@@ -10,7 +10,6 @@ from pathlib import Path
 
 from novel_downloader.core.exporters.common import CommonExporter
 from novel_downloader.core.exporters.registry import register_exporter
-from novel_downloader.models import ExporterConfig
 from novel_downloader.utils import download
 from novel_downloader.utils.constants import (
     DEFAULT_HEADERS,
@@ -26,9 +25,6 @@ class LinovelibExporter(CommonExporter):
     """
     Exporter for 哔哩轻小说 novels.
     """
-
-    def __init__(self, config: ExporterConfig):
-        super().__init__(config, "linovelib")
 
     @staticmethod
     def _download_image(

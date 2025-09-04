@@ -20,7 +20,7 @@ from novel_downloader.core.interfaces import (
 from novel_downloader.models import DownloaderConfig
 
 DownloaderBuilder = Callable[
-    [FetcherProtocol, ParserProtocol, DownloaderConfig],
+    [FetcherProtocol, ParserProtocol, DownloaderConfig, str],
     DownloaderProtocol,
 ]
 D = TypeVar("D", bound=DownloaderProtocol)
@@ -66,4 +66,4 @@ def get_downloader(
         downloader_cls = _DOWNLOADER_MAP[site_key]
     except KeyError:
         return CommonDownloader(fetcher, parser, config, site_key)
-    return downloader_cls(fetcher, parser, config)
+    return downloader_cls(fetcher, parser, config, site_key)

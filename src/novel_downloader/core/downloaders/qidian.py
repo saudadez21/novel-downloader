@@ -41,9 +41,10 @@ class QidianDownloader(BaseDownloader):
         fetcher: FetcherProtocol,
         parser: ParserProtocol,
         config: DownloaderConfig,
+        site: str,
     ):
         config.request_interval = max(1.0, config.request_interval)
-        super().__init__(fetcher, parser, config, "qidian")
+        super().__init__(fetcher, parser, config, site)
 
     async def _download_one(
         self,

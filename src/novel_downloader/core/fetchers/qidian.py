@@ -30,6 +30,8 @@ class QidianSession(BaseSession):
     A session class for interacting with the 起点中文网 (www.qidian.com) novel website.
     """
 
+    site_name: str = "qidian"
+
     HOMEPAGE_URL = "https://www.qidian.com/"
     BOOKCASE_URL = "https://my.qidian.com/bookcase/"
     BOOK_INFO_URL = "https://www.qidian.com/book/{book_id}/"
@@ -51,7 +53,7 @@ class QidianSession(BaseSession):
         cookies: dict[str, str] | None = None,
         **kwargs: Any,
     ) -> None:
-        super().__init__("qidian", config, cookies, **kwargs)
+        super().__init__(config, cookies, **kwargs)
         self._s_init = rc4_init(self._d2("dGcwOUl0Myo5aA=="))
         self._cookie_key = self._d("d190c2Zw")
         self._fp_key = self._d("ZmluZ2VycHJpbnQ=")
@@ -85,12 +87,6 @@ class QidianSession(BaseSession):
         book_id: str,
         **kwargs: Any,
     ) -> list[str]:
-        """
-        Fetch the raw HTML of the book info page asynchronously.
-
-        :param book_id: The book identifier.
-        :return: The page content as string list.
-        """
         url = self.book_info_url(book_id=book_id)
         return [await self.fetch(url, **kwargs)]
 
@@ -100,13 +96,6 @@ class QidianSession(BaseSession):
         chapter_id: str,
         **kwargs: Any,
     ) -> list[str]:
-        """
-        Fetch the raw HTML of a single chapter asynchronously.
-
-        :param book_id: The book identifier.
-        :param chapter_id: The chapter identifier.
-        :return: The page content as string list.
-        """
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
         return [await self.fetch(url, **kwargs)]
 
@@ -120,18 +109,6 @@ class QidianSession(BaseSession):
         :return: The HTML markup of the bookcase page.
         """
         url = self.bookcase_url()
-        return [await self.fetch(url, **kwargs)]
-
-    async def get_homepage(
-        self,
-        **kwargs: Any,
-    ) -> list[str]:
-        """
-        Retrieve the site home page.
-
-        :return: The HTML markup of the home page.
-        """
-        url = self.homepage_url()
         return [await self.fetch(url, **kwargs)]
 
     @property
@@ -165,7 +142,7 @@ class QidianSession(BaseSession):
         if self._rate_limiter:
             await self._rate_limiter.wait()
 
-        for attempt in range(self.retry_times + 1):
+        for attempt in range(self._retry_times + 1):
             try:
                 refreshed_token = self._build_payload_token(url)
                 self.update_cookies({self._cookie_key: refreshed_token})
@@ -175,11 +152,11 @@ class QidianSession(BaseSession):
                     text: str = await resp.text(encoding=encoding)
                     return text
             except aiohttp.ClientError:
-                if attempt < self.retry_times:
+                if attempt < self._retry_times:
                     await async_jitter_sleep(
-                        self.backoff_factor,
+                        self._backoff_factor,
                         mul_spread=1.1,
-                        max_sleep=self.backoff_factor + 2,
+                        max_sleep=self._backoff_factor + 2,
                     )
                     continue
                 raise

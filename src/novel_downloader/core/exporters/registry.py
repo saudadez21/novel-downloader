@@ -15,7 +15,7 @@ from novel_downloader.core.exporters.common import CommonExporter
 from novel_downloader.core.interfaces import ExporterProtocol
 from novel_downloader.models import ExporterConfig
 
-ExporterBuilder = Callable[[ExporterConfig], ExporterProtocol]
+ExporterBuilder = Callable[[ExporterConfig, str], ExporterProtocol]
 
 E = TypeVar("E", bound=ExporterProtocol)
 _EXPORTER_MAP: dict[str, ExporterBuilder] = {}
@@ -52,4 +52,4 @@ def get_exporter(site: str, config: ExporterConfig) -> ExporterProtocol:
         exporter_cls = _EXPORTER_MAP[site_key]
     except KeyError:
         return CommonExporter(config, site_key)
-    return exporter_cls(config)
+    return exporter_cls(config, site_key)

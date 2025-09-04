@@ -12,7 +12,6 @@ from typing import Any
 
 from novel_downloader.core.exporters.common import CommonExporter
 from novel_downloader.core.exporters.registry import register_exporter
-from novel_downloader.models import ExporterConfig
 
 
 @register_exporter(site_keys=["qidian", "qd"])
@@ -27,9 +26,6 @@ class QidianExporter(CommonExporter):
         DEFAULT_SOURCE_ID: 0,
         ENCRYPTED_SOURCE_ID: 1,
     }
-
-    def __init__(self, config: ExporterConfig):
-        super().__init__(config, site="qidian")
 
     def _render_txt_extras(self, extras: dict[str, Any]) -> str:
         """

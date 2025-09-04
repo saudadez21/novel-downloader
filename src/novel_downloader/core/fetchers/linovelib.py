@@ -10,8 +10,6 @@ from typing import Any
 
 from novel_downloader.core.fetchers.base import BaseSession
 from novel_downloader.core.fetchers.registry import register_fetcher
-from novel_downloader.models import FetcherConfig
-from novel_downloader.utils import async_jitter_sleep
 
 
 @register_fetcher(
@@ -22,6 +20,8 @@ class LinovelibSession(BaseSession):
     A session class for interacting with 哔哩轻小说 (www.linovelib.com) novel website.
     """
 
+    site_name: str = "linovelib"
+
     BASE_URL = "https://www.linovelib.com"
     BOOK_INFO_URL = "https://www.linovelib.com/novel/{book_id}.html"
     BOOK_CATALOG_UTL = "https://www.linovelib.com/novel/{book_id}/catalog"
@@ -29,14 +29,6 @@ class LinovelibSession(BaseSession):
     CHAPTER_URL = "https://www.linovelib.com/novel/{book_id}/{chapter_id}.html"
 
     _VOL_ID_PATTERN: re.Pattern[str] = re.compile(r"/novel/\d+/(vol_\d+)\.html")
-
-    def __init__(
-        self,
-        config: FetcherConfig,
-        cookies: dict[str, str] | None = None,
-        **kwargs: Any,
-    ) -> None:
-        super().__init__("linovelib", config, cookies, **kwargs)
 
     async def get_book_info(
         self,
@@ -63,11 +55,7 @@ class LinovelibSession(BaseSession):
 
         vol_htmls = []
         for vol_id in vol_ids:
-            await async_jitter_sleep(
-                self.request_interval,
-                mul_spread=1.1,
-                max_sleep=self.request_interval + 2,
-            )
+            await self._sleep()
             html = await self.get_book_volume(book_id, vol_id, **kwargs)
             if html:
                 vol_htmls.append(html)
@@ -129,11 +117,7 @@ class LinovelibSession(BaseSession):
 
             html_pages.append(html)
             idx += 1
-            await async_jitter_sleep(
-                self.request_interval,
-                mul_spread=1.1,
-                max_sleep=self.request_interval + 2,
-            )
+            await self._sleep()
 
         return html_pages
 
