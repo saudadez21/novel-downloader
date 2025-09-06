@@ -6,12 +6,10 @@ novel_downloader.core.fetchers.eightnovel
 """
 
 import re
-from re import Pattern
 from typing import Any
 
 from novel_downloader.core.fetchers.base import BaseSession
 from novel_downloader.core.fetchers.registry import register_fetcher
-from novel_downloader.models import FetcherConfig
 
 
 @register_fetcher(
@@ -22,36 +20,23 @@ class EightnovelSession(BaseSession):
     A session class for interacting with the 无限轻小说 (www.8novel.com) novel website.
     """
 
+    site_name: str = "eightnovel"
+
     BOOK_INFO_URL = "https://www.8novel.com/novelbooks/{book_id}/"
     CHAPTER_URL = "https://article.8novel.com/read/{book_id}/?{chapter_id}"
     CHAPTER_CONTENT_URL = (
         "https://article.8novel.com/txt/1/{book_id}/{chapter_id}{seed_segment}.html"
     )
 
-    _SPLIT_STR_PATTERN = re.compile(
-        r'["\']([^"\']+)["\']\s*\.split\s*\(\s*["\']\s*,\s*["\']\s*\)', re.DOTALL
+    _SPLIT_DIGITS_PATTERN = re.compile(
+        r'["\'](\d+(?:,\d+)*)["\']\s*\.split\s*\(\s*["\']\s*,\s*["\']\s*\)', re.DOTALL
     )
-    _DIGIT_LIST_PATTERN: Pattern[str] = re.compile(r"^\d+(?:,\d+)*$")
-
-    def __init__(
-        self,
-        config: FetcherConfig,
-        cookies: dict[str, str] | None = None,
-        **kwargs: Any,
-    ) -> None:
-        super().__init__("eightnovel", config, cookies, **kwargs)
 
     async def get_book_info(
         self,
         book_id: str,
         **kwargs: Any,
     ) -> list[str]:
-        """
-        Fetch the raw HTML of the book info page asynchronously.
-
-        :param book_id: The book identifier.
-        :return: The page content as string list.
-        """
         url = self.book_info_url(book_id=book_id)
         return [await self.fetch(url, **kwargs)]
 
@@ -84,12 +69,6 @@ class EightnovelSession(BaseSession):
 
     @classmethod
     def book_info_url(cls, book_id: str) -> str:
-        """
-        Construct the URL for fetching a book's info page.
-
-        :param book_id: The identifier of the book.
-        :return: Fully qualified URL for the book info page.
-        """
         return cls.BOOK_INFO_URL.format(book_id=book_id)
 
     @classmethod
@@ -110,17 +89,10 @@ class EightnovelSession(BaseSession):
         of the form "...".split(","), pick the ones that may contain seed,
         and return the last value.
         """
-        split_literals: list[str] = cls._SPLIT_STR_PATTERN.findall(html_str)
-
-        numeric_lists = [
-            lit for lit in split_literals if cls._DIGIT_LIST_PATTERN.fullmatch(lit)
-        ]
-
-        if not numeric_lists:
-            return ""
-
-        last_list = numeric_lists[-1]
-        return last_list.split(",")[-1]
+        matches: list[str] = cls._SPLIT_DIGITS_PATTERN.findall(html_str)
+        if not matches:
+            raise ValueError("No digit lists found in HTML.")
+        return matches[-1].split(",")[-1]
 
     @classmethod
     def _build_chapter_content_url(

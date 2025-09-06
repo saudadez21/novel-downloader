@@ -141,7 +141,7 @@ class CommonExporter(BaseExporter):
         book_id = self._normalize_book_id(book_id)
         self._init_chapter_storages(book_id)
 
-        mode = self._config.split_mode
+        mode = self._split_mode
         if mode == "book":
             return self._export_epub_by_book(book_id)
         if mode == "volume":

@@ -12,8 +12,6 @@ from typing import Any
 
 from novel_downloader.core.fetchers.base import BaseSession
 from novel_downloader.core.fetchers.registry import register_fetcher
-from novel_downloader.models import FetcherConfig
-from novel_downloader.utils import async_jitter_sleep
 
 
 @register_fetcher(
@@ -24,20 +22,14 @@ class Xs63bSession(BaseSession):
     A session class for interacting with the 小说路上 (m.xs63b.com) novel website.
     """
 
+    site_name: str = "xs63b"
+
     BOOK_INFO_URL = "https://m.xs63b.com/{book_id}/"
     BOOK_CATALOG_URL = "https://www.xs63b.com/{book_id}/"
     CHAPTER_URL = "https://m.xs63b.com/{book_id}/{chapter_id}.html"
 
     _JSARR_PATTERN = re.compile(r"var\s+jsarr\s*=\s*\[([^\]]+)\]")
     _JSSTR_PATTERN = re.compile(r"var\s+jsstr\s*=\s*\"([^\"]+)\";")
-
-    def __init__(
-        self,
-        config: FetcherConfig,
-        cookies: dict[str, str] | None = None,
-        **kwargs: Any,
-    ) -> None:
-        super().__init__("xs63b", config, cookies, **kwargs)
 
     async def get_book_info(
         self,
@@ -100,11 +92,7 @@ class Xs63bSession(BaseSession):
             jsstr = self._parse_jsstr(html)
             chapter_url = self._build_chapter_url(book_id, jsarr, jsstr)
 
-            await async_jitter_sleep(
-                self.request_interval,
-                mul_spread=1.1,
-                max_sleep=self.request_interval + 2,
-            )
+            await self._sleep()
 
         return html_pages
 

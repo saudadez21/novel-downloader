@@ -9,7 +9,6 @@ from typing import Any
 
 from novel_downloader.core.fetchers.base import BaseSession
 from novel_downloader.core.fetchers.registry import register_fetcher
-from novel_downloader.models import FetcherConfig
 
 
 @register_fetcher(
@@ -21,28 +20,16 @@ class ShuhaigeSession(BaseSession):
     书海阁小说网 (www.shuhaige.net) novel website.
     """
 
+    site_name: str = "shuhaige"
+
     BOOK_INFO_URL = "https://www.shuhaige.net/{book_id}/"
     CHAPTER_URL = "https://www.shuhaige.net/{book_id}/{chapter_id}.html"
-
-    def __init__(
-        self,
-        config: FetcherConfig,
-        cookies: dict[str, str] | None = None,
-        **kwargs: Any,
-    ) -> None:
-        super().__init__("shuhaige", config, cookies, **kwargs)
 
     async def get_book_info(
         self,
         book_id: str,
         **kwargs: Any,
     ) -> list[str]:
-        """
-        Fetch the raw HTML of the book info page asynchronously.
-
-        :param book_id: The book identifier.
-        :return: The page content as string list.
-        """
         url = self.book_info_url(book_id=book_id)
         return [await self.fetch(url, **kwargs)]
 
@@ -52,13 +39,6 @@ class ShuhaigeSession(BaseSession):
         chapter_id: str,
         **kwargs: Any,
     ) -> list[str]:
-        """
-        Fetch the raw HTML of a single chapter asynchronously.
-
-        :param book_id: The book identifier.
-        :param chapter_id: The chapter identifier.
-        :return: The page content as string list.
-        """
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
         return [await self.fetch(url, **kwargs)]
 

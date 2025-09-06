@@ -10,7 +10,6 @@ from typing import Any
 
 from novel_downloader.core.fetchers.base import BaseSession
 from novel_downloader.core.fetchers.registry import register_fetcher
-from novel_downloader.models import FetcherConfig
 
 
 @register_fetcher(
@@ -21,20 +20,16 @@ class DxmwxSession(BaseSession):
     A session class for interacting with the 大熊猫文学网 (www.dxmwx.org) novel website.
     """
 
+    site_name: str = "dxmwx"
+    BASE_URL_MAP: dict[str, str] = {
+        "simplified": "www.dxmwx.org",
+        "traditional": "tw.dxmwx.org",
+    }
+    DEFAULT_BASE_URL: str = "www.dxmwx.org"
+
     BOOK_INFO_URL = "https://{base_url}/book/{book_id}.html"
     BOOK_CATALOG_URL = "https://{base_url}/chapter/{book_id}.html"
     CHAPTER_URL = "https://{base_url}/read/{book_id}_{chapter_id}.html"
-
-    def __init__(
-        self,
-        config: FetcherConfig,
-        cookies: dict[str, str] | None = None,
-        **kwargs: Any,
-    ) -> None:
-        super().__init__("dxmwx", config, cookies, **kwargs)
-        self.base_url = (
-            "www.dxmwx.org" if config.locale_style == "simplified" else "tw.dxmwx.org"
-        )
 
     async def get_book_info(
         self,
@@ -49,8 +44,8 @@ class DxmwxSession(BaseSession):
         :param book_id: The book identifier.
         :return: The page content as string list.
         """
-        info_url = self.book_info_url(base_url=self.base_url, book_id=book_id)
-        catalog_url = self.book_catalog_url(base_url=self.base_url, book_id=book_id)
+        info_url = self.book_info_url(base_url=self._base_url, book_id=book_id)
+        catalog_url = self.book_catalog_url(base_url=self._base_url, book_id=book_id)
 
         info_html, catalog_html = await asyncio.gather(
             self.fetch(info_url, **kwargs),
@@ -64,15 +59,8 @@ class DxmwxSession(BaseSession):
         chapter_id: str,
         **kwargs: Any,
     ) -> list[str]:
-        """
-        Fetch the raw HTML of a single chapter asynchronously.
-
-        :param book_id: The book identifier.
-        :param chapter_id: The chapter identifier.
-        :return: The page content as string list.
-        """
         url = self.chapter_url(
-            base_url=self.base_url, book_id=book_id, chapter_id=chapter_id
+            base_url=self._base_url, book_id=book_id, chapter_id=chapter_id
         )
         return [await self.fetch(url, **kwargs)]
 

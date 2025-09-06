@@ -11,7 +11,6 @@ from typing import Any
 
 from novel_downloader.core.fetchers.base import BaseSession
 from novel_downloader.core.fetchers.registry import register_fetcher
-from novel_downloader.models import FetcherConfig
 
 
 @register_fetcher(
@@ -22,18 +21,12 @@ class Ixdzs8Session(BaseSession):
     A session class for interacting with the 爱下电子书 (ixdzs8.com) novel website.
     """
 
+    site_name: str = "ixdzs8"
+
     BOOK_INFO_URL = "https://ixdzs8.com/read/{book_id}/"
     BOOK_CATALOG_URL = "https://ixdzs8.com/novel/clist/"
     CHAPTER_URL = "https://ixdzs8.com/read/{book_id}/{chapter_id}.html"
     _TOKEN_PATTERN = re.compile(r'let\s+token\s*=\s*"([^"]+)"')
-
-    def __init__(
-        self,
-        config: FetcherConfig,
-        cookies: dict[str, str] | None = None,
-        **kwargs: Any,
-    ) -> None:
-        super().__init__("ixdzs8", config, cookies, **kwargs)
 
     async def get_book_info(
         self,
@@ -63,13 +56,6 @@ class Ixdzs8Session(BaseSession):
         chapter_id: str,
         **kwargs: Any,
     ) -> list[str]:
-        """
-        Fetch the raw HTML of a single chapter asynchronously.
-
-        :param book_id: The book identifier.
-        :param chapter_id: The chapter identifier.
-        :return: The page content as string list.
-        """
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
         return [await self.fetch_verified_html(url, **kwargs)]
 

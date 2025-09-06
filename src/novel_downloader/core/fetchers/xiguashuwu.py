@@ -9,8 +9,6 @@ from typing import Any
 
 from novel_downloader.core.fetchers.base import BaseSession
 from novel_downloader.core.fetchers.registry import register_fetcher
-from novel_downloader.models import FetcherConfig
-from novel_downloader.utils import async_jitter_sleep
 
 
 @register_fetcher(
@@ -21,18 +19,12 @@ class XiguashuwuSession(BaseSession):
     A session class for interacting with the 西瓜书屋 (www.xiguashuwu.com) novel.
     """
 
+    site_name: str = "xiguashuwu"
+
     BASE_URL = "https://www.xiguashuwu.com"
     BOOK_INFO_URL = "https://www.xiguashuwu.com/book/{book_id}/iszip/0/"
     BOOK_CATALOG_URL = "https://www.xiguashuwu.com/book/{book_id}/catalog/"
     CHAPTER_URL = "https://www.xiguashuwu.com/book/{book_id}/{chapter_id}.html"
-
-    def __init__(
-        self,
-        config: FetcherConfig,
-        cookies: dict[str, str] | None = None,
-        **kwargs: Any,
-    ) -> None:
-        super().__init__("xiguashuwu", config, cookies, **kwargs)
 
     async def get_book_info(
         self,
@@ -85,11 +77,7 @@ class XiguashuwuSession(BaseSession):
             if not any(pat in html for pat in next_patterns):
                 break
 
-            await async_jitter_sleep(
-                self.request_interval,
-                mul_spread=1.1,
-                max_sleep=self.request_interval + 2,
-            )
+            await self._sleep()
         return [info_html, *catalog_pages]
 
     async def get_book_chapter(
@@ -130,11 +118,7 @@ class XiguashuwuSession(BaseSession):
 
             html_pages.append(html)
             idx += 1
-            await async_jitter_sleep(
-                self.request_interval,
-                mul_spread=1.1,
-                max_sleep=self.request_interval + 2,
-            )
+            await self._sleep()
 
         return html_pages
 

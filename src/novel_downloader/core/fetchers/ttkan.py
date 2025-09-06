@@ -20,6 +20,8 @@ class TtkanSession(BaseSession):
     A session class for interacting with the 天天看小说 (www.ttkan.co) novel website.
     """
 
+    site_name: str = "ttkan"
+
     BOOK_INFO_URL = "https://{lang}.ttkan.co/novel/chapters/{book_id}"
     CHAPTER_URL = "https://{lang}.wa01.com/novel/pagea/{book_id}_{chapter_id}.html"
 
@@ -29,7 +31,7 @@ class TtkanSession(BaseSession):
         cookies: dict[str, str] | None = None,
         **kwargs: Any,
     ) -> None:
-        super().__init__("ttkan", config, cookies, **kwargs)
+        super().__init__(config, cookies, **kwargs)
         self._lang = "cn" if config.locale_style == "simplified" else "tw"
 
     async def get_book_info(
@@ -37,12 +39,6 @@ class TtkanSession(BaseSession):
         book_id: str,
         **kwargs: Any,
     ) -> list[str]:
-        """
-        Fetch the raw HTML of the book info page asynchronously.
-
-        :param book_id: The book identifier.
-        :return: The page content as string list.
-        """
         url = self.book_info_url(book_id=book_id)
         return [await self.fetch(url, **kwargs)]
 
@@ -52,13 +48,6 @@ class TtkanSession(BaseSession):
         chapter_id: str,
         **kwargs: Any,
     ) -> list[str]:
-        """
-        Fetch the raw HTML of a single chapter asynchronously.
-
-        :param book_id: The book identifier.
-        :param chapter_id: The chapter identifier.
-        :return: The page content as string list.
-        """
         url = self.chapter_url(
             book_id=book_id,
             chapter_id=chapter_id,

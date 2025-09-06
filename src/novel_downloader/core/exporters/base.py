@@ -13,7 +13,7 @@ import logging
 import types
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Self, cast
+from typing import Any, ClassVar, Self, cast
 
 from novel_downloader.models import BookInfoDict, ChapterDict, ExporterConfig
 from novel_downloader.utils import ChapterStorage, get_cleaner
@@ -31,8 +31,8 @@ class BaseExporter(abc.ABC):
     such as TXT, EPUB, Markdown, or PDF.
     """
 
-    DEFAULT_SOURCE_ID = 0
-    PRIORITIES_MAP = {
+    DEFAULT_SOURCE_ID: ClassVar[int] = 0
+    PRIORITIES_MAP: ClassVar[dict[int, int]] = {
         DEFAULT_SOURCE_ID: 0,
     }
 
@@ -47,11 +47,19 @@ class BaseExporter(abc.ABC):
         :param config: Exporter configuration settings.
         :param site: Identifier for the target website or source.
         """
-        self._config = config
         self._site = site
+        self._storage_cache: dict[str, ChapterStorage] = {}
+
+        self._make_txt = config.make_txt
+        self._make_epub = config.make_epub
+        self._make_md = config.make_md
+        self._make_pdf = config.make_pdf
+
         self._include_cover = config.include_cover
         self._include_picture = config.include_picture
-        self._storage_cache: dict[str, ChapterStorage] = {}
+        self._split_mode = config.split_mode
+        self._filename_template = config.filename_template
+        self._append_timestamp = config.append_timestamp
 
         self._raw_data_dir = Path(config.raw_data_dir) / site
         self._output_dir = Path(config.output_dir)
@@ -62,7 +70,7 @@ class BaseExporter(abc.ABC):
             config=config.cleaner_cfg,
         )
 
-        self.logger = logging.getLogger(f"{self.__class__.__name__}")
+        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
     def export(self, book_id: str) -> dict[str, Path]:
         """
@@ -74,14 +82,14 @@ class BaseExporter(abc.ABC):
         results: dict[str, Path] = {}
 
         actions = [
-            ("make_txt", "txt", self.export_as_txt),
-            ("make_epub", "epub", self.export_as_epub),
-            ("make_md", "md", self.export_as_md),
-            ("make_pdf", "pdf", self.export_as_pdf),
+            (self._make_txt, "txt", self.export_as_txt),
+            (self._make_epub, "epub", self.export_as_epub),
+            (self._make_md, "md", self.export_as_md),
+            (self._make_pdf, "pdf", self.export_as_pdf),
         ]
 
-        for flag_name, fmt_key, export_method in actions:
-            if getattr(self._config, flag_name, False):
+        for enabled, fmt_key, export_method in actions:
+            if enabled:
                 try:
                     self.logger.info(
                         "%s Attempting to export book_id '%s' as %s...",
@@ -107,7 +115,6 @@ class BaseExporter(abc.ABC):
 
         return results
 
-    @abc.abstractmethod
     def export_as_txt(self, book_id: str) -> Path | None:
         """
         Persist the assembled book as a .txt file.
@@ -116,7 +123,7 @@ class BaseExporter(abc.ABC):
 
         :param book_id: The book identifier (used for filename, lookup, etc.)
         """
-        ...
+        raise NotImplementedError("TXT export not supported by this Exporter.")
 
     def export_as_epub(self, book_id: str) -> Path | None:
         """
@@ -163,8 +170,8 @@ class BaseExporter(abc.ABC):
         :return: Formatted filename with extension.
         """
         context = SafeDict(title=title, author=author or "", **extra_fields)
-        name = self._config.filename_template.format_map(context)
-        if self._config.append_timestamp:
+        name = self._filename_template.format_map(context)
+        if self._append_timestamp:
             name += f"_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         return f"{name}.{ext}"
 

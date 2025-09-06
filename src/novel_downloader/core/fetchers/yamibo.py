@@ -12,8 +12,7 @@ from lxml import html
 
 from novel_downloader.core.fetchers.base import BaseSession
 from novel_downloader.core.fetchers.registry import register_fetcher
-from novel_downloader.models import FetcherConfig, LoginField
-from novel_downloader.utils import async_jitter_sleep
+from novel_downloader.models import LoginField
 
 
 @register_fetcher(
@@ -24,20 +23,14 @@ class YamiboSession(BaseSession):
     A session class for interacting with the 百合会 (www.yamibo.com) novel website.
     """
 
+    site_name: str = "yamibo"
+
     BASE_URL = "https://www.yamibo.com"
     BOOKCASE_URL = "https://www.yamibo.com/my/fav"
     BOOK_INFO_URL = "https://www.yamibo.com/novel/{book_id}"
     CHAPTER_URL = "https://www.yamibo.com/novel/view-chapter?id={chapter_id}"
 
     LOGIN_URL = "https://www.yamibo.com/user/login"
-
-    def __init__(
-        self,
-        config: FetcherConfig,
-        cookies: dict[str, str] | None = None,
-        **kwargs: Any,
-    ) -> None:
-        super().__init__("yamibo", config, cookies, **kwargs)
 
     async def login(
         self,
@@ -69,11 +62,7 @@ class YamiboSession(BaseSession):
             ):
                 self._is_logged_in = True
                 return True
-            await async_jitter_sleep(
-                self.backoff_factor,
-                mul_spread=1.1,
-                max_sleep=self.backoff_factor + 2,
-            )
+            await self._sleep()
 
         self._is_logged_in = False
         return False
@@ -83,12 +72,6 @@ class YamiboSession(BaseSession):
         book_id: str,
         **kwargs: Any,
     ) -> list[str]:
-        """
-        Fetch the raw HTML of the book info page asynchronously.
-
-        :param book_id: The book identifier.
-        :return: The page content as string list.
-        """
         url = self.book_info_url(book_id=book_id)
         return [await self.fetch(url, **kwargs)]
 
@@ -98,13 +81,6 @@ class YamiboSession(BaseSession):
         chapter_id: str,
         **kwargs: Any,
     ) -> list[str]:
-        """
-        Fetch the raw HTML of a single chapter asynchronously.
-
-        :param book_id: The book identifier.
-        :param chapter_id: The chapter identifier.
-        :return: The page content as string list.
-        """
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
         return [await self.fetch(url, **kwargs)]
 

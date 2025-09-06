@@ -28,9 +28,12 @@ class BaseSession(abc.ABC):
     BaseSession wraps basic HTTP operations using aiohttp.ClientSession.
     """
 
+    site_name: str
+    BASE_URL_MAP: dict[str, str] = {}
+    DEFAULT_BASE_URL: str = ""
+
     def __init__(
         self,
-        site: str,
         config: FetcherConfig,
         cookies: dict[str, str] | None = None,
         **kwargs: Any,
@@ -41,26 +44,59 @@ class BaseSession(abc.ABC):
         :param config: Configuration object for session behavior
         :param cookies: Optional initial cookies to set on the session.
         """
-        self._site = site
-        self._config = config
-
-        self._state_file = DATA_DIR / site / "session_state.cookies"
-        self._state_file.parent.mkdir(parents=True, exist_ok=True)
-
+        self._base_url = self._resolve_base_url(config.locale_style)
+        self._backoff_factor = config.backoff_factor
+        self._request_interval = config.request_interval
+        self._retry_times = config.retry_times
+        self._timeout = config.timeout
+        self._max_connections = config.max_connections
+        self._verify_ssl = config.verify_ssl
+        self._init_cookies = cookies or {}
         self._is_logged_in = False
+
+        self._state_file = DATA_DIR / self.site_name / "session_state.cookies"
+
         self._headers = (
-            config.headers.copy() if config.headers else DEFAULT_USER_HEADERS.copy()
+            config.headers.copy()
+            if config.headers is not None
+            else DEFAULT_USER_HEADERS.copy()
         )
         if config.user_agent:
             self._headers["User-Agent"] = config.user_agent
-        self._cookies = cookies or {}
+
         self._session: ClientSession | None = None
-        self._rate_limiter: TokenBucketRateLimiter | None = None
+        self._rate_limiter: TokenBucketRateLimiter | None = (
+            TokenBucketRateLimiter(config.max_rps) if config.max_rps > 0 else None
+        )
 
-        if config.max_rps > 0:
-            self._rate_limiter = TokenBucketRateLimiter(config.max_rps)
+        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
-        self.logger = logging.getLogger(f"{self.__class__.__name__}")
+    async def init(
+        self,
+        **kwargs: Any,
+    ) -> None:
+        """
+        Set up the aiohttp.ClientSession with timeout, connector, headers.
+        """
+        timeout = ClientTimeout(total=self._timeout)
+        connector = TCPConnector(
+            ssl=self._verify_ssl,
+            limit_per_host=self._max_connections,
+        )
+        self._session = ClientSession(
+            timeout=timeout,
+            connector=connector,
+            headers=self._headers,
+            cookies=self._init_cookies,
+        )
+
+    async def close(self) -> None:
+        """
+        Shutdown and clean up any resources.
+        """
+        if self._session and not self._session.closed:
+            await self._session.close()
+        self._session = None
 
     async def login(
         self,
@@ -107,47 +143,16 @@ class BaseSession(abc.ABC):
         """
         ...
 
-    async def get_bookcase(
-        self,
-        **kwargs: Any,
-    ) -> list[str]:
+    @property
+    def is_logged_in(self) -> bool:
         """
-        Optional: Retrieve the HTML content of the authenticated user's bookcase page.
-        Subclasses that support user login/bookcase should override this.
+        Indicates whether the requester is currently authenticated.
+        """
+        return self._is_logged_in
 
-        :return: The HTML of the bookcase page.
-        """
-        raise NotImplementedError(
-            "Bookcase fetching is not supported by this session type. "
-            "Override get_bookcase() in your subclass to enable it."
-        )
-
-    async def init(
-        self,
-        **kwargs: Any,
-    ) -> None:
-        """
-        Set up the aiohttp.ClientSession with timeout, connector, headers.
-        """
-        timeout = ClientTimeout(total=self.timeout)
-        connector = TCPConnector(
-            ssl=self._config.verify_ssl,
-            limit_per_host=self.max_connections,
-        )
-        self._session = ClientSession(
-            timeout=timeout,
-            connector=connector,
-            headers=self._headers,
-            cookies=self._cookies,
-        )
-
-    async def close(self) -> None:
-        """
-        Shutdown and clean up any resources.
-        """
-        if self._session and not self._session.closed:
-            await self._session.close()
-        self._session = None
+    @property
+    def login_fields(self) -> list[LoginField]:
+        return []
 
     async def fetch(
         self,
@@ -166,17 +171,17 @@ class BaseSession(abc.ABC):
         if self._rate_limiter:
             await self._rate_limiter.wait()
 
-        for attempt in range(self.retry_times + 1):
+        for attempt in range(self._retry_times + 1):
             try:
                 async with self.session.get(url, **kwargs) as resp:
                     resp.raise_for_status()
                     return await self._response_to_str(resp, encoding)
             except aiohttp.ClientError:
-                if attempt < self.retry_times:
+                if attempt < self._retry_times:
                     await async_jitter_sleep(
-                        self.backoff_factor,
+                        self._backoff_factor,
                         mul_spread=1.1,
-                        max_sleep=self.backoff_factor + 2,
+                        max_sleep=self._backoff_factor + 2,
                     )
                     continue
                 raise
@@ -298,7 +303,6 @@ class BaseSession(abc.ABC):
 
         :param cookies: A dictionary of cookie key-value pairs.
         """
-        self._cookies.update(cookies)
         if self._session:
             self._session.cookie_jar.update_cookies(cookies)
 
@@ -321,21 +325,6 @@ class BaseSession(abc.ABC):
         return False
 
     @property
-    def site(self) -> str:
-        return self._site
-
-    @property
-    def is_logged_in(self) -> bool:
-        """
-        Indicates whether the requester is currently authenticated.
-        """
-        return self._is_logged_in
-
-    @property
-    def login_fields(self) -> list[LoginField]:
-        return []
-
-    @property
     def session(self) -> ClientSession:
         """
         Return the active aiohttp.ClientSession.
@@ -346,25 +335,13 @@ class BaseSession(abc.ABC):
             raise RuntimeError("Session is not initialized or has been shut down.")
         return self._session
 
-    @property
-    def backoff_factor(self) -> float:
-        return self._config.backoff_factor
-
-    @property
-    def retry_times(self) -> int:
-        return self._config.retry_times
-
-    @property
-    def request_interval(self) -> float:
-        return self._config.request_interval
-
-    @property
-    def timeout(self) -> float:
-        return self._config.timeout
-
-    @property
-    def max_connections(self) -> int:
-        return self._config.max_connections
+    async def _sleep(self) -> None:
+        if self._request_interval > 0:
+            await async_jitter_sleep(
+                self._request_interval,
+                mul_spread=1.1,
+                max_sleep=self._request_interval + 2,
+            )
 
     @property
     def headers(self) -> dict[str, str]:
@@ -394,11 +371,12 @@ class BaseSession(abc.ABC):
         encoding: str | None = None,
     ) -> str:
         """
-        Read the full body of resp as text. First try the declared charset,
-        then on UnicodeDecodeError fall back to a lenient utf-8 decode.
+        Read the full body of resp as text. Try the provided encoding,
+        response charset, and common fallbacks. On failure, fall back
+        to utf-8 with errors ignored.
         """
         data: bytes = await resp.read()
-        encodings = [
+        encodings: list[str | None] = [
             encoding,
             resp.charset,
             "gb2312",
@@ -406,14 +384,17 @@ class BaseSession(abc.ABC):
             "gbk",
             "utf-8",
         ]
-        encodings_list: list[str] = [e for e in encodings if e]
-        for enc in encodings_list:
+
+        for enc in (e for e in encodings if e is not None):
             try:
                 return data.decode(enc)
             except UnicodeDecodeError:
                 continue
-        encoding = encoding or "utf-8"
-        return data.decode(encoding, errors="ignore")
+        return data.decode(encoding or "utf-8", errors="ignore")
+
+    def _resolve_base_url(self, locale_style: str) -> str:
+        key = locale_style.strip().lower()
+        return self.BASE_URL_MAP.get(key, self.DEFAULT_BASE_URL)
 
     async def __aenter__(self) -> Self:
         if self._session is None or self._session.closed:

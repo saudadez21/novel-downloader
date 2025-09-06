@@ -9,7 +9,6 @@ from typing import Any
 
 from novel_downloader.core.fetchers.base import BaseSession
 from novel_downloader.core.fetchers.registry import register_fetcher
-from novel_downloader.models import FetcherConfig
 
 
 @register_fetcher(
@@ -20,28 +19,16 @@ class AaatxtSession(BaseSession):
     A session class for interacting with the 3A电子书 (www.aaatxt.com) novel website.
     """
 
+    site_name: str = "aaatxt"
+
     BOOK_INFO_URL = "http://www.aaatxt.com/shu/{book_id}.html"
     CHAPTER_URL = "http://www.aaatxt.com/yuedu/{chapter_id}.html"
-
-    def __init__(
-        self,
-        config: FetcherConfig,
-        cookies: dict[str, str] | None = None,
-        **kwargs: Any,
-    ) -> None:
-        super().__init__("aaatxt", config, cookies, **kwargs)
 
     async def get_book_info(
         self,
         book_id: str,
         **kwargs: Any,
     ) -> list[str]:
-        """
-        Fetch the raw HTML of the book info page asynchronously.
-
-        :param book_id: The book identifier.
-        :return: The page content as string list.
-        """
         url = self.book_info_url(book_id=book_id)
         return [await self.fetch(url, **kwargs)]
 
@@ -51,13 +38,6 @@ class AaatxtSession(BaseSession):
         chapter_id: str,
         **kwargs: Any,
     ) -> list[str]:
-        """
-        Fetch the raw HTML of a single chapter asynchronously.
-
-        :param book_id: The book identifier.
-        :param chapter_id: The chapter identifier.
-        :return: The page content as string list.
-        """
         url = self.chapter_url(chapter_id=chapter_id)
         return [await self.fetch(url, encoding="gb2312", **kwargs)]
 

@@ -2,13 +2,13 @@
 [general]
 retry_times = 3                    # 请求失败重试次数
 backoff_factor = 2.0
-timeout = 30.0                     # 页面加载超时时间 (秒)
+timeout = 30.0                     # 请求加载超时时间 (秒)
 max_connections = 10               # 并发连接的最大数
 max_rps = 1000.0                   # 最大请求速率 (requests per second), 如不设置则请设置一个较大的数或负数
 request_interval = 1.0             # 同一本书各章节请求间隔 (秒)
-raw_data_dir = "./raw_data"        # 原始章节 JSON/DB 存放目录
+raw_data_dir = "./raw_data"        # 书籍原始 JSON/DB/图片 数据存放目录
 output_dir = "./downloads"         # 最终输出文件存放目录
-cache_dir = "./novel_cache"        # 本地缓存目录 (字体 / 图片等)
+cache_dir = "./novel_cache"        # 本地缓存目录
 workers = 2                        # 工作协程数
 skip_existing = true               # 是否跳过已存在章节
 storage_batch_size = 1             # SQLite 批量提交的章节数量

@@ -351,7 +351,7 @@ class QidianParser(BaseParser):
             char_set=char_set,
             refl_set=refl_set,
             cache_dir=self._base_cache_dir,
-            batch_size=self._config.batch_size,
+            batch_size=self._batch_size,
         )
         if not mapping_result:
             return None
