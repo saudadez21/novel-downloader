@@ -31,8 +31,6 @@ class QianbiDownloader(BaseDownloader):
     each chapter as a unit (fetch -> parse -> enqueue storage).
     """
 
-    DEFAULT_SOURCE_ID = 0
-
     async def _download_one(
         self,
         book: BookConfig,
@@ -57,16 +55,10 @@ class QianbiDownloader(BaseDownloader):
         raw_base.mkdir(parents=True, exist_ok=True)
         html_dir = self._debug_dir / book_id / "html"
 
-        chapter_storage = ChapterStorage(
-            raw_base=raw_base,
-            priorities=self.PRIORITIES_MAP,
-        )
-        chapter_storage.connect()
-
         def cancelled() -> bool:
             return bool(cancel_event and cancel_event.is_set())
 
-        try:
+        with ChapterStorage(raw_base, priorities=self.PRIORITIES_MAP) as storage:
             # --- metadata ---
             book_info = await self.load_book_info(book_id=book_id, html_dir=html_dir)
             if not book_info:
@@ -75,28 +67,32 @@ class QianbiDownloader(BaseDownloader):
             book_info = await self._repair_chapter_ids(
                 book_id,
                 book_info,
-                chapter_storage,
+                storage,
                 html_dir,
             )
 
             vols = book_info["volumes"]
-            total_chapters = sum(len(v["chapters"]) for v in vols)
-            if total_chapters == 0:
-                self.logger.warning("%s 书籍没有章节可下载: %s", TAG, book_id)
+            plan = self._planned_chapter_ids(vols, start_id, end_id, ignore_set)
+            if not plan:
+                self.logger.info("%s nothing to do after filtering: %s", TAG, book_id)
                 return
 
-            progress = Progress(total_chapters, progress_hook)
+            progress = Progress(total=len(plan), hook=progress_hook)
 
             # --- queues & batching ---
-            cid_q: asyncio.Queue[str | StopToken] = asyncio.Queue()
-            save_q: asyncio.Queue[ChapterDict | StopToken] = asyncio.Queue()
+            cid_q: asyncio.Queue[str | StopToken] = asyncio.Queue(
+                maxsize=self._workers * 2
+            )
+            save_q: asyncio.Queue[ChapterDict | StopToken] = asyncio.Queue(
+                maxsize=self._workers * 2
+            )
             batch: list[ChapterDict] = []
 
             async def flush_batch() -> None:
                 if not batch:
                     return
                 try:
-                    chapter_storage.upsert_chapters(batch, self.DEFAULT_SOURCE_ID)
+                    storage.upsert_chapters(batch, self.DEFAULT_SOURCE_ID)
                 except Exception as e:
                     self.logger.error(
                         "[Storage] batch upsert failed (size=%d): %s",
@@ -157,8 +153,6 @@ class QianbiDownloader(BaseDownloader):
                         return
 
             # --- stage: chapter worker ---
-            sem = asyncio.Semaphore(self._workers)
-
             async def chapter_worker() -> None:
                 """
                 Fetch + parse with retry, then enqueue to save_q.
@@ -172,17 +166,12 @@ class QianbiDownloader(BaseDownloader):
                         await save_q.put(STOP)
                         return
 
-                    if not cid or cid in ignore_set:
-                        # Ignore silently and continue.
-                        continue
-
                     # If cancelled, don't start a new network call; let storage finish.
                     if cancelled():
                         await save_q.put(STOP)
                         return
 
-                    async with sem:
-                        chap = await self._process_chapter(book_id, cid, html_dir)
+                    chap = await self._process_chapter(book_id, cid, html_dir)
                     if chap:
                         await save_q.put(chap)
 
@@ -201,10 +190,10 @@ class QianbiDownloader(BaseDownloader):
                 so chapter workers can exit deterministically.
                 """
                 try:
-                    async for cid in self._chapter_ids(vols, start_id, end_id):
+                    for cid in plan:
                         if cancelled():
                             break
-                        if self._skip_existing and chapter_storage.exists(cid):
+                        if self._skip_existing and storage.exists(cid):
                             # Count as completed but don't enqueue.
                             await progress.bump(1)
                         else:
@@ -235,9 +224,6 @@ class QianbiDownloader(BaseDownloader):
                     TAG,
                     book_info.get("book_name", "unknown"),
                 )
-
-        finally:
-            chapter_storage.close()
 
     async def _repair_chapter_ids(
         self,

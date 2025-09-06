@@ -69,7 +69,7 @@ class BaseSession(abc.ABC):
             TokenBucketRateLimiter(config.max_rps) if config.max_rps > 0 else None
         )
 
-        self.logger = logging.getLogger(self.__class__.__name__)
+        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
     async def init(
         self,

@@ -10,9 +10,9 @@ import abc
 import asyncio
 import json
 import logging
-from collections.abc import AsyncIterator, Awaitable, Callable, Sequence
+from collections.abc import Awaitable, Callable, Sequence
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, ClassVar, cast
 
 from novel_downloader.core.interfaces import FetcherProtocol, ParserProtocol
 from novel_downloader.models import (
@@ -35,8 +35,8 @@ class BaseDownloader(abc.ABC):
     a single book, using the provided fetcher and parser components.
     """
 
-    DEFAULT_SOURCE_ID = 0
-    PRIORITIES_MAP = {
+    DEFAULT_SOURCE_ID: ClassVar[int] = 0
+    PRIORITIES_MAP: ClassVar[dict[int, int]] = {
         DEFAULT_SOURCE_ID: 0,
     }
 
@@ -73,7 +73,7 @@ class BaseDownloader(abc.ABC):
         self._debug_dir = Path.cwd() / "debug" / site
         self._debug_dir.mkdir(parents=True, exist_ok=True)
 
-        self.logger = logging.getLogger(self.__class__.__name__)
+        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
     async def download_many(
         self,
@@ -144,6 +144,7 @@ class BaseDownloader(abc.ABC):
                 book.get("start_id", "-"),
                 book.get("end_id", "-"),
             )
+            return
 
         # if already cancelled before starting
         if cancel_event and cancel_event.is_set():
@@ -268,23 +269,20 @@ class BaseDownloader(abc.ABC):
         """
         if not self._save_html:
             return
-
         html_dir.mkdir(parents=True, exist_ok=True)
         for i, html in enumerate(html_list):
-            file_path = html_dir / f"{filename}_{i}.html"
-            file_path.write_text(html, encoding="utf-8")
+            (html_dir / f"{filename}_{i}.html").write_text(html, encoding="utf-8")
 
     @staticmethod
-    async def _chapter_ids(
-        volumes: list[VolumeInfoDict],
+    def _planned_chapter_ids(
+        vols: list[VolumeInfoDict],
         start_id: str | None,
         end_id: str | None,
-    ) -> AsyncIterator[str]:
-        """
-        Yield each chapterId in order, respecting start/end bounds.
-        """
+        ignore: set[str],
+    ) -> list[str]:
         seen_start = start_id is None
-        for vol in volumes:
+        out: list[str] = []
+        for vol in vols:
             for chap in vol["chapters"]:
                 cid = chap.get("chapterId")
                 if not cid:
@@ -294,9 +292,11 @@ class BaseDownloader(abc.ABC):
                         seen_start = True
                     else:
                         continue
-                yield cid
+                if cid not in ignore:
+                    out.append(cid)
                 if end_id is not None and cid == end_id:
-                    return
+                    return out
+        return out
 
     @property
     def fetcher(self) -> FetcherProtocol:

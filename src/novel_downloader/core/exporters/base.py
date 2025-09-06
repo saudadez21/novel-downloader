@@ -13,7 +13,7 @@ import logging
 import types
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Self, cast
+from typing import Any, ClassVar, Self, cast
 
 from novel_downloader.models import BookInfoDict, ChapterDict, ExporterConfig
 from novel_downloader.utils import ChapterStorage, get_cleaner
@@ -31,8 +31,8 @@ class BaseExporter(abc.ABC):
     such as TXT, EPUB, Markdown, or PDF.
     """
 
-    DEFAULT_SOURCE_ID = 0
-    PRIORITIES_MAP = {
+    DEFAULT_SOURCE_ID: ClassVar[int] = 0
+    PRIORITIES_MAP: ClassVar[dict[int, int]] = {
         DEFAULT_SOURCE_ID: 0,
     }
 
@@ -70,7 +70,7 @@ class BaseExporter(abc.ABC):
             config=config.cleaner_cfg,
         )
 
-        self.logger = logging.getLogger(self.__class__.__name__)
+        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
     def export(self, book_id: str) -> dict[str, Path]:
         """
