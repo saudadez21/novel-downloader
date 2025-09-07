@@ -40,10 +40,7 @@ class QidianSession(BaseSession):
     LOGIN_URL = "https://passport.qidian.com/"
 
     _cookie_keys: ClassVar[list[str]] = [
-        "X2NzcmZUb2tlbg==",
         "eXdndWlk",
-        "eXdvcGVuaWQ=",
-        "eXdrZXk=",
         "d190c2Zw",
     ]
 

@@ -11,9 +11,11 @@ __all__ = [
     "CommonDownloader",
     "QianbiDownloader",
     "QidianDownloader",
+    "QqbookDownloader",
 ]
 
 from .common import CommonDownloader
 from .qianbi import QianbiDownloader
 from .qidian import QidianDownloader
+from .qqbook import QqbookDownloader
 from .registry import get_downloader

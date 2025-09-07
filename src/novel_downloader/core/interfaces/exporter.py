@@ -13,12 +13,6 @@ from typing import Protocol, Self, runtime_checkable
 
 @runtime_checkable
 class ExporterProtocol(Protocol):
-    """
-    A exporter must implement a method to persist a completed book as plain text.
-
-    It may also optionally implement an EPUB (or other format) exporter.
-    """
-
     def export(self, book_id: str) -> dict[str, Path]:
         """
         Export the book in the formats specified in config.

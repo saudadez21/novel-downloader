@@ -20,9 +20,6 @@ class BaseParser(abc.ABC):
     BaseParser defines the interface for extracting book metadata and chapter content
     from raw HTML.
 
-    This base class manages internal book state (e.g. current book ID) and supports
-    configuration-driven behavior such as content cleaning or formatting.
-
     Subclasses must implement actual parsing logic for specific sites.
     """
 
@@ -30,10 +27,7 @@ class BaseParser(abc.ABC):
 
     _SPACE_RE = re.compile(r"\s+")
 
-    def __init__(
-        self,
-        config: ParserConfig,
-    ):
+    def __init__(self, config: ParserConfig):
         """
         Initialize the parser with a configuration object.
 

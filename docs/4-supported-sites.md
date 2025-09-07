@@ -58,6 +58,7 @@ novel-cli search --site biquge 三体
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 | 支持语言 |
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
 | [起点中文网](https://www.qidian.com)                         | qidian    | ✅     | ❌     | ✅     | ⚠️     | 简      |
+| [QQ阅读](https://book.qq.com/)                               | qqbook    | ❌     | ❌     | ✅     | ⚠️     | 简      |
 | [和图书](https://www.hetushu.com/index.php)                  | hetushu   | ✅     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [笔趣阁](http://www.b520.cc)                                 | biquge    | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [铅笔小说](https://www.23qb.net), [备用](https://www.23qb.com/) | qianbi | ✅     | ❌     | ⚠️     | ✅     | 简      |
@@ -155,6 +156,14 @@ novel-cli download --site yamibo 123456
   * 其它:
     * 章节存在重复内容时请在 `settings.toml` 中该站点 (`[sites.qidian]`) 的 `use_truncation` 为 `true`。
     * 近月更新章节可能使用字体加密, 可按需开启解密字体 (`decode_font` 参数)
+
+* **QQ 阅读 (qqbook)**
+  * 书籍: `https://book.qq.com/book-detail/41089201` -> Book ID: `41089201`
+  * 章节: `https://book.qq.com/book-read/41089201/1` -> Chapter ID: `1`
+  * 登录: 需要有效 Cookie
+  * 其它:
+    * VIP 章节解析需要额外安装 [Node.js](https://nodejs.org/en/download)
+    * VIP 章节可能使用字体加密, 可按需开启解密字体 (`decode_font` 参数)
 
 * **和图书 (hetushu)**
   * 书籍: `https://www.hetushu.com/book/5763/index.html` -> Book ID: `5763`

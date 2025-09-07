@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.parsers.qidian.main_parser
-------------------------------------------------
+novel_downloader.core.parsers.qidian
+------------------------------------
 
-Main parser class for handling Qidian HTML
 """
 
 from __future__ import annotations
 
 import json
 import logging
-import re
 from contextlib import suppress
 from html import unescape
 from pathlib import Path
@@ -34,10 +32,7 @@ from novel_downloader.utils import (
 from novel_downloader.utils.constants import DATA_DIR
 from novel_downloader.utils.cookies import get_cookie_value
 from novel_downloader.utils.fontocr import get_font_ocr
-
-from .utils import (
-    get_decryptor,
-)
+from novel_downloader.utils.node_decryptor import get_decryptor
 
 logger = logging.getLogger(__name__)
 
@@ -69,25 +64,16 @@ class QidianParser(BaseParser):
     Parser for 起点中文网 site.
     """
 
-    _RE_P_DELIM = re.compile(r"(?i)<\s*p\s*>")
-    _RE_ATTR = re.compile(r"attr\(\s*([^)]+?)\s*\)", re.I)
-    _RE_SCALEX = re.compile(r"scalex\(\s*-?1\s*\)", re.I)
-
-    def __init__(
-        self,
-        config: ParserConfig,
-        fuid: str = "",
-    ):
+    def __init__(self, config: ParserConfig, fuid: str = ""):
         """
         Initialize the QidianParser with the given configuration.
-
-        :param config: ParserConfig object controlling:
         """
         super().__init__(config)
 
-        self._fixed_font_dir: Path = self._base_cache_dir / "fixed_fonts"
-        self._fixed_font_dir.mkdir(parents=True, exist_ok=True)
-        self._debug_dir: Path = Path.cwd() / "debug"
+        self._rand_path = self._base_cache_dir / "qidian" / "randomFont.ttf"
+        self._fixed_font_dir = self._base_cache_dir / "qidian" / "fixed_fonts"
+        self._fixed_map_dir = self._base_cache_dir / "qidian" / "fixed_font_map"
+        self._debug_dir = Path.cwd() / "debug" / "qidian"
 
         state_files = [
             DATA_DIR / "qidian" / "session_state.cookies",
@@ -99,12 +85,6 @@ class QidianParser(BaseParser):
         html_list: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        """
-        Parse a book info page and extract metadata and chapter structure.
-
-        :param html_list: Raw HTML of the book info page.
-        :return: Parsed metadata and chapter structure as a dictionary.
-        """
         if not html_list:
             return None
 
@@ -172,57 +152,39 @@ class QidianParser(BaseParser):
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        """
-        :param html_list: Raw HTML of the chapter page.
-        :param chapter_id: Identifier of the chapter being parsed.
-        :return: Cleaned chapter content as plain text.
-        """
         if not html_list:
+            logger.warning("[Parser] chapter_id=%s :: html_list is empty", chapter_id)
             return None
         try:
             ssr_data = self._find_ssr_page_context(html_list[0])
             chapter_info = self._extract_chapter_info(ssr_data)
-            if not chapter_info:
-                logger.warning(
-                    "[Parser] ssr_chapterInfo not found for chapter '%s'", chapter_id
-                )
-                return None
-
-            if not self._can_view_chapter(chapter_info):
-                logger.warning(
-                    "[Parser] Chapter '%s' is not purchased or inaccessible.",
-                    chapter_id,
-                )
-                return None
-
-            if self._is_encrypted(ssr_data):
-                if not self._decode_font:
-                    return None
-                return self.parse_encrypted_chapter(chapter_info, chapter_id)
-
-            return self.parse_normal_chapter(chapter_info, chapter_id)
-
         except Exception as e:
-            logger.warning("[Parser] parse error for chapter '%s': %s", chapter_id, e)
-        return None
+            logger.warning(
+                "[Parser] chapter_id=%s :: failed to locate ssr_pageContext block: %s",
+                chapter_id,
+                e,
+            )
+            return None
 
-    def parse_normal_chapter(
-        self,
-        chapter_info: dict[str, Any],
-        chapter_id: str,
-    ) -> ChapterDict | None:
-        """
-        Extract structured chapter info from a normal Qidian page.
+        if not chapter_info:
+            logger.warning(
+                "[Parser] ssr_chapterInfo not found for chapter '%s'", chapter_id
+            )
+            return None
 
-        :param chapter_info: Parsed chapter info block from ssr data.
-        :param chapter_id: Chapter identifier (string).
-        :return: a dictionary with keys like 'id', 'title', 'content', etc.
-        """
+        if not self._can_view_chapter(chapter_info):
+            logger.warning(
+                "[Parser] Chapter '%s' is not purchased or inaccessible.",
+                chapter_id,
+            )
+            return None
+
         duplicated = self._is_duplicated(chapter_info)
+        encrypted = self._is_encrypted(chapter_info)
 
         title = chapter_info.get("chapterName", "Untitled")
         raw_html = chapter_info.get("content", "")
-        chapter_id = chapter_info.get("chapterId", chapter_id)
+        cid = str(chapter_info.get("chapterId") or chapter_id)
         fkp = chapter_info.get("fkp", "")
         author_say = chapter_info.get("authorSay", "").strip()
         update_time = chapter_info.get("updateTime", "")
@@ -234,19 +196,25 @@ class QidianParser(BaseParser):
 
         if self._is_vip(chapter_info):
             decryptor = get_decryptor()
-            raw_html = decryptor.decrypt(raw_html, chapter_id, fkp, self._fuid)
+            raw_html = decryptor.decrypt_qd(raw_html, cid, fkp, self._fuid)
 
-        parts = self._RE_P_DELIM.split(raw_html)
-        paragraphs = [unescape(p).strip() for p in parts if p.strip()]
-        chapter_text = "\n".join(paragraphs)
+        chapter_text = (
+            self._parse_font_encrypted(raw_html, chapter_info, cid)
+            if encrypted
+            else self._parse_normal(raw_html)
+        )
         if not chapter_text:
+            logger.warning(
+                "[Parser] chapter_id=%s :: content empty after decryption/font-mapping",
+                chapter_id,
+            )
             return None
 
         if self._use_truncation and duplicated:
             chapter_text = truncate_half_lines(chapter_text)
 
         return {
-            "id": str(chapter_id),
+            "id": cid,
             "title": title,
             "content": chapter_text,
             "extra": {
@@ -258,107 +226,115 @@ class QidianParser(BaseParser):
                 "duplicated": duplicated,
                 "seq": seq,
                 "volume": volume,
-                "encrypted": False,
+                "encrypted": encrypted,
             },
         }
 
-    def parse_encrypted_chapter(
-        self,
-        chapter_info: dict[str, Any],
-        chapter_id: str,
-    ) -> ChapterDict | None:
+    def _parse_normal(self, raw_html: str) -> str:
         """
-        Extract and return the formatted textual content of an encrypted chapter.
+        Extract structured chapter content from a normal Qidian page.
+        """
+        parts = raw_html.split("<p>")
+        paragraphs = [unescape(p).strip() for p in parts if p.strip()]
+        chapter_text = "\n".join(paragraphs)
+        if not chapter_text:
+            return ""
+        return chapter_text
 
+    def _parse_font_encrypted(
+        self,
+        raw_html: str,
+        chapter_info: dict[str, Any],
+        cid: str,
+    ) -> str:
+        """
         Steps:
           1. Decode and save randomFont bytes; download fixedFont via download().
           2. Parse CSS rules and save debug JSON.
           3. Render encrypted paragraphs, then run OCR font-mapping.
           4. Extracts paragraph texts and formats them.
-
-        :param chapter_info: Parsed chapter info block from ssr data.
-        :return: Formatted chapter text or empty string if not parsable.
         """
-        debug_dir = self._debug_dir / "qidian" / "font_debug" / chapter_id
+        if not self._decode_font:
+            logger.warning(
+                "[Parser] chapter_id=%s :: font decryption skipped "
+                "(set `decode_font=True` to enable)",
+                cid,
+            )
+            return ""
+
+        css_str = chapter_info.get("css")
+        random_font_str = chapter_info.get("randomFont")
+        rf = json.loads(random_font_str) if isinstance(random_font_str, str) else None
+        rf_data = rf.get("data") if rf else None
+        fixed_woff2_url = chapter_info.get("fixedFontWoff2")
+
+        if not css_str:
+            logger.warning("[Parser] cid=%s :: css missing or empty", cid)
+            return ""
+        if not rf_data:
+            logger.warning("[Parser] cid=%s :: randomFont.data missing or empty", cid)
+            return ""
+        if not fixed_woff2_url:
+            logger.warning("[Parser] cid=%s :: fixedFontWoff2 missing or empty", cid)
+            return ""
+
+        debug_dir = self._debug_dir / "font_debug" / cid
         if self._save_font_debug:
             debug_dir.mkdir(parents=True, exist_ok=True)
 
-        duplicated = self._is_duplicated(chapter_info)
-
-        css_str = chapter_info["css"]
-        randomFont_str = chapter_info["randomFont"]
-        fixedFontWoff2_url = chapter_info["fixedFontWoff2"]
-
-        title = chapter_info.get("chapterName", "Untitled")
-        raw_html = chapter_info.get("content", "")
-        chapter_id = chapter_info.get("chapterId", chapter_id)
-        fkp = chapter_info.get("fkp", "")
-        author_say = chapter_info.get("authorSay", "").strip()
-        update_time = chapter_info.get("updateTime", "")
-        update_timestamp = chapter_info.get("updateTimestamp", 0)
-        modify_time = chapter_info.get("modifyTime", 0)
-        word_count = chapter_info.get("actualWords", 0)
-        seq = chapter_info.get("seq")
-        volume = chapter_info.get("extra", {}).get("volumeName", "")
-
-        # extract + save font
-        rf = json.loads(randomFont_str)
-        rand_path = self._base_cache_dir / "randomFont.ttf"
-        rand_path.parent.mkdir(parents=True, exist_ok=True)
-        rand_path.write_bytes(bytes(rf["data"]))
+        try:
+            self._rand_path.parent.mkdir(parents=True, exist_ok=True)
+            self._rand_path.write_bytes(bytes(rf_data))
+        except Exception as e:
+            logger.error(
+                "[Parser] cid=%s :: failed to write randomFont.ttf",
+                cid,
+                exc_info=e,
+            )
+            return ""
 
         fixed_path = download(
-            url=fixedFontWoff2_url,
+            url=fixed_woff2_url,
             target_dir=self._fixed_font_dir,
         )
         if fixed_path is None:
             logger.warning(
-                "[Parser] failed to download fixedfont for chapter '%s'", chapter_id
+                "[Parser] failed to download fixedfont for chapter '%s'", cid
             )
-            return None
-
-        # Extract and render paragraphs from HTML with CSS rules
-        if self._is_vip(chapter_info):
-            decryptor = get_decryptor()
-            raw_html = decryptor.decrypt(
-                raw_html,
-                chapter_id,
-                fkp,
-                self._fuid,
-            )
+            return ""
 
         css_rules = self._parse_css_rules(css_str)
         paragraphs_str, refl_list = self._render_visible_text(raw_html, css_rules)
         if self._save_font_debug:
-            paragraphs_str_path = debug_dir / f"{chapter_id}_debug.txt"
-            paragraphs_str_path.write_text(paragraphs_str, encoding="utf-8")
+            (debug_dir / f"{cid}_debug.txt").write_text(
+                paragraphs_str, encoding="utf-8"
+            )
 
         # Run OCR + fallback mapping
         char_set = {c for c in paragraphs_str if c not in {" ", "\n", "\u3000"}}
         refl_set = set(refl_list)
         char_set = char_set - refl_set
         if self._save_font_debug:
-            char_sets_path = debug_dir / "char_set_debug.txt"
-            temp = f"char_set:\n{char_set}\n\nrefl_set:\n{refl_set}"
-            char_sets_path.write_text(
-                temp,
+            (debug_dir / "char_set_debug.txt").write_text(
+                f"char_set:\n{char_set}\n\nrefl_set:\n{refl_set}",
                 encoding="utf-8",
             )
 
         mapping_result = self._generate_font_map(
             fixed_font_path=fixed_path,
-            random_font_path=rand_path,
+            random_font_path=self._rand_path,
             char_set=char_set,
             refl_set=refl_set,
-            cache_dir=self._base_cache_dir,
             batch_size=self._batch_size,
         )
         if not mapping_result:
-            return None
+            logger.warning(
+                "[Parser] font mapping returned empty result for chapter '%s'", cid
+            )
+            return ""
 
         if self._save_font_debug:
-            mapping_json_path = debug_dir / "font_mapping.json"
-            mapping_json_path.write_text(
+            (debug_dir / "font_mapping.json").write_text(
                 json.dumps(mapping_result, ensure_ascii=False, indent=2),
                 encoding="utf-8",
             )
@@ -369,28 +345,9 @@ class QidianParser(BaseParser):
             font_map=mapping_result,
         )
 
-        final_paragraphs_str = "\n".join(
+        return "\n".join(
             line.strip() for line in original_text.splitlines() if line.strip()
         )
-        if self._use_truncation and duplicated:
-            final_paragraphs_str = truncate_half_lines(final_paragraphs_str)
-
-        return {
-            "id": str(chapter_id),
-            "title": str(title),
-            "content": final_paragraphs_str,
-            "extra": {
-                "author_say": author_say,
-                "updated_at": update_time,
-                "update_timestamp": update_timestamp,
-                "modify_time": modify_time,
-                "word_count": word_count,
-                "duplicated": duplicated,
-                "seq": seq,
-                "volume": volume,
-                "encrypted": True,
-            },
-        }
 
     @staticmethod
     def _find_ssr_page_context(html_str: str) -> dict[str, Any]:
@@ -416,17 +373,6 @@ class QidianParser(BaseParser):
         page_data = page_props.get("pageData", {})
         chapter_info = page_data.get("chapterInfo", {})
         return chapter_info if isinstance(chapter_info, dict) else {}
-
-    @staticmethod
-    def _is_restricted_page(html_str: str) -> bool:
-        """
-        Return True if page content indicates access restriction
-        (e.g. not subscribed/purchased).
-
-        :param html_str: Raw HTML string.
-        """
-        markers = ["这是VIP章节", "需要订阅", "订阅后才能阅读"]
-        return any(m in html_str for m in markers)
 
     @classmethod
     def _is_vip(cls, chapter_info: dict[str, Any]) -> bool:
@@ -458,30 +404,22 @@ class QidianParser(BaseParser):
         return bool(efw_flag == 1)
 
     @classmethod
-    def _is_encrypted(cls, content: str | dict[str, Any]) -> bool:
+    def _is_encrypted(cls, chapter_info: dict[str, Any]) -> bool:
         """
         Return True if content is encrypted.
 
         Chapter Encryption Status (cES):
           * 0: 内容是'明文'
           * 2: 字体加密
-
-        :param content: HTML content, either as a raw string or a BeautifulSoup object.
-        :return: True if encrypted marker is found, else False.
         """
-        ssr_data = (
-            cls._find_ssr_page_context(content) if isinstance(content, str) else content
-        )
-        chapter_info = cls._extract_chapter_info(ssr_data)
         return int(chapter_info.get("cES", 0)) == 2
 
-    @staticmethod
     def _generate_font_map(
+        self,
         fixed_font_path: Path,
         random_font_path: Path,
         char_set: set[str],
         refl_set: set[str],
-        cache_dir: Path,
         batch_size: int = 32,
     ) -> dict[str, str]:
         """
@@ -494,7 +432,6 @@ class QidianParser(BaseParser):
         :param random_font_path: random font file.
         :param char_set: Characters to match directly.
         :param refl_set: Characters to match in flipped form.
-        :param cache_dir: Directory to save/load cached results.
         :param batch_size: How many chars to OCR per batch.
 
         :return: { obf_char: real_char, ... }
@@ -504,7 +441,7 @@ class QidianParser(BaseParser):
             return {}
 
         mapping_result: dict[str, str] = {}
-        fixed_map_file = cache_dir / "fixed_font_map" / f"{fixed_font_path.stem}.json"
+        fixed_map_file = self._fixed_map_dir / f"{fixed_font_path.stem}.json"
         fixed_map_file.parent.mkdir(parents=True, exist_ok=True)
 
         # load existing cache
@@ -587,9 +524,8 @@ class QidianParser(BaseParser):
 
         Returns None if can't extract a tag.
         """
-        sel = selector.strip()
         # If it has spaces, take the rightmost simple selector
-        last = sel.split()[-1]
+        last = selector.strip().split()[-1]
         # Drop ::pseudo
         last = last.split("::", 1)[0]
         # If it's like 'span[attr=..]' keep 'span'
@@ -604,50 +540,12 @@ class QidianParser(BaseParser):
         """
         Parse 'name:value;...' inside a block. Tolerates quotes and attr().
         """
-        decls: list[tuple[str, str]] = []
-        i = 0
-        n = len(block)
-        name: list[str] = []
-        val: list[str] = []
-        in_name = True
-        quote = None  # track ' or "
-        while i < n:
-            c = block[i]
-            if quote:
-                # inside quotes
-                if c == "\\" and i + 1 < n:
-                    # keep escaped char
-                    (name if in_name else val).append(c)
-                    i += 1
-                    (name if in_name else val).append(block[i])
-                elif c == quote:
-                    (name if in_name else val).append(c)
-                    quote = None
-                else:
-                    (name if in_name else val).append(c)
-            else:
-                if c in ("'", '"'):
-                    (name if in_name else val).append(c)
-                    quote = c
-                elif in_name and c == ":":
-                    in_name = False
-                elif c == ";":
-                    nm = "".join(name).strip().lower()
-                    vl = "".join(val).strip()
-                    if nm:
-                        decls.append((nm, vl))
-                    name.clear()
-                    val.clear()
-                    in_name = True
-                else:
-                    (name if in_name else val).append(c)
-            i += 1
-
-        if name or val:
-            nm = "".join(name).strip().lower()
-            vl = "".join(val).strip()
-            if nm:
-                decls.append((nm, vl))
+        parts = [d.strip() for d in block.split(";") if d.strip()]
+        decls = []
+        for p in parts:
+            if ":" in p:
+                name, val = p.split(":", 1)
+                decls.append((name.strip().lower(), val.strip()))
         return decls
 
     @classmethod
@@ -661,83 +559,65 @@ class QidianParser(BaseParser):
         rules: Rules = {"orders": [], "sy": {}, "p_rules": {}}
         order_pairs: list[tuple[str, int]] = []
 
-        i = 0
+        pos = 0
         while True:
-            b1 = css_str.find("{", i)
+            b1 = css_str.find("{", pos)
             if b1 == -1:
                 break
-            selector = css_str[i:b1].strip().lower()
+            selector = css_str[pos:b1].strip().lower()
             b2 = css_str.find("}", b1 + 1)
             if b2 == -1:
                 break
             block = css_str[b1 + 1 : b2]
-            i = b2 + 1
+            pos = b2 + 1
 
             decls = cls._parse_decls(block)
-
             new_rule: Rule = {}
             order_val: int | None = None
 
             for name, value in decls:
                 v = value.strip()
                 if name == "font-size" and v == "0":
-                    if "::first-letter" in selector:
-                        new_rule["delete_first"] = True
-                    else:
-                        new_rule["delete_all"] = True
-                elif name == "transform":
-                    if cls._RE_SCALEX.search(v.replace(" ", "")):
-                        new_rule["transform_flip_x"] = True
+                    new_rule[
+                        "delete_first" if "::first-letter" in selector else "delete_all"
+                    ] = True
+                elif name == "transform" and "scalex(-1" in v.replace(" ", "").lower():
+                    new_rule["transform_flip_x"] = True
                 elif name == "order":
-                    with suppress(ValueError, TypeError):
+                    with suppress(ValueError):
                         order_val = int(v)
                 elif name == "content":
-                    # normalize: remove outer quotes
                     if "::after" in selector:
-                        m = cls._RE_ATTR.search(v)
-                        if m:
-                            new_rule["append_end_attr"] = m.group(1)
+                        if v.lower().startswith("attr("):
+                            new_rule["append_end_attr"] = v[5:-1].strip()
                         else:
-                            s = v.strip().strip("\"'")
-                            new_rule["append_end_char"] = s
+                            new_rule["append_end_char"] = v.strip().strip("\"'")
                     elif "::before" in selector:
-                        m = cls._RE_ATTR.search(v)
-                        if m:
-                            new_rule["append_start_attr"] = m.group(1)
+                        if v.lower().startswith("attr("):
+                            new_rule["append_start_attr"] = v[5:-1].strip()
                         else:
-                            s = v.strip().strip("\"'")
-                            new_rule["append_start_char"] = s
+                            new_rule["append_start_char"] = v.strip().strip("\"'")
 
-            # classification
             if selector.startswith(".sy-"):
                 key = selector.lstrip(".")
-                old = rules["sy"].get(key)
-                rules["sy"][key] = {**old, **new_rule} if old else (new_rule or {})
-
+                rules["sy"][key] = {**rules["sy"].get(key, {}), **new_rule}
             elif selector.startswith(".p") and " " in selector:
                 p_cls, right = selector.split(" ", 1)
-                p_cls = p_cls.lstrip(".")
                 tag = cls._only_tag(right)
                 if tag:
-                    prev = rules["p_rules"].setdefault(p_cls, {}).get(tag)
-                    rules["p_rules"][p_cls][tag] = (
-                        {**prev, **new_rule} if prev else (new_rule or {})
-                    )
+                    p_cls = p_cls.lstrip(".")
+                    rules["p_rules"].setdefault(p_cls, {})
+                    rules["p_rules"][p_cls][tag] = {
+                        **rules["p_rules"][p_cls].get(tag, {}),
+                        **new_rule,
+                    }
 
             if order_val is not None:
-                tag_for_order = cls._only_tag(selector)
-                if tag_for_order:
-                    order_pairs.append((tag_for_order, order_val))
+                tag = cls._only_tag(selector)
+                if tag:
+                    order_pairs.append((tag, order_val))
 
-        # normalize orders
-        order_pairs.sort(key=lambda t: t[1])
-        seen = set()
-        orders: list[str] = []
-        for tag, _ in order_pairs:
-            if tag not in seen:
-                seen.add(tag)
-                orders.append(tag)
-        rules["orders"] = orders
+        rules["orders"] = [t for t, _ in sorted(order_pairs, key=lambda x: x[1])]
         return rules
 
     @staticmethod

@@ -19,54 +19,62 @@ source .venv/bin/activate
 
 ### 安装 novel-downloader
 
-1. 从 PyPI 安装:
+(1) 从 PyPI 安装:
 
-    ```bash
-    pip install novel-downloader
-    ```
+```bash
+pip install novel-downloader
+```
 
-2. 最新开发版 (从 GitHub 安装)
+(2) 最新开发版 (从 GitHub 安装)
 
-    ```bash
-    # 克隆项目
-    git clone https://github.com/saudadez21/novel-downloader.git
-    cd novel-downloader
+```bash
+# 克隆项目
+git clone https://github.com/saudadez21/novel-downloader.git
+cd novel-downloader
 
-    # 安装为库并生成 CLI
-    pip install .
-    ```
+# 安装为库并生成 CLI
+pip install .
+```
 
 安装完成后, 会在系统 `PATH` 中生成 `novel-cli` 可执行命令。
 
-## 可选功能及依赖
+## 可选功能与依赖说明
+
+### Node.js 解密支持
+
+起点与 QQ 阅读阅读的 VIP 章节解密逻辑基于 JavaScript 实现, 因此需要额外安装 [Node.js](https://nodejs.org/en/download) 来完成解密。
 
 ### 字体解密 (`decode_font` 参数)
 
-如果开启解密字体功能 (`decode_font` 参数), 需要安装额外库 (注意: OCR 准确率大约 98+%):
+启用解密字体功能时, 需要安装额外依赖 (注意: OCR 准确率大约 98+%):
+
+(1) 安装扩展依赖:
 
 ```bash
 pip install novel-downloader[font-recovery]
 ```
 
-然后安装 [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) 及相关依赖 (请根据 paddlepaddle [文档](https://www.paddlepaddle.org.cn/install/quick?docurl=/documentation/docs/zh/develop/install/pip/windows-pip.html) 选择合适版本和 CUDA 支持):
+(2) 安装 [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) 及其依赖, 请根据 paddlepaddle [文档](https://www.paddlepaddle.org.cn/install/quick?docurl=/documentation/docs/zh/develop/install/pip/windows-pip.html) 选择合适版本 (CPU / GPU 及 CUDA 支持):
 
-- CPU 版:
-    ```bash
-    python -m pip install paddlepaddle==3.1.1 -i https://www.paddlepaddle.org.cn/packages/stable/cpu/
-    ```
+**CPU 版本:**
 
-- GPU 版 (请根据 CUDA 版本选用对应 paddlepaddle-gpu):
-    ```bash
-    python -m pip install paddlepaddle-gpu==3.1.1 -i https://www.paddlepaddle.org.cn/packages/stable/cu118/
-    ```
+```bash
+python -m pip install paddlepaddle==3.1.1 -i https://www.paddlepaddle.org.cn/packages/stable/cpu/
+```
 
-根据 PaddleOCR [文档](https://www.paddleocr.ai/latest/version3.x/installation.html) 安装 `paddleocr`:
+**GPU 版本 (根据 CUDA 版本选择对应包):**
+
+```bash
+python -m pip install paddlepaddle-gpu==3.1.1 -i https://www.paddlepaddle.org.cn/packages/stable/cu118/
+```
+
+(3) 根据 PaddleOCR [文档](https://www.paddleocr.ai/latest/version3.x/installation.html) 安装 PaddleOCR:
 
 ```bash
 pip install paddleocr
 ```
 
-当前使用版本示例:
+#### 开发使用版本
 
 ```bash
 paddleocr==3.2.0

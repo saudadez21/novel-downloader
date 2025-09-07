@@ -19,6 +19,7 @@ class ChapterInfoDict(TypedDict):
     title: str
     url: str
     chapterId: str
+    accessible: NotRequired[bool]
 
 
 class VolumeInfoDict(TypedDict):

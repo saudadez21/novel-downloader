@@ -32,6 +32,13 @@ book_ids = [
 login_required = true              # 是否需要登录才能访问
 use_truncation = true              # 是否基于章节长度截断以避免重复内容
 
+[sites.qqbook]  # QQ 阅读
+book_ids = [
+  "0000000000",
+  "0000000000"
+]
+login_required = true
+
 [sites.esjzone]  # ESJ Zone
 book_ids = [
   "0000000000",
