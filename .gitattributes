@@ -32,8 +32,7 @@
 *.p      binary
 *.db     binary
 
-# === Treat JS in resources as vendored (for GitHub) ===
-src/novel_downloader/resources/js_scripts/**      linguist-vendored
+# === Treat resources as vendored (for GitHub) ===
 src/novel_downloader/resources/css_styles/**      linguist-vendored
 src/novel_downloader/resources/images/**          linguist-vendored
 src/novel_downloader/resources/json/**            linguist-vendored
