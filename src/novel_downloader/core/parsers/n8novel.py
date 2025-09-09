@@ -177,7 +177,7 @@ class N8novelParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "eightnovel"},
+            "extra": {"site": "n8novel"},
         }
 
     @staticmethod
