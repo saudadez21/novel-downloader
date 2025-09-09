@@ -56,6 +56,7 @@ novel-cli download 123456
 
 * 支持站点见: [支持站点列表](docs/4-supported-sites.md)
 * 更多示例见: [CLI 使用示例](docs/5-cli-usage-examples.md)
+* 运行中可使用 `CTRL+C` 取消任务
 
 ### 3. 图形界面 (GUI / Web)
 
@@ -66,6 +67,8 @@ novel-web
 # 如需提供局域网/外网访问 (请自行留意安全与网络环境)
 # novel-web --listen public
 ```
+
+* 运行中可使用 `CTRL+C` 停止服务
 
 ---
 

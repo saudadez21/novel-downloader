@@ -178,7 +178,14 @@ async def _download(
 
         for book in valid_books:
             ui.info(t("download_downloading", book_id=book["book_id"], site=site))
-            await downloader.download(book, progress_hook=_print_progress)
+
+            hook, close = ui.create_progress_hook(
+                prefix=t("download_progress_prefix"), unit="chapters"
+            )
+            try:
+                await downloader.download(book, progress_hook=hook)
+            finally:
+                close()
 
             if not no_export and exporter is not None:
                 await asyncio.to_thread(exporter.export, book["book_id"])
@@ -238,10 +245,3 @@ async def _prompt_login_fields(
         result[field.name] = value
 
     return result
-
-
-async def _print_progress(done: int, total: int) -> None:
-    """Progress hook passed into the downloader."""
-    ui.print_progress(
-        done, total, prefix=t("download_progress_prefix"), unit="chapters"
-    )
