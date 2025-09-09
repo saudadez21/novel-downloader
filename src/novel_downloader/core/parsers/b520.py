@@ -112,5 +112,5 @@ class BiqugeParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "biquge"},
+            "extra": {"site": "b520"},
         }

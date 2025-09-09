@@ -26,7 +26,7 @@ _SUPPORT_SITES = {
     "aaatxt": "3A电子书",
     "biquge": "笔趣阁",
     "dxmwx": "大熊猫文学网",
-    "eightnovel": "无限轻小说",
+    "n8novel": "无限轻小说",
     "esjzone": "ESJ Zone",
     "hetushu": "和图书",
     "i25zw": "25中文网",

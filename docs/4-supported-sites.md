@@ -60,7 +60,7 @@ novel-cli search --site biquge 三体
 | [起点中文网](https://www.qidian.com)                         | qidian    | ✅     | ❌     | ✅     | ⚠️     | 简      |
 | [QQ阅读](https://book.qq.com/)                               | qqbook    | ❌     | ❌     | ✅     | ⚠️     | 简      |
 | [和图书](https://www.hetushu.com/index.php)                  | hetushu   | ✅     | ❌     | ❌     | ✅     | 简 / 繁 |
-| [笔趣阁](http://www.b520.cc)                                 | biquge    | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [笔趣阁](http://www.b520.cc)                                 | b520      | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [铅笔小说](https://www.23qb.net), [备用](https://www.23qb.com/) | qianbi | ✅     | ❌     | ⚠️     | ✅     | 简      |
 | [飘天文学网](https://www.piaotia.com/)                        | piaotia  | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [小说屋](http://www.xiaoshuoge.info/)                        | xiaoshuowu | ❌     | ❌     | ⚠️     | ✅     | 简      |
@@ -109,7 +109,7 @@ novel-cli download --site qbtr 9876
 | [哔哩轻小说](https://www.linovelib.com/)                     | linovelib  | ✅     | ✅     | ⚠️     | ⚠️     | 简      |
 | [ESJ Zone](https://www.esjzone.cc)                           | esjzone   | ✅     | ✅     | ✅     | ✅     | 简      |
 | [神凑轻小说](https://www.shencou.com/)                        | shencou   | ✅     | ✅     | ⚠️     | ⚠️     | 简      |
-| [无限轻小说](https://www.8novel.com/)                         | 8novel    | ✅     | ✅     | ⚠️     | ✅     | 繁      |
+| [无限轻小说](https://www.8novel.com/)                         | n8novel   | ✅     | ✅     | ⚠️     | ✅     | 繁      |
 
 **使用示例**
 
@@ -169,7 +169,7 @@ novel-cli download --site yamibo 123456
   * 书籍: `https://www.hetushu.com/book/5763/index.html` -> Book ID: `5763`
   * 章节: `https://www.hetushu.com/book/5763/4327466.html` -> Chapter ID: `4327466`
 
-* **笔趣阁 (biquge)**
+* **笔趣阁 (b520)**
   * 书籍: `http://www.b520.cc/8_8187/` -> Book ID: `8_8187`
   * 章节: `http://www.b520.cc/8_8187/3899831.html` -> Chapter ID: `3899831`
 
@@ -267,7 +267,7 @@ novel-cli download --site yamibo 123456
   * 章节: `https://www.linovelib.com/novel/1234/47800.html` -> Chapter ID: `47800`
   * 风控: 请求过于频繁可能触发限制, 导致封禁或限流。
 
-* **无限轻小说 (8novel)**
+* **无限轻小说 (n8novel)**
   * 书籍: `https://www.8novel.com/novelbooks/3365/` -> Book ID: `3365`
   * 章节: `https://article.8novel.com/read/3365/?106235` -> Chapter ID: `106235`
 

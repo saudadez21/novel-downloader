@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.searchers.eightnovel
-------------------------------------------
+novel_downloader.core.searchers.n8novel
+---------------------------------------
 
 """
 
@@ -17,10 +17,10 @@ logger = logging.getLogger(__name__)
 
 
 @register_searcher(
-    site_keys=["eightnovel", "8novel"],
+    site_keys=["n8novel", "8novel"],
 )
-class EightnovelSearcher(BaseSearcher):
-    site_name = "8novel"
+class N8novelSearcher(BaseSearcher):
+    site_name = "n8novel"
     priority = 20
     BASE_URL = "https://www.8novel.com"
     SEARCH_URL = "https://www.8novel.com/search/"

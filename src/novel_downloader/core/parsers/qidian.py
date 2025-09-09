@@ -296,6 +296,7 @@ class QidianParser(BaseParser):
         fixed_path = download(
             url=fixed_woff2_url,
             target_dir=self._fixed_font_dir,
+            on_exist="skip",
         )
         if fixed_path is None:
             logger.warning(
@@ -436,7 +437,7 @@ class QidianParser(BaseParser):
 
         :return: { obf_char: real_char, ... }
         """
-        font_ocr = get_font_ocr()
+        font_ocr = get_font_ocr(self._fontocr_cfg)
         if not font_ocr:
             return {}
 

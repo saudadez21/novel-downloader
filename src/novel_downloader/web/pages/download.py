@@ -15,7 +15,7 @@ _SUPPORT_SITES = {
     "biquge": "笔趣阁 (biquge)",
     "biquyuedu": "精彩小说 (biquyuedu)",
     "dxmwx": "大熊猫文学网 (dxmwx)",
-    "eightnovel": "无限轻小说 (8novel)",
+    "n8novel": "无限轻小说 (n8novel)",
     "esjzone": "ESJ Zone (esjzone)",
     "guidaye": "名著阅读 (guidaye)",
     "hetushu": "和图书 (hetushu)",

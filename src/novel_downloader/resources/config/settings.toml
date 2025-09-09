@@ -23,6 +23,17 @@ decode_font = false                # 是否尝试本地解码混淆字体
 batch_size = 32
 save_font_debug = false            # 是否保存字体解码调试数据
 
+# 以下为 PaddleOCR 文本识别的可选参数
+# 默认情况下, 请保持注释, 程序会使用 PaddleOCR 内置的默认值
+# 如果需要修改配置, 请取消注释并填写参数值 (参考官网文档)
+# https://www.paddleocr.ai/main/version3.x/module_usage/text_recognition.html
+
+model_name = "PP-OCRv5_mobile_rec"
+# model_dir = "/path/to/inference"
+# input_shape = [3, 48, 320]        # [C, H, W], 按所选模型文档填写, 不确定请注释
+# device = "gpu"                    # "cpu" / "gpu"
+# cpu_threads = 10
+
 # 各站点的特定配置
 [sites.qidian]  # 起点中文网
 book_ids = [

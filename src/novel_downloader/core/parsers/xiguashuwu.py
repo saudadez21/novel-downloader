@@ -284,8 +284,7 @@ class XiguashuwuParser(BaseParser):
                 return char
         return f'<img src="{url}" />'
 
-    @classmethod
-    def _recognize_glyph_from_url(cls, url: str) -> str | None:
+    def _recognize_glyph_from_url(self, url: str) -> str | None:
         """
         Download the glyph image at `url` and run the font OCR on it.
 
@@ -293,7 +292,7 @@ class XiguashuwuParser(BaseParser):
         :return: The recognized character (top-1) if OCR succeeds, otherwise None.
         """
         try:
-            ocr = get_font_ocr()
+            ocr = get_font_ocr(self._fontocr_cfg)
             if not ocr:
                 return None
 
@@ -304,7 +303,7 @@ class XiguashuwuParser(BaseParser):
 
             char, score = ocr.predict([img_np])[0]
 
-            return char if score >= cls._CONF_THRESHOLD else None
+            return char if score >= self._CONF_THRESHOLD else None
 
         except Exception as e:
             logger.warning("[Parser] Failed to ocr glyph image %s: %s", url, e)

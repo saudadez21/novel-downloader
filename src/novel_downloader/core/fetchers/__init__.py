@@ -12,7 +12,6 @@ __all__ = [
     "BiqugeSession",
     "BiquyueduSession",
     "DxmwxSession",
-    "EightnovelSession",
     "EsjzoneSession",
     "GuidayeSession",
     "HetushuSession",
@@ -21,6 +20,7 @@ __all__ = [
     "Jpxs123Session",
     "LewennSession",
     "LinovelibSession",
+    "N8novelSession",
     "PiaotiaSession",
     "QbtrSession",
     "QianbiSession",
@@ -45,7 +45,6 @@ from .aaatxt import AaatxtSession
 from .b520 import BiqugeSession
 from .biquyuedu import BiquyueduSession
 from .dxmwx import DxmwxSession
-from .eightnovel import EightnovelSession
 from .esjzone import EsjzoneSession
 from .guidaye import GuidayeSession
 from .hetushu import HetushuSession
@@ -54,6 +53,7 @@ from .ixdzs8 import Ixdzs8Session
 from .jpxs123 import Jpxs123Session
 from .lewenn import LewennSession
 from .linovelib import LinovelibSession
+from .n8novel import N8novelSession
 from .piaotia import PiaotiaSession
 from .qbtr import QbtrSession
 from .qianbi import QianbiSession

@@ -9,6 +9,8 @@ Lazily load the FontOCR class.
 import logging
 from typing import TYPE_CHECKING
 
+from novel_downloader.models import FontOCRConfig
+
 if TYPE_CHECKING:
     from .core import FontOCR
 
@@ -17,11 +19,7 @@ logger = logging.getLogger(__name__)
 _FONT_OCR: "FontOCR | None" = None
 
 
-def get_font_ocr(
-    model_name: str | None = None,
-    model_dir: str | None = None,
-    input_shape: tuple[int, int, int] | None = None,
-) -> "FontOCR | None":
+def get_font_ocr(cfg: FontOCRConfig) -> "FontOCR | None":
     """
     Try to initialize and return a singleton FontOCR instance.
     Returns None if FontOCR or its dependencies are not available.
@@ -32,9 +30,13 @@ def get_font_ocr(
             from .core import FontOCR
 
             _FONT_OCR = FontOCR(
-                model_name=model_name,
-                model_dir=model_dir,
-                input_shape=input_shape,
+                model_name=cfg.model_name,
+                model_dir=cfg.model_dir,
+                input_shape=cfg.input_shape,
+                device=cfg.device,
+                precision=cfg.precision,
+                cpu_threads=cfg.cpu_threads,
+                enable_hpi=cfg.enable_hpi,
             )
         except ImportError:
             logger.warning(
