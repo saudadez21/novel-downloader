@@ -1,3 +1,14 @@
+## v2.0.2 (2025-09-10)
+
+### Feat
+
+- **site**: add support for qqbook (#76)
+
+### Refactor
+
+- **fetcher**: simplify BaseSession (class attrs, config unpacking, centralized base_url) (#74)
+- **exporter**: reorganize pipeline, remove redundancy, improve layout (#73)
+
 ## v2.0.1 (2025-09-02)
 
 ### Refactor
