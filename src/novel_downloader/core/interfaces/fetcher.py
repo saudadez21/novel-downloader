@@ -26,8 +26,7 @@ class FetcherProtocol(Protocol):
         **kwargs: Any,
     ) -> None:
         """
-        Perform async initialization, such as
-        launching a browser or creating a session.
+        Perform async initialization, such as creating a session.
 
         This should be called before using any other method
         if initialization is required.

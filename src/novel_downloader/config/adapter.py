@@ -17,6 +17,7 @@ from novel_downloader.models import (
     DownloaderConfig,
     ExporterConfig,
     FetcherConfig,
+    FontOCRConfig,
     ParserConfig,
     TextCleanerConfig,
 )
@@ -97,13 +98,16 @@ class ConfigAdapter:
         """
         g = self._gen_cfg
         s = self._site_cfg
-        font_ocr = g.get("font_ocr") or {}
+        g_font = g.get("font_ocr") or {}
+        s_font = s.get("font_ocr") or {}
+        font_ocr: dict[str, Any] = {**g_font, **s_font}
         return ParserConfig(
             cache_dir=g.get("cache_dir", "./novel_cache"),
             use_truncation=bool(s.get("use_truncation", True)),
             decode_font=bool(font_ocr.get("decode_font", False)),
             save_font_debug=bool(font_ocr.get("save_font_debug", False)),
             batch_size=int(font_ocr.get("batch_size", 32)),
+            fontocr_cfg=self._dict_to_fontocr_cfg(font_ocr),
         )
 
     def get_exporter_config(self) -> ExporterConfig:
@@ -282,6 +286,28 @@ class ConfigAdapter:
             with contextlib.suppress(Exception):
                 out["ignore_ids"] = [str(x) for x in data["ignore_ids"]]
         return out
+
+    @staticmethod
+    def _dict_to_fontocr_cfg(data: dict[str, Any]) -> FontOCRConfig:
+        """
+        Convert a raw ``font_ocr`` dict into a :class:`FontOCRConfig`.
+        """
+        if not isinstance(data, dict):
+            return FontOCRConfig()
+
+        ishape = data.get("input_shape")
+        if isinstance(ishape, list):
+            ishape = tuple(ishape)  # [C, H, W] -> (C, H, W)
+
+        return FontOCRConfig(
+            model_name=data.get("model_name"),
+            model_dir=data.get("model_dir"),
+            input_shape=ishape,
+            device=data.get("device"),
+            precision=data.get("precision", "fp32"),
+            cpu_threads=data.get("cpu_threads", 10),
+            enable_hpi=data.get("enable_hpi", False),
+        )
 
     @classmethod
     def _dict_to_cleaner_cfg(cls, cfg: dict[str, Any]) -> TextCleanerConfig:

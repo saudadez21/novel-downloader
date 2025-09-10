@@ -11,9 +11,11 @@ __all__ = [
     "CommonExporter",
     "LinovelibExporter",
     "QidianExporter",
+    "QqbookExporter",
 ]
 
 from .common import CommonExporter
 from .linovelib import LinovelibExporter
 from .qidian import QidianExporter
+from .qqbook import QqbookExporter
 from .registry import get_exporter

@@ -13,7 +13,6 @@ __all__ = [
     "BiqugeParser",
     "BiquyueduParser",
     "DxmwxParser",
-    "EightnovelParser",
     "EsjzoneParser",
     "GuidayeParser",
     "HetushuParser",
@@ -22,10 +21,12 @@ __all__ = [
     "Jpxs123Parser",
     "LewennParser",
     "LinovelibParser",
+    "N8novelParser",
     "PiaotiaParser",
     "QbtrParser",
     "QianbiParser",
     "QidianParser",
+    "QqbookParser",
     "Quanben5Parser",
     "SfacgParser",
     "ShencouParser",
@@ -45,7 +46,6 @@ from .aaatxt import AaatxtParser
 from .b520 import BiqugeParser
 from .biquyuedu import BiquyueduParser
 from .dxmwx import DxmwxParser
-from .eightnovel import EightnovelParser
 from .esjzone import EsjzoneParser
 from .guidaye import GuidayeParser
 from .hetushu import HetushuParser
@@ -54,10 +54,12 @@ from .ixdzs8 import Ixdzs8Parser
 from .jpxs123 import Jpxs123Parser
 from .lewenn import LewennParser
 from .linovelib import LinovelibParser
+from .n8novel import N8novelParser
 from .piaotia import PiaotiaParser
 from .qbtr import QbtrParser
 from .qianbi import QianbiParser
 from .qidian import QidianParser
+from .qqbook import QqbookParser
 from .quanben5 import Quanben5Parser
 from .registry import get_parser
 from .sfacg import SfacgParser

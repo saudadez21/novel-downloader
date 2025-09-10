@@ -18,6 +18,7 @@ from novel_downloader.utils.constants import DEFAULT_USER_HEADERS
 
 class BaseSearcher(abc.ABC):
     site_name: str
+    priority: int = 1000
     BASE_URL: str = ""
     _session: ClassVar[aiohttp.ClientSession | None] = None
 

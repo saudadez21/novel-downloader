@@ -90,6 +90,12 @@ XIGUASHUWU_FONT_MAP_PATH = files("novel_downloader.resources.json").joinpath(
 )
 
 # JavaScript
+EXPR_TO_JSON_SCRIPT_PATH = files("novel_downloader.resources.js_scripts").joinpath(
+    "expr_to_json.js"
+)
 QD_DECRYPT_SCRIPT_PATH = files("novel_downloader.resources.js_scripts").joinpath(
     "qidian_decrypt_node.js"
+)
+QQ_DECRYPT_SCRIPT_PATH = files("novel_downloader.resources.js_scripts").joinpath(
+    "qq_decrypt_node.js"
 )

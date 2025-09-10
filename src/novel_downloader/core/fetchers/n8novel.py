@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.fetchers.eightnovel
------------------------------------------
+novel_downloader.core.fetchers.n8novel
+--------------------------------------
 
 """
 
@@ -13,14 +13,14 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 
 
 @register_fetcher(
-    site_keys=["8novel", "eightnovel"],
+    site_keys=["8novel", "n8novel"],
 )
-class EightnovelSession(BaseSession):
+class N8novelSession(BaseSession):
     """
     A session class for interacting with the 无限轻小说 (www.8novel.com) novel website.
     """
 
-    site_name: str = "eightnovel"
+    site_name: str = "n8novel"
 
     BOOK_INFO_URL = "https://www.8novel.com/novelbooks/{book_id}/"
     CHAPTER_URL = "https://article.8novel.com/read/{book_id}/?{chapter_id}"

@@ -17,9 +17,10 @@ Public API:
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Sequence
+from collections.abc import Awaitable, Callable, Iterable, Sequence
 
 from rich.console import Console
+from rich.progress import Progress, TaskID
 from rich.prompt import Confirm, Prompt
 from rich.table import Table
 
@@ -154,3 +155,29 @@ def print_progress(
     total = max(1, total)
     pct = done / total * 100.0
     _CONSOLE.print(f"[dim]{prefix}[/] {done}/{total} {unit} ({pct:.2f}%)")
+
+
+def create_progress_hook(
+    prefix: str = "Progress",
+    unit: str = "item",
+) -> tuple[Callable[[int, int], Awaitable[None]], Callable[[], None]]:
+    progress = Progress(console=_CONSOLE)
+    task_id: TaskID | None = None
+
+    async def hook(done: int, total: int) -> None:
+        nonlocal task_id
+        if task_id is None:
+            progress.start()
+            task_id = progress.add_task(f"[cyan]{prefix}[/]", total=max(1, total))
+
+        progress.update(
+            task_id,
+            completed=done,
+            total=max(1, total),
+            description=f"{prefix} ({done}/{total} {unit})",
+        )
+
+    def close() -> None:
+        progress.stop()
+
+    return hook, close

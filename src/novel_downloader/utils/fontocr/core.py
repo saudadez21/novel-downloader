@@ -34,6 +34,7 @@ class FontOCR:
         device: str | None = None,
         precision: str = "fp32",
         cpu_threads: int = 10,
+        enable_hpi: bool = False,
         **kwargs: Any,
     ) -> None:
         """
@@ -54,6 +55,7 @@ class FontOCR:
             device=device,
             precision=precision,
             cpu_threads=cpu_threads,
+            enable_hpi=enable_hpi,
         )
 
     def predict(

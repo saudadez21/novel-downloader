@@ -64,11 +64,19 @@
 
 用于支持混淆字体破解与文本识别
 
-| 参数名             | 类型         | 默认值      | 说明                                                   |
-| ----------------- | ------------ | ---------- | ------------------------------------------------------ |
-| `decode_font`     | bool         | false      | 是否尝试本地解码混淆字体                                 |
-| `batch_size`      | int          | 32         | OCR 模型推理时的批处理大小                               |
-| `save_font_debug` | bool         | false      | 是否保存字体调试数据                                     |
+| 参数名             | 类型         | 默认值      | 说明                                                        |
+| ----------------- | ------------ | ---------- | ----------------------------------------------------------- |
+| `decode_font`     | bool         | false      | 是否尝试本地解码混淆字体                                      |
+| `batch_size`      | int          | 32         | OCR 模型推理时的批处理大小                                    |
+| `save_font_debug` | bool         | false      | 是否保存字体调试数据                                          |
+| `model_name`      | str/None     | None       | 模型名称, 如果设置为None, 则使用 `PP-OCRv5_server_rec`         |
+| `model_dir`       | str/None     | None       | 模型存储路径                                                  |
+| `input_shape`     | tuple/None   | None       | 模型输入图像尺寸, 格式为 (C, H, W)                             |
+| `device`          | str/None     | None       | 用于推理的设备, 例如："cpu"、"gpu"、"npu"、"gpu:0"、"gpu:0,1"  |
+| `cpu_threads`     | int          | 10         | 在 CPU 上推理时使用的线程数量                                  |
+| `enable_hpi`      | bool         | false      | 是否启用高性能推理                                             |
+
+> **PaddleOCR** 相关配置可见官网 [文档](https://www.paddleocr.ai/main/version3.x/module_usage/text_recognition.html#_4)
 
 #### 示例配置
 

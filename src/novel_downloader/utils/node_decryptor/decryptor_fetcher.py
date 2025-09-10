@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.parsers.qidian.utils.decryptor_fetcher
-------------------------------------------------------------
+novel_downloader.utils.node_decryptor.decryptor_fetcher
+-------------------------------------------------------
 
 Download and cache the *qidian-decryptor* executable from the project's
 GitHub releases.
@@ -10,7 +10,7 @@ GitHub releases.
 from __future__ import annotations
 
 __all__ = [
-    "ensure_decryptor",
+    "ensure_qd_decryptor",
     "RELEASE_VERSION",
 ]
 
@@ -41,13 +41,12 @@ PLATFORM_BINARIES: Final[dict[str, str]] = {
 # --------------------------------------------------------------------------- #
 
 
-def ensure_decryptor(dest_root: Path | None = None) -> Path:
+def ensure_qd_decryptor(dest_root: Path | None = None) -> Path:
     """
     Ensure that the decryptor executable matching the current platform and
     :data:`RELEASE_VERSION` exists locally; download it if necessary.
 
     :param dest_root: Root directory used to cache the binary.
-                      If *None*, the global constant ``JS_SCRIPT_DIR`` is used.
     :return: Path to the ready-to-use executable (inside the version sub-folder).
     :raises RuntimeError: If the current platform is unsupported.
     :raises ValueError: If the downloaded file fails SHA-256 verification.
@@ -56,7 +55,7 @@ def ensure_decryptor(dest_root: Path | None = None) -> Path:
     platform_key = _get_platform_key()
 
     bin_name = PLATFORM_BINARIES[platform_key]
-    # 版本: /<version>/<binary>
+    # /<version>/<binary>
     version_dir = dest_root / RELEASE_VERSION.lstrip("v")
     dest_path = version_dir / bin_name
 

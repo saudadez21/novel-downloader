@@ -40,12 +40,24 @@ class DownloaderConfig:
 
 
 @dataclass
+class FontOCRConfig:
+    model_name: str | None = None
+    model_dir: str | None = None
+    input_shape: tuple[int, int, int] | None = None
+    device: str | None = None
+    precision: str = "fp32"
+    cpu_threads: int = 10
+    enable_hpi: bool = False
+
+
+@dataclass
 class ParserConfig:
     cache_dir: str = "./novel_cache"
     use_truncation: bool = True
     decode_font: bool = False
     batch_size: int = 32
     save_font_debug: bool = False
+    fontocr_cfg: FontOCRConfig = field(default_factory=FontOCRConfig)
 
 
 @dataclass

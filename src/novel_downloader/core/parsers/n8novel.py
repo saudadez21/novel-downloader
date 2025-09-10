@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.parsers.eightnovel
-----------------------------------------
+novel_downloader.core.parsers.n8novel
+-------------------------------------
 
 """
 
@@ -21,9 +21,9 @@ from novel_downloader.models import (
 
 
 @register_parser(
-    site_keys=["eightnovel", "8novel"],
+    site_keys=["n8novel", "8novel"],
 )
-class EightnovelParser(BaseParser):
+class N8novelParser(BaseParser):
     """
     Parser for 无限轻小说 book pages.
     """
@@ -177,7 +177,7 @@ class EightnovelParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "eightnovel"},
+            "extra": {"site": "n8novel"},
         }
 
     @staticmethod

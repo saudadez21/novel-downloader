@@ -11,12 +11,12 @@ __all__ = [
     "AaatxtSearcher",
     "BiqugeSearcher",
     "DxmwxSearcher",
-    "EightnovelSearcher",
     "EsjzoneSearcher",
     "HetushuSearcher",
     "I25zwSearcher",
     "Ixdzs8Searcher",
     "Jpxs123Searcher",
+    "N8novelSearcher",
     "PiaotiaSearcher",
     "QbtrSearcher",
     "QianbiSearcher",
@@ -32,12 +32,12 @@ __all__ = [
 from .aaatxt import AaatxtSearcher
 from .b520 import BiqugeSearcher
 from .dxmwx import DxmwxSearcher
-from .eightnovel import EightnovelSearcher
 from .esjzone import EsjzoneSearcher
 from .hetushu import HetushuSearcher
 from .i25zw import I25zwSearcher
 from .ixdzs8 import Ixdzs8Searcher
 from .jpxs123 import Jpxs123Searcher
+from .n8novel import N8novelSearcher
 from .piaotia import PiaotiaSearcher
 from .qbtr import QbtrSearcher
 from .qianbi import QianbiSearcher
