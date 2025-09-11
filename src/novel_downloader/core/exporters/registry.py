@@ -9,6 +9,7 @@ Registry and factory helpers for creating site-specific or common exporters.
 __all__ = ["register_exporter", "get_exporter"]
 
 from collections.abc import Callable, Sequence
+from importlib import import_module
 from typing import TypeVar
 
 from novel_downloader.core.exporters.common import CommonExporter
@@ -19,6 +20,7 @@ ExporterBuilder = Callable[[ExporterConfig, str], ExporterProtocol]
 
 E = TypeVar("E", bound=ExporterProtocol)
 _EXPORTER_MAP: dict[str, ExporterBuilder] = {}
+_EXPORTERS_PKG = "novel_downloader.core.exporters"
 
 
 def register_exporter(
@@ -39,6 +41,33 @@ def register_exporter(
     return decorator
 
 
+def _normalize_key(site_key: str) -> str:
+    """
+    Normalize a site key to the expected module basename:
+      * lowercase
+      * if first char is a digit, prefix with 'n'
+    """
+    key = site_key.strip().lower()
+    if not key:
+        raise ValueError("Site key cannot be empty")
+    if key[0].isdigit():
+        return f"n{key}"
+    return key
+
+
+def _load_exporter(site_key: str) -> None:
+    """
+    Attempt to import the site-specific exporter module.
+    """
+    modname = f"{_EXPORTERS_PKG}.{_normalize_key(site_key)}"
+    try:
+        import_module(modname)
+    except ModuleNotFoundError as e:
+        if e.name == modname:
+            return
+        raise
+
+
 def get_exporter(site: str, config: ExporterConfig) -> ExporterProtocol:
     """
     Returns a site-specific exporter instance.
@@ -47,9 +76,14 @@ def get_exporter(site: str, config: ExporterConfig) -> ExporterProtocol:
     :param config: Configuration for the exporter
     :return: An instance of a exporter class
     """
-    site_key = site.lower()
-    try:
-        exporter_cls = _EXPORTER_MAP[site_key]
-    except KeyError:
+    site_key = _normalize_key(site)
+
+    exporter_cls = _EXPORTER_MAP.get(site_key)
+    if exporter_cls is None:
+        _load_exporter(site_key)
+        exporter_cls = _EXPORTER_MAP.get(site_key)
+
+    if exporter_cls is None:
         return CommonExporter(config, site_key)
+
     return exporter_cls(config, site_key)
