@@ -9,6 +9,7 @@ Registry and factory helpers for creating site-specific fetchers.
 __all__ = ["register_fetcher", "get_fetcher"]
 
 from collections.abc import Callable, Sequence
+from importlib import import_module
 from typing import TypeVar
 
 from novel_downloader.core.interfaces import FetcherProtocol
@@ -18,6 +19,7 @@ FetcherBuilder = Callable[[FetcherConfig], FetcherProtocol]
 
 F = TypeVar("F", bound=FetcherProtocol)
 _FETCHER_MAP: dict[str, FetcherBuilder] = {}
+_FETCHERS_PKG = "novel_downloader.core.fetchers"
 
 
 def register_fetcher(
@@ -27,7 +29,6 @@ def register_fetcher(
     Decorator to register a fetcher class under given keys.
 
     :param site_keys: Sequence of site identifiers
-    :param backends: Sequence of backend types
     :return: A class decorator that populates _FETCHER_MAP.
     """
 
@@ -38,6 +39,33 @@ def register_fetcher(
         return cls
 
     return decorator
+
+
+def _normalize_key(site_key: str) -> str:
+    """
+    Convert a requested site key into the expected module basename:
+      * lowercase
+      * if first char is a digit, prefix with 'n'
+    """
+    key = site_key.strip().lower()
+    if not key:
+        raise ValueError("Site key cannot be empty")
+    if key[0].isdigit():
+        return f"n{key}"
+    return key
+
+
+def _import_fetcher(site_key: str) -> None:
+    """
+    Attempt to import the site-specific fetcher module.
+    """
+    modname = f"{_FETCHERS_PKG}.{site_key}"
+    try:
+        import_module(modname)
+    except ModuleNotFoundError as e:
+        if e.name == modname:
+            return
+        raise
 
 
 def get_fetcher(
@@ -51,10 +79,14 @@ def get_fetcher(
     :param config: Configuration for the requester
     :return: An instance of a requester class
     """
-    site_key = site.lower()
-    try:
-        fetcher_cls = _FETCHER_MAP[site_key]
-    except KeyError as err:
-        raise ValueError(f"Unsupported site: {site!r}") from err
+    site_key = _normalize_key(site)
+
+    fetcher_cls = _FETCHER_MAP.get(site_key)
+    if fetcher_cls is None:
+        _import_fetcher(site_key)
+        fetcher_cls = _FETCHER_MAP.get(site_key)
+
+    if fetcher_cls is None:
+        raise ValueError(f"Unsupported site: {site!r}")
 
     return fetcher_cls(config)
