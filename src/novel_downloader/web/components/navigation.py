@@ -22,6 +22,7 @@ def navbar(active: str) -> None:
         _nav_btn("搜索", "/", active == "search", icon="search")
         _nav_btn("下载", "/download", active == "download", icon="download")
         _nav_btn("正在下载", "/progress", active == "progress", icon="cloud_download")
+        _nav_btn("历史记录", "/history", active == "history", icon="history")
 
 
 def _nav_btn(label: str, path: str, is_active: bool, icon: str | None = None) -> None:

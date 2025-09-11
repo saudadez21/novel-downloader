@@ -76,7 +76,7 @@ make_txt = true                    # 是否生成完整 TXT 文件
 make_epub = true                   # 是否生成 EPUB
 
 [output.naming]
-append_timestamp = false           # 在文件名中追加时间戳
+append_timestamp = true            # 在文件名中追加时间戳
 filename_template = "{title}_{author}"  # 文件命名规则
 
 [output.epub]

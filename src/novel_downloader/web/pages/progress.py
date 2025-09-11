@@ -67,7 +67,7 @@ def _progress_block(t: DownloadTask) -> None:
         if t.status == "completed" and t.exported_paths:
             with ui.row().classes("w-full gap-2 mt-1"):
                 for key, p in t.exported_paths.items():
-                    url = f"/download/{p.name}?v={t.task_id}"
+                    url = f"/downloads/{p.name}?v={t.task_id}"
                     ui.button(key, on_click=lambda e, url=url: ui.download(url)).props(
                         "outline size=sm"
                     )

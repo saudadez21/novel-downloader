@@ -22,8 +22,8 @@ def mount_exports() -> None:
     output_dir = get_config_value(["general", "output_dir"], "./downloads")
     out = Path(output_dir).expanduser().resolve()
     out.mkdir(parents=True, exist_ok=True)
-    # serves /download/<filename> from the export dir
-    app.add_static_files("/download", local_directory=out)
+    # serves /downloads/<filename> from the export dir
+    app.add_static_files("/downloads", local_directory=out)
 
 
 def web_main() -> None:
