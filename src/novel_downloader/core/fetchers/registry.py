@@ -43,7 +43,7 @@ def register_fetcher(
 
 def _normalize_key(site_key: str) -> str:
     """
-    Convert a requested site key into the expected module basename:
+    Normalize a site key to the expected module basename:
       * lowercase
       * if first char is a digit, prefix with 'n'
     """
