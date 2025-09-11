@@ -1,24 +1,24 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.archived.xshbook.searcher
------------------------------------------------
+novel_downloader.core.searchers.xshbook
+---------------------------------------
 
 """
 
 import logging
 
 from lxml import html
-from novel_downloader.core.searchers.base import BaseSearcher
-from novel_downloader.models import SearchResult
 
-# from novel_downloader.core.searchers.registry import register_searcher
+from novel_downloader.core.searchers.base import BaseSearcher
+from novel_downloader.core.searchers.registry import register_searcher
+from novel_downloader.models import SearchResult
 
 logger = logging.getLogger(__name__)
 
 
-# @register_searcher(
-#     site_keys=["xshbook"],
-# )
+@register_searcher(
+    site_keys=["xshbook"],
+)
 class XshbookSearcher(BaseSearcher):
     site_name = "xshbook"
     priority = 30

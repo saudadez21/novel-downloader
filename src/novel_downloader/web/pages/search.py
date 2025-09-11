@@ -8,6 +8,7 @@ Search UI with a settings dropdown, persistent state, and paginated results.
 
 from __future__ import annotations
 
+import asyncio
 import contextlib
 from collections.abc import Callable
 from math import ceil
@@ -17,7 +18,7 @@ from nicegui import ui
 from nicegui.elements.number import Number
 from nicegui.events import ValueChangeEventArguments
 
-from novel_downloader.core import search
+from novel_downloader.core.searchers import search_stream
 from novel_downloader.models import SearchResult
 from novel_downloader.web.components import navbar
 from novel_downloader.web.services import manager, setup_dialog
@@ -39,11 +40,11 @@ _SUPPORT_SITES = {
     "shuhaige": "书海阁小说网",
     "tongrenquan": "同人圈",
     "ttkan": "天天看小说",
-    # "wanbengo": "完本神站",
+    "wanbengo": "完本神站",
     "xiaoshuowu": "小说屋",
     "xiguashuwu": "西瓜书屋",
     "xs63b": "小说路上",
-    # "xshbook": "小说虎",
+    "xshbook": "小说虎",
 }
 
 _DEFAULT_TIMEOUT = 10.0
@@ -65,12 +66,20 @@ def _get_state() -> dict[str, Any]:
             "results": [],  # list[SearchResult]
             "page": 1,
             "page_size": _PAGE_SIZE,
+            "search_task": None,  # asyncio.Task | None
+            "searching": False,  # bool
         }
     return _STATE[cid]
 
 
 def _cleanup_state() -> None:
     cid = ui.context.client.id
+    # cancel any in-flight search task to avoid leaks
+    st = _STATE.get(cid)
+    if st and isinstance(st.get("search_task"), asyncio.Task):
+        task: asyncio.Task[Any] = st["search_task"]
+        if not task.done():
+            task.cancel()
     _STATE.pop(cid, None)
 
 
@@ -104,7 +113,7 @@ def _coerce_psl(inp: Number) -> int:
 
 def _render_placeholder_cover() -> None:
     with ui.element("div").classes(
-        "w-[72px] h-[96px] bg-grey-3 rounded-md flex items-center " "justify-center"
+        "w-[72px] h-[96px] bg-grey-3 rounded-md flex items-center justify-center"
     ):
         ui.icon("book").classes("text-grey-6 text-3xl")
 
@@ -244,9 +253,25 @@ def page_search() -> None:
 
         search_btn = ui.button("搜索", color="primary").props("unelevated")
 
+        ui.button("停止", on_click=lambda: _cancel_current(state)).props("outline")
+
+    # status row (shows "searching..." and total count)
+    status_area = ui.row().classes("items-center gap-2 my-1 w-full")
+
     # results & pagination container
     list_area = ui.column().classes("w-full")
     pager_area = ui.row().classes("items-center justify-center w-full q-mt-md")
+
+    @ui.refreshable  # type: ignore[misc]
+    def render_status() -> None:
+        status_area.clear()
+        with status_area:
+            if state.get("searching"):
+                ui.icon("hourglass_top").classes("text-grey-6")
+                ui.label("正在搜索（结果将陆续显示）...").classes("text-sm text-grey-7")
+            total = len(state.get("results") or [])
+            if total > 0:
+                ui.label(f"当前已获取 {total} 条结果").classes("text-sm text-grey-7")
 
     @ui.refreshable  # type: ignore[misc]
     def render_results() -> None:
@@ -295,33 +320,80 @@ def page_search() -> None:
                     on_change=_on_page_change,
                 ).props(f"max-pages={_PAGER_WIDTH} boundary-numbers ellipses")
 
+    def _cancel_current(st: dict[str, Any]) -> None:
+        task: asyncio.Task[Any] | None = st.get("search_task")
+        if task and not task.done():
+            task.cancel()
+        st["search_task"] = None
+        st["searching"] = False
+        render_status.refresh()
+
+    async def _run_stream(
+        q: str, sites: list[str] | None, per_site_limit: int, timeout_val: float
+    ) -> None:
+        """
+        Runs search_stream, progressively appending chunks of results to state,
+        and refreshing UI after each chunk.
+        """
+        try:
+            # show loading state
+            state["searching"] = True
+            search_btn.props("loading")
+            render_status.refresh()
+
+            # clear existing results and reset pagination
+            state["results"] = []
+            state["page"] = 1
+            render_results.refresh()
+
+            async for chunk in search_stream(
+                keyword=q,
+                sites=sites,
+                limit=None,  # show all
+                per_site_limit=per_site_limit,
+                timeout=timeout_val,
+            ):
+                if not chunk:
+                    continue
+                state["results"].extend(chunk)
+                # Refresh both status (count) and the visible list
+                render_status.refresh()
+                render_results.refresh()
+
+        except asyncio.CancelledError:
+            # cancellation when user starts a new search or presses Stop
+            pass
+        finally:
+            state["searching"] = False
+            search_btn.props(remove="loading")
+            render_status.refresh()
+
     async def do_search() -> None:
         q = (query_in.value or "").strip()
         if not q:
             ui.notify("请输入关键词", type="warning")
             return
 
+        # Cancel any previous search
+        _cancel_current(state)
+
+        # persist current settings
         state["query"] = q
         state["sites"] = get_sites()
         per_site_limit = get_psl()
         timeout_val = get_timeout()
 
-        # perform search
-        results = await search(
-            keyword=q,
-            sites=state["sites"],
-            limit=None,  # show all
-            per_site_limit=per_site_limit,
-            timeout=timeout_val,
+        # kick off streaming search as a background task
+        task = asyncio.create_task(
+            _run_stream(q, state["sites"], per_site_limit, timeout_val)
         )
-        state["results"] = results
-        state["page"] = 1
-        render_results.refresh()
+        state["search_task"] = task
 
     search_btn.on("click", do_search)
     query_in.on("keydown.enter", do_search)
 
     # initial render
+    render_status()
     render_results()
 
     # clean up state on disconnect to avoid leaks

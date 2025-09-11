@@ -17,7 +17,7 @@ from pathlib import Path
 from novel_downloader.cli import ui
 from novel_downloader.cli.download import _download
 from novel_downloader.config import ConfigAdapter, load_config
-from novel_downloader.core import search
+from novel_downloader.core.searchers import search
 from novel_downloader.models import BookConfig, SearchResult
 from novel_downloader.utils.i18n import t
 
