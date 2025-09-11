@@ -8,6 +8,7 @@ Site-specific searcher implementations for discovering novels across multiple so
 
 __all__ = [
     "search",
+    "search_stream",
     "AaatxtSearcher",
     "BiqugeSearcher",
     "DxmwxSearcher",
@@ -44,7 +45,7 @@ from .piaotia import PiaotiaSearcher
 from .qbtr import QbtrSearcher
 from .qianbi import QianbiSearcher
 from .quanben5 import Quanben5Searcher
-from .registry import search
+from .registry import search, search_stream
 from .shuhaige import ShuhaigeSearcher
 from .tongrenquan import TongrenquanSearcher
 from .ttkan import TtkanSearcher
