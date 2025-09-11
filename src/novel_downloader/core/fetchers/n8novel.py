@@ -24,10 +24,9 @@ class N8novelSession(BaseSession):
 
     BOOK_INFO_URL = "https://www.8novel.com/novelbooks/{book_id}/"
     CHAPTER_URL = "https://article.8novel.com/read/{book_id}/?{chapter_id}"
-    CHAPTER_CONTENT_URL = (
-        "https://article.8novel.com/txt/1/{book_id}/{chapter_id}{seed_segment}.html"
-    )
+    CHAPTER_CONTENT_URL = "https://article.8novel.com/txt/{txt_dir}/{book_id}/{chapter_id}{seed_segment}.html"
 
+    _TXT_DIR_PATTERN = re.compile(r"%2f(\d)%")
     _SPLIT_DIGITS_PATTERN = re.compile(
         r'["\'](\d+(?:,\d+)*)["\']\s*\.split\s*\(\s*["\']\s*,\s*["\']\s*\)', re.DOTALL
     )
@@ -57,11 +56,13 @@ class N8novelSession(BaseSession):
         """
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
         chapter_html = await self.fetch(url, **kwargs)
+        txt_dir = self._extract_txt_dir(chapter_html)
         url_seed = self._extract_url_seed(chapter_html)
         content_url = self._build_chapter_content_url(
             seed=url_seed,
             book_id=book_id,
             chapter_id=chapter_id,
+            txt_dir=txt_dir,
         )
         content_html = await self.fetch(content_url, **kwargs)
 
@@ -95,8 +96,22 @@ class N8novelSession(BaseSession):
         return matches[-1].split(",")[-1]
 
     @classmethod
+    def _extract_txt_dir(cls, html_str: str) -> str:
+        """
+        Extract the txt directory number (e.g., '1' or '2') from obfuscated JS.
+        """
+        match = cls._TXT_DIR_PATTERN.search(html_str)
+        if not match:
+            raise ValueError("No txt directory number found in HTML.")
+        return match.group(1)
+
+    @classmethod
     def _build_chapter_content_url(
-        cls, seed: str, book_id: str, chapter_id: str
+        cls,
+        seed: str,
+        book_id: str,
+        chapter_id: str,
+        txt_dir: str,
     ) -> str:
         """
         Slices out a 5-character segment of `seed` at offset
@@ -107,5 +122,8 @@ class N8novelSession(BaseSession):
         seed_segment = seed[start : start + 5]
 
         return cls.CHAPTER_CONTENT_URL.format(
-            book_id=book_id, chapter_id=chapter_id, seed_segment=seed_segment
+            book_id=book_id,
+            chapter_id=chapter_id,
+            seed_segment=seed_segment,
+            txt_dir=txt_dir,
         )
