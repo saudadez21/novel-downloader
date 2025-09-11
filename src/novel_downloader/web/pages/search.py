@@ -17,7 +17,7 @@ from nicegui import ui
 from nicegui.elements.number import Number
 from nicegui.events import ValueChangeEventArguments
 
-from novel_downloader.core import search
+from novel_downloader.core.searchers import search
 from novel_downloader.models import SearchResult
 from novel_downloader.web.components import navbar
 from novel_downloader.web.services import manager, setup_dialog
@@ -39,11 +39,11 @@ _SUPPORT_SITES = {
     "shuhaige": "书海阁小说网",
     "tongrenquan": "同人圈",
     "ttkan": "天天看小说",
-    # "wanbengo": "完本神站",
+    "wanbengo": "完本神站",
     "xiaoshuowu": "小说屋",
     "xiguashuwu": "西瓜书屋",
     "xs63b": "小说路上",
-    # "xshbook": "小说虎",
+    "xshbook": "小说虎",
 }
 
 _DEFAULT_TIMEOUT = 10.0

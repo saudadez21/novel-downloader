@@ -1,24 +1,24 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.archived.wanbengo.searcher
-------------------------------------------------
+novel_downloader.core.searchers.wanbengo
+----------------------------------------
 
 """
 
 import logging
 
 from lxml import html
-from novel_downloader.core.searchers.base import BaseSearcher
-from novel_downloader.models import SearchResult
 
-# from novel_downloader.core.searchers.registry import register_searcher
+from novel_downloader.core.searchers.base import BaseSearcher
+from novel_downloader.core.searchers.registry import register_searcher
+from novel_downloader.models import SearchResult
 
 logger = logging.getLogger(__name__)
 
 
-# @register_searcher(
-#     site_keys=["wanbengo"],
-# )
+@register_searcher(
+    site_keys=["wanbengo"],
+)
 class WanbengoSearcher(BaseSearcher):
     site_name = "wanbengo"
     priority = 30
