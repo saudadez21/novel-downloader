@@ -124,6 +124,7 @@ novel-cli download --site esjzone 1234567890
 
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 | 支持语言 |
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
+| [镇魂小说网](https://www.zhenhunxiaoshuo.com/)           | zhenhunxiaoshuo | ❌     | ❌     | ❌     | ⚠️     | 简      |
 | [百合会](https://www.yamibo.com/site/novel)                  | yamibo     | ✅     | ❌     | ✅     | ⚠️     | 简      |
 | [3A电子书](http://www.aaatxt.com/)                           | aaatxt     | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [西瓜书屋](https://www.xiguashuwu.com/)                      | xiguashuwu | ❌     | ❌     | ⚠️     | ✅     | 简      |
@@ -291,6 +292,10 @@ novel-cli download --site yamibo 123456
     * 目录页中仍保留了一些已删除章节的重复条目, 却未同步删除
 
 #### 其它小说
+
+* **镇魂小说网 (zhenhunxiaoshuo)**
+  * 书籍: `https://www.zhenhunxiaoshuo.com/modaozushi/` -> Book ID: `modaozushi`
+  * 章节: `https://www.zhenhunxiaoshuo.com/5419.html` -> Chapter ID: `5419`
 
 * **百合会 (yamibo)**
   * 书籍: `https://www.yamibo.com/novel/262117` -> Book ID: `262117`

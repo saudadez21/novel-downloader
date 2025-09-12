@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 @register_searcher(
     site_keys=["biquge", "b520"],
 )
-class BiqugeSearcher(BaseSearcher):
+class B520Searcher(BaseSearcher):
     site_name = "biquge"
     priority = 30
     BASE_URL = "http://www.b520.cc/"

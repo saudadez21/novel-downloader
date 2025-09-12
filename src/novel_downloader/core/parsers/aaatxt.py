@@ -64,8 +64,7 @@ class AaatxtParser(BaseParser):
         )
         tags = [genre] if genre else []
 
-        summary_el = tree.xpath("//div[@id='jj']//p")
-        summary = summary_el[0].text_content().strip() if summary_el else ""
+        summary = self._first_str(tree.xpath("//div[@id='jj']//p/text()"))
 
         download_url = self._first_str(
             tree.xpath("//div[@id='down']//li[@class='bd']//a/@href")

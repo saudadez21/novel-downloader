@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.fetchers.b520
------------------------------------
+novel_downloader.core.fetchers.zhenhunxiaoshuo
+----------------------------------------------
 
 """
 
@@ -12,17 +12,18 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 
 
 @register_fetcher(
-    site_keys=["biquge", "b520"],
+    site_keys=["zhenhunxiaoshuo"],
 )
-class B520Session(BaseSession):
+class ZhenhunxiaoshuoSession(BaseSession):
     """
-    A session class for interacting with the 笔趣阁 (www.b520.cc) novel website.
+    A session class for interacting with the 镇魂小说网
+    (www.zhenhunxiaoshuo.com) novel website.
     """
 
-    site_name: str = "b520"
+    site_name: str = "zhenhunxiaoshuo"
 
-    BOOK_INFO_URL = "http://www.b520.cc/{book_id}/"
-    CHAPTER_URL = "http://www.b520.cc/{book_id}/{chapter_id}.html"
+    BOOK_INFO_URL = "https://www.zhenhunxiaoshuo.com/{book_id}/"
+    CHAPTER_URL = "https://www.zhenhunxiaoshuo.com/{chapter_id}.html"
 
     async def get_book_info(
         self,
@@ -38,8 +39,8 @@ class B520Session(BaseSession):
         chapter_id: str,
         **kwargs: Any,
     ) -> list[str]:
-        url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
-        return [await self.fetch(url, encoding="gbk", **kwargs)]
+        url = self.chapter_url(chapter_id=chapter_id)
+        return [await self.fetch(url, **kwargs)]
 
     @classmethod
     def book_info_url(cls, book_id: str) -> str:
@@ -52,12 +53,11 @@ class B520Session(BaseSession):
         return cls.BOOK_INFO_URL.format(book_id=book_id)
 
     @classmethod
-    def chapter_url(cls, book_id: str, chapter_id: str) -> str:
+    def chapter_url(cls, chapter_id: str) -> str:
         """
         Construct the URL for fetching a specific chapter.
 
         :param book_id: The identifier of the book.
-        :param chapter_id: The identifier of the chapter.
         :return: Fully qualified chapter URL.
         """
-        return cls.CHAPTER_URL.format(book_id=book_id, chapter_id=chapter_id)
+        return cls.CHAPTER_URL.format(chapter_id=chapter_id)

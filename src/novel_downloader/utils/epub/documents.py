@@ -12,6 +12,7 @@ Defines the classes that render EPUB navigation and packaging documents:
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
+from html import escape
 
 from .constants import (
     NAV_TEMPLATE,
@@ -76,7 +77,7 @@ class NavDocument(EpubResource):
         raw = NAV_TEMPLATE.format(
             lang=self.language,
             id=self.id,
-            title=self.title,
+            title=escape(self.title, quote=False),
             items=items_str,
         )
         return raw
@@ -85,15 +86,16 @@ class NavDocument(EpubResource):
     def _render_items_str(cls, items: Sequence[ChapterEntry | VolumeEntry]) -> str:
         lines: list[str] = []
         for item in items:
+            label = escape(item.label, quote=False)
             if isinstance(item, VolumeEntry) and item.chapters:
-                lines.append(f'<li><a href="{item.src}">{item.label}</a>')
+                lines.append(f'<li><a href="{item.src}">{label}</a>')
                 lines.append("  <ol>")
                 child = cls._render_items_str(item.chapters)
                 lines.extend(child.splitlines())
                 lines.append("  </ol>")
                 lines.append("</li>")
             else:
-                lines.append(f'<li><a href="{item.src}">{item.label}</a></li>')
+                lines.append(f'<li><a href="{item.src}">{label}</a></li>')
         return "\n".join(lines)
 
 

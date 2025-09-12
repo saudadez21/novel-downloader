@@ -217,6 +217,7 @@ class QidianParser(BaseParser):
             "title": title,
             "content": chapter_text,
             "extra": {
+                "site": "qidian",
                 "author_say": author_say,
                 "updated_at": update_time,
                 "update_timestamp": update_timestamp,
