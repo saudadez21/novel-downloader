@@ -96,6 +96,8 @@ novel-cli download --site ttkan bookname-authorname
 | [乐文小说网](https://www.lewenn.net/)                        | lewenn    | ❌     | ❌     | ⚠️     | ⚠️     | 简      |
 | [精彩小说](https://biquyuedu.com/)                           | biquyuedu | ❌     | ❌     | ⚠️     | ❌     | 简      |
 | [笔趣读](https://www.blqudu.cc/)                             | blqudu    | ❌     | ❌     | ⚠️     | ❌     | 简      |
+| [追书网](https://www.mangg.net/) (net)                       | mangg_net | ❌     | ❌     | ❌     | ✅     | 简      |
+| [追书网](https://www.mangg.com/) (com)                       | mangg_com | ❌     | ❌     | ⚠️     | ❌     | 简      |
 
 #### 同人小说
 
@@ -248,6 +250,14 @@ novel-cli download --site ttkan bookname-authorname
 * **笔趣读 (blqudu)**
   * 书籍: `https://www.blqudu.cc/137_137144/` -> Book ID: `137_137144`
   * 章节: `https://www.biqudv.cc/137_137144/628955328.html` -> Chapter ID: `628955328`
+
+* **追书网.net (mangg_net)**
+  * 书籍: `https://www.mangg.net/id26581/` -> Book ID: `id26581`
+  * 章节: `https://www.mangg.net/id26581/1159408.html` -> Chapter ID: `1159408`
+
+* **追书网.com (mangg_com)**
+  * 书籍: `https://www.mangg.com/id57715/` -> Book ID: `id57715`
+  * 章节: `https://www.mangg.com/id57715/632689.html` -> Chapter ID: `632689`
 
 #### 同人小说
 

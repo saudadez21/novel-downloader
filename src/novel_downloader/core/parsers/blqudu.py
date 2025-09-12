@@ -20,10 +20,6 @@ class BlquduParser(LewennParser):
     BASE_URL = "https://www.blqudu.cc"
 
     ADS: set[str] = {
-        "app2",
-        "read2",
-        "chaptererror",
-        "loadBookInfo",
         "记住笔趣阁",
         "biqudv.cc",
     }

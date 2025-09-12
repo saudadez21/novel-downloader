@@ -55,7 +55,7 @@ class ConfigAdapter:
         """
         s, g = self._site_cfg, self._gen_cfg
         return FetcherConfig(
-            request_interval=self._pick("request_interval", 2.0, s, g),
+            request_interval=self._pick("request_interval", 0.5, s, g),
             retry_times=self._pick("retry_times", 3, s, g),
             backoff_factor=self._pick("backoff_factor", 2.0, s, g),
             timeout=self._pick("timeout", 30.0, s, g),
@@ -77,7 +77,7 @@ class ConfigAdapter:
         s, g = self._site_cfg, self._gen_cfg
         debug = g.get("debug") or {}
         return DownloaderConfig(
-            request_interval=self._pick("request_interval", 2.0, s, g),
+            request_interval=self._pick("request_interval", 0.5, s, g),
             retry_times=self._pick("retry_times", 3, s, g),
             backoff_factor=self._pick("backoff_factor", 2.0, s, g),
             workers=self._pick("workers", 2, s, g),

@@ -20,7 +20,7 @@ from novel_downloader.models import (
 
 
 @register_parser(
-    site_keys=["biquge", "b520"],
+    site_keys=["b520"],
 )
 class B520Parser(BaseParser):
     """

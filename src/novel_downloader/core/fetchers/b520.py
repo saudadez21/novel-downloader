@@ -12,7 +12,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 
 
 @register_fetcher(
-    site_keys=["biquge", "b520"],
+    site_keys=["b520"],
 )
 class B520Session(BaseSession):
     """
