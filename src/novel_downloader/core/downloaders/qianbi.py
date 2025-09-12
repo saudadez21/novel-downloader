@@ -44,8 +44,6 @@ class QianbiDownloader(BaseDownloader):
 
         :param book: BookConfig with at least 'book_id'.
         """
-        TAG = "[Downloader]"
-
         book_id = book["book_id"]
         start_id = book.get("start_id")
         end_id = book.get("end_id")
@@ -74,7 +72,7 @@ class QianbiDownloader(BaseDownloader):
             vols = book_info["volumes"]
             plan = self._planned_chapter_ids(vols, start_id, end_id, ignore_set)
             if not plan:
-                self.logger.info("%s nothing to do after filtering: %s", TAG, book_id)
+                self.logger.info("Nothing to do after filtering: %s", book_id)
                 return
 
             progress = Progress(total=len(plan), hook=progress_hook)
@@ -95,7 +93,7 @@ class QianbiDownloader(BaseDownloader):
                     storage.upsert_chapters(batch, self.DEFAULT_SOURCE_ID)
                 except Exception as e:
                     self.logger.error(
-                        "[Storage] batch upsert failed (size=%d): %s",
+                        "Storage batch upsert failed (size=%d): %s",
                         len(batch),
                         e,
                         exc_info=True,
@@ -212,16 +210,14 @@ class QianbiDownloader(BaseDownloader):
             # --- done ---
             if cancelled():
                 self.logger.info(
-                    "%s Novel '%s' cancelled: flushed %d/%d chapters.",
-                    TAG,
+                    "Novel '%s' cancelled: flushed %d/%d chapters.",
                     book_info.get("book_name", "unknown"),
                     progress.done,
                     progress.total,
                 )
             else:
                 self.logger.info(
-                    "%s Novel '%s' download completed.",
-                    TAG,
+                    "Novel '%s' download completed.",
                     book_info.get("book_name", "unknown"),
                 )
 
@@ -255,7 +251,7 @@ class QianbiDownloader(BaseDownloader):
                     data = await self._process_chapter(book_id, prev_cid, html_dir)
                     if not data:
                         self.logger.warning(
-                            "failed to fetch chapter %s, skipping repair",
+                            "Failed to fetch chapter %s, skipping repair",
                             prev_cid,
                         )
                         continue
@@ -275,7 +271,7 @@ class QianbiDownloader(BaseDownloader):
                     continue
 
                 self.logger.info(
-                    "repaired chapterId: set to %s (from prev %s)",
+                    "Repaired chapterId: set to %s (from prev %s)",
                     next_cid,
                     prev_cid,
                 )
@@ -309,11 +305,11 @@ class QianbiDownloader(BaseDownloader):
                 return chap
             except Exception as e:
                 if attempt < self._retry_times:
-                    self.logger.info(f"[ChapterWorker] Retry {cid} ({attempt+1}): {e}")
+                    self.logger.info(f"Retry chapter {cid} ({attempt+1}): {e}")
                     backoff = self._backoff_factor * (2**attempt)
                     await async_jitter_sleep(
                         base=backoff, mul_spread=1.2, max_sleep=backoff + 3
                     )
                 else:
-                    self.logger.warning(f"[ChapterWorker] Failed {cid}: {e}")
+                    self.logger.warning(f"Failed chapter {cid}: {e}")
         return None

@@ -8,7 +8,6 @@ primarily used for decrypting custom font encryption.
 """
 
 import io
-import logging
 from pathlib import Path
 from typing import Any
 
@@ -17,8 +16,6 @@ from fontTools.ttLib import TTFont
 from paddleocr import TextRecognition
 from PIL import Image, ImageDraw, ImageFont
 from PIL.Image import Transpose
-
-logger = logging.getLogger(__name__)
 
 
 class FontOCR:

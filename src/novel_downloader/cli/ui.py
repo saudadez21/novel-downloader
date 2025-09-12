@@ -17,13 +17,27 @@ Public API:
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Awaitable, Callable, Iterable, Sequence
+from logging.handlers import TimedRotatingFileHandler
 
 from rich.console import Console
+from rich.logging import RichHandler
 from rich.progress import Progress, TaskID
 from rich.prompt import Confirm, Prompt
 from rich.table import Table
 
+from novel_downloader.utils.constants import LOGGER_DIR, PACKAGE_NAME
+
+_LOG_LEVELS: dict[str, int] = {
+    "DEBUG": logging.DEBUG,
+    "INFO": logging.INFO,
+    "WARNING": logging.WARNING,
+    "ERROR": logging.ERROR,
+}
+_MUTE_LOGGERS: set[str] = {
+    "fontTools.ttLib.tables._p_o_s_t",
+}
 _CONSOLE = Console()
 
 
@@ -181,3 +195,80 @@ def create_progress_hook(
         progress.stop()
 
     return hook, close
+
+
+def _normalize_level(level: int | str) -> int:
+    if isinstance(level, int):
+        return level
+    if isinstance(level, str):
+        lvl = _LOG_LEVELS.get(level.upper())
+        if isinstance(lvl, int):
+            return lvl
+    return logging.INFO
+
+
+def setup_logging(
+    console_level: int | str = "INFO",
+    file_level: int | str = "DEBUG",
+    *,
+    console: bool = True,
+    file: bool = True,
+    backup_count: int = 7,
+    when: str = "midnight",
+) -> None:
+    # Tame noisy third-party loggers
+    for name in _MUTE_LOGGERS:
+        ml = logging.getLogger(name)
+        ml.setLevel(logging.ERROR)
+        ml.propagate = False
+
+    logger = logging.getLogger(PACKAGE_NAME)
+    logger.setLevel(logging.DEBUG)
+    logger.propagate = False  # otherwise may affected by PaddleOCR
+
+    # Clear existing handlers to avoid duplicate logs
+    if logger.hasHandlers():
+        logger.handlers.clear()
+
+    # File handler (rotates daily)
+    if file:
+        file_level = _normalize_level(file_level)
+
+        LOGGER_DIR.mkdir(parents=True, exist_ok=True)
+        log_path = LOGGER_DIR / f"{PACKAGE_NAME}.log"
+
+        fh = TimedRotatingFileHandler(
+            filename=log_path,
+            when=when,
+            interval=1,
+            backupCount=backup_count,
+            encoding="utf-8",
+            utc=False,
+            delay=True,
+        )
+
+        file_formatter = logging.Formatter(
+            fmt="%(asctime)s [%(levelname)s] %(name)s.%(funcName)s: %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
+        fh.setFormatter(file_formatter)
+        fh.setLevel(file_level)
+        logger.addHandler(fh)
+
+        print(f"Logging to {log_path}")
+
+    # Console handler
+    if console:
+        console_level = _normalize_level(console_level)
+
+        ch = RichHandler(
+            console=_CONSOLE,
+            rich_tracebacks=True,
+            markup=True,
+            show_time=True,
+            show_path=False,
+            log_time_format="%H:%M:%S",
+        )
+        ch.setFormatter(logging.Formatter("%(message)s"))
+        ch.setLevel(console_level)
+        logger.addHandler(ch)

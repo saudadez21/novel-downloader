@@ -44,7 +44,7 @@ class SfacgSession(BaseSession):
 
         if await self._check_login_status():
             self._is_logged_in = True
-            self.logger.debug("[auth] Logged in via cookies.")
+            self.logger.debug("Logged in via cookies: sfacg")
             return True
 
         self._is_logged_in = False

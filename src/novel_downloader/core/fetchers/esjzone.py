@@ -49,11 +49,11 @@ class EsjzoneSession(BaseSession):
 
         if await self._check_login_status():
             self._is_logged_in = True
-            self.logger.debug("[auth] Logged in via cookies.")
+            self.logger.debug("Logged in via cookies: esjzone")
             return True
 
         if not (username and password):
-            self.logger.warning("[auth] No credentials provided.")
+            self.logger.warning("No credentials provided: esjzone")
             return False
 
         for _ in range(attempt):
@@ -166,7 +166,7 @@ class EsjzoneSession(BaseSession):
             text_1 = await resp_1.text()
             token = self._extract_token(text_1)
         except Exception as exc:
-            self.logger.warning("[session] _api_login failed at step 1: %s", exc)
+            self.logger.warning("esjzone _api_login failed at step 1: %s", exc)
             return False
 
         data_2 = {
@@ -185,7 +185,7 @@ class EsjzoneSession(BaseSession):
             resp_code: int = json_2.get("status", 301)
             return resp_code == 200
         except Exception as exc:
-            self.logger.warning("[session] _api_login failed at step 2: %s", exc)
+            self.logger.warning("esjzone _api_login failed at step 2: %s", exc)
         return False
 
     async def _check_login_status(self) -> bool:

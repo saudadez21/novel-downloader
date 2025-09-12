@@ -39,20 +39,20 @@ def _resolve_file_path(
         path = Path(user_path).expanduser().resolve()
         if path.is_file():
             return path
-        logger.warning("[config] Specified file not found: %s", path)
+        logger.warning("Specified file not found: %s", path)
 
     filenames = [local_filename] if isinstance(local_filename, str) else local_filename
     for name in filenames:
         local_path = Path.cwd() / name
         if local_path.is_file():
-            logger.debug("[config] Using local file: %s", local_path)
+            logger.debug("Using local file: %s", local_path)
             return local_path
 
     if fallback_path.is_file():
-        logger.debug("[config] Using fallback file: %s", fallback_path)
+        logger.debug("Using fallback file: %s", fallback_path)
         return fallback_path
 
-    logger.warning("[config] No file found at any location for: %s", local_filename)
+    logger.warning("No file found at any location for: %s", local_filename)
     return None
 
 
@@ -67,7 +67,7 @@ def _validate_dict(data: Any, path: Path, format: str) -> dict[str, Any]:
     """
     if not isinstance(data, dict):
         logger.warning(
-            "[config] %s content is not a dictionary: %s",
+            "%s content is not a dictionary: %s",
             format.upper(),
             path,
         )
@@ -140,7 +140,7 @@ def load_config(
     try:
         return _load_by_extension(path)
     except Exception as e:
-        logger.warning("[config] Failed to load config file: %s", e)
+        logger.warning("Failed to load config file: %s", e)
     return {}
 
 
@@ -177,10 +177,10 @@ def save_config(
         with output.open("w", encoding="utf-8") as f:
             json.dump(config, f, indent=2, ensure_ascii=False)
     except Exception as e:
-        logger.error("[config] Failed to write config JSON '%s': %s", output, e)
+        logger.error("Failed to write config JSON '%s': %s", output, e)
         raise
 
-    logger.info("[config] Configuration successfully saved to JSON: %s", output)
+    logger.info("Configuration successfully saved to JSON: %s", output)
     return
 
 
@@ -204,7 +204,7 @@ def save_config_file(
     try:
         data = _load_by_extension(source)
     except (ValueError, ImportError) as e:
-        logger.error("[config] Failed to load config file: %s", e)
+        logger.error("Failed to load config file: %s", e)
         raise ValueError(f"Invalid config file: {source}") from e
 
     save_config(data, output_path)

@@ -71,8 +71,8 @@ def _delete_path(p: Path) -> None:
                 p.unlink()
             else:
                 shutil.rmtree(p, ignore_errors=True)
-            ui.success(f"[clean] {t('clean_deleted')}: {p}")
+            ui.success(f"clean: {t('clean_deleted')} path={p}")
         except Exception as e:
-            ui.error(f"[clean] {t('clean_failed', path=p)}: {p} -> {e}")
+            ui.error(f"clean: {t('clean_failed', path=p)} error={e}")
     else:
-        ui.warn(f"[clean] {t('clean_not_found')}: {p}")
+        ui.warn(f"clean: {t('clean_not_found')} path={p}")

@@ -94,7 +94,7 @@ class BaseDownloader(abc.ABC):
         if not self._check_login():
             book_ids = [b["book_id"] for b in books]
             self.logger.warning(
-                "[%s] login failed, skipping download of books: %s",
+                "%s login failed, skipping download of books: %s",
                 self._site,
                 ", ".join(book_ids) or "<none>",
             )
@@ -104,7 +104,7 @@ class BaseDownloader(abc.ABC):
             # stop early if cancellation requested
             if cancel_event and cancel_event.is_set():
                 self.logger.info(
-                    "[%s] download cancelled before book: %s",
+                    "%s download cancelled before book: %s",
                     self._site,
                     book["book_id"],
                 )
@@ -138,7 +138,7 @@ class BaseDownloader(abc.ABC):
         """
         if not self._check_login():
             self.logger.warning(
-                "[%s] login failed, skipping download of book: %s (%s-%s)",
+                "%s login failed, skipping download of book: %s (%s-%s)",
                 self._site,
                 book["book_id"],
                 book.get("start_id", "-"),
@@ -149,7 +149,7 @@ class BaseDownloader(abc.ABC):
         # if already cancelled before starting
         if cancel_event and cancel_event.is_set():
             self.logger.info(
-                "[%s] download cancelled before start of book: %s",
+                "%s download cancelled before start of book: %s",
                 self._site,
                 book["book_id"],
             )
@@ -316,7 +316,7 @@ class BaseDownloader(abc.ABC):
         :param error: The exception raised during download.
         """
         self.logger.warning(
-            "[%s] Failed to download (book_id=%s, start=%s, end=%s): %s",
+            "%s Failed to download (book_id=%s, start=%s, end=%s): %s",
             self.__class__.__name__,
             book.get("book_id", "<unknown>"),
             book.get("start_id", "-"),

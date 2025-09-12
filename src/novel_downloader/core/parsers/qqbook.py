@@ -185,7 +185,7 @@ class QqbookParser(BaseParser):
         **kwargs: Any,
     ) -> ChapterDict | None:
         if not html_list:
-            logger.warning("[Parser] chapter_id=%s :: html_list is empty", chapter_id)
+            logger.warning("QQbook chapter %s :: html_list is empty", chapter_id)
             return None
         try:
             nuxt_block = self._find_nuxt_block(html_list[0])
@@ -195,7 +195,7 @@ class QqbookParser(BaseParser):
             data_block = data_list[0]
         except Exception as e:
             logger.warning(
-                "[Parser] chapter_id=%s :: failed to locate Nuxt block: %s",
+                "QQbook chapter %s :: failed to locate Nuxt block: %s",
                 chapter_id,
                 e,
             )
@@ -204,14 +204,14 @@ class QqbookParser(BaseParser):
         curr_content = data_block.get("currentContent") or {}
         if not curr_content:
             logger.warning(
-                "[Parser] chapter_id=%s :: currentContent missing or empty", chapter_id
+                "QQbook chapter %s :: currentContent missing or empty", chapter_id
             )
             return None
 
         content = curr_content.get("content", "")
         if not content:
             logger.warning(
-                "[Parser] chapter_id=%s :: raw 'content' missing or empty", chapter_id
+                "QQbook chapter %s :: raw 'content' missing or empty", chapter_id
             )
             return None
 
@@ -226,7 +226,7 @@ class QqbookParser(BaseParser):
         word_count = curr_content.get("totalWords") or ""
 
         logger.debug(
-            "[Parser]chapter_id=%s :: meta title=%r encrypt=%s font_encrypt=%s",
+            "QQbook chapter %s :: meta title=%r encrypt=%s font_encrypt=%s",
             chapter_id,
             title,
             encrypt,
@@ -238,7 +238,7 @@ class QqbookParser(BaseParser):
                 content = self._parse_encrypted(content=content, cid=cid, bk_cfg=bk_cfg)
             except Exception as e:
                 logger.warning(
-                    "[Parser] chapter_id=%s :: encrypted content decryption failed: %s",
+                    "QQbook chapter %s :: encrypted content decryption failed: %s",
                     chapter_id,
                     e,
                 )
@@ -253,7 +253,7 @@ class QqbookParser(BaseParser):
 
         if not content:
             logger.warning(
-                "[Parser] chapter_id=%s :: content empty after decryption/font-mapping",
+                "QQbook chapter %s :: content empty after decryption/font-mapping",
                 chapter_id,
             )
             return None
@@ -302,7 +302,7 @@ class QqbookParser(BaseParser):
         """
         if not self._decode_font:
             logger.warning(
-                "[Parser] chapter_id=%s :: font decryption skipped "
+                "QQbook chapter %s :: font decryption skipped "
                 "(set `decode_font=True` to enable)",
                 cid,
             )
@@ -314,13 +314,13 @@ class QqbookParser(BaseParser):
         fixed_woff2_url = font_resp.get("fixedFontWoff2")
 
         if not css_str:
-            logger.warning("[Parser] cid=%s :: css missing or empty", cid)
+            logger.warning("QQbook chapter %s :: css missing or empty", cid)
             return ""
         if not rf_data:
-            logger.warning("[Parser] cid=%s :: randomFont.data missing or empty", cid)
+            logger.warning("QQbook chapter %s :: randomFont.data missing or empty", cid)
             return ""
         if not fixed_woff2_url:
-            logger.warning("[Parser] cid=%s :: fixedFontWoff2 missing or empty", cid)
+            logger.warning("QQbook chapter %s :: fixedFontWoff2 missing or empty", cid)
             return ""
 
         debug_dir = self._debug_dir / "font_debug" / cid
@@ -332,7 +332,7 @@ class QqbookParser(BaseParser):
             self._rand_path.write_bytes(bytes(rf_data))
         except Exception as e:
             logger.error(
-                "[Parser] cid=%s :: failed to write randomFont.ttf",
+                "QQbook chapter %s :: failed to write randomFont.ttf",
                 cid,
                 exc_info=e,
             )
@@ -344,9 +344,7 @@ class QqbookParser(BaseParser):
             on_exist="skip",
         )
         if fixed_path is None:
-            logger.warning(
-                "[Parser] failed to download fixedfont for chapter '%s'", cid
-            )
+            logger.warning("QQbook chapter %s :: failed to download fixedfont.", cid)
             return ""
 
         css_rules = self._parse_css_rules(css_str)
@@ -375,7 +373,7 @@ class QqbookParser(BaseParser):
         )
         if not mapping_result:
             logger.warning(
-                "[Parser] font mapping returned empty result for chapter '%s'", cid
+                "QQbook chapter %s :: font mapping returned empty result.", cid
             )
             return ""
 
@@ -492,7 +490,7 @@ class QqbookParser(BaseParser):
             with open(fixed_map_file, "w", encoding="utf-8") as f:
                 json.dump(fixed_map, f, ensure_ascii=False, indent=2)
         except Exception as e:
-            logger.error("[FontOCR] Failed to save fixed map: %s", e)
+            logger.error("Failed to save fixed map (QQbook): %s", e)
 
         return mapping_result
 

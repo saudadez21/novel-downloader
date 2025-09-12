@@ -20,7 +20,6 @@ from novel_downloader.core import get_downloader, get_exporter, get_fetcher, get
 from novel_downloader.models import BookConfig, LoginField
 from novel_downloader.utils.cookies import parse_cookies
 from novel_downloader.utils.i18n import t
-from novel_downloader.utils.logger import setup_logging
 
 
 def register_download_subcommand(subparsers: _SubParsersAction) -> None:  # type: ignore
@@ -155,7 +154,7 @@ async def _download(
     exporter_cfg = adapter.get_exporter_config()
     login_cfg = adapter.get_login_config()
     log_level = adapter.get_log_level()
-    setup_logging(console_level=log_level)
+    ui.setup_logging(console_level=log_level)
 
     parser = get_parser(site, parser_cfg)
     exporter = None

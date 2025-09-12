@@ -78,7 +78,6 @@ class BaseExporter(abc.ABC):
 
         :param book_id: The book identifier (used for filename, lookup, etc.)
         """
-        TAG = "[Exporter]"
         results: dict[str, Path] = {}
 
         actions = [
@@ -92,8 +91,7 @@ class BaseExporter(abc.ABC):
             if enabled:
                 try:
                     self.logger.info(
-                        "%s Attempting to export book_id '%s' as %s...",
-                        TAG,
+                        "Attempting to export book_id '%s' as %s...",
                         book_id,
                         fmt_key,
                     )
@@ -101,17 +99,16 @@ class BaseExporter(abc.ABC):
 
                     if isinstance(path, Path):
                         results[fmt_key] = path
-                        self.logger.info("%s Successfully saved as %s.", TAG, fmt_key)
+                        self.logger.info("Successfully saved as %s.", fmt_key)
 
                 except NotImplementedError as e:
                     self.logger.warning(
-                        "%s Export method for %s not implemented: %s",
-                        TAG,
+                        "Export method for %s not implemented: %s",
                         fmt_key,
                         e,
                     )
                 except Exception:
-                    self.logger.exception("%s Error while saving as %s", TAG, fmt_key)
+                    self.logger.exception("Error while saving as %s", fmt_key)
 
         return results
 

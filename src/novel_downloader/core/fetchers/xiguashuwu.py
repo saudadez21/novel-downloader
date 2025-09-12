@@ -53,12 +53,12 @@ class XiguashuwuSession(BaseSession):
                 html = await self.fetch(full_url, **kwargs)
             except Exception as exc:
                 self.logger.warning(
-                    "[async] get_book_catalog(%s page %d) failed: %s",
+                    "xiguashuwu get_book_catalog(%s page %d) failed: %s",
                     book_id,
                     idx,
                     exc,
                 )
-                break
+                return []
 
             catalog_pages.append(html)
             idx += 1
@@ -109,12 +109,12 @@ class XiguashuwuSession(BaseSession):
                 html = await self.fetch(full_url, **kwargs)
             except Exception as exc:
                 self.logger.warning(
-                    "[async] get_book_chapter(%s page %d) failed: %s",
+                    "xiguashuwu get_book_chapter(%s page %d) failed: %s",
                     chapter_id,
                     idx,
                     exc,
                 )
-                break
+                return []
 
             html_pages.append(html)
             idx += 1

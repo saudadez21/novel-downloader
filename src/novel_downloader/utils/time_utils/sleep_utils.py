@@ -33,7 +33,7 @@ def _calc_sleep_duration(
     """
     if base < 0 or add_spread < 0 or mul_spread < 1.0:
         logger.warning(
-            "[%s] Invalid parameters: base=%s, add_spread=%s, mul_spread=%s",
+            "%s: Invalid parameters (base=%s, add_spread=%s, mul_spread=%s)",
             log_prefix,
             base,
             add_spread,
@@ -49,7 +49,7 @@ def _calc_sleep_duration(
         duration = min(duration, max_sleep)
 
     logger.debug(
-        "[%s] base=%.3f mul=%.3f add=%.3f max=%s -> duration=%.3f",
+        "%s: base=%.3f mul=%.3f add=%.3f max=%s -> duration=%.3f",
         log_prefix,
         base,
         multiplicative_jitter,

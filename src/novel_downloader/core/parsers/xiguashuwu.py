@@ -306,7 +306,7 @@ class XiguashuwuParser(BaseParser):
             return char if score >= self._CONF_THRESHOLD else None
 
         except Exception as e:
-            logger.warning("[Parser] Failed to ocr glyph image %s: %s", url, e)
+            logger.warning("Failed to ocr xiguashuwu glyph image %s: %s", url, e)
         return None
 
     @classmethod
