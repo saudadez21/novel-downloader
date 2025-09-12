@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+"""
+novel_downloader.core.parsers.blqudu
+------------------------------------
+
+"""
+
+from novel_downloader.core.parsers.lewenn import LewennParser
+from novel_downloader.core.parsers.registry import register_parser
+
+
+@register_parser(
+    site_keys=["blqudu"],
+)
+class BlquduParser(LewennParser):
+    """
+    Parser for 笔趣读 book pages.
+    """
+
+    BASE_URL = "https://www.blqudu.cc"
+
+    ADS: set[str] = {
+        "app2",
+        "read2",
+        "chaptererror",
+        "loadBookInfo",
+        "记住笔趣阁",
+        "biqudv.cc",
+    }

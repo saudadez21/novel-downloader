@@ -67,8 +67,7 @@ class LewennParser(BaseParser):
             cover_src if cover_src.startswith("http") else f"{self.BASE_URL}{cover_src}"
         )
 
-        summary_lines = tree.xpath('//div[@id="intro"]/p//text()')
-        summary = "\n".join(line.strip() for line in summary_lines).strip()
+        summary = self._join_strs(tree.xpath('//div[@id="intro"]/p//text()'))
 
         # --- Volumes & Chapters ---
         chapters: list[ChapterInfoDict] = []
@@ -126,8 +125,6 @@ class LewennParser(BaseParser):
         for ln in raw_lines:
             if not ln or self._is_ad_line(ln):
                 continue
-            # if ln.startswith("(") and ln.endswith(")"):
-            #     continue
             lines.append(ln.replace(chr(0xA0), ""))
 
         content = "\n".join(lines)

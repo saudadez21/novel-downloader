@@ -59,8 +59,7 @@ class Jpxs123Parser(BaseParser):
         )
 
         # Summary from the <p> inside infos
-        paras = tree.xpath('//div[@class="infos"]/p//text()')
-        summary = "\n".join(p.strip() for p in paras if p.strip())
+        summary = self._join_strs(tree.xpath('//div[@class="infos"]/p//text()'))
 
         # Chapters from the book_list
         chapters: list[ChapterInfoDict] = []

@@ -55,6 +55,14 @@ novel-cli search --site biquge 三体
 
 ### 支持站点总览
 
+**使用示例**
+
+```bash
+novel-cli download --site qidian 1234567890
+novel-cli download --site qianbi 12345
+novel-cli download --site ttkan bookname-authorname
+```
+
 #### 一般小说
 
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 | 支持语言 |
@@ -77,14 +85,6 @@ novel-cli search --site biquge 三体
 | [全本小说网](https://quanben5.com/)                          | quanben5  | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [名著阅读](https://b.guidaye.com/)                           | guidaye   | ❌     | ❌     | ❌     | ⚠️     | 简      |
 
-**使用示例**
-
-```bash
-novel-cli download --site qidian 1234567890
-novel-cli download --site qianbi 12345
-novel-cli download --site ttkan bookname-authorname
-```
-
 #### 类笔趣阁
 
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 | 支持语言 |
@@ -95,6 +95,7 @@ novel-cli download --site ttkan bookname-authorname
 | [一笔阁](https://www.yibige.org/)                            | yibige    | ❌     | ❌     | ⚠️     | ⚠️     | 简 / 繁 |
 | [乐文小说网](https://www.lewenn.net/)                        | lewenn    | ❌     | ❌     | ⚠️     | ⚠️     | 简      |
 | [精彩小说](https://biquyuedu.com/)                           | biquyuedu | ❌     | ❌     | ⚠️     | ❌     | 简      |
+| [笔趣读](https://www.blqudu.cc/)                             | blqudu    | ❌     | ❌     | ⚠️     | ❌     | 简      |
 
 #### 同人小说
 
@@ -243,6 +244,10 @@ novel-cli download --site ttkan bookname-authorname
 * **精彩小说 (biquyuedu)**
   * 书籍: `https://biquyuedu.com/novel/GDr1I1.html` -> Book ID: `GDr1I1`
   * 章节: `https://biquyuedu.com/novel/GDr1I1/1.html` -> Chapter ID: `1`
+
+* **笔趣读 (blqudu)**
+  * 书籍: `https://www.blqudu.cc/137_137144/` -> Book ID: `137_137144`
+  * 章节: `https://www.biqudv.cc/137_137144/628955328.html` -> Chapter ID: `628955328`
 
 #### 同人小说
 

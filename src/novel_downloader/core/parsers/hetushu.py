@@ -64,8 +64,7 @@ class HetushuParser(BaseParser):
             if a.strip()
         ]
 
-        paras = tree.xpath('//div[@class="intro"]/p/text()')
-        summary = "\n".join(p.strip() for p in paras if p.strip())
+        summary = self._join_strs(tree.xpath('//div[@class="intro"]/p/text()'))
 
         # --- Chapter volumes & listings ---
         volumes: list[VolumeInfoDict] = []
