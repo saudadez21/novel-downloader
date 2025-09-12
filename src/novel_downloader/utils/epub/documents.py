@@ -165,7 +165,8 @@ class NCXDocument(EpubResource):
         lines.append(f'<navPoint id="{pt.id}" playOrder="{order}">')
         order += 1
         # label and content
-        lines.append(f"<navLabel><text>{pt.label}</text></navLabel>")
+        label = escape(pt.label, quote=False)
+        lines.append(f"<navLabel><text>{label}</text></navLabel>")
         lines.append(f'<content src="{pt.src}"/>')
         # children
         for child in pt.children:
