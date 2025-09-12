@@ -63,6 +63,7 @@ novel-cli search --site biquge 三体
 | [笔趣阁](http://www.b520.cc)                                 | b520      | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [铅笔小说](https://www.23qb.net), [备用](https://www.23qb.com/) | qianbi | ✅     | ❌     | ⚠️     | ✅     | 简      |
 | [飘天文学网](https://www.piaotia.com/)                        | piaotia  | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [新吾爱文学](https://www.71ge.com/)                           | n71ge    | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [小说屋](http://www.xiaoshuoge.info/)                        | xiaoshuowu | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [精品小说网](https://www.jpxs123.com/)                        | jpxs123  | ❌     | ❌     | ❌     | ✅     | 简      |
 | [天天看小说](https://www.ttkan.co/)                          | ttkan     | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
@@ -180,6 +181,10 @@ novel-cli download --site yamibo 123456
 * **飘天文学网 (piaotia)**
   * 书籍: `https://www.piaotia.com/bookinfo/13/12345.html` -> Book ID: `13-12345`
   * 章节: `https://www.piaotia.com/html/13/12345/114514.html` -> Chapter ID: `114514`
+
+* **新吾爱文学 (n71ge)**
+  * 书籍: `https://www.71ge.com/65_65536/` -> Book ID: `65_65536`
+  * 章节: `https://www.71ge.com/65_65536/1.html` -> Chapter ID: `1`
 
 * **小说屋 (xiaoshuowu)**
   * 书籍: `http://www.xiaoshuoge.info/html/987/987654/` -> Book ID: `987-987654`
