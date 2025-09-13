@@ -157,6 +157,9 @@ SAMPLES: dict[str, list[tuple[str, str, str | None]]] = {
         # b520
         ("http://www.b520.cc/8_8187/", "b520", "8_8187"),
         ("http://www.b520.cc/8_8187/3899831.html", "b520", "8_8187"),
+        # n8tsw
+        ("https://www.8tsw.com/0_1/", "n8tsw", "0_1"),
+        ("https://www.8tsw.com/0_1/1.html", "n8tsw", "0_1"),
         # shuhaige
         ("https://www.shuhaige.net/199178/", "shuhaige", "199178"),
         ("https://www.shuhaige.net/199178/86580492.html", "shuhaige", "199178"),

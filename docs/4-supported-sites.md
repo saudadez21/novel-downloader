@@ -93,10 +93,11 @@ novel-cli download --site ttkan shengxu-chendong
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 | 支持语言 |
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
 | [笔趣阁](http://www.b520.cc)                                 | b520      | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [笔趣阁](https://www.8tsw.com/)                              | n8tsw     | ❌     | ❌     | ⚠️     | ⚠️     | 简      |
 | [书海阁小说网](https://www.shuhaige.net/)                     | shuhaige | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [小说虎](https://www.xshbook.com/)                           | xshbook   | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [一笔阁](https://www.yibige.org/)                            | yibige    | ❌     | ❌     | ⚠️     | ⚠️     | 简 / 繁 |
-| [乐文小说网](https://www.lewenn.net/)                        | lewenn    | ❌     | ❌     | ⚠️     | ⚠️     | 简      |
+| [乐文小说网](https://www.lewenn.net/)                        | lewenn    | ❌     | ❌     | ⚠️     | ❌     | 简      |
 | [精彩小说](https://biquyuedu.com/)                           | biquyuedu | ❌     | ❌     | ⚠️     | ❌     | 简      |
 | [笔趣读](https://www.blqudu.cc/)                             | blqudu    | ❌     | ❌     | ⚠️     | ❌     | 简      |
 | [追书网](https://www.mangg.net/) (net)                       | mangg_net | ❌     | ❌     | ❌     | ✅     | 简      |
@@ -231,6 +232,11 @@ novel-cli download --site ttkan shengxu-chendong
 * **笔趣阁 (b520)**
   * 书籍: `http://www.b520.cc/8_8187/` -> Book ID: `8_8187`
   * 章节: `http://www.b520.cc/8_8187/3899831.html` -> Chapter ID: `3899831`
+
+* **笔趣阁 (n8tsw)**
+  * 书籍: `https://www.8tsw.com/0_1/` -> Book ID: `0_1`
+  * 章节: `https://www.8tsw.com/0_1/1.html` -> Chapter ID: `1`
+  * 注意: 有时响应不稳定
 
 * **书海阁小说网 (shuhaige)**
   * 书籍: `https://www.shuhaige.net/199178/` -> Book ID: `199178`
