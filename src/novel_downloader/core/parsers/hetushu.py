@@ -28,6 +28,7 @@ class HetushuParser(BaseParser):
     Parser for 和图书 book pages.
     """
 
+    site_name: str = "hetushu"
     BASE_URL = "https://www.hetushu.com"
 
     def parse_book_info(
@@ -134,5 +135,5 @@ class HetushuParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "hetushu"},
+            "extra": {"site": self.site_name},
         }

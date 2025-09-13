@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.fetchers.xiaoshuowu
+novel_downloader.core.fetchers.xiaoshuoge
 -----------------------------------------
 
 """
@@ -13,14 +13,14 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 
 
 @register_fetcher(
-    site_keys=["xiaoshuowu", "xiaoshuoge"],
+    site_keys=["xiaoshuoge"],
 )
 class XiaoshuowuSession(BaseSession):
     """
     A session class for interacting with the 小说屋 (www.xiaoshuoge.info) novel.
     """
 
-    site_name: str = "xiaoshuowu"
+    site_name: str = "xiaoshuoge"
 
     BOOK_INFO_URL = "http://www.xiaoshuoge.info/book/{book_id}/"
     BOOK_CATALOG_URL = "http://www.xiaoshuoge.info/html/{book_id}/"

@@ -28,6 +28,8 @@ class TtkanParser(BaseParser):
     Parser for 天天看小說 book pages.
     """
 
+    site_name: str = "ttkan"
+
     def parse_book_info(
         self,
         html_list: list[str],
@@ -128,5 +130,5 @@ class TtkanParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "ttkan"},
+            "extra": {"site": self.site_name},
         }

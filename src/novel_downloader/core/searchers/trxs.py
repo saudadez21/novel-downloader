@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.searchers.tongrenquan
--------------------------------------------
+novel_downloader.core.searchers.trxs
+------------------------------------
 
 """
 
@@ -17,13 +17,13 @@ logger = logging.getLogger(__name__)
 
 
 @register_searcher(
-    site_keys=["tongrenquan"],
+    site_keys=["trxs"],
 )
-class TongrenquanSearcher(BaseSearcher):
-    site_name = "tongrenquan"
+class TrxsSearcher(BaseSearcher):
+    site_name = "trxs"
     priority = 30
-    SEARCH_URL = "https://www.tongrenquan.org/e/search/indexstart.php"
-    BASE_URL = "https://www.tongrenquan.org"
+    SEARCH_URL = "https://www.trxs.cc/e/search/index.php"
+    BASE_URL = "https://www.trxs.cc/"
 
     @classmethod
     async def _fetch_html(cls, keyword: str) -> str:
@@ -32,8 +32,8 @@ class TongrenquanSearcher(BaseSearcher):
         classid = "0"
         body = f"keyboard={keyboard}&show={show}&classid={classid}"
         headers = {
-            "Origin": "https://www.tongrenquan.org",
-            "Referer": "https://www.tongrenquan.org/",
+            "Origin": "https://www.trxs.cc",
+            "Referer": "https://www.trxs.cc/",
             "Content-Type": "application/x-www-form-urlencoded",
         }
         try:

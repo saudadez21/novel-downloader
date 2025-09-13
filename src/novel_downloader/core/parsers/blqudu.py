@@ -17,8 +17,8 @@ class BlquduParser(LewennParser):
     Parser for 笔趣读 book pages.
     """
 
+    site_name: str = "blqudu"
     BASE_URL = "https://www.blqudu.cc"
-
     ADS: set[str] = {
         "记住笔趣阁",
         "biqudv.cc",

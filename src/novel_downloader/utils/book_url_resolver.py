@@ -495,6 +495,20 @@ SITE_RULES: dict[str, SiteRuleSet] = {
         ],
         hints=[],
     ),
+    "www.trxs.cc": SiteRuleSet(
+        site_key="trxs",
+        extractors=[
+            BookIdExtractor(
+                pattern=r"^/tongren/(\d+)\.html",
+                build_book_id=lambda m: m.group(1),
+            ),
+            BookIdExtractor(
+                pattern=r"^/tongren/(\d+)/\d+\.html$",
+                build_book_id=lambda m: m.group(1),
+            ),
+        ],
+        hints=[],
+    ),
     "ttkan.co": SiteRuleSet(
         site_key="ttkan",
         extractors=[
@@ -520,7 +534,7 @@ SITE_RULES: dict[str, SiteRuleSet] = {
         hints=[],
     ),
     "www.xiaoshuoge.info": SiteRuleSet(
-        site_key="xiaoshuowu",
+        site_key="xiaoshuoge",
         extractors=[
             BookIdExtractor(
                 pattern=r"^/html/(\d+)/(\d+)/",

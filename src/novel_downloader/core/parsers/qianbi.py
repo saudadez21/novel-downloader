@@ -27,6 +27,8 @@ class QianbiParser(BaseParser):
     Parser for 铅笔小说 book pages.
     """
 
+    site_name: str = "qianbi"
+
     def parse_book_info(
         self,
         html_list: list[str],
@@ -144,7 +146,7 @@ class QianbiParser(BaseParser):
             "title": title_text,
             "content": content_text,
             "extra": {
-                "site": "qianbi",
+                "site": self.site_name,
                 "volume": volume_text,
                 "next_chapter_id": next_chapter_id,
             },

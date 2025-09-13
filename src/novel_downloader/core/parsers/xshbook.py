@@ -25,6 +25,7 @@ from novel_downloader.models import (
 class XshbookParser(BaseParser):
     """Parser for 小说虎 book pages."""
 
+    site_name: str = "xshbook"
     BASE = "http://www.xshbook.com"
 
     def parse_book_info(
@@ -130,5 +131,5 @@ class XshbookParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "xshbook"},
+            "extra": {"site": self.site_name},
         }

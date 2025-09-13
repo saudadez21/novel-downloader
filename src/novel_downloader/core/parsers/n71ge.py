@@ -27,6 +27,8 @@ class N71geParser(BaseParser):
     Parser for 新吾爱文学 book pages.
     """
 
+    site_name: str = "n71ge"
+
     def parse_book_info(
         self,
         html_list: list[str],
@@ -144,5 +146,5 @@ class N71geParser(BaseParser):
             "id": chapter_id,
             "title": title_text,
             "content": "\n".join(contents),
-            "extra": {"site": "n71ge"},
+            "extra": {"site": self.site_name},
         }

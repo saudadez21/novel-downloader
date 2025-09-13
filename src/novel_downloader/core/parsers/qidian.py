@@ -64,6 +64,8 @@ class QidianParser(BaseParser):
     Parser for 起点中文网 site.
     """
 
+    site_name: str = "qidian"
+
     def __init__(self, config: ParserConfig, fuid: str = ""):
         """
         Initialize the QidianParser with the given configuration.
@@ -217,7 +219,7 @@ class QidianParser(BaseParser):
             "title": title,
             "content": chapter_text,
             "extra": {
-                "site": "qidian",
+                "site": self.site_name,
                 "author_say": author_say,
                 "updated_at": update_time,
                 "update_timestamp": update_timestamp,

@@ -27,6 +27,7 @@ class AaatxtParser(BaseParser):
     Parser for 3A电子书 book pages.
     """
 
+    site_name: str = "aaatxt"
     ADS: set[str] = {
         "按键盘上方向键",
         "未阅读完",
@@ -127,5 +128,5 @@ class AaatxtParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "aaatxt"},
+            "extra": {"site": self.site_name},
         }

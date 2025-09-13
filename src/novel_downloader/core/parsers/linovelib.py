@@ -30,6 +30,8 @@ class LinovelibParser(BaseParser):
     Parser for 哔哩轻小说 book pages.
     """
 
+    site_name: str = "linovelib"
+
     # Book info XPaths
     _BOOK_NAME_XPATH = '//div[@class="book-info"]/h1[@class="book-name"]/text()'
     _AUTHOR_XPATH = '//div[@class="au-name"]/a[1]/text()'
@@ -170,7 +172,7 @@ class LinovelibParser(BaseParser):
             "id": chapter_id,
             "title": title_text,
             "content": "\n".join(contents),
-            "extra": {"site": "linovelib"},
+            "extra": {"site": self.site_name},
         }
 
     @staticmethod

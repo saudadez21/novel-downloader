@@ -28,6 +28,8 @@ class Xs63bParser(BaseParser):
     Parser for 小说路上 book pages.
     """
 
+    site_name: str = "xs63b"
+
     TITLE_SELECTOR = "//div[@class='block_txt2']//h2/text()"
     AUTHOR_SELECTOR = "//p[contains(., '作者')]/a/text()"
     TYPE_SELECTOR = "//p[contains(., '分类')]/a/text()"
@@ -157,5 +159,5 @@ class Xs63bParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "xs63b"},
+            "extra": {"site": self.site_name},
         }

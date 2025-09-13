@@ -73,11 +73,11 @@ SAMPLES: dict[str, list[tuple[str, str, str | None]]] = {
         # n71ge
         ("https://www.71ge.com/65_65536/", "n71ge", "65_65536"),
         ("https://www.71ge.com/65_65536/1.html", "n71ge", "65_65536"),
-        # xiaoshuowu
-        ("http://www.xiaoshuoge.info/html/987/987654/", "xiaoshuowu", "987-987654"),
+        # xiaoshuoge
+        ("http://www.xiaoshuoge.info/html/987/987654/", "xiaoshuoge", "987-987654"),
         (
             "http://www.xiaoshuoge.info/html/987/987654/123456789.html",
-            "xiaoshuowu",
+            "xiaoshuoge",
             "987-987654",
         ),
         # jpxs123
@@ -197,6 +197,9 @@ SAMPLES: dict[str, list[tuple[str, str, str | None]]] = {
         # tongrenquan
         ("https://www.tongrenquan.org/tongren/7548.html", "tongrenquan", "7548"),
         ("https://www.tongrenquan.org/tongren/7548/1.html", "tongrenquan", "7548"),
+        # trxs
+        ("https://www.trxs.cc/tongren/6201.html", "trxs", "6201"),
+        ("https://www.trxs.cc/tongren/6201/1.html", "trxs", "6201"),
         # qbtr
         ("https://www.qbtr.cc/tongren/8978.html", "qbtr", "tongren-8978"),
         ("https://www.qbtr.cc/tongren/8978/1.html", "qbtr", "tongren-8978"),

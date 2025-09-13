@@ -23,6 +23,7 @@ class BaseParser(abc.ABC):
     Subclasses must implement actual parsing logic for specific sites.
     """
 
+    site_name: str
     ADS: set[str] = set()
 
     _SPACE_RE = re.compile(r"\s+")

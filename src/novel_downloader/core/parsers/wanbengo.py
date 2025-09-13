@@ -31,6 +31,7 @@ class WanbengoParser(BaseParser):
     Parser for 完本神站 book pages.
     """
 
+    site_name: str = "wanbengo"
     BASE = "https://www.wanbengo.com"
 
     # XPaths for the book info page
@@ -152,7 +153,7 @@ class WanbengoParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "wanbengo"},
+            "extra": {"site": self.site_name},
         }
 
     @staticmethod

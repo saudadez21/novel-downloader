@@ -27,6 +27,7 @@ class BiquyueduParser(BaseParser):
     Parser for 精彩小说 book pages.
     """
 
+    site_name: str = "biquyuedu"
     ADS: set[str] = {
         "笔趣阁",
         "请记住本书首发域名",
@@ -129,5 +130,5 @@ class BiquyueduParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "biquyuedu"},
+            "extra": {"site": self.site_name},
         }

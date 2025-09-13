@@ -28,6 +28,8 @@ class ZhenhunxiaoshuoParser(BaseParser):
     Parser for 镇魂小说网 book pages.
     """
 
+    site_name: str = "zhenhunxiaoshuo"
+
     def parse_book_info(
         self,
         html_list: list[str],
@@ -100,5 +102,5 @@ class ZhenhunxiaoshuoParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "zhenhunxiaoshuo"},
+            "extra": {"site": self.site_name},
         }

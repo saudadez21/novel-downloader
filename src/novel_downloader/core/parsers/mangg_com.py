@@ -27,8 +27,8 @@ class ManggComParser(BaseParser):
     Parser for 追书网 book pages.
     """
 
+    site_name: str = "mangg_com"
     BASE_URL = "https://www.mangg.com"
-
     ADS: set[str] = {
         "记住追书网网",
         "mangg.com",
@@ -120,5 +120,5 @@ class ManggComParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "mangg_com"},
+            "extra": {"site": self.site_name},
         }

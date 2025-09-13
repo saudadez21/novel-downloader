@@ -42,6 +42,7 @@ class XiguashuwuParser(BaseParser):
     Parser for 西瓜书屋 book pages.
     """
 
+    site_name: str = "xiguashuwu"
     BASE_URL = "https://www.xiguashuwu.com"
     _CONF_THRESHOLD = 0.60
     _FONT_MAP: dict[str, str] = json.loads(
@@ -171,7 +172,7 @@ class XiguashuwuParser(BaseParser):
             "id": chapter_id,
             "title": title_text,
             "content": content,
-            "extra": {"site": "xiguashuwu"},
+            "extra": {"site": self.site_name},
         }
 
     @classmethod

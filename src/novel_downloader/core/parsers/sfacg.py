@@ -27,6 +27,8 @@ class SfacgParser(BaseParser):
     Parser for sfacg book pages.
     """
 
+    site_name: str = "sfacg"
+
     # Book info XPaths
     _BOOK_NAME_XPATH = '//ul[@class="book_info"]//span[@class="book_newtitle"]/text()'
     _AUTHOR_INFO_XPATH = '//ul[@class="book_info"]//span[@class="book_info3"]/text()'
@@ -160,5 +162,5 @@ class SfacgParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "sfacg"},
+            "extra": {"site": self.site_name},
         }

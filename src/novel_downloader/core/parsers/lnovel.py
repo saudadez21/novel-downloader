@@ -27,6 +27,7 @@ class LnovelParser(BaseParser):
     Parser for 轻小说百科 book pages.
     """
 
+    site_name: str = "lnovel"
     BASE_URL = "https://lnovel.org"
 
     def parse_book_info(
@@ -162,5 +163,5 @@ class LnovelParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "lnovel"},
+            "extra": {"site": self.site_name},
         }

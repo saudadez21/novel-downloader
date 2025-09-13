@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.searchers.xiaoshuowu
+novel_downloader.core.searchers.xiaoshuoge
 ------------------------------------------
 
 """
@@ -17,10 +17,10 @@ logger = logging.getLogger(__name__)
 
 
 @register_searcher(
-    site_keys=["xiaoshuowu", "xiaoshuoge"],
+    site_keys=["xiaoshuoge"],
 )
 class XiaoshuowuSearcher(BaseSearcher):
-    site_name = "xiaoshuowu"
+    site_name = "xiaoshuoge"
     priority = 30
     SEARCH_URL = "http://www.xiaoshuoge.info/modules/article/search.php"
 

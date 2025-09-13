@@ -27,6 +27,8 @@ class ManggNetParser(BaseParser):
     Parser for 追书网 book pages.
     """
 
+    site_name: str = "mangg_net"
+
     def parse_book_info(
         self,
         html_list: list[str],
@@ -157,5 +159,5 @@ class ManggNetParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "mangg_net"},
+            "extra": {"site": self.site_name},
         }

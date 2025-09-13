@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.parsers.tongrenquan
------------------------------------------
+novel_downloader.core.parsers.trxs
+----------------------------------
 
 """
 
@@ -9,26 +9,25 @@ from typing import Any
 
 from lxml import html
 
-from novel_downloader.core.parsers.base import BaseParser
 from novel_downloader.core.parsers.registry import register_parser
+from novel_downloader.core.parsers.tongrenquan import TongrenquanParser
 from novel_downloader.models import (
     BookInfoDict,
-    ChapterDict,
     ChapterInfoDict,
     VolumeInfoDict,
 )
 
 
 @register_parser(
-    site_keys=["tongrenquan"],
+    site_keys=["trxs"],
 )
-class TongrenquanParser(BaseParser):
+class TrxsParser(TongrenquanParser):
     """
-    Parser for 同人圈 book pages.
+    Parser for 同人小说网 book pages.
     """
 
-    site_name: str = "tongrenquan"
-    BASE_URL = "https://www.tongrenquan.org"
+    site_name: str = "trxs"
+    BASE_URL = "https://www.trxs.cc"
 
     def parse_book_info(
         self,
@@ -42,15 +41,12 @@ class TongrenquanParser(BaseParser):
 
         # Metadata
         book_name = self._first_str(tree.xpath('//div[@class="infos"]/h1/text()'))
-        author = self._first_str(
-            tree.xpath('//div[@class="date"]/span/text()'),
-            replaces=[("作者：", "")],
-        )
+        author = self._first_str(tree.xpath('//div[@class="date"]/span/a/text()'))
         cover_url = self.BASE_URL + self._first_str(
             tree.xpath('//div[@class="pic"]//img/@src')
         )
         update_time = self._first_str(
-            tree.xpath('//div[@class="date"]/text()'),
+            tree.xpath('//div[@class="date"]/text()[normalize-space()]'),
             replaces=[("日期：", "")],
         )
 
@@ -67,7 +63,6 @@ class TongrenquanParser(BaseParser):
             }
             for a in tree.xpath('//div[contains(@class,"book_list")]//ul//li/a')
         ]
-
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 
         return {
@@ -79,39 +74,4 @@ class TongrenquanParser(BaseParser):
             "summary": summary,
             "volumes": volumes,
             "extra": {},
-        }
-
-    def parse_chapter(
-        self,
-        html_list: list[str],
-        chapter_id: str,
-        **kwargs: Any,
-    ) -> ChapterDict | None:
-        if not html_list:
-            return None
-
-        tree = html.fromstring(html_list[0])
-
-        raw_title = self._first_str(
-            tree.xpath('//div[contains(@class,"read_chapterName")]//h1/text()')
-        )
-
-        book_name = self._first_str(
-            tree.xpath('//div[contains(@class,"readTop")]//a[last()]/text()')
-        )
-
-        title = raw_title.replace(book_name, "").strip()
-
-        # Extract paragraphs of content
-        paras = tree.xpath('//div[contains(@class,"read_chapterDetail")]/p')
-        texts = [p.text_content().strip() for p in paras if p.text_content().strip()]
-        content = "\n".join(texts)
-        if not content:
-            return None
-
-        return {
-            "id": chapter_id,
-            "title": title,
-            "content": content,
-            "extra": {"site": self.site_name},
         }

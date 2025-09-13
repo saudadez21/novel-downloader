@@ -27,6 +27,7 @@ class YamiboParser(BaseParser):
     Parser for 百合会 book pages.
     """
 
+    site_name: str = "yamibo"
     BASE_URL = "https://www.yamibo.com"
 
     def parse_book_info(
@@ -148,7 +149,7 @@ class YamiboParser(BaseParser):
             "title": title,
             "content": content,
             "extra": {
-                "site": "yamibo",
+                "site": self.site_name,
                 "word_count": word_count,
                 "updated_at": updated_at,
             },

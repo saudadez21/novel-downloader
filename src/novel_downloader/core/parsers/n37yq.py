@@ -27,6 +27,8 @@ class N37yqParser(BaseParser):
     Parser for 哔哩轻小说 book pages.
     """
 
+    site_name: str = "n37yq"
+
     def parse_book_info(
         self,
         html_list: list[str],
@@ -181,5 +183,5 @@ class N37yqParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "n37yq"},
+            "extra": {"site": self.site_name},
         }

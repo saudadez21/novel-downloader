@@ -27,6 +27,8 @@ class B520Parser(BaseParser):
     Parser for 笔趣阁 book pages.
     """
 
+    site_name: str = "b520"
+
     def parse_book_info(
         self,
         html_list: list[str],
@@ -111,5 +113,5 @@ class B520Parser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "b520"},
+            "extra": {"site": self.site_name},
         }

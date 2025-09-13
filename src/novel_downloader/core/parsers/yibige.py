@@ -27,6 +27,7 @@ class YibigeParser(BaseParser):
     Parser for 一笔阁 book pages.
     """
 
+    site_name: str = "yibige"
     ADS = {
         "首发无广告",
         "请分享",
@@ -137,7 +138,7 @@ class YibigeParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "yibige"},
+            "extra": {"site": self.site_name},
         }
 
     def _is_ad(self, s: str) -> bool:

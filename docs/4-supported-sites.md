@@ -76,7 +76,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [铅笔小说](https://www.23qb.net), [备用](https://www.23qb.com/) | qianbi | ✅     | ❌     | ⚠️     | ✅     | 简      |
 | [飘天文学网](https://www.piaotia.com/)                        | piaotia  | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [新吾爱文学](https://www.71ge.com/)                           | n71ge    | ❌     | ❌     | ⚠️     | ✅     | 简      |
-| [小说屋](http://www.xiaoshuoge.info/)                        | xiaoshuowu | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [小说屋](http://www.xiaoshuoge.info/)                        | xiaoshuoge | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [精品小说网](https://www.jpxs123.com/)                        | jpxs123  | ❌     | ❌     | ❌     | ✅     | 简      |
 | [天天看小说](https://www.ttkan.co/)                          | ttkan     | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [爱下电子书](https://ixdzs8.com/)                             | ixdzs8   | ❌     | ❌     | ⚠️     | ✅     | 简      |
@@ -107,6 +107,7 @@ novel-cli download --site ttkan shengxu-chendong
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 | 支持语言 |
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
 | [同人圈](https://www.tongrenquan.org/)                      | tongrenquan | ❌     | ❌     | ❌     | ✅     | 简      |
+| [同人小说网](https://www.trxs.cc/)                           | trxs        | ❌     | ❌     | ❌     | ✅     | 简      |
 | [全本同人小说](https://www.qbtr.cc/)                         | qbtr        | ❌     | ❌     | ❌     | ✅     | 简      |
 
 #### 轻小说
@@ -178,7 +179,7 @@ novel-cli download --site ttkan shengxu-chendong
   * 书籍: `https://www.71ge.com/65_65536/` -> Book ID: `65_65536`
   * 章节: `https://www.71ge.com/65_65536/1.html` -> Chapter ID: `1`
 
-* **小说屋 (xiaoshuowu)**
+* **小说屋 (xiaoshuoge)**
   * 书籍: `http://www.xiaoshuoge.info/html/987/987654/` -> Book ID: `987-987654`
   * 章节: `http://www.xiaoshuoge.info/html/987/987654/123456789.html` -> Chapter ID: `123456789`
 
@@ -270,6 +271,10 @@ novel-cli download --site ttkan shengxu-chendong
 * **同人圈 (tongrenquan)**
   * 书籍: `https://www.tongrenquan.org/tongren/7548.html` -> Book ID: `7548`
   * 章节: `https://www.tongrenquan.org/tongren/7548/1.html` -> Chapter ID: `1`
+
+* **同人小说网 (trxs)**
+  * 书籍: `https://www.trxs.cc/tongren/6201.html` -> Book ID: `6201`
+  * 章节: `https://www.trxs.cc/tongren/6201/1.html` -> Chapter ID: `1`
 
 * **全本同人小说 (qbtr)**
   * 书籍: `https://www.qbtr.cc/tongren/8978.html` -> Book ID: `tongren-8978`

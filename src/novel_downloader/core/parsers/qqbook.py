@@ -59,6 +59,8 @@ class QqbookParser(BaseParser):
     Parser for QQ 阅读 site.
     """
 
+    site_name: str = "qqbook"
+
     _NUXT_BLOCK_RE = re.compile(
         r"window\.__NUXT__\s*=\s*([\s\S]*?);?\s*<\/script>",
         re.S,
@@ -263,7 +265,7 @@ class QqbookParser(BaseParser):
             "title": title,
             "content": content,
             "extra": {
-                "site": "qqbook",
+                "site": self.site_name,
                 "updated_at": update_time,
                 "word_count": word_count,
                 "encrypt": encrypt,

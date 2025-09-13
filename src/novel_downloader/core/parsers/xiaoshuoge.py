@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.parsers.xiaoshuowu
+novel_downloader.core.parsers.xiaoshuoge
 ----------------------------------------
 
 """
@@ -20,13 +20,14 @@ from novel_downloader.models import (
 
 
 @register_parser(
-    site_keys=["xiaoshuowu", "xiaoshuoge"],
+    site_keys=["xiaoshuoge"],
 )
 class XiaoshuowuParser(BaseParser):
     """
     Parser for 小说屋 (xiaoshuoge.info).
     """
 
+    site_name: str = "xiaoshuoge"
     AD_STR: str = "小说屋 www.xiaoshuoge.info"
 
     def parse_book_info(
@@ -169,5 +170,5 @@ class XiaoshuowuParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "xiaoshuowu"},
+            "extra": {"site": self.site_name},
         }

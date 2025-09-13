@@ -27,6 +27,8 @@ class I25zwParser(BaseParser):
     Parser for 25中文网 book-info pages.
     """
 
+    site_name: str = "i25zw"
+
     def parse_book_info(
         self,
         html_list: list[str],
@@ -133,5 +135,5 @@ class I25zwParser(BaseParser):
             "id": chapter_id,
             "title": title_text,
             "content": content_text,
-            "extra": {"site": "i25zw"},
+            "extra": {"site": self.site_name},
         }

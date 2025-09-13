@@ -27,6 +27,8 @@ class Shu111Parser(BaseParser):
     Parser for 书林文学 book pages.
     """
 
+    site_name: str = "shu111"
+
     def parse_book_info(
         self,
         html_list: list[str],
@@ -140,5 +142,5 @@ class Shu111Parser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "shu111"},
+            "extra": {"site": self.site_name},
         }

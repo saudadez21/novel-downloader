@@ -27,8 +27,8 @@ class LewennParser(BaseParser):
     Parser for 乐文小说网 book pages.
     """
 
+    site_name: str = "lewenn"
     BASE_URL = "https://www.lewenn.net"
-
     ADS: set[str] = {
         "记住乐文小说网",
         "lewenn.net",
@@ -132,5 +132,5 @@ class LewennParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "lewenn"},
+            "extra": {"site": self.site_name},
         }
