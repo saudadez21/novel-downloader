@@ -185,6 +185,9 @@ SAMPLES: dict[str, list[tuple[str, str, str | None]]] = {
         # blqudu
         ("https://www.blqudu.cc/137_137144/", "blqudu", "137_137144"),
         ("https://www.biqudv.cc/137_137144/628955328.html", "blqudu", "137_137144"),
+        # n23ddw
+        ("https://www.23ddw.net/du/80/80892/", "n23ddw", "80-80892"),
+        ("https://www.23ddw.net/du/80/80892/13055110.html", "n23ddw", "80-80892"),
         # mangg_com
         ("https://www.mangg.com/id57715/", "mangg_com", "id57715"),
         ("https://www.mangg.com/id57715/632689.html", "mangg_com", "id57715"),

@@ -100,6 +100,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [乐文小说网](https://www.lewenn.net/)                        | lewenn    | ❌     | ❌     | ⚠️     | ❌     | 简      |
 | [精彩小说](https://biquyuedu.com/)                           | biquyuedu | ❌     | ❌     | ⚠️     | ❌     | 简      |
 | [笔趣读](https://www.blqudu.cc/)                             | blqudu    | ❌     | ❌     | ⚠️     | ❌     | 简      |
+| [顶点小说网](https://www.23ddw.net/)                         | n23ddw    | ❌     | ❌     | ❌     | ✅     | 简      |
 | [追书网](https://www.mangg.net/) (net)                       | mangg_net | ❌     | ❌     | ❌     | ✅     | 简      |
 | [追书网](https://www.mangg.com/) (com)                       | mangg_com | ❌     | ❌     | ⚠️     | ❌     | 简      |
 
@@ -263,6 +264,10 @@ novel-cli download --site ttkan shengxu-chendong
   * 书籍: `https://www.blqudu.cc/137_137144/` -> Book ID: `137_137144`
   * 章节: `https://www.biqudv.cc/137_137144/628955328.html` -> Chapter ID: `628955328`
   * 注意: 大部分书籍的最后几章都不完整
+
+* **顶点小说网 (n23ddw)**
+  * 书籍: `https://www.23ddw.net/du/80/80892/` -> Book ID: `80-80892`
+  * 章节: `https://www.23ddw.net/du/80/80892/13055110.html` -> Chapter ID: `13055110`
 
 * **追书网.net (mangg_net)**
   * 书籍: `https://www.mangg.net/id26581/` -> Book ID: `id26581`

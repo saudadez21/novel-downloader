@@ -313,6 +313,16 @@ SITE_RULES: dict[str, SiteRuleSet] = {
         ],
         hints=[],
     ),
+    "www.23ddw.net": SiteRuleSet(
+        site_key="n23ddw",
+        extractors=[
+            BookIdExtractor(
+                pattern=r"^/du/(\d+)/(\d+)/",
+                build_book_id=lambda m: f"{m.group(1)}-{m.group(2)}",
+            ),
+        ],
+        hints=[],
+    ),
     "8novel.com": SiteRuleSet(
         site_key="n8novel",
         extractors=[
