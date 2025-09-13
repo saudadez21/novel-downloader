@@ -58,9 +58,12 @@ novel-cli search --site biquge 三体
 **使用示例**
 
 ```bash
-novel-cli download --site qidian 1234567890
-novel-cli download --site qianbi 12345
-novel-cli download --site ttkan bookname-authorname
+novel-cli download https://www.hetushu.com/book/5763/index.html
+novel-cli download https://www.23qb.net/book/12282/
+
+novel-cli download --site qidian 1010868264
+novel-cli download --site qianbi 12282
+novel-cli download --site ttkan shengxu-chendong
 ```
 
 #### 一般小说
@@ -213,8 +216,8 @@ novel-cli download --site ttkan bookname-authorname
   * 章节: `https://quanben5.com/n/doushentianxia/13685.html` -> Chapter ID: `13685`
 
 * **天天看小說 (ttkan)**
-  * 书籍: `https://www.ttkan.co/novel/chapters/bookname-authorname` -> Book ID: `bookname-authorname`
-  * 章节: `https://www.wa01.com/novel/pagea/bookname-authorname_1.html` -> Chapter ID: `1`
+  * 书籍: `https://www.ttkan.co/novel/chapters/shengxu-chendong` -> Book ID: `shengxu-chendong`
+  * 章节: `https://www.wa01.com/novel/pagea/shengxu-chendong_1.html` -> Chapter ID: `1`
 
 * **名著阅读 (guidaye)**
   * 书籍: `https://b.guidaye.com/kongbu/654/` -> Book ID: `kongbu-654`
@@ -250,6 +253,7 @@ novel-cli download --site ttkan bookname-authorname
 * **笔趣读 (blqudu)**
   * 书籍: `https://www.blqudu.cc/137_137144/` -> Book ID: `137_137144`
   * 章节: `https://www.biqudv.cc/137_137144/628955328.html` -> Chapter ID: `628955328`
+  * 注意: 大部分书籍的最后几章都不完整
 
 * **追书网.net (mangg_net)**
   * 书籍: `https://www.mangg.net/id26581/` -> Book ID: `id26581`

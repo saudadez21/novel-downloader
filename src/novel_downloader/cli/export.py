@@ -29,7 +29,7 @@ def register_export_subcommand(subparsers: _SubParsersAction) -> None:  # type: 
         help=t("export_format_help"),
     )
     parser.add_argument(
-        "--site", default="qidian", help=t("download_option_site", default="qidian")
+        "--site", default="qidian", help=t("export_option_site", default="qidian")
     )
     parser.add_argument("--config", type=str, help=t("help_config"))
 

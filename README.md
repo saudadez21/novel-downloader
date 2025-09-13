@@ -50,8 +50,14 @@ novel-cli config init
 ### 2. 命令行 (CLI)
 
 ```bash
-# 执行下载任务 (示例: 书籍 ID 为 123456, 默认站点为起点)
-novel-cli download 123456
+# 直接通过 URL 启动下载
+novel-cli download https://www.hetushu.com/book/5763/index.html
+
+# 使用配置文件中的 book_ids 启动下载
+novel-cli download --site qidian
+
+# 指定站点 + 书籍 ID 启动下载
+novel-cli download --site qianbi 12282
 ```
 
 * 支持站点见: [支持站点列表](docs/4-supported-sites.md)

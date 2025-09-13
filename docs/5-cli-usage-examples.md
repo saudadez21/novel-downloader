@@ -100,18 +100,25 @@ Commands:
 
 #### 1. download 子命令
 
-按书籍 ID 下载完整小说, 支持从命令行或配置文件读取 ID
+下载完整小说, 支持三种方式:
+
+1. **直接传入 URL**
+2. **指定站点 + 书籍 ID**
+3. **省略参数, 从配置文件读取 ID**
 
 **Synopsis**
 
 ```bash
-novel-cli download [-h] [--site SITE] [--config CONFIG] [--start START] [--end END] [--no-export] [book_ids ...]
+novel-cli download [-h] [--site SITE] [--config CONFIG] [--start START] [--end END] [--no-export] [book_ids | url]
 ```
 
 **Options**
 
-* `book_ids ...`: 要下载的书籍 ID (可选, 省略时将从配置文件读取)
-* `--site SITE`: 站点键 (如 `qidian`, `biquge`, ...), 默认 `qidian`
+* `book_ids | url`:
+  * 输入书籍 ID (配合 `--site` 使用)
+  * 输入书籍/章节 URL (自动解析站点与书籍 ID)
+  * 省略时将从配置文件读取 `book_ids`
+* `--site SITE`: 站点键 (如 `qidian`, `biquge`, ...), 若直接传入 URL, 可省略
 * `--start START`: 起始章节**唯一 ID** (仅用于第一个 `book_id`)
 * `--end`: 结束章节**唯一 ID**, **包含** (仅用于第一个 `book_id`)
 * `--no-export`: 仅下载, 不进行导出。启用后将跳过导出步骤
@@ -125,20 +132,22 @@ novel-cli download [-h] [--site SITE] [--config CONFIG] [--start START] [--end E
 **Examples**
 
 ```bash
-# 下载指定起点小说的书籍
-novel-cli download 1234567890
+# 方式一: 直接通过 URL 启动下载
+novel-cli download https://www.hetushu.com/book/5763/index.html
 
-# 指定站点 (如 biquge)
+# 方式二: 指定站点 + 书籍 ID
 novel-cli download --site biquge 8_8187
+novel-cli download --site qianbi 12282
+novel-cli download --site qidian 1010868264
 
-# 只下载起点小说的一部分章节
-novel-cli download --start 10001 --end 10200 1234567890
+# 只下载部分章节
+novel-cli download --site qidian 1010868264 --start 402902546 --end 406807540
 
 # 仅下载, 跳过导出步骤
-novel-cli download --no-export 1234567890
+novel-cli download --no-export --site qidian 1010868264
 
-# 从配置文件中读取 ID
-novel-cli download
+# 方式三: 从配置文件中读取 ID
+novel-cli download --site qianbi
 ```
 
 ---

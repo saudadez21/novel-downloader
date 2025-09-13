@@ -18,6 +18,7 @@ from novel_downloader.cli import ui
 from novel_downloader.config import ConfigAdapter, load_config
 from novel_downloader.core import get_downloader, get_exporter, get_fetcher, get_parser
 from novel_downloader.models import BookConfig, LoginField
+from novel_downloader.utils.book_url_resolver import resolve_book_url
 from novel_downloader.utils.cookies import parse_cookies
 from novel_downloader.utils.i18n import t
 
@@ -27,9 +28,7 @@ def register_download_subcommand(subparsers: _SubParsersAction) -> None:  # type
     parser = subparsers.add_parser("download", help=t("help_download"))
 
     parser.add_argument("book_ids", nargs="*", help=t("download_book_ids"))
-    parser.add_argument(
-        "--site", default="qidian", help=t("download_option_site", default="qidian")
-    )
+    parser.add_argument("--site", help=t("download_option_site"))
     parser.add_argument("--config", type=str, help=t("help_config"))
 
     parser.add_argument("--start", type=str, help=t("download_option_start"))
@@ -46,12 +45,35 @@ def register_download_subcommand(subparsers: _SubParsersAction) -> None:  # type
 
 def handle_download(args: Namespace) -> None:
     """Handle the `download` subcommand."""
-    site: str = args.site
     config_path: Path | None = Path(args.config) if args.config else None
-    book_ids: list[BookConfig] = _cli_args_to_book_configs(
-        args.book_ids, args.start, args.end
-    )
     no_export: bool = getattr(args, "no_export", False)
+
+    site: str | None = args.site
+    if site:  # SITE MODE
+        book_ids: list[BookConfig] = _cli_args_to_book_configs(
+            args.book_ids, args.start, args.end
+        )
+    else:  # URL MODE
+        ui.info(t("download_url_mode"))
+        if len(args.book_ids) != 1:
+            ui.error(t("download_url_expected", n=len(args.book_ids)))
+            return
+
+        raw_url = args.book_ids[0]
+        resolved = resolve_book_url(raw_url)
+        if not resolved:
+            ui.error(t("download_url_parse_fail", url=raw_url))
+            return
+
+        site = resolved["site_key"]
+        first: BookConfig = {"book_id": resolved["book"]["book_id"]}
+        if args.start:
+            first["start_id"] = args.start
+        if args.end:
+            first["end_id"] = args.end
+        book_ids = [first]
+
+        ui.info(t("download_resolved", site=site, book_id=first["book_id"]))
 
     ui.info(t("download_site_info", site=site))
 
@@ -63,7 +85,7 @@ def handle_download(args: Namespace) -> None:
 
     adapter = ConfigAdapter(config=config_data, site=site)
 
-    if not book_ids:
+    if not book_ids and args.site:
         try:
             book_ids = adapter.get_book_ids()
         except Exception as e:
