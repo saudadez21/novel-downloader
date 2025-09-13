@@ -200,6 +200,8 @@ SAMPLES: dict[str, list[tuple[str, str, str | None]]] = {
         # qbtr
         ("https://www.qbtr.cc/tongren/8978.html", "qbtr", "tongren-8978"),
         ("https://www.qbtr.cc/tongren/8978/1.html", "qbtr", "tongren-8978"),
+        ("https://www.qbtr.cc/changgui/9089.html", "qbtr", "changgui-9089"),
+        ("https://www.qbtr.cc/changgui/9089/1.html", "qbtr", "changgui-9089"),
     ],
     # -------------------
     # Light novel
@@ -233,6 +235,11 @@ SAMPLES: dict[str, list[tuple[str, str, str | None]]] = {
         ("https://www.shencou.com/books/read_3540.html", "shencou", None),
         ("https://www.shencou.com/read/3/3540/index.html", "shencou", "3-3540"),
         ("https://www.shencou.com/read/3/3540/156328.html", "shencou", "3-3540"),
+        # lnovel (2nd is chapter url)
+        ("https://lnovel.org/books-3638", "lnovel", "3638"),
+        ("https://lnovel.org/chapters-138730", "lnovel", None),
+        ("https://lnovel.tw/books-986", "lnovel", "986"),
+        ("https://lnovel.tw/chapters-64989", "lnovel", None),
     ],
     # -------------------
     # Others

@@ -119,6 +119,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [ESJ Zone](https://www.esjzone.cc)                           | esjzone   | ✅     | ✅     | ✅     | ✅     | 简      |
 | [神凑轻小说](https://www.shencou.com/)                        | shencou   | ✅     | ✅     | ⚠️     | ⚠️     | 简      |
 | [无限轻小说](https://www.8novel.com/)                         | n8novel   | ✅     | ✅     | ⚠️     | ✅     | 繁      |
+| [轻小说百科](https://lnovel.org/)                             | lnovel    | ✅     | ✅     | ⚠️     | ⚠️     | 简 / 繁 |
 
 #### 其它小说
 
@@ -308,6 +309,10 @@ novel-cli download --site ttkan shengxu-chendong
   * 已知问题:
     * 图片资源可能无法正常加载或失效
     * 目录页中仍保留了一些已删除章节的重复条目, 却未同步删除
+
+* **轻小说百科 (lnovel)**
+  * 书籍: `https://lnovel.org/books-3638` -> Book ID: `3638`
+  * 章节: `https://lnovel.org/chapters-138730` -> Chapter ID: `138730`
 
 #### 其它小说
 

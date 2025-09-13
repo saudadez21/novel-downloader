@@ -62,6 +62,9 @@ HOST_ALIASES: dict[str, str] = {
     # dxmwx simplified/traditional
     "www.dxmwx.org": "dxmwx.org",
     "tw.dxmwx.org": "dxmwx.org",
+    # lnovel simplified/traditional
+    # "lnovel.org": "lnovel.org",
+    "lnovel.tw": "lnovel.org",
     # quanben5 simplified/traditional
     "quanben5.com": "quanben5.com",
     "big5.quanben5.com": "quanben5.com",
@@ -275,6 +278,21 @@ SITE_RULES: dict[str, SiteRuleSet] = {
         ],
         hints=[],
     ),
+    "lnovel.org": SiteRuleSet(
+        site_key="lnovel",
+        extractors=[
+            BookIdExtractor(
+                pattern=r"^/books-(\d+)$",
+                build_book_id=lambda m: m.group(1),
+            ),
+        ],
+        hints=[
+            HintRule(
+                pattern=r"^/chapters-\d+",
+                hint="章节 URL 不包含书籍 ID, 请复制小说目录页链接",
+            )
+        ],
+    ),
     "www.mangg.com": SiteRuleSet(
         site_key="mangg_com",
         extractors=[
@@ -351,12 +369,8 @@ SITE_RULES: dict[str, SiteRuleSet] = {
         site_key="qbtr",
         extractors=[
             BookIdExtractor(
-                pattern=r"^/tongren/(\d+)\.html",
-                build_book_id=lambda m: f"tongren-{m.group(1)}",
-            ),
-            BookIdExtractor(
-                pattern=r"^/tongren/(\d+)/\d+\.html$",
-                build_book_id=lambda m: f"tongren-{m.group(1)}",
+                pattern=r"^/([^/]+)/(\d+)(?:/\d+)?\.html$",
+                build_book_id=lambda m: f"{m.group(1)}-{m.group(2)}",
             ),
         ],
         hints=[],
