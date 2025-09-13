@@ -95,7 +95,7 @@ class Chapter(EpubResource):
     css: list[StyleSheet] = field(default_factory=list)
     media_type: str = field(init=False, default="application/xhtml+xml")
 
-    def to_xhtml(self, lang: str = "zh-CN") -> str:
+    def to_xhtml(self, lang: str = "zh-Hans") -> str:
         """
         Generate the XHTML for a chapter.
         """

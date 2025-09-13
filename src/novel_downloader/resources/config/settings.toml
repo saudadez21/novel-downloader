@@ -66,6 +66,7 @@ book_ids = [
 ]
 split_mode = "book"                # 导出方式: book / volume
 login_required = false
+request_interval = 1.5
 
 [sites.common]
 login_required = false

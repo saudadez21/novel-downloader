@@ -6,10 +6,16 @@ novel_downloader.core.fetchers.linovelib
 """
 
 import re
-from typing import Any
+from pathlib import Path
+from typing import Any, Literal
 
 from novel_downloader.core.fetchers.base import BaseSession
 from novel_downloader.core.fetchers.registry import register_fetcher
+from novel_downloader.utils import write_file
+from novel_downloader.utils.constants import DEFAULT_HEADERS, DEFAULT_IMAGE_SUFFIX
+
+_IMG_HEADERS = DEFAULT_HEADERS.copy()
+_IMG_HEADERS["Referer"] = "https://www.linovelib.com/"
 
 
 @register_fetcher(
@@ -179,3 +185,29 @@ class LinovelibSession(BaseSession):
         """
         # /novel/{book_id}/{vol_id}.html
         return self._VOL_ID_PATTERN.findall(html_str)
+
+    async def _download_one_image(
+        self,
+        url: str,
+        folder: Path,
+        *,
+        on_exist: Literal["overwrite", "skip", "rename"],
+    ) -> None:
+        """Download a single image."""
+        async with self.session.get(url, headers=_IMG_HEADERS) as resp:
+            save_path = self._build_filepath(
+                url=url,
+                folder=folder,
+                default_suffix=DEFAULT_IMAGE_SUFFIX,
+                on_exist=on_exist,
+            )
+            if save_path.exists() and on_exist == "skip":
+                return
+
+            resp.raise_for_status()
+            write_file(
+                content=await resp.read(),  # bytes
+                filepath=save_path,
+                on_exist=on_exist,
+            )
+            self.logger.debug("Saved image: %s <- %s", save_path, url)

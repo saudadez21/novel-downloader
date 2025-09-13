@@ -209,6 +209,10 @@ SAMPLES: dict[str, list[tuple[str, str, str | None]]] = {
         ("https://m.sfacg.com/b/456123/", "sfacg", "456123"),
         ("https://m.sfacg.com/i/456123/", "sfacg", "456123"),
         ("https://m.sfacg.com/c/5417665/", "sfacg", None),
+        # n37yq
+        ("https://www.37yq.com/lightnovel/2362.html", "n37yq", "2362"),
+        ("https://www.37yq.com/lightnovel/2362/catalog", "n37yq", "2362"),
+        ("https://www.37yq.com/lightnovel/2362/92560.html", "n37yq", "2362"),
         # linovelib
         ("https://www.linovelib.com/novel/1234.html", "linovelib", "1234"),
         ("https://www.linovelib.com/novel/1234/47800.html", "linovelib", "1234"),

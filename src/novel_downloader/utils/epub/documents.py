@@ -32,7 +32,7 @@ from .models import (
 @dataclass
 class NavDocument(EpubResource):
     title: str = "未命名"
-    language: str = "zh-CN"
+    language: str = "zh-Hans"
     id: str = "nav"
     filename: str = "nav.xhtml"
     media_type: str = field(init=False, default="application/xhtml+xml")
@@ -185,7 +185,7 @@ class OpfDocument(EpubResource):
     description: str = ""
     uid: str = ""
     subject: list[str] = field(default_factory=list)
-    language: str = "zh-CN"
+    language: str = "zh-Hans"
 
     # resource identity
     id: str = "opf"
@@ -244,21 +244,30 @@ class OpfDocument(EpubResource):
 
         :return: A string containing the full OPF XML content.
         """
-        now_iso = datetime.now(UTC).replace(microsecond=0).isoformat()
+        now_iso = (
+            datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+        )
 
         # metadata block
         meta_lines: list[str] = []
         meta_lines.append(f'<meta property="dcterms:modified">{now_iso}</meta>')
         meta_lines.append(f'<dc:identifier id="id">{self.uid}</dc:identifier>')
-        meta_lines.append(f"<dc:title>{self.title}</dc:title>")
+        meta_lines.append(f"<dc:title>{escape(self.title, quote=True)}</dc:title>")
         meta_lines.append(f"<dc:language>{self.language}</dc:language>")
         if self.author:
-            meta_lines.append(f'<dc:creator id="creator">{self.author}</dc:creator>')
+            meta_lines.append(
+                f'<dc:creator id="creator">{escape(self.author, quote=True)}</dc:creator>'  # noqa: E501
+            )
+            meta_lines.append(
+                '<meta refines="#creator" property="role" scheme="marc:relators">aut</meta>'  # noqa: E501
+            )
         if self.description:
-            meta_lines.append(f"<dc:description>{self.description}</dc:description>")
+            meta_lines.append(
+                f"<dc:description>{escape(self.description, quote=True)}</dc:description>"  # noqa: E501
+            )
         if self.subject:
             joined = ",".join(self.subject)
-            meta_lines.append(f"<dc:subject>{joined}</dc:subject>")
+            meta_lines.append(f"<dc:subject>{escape(joined, quote=True)}</dc:subject>")
         if self.include_cover and self._cover_item:
             meta_lines.append(f'<meta name="cover" content="{self._cover_item.id}"/>')
         metadata = "\n".join(meta_lines)

@@ -7,6 +7,7 @@ Exporter implementation for handling Linovelib novels.
 """
 
 from pathlib import Path
+from typing import Literal
 
 from novel_downloader.core.exporters.common import CommonExporter
 from novel_downloader.core.exporters.registry import register_exporter
@@ -32,7 +33,7 @@ class LinovelibExporter(CommonExporter):
         target_dir: Path,
         filename: str | None = None,
         *,
-        on_exist: str = "overwrite",
+        on_exist: Literal["overwrite", "skip", "rename"] = "overwrite",
     ) -> Path | None:
         """
         Download image from url to target dir with given name
@@ -42,6 +43,6 @@ class LinovelibExporter(CommonExporter):
             target_dir,
             filename=filename,
             headers=_IMG_HEADERS,
-            on_exist="overwrite",
+            on_exist=on_exist,
             default_suffix=DEFAULT_IMAGE_SUFFIX,
         )

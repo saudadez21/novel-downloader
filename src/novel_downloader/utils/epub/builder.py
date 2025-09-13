@@ -63,7 +63,7 @@ class EpubBuilder:
         serial_status: str = "",
         word_count: str = "0",
         uid: str = "",
-        language: str = "zh-CN",
+        language: str = "zh-Hans",
     ):
         # metadata
         self.title = title

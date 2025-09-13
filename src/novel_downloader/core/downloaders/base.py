@@ -10,9 +10,10 @@ import abc
 import asyncio
 import json
 import logging
+import re
 from collections.abc import Awaitable, Callable, Sequence
 from pathlib import Path
-from typing import Any, ClassVar, cast
+from typing import Any, ClassVar
 
 from novel_downloader.core.interfaces import FetcherProtocol, ParserProtocol
 from novel_downloader.models import (
@@ -21,7 +22,6 @@ from novel_downloader.models import (
     DownloaderConfig,
     VolumeInfoDict,
 )
-from novel_downloader.utils import time_diff
 
 
 class BaseDownloader(abc.ABC):
@@ -39,6 +39,11 @@ class BaseDownloader(abc.ABC):
     PRIORITIES_MAP: ClassVar[dict[int, int]] = {
         DEFAULT_SOURCE_ID: 0,
     }
+
+    _IMG_SRC_RE = re.compile(
+        r'<img[^>]*\bsrc\s*=\s*["\'](https?://[^"\']+)["\'][^>]*>',
+        re.IGNORECASE,
+    )
 
     def __init__(
         self,
@@ -165,28 +170,6 @@ class BaseDownloader(abc.ABC):
         except Exception as e:
             self._handle_download_exception(book, e)
 
-    async def load_book_info(
-        self,
-        book_id: str,
-        html_dir: Path,
-    ) -> BookInfoDict | None:
-        book_info = self._load_book_info(
-            book_id=book_id,
-            max_age_days=1,
-        )
-        if book_info:
-            return book_info
-
-        info_html = await self.fetcher.get_book_info(book_id)
-        self._save_html_pages(html_dir, "info", info_html)
-        book_info = self.parser.parse_book_info(info_html)
-
-        if book_info:
-            self._save_book_info(book_id, book_info)
-            return book_info
-
-        return self._load_book_info(book_id)
-
     @abc.abstractmethod
     async def _download_one(
         self,
@@ -201,38 +184,28 @@ class BaseDownloader(abc.ABC):
         """
         ...
 
-    def _load_book_info(
+    async def _load_book_info(
         self,
         book_id: str,
-        *,
-        max_age_days: int | None = None,
+        html_dir: Path,
     ) -> BookInfoDict | None:
         """
-        Attempt to read and parse the book_info.json for a given book_id.
+        Attempt to fetch and parse the book_info for a given book_id.
 
         :param book_id: identifier of the book
-        :param max_age_days: if set, only return if 'update_time' is less
-        :return: dict of book info if is valid JSON, else empty
         """
-        info_path = self._raw_data_dir / book_id / "book_info.json"
-        if not info_path.is_file():
-            return None
-
-        try:
-            raw: dict[str, Any] = json.loads(info_path.read_text(encoding="utf-8"))
-        except json.JSONDecodeError:
-            return None
-
-        if max_age_days is not None:
-            days, *_ = time_diff(
-                raw.get("update_time", ""),
-                "UTC+8",
-            )
-            if days > max_age_days:
+        info_html = await self.fetcher.get_book_info(book_id)
+        self._save_html_pages(html_dir, "info", info_html)
+        book_info = self.parser.parse_book_info(info_html)
+        if book_info:
+            self._save_book_info(book_id, book_info)
+        else:
+            info_path = self._raw_data_dir / book_id / "book_info.json"
+            try:
+                book_info = json.loads(info_path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
                 return None
-
-        # return data
-        return cast(BookInfoDict, raw)
+        return book_info
 
     def _save_book_info(
         self,
@@ -272,6 +245,13 @@ class BaseDownloader(abc.ABC):
         html_dir.mkdir(parents=True, exist_ok=True)
         for i, html in enumerate(html_list):
             (html_dir / f"{filename}_{i}.html").write_text(html, encoding="utf-8")
+
+    @classmethod
+    def _extract_img_urls(cls, content: str) -> list[str]:
+        """
+        Extract all <img> tag src URLs from the given HTML string.
+        """
+        return cls._IMG_SRC_RE.findall(content)
 
     @staticmethod
     def _planned_chapter_ids(

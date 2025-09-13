@@ -66,7 +66,7 @@ class QqbookDownloader(BaseDownloader):
             return bool(cancel_event and cancel_event.is_set())
 
         # ---- metadata ---
-        book_info = await self.load_book_info(book_id=book_id, html_dir=html_dir)
+        book_info = await self._load_book_info(book_id=book_id, html_dir=html_dir)
         if not book_info:
             return
 

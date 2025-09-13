@@ -51,7 +51,7 @@ class CommonDownloader(BaseDownloader):
             return bool(cancel_event and cancel_event.is_set())
 
         # --- metadata ---
-        book_info = await self.load_book_info(book_id=book_id, html_dir=html_dir)
+        book_info = await self._load_book_info(book_id=book_id, html_dir=html_dir)
         if not book_info:
             return
 
@@ -228,6 +228,9 @@ class CommonDownloader(BaseDownloader):
                 )
                 if not chap:
                     raise ValueError("Empty parse result")
+                imgs = self._extract_img_urls(chap["content"])
+                img_dir = self._raw_data_dir / book_id / "images"
+                await self.fetcher.download_images(img_dir, imgs)
                 return chap
             except Exception as e:
                 if attempt < self._retry_times:

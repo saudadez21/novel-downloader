@@ -114,6 +114,7 @@ novel-cli download --site ttkan shengxu-chendong
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 | 支持语言 |
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
 | [SF轻小说](https://m.sfacg.com)                              | sfacg      | ✅     | ✅     | ✅     | ⚠️     | 简      |
+| [三七轻小说](https://www.37yq.com/)                          | n37yq      | ✅     | ✅     | ⚠️     | ✅     | 简      |
 | [哔哩轻小说](https://www.linovelib.com/)                     | linovelib  | ✅     | ✅     | ⚠️     | ⚠️     | 简      |
 | [ESJ Zone](https://www.esjzone.cc)                           | esjzone   | ✅     | ✅     | ✅     | ✅     | 简      |
 | [神凑轻小说](https://www.shencou.com/)                        | shencou   | ✅     | ✅     | ⚠️     | ⚠️     | 简      |
@@ -280,6 +281,10 @@ novel-cli download --site ttkan shengxu-chendong
   * 书籍: `https://m.sfacg.com/b/456123/` -> Book ID: `456123`
   * 章节: `https://m.sfacg.com/c/5417665/` -> Chapter ID: `5417665`
   * 登录: 需提供有效的 Cookie 才能访问订阅章节。
+
+* **三七轻小说 (n37yq)**
+  * 书籍: `https://www.37yq.com/lightnovel/2362.html` -> Book ID: `2362`
+  * 章节: `https://www.37yq.com/lightnovel/2362/92560.html` -> Chapter ID: `92560`
 
 * **哔哩轻小说 (linovelib)**
   * 书籍: `https://www.linovelib.com/novel/1234.html` -> Book ID: `1234`

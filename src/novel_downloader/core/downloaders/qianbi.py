@@ -58,7 +58,7 @@ class QianbiDownloader(BaseDownloader):
 
         with ChapterStorage(raw_base, priorities=self.PRIORITIES_MAP) as storage:
             # --- metadata ---
-            book_info = await self.load_book_info(book_id=book_id, html_dir=html_dir)
+            book_info = await self._load_book_info(book_id=book_id, html_dir=html_dir)
             if not book_info:
                 return
 

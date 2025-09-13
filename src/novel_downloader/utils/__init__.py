@@ -18,7 +18,6 @@ __all__ = [
     "content_prefix",
     "truncate_half_lines",
     "diff_inline_display",
-    "time_diff",
     "async_jitter_sleep",
     "jitter_sleep",
 ]
@@ -43,5 +42,4 @@ from .text_utils import (
 from .time_utils import (
     async_jitter_sleep,
     jitter_sleep,
-    time_diff,
 )

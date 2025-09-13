@@ -157,7 +157,7 @@ def _vol_border_div_str(flip: bool = False) -> str:
     classes = "vol-border" + (" flip" if flip else "")
     return (
         f'<div class="{classes}">'
-        f'<img src="../{IMAGE_FOLDER}/volume_border.png" alt="">'
+        f'<img src="../{IMAGE_FOLDER}/volume_border.png" alt="" />'
         f"</div>"
     )
 

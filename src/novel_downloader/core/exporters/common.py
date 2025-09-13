@@ -9,7 +9,7 @@ Shared exporter implementation for producing standard TXT and EPUB outputs.
 import re
 from html import escape
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from novel_downloader.core.exporters.base import BaseExporter
 from novel_downloader.models import (
@@ -359,6 +359,7 @@ class CommonExporter(BaseExporter):
             # Append each chapter
             for ch_info in vol.get("chapters", []):
                 chap_id = ch_info.get("chapterId")
+                chap_title = ch_info.get("title")
                 if not chap_id:
                     continue
 
@@ -369,7 +370,10 @@ class CommonExporter(BaseExporter):
                     )
                     continue
 
-                title = self._cleaner.clean_title(ch.get("title", "")) or chap_id
+                title = (
+                    self._cleaner.clean_title(chap_title or ch.get("title", ""))
+                    or chap_id
+                )
                 content = self._cleaner.clean_content(ch.get("content", ""))
 
                 content = (
@@ -442,7 +446,7 @@ class CommonExporter(BaseExporter):
         target_dir: Path,
         filename: str | None = None,
         *,
-        on_exist: str = "overwrite",
+        on_exist: Literal["overwrite", "skip", "rename"] = "overwrite",
     ) -> Path | None:
         """
         Download image from url to target dir with given name
@@ -454,7 +458,7 @@ class CommonExporter(BaseExporter):
             target_dir,
             filename=filename,
             headers=DEFAULT_HEADERS,
-            on_exist="overwrite",
+            on_exist=on_exist,
             default_suffix=DEFAULT_IMAGE_SUFFIX,
         )
 
