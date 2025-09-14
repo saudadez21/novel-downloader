@@ -22,7 +22,7 @@ from novel_downloader.models import (
 @register_parser(
     site_keys=["xiaoshuoge"],
 )
-class XiaoshuowuParser(BaseParser):
+class XiaoshuogeParser(BaseParser):
     """
     Parser for 小说屋 (xiaoshuoge.info).
     """

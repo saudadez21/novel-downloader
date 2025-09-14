@@ -22,7 +22,7 @@ from novel_downloader.models import (
 @register_parser(
     site_keys=["n8tsw"],
 )
-class BlquduParser(BaseParser):
+class N8tswParser(BaseParser):
     """
     Parser for 笔趣阁 book pages.
     """

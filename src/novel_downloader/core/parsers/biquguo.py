@@ -12,7 +12,7 @@ from novel_downloader.core.parsers.registry import register_parser
 @register_parser(
     site_keys=["biquguo"],
 )
-class XXParser(ManggNetParser):
+class BiquguoParser(ManggNetParser):
     """
     Parser for 笔趣阁小说网 book pages.
     """

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.searchers.biquguo
----------------------------------------
+novel_downloader.core.searchers.ciluke
+--------------------------------------
 
 """
 
@@ -10,15 +10,15 @@ from novel_downloader.core.searchers.registry import register_searcher
 
 
 @register_searcher(
-    site_keys=["biquguo"],
+    site_keys=["ciluke"],
 )
-class BiquguoSearcher(ManggNetSearcher):
-    site_name = "biquguo"
+class CilukeSearcher(ManggNetSearcher):
+    site_name = "ciluke"
     priority = 30
-    BASE_URL = "https://www.biquguo.com/"
-    SEARCH_URL = "https://www.biquguo.com/search.php"
+    BASE_URL = "https://www.ciluke.com/"
+    SEARCH_URL = "https://www.ciluke.com/search.php"
 
     @staticmethod
     def _url_to_id(url: str) -> str:
-        # "/84/84829/" -> "84-84829"
+        # "/54/54978/" -> "54-54978"
         return url.strip("/").replace("/", "-")

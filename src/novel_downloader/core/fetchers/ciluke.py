@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.fetchers.biquguo
---------------------------------------
+novel_downloader.core.fetchers.ciluke
+-------------------------------------
 
 """
 
@@ -10,16 +10,16 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 
 
 @register_fetcher(
-    site_keys=["biquguo"],
+    site_keys=["ciluke"],
 )
-class BiquguoSession(ManggNetSession):
+class CilukeSession(ManggNetSession):
     """
-    A session class for interacting with the 笔趣阁小说网 (www.biquguo.com) novel.
+    A session class for interacting with the 思路客 (www.ciluke.com) novel.
     """
 
-    site_name: str = "biquguo"
+    site_name: str = "ciluke"
 
-    BASE_URL = "https://www.biquguo.com"
+    BASE_URL = "https://www.ciluke.com"
 
     @classmethod
     def relative_info_url(cls, book_id: str, idx: int) -> str:

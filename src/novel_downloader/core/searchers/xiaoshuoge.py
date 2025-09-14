@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 @register_searcher(
     site_keys=["xiaoshuoge"],
 )
-class XiaoshuowuSearcher(BaseSearcher):
+class XiaoshuogeSearcher(BaseSearcher):
     site_name = "xiaoshuoge"
     priority = 30
     SEARCH_URL = "http://www.xiaoshuoge.info/modules/article/search.php"

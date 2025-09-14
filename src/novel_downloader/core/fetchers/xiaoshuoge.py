@@ -15,7 +15,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 @register_fetcher(
     site_keys=["xiaoshuoge"],
 )
-class XiaoshuowuSession(BaseSession):
+class XiaoshuogeSession(BaseSession):
     """
     A session class for interacting with the 小说屋 (www.xiaoshuoge.info) novel.
     """
