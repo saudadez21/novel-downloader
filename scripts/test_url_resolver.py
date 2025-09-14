@@ -109,6 +109,10 @@ SAMPLES: dict[str, list[tuple[str, str, str | None]]] = {
         ("https://www.i25zw.com/book/64371.html", "i25zw", "64371"),
         ("https://www.i25zw.com/64371/", "i25zw", "64371"),
         ("https://www.i25zw.com/64371/153149757.html", "i25zw", "64371"),
+        # laoyaoxs
+        ("https://www.laoyaoxs.org/info/7359.html", "laoyaoxs", "7359"),
+        ("https://www.laoyaoxs.org/list/7359/", "laoyaoxs", "7359"),
+        ("https://www.laoyaoxs.org/list/7359/21385.html", "laoyaoxs", "7359"),
         # shu111
         ("https://www.shu111.com/book/282944.html", "shu111", "282944"),
         ("https://www.shu111.com/book/282944/96171674.html", "shu111", "282944"),

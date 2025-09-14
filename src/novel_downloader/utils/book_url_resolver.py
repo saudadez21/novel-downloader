@@ -314,6 +314,20 @@ SITE_RULES: dict[str, SiteRuleSet] = {
         ],
         hints=[],
     ),
+    "www.laoyaoxs.org": SiteRuleSet(
+        site_key="laoyaoxs",
+        extractors=[
+            BookIdExtractor(
+                pattern=r"^/list/(\d+)/",
+                build_book_id=lambda m: m.group(1),
+            ),
+            BookIdExtractor(
+                pattern=r"^/info/(\d+)\.html",
+                build_book_id=lambda m: m.group(1),
+            ),
+        ],
+        hints=[],
+    ),
     "www.lewenn.net": SiteRuleSet(
         site_key="lewenn",
         extractors=[
