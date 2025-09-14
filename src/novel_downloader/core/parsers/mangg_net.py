@@ -61,7 +61,7 @@ class ManggNetParser(BaseParser):
 
         summary = self._first_str(
             tree.xpath('//meta[@property="og:description"]/@content'),
-            replaces=[("\u00a0", " ")],
+            replaces=[("\u00a0", " "), ("<br>", "\n")],
         )
         if not summary:
             summary = self._join_strs(

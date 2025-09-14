@@ -294,6 +294,16 @@ SITE_RULES: dict[str, SiteRuleSet] = {
         ],
         hints=[],
     ),
+    "www.ktshu.cc": SiteRuleSet(
+        site_key="ktshu",
+        extractors=[
+            BookIdExtractor(
+                pattern=r"^/book/(\d+)/",
+                build_book_id=lambda m: m.group(1),
+            ),
+        ],
+        hints=[],
+    ),
     "www.lewenn.net": SiteRuleSet(
         site_key="lewenn",
         extractors=[

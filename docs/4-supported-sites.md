@@ -107,6 +107,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [笔趣阁](https://www.biquge5.com/)                           | biquge5  | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [笔趣阁小说网](https://www.biquguo.com/)                      | biquguo  | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [思路客](https://www.ciluke.com/)                            | ciluke   | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [八一中文网](https://www.ktshu.cc/)                           | ktshu    | ❌     | ❌     | ⚠️     | ✅     | 简      |
 
 #### 同人小说
 
@@ -296,6 +297,10 @@ novel-cli download --site ttkan shengxu-chendong
 * **思路客 (ciluke)**
   * 书籍: `https://www.ciluke.com/19/19747/` -> Book ID: `19-19747`
   * 章节: `https://www.ciluke.com/19/19747/316194.html` -> Chapter ID: `316194`
+
+* **八一中文网 (ktshu)**
+  * 书籍: `https://www.ktshu.cc/book/47244/` -> Book ID: `47244`
+  * 章节: `https://www.ktshu.cc/book/47244/418953.html` -> Chapter ID: `418953`
 
 #### 同人小说
 

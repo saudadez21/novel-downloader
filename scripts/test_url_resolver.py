@@ -207,6 +207,9 @@ SAMPLES: dict[str, list[tuple[str, str, str | None]]] = {
         # ciluke
         ("https://www.ciluke.com/19/19747/", "ciluke", "19-19747"),
         ("https://www.ciluke.com/19/19747/316194.html", "ciluke", "19-19747"),
+        # ktshu
+        ("https://www.ktshu.cc/book/47244/", "ktshu", "47244"),
+        ("https://www.ktshu.cc/book/47244/418953.html", "ktshu", "47244"),
     ],
     # -------------------
     # Doujin
