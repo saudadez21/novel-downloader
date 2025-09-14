@@ -14,7 +14,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 )
 class BlquduSession(LewennSession):
     """
-    A session class for interacting with the 笔趣读 (www.blqudu.cc) novel website.
+    A session class for interacting with the 笔趣读 (www.blqudu.cc) novel.
     """
 
     site_name: str = "blqudu"

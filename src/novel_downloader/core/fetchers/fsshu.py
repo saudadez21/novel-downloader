@@ -14,7 +14,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 )
 class FsshuSession(ManggNetSession):
     """
-    A session class for interacting with the 笔趣阁 (www.fsshu.com) novel website.
+    A session class for interacting with the 笔趣阁 (www.fsshu.com) novel.
     """
 
     site_name: str = "fsshu"

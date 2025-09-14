@@ -16,7 +16,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 )
 class B520Session(BaseSession):
     """
-    A session class for interacting with the 书林文学 (shu111.com) novel website.
+    A session class for interacting with the 书林文学 (shu111.com) novel.
     """
 
     site_name: str = "shu111"

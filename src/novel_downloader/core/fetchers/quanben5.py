@@ -16,7 +16,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 )
 class Quanben5Session(BaseSession):
     """
-    A session class for interacting with the 全本小说网 (quanben5.com) novel website.
+    A session class for interacting with the 全本小说网 (quanben5.com) novel.
     """
 
     site_name: str = "quanben5"

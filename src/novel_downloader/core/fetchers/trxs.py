@@ -14,7 +14,7 @@ from novel_downloader.core.fetchers.tongrenquan import TongrenquanSession
 )
 class TrxsSession(TongrenquanSession):
     """
-    A session class for interacting with the 同人小说网 (www.trxs.cc) novel website.
+    A session class for interacting with the 同人小说网 (www.trxs.cc) novel.
     """
 
     site_name: str = "trxs"

@@ -20,7 +20,7 @@ from novel_downloader.models import LoginField
 )
 class YamiboSession(BaseSession):
     """
-    A session class for interacting with the 百合会 (www.yamibo.com) novel website.
+    A session class for interacting with the 百合会 (www.yamibo.com) novel.
     """
 
     site_name: str = "yamibo"

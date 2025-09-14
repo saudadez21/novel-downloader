@@ -17,7 +17,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 class ShuhaigeSession(BaseSession):
     """
     A session class for interacting with the
-    书海阁小说网 (www.shuhaige.net) novel website.
+    书海阁小说网 (www.shuhaige.net) novel.
     """
 
     site_name: str = "shuhaige"

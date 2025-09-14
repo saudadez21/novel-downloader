@@ -27,7 +27,7 @@ from novel_downloader.utils.crypto_utils.rc4 import rc4_init, rc4_stream
 )
 class QidianSession(BaseSession):
     """
-    A session class for interacting with the 起点中文网 (www.qidian.com) novel website.
+    A session class for interacting with the 起点中文网 (www.qidian.com) novel.
     """
 
     site_name: str = "qidian"

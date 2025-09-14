@@ -16,7 +16,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 )
 class LnovelSession(BaseSession):
     """
-    A session class for interacting with the 轻小说百科 (lnovel.org) novel website.
+    A session class for interacting with the 轻小说百科 (lnovel.org) novel.
     """
 
     site_name: str = "lnovel"

@@ -16,7 +16,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 )
 class LewennSession(BaseSession):
     """
-    A session class for interacting with the 乐文小说网 (www.lewenn.net) novel website.
+    A session class for interacting with the 乐文小说网 (www.lewenn.net) novel.
     """
 
     site_name: str = "lewenn"

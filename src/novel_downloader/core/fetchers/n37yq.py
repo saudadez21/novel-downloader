@@ -17,7 +17,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 )
 class N37yqSession(BaseSession):
     """
-    A session class for interacting with the 三七轻小说 (www.37yq.com) novel website.
+    A session class for interacting with the 三七轻小说 (www.37yq.com) novel.
     """
 
     site_name: str = "n37yq"

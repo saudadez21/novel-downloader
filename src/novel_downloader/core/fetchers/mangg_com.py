@@ -14,7 +14,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 )
 class ManggComSession(LewennSession):
     """
-    A session class for interacting with the 追书网 (www.mangg.com) novel website.
+    A session class for interacting with the 追书网 (www.mangg.com) novel.
     """
 
     site_name: str = "mangg_com"

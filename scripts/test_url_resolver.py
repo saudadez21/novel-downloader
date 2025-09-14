@@ -201,6 +201,9 @@ SAMPLES: dict[str, list[tuple[str, str, str | None]]] = {
         # biquge5
         ("https://www.biquge5.com/9_9194/", "biquge5", "9_9194"),
         ("https://www.biquge5.com/9_9194/737908.html", "biquge5", "9_9194"),
+        # biquguo
+        ("https://www.biquguo.com/0/352/", "biquguo", "0-352"),
+        ("https://www.biquguo.com/0/352/377618.html", "biquguo", "0-352"),
     ],
     # -------------------
     # Doujin

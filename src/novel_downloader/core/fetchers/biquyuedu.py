@@ -16,7 +16,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 )
 class BiquyueduSession(BaseSession):
     """
-    A session class for interacting with the 精彩小说 (biquyuedu.com) novel website.
+    A session class for interacting with the 精彩小说 (biquyuedu.com) novel.
     """
 
     site_name: str = "biquyuedu"

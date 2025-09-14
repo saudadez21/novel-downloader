@@ -16,7 +16,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 )
 class N23ddwSession(BaseSession):
     """
-    A session class for interacting with the 顶点小说网 (www.23ddw.net) novel website.
+    A session class for interacting with the 顶点小说网 (www.23ddw.net) novel.
     """
 
     site_name: str = "n23ddw"

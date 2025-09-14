@@ -17,7 +17,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 class ZhenhunxiaoshuoSession(BaseSession):
     """
     A session class for interacting with the 镇魂小说网
-    (www.zhenhunxiaoshuo.com) novel website.
+    (www.zhenhunxiaoshuo.com) novel.
     """
 
     site_name: str = "zhenhunxiaoshuo"

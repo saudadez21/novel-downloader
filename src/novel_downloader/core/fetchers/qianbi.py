@@ -17,7 +17,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 )
 class QianbiSession(BaseSession):
     """
-    A session class for interacting with the 铅笔小说 (www.23qb.com) novel website.
+    A session class for interacting with the 铅笔小说 (www.23qb.com) novel.
     """
 
     site_name: str = "qianbi"

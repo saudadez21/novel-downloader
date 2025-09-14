@@ -16,7 +16,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 )
 class WanbengoSession(BaseSession):
     """
-    A session class for interacting with the 完本神站 (www.wanbengo.com) novel website.
+    A session class for interacting with the 完本神站 (www.wanbengo.com) novel.
     """
 
     site_name: str = "wanbengo"

@@ -136,6 +136,16 @@ SITE_RULES: dict[str, SiteRuleSet] = {
         ],
         hints=[],
     ),
+    "www.biquguo.com": SiteRuleSet(
+        site_key="biquguo",
+        extractors=[
+            BookIdExtractor(
+                pattern=r"^/(\d+)/(\d+)/",
+                build_book_id=lambda m: f"{m.group(1)}-{m.group(2)}",
+            ),
+        ],
+        hints=[],
+    ),
     "biquyuedu.com": SiteRuleSet(
         site_key="biquyuedu",
         extractors=[

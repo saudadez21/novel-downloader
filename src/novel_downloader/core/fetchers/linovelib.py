@@ -23,7 +23,7 @@ _IMG_HEADERS["Referer"] = "https://www.linovelib.com/"
 )
 class LinovelibSession(BaseSession):
     """
-    A session class for interacting with 哔哩轻小说 (www.linovelib.com) novel website.
+    A session class for interacting with 哔哩轻小说 (www.linovelib.com) novel.
     """
 
     site_name: str = "linovelib"

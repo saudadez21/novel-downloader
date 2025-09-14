@@ -16,7 +16,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 )
 class N71geSession(BaseSession):
     """
-    A session class for interacting with the 新吾爱文学 (www.71ge.com) novel website.
+    A session class for interacting with the 新吾爱文学 (www.71ge.com) novel.
     """
 
     site_name: str = "n71ge"

@@ -19,7 +19,7 @@ from novel_downloader.models import LoginField
 )
 class EsjzoneSession(BaseSession):
     """
-    A session class for interacting with the ESJ Zone (www.esjzone.cc) novel website.
+    A session class for interacting with the ESJ Zone (www.esjzone.cc) novel.
     """
 
     site_name: str = "esjzone"

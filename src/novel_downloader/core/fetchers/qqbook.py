@@ -18,7 +18,7 @@ from novel_downloader.models import LoginField
 )
 class QqbookSession(BaseSession):
     """
-    A session class for interacting with the QQ 阅读 (book.qq.com) novel website.
+    A session class for interacting with the QQ 阅读 (book.qq.com) novel.
     """
 
     site_name: str = "qqbook"

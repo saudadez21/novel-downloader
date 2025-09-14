@@ -17,7 +17,7 @@ from novel_downloader.core.fetchers.base import BaseSession
 # )
 class DeqixsSession(BaseSession):
     """
-    A session class for interacting with the 得奇小说网 (www.deqixs.com) novel website.
+    A session class for interacting with the 得奇小说网 (www.deqixs.com) novel.
     """
 
     BASE_URL = "https://www.deqixs.com"

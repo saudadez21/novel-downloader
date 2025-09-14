@@ -17,7 +17,7 @@ from novel_downloader.models import LoginField
 )
 class SfacgSession(BaseSession):
     """
-    A session class for interacting with the SF轻小说 (m.sfacg.com) novel website.
+    A session class for interacting with the SF轻小说 (m.sfacg.com) novel.
     """
 
     site_name: str = "sfacg"

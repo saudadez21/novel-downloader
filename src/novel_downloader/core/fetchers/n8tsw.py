@@ -14,7 +14,7 @@ from novel_downloader.core.fetchers.shuhaige import ShuhaigeSession
 )
 class N8tswSession(ShuhaigeSession):
     """
-    A session class for interacting with the 笔趣阁 (www.8tsw.com) novel website.
+    A session class for interacting with the 笔趣阁 (www.8tsw.com) novel.
     """
 
     site_name: str = "n8tsw"
