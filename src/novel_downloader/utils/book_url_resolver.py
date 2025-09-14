@@ -192,6 +192,16 @@ SITE_RULES: dict[str, SiteRuleSet] = {
         ],
         hints=[],
     ),
+    "www.fsshu.com": SiteRuleSet(
+        site_key="fsshu",
+        extractors=[
+            BookIdExtractor(
+                pattern=r"^/biquge/(\d+_\d+)/",
+                build_book_id=lambda m: m.group(1),
+            ),
+        ],
+        hints=[],
+    ),
     "b.guidaye.com": SiteRuleSet(
         site_key="guidaye",
         extractors=[
@@ -313,16 +323,6 @@ SITE_RULES: dict[str, SiteRuleSet] = {
         ],
         hints=[],
     ),
-    "www.23ddw.net": SiteRuleSet(
-        site_key="n23ddw",
-        extractors=[
-            BookIdExtractor(
-                pattern=r"^/du/(\d+)/(\d+)/",
-                build_book_id=lambda m: f"{m.group(1)}-{m.group(2)}",
-            ),
-        ],
-        hints=[],
-    ),
     "8novel.com": SiteRuleSet(
         site_key="n8novel",
         extractors=[
@@ -333,6 +333,26 @@ SITE_RULES: dict[str, SiteRuleSet] = {
             BookIdExtractor(
                 pattern=r"^/read/(\d+)/",
                 build_book_id=lambda m: m.group(1),
+            ),
+        ],
+        hints=[],
+    ),
+    "www.8tsw.com": SiteRuleSet(
+        site_key="n8tsw",
+        extractors=[
+            BookIdExtractor(
+                pattern=r"^/(\d+_\d+)/",
+                build_book_id=lambda m: m.group(1),
+            ),
+        ],
+        hints=[],
+    ),
+    "www.23ddw.net": SiteRuleSet(
+        site_key="n23ddw",
+        extractors=[
+            BookIdExtractor(
+                pattern=r"^/du/(\d+)/(\d+)/",
+                build_book_id=lambda m: f"{m.group(1)}-{m.group(2)}",
             ),
         ],
         hints=[],
@@ -353,16 +373,6 @@ SITE_RULES: dict[str, SiteRuleSet] = {
     ),
     "www.71ge.com": SiteRuleSet(
         site_key="n71ge",
-        extractors=[
-            BookIdExtractor(
-                pattern=r"^/(\d+_\d+)/",
-                build_book_id=lambda m: m.group(1),
-            ),
-        ],
-        hints=[],
-    ),
-    "www.8tsw.com": SiteRuleSet(
-        site_key="n8tsw",
         extractors=[
             BookIdExtractor(
                 pattern=r"^/(\d+_\d+)/",

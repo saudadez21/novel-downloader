@@ -149,6 +149,8 @@ class ManggNetParser(BaseParser):
                 # e.g. "第(1/3)页"
                 if parts and parts[0].startswith("第(") and parts[0].endswith(")页"):
                     parts.pop(0)
+                if parts and parts[-1].startswith("第(") and parts[-1].endswith(")页"):
+                    parts.pop()
                 paragraphs.append("\n".join(parts))
 
         content = "\n".join(paragraphs)

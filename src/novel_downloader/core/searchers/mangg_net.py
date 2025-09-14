@@ -57,8 +57,7 @@ class ManggNetSearcher(BaseSearcher):
             if limit is not None and idx >= limit:
                 break
 
-            # "/id84814/" -> "id84814"
-            book_id = href.strip("/")
+            book_id = cls._url_to_id(href)
             book_url = cls._abs_url(href)
 
             cover_src = cls._first_str(row.xpath("./dt/a/img/@src"))
@@ -101,3 +100,8 @@ class ManggNetSearcher(BaseSearcher):
                 )
             )
         return results
+
+    @staticmethod
+    def _url_to_id(url: str) -> str:
+        # "/id84814/" -> "id84814"
+        return url.strip("/")

@@ -36,6 +36,7 @@ class ManggNetSession(BaseSession):
         :param book_id: The book identifier.
         :return: The page content as string list.
         """
+        book_id = book_id.replace("-", "/")
         html_pages: list[str] = []
         idx = 1
         suffix = self.relative_info_url(book_id, idx)
@@ -46,7 +47,8 @@ class ManggNetSession(BaseSession):
                 html = await self.fetch(full_url, **kwargs)
             except Exception as exc:
                 self.logger.warning(
-                    "mangg_net get_book_info(%s page %d) failed: %s",
+                    "%s get_book_info(%s page %d) failed: %s",
+                    self.site_name,
                     book_id,
                     idx,
                     exc,
@@ -77,6 +79,7 @@ class ManggNetSession(BaseSession):
         :param chapter_id: The chapter identifier.
         :return: The page content as string list.
         """
+        book_id = book_id.replace("-", "/")
         html_pages: list[str] = []
         idx = 1
         suffix = self.relative_chapter_url(book_id, chapter_id, idx)
@@ -87,7 +90,8 @@ class ManggNetSession(BaseSession):
                 html = await self.fetch(full_url, **kwargs)
             except Exception as exc:
                 self.logger.warning(
-                    "mangg_net get_book_chapter(%s page %d) failed: %s",
+                    "%s get_book_chapter(%s page %d) failed: %s",
+                    self.site_name,
                     book_id,
                     idx,
                     exc,
