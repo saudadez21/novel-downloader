@@ -86,6 +86,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [25中文网](https://www.i25zw.com/)                           | i25zw     | ❌     | ❌     | ❌     | ✅     | 简      |
 | [老幺小说网](hhttps://www.laoyaoxs.org/)                     | laoyaoxs  | ❌     | ❌     | ❌     | ✅     | 简      |
 | [书林文学](http://shu111.com)                                | shu111    | ❌     | ❌     | ⚠️     | ❌     | 简      |
+| [鲲弩小说](https://www.kunnu.com/)                           | kunnu     | ✅     | ❌     | ❌     | ❌     | 简      |
 | [全本小说网](https://quanben5.com/)                          | quanben5  | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [名著阅读](https://b.guidaye.com/)                           | guidaye   | ❌     | ❌     | ❌     | ⚠️     | 简      |
 
@@ -227,6 +228,10 @@ novel-cli download --site ttkan shengxu-chendong
   * 书籍: `https://www.shu111.com/book/282944.html` -> Book ID: `282944`
   * 章节: `https://www.shu111.com/book/282944/96171674.html` -> Chapter ID: `96171674`
   * 注意: 网站加载速度较慢
+
+* **鲲弩小说 (kunnu)**
+  * 书籍: `https://www.kunnu.com/guichui/` -> Book ID: `guichui`
+  * 章节: `https://www.kunnu.com/guichui/27427.htm` -> Chapter ID: `27427`
 
 * **全本小说网 (quanben5)**
   * 书籍: `https://quanben5.com/n/doushentianxia/` -> Book ID: `doushentianxia`

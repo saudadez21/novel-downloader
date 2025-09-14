@@ -116,6 +116,9 @@ SAMPLES: dict[str, list[tuple[str, str, str | None]]] = {
         # shu111
         ("https://www.shu111.com/book/282944.html", "shu111", "282944"),
         ("https://www.shu111.com/book/282944/96171674.html", "shu111", "282944"),
+        # kunnu
+        ("https://www.kunnu.com/guichui/", "kunnu", "guichui"),
+        ("https://www.kunnu.com/guichui/27427.htm", "kunnu", "guichui"),
         # quanben5 (+ alias)
         ("https://quanben5.com/n/doushentianxia/", "quanben5", "doushentianxia"),
         (
