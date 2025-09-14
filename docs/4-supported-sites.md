@@ -104,6 +104,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [追书网](https://www.mangg.com/) (com)                       | mangg_com | ❌     | ❌     | ⚠️     | ❌     | 简      |
 | [追书网](https://www.mangg.net/) (net)                       | mangg_net | ❌     | ❌     | ❌     | ✅     | 简      |
 | [笔趣阁](https://www.fsshu.com/)                             | fsshu    | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [笔趣阁](https://www.biquge5.com/)                           | biquge5  | ❌     | ❌     | ⚠️     | ✅     | 简      |
 
 #### 同人小说
 
@@ -281,6 +282,10 @@ novel-cli download --site ttkan shengxu-chendong
 * **笔趣阁 (fsshu)**
   * 书籍: `https://www.fsshu.com/biquge/0_139/` -> Book ID: `0_139`
   * 章节: `https://www.fsshu.com/biquge/0_139/c40381.html` -> Chapter ID: `c40381`
+
+* **笔趣阁 (biquge5)**
+  * 书籍: `https://www.biquge5.com/9_9194/` -> Book ID: `9_9194`
+  * 章节: `https://www.biquge5.com/9_9194/737908.html` -> Chapter ID: `737908`
 
 #### 同人小说
 

@@ -198,6 +198,9 @@ SAMPLES: dict[str, list[tuple[str, str, str | None]]] = {
         # fsshu
         ("https://www.fsshu.com/biquge/0_139/", "fsshu", "0_139"),
         ("https://www.fsshu.com/biquge/0_139/c40381.html", "fsshu", "0_139"),
+        # biquge5
+        ("https://www.biquge5.com/9_9194/", "biquge5", "9_9194"),
+        ("https://www.biquge5.com/9_9194/737908.html", "biquge5", "9_9194"),
     ],
     # -------------------
     # Doujin

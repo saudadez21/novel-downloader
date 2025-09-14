@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class SososhuSearcher(BaseSearcher):
     priority = 30
 
-    site_name: str
+    site_name: str = "sososhu"
     SOSOSHU_KEY: str
     BASE_URL: str
     SEARCH_URL = "https://www.sososhu.com/"
