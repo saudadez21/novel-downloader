@@ -74,6 +74,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [QQ阅读](https://book.qq.com/)                               | qqbook    | ❌     | ❌     | ✅     | ⚠️     | 简      |
 | [和图书](https://www.hetushu.com/index.php)                  | hetushu   | ✅     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [铅笔小说](https://www.23qb.net), [备用](https://www.23qb.com/) | qianbi | ✅     | ❌     | ⚠️     | ✅     | 简      |
+| [有度中文网](https://www.yodu.org/)                          | yodu      | ✅     | ⚠️     | ⚠️     | ✅     | 简      |
 | [飘天文学网](https://www.piaotia.com/)                        | piaotia  | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [新吾爱文学](https://www.71ge.com/)                           | n71ge    | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [小说屋](http://www.xiaoshuoge.info/)                        | xiaoshuoge | ❌     | ❌     | ⚠️     | ✅     | 简      |
@@ -181,6 +182,12 @@ novel-cli download --site ttkan shengxu-chendong
 * **铅笔小说 (qianbi)**
   * 书籍: `https://www.23qb.net/book/12282/` -> Book ID: `12282`
   * 章节: `https://www.23qb.net/book/12282/7908999.html` -> Chapter ID: `7908999`
+
+* **有度中文网 (yodu)**
+  * 书籍: `https://www.yodu.org/book/18862/` -> Book ID: `18862`
+  * 章节: `https://www.yodu.org/book/18862/4662939.html` -> Chapter ID: `4662939`
+  * 已知问题:
+    * 图片资源可能无法加载 (404)
 
 * **飘天文学网 (piaotia)**
   * 书籍: `https://www.piaotia.com/bookinfo/13/12345.html` -> Book ID: `13-12345`

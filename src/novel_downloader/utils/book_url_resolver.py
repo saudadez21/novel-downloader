@@ -712,6 +712,16 @@ SITE_RULES: dict[str, SiteRuleSet] = {
         ],
         hints=[],
     ),
+    "www.yodu.org": SiteRuleSet(
+        site_key="yodu",
+        extractors=[
+            BookIdExtractor(
+                pattern=r"^/book/(\d+)/",
+                build_book_id=lambda m: m.group(1),
+            ),
+        ],
+        hints=[],
+    ),
     "www.zhenhunxiaoshuo.com": SiteRuleSet(
         site_key="zhenhunxiaoshuo",
         extractors=[

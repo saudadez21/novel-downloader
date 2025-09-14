@@ -230,7 +230,7 @@ class QianbiDownloader(BaseDownloader):
     ) -> BookInfoDict:
         """
         Fill in missing chapterId fields by retrieving the previous chapter
-        and following its 'next_chapter_id'. Uses storage to avoid refetching.
+        and following its 'next_cid'. Uses storage to avoid refetching.
         """
         prev_cid: str = ""
         for vol in book_info["volumes"]:
@@ -262,10 +262,10 @@ class QianbiDownloader(BaseDownloader):
                         max_sleep=self._request_interval + 2,
                     )
 
-                next_cid = data.get("extra", {}).get("next_chapter_id")
+                next_cid = data.get("extra", {}).get("next_cid")
                 if not next_cid:
                     self.logger.warning(
-                        "No next_chapter_id in data for %s",
+                        "No next_cid in data for %s",
                         prev_cid,
                     )
                     continue

@@ -137,9 +137,7 @@ class QianbiParser(BaseParser):
         next_href = self._first_str(
             tree.xpath('//div[@class="footer"]/a[@class="f-right"]/@href')
         )
-        next_chapter_id = (
-            next_href.split("/")[-1].replace(".html", "") if next_href else ""
-        )
+        next_cid = next_href.split("/")[-1].replace(".html", "") if next_href else ""
 
         return {
             "id": chapter_id,
@@ -148,6 +146,6 @@ class QianbiParser(BaseParser):
             "extra": {
                 "site": self.site_name,
                 "volume": volume_text,
-                "next_chapter_id": next_chapter_id,
+                "next_cid": next_cid,
             },
         }

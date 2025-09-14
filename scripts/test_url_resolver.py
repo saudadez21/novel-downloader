@@ -66,6 +66,9 @@ SAMPLES: dict[str, list[tuple[str, str, str | None]]] = {
         ("https://www.23qb.net/book/12282/", "qianbi", "12282"),
         ("https://www.23qb.net/book/12282/catalog", "qianbi", "12282"),
         ("https://www.23qb.net/book/12282/7908999.html", "qianbi", "12282"),
+        # yodu
+        ("https://www.yodu.org/book/18862/", "yodu", "18862"),
+        ("https://www.yodu.org/book/18862/4662939.html", "yodu", "18862"),
         # piaotia
         ("https://www.piaotia.com/bookinfo/13/12345.html", "piaotia", "13-12345"),
         ("https://www.piaotia.com/html/12/12345/index.html", "piaotia", "12-12345"),
