@@ -213,6 +213,9 @@ SAMPLES: dict[str, list[tuple[str, str, str | None]]] = {
         # n37yue
         ("https://www.37yue.com/0/180/", "n37yue", "0-180"),
         ("https://www.37yue.com/0/180/164267.html", "n37yue", "0-180"),
+        # bxwx9
+        ("https://www.bxwx9.org/b/48/48453/", "bxwx9", "48-48453"),
+        ("https://www.bxwx9.org/b/48/48453/175908.html", "bxwx9", "48-48453"),
     ],
     # -------------------
     # Doujin

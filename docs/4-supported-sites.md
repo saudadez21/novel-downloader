@@ -109,6 +109,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [思路客](https://www.ciluke.com/)                            | ciluke   | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [八一中文网](https://www.ktshu.cc/)                           | ktshu    | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [37阅读网](https://www.37yue.com/)                           | n37yue   | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [笔下文学网](https://www.bxwx9.org/)                          | bxwx9    | ❌     | ❌     | ⚠️     | ✅     | 简      |
 
 #### 同人小说
 
@@ -306,6 +307,10 @@ novel-cli download --site ttkan shengxu-chendong
 * **37阅读网 (n37yue)**
   * 书籍: `https://www.37yue.com/0/180/` -> Book ID: `0-180`
   * 章节: `https://www.37yue.com/0/180/164267.html` -> Chapter ID: `164267`
+
+* **笔下文学网 (bxwx9)**
+  * 书籍: `https://www.bxwx9.org/b/48/48453/` -> Book ID: `48-48453`
+  * 章节: `https://www.bxwx9.org/b/48/48453/175908.html` -> Chapter ID: `175908`
 
 #### 同人小说
 

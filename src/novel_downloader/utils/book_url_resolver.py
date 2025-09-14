@@ -170,6 +170,16 @@ SITE_RULES: dict[str, SiteRuleSet] = {
         ],
         hints=[],
     ),
+    "www.bxwx9.org": SiteRuleSet(
+        site_key="bxwx9",
+        extractors=[
+            BookIdExtractor(
+                pattern=r"^/b/(\d+)/(\d+)/",
+                build_book_id=lambda m: f"{m.group(1)}-{m.group(2)}",
+            ),
+        ],
+        hints=[],
+    ),
     "www.ciluke.com": SiteRuleSet(
         site_key="ciluke",
         extractors=[
