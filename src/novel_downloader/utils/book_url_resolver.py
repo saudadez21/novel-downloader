@@ -411,6 +411,16 @@ SITE_RULES: dict[str, SiteRuleSet] = {
         ],
         hints=[],
     ),
+    "www.37yue.com": SiteRuleSet(
+        site_key="n37yue",
+        extractors=[
+            BookIdExtractor(
+                pattern=r"^/(\d+)/(\d+)/",
+                build_book_id=lambda m: f"{m.group(1)}-{m.group(2)}",
+            ),
+        ],
+        hints=[],
+    ),
     "www.71ge.com": SiteRuleSet(
         site_key="n71ge",
         extractors=[

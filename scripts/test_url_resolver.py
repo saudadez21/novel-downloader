@@ -210,6 +210,9 @@ SAMPLES: dict[str, list[tuple[str, str, str | None]]] = {
         # ktshu
         ("https://www.ktshu.cc/book/47244/", "ktshu", "47244"),
         ("https://www.ktshu.cc/book/47244/418953.html", "ktshu", "47244"),
+        # n37yue
+        ("https://www.37yue.com/0/180/", "n37yue", "0-180"),
+        ("https://www.37yue.com/0/180/164267.html", "n37yue", "0-180"),
     ],
     # -------------------
     # Doujin
