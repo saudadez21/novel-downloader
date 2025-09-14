@@ -9,6 +9,7 @@ from typing import Any
 
 from lxml import html
 from novel_downloader.core.parsers.base import BaseParser
+from novel_downloader.core.parsers.registry import register_parser
 from novel_downloader.models import (
     BookInfoDict,
     ChapterDict,
@@ -16,12 +17,10 @@ from novel_downloader.models import (
     VolumeInfoDict,
 )
 
-# from novel_downloader.core.parsers.registry import register_parser
 
-
-# @register_parser(
-#     site_keys=["deqixs"],
-# )
+@register_parser(
+    site_keys=["deqixs"],
+)
 class DeqixsParser(BaseParser):
     """
     Parser for 得奇小说网 book pages.

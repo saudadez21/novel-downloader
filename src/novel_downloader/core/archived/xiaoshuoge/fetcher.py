@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.fetchers.qianbi
--------------------------------------
+novel_downloader.core.archived.xiaoshuoge.fetcher
+-------------------------------------------------
 
 """
 
@@ -13,18 +13,18 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 
 
 @register_fetcher(
-    site_keys=["qianbi"],
+    site_keys=["xiaoshuoge"],
 )
-class QianbiSession(BaseSession):
+class XiaoshuogeSession(BaseSession):
     """
-    A session class for interacting with the 铅笔小说 (www.23qb.com) novel.
+    A session class for interacting with the 小说屋 (www.xiaoshuoge.info) novel.
     """
 
-    site_name: str = "qianbi"
+    site_name: str = "xiaoshuoge"
 
-    BOOK_INFO_URL = "https://www.23qb.com/book/{book_id}/"
-    BOOK_CATALOG_URL = "https://www.23qb.com/book/{book_id}/catalog"
-    CHAPTER_URL = "https://www.23qb.com/book/{book_id}/{chapter_id}.html"
+    BOOK_INFO_URL = "http://www.xiaoshuoge.info/book/{book_id}/"
+    BOOK_CATALOG_URL = "http://www.xiaoshuoge.info/html/{book_id}/"
+    CHAPTER_URL = "http://www.xiaoshuoge.info/html/{book_id}/{chapter_id}.html"
 
     async def get_book_info(
         self,
@@ -39,12 +39,13 @@ class QianbiSession(BaseSession):
         :param book_id: The book identifier.
         :return: The page content as string list.
         """
+        book_id = book_id.replace("-", "/")
         info_url = self.book_info_url(book_id=book_id)
         catalog_url = self.book_catalog_url(book_id=book_id)
 
         info_html, catalog_html = await asyncio.gather(
-            self.fetch(info_url, **kwargs),
-            self.fetch(catalog_url, **kwargs),
+            self.fetch(info_url, ssl=False, **kwargs),
+            self.fetch(catalog_url, ssl=False, **kwargs),
         )
         return [info_html, catalog_html]
 
@@ -54,8 +55,9 @@ class QianbiSession(BaseSession):
         chapter_id: str,
         **kwargs: Any,
     ) -> list[str]:
+        book_id = book_id.replace("-", "/")
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
-        return [await self.fetch(url, **kwargs)]
+        return [await self.fetch(url, ssl=False, **kwargs)]
 
     @classmethod
     def book_info_url(cls, book_id: str) -> str:
@@ -65,7 +67,8 @@ class QianbiSession(BaseSession):
         :param book_id: The identifier of the book.
         :return: Fully qualified URL for the book info page.
         """
-        return cls.BOOK_INFO_URL.format(book_id=book_id)
+        clean_id = book_id.rsplit("/", 1)[-1]
+        return cls.BOOK_INFO_URL.format(book_id=clean_id)
 
     @classmethod
     def book_catalog_url(cls, book_id: str) -> str:

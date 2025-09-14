@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.searchers.xiaoshuoge
-------------------------------------------
+novel_downloader.core.archived.xiaoshuoge.searcher
+--------------------------------------------------
 
 """
 
 import logging
 
 from lxml import html
-
 from novel_downloader.core.searchers.base import BaseSearcher
 from novel_downloader.core.searchers.registry import register_searcher
 from novel_downloader.models import SearchResult

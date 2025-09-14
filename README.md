@@ -57,7 +57,7 @@ novel-cli download https://www.hetushu.com/book/5763/index.html
 novel-cli download --site qidian
 
 # 指定站点 + 书籍 ID 启动下载
-novel-cli download --site qianbi 12282
+novel-cli download --site n23qb 12282
 ```
 
 * 支持站点见: [支持站点列表](docs/4-supported-sites.md)

@@ -48,7 +48,7 @@
 novel-cli search 关键词
 
 # 指定站点
-novel-cli search --site biquge 三体
+novel-cli search --site b520 三体
 ```
 
 ---
@@ -59,10 +59,10 @@ novel-cli search --site biquge 三体
 
 ```bash
 novel-cli download https://www.hetushu.com/book/5763/index.html
-novel-cli download https://www.23qb.net/book/12282/
+novel-cli download https://www.23qb.com/book/12282/
 
 novel-cli download --site qidian 1010868264
-novel-cli download --site qianbi 12282
+novel-cli download --site n23qb 12282
 novel-cli download --site ttkan shengxu-chendong
 ```
 
@@ -73,22 +73,20 @@ novel-cli download --site ttkan shengxu-chendong
 | [起点中文网](https://www.qidian.com)                         | qidian    | ✅     | ❌     | ✅     | ⚠️     | 简      |
 | [QQ阅读](https://book.qq.com/)                               | qqbook    | ❌     | ❌     | ✅     | ⚠️     | 简      |
 | [和图书](https://www.hetushu.com/index.php)                  | hetushu   | ✅     | ❌     | ❌     | ✅     | 简 / 繁 |
-| [铅笔小说](https://www.23qb.net), [备用](https://www.23qb.com/) | qianbi | ✅     | ❌     | ⚠️     | ✅     | 简      |
+| [铅笔小说](https://www.23qb.com)                             | n23qb     | ✅     | ❌     | ⚠️     | ✅     | 简      |
 | [有度中文网](https://www.yodu.org/)                          | yodu      | ✅     | ⚠️     | ⚠️     | ✅     | 简      |
 | [飘天文学网](https://www.piaotia.com/)                        | piaotia  | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [新吾爱文学](https://www.71ge.com/)                           | n71ge    | ❌     | ❌     | ⚠️     | ✅     | 简      |
-| [小说屋](http://www.xiaoshuoge.info/)                        | xiaoshuoge | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [精品小说网](https://www.jpxs123.com/)                        | jpxs123  | ❌     | ❌     | ❌     | ✅     | 简      |
 | [天天看小说](https://www.ttkan.co/)                          | ttkan     | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [爱下电子书](https://ixdzs8.com/)                             | ixdzs8   | ❌     | ❌     | ⚠️     | ✅     | 简      |
-| [小说路上](https://m.xs63b.com/)                              | xs63b    | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [大熊猫文学网](https://www.dxmwx.org/)                        | dxmwx    | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [完本神站](https://www.wanbengo.com/)                        | wanbengo  | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [25中文网](https://www.i25zw.com/)                           | i25zw     | ❌     | ❌     | ❌     | ✅     | 简      |
 | [老幺小说网](hhttps://www.laoyaoxs.org/)                     | laoyaoxs  | ❌     | ❌     | ❌     | ✅     | 简      |
-| [书林文学](http://shu111.com)                                | shu111    | ❌     | ❌     | ⚠️     | ❌     | 简      |
-| [鲲弩小说](https://www.kunnu.com/)                           | kunnu     | ✅     | ❌     | ❌     | ❌     | 简      |
 | [全本小说网](https://quanben5.com/)                          | quanben5  | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
+| [鲲弩小说](https://www.kunnu.com/)                           | kunnu     | ✅     | ❌     | ❌     | ❌     | 简      |
+| [书林文学](http://shu111.com)                                | shu111    | ❌     | ❌     | ⚠️     | ❌     | 简      |
 | [名著阅读](https://b.guidaye.com/)                           | guidaye   | ❌     | ❌     | ❌     | ⚠️     | 简      |
 
 #### 类笔趣阁
@@ -96,14 +94,13 @@ novel-cli download --site ttkan shengxu-chendong
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 | 支持语言 |
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
 | [笔趣阁](http://www.b520.cc)                                 | b520      | ❌     | ❌     | ⚠️     | ✅     | 简      |
-| [笔趣阁](https://www.8tsw.com/)                              | n8tsw     | ❌     | ❌     | ⚠️     | ⚠️     | 简      |
 | [书海阁小说网](https://www.shuhaige.net/)                     | shuhaige | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [小说虎](https://www.xshbook.com/)                           | xshbook   | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [顶点小说网](https://www.23ddw.net/)                         | n23ddw    | ❌     | ❌     | ❌     | ✅     | 简      |
 | [一笔阁](https://www.yibige.org/)                            | yibige    | ❌     | ❌     | ⚠️     | ⚠️     | 简 / 繁 |
 | [乐文小说网](https://www.lewenn.net/)                        | lewenn    | ❌     | ❌     | ⚠️     | ❌     | 简      |
 | [精彩小说](https://biquyuedu.com/)                           | biquyuedu | ❌     | ❌     | ⚠️     | ❌     | 简      |
 | [笔趣读](https://www.blqudu.cc/)                             | blqudu    | ❌     | ❌     | ⚠️     | ❌     | 简      |
-| [顶点小说网](https://www.23ddw.net/)                         | n23ddw    | ❌     | ❌     | ❌     | ✅     | 简      |
 | [追书网](https://www.mangg.com/) (com)                       | mangg_com | ❌     | ❌     | ⚠️     | ❌     | 简      |
 | [追书网](https://www.mangg.net/) (net)                       | mangg_net | ❌     | ❌     | ❌     | ✅     | 简      |
 | [笔趣阁](https://www.fsshu.com/)                             | fsshu    | ❌     | ❌     | ⚠️     | ✅     | 简      |
@@ -131,8 +128,8 @@ novel-cli download --site ttkan shengxu-chendong
 | [哔哩轻小说](https://www.linovelib.com/)                     | linovelib  | ✅     | ✅     | ⚠️     | ⚠️     | 简      |
 | [ESJ Zone](https://www.esjzone.cc)                           | esjzone   | ✅     | ✅     | ✅     | ✅     | 简      |
 | [神凑轻小说](https://www.shencou.com/)                        | shencou   | ✅     | ✅     | ⚠️     | ⚠️     | 简      |
-| [无限轻小说](https://www.8novel.com/)                         | n8novel   | ✅     | ✅     | ⚠️     | ✅     | 繁      |
 | [轻小说百科](https://lnovel.org/)                             | lnovel    | ✅     | ✅     | ⚠️     | ⚠️     | 简 / 繁 |
+| [无限轻小说](https://www.8novel.com/)                         | n8novel   | ✅     | ✅     | ⚠️     | ✅     | 繁      |
 
 #### 其它小说
 
@@ -147,7 +144,10 @@ novel-cli download --site ttkan shengxu-chendong
 
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 | 支持语言 |
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
+| [笔趣阁](https://www.8tsw.com/)                              | n8tsw     | ❌     | ❌     | ⚠️     | ⚠️     | 简      |
 | [得奇小说网](https://www.deqixs.com/)                        | deqixs    | ❌     | ❌     | ❌     | ✅     | 简      |
+| [小说屋](http://www.xiaoshuoge.info/)                       | xiaoshuoge | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [小说路上](https://m.xs63b.com/)                              | xs63b    | ❌     | ❌     | ⚠️     | ✅     | 简      |
 
 ---
 
@@ -179,9 +179,9 @@ novel-cli download --site ttkan shengxu-chendong
   * 书籍: `https://www.hetushu.com/book/5763/index.html` -> Book ID: `5763`
   * 章节: `https://www.hetushu.com/book/5763/4327466.html` -> Chapter ID: `4327466`
 
-* **铅笔小说 (qianbi)**
-  * 书籍: `https://www.23qb.net/book/12282/` -> Book ID: `12282`
-  * 章节: `https://www.23qb.net/book/12282/7908999.html` -> Chapter ID: `7908999`
+* **铅笔小说 (n23qb)**
+  * 书籍: `https://www.23qb.com/book/12282/` -> Book ID: `12282`
+  * 章节: `https://www.23qb.com/book/12282/7908999.html` -> Chapter ID: `7908999`
 
 * **有度中文网 (yodu)**
   * 书籍: `https://www.yodu.org/book/18862/` -> Book ID: `18862`
@@ -197,10 +197,6 @@ novel-cli download --site ttkan shengxu-chendong
   * 书籍: `https://www.71ge.com/65_65536/` -> Book ID: `65_65536`
   * 章节: `https://www.71ge.com/65_65536/1.html` -> Chapter ID: `1`
 
-* **小说屋 (xiaoshuoge)**
-  * 书籍: `http://www.xiaoshuoge.info/html/987/987654/` -> Book ID: `987-987654`
-  * 章节: `http://www.xiaoshuoge.info/html/987/987654/123456789.html` -> Chapter ID: `123456789`
-
 * **精品小说网 (jpxs123)**
   * 书籍: `https://www.jpxs123.com/xh/zhetian.html` -> Book ID: `xh-zhetian`
   * 章节: `https://www.jpxs123.com/xh/zhetian/1.html` -> Chapter ID: `1`
@@ -209,11 +205,6 @@ novel-cli download --site ttkan shengxu-chendong
 * **爱下电子书 (ixdzs8)**
   * 书籍: `https://ixdzs8.com/read/38804/` -> Book ID: `38804`
   * 章节: `https://ixdzs8.com/read/38804/p1.html` -> Chapter ID: `p1`
-
-* **小说路上 (xs63b)**
-  * 书籍: `https://m.xs63b.com/xuanhuan/aoshijiuzhongtian/` -> Book ID: `xuanhuan-aoshijiuzhongtian`
-  * 章节: `https://m.xs63b.com/xuanhuan/aoshijiuzhongtian/8748062.html` -> Chapter ID: `8748062`
-  * 注意: 桌面端页面部分章节缺页, 移动端正常
 
 * **大熊猫文学网 (dxmwx)**
   * 书籍: `https://www.dxmwx.org/book/55598.html` -> Book ID: `55598`
@@ -257,11 +248,6 @@ novel-cli download --site ttkan shengxu-chendong
 * **笔趣阁 (b520)**
   * 书籍: `http://www.b520.cc/8_8187/` -> Book ID: `8_8187`
   * 章节: `http://www.b520.cc/8_8187/3899831.html` -> Chapter ID: `3899831`
-
-* **笔趣阁 (n8tsw)**
-  * 书籍: `https://www.8tsw.com/0_1/` -> Book ID: `0_1`
-  * 章节: `https://www.8tsw.com/0_1/1.html` -> Chapter ID: `1`
-  * 注意: 有时响应不稳定
 
 * **书海阁小说网 (shuhaige)**
   * 书籍: `https://www.shuhaige.net/199178/` -> Book ID: `199178`
@@ -403,11 +389,24 @@ novel-cli download --site ttkan shengxu-chendong
 
 #### 已归档站点
 
+* **笔趣阁 (n8tsw)**
+  * 书籍: `https://www.8tsw.com/0_1/` -> Book ID: `0_1`
+  * 章节: `https://www.8tsw.com/0_1/1.html` -> Chapter ID: `1`
+
 * **得奇小说网 (deqixs)**
   * 书籍: `https://www.deqixs.com/xiaoshuo/2026/` -> Book ID: `2026`
   * 章节: `https://www.deqixs.com/xiaoshuo/2026/1969933.html` -> Chapter ID: `1969933`
   * 注意: 该站点直接提供 txt 下载。
   * 缺点: 每章节分页过多, 每页内容较少, 推荐适当降低请求间隔
+
+* **小说屋 (xiaoshuoge)**
+  * 书籍: `http://www.xiaoshuoge.info/html/987/987654/` -> Book ID: `987-987654`
+  * 章节: `http://www.xiaoshuoge.info/html/987/987654/123456789.html` -> Chapter ID: `123456789`
+
+* **小说路上 (xs63b)**
+  * 书籍: `https://m.xs63b.com/xuanhuan/aoshijiuzhongtian/` -> Book ID: `xuanhuan-aoshijiuzhongtian`
+  * 章节: `https://m.xs63b.com/xuanhuan/aoshijiuzhongtian/8748062.html` -> Chapter ID: `8748062`
+  * 注意: 桌面端页面部分章节缺页, 移动端正常
 
 ---
 

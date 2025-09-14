@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.fetchers.xs63b
-------------------------------------
+novel_downloader.core.archived.xs63b.fetcher
+--------------------------------------------
 
 """
 

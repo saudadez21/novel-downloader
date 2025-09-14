@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.fetchers.n8tsw
-------------------------------------
+novel_downloader.core.archived.n8tsw.fetcher
+--------------------------------------------
 
 """
 

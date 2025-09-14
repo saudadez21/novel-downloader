@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.parsers.qianbi
-------------------------------------
+novel_downloader.core.parsers.n23qb
+-----------------------------------
 
 """
 
@@ -20,14 +20,14 @@ from novel_downloader.models import (
 
 
 @register_parser(
-    site_keys=["qianbi"],
+    site_keys=["n23qb"],
 )
-class QianbiParser(BaseParser):
+class N23qbParser(BaseParser):
     """
     Parser for 铅笔小说 book pages.
     """
 
-    site_name: str = "qianbi"
+    site_name: str = "n23qb"
 
     def parse_book_info(
         self,

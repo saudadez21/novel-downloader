@@ -431,6 +431,16 @@ SITE_RULES: dict[str, SiteRuleSet] = {
         ],
         hints=[],
     ),
+    "www.23qb.com": SiteRuleSet(
+        site_key="n23qb",
+        extractors=[
+            BookIdExtractor(
+                pattern=r"^/book/(\d+)/",
+                build_book_id=lambda m: m.group(1),
+            ),
+        ],
+        hints=[],
+    ),
     "www.37yq.com": SiteRuleSet(
         site_key="n37yq",
         extractors=[
@@ -485,16 +495,6 @@ SITE_RULES: dict[str, SiteRuleSet] = {
             BookIdExtractor(
                 pattern=r"^/([^/]+)/(\d+)(?:/\d+)?\.html$",
                 build_book_id=lambda m: f"{m.group(1)}-{m.group(2)}",
-            ),
-        ],
-        hints=[],
-    ),
-    "www.23qb.net": SiteRuleSet(
-        site_key="qianbi",
-        extractors=[
-            BookIdExtractor(
-                pattern=r"^/book/(\d+)/",
-                build_book_id=lambda m: m.group(1),
             ),
         ],
         hints=[],

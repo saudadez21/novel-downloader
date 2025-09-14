@@ -62,10 +62,10 @@ SAMPLES: dict[str, list[tuple[str, str, str | None]]] = {
         # hetushu (+ alias)
         ("https://www.hetushu.com/book/5763/index.html", "hetushu", "5763"),
         ("https://www.hetubook.com/book/5763/4327466.html", "hetushu", "5763"),
-        # qianbi
-        ("https://www.23qb.net/book/12282/", "qianbi", "12282"),
-        ("https://www.23qb.net/book/12282/catalog", "qianbi", "12282"),
-        ("https://www.23qb.net/book/12282/7908999.html", "qianbi", "12282"),
+        # n23qb
+        ("https://www.23qb.com/book/12282/", "n23qb", "12282"),
+        ("https://www.23qb.com/book/12282/catalog", "n23qb", "12282"),
+        ("https://www.23qb.com/book/12282/7908999.html", "n23qb", "12282"),
         # yodu
         ("https://www.yodu.org/book/18862/", "yodu", "18862"),
         ("https://www.yodu.org/book/18862/4662939.html", "yodu", "18862"),

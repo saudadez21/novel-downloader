@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.downloaders.qianbi
-----------------------------------------
+novel_downloader.core.downloaders.n23qb
+---------------------------------------
 
 Downloader implementation for Qianbi novels, with chapter ID repair logic.
 """
@@ -22,10 +22,10 @@ from novel_downloader.models import (
 from novel_downloader.utils import ChapterStorage, async_jitter_sleep
 
 
-@register_downloader(site_keys=["qianbi"])
-class QianbiDownloader(BaseDownloader):
+@register_downloader(site_keys=["n23qb"])
+class N23qbDownloader(BaseDownloader):
     """
-    Downloader for Qianbi (铅笔) novels.
+    Downloader for n23qb (铅笔) novels.
 
     Repairs missing chapter IDs by following 'next' links, then downloads
     each chapter as a unit (fetch -> parse -> enqueue storage).

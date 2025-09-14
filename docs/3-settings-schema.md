@@ -109,7 +109,7 @@ batch_size = 32
 
 ### sites 配置
 
-站点级设置 (如 `qidian`, `biquge`, ...), **站点级会覆盖全局行为**; 每个站点配置位于 `[sites.<site>]` 下
+站点级设置 (如 `qidian`, `b520`, ...), **站点级会覆盖全局行为**; 每个站点配置位于 `[sites.<site>]` 下
 
 #### 通用键
 
@@ -223,9 +223,6 @@ book_id = "1012584111"
 #### 示例配置
 
 ```toml
-[output]
-clean_text = true
-
 [output.formats]
 make_txt = true
 make_epub = true
