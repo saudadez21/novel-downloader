@@ -1,3 +1,11 @@
+## v2.1.0 (2025-09-15)
+
+### Feat
+
+- **core**: add 20 sites, archive 3, richer logging, URL auto-resolve, EPUB hardening (#80)
+- **web**: use search_stream and add /history page (#79)
+- **core**: lazy-load registries to remove implicit imports (#78)
+
 ## v2.0.2 (2025-09-10)
 
 ### Feat
