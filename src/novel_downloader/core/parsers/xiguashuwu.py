@@ -26,7 +26,7 @@ from novel_downloader.models import (
 )
 from novel_downloader.utils.constants import (
     DEFAULT_USER_HEADERS,
-    XIGUASHUWU_FONT_MAP_PATH,
+    XIGUASHUWU_MAP_PATH,
 )
 from novel_downloader.utils.crypto_utils.aes_util import aes_cbc_decrypt
 from novel_downloader.utils.fontocr import get_font_ocr
@@ -45,9 +45,7 @@ class XiguashuwuParser(BaseParser):
     site_name: str = "xiguashuwu"
     BASE_URL = "https://www.xiguashuwu.com"
     _CONF_THRESHOLD = 0.60
-    _FONT_MAP: dict[str, str] = json.loads(
-        XIGUASHUWU_FONT_MAP_PATH.read_text(encoding="utf-8")
-    )
+    _FONT_MAP: dict[str, str] = {}
     _GLYPH_CACHE: dict[str, str] = {}
 
     _CODEURL_PATTERN = re.compile(
@@ -272,6 +270,8 @@ class XiguashuwuParser(BaseParser):
         Given an <img> src URL, return the mapped character if this image
         represents a single glyph.
         """
+        if not self._FONT_MAP:
+            self._FONT_MAP = json.loads(XIGUASHUWU_MAP_PATH.read_text(encoding="utf-8"))
         fname = url.split("/")[-1].split("?", 1)[0]
         char = self._FONT_MAP.get(fname)
         if char:

@@ -74,9 +74,7 @@ class BaseDownloader(abc.ABC):
         self._storage_batch_size = max(1, config.storage_batch_size)
 
         self._raw_data_dir = Path(config.raw_data_dir) / site
-        self._raw_data_dir.mkdir(parents=True, exist_ok=True)
         self._debug_dir = Path.cwd() / "debug" / site
-        self._debug_dir.mkdir(parents=True, exist_ok=True)
 
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
@@ -184,18 +182,14 @@ class BaseDownloader(abc.ABC):
         """
         ...
 
-    async def _load_book_info(
-        self,
-        book_id: str,
-        html_dir: Path,
-    ) -> BookInfoDict | None:
+    async def _load_book_info(self, book_id: str) -> BookInfoDict | None:
         """
         Attempt to fetch and parse the book_info for a given book_id.
 
         :param book_id: identifier of the book
         """
         info_html = await self.fetcher.get_book_info(book_id)
-        self._save_html_pages(html_dir, "info", info_html)
+        self._save_html_pages(book_id, "info", info_html)
         book_info = self.parser.parse_book_info(info_html)
         if book_info:
             self._save_book_info(book_id, book_info)
@@ -207,11 +201,7 @@ class BaseDownloader(abc.ABC):
                 return None
         return book_info
 
-    def _save_book_info(
-        self,
-        book_id: str,
-        book_info: BookInfoDict,
-    ) -> None:
+    def _save_book_info(self, book_id: str, book_info: BookInfoDict) -> None:
         """
         Serialize and save the book_info dict as json.
 
@@ -227,21 +217,24 @@ class BaseDownloader(abc.ABC):
 
     def _save_html_pages(
         self,
-        html_dir: Path,
+        book_id: str,
         filename: str,
         html_list: Sequence[str],
+        *,
+        folder: str = "html",
     ) -> None:
         """
         If save_html is enabled, write each HTML snippet to a file.
 
         Filenames will be {chap_id}_{index}.html in html_dir.
 
-        :param html_dir: directory in which to write HTML files
+        :param book_id: The book identifier
         :param filename: used as filename prefix
         :param html_list: list of HTML strings to save
         """
         if not self._save_html:
             return
+        html_dir = self._debug_dir / book_id / folder
         html_dir.mkdir(parents=True, exist_ok=True)
         for i, html in enumerate(html_list):
             (html_dir / f"{filename}_{i}.html").write_text(html, encoding="utf-8")

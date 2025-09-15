@@ -8,7 +8,6 @@ Downloader implementation for QQ novels, with unpurchased chapter ID skip logic.
 
 import asyncio
 from collections.abc import Awaitable, Callable
-from pathlib import Path
 from typing import Any, ClassVar
 
 from novel_downloader.core.downloaders.base import BaseDownloader
@@ -60,13 +59,12 @@ class QqbookDownloader(BaseDownloader):
 
         raw_base = self._raw_data_dir / book_id
         raw_base.mkdir(parents=True, exist_ok=True)
-        html_dir = self._debug_dir / book_id / "html"
 
         def cancelled() -> bool:
             return bool(cancel_event and cancel_event.is_set())
 
         # ---- metadata ---
-        book_info = await self._load_book_info(book_id=book_id, html_dir=html_dir)
+        book_info = await self._load_book_info(book_id=book_id)
         if not book_info:
             return
 
@@ -174,7 +172,7 @@ class QqbookDownloader(BaseDownloader):
                     await save_q.put(STOP)
                     return
 
-                chap = await self._process_chapter(book_id, cid, html_dir)
+                chap = await self._process_chapter(book_id, cid)
                 if chap and not cancelled():
                     await save_q.put(chap)
 
@@ -256,7 +254,6 @@ class QqbookDownloader(BaseDownloader):
         self,
         book_id: str,
         cid: str,
-        html_dir: Path,
     ) -> ChapterDict | None:
         """
         Fetch, debug-save, parse a single chapter with retries.
@@ -266,7 +263,7 @@ class QqbookDownloader(BaseDownloader):
         for attempt in range(self._retry_times + 1):
             try:
                 html_list = await self.fetcher.get_book_chapter(book_id, cid)
-                self._save_html_pages(html_dir, cid, html_list)
+                self._save_html_pages(book_id, cid, html_list)
                 chap = await asyncio.to_thread(
                     self.parser.parse_chapter, html_list, cid
                 )

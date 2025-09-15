@@ -8,7 +8,6 @@ Downloader implementation for Qianbi novels, with chapter ID repair logic.
 
 import asyncio
 from collections.abc import Awaitable, Callable
-from pathlib import Path
 from typing import Any
 
 from novel_downloader.core.downloaders.base import BaseDownloader
@@ -51,14 +50,13 @@ class N23qbDownloader(BaseDownloader):
 
         raw_base = self._raw_data_dir / book_id
         raw_base.mkdir(parents=True, exist_ok=True)
-        html_dir = self._debug_dir / book_id / "html"
 
         def cancelled() -> bool:
             return bool(cancel_event and cancel_event.is_set())
 
         with ChapterStorage(raw_base, priorities=self.PRIORITIES_MAP) as storage:
             # --- metadata ---
-            book_info = await self._load_book_info(book_id=book_id, html_dir=html_dir)
+            book_info = await self._load_book_info(book_id=book_id)
             if not book_info:
                 return
 
@@ -66,7 +64,6 @@ class N23qbDownloader(BaseDownloader):
                 book_id,
                 book_info,
                 storage,
-                html_dir,
             )
 
             vols = book_info["volumes"]
@@ -169,7 +166,7 @@ class N23qbDownloader(BaseDownloader):
                         await save_q.put(STOP)
                         return
 
-                    chap = await self._process_chapter(book_id, cid, html_dir)
+                    chap = await self._process_chapter(book_id, cid)
                     if chap:
                         await save_q.put(chap)
 
@@ -226,7 +223,6 @@ class N23qbDownloader(BaseDownloader):
         book_id: str,
         book_info: BookInfoDict,
         storage: ChapterStorage,
-        html_dir: Path,
     ) -> BookInfoDict:
         """
         Fill in missing chapterId fields by retrieving the previous chapter
@@ -248,7 +244,7 @@ class N23qbDownloader(BaseDownloader):
                 data = storage.get_best_chapter(prev_cid)
                 if not data:
                     # fetch+parse previous to discover next
-                    data = await self._process_chapter(book_id, prev_cid, html_dir)
+                    data = await self._process_chapter(book_id, prev_cid)
                     if not data:
                         self.logger.warning(
                             "Failed to fetch chapter %s, skipping repair",
@@ -285,7 +281,6 @@ class N23qbDownloader(BaseDownloader):
         self,
         book_id: str,
         cid: str,
-        html_dir: Path,
     ) -> ChapterDict | None:
         """
         Fetches, saves raw HTML, parses a single chapter,
@@ -296,7 +291,7 @@ class N23qbDownloader(BaseDownloader):
         for attempt in range(self._retry_times + 1):
             try:
                 html_list = await self.fetcher.get_book_chapter(book_id, cid)
-                self._save_html_pages(html_dir, cid, html_list)
+                self._save_html_pages(book_id, cid, html_list)
                 chap = await asyncio.to_thread(
                     self.parser.parse_chapter, html_list, cid
                 )

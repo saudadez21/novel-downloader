@@ -19,7 +19,7 @@ from novel_downloader.models import (
     ChapterInfoDict,
     VolumeInfoDict,
 )
-from novel_downloader.utils.constants import YODU_FONT_MAP_PATH
+from novel_downloader.utils.constants import YODU_MAP_PATH
 
 
 @register_parser(
@@ -225,5 +225,5 @@ class YoduParser(BaseParser):
         Apply font mapping to the input text.
         """
         if not cls._FONT_MAP:
-            cls._FONT_MAP = json.loads(YODU_FONT_MAP_PATH.read_text(encoding="utf-8"))
+            cls._FONT_MAP = json.loads(YODU_MAP_PATH.read_text(encoding="utf-8"))
         return "".join(cls._FONT_MAP.get(ch, ch) for ch in text)

@@ -63,7 +63,6 @@ class BaseExporter(abc.ABC):
 
         self._raw_data_dir = Path(config.raw_data_dir) / site
         self._output_dir = Path(config.output_dir)
-        self._output_dir.mkdir(parents=True, exist_ok=True)
 
         self._cleaner = get_cleaner(
             enabled=config.clean_text,

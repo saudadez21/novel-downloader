@@ -40,7 +40,7 @@ def _unique_path(path: Path, max_tries: int = 100) -> Path:
 
 def write_file(
     content: str | bytes,
-    filepath: str | Path,
+    filepath: Path,
     *,
     on_exist: Literal["overwrite", "skip", "rename"] = "overwrite",
     encoding: str = "utf-8",
@@ -55,27 +55,32 @@ def write_file(
     :return: The final path where the content was written.
     :raise: Any I/O error such as PermissionError or OSError
     """
-    path = Path(filepath)
-    path = path.with_name(sanitize_filename(path.name))
-    path.parent.mkdir(parents=True, exist_ok=True)
+    filepath = filepath.with_name(sanitize_filename(filepath.name))
+    filepath.parent.mkdir(parents=True, exist_ok=True)
 
-    if path.exists():
+    if filepath.exists():
         match on_exist:
             case "skip":
-                return path
+                return filepath
             case "rename":
-                path = _unique_path(path)
+                filepath = _unique_path(filepath)
 
     write_mode = "wb" if isinstance(content, bytes) else "w"
 
-    with tempfile.NamedTemporaryFile(
-        mode=write_mode,
-        encoding=None if "b" in write_mode else encoding,
-        newline=None if "b" in write_mode else "\n",
-        delete=False,
-        dir=path.parent,
-    ) as tmp:
-        tmp.write(content)
-        tmp_path = Path(tmp.name)
-    tmp_path.replace(path)
-    return path
+    tmp_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode=write_mode,
+            encoding=None if "b" in write_mode else encoding,
+            newline=None if "b" in write_mode else "\n",
+            delete=False,
+            dir=filepath.parent,
+        ) as tmp:
+            tmp.write(content)
+            tmp_path = Path(tmp.name)
+        tmp_path.replace(filepath)
+        return filepath
+    except Exception:
+        if tmp_path and tmp_path.exists():
+            tmp_path.unlink(missing_ok=True)
+        raise
