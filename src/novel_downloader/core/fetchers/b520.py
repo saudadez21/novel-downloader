@@ -12,11 +12,11 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 
 
 @register_fetcher(
-    site_keys=["biquge", "b520"],
+    site_keys=["b520"],
 )
-class BiqugeSession(BaseSession):
+class B520Session(BaseSession):
     """
-    A session class for interacting with the 笔趣阁 (www.b520.cc) novel website.
+    A session class for interacting with the 笔趣阁 (www.b520.cc) novel.
     """
 
     site_name: str = "b520"

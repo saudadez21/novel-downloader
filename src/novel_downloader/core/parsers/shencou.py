@@ -26,6 +26,8 @@ class ShencouParser(BaseParser):
     Parser for 神凑轻小说 book pages.
     """
 
+    site_name: str = "shencou"
+
     def parse_book_info(
         self,
         html_list: list[str],
@@ -211,5 +213,5 @@ class ShencouParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "shencou"},
+            "extra": {"site": self.site_name},
         }

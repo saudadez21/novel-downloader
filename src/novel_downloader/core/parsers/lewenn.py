@@ -27,12 +27,9 @@ class LewennParser(BaseParser):
     Parser for 乐文小说网 book pages.
     """
 
+    site_name: str = "lewenn"
     BASE_URL = "https://www.lewenn.net"
-
     ADS: set[str] = {
-        "app2",
-        "read2",
-        "chaptererror",
         "记住乐文小说网",
         "lewenn.net",
     }
@@ -67,8 +64,7 @@ class LewennParser(BaseParser):
             cover_src if cover_src.startswith("http") else f"{self.BASE_URL}{cover_src}"
         )
 
-        summary_lines = tree.xpath('//div[@id="intro"]/p//text()')
-        summary = "\n".join(line.strip() for line in summary_lines).strip()
+        summary = self._join_strs(tree.xpath('//div[@id="intro"]/p//text()'))
 
         # --- Volumes & Chapters ---
         chapters: list[ChapterInfoDict] = []
@@ -115,20 +111,18 @@ class LewennParser(BaseParser):
 
         title = self._first_str(tree.xpath('//div[@class="content"]/h1/text()'))
 
-        nodes = tree.xpath('//div[@id="content" and contains(@class,"showtxt")]')
-        if not nodes:
-            return None
-        content_div = nodes[0]
-
-        raw_lines = [ln.strip() for ln in content_div.xpath(".//text()")]
+        # collect all visible text inside #content, skipping scripts/styles
+        raw_texts = tree.xpath(
+            '//div[@id="content"]//text()[not(ancestor::script) and not(ancestor::style)]'  # noqa: E501
+        )
 
         lines: list[str] = []
-        for ln in raw_lines:
-            if not ln or self._is_ad_line(ln):
+        for ln in raw_texts:
+            # normalize spaces: \xa0 (nbsp) and \u3000 (ideographic space)
+            s = ln.replace("\xa0", "").replace("\u3000", "").strip()
+            if not s or self._is_ad_line(s):
                 continue
-            # if ln.startswith("(") and ln.endswith(")"):
-            #     continue
-            lines.append(ln.replace(chr(0xA0), ""))
+            lines.append(s)
 
         content = "\n".join(lines)
         if not content.strip():
@@ -138,5 +132,5 @@ class LewennParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "lewenn"},
+            "extra": {"site": self.site_name},
         }

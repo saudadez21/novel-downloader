@@ -7,18 +7,26 @@ Abstract base class providing common HTTP session handling for fetchers.
 """
 
 import abc
+import asyncio
 import json
 import logging
 import types
 from collections.abc import Mapping
-from typing import Any, Self
+from pathlib import Path
+from typing import Any, Literal, Self
+from urllib.parse import unquote, urlparse
 
 import aiohttp
 from aiohttp import ClientResponse, ClientSession, ClientTimeout, TCPConnector
 
 from novel_downloader.models import FetcherConfig, LoginField
-from novel_downloader.utils import async_jitter_sleep
-from novel_downloader.utils.constants import DATA_DIR, DEFAULT_USER_HEADERS
+from novel_downloader.utils import async_jitter_sleep, sanitize_filename
+from novel_downloader.utils.constants import (
+    DATA_DIR,
+    DEFAULT_IMAGE_SUFFIX,
+    DEFAULT_USER_HEADERS,
+)
+from novel_downloader.utils.file_utils.io import _unique_path, write_file
 
 from .rate_limiter import TokenBucketRateLimiter
 
@@ -142,6 +150,40 @@ class BaseSession(abc.ABC):
         :return: The page content as string list.
         """
         ...
+
+    async def download_images(
+        self,
+        img_dir: Path,
+        urls: list[str],
+        batch_size: int = 10,
+        *,
+        on_exist: Literal["overwrite", "skip", "rename"] = "skip",
+    ) -> None:
+        """
+        Download images to `img_dir` in batches.
+
+        Any HTTP error (raise_for_status) is logged and skipped.
+
+        :param img_dir: Destination folder.
+        :param urls: List of image URLs (http/https).
+        :param batch_size: Concurrency per batch.
+        :param on_exist: What to do when file exists.
+        """
+        if not urls:
+            return
+
+        img_dir.mkdir(parents=True, exist_ok=True)
+
+        for i in range(0, len(urls), max(1, batch_size)):
+            batch = urls[i : i + batch_size]
+            tasks = [
+                self._download_one_image(url, img_dir, on_exist=on_exist)
+                for url in batch
+            ]
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            for r in results:
+                if isinstance(r, Exception):
+                    self.logger.warning("Image download error: %s", r)
 
     @property
     def is_logged_in(self) -> bool:
@@ -392,9 +434,62 @@ class BaseSession(abc.ABC):
                 continue
         return data.decode(encoding or "utf-8", errors="ignore")
 
+    async def _download_one_image(
+        self,
+        url: str,
+        folder: Path,
+        *,
+        on_exist: Literal["overwrite", "skip", "rename"],
+    ) -> None:
+        """Download a single image."""
+        async with self.session.get(url) as resp:
+            save_path = self._build_filepath(
+                url=url,
+                folder=folder,
+                default_suffix=DEFAULT_IMAGE_SUFFIX,
+                on_exist=on_exist,
+            )
+            if save_path.exists() and on_exist == "skip":
+                return
+
+            try:
+                resp.raise_for_status()
+            except aiohttp.ClientResponseError as e:
+                self.logger.warning("Skip %s (HTTP %s): %s", url, e.status, e)
+                return
+
+            write_file(
+                content=await resp.read(),  # bytes
+                filepath=save_path,
+                on_exist=on_exist,
+            )
+            self.logger.debug("Saved image: %s <- %s", save_path, url)
+
     def _resolve_base_url(self, locale_style: str) -> str:
         key = locale_style.strip().lower()
         return self.BASE_URL_MAP.get(key, self.DEFAULT_BASE_URL)
+
+    @staticmethod
+    def _build_filepath(
+        url: str,
+        folder: Path,
+        default_suffix: str,
+        on_exist: Literal["overwrite", "skip", "rename"],
+    ) -> Path:
+        parsed_url = urlparse(url)
+        url_path = Path(unquote(parsed_url.path))
+
+        raw_name = url_path.name or "unnamed"
+        name = sanitize_filename(raw_name)
+
+        if "." not in name and (url_path.suffix or default_suffix):
+            name += url_path.suffix or default_suffix
+
+        file_path = folder / name
+        if on_exist == "rename":
+            file_path = _unique_path(file_path)
+
+        return file_path
 
     async def __aenter__(self) -> Self:
         if self._session is None or self._session.closed:

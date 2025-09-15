@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.searchers.qianbi
---------------------------------------
+novel_downloader.core.searchers.n23qb
+-------------------------------------
 
 """
 
@@ -17,10 +17,10 @@ logger = logging.getLogger(__name__)
 
 
 @register_searcher(
-    site_keys=["qianbi"],
+    site_keys=["n23qb"],
 )
-class QianbiSearcher(BaseSearcher):
-    site_name = "qianbi"
+class N23qbSearcher(BaseSearcher):
+    site_name = "n23qb"
     priority = 10
     BASE_URL = "https://www.23qb.com/"
     SEARCH_URL = "https://www.23qb.com/search.html"

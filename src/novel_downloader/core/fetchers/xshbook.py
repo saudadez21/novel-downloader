@@ -16,7 +16,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 )
 class XshbookSession(BaseSession):
     """
-    A session class for interacting with the 小说虎 (www.xshbook.com) novel website.
+    A session class for interacting with the 小说虎 (www.xshbook.com) novel.
     """
 
     site_name: str = "xshbook"

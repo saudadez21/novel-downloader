@@ -28,6 +28,8 @@ class PiaotiaParser(BaseParser):
     Parser for 飘天文学网 book pages.
     """
 
+    site_name: str = "piaotia"
+
     _RE_DEVICE_DIV = re.compile(
         r'<div\s+id=[\'"“”]?device[\'"“”]?[^>]*>',
         flags=re.IGNORECASE,
@@ -185,5 +187,5 @@ class PiaotiaParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "piaotia"},
+            "extra": {"site": self.site_name},
         }

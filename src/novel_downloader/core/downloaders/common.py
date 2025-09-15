@@ -8,7 +8,6 @@ Concrete downloader implementation with a generic async pipeline for common nove
 
 import asyncio
 from collections.abc import Awaitable, Callable
-from pathlib import Path
 from typing import Any
 
 from novel_downloader.core.downloaders.base import BaseDownloader
@@ -38,8 +37,6 @@ class CommonDownloader(BaseDownloader):
         On cancel: stop producing, workers finish at most one chapter,
         storage drains, flushes, and exits.
         """
-        TAG = "[Downloader]"
-
         book_id = self._normalize_book_id(book["book_id"])
         start_id = book.get("start_id")
         end_id = book.get("end_id")
@@ -47,20 +44,19 @@ class CommonDownloader(BaseDownloader):
 
         raw_base = self._raw_data_dir / book_id
         raw_base.mkdir(parents=True, exist_ok=True)
-        html_dir = self._debug_dir / book_id / "html"
 
         def cancelled() -> bool:
             return bool(cancel_event and cancel_event.is_set())
 
         # --- metadata ---
-        book_info = await self.load_book_info(book_id=book_id, html_dir=html_dir)
+        book_info = await self._load_book_info(book_id=book_id)
         if not book_info:
             return
 
         vols = book_info["volumes"]
         plan = self._planned_chapter_ids(vols, start_id, end_id, ignore_set)
         if not plan:
-            self.logger.info("%s nothing to do after filtering: %s", TAG, book_id)
+            self.logger.info("Nothing to do after filtering: %s", book_id)
             return
 
         progress = Progress(total=len(plan), hook=progress_hook)
@@ -79,7 +75,7 @@ class CommonDownloader(BaseDownloader):
                 storage.upsert_chapters(batch, self.DEFAULT_SOURCE_ID)
             except Exception as e:
                 self.logger.error(
-                    "[Storage] batch upsert failed (size=%d): %s",
+                    "Storage batch upsert failed (size=%d): %s",
                     len(batch),
                     e,
                     exc_info=True,
@@ -155,7 +151,7 @@ class CommonDownloader(BaseDownloader):
                     await save_q.put(STOP)
                     return
 
-                chap = await self._process_chapter(book_id, cid, html_dir)
+                chap = await self._process_chapter(book_id, cid)
                 if chap:
                     await save_q.put(chap)
 
@@ -198,16 +194,14 @@ class CommonDownloader(BaseDownloader):
         # --- done ---
         if cancelled():
             self.logger.info(
-                "%s Novel '%s' cancelled: flushed %d/%d chapters.",
-                TAG,
+                "Novel '%s' cancelled: flushed %d/%d chapters.",
                 book_info.get("book_name", "unknown"),
                 progress.done,
                 progress.total,
             )
         else:
             self.logger.info(
-                "%s Novel '%s' download completed.",
-                TAG,
+                "Novel '%s' download completed.",
                 book_info.get("book_name", "unknown"),
             )
 
@@ -215,7 +209,6 @@ class CommonDownloader(BaseDownloader):
         self,
         book_id: str,
         cid: str,
-        html_dir: Path,
     ) -> ChapterDict | None:
         """
         Fetches, saves raw HTML, parses a single chapter,
@@ -226,24 +219,25 @@ class CommonDownloader(BaseDownloader):
         for attempt in range(self._retry_times + 1):
             try:
                 html_list = await self.fetcher.get_book_chapter(book_id, cid)
-                self._save_html_pages(html_dir, cid, html_list)
+                self._save_html_pages(book_id, cid, html_list)
                 chap = await asyncio.to_thread(
                     self.parser.parse_chapter, html_list, cid
                 )
                 if not chap:
                     raise ValueError("Empty parse result")
+                imgs = self._extract_img_urls(chap["content"])
+                img_dir = self._raw_data_dir / book_id / "images"
+                await self.fetcher.download_images(img_dir, imgs)
                 return chap
             except Exception as e:
                 if attempt < self._retry_times:
-                    self.logger.info(
-                        "[ChapterWorker] Retry %s (%s): %s", cid, attempt + 1, e
-                    )
+                    self.logger.info("Retry chapter %s (%s): %s", cid, attempt + 1, e)
                     backoff = self._backoff_factor * (2**attempt)
                     await async_jitter_sleep(
                         base=backoff, mul_spread=1.2, max_sleep=backoff + 3
                     )
                 else:
-                    self.logger.warning("[ChapterWorker] Failed %s: %s", cid, e)
+                    self.logger.warning("Failed chapter %s: %s", cid, e)
         return None
 
     @staticmethod

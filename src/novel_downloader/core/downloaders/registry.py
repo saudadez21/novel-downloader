@@ -65,7 +65,7 @@ def _load_downloader(site_key: str) -> None:
     """
     Attempt to import the site-specific downloader module.
     """
-    modname = f"{_DOWNLOADERS_PKG}.{_normalize_key(site_key)}"
+    modname = f"{_DOWNLOADERS_PKG}.{site_key}"
     try:
         import_module(modname)
     except ModuleNotFoundError as e:

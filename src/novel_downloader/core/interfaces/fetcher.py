@@ -7,7 +7,8 @@ Protocol defining the interface for asynchronous fetching, login, and session ma
 """
 
 import types
-from typing import Any, Protocol, Self, runtime_checkable
+from pathlib import Path
+from typing import Any, Literal, Protocol, Self, runtime_checkable
 
 from novel_downloader.models import LoginField
 
@@ -97,6 +98,24 @@ class FetcherProtocol(Protocol):
         or other storage, so that it can be restored in future sessions.
 
         :return: True if the session state was successfully saved.
+        """
+        ...
+
+    async def download_images(
+        self,
+        img_dir: Path,
+        urls: list[str],
+        batch_size: int = 10,
+        *,
+        on_exist: Literal["overwrite", "skip", "rename"] = "skip",
+    ) -> None:
+        """
+        Download images to `img_dir` in batches.
+
+        :param img_dir: Destination folder.
+        :param urls: List of image URLs (http/https).
+        :param batch_size: Concurrency per batch.
+        :param on_exist: What to do when file exists.
         """
         ...
 

@@ -16,7 +16,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 )
 class HetushuSession(BaseSession):
     """
-    A session class for interacting with the 和图书 (www.hetushu.com) novel website.
+    A session class for interacting with the 和图书 (www.hetushu.com) novel.
     """
 
     site_name: str = "hetushu"

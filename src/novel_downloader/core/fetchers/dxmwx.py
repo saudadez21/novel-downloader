@@ -17,7 +17,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 )
 class DxmwxSession(BaseSession):
     """
-    A session class for interacting with the 大熊猫文学网 (www.dxmwx.org) novel website.
+    A session class for interacting with the 大熊猫文学网 (www.dxmwx.org) novel.
     """
 
     site_name: str = "dxmwx"

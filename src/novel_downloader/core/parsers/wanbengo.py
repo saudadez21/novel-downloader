@@ -9,7 +9,6 @@ import re
 from datetime import datetime
 from html import unescape
 from typing import Any
-from urllib.parse import urljoin
 
 from lxml import html
 
@@ -31,7 +30,7 @@ class WanbengoParser(BaseParser):
     Parser for 完本神站 book pages.
     """
 
-    BASE = "https://www.wanbengo.com"
+    site_name: str = "wanbengo"
 
     # XPaths for the book info page
     X_BOOK_NAME = "//div[@class='detailTopMid']//h1/text()"
@@ -95,10 +94,9 @@ class WanbengoParser(BaseParser):
         for a in tree.xpath(self.X_CHAPTERS):
             title = self._norm_space("".join(a.xpath(".//text()")))
             href = a.get("href") or ""
-            url = urljoin(self.BASE, href)
             # "/129/103950.html" -> "103950"
-            cid = url.rstrip(".html").split("/")[-1]
-            chapters.append({"title": title, "url": url, "chapterId": cid})
+            cid = href.rstrip(".html").split("/")[-1]
+            chapters.append({"title": title, "url": href, "chapterId": cid})
 
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 
@@ -152,7 +150,7 @@ class WanbengoParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "wanbengo"},
+            "extra": {"site": self.site_name},
         }
 
     @staticmethod

@@ -64,6 +64,8 @@ class QidianParser(BaseParser):
     Parser for 起点中文网 site.
     """
 
+    site_name: str = "qidian"
+
     def __init__(self, config: ParserConfig, fuid: str = ""):
         """
         Initialize the QidianParser with the given configuration.
@@ -153,14 +155,14 @@ class QidianParser(BaseParser):
         **kwargs: Any,
     ) -> ChapterDict | None:
         if not html_list:
-            logger.warning("[Parser] chapter_id=%s :: html_list is empty", chapter_id)
+            logger.warning("qidian chapter %s :: html_list is empty", chapter_id)
             return None
         try:
             ssr_data = self._find_ssr_page_context(html_list[0])
             chapter_info = self._extract_chapter_info(ssr_data)
         except Exception as e:
             logger.warning(
-                "[Parser] chapter_id=%s :: failed to locate ssr_pageContext block: %s",
+                "qidian chapter %s :: failed to locate ssr_pageContext block: %s",
                 chapter_id,
                 e,
             )
@@ -168,14 +170,13 @@ class QidianParser(BaseParser):
 
         if not chapter_info:
             logger.warning(
-                "[Parser] ssr_chapterInfo not found for chapter '%s'", chapter_id
+                "qidian chapter %s :: ssr_chapterInfo not found.", chapter_id
             )
             return None
 
         if not self._can_view_chapter(chapter_info):
             logger.warning(
-                "[Parser] Chapter '%s' is not purchased or inaccessible.",
-                chapter_id,
+                "qidian chapter %s :: not purchased or inaccessible.", chapter_id
             )
             return None
 
@@ -205,7 +206,7 @@ class QidianParser(BaseParser):
         )
         if not chapter_text:
             logger.warning(
-                "[Parser] chapter_id=%s :: content empty after decryption/font-mapping",
+                "qidian chapter %s :: content empty after decryption/font-mapping",
                 chapter_id,
             )
             return None
@@ -218,6 +219,7 @@ class QidianParser(BaseParser):
             "title": title,
             "content": chapter_text,
             "extra": {
+                "site": self.site_name,
                 "author_say": author_say,
                 "updated_at": update_time,
                 "update_timestamp": update_timestamp,
@@ -256,7 +258,7 @@ class QidianParser(BaseParser):
         """
         if not self._decode_font:
             logger.warning(
-                "[Parser] chapter_id=%s :: font decryption skipped "
+                "qidian chapter %s :: font decryption skipped "
                 "(set `decode_font=True` to enable)",
                 cid,
             )
@@ -269,13 +271,13 @@ class QidianParser(BaseParser):
         fixed_woff2_url = chapter_info.get("fixedFontWoff2")
 
         if not css_str:
-            logger.warning("[Parser] cid=%s :: css missing or empty", cid)
+            logger.warning("qidian chapter %s :: css missing or empty", cid)
             return ""
         if not rf_data:
-            logger.warning("[Parser] cid=%s :: randomFont.data missing or empty", cid)
+            logger.warning("qidian chapter %s :: randomFont.data missing or empty", cid)
             return ""
         if not fixed_woff2_url:
-            logger.warning("[Parser] cid=%s :: fixedFontWoff2 missing or empty", cid)
+            logger.warning("qidian chapter %s :: fixedFontWoff2 missing or empty", cid)
             return ""
 
         debug_dir = self._debug_dir / "font_debug" / cid
@@ -287,7 +289,7 @@ class QidianParser(BaseParser):
             self._rand_path.write_bytes(bytes(rf_data))
         except Exception as e:
             logger.error(
-                "[Parser] cid=%s :: failed to write randomFont.ttf",
+                "qidian chapter %s :: failed to write randomFont.ttf",
                 cid,
                 exc_info=e,
             )
@@ -299,9 +301,7 @@ class QidianParser(BaseParser):
             on_exist="skip",
         )
         if fixed_path is None:
-            logger.warning(
-                "[Parser] failed to download fixedfont for chapter '%s'", cid
-            )
+            logger.warning("qidian chapter %s :: failed to download fixedfont", cid)
             return ""
 
         css_rules = self._parse_css_rules(css_str)
@@ -330,7 +330,7 @@ class QidianParser(BaseParser):
         )
         if not mapping_result:
             logger.warning(
-                "[Parser] font mapping returned empty result for chapter '%s'", cid
+                "qidian chapter %s :: font mapping returned empty result", cid
             )
             return ""
 
@@ -500,7 +500,7 @@ class QidianParser(BaseParser):
             with open(fixed_map_file, "w", encoding="utf-8") as f:
                 json.dump(fixed_map, f, ensure_ascii=False, indent=2)
         except Exception as e:
-            logger.error("[FontOCR] Failed to save fixed map: %s", e)
+            logger.error("Failed to save fixed map (qidian): %s", e)
 
         return mapping_result
 

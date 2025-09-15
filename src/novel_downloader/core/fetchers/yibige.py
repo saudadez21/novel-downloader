@@ -17,7 +17,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 )
 class YibigeSession(BaseSession):
     """
-    A session class for interacting with the 一笔阁 (www.yibige.org) novel website.
+    A session class for interacting with the 一笔阁 (www.yibige.org) novel.
     """
 
     site_name: str = "yibige"

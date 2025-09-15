@@ -15,7 +15,6 @@ from novel_downloader.cli import ui
 from novel_downloader.config import ConfigAdapter, load_config
 from novel_downloader.core import get_exporter
 from novel_downloader.utils.i18n import t
-from novel_downloader.utils.logger import setup_logging
 
 
 def register_export_subcommand(subparsers: _SubParsersAction) -> None:  # type: ignore
@@ -30,7 +29,7 @@ def register_export_subcommand(subparsers: _SubParsersAction) -> None:  # type: 
         help=t("export_format_help"),
     )
     parser.add_argument(
-        "--site", default="qidian", help=t("download_option_site", default="qidian")
+        "--site", default="qidian", help=t("export_option_site", default="qidian")
     )
     parser.add_argument("--config", type=str, help=t("help_config"))
 
@@ -55,7 +54,7 @@ def handle_export(args: Namespace) -> None:
     adapter = ConfigAdapter(config=config_data, site=site)
     exporter_cfg = adapter.get_exporter_config()
     log_level = adapter.get_log_level()
-    setup_logging(console_level=log_level)
+    ui.setup_logging(console_level=log_level)
 
     with get_exporter(site, exporter_cfg) as exporter:
         for book_id in book_ids:

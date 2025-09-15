@@ -20,7 +20,7 @@ from novel_downloader.models import LoginField
 )
 class YamiboSession(BaseSession):
     """
-    A session class for interacting with the 百合会 (www.yamibo.com) novel website.
+    A session class for interacting with the 百合会 (www.yamibo.com) novel.
     """
 
     site_name: str = "yamibo"
@@ -48,11 +48,11 @@ class YamiboSession(BaseSession):
 
         if await self._check_login_status():
             self._is_logged_in = True
-            self.logger.debug("[auth] Logged in via cookies.")
+            self.logger.debug("Logged in via cookies: yamibo")
             return True
 
         if not (username and password):
-            self.logger.warning("[auth] No credentials provided.")
+            self.logger.warning("No credentials provided: yamibo")
             return False
 
         for _ in range(attempt):
@@ -163,10 +163,10 @@ class YamiboSession(BaseSession):
             csrf_value = tree.xpath('//input[@name="_csrf-frontend"]/@value')
             csrf_value = csrf_value[0] if csrf_value else ""
             if not csrf_value:
-                self.logger.warning("[session] _api_login: CSRF token not found.")
+                self.logger.warning("yamibo _api_login: CSRF token not found.")
                 return False
         except Exception as exc:
-            self.logger.warning("[session] _api_login failed at step 1: %s", exc)
+            self.logger.warning("yamibo _api_login failed at step 1: %s", exc)
             return False
 
         data_2 = {
@@ -186,7 +186,7 @@ class YamiboSession(BaseSession):
             text_2 = await resp_2.text()
             return "登录成功" in text_2
         except Exception as exc:
-            self.logger.warning("[session] _api_login failed at step 2: %s", exc)
+            self.logger.warning("yamibo _api_login failed at step 2: %s", exc)
         return False
 
     async def _check_login_status(self) -> bool:

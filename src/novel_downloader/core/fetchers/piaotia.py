@@ -17,7 +17,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 )
 class PiaotiaSession(BaseSession):
     """
-    A session class for interacting with the 飘天文学网 (www.piaotia.com) novel website.
+    A session class for interacting with the 飘天文学网 (www.piaotia.com) novel.
     """
 
     site_name: str = "piaotia"

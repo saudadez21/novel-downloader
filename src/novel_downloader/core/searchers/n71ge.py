@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.searchers.xs63b
+novel_downloader.core.searchers.n71ge
 -------------------------------------
 
 """
 
+import contextlib
 import logging
 
 from lxml import html
@@ -17,30 +18,33 @@ logger = logging.getLogger(__name__)
 
 
 @register_searcher(
-    site_keys=["xs63b"],
+    site_keys=["n71ge", "71ge"],
 )
-class Xs63bSearcher(BaseSearcher):
-    site_name = "xs63b"
-    priority = 30
-    BASE_URL = "https://www.xs63b.com"
-    SEARCH_URL = "https://www.xs63b.com/search/"
+class N71geSearcher(BaseSearcher):
+    site_name = "n71ge"
+    priority = 20
+    BASE_URL = "https://www.71ge.com"
+    SEARCH_URL = "https://www.71ge.com/search.php"
 
     @classmethod
     async def _fetch_html(cls, keyword: str) -> str:
         headers = {
-            "Host": "www.xs63b.com",
-            "Origin": "https://www.xs63b.com",
-            "Referer": "https://www.xs63b.com/",
+            "Dnt": "1",
+            "Origin": "https://www.71ge.com",
+            "Referer": "https://www.71ge.com/search.php",
+            "Content-Type": "application/x-www-form-urlencoded",
         }
+        with contextlib.suppress(Exception):
+            await cls._http_get(cls.SEARCH_URL, headers=headers)
+        searchkey = cls._quote(keyword, encoding="gbk", errors="replace")
+        login = "login"
+        submit = cls._quote(
+            "&#160;搜&#160;&#160;索&#160;", encoding="gbk", errors="replace"
+        )
+        body = f"s={searchkey}&action={login}&submit={submit}"
         try:
-            async with (await cls._http_get(cls.BASE_URL, headers=headers)) as resp:
-                base_html = await cls._response_to_str(resp)
-            data = {
-                "_token": cls._parse_token(base_html),
-                "kw": keyword,
-            }
             async with (
-                await cls._http_post(cls.SEARCH_URL, data=data, headers=headers)
+                await cls._http_post(cls.SEARCH_URL, data=body, headers=headers)
             ) as resp:
                 return await cls._response_to_str(resp)
         except Exception:
@@ -54,29 +58,27 @@ class Xs63bSearcher(BaseSearcher):
     @classmethod
     def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
         doc = html.fromstring(html_str)
-        rows = doc.xpath("//div[@class='toplist']/ul/li")
+        rows = doc.xpath("//tr[td/a]")
         results: list[SearchResult] = []
 
         for idx, row in enumerate(rows):
-            href = cls._first_str(row.xpath(".//p[@class='s1']/a[1]/@href"))
+            title_a = row.xpath("./td[1]/a")
+            href = cls._first_str([a.get("href") for a in title_a])
+            title = cls._first_str([a.text_content() for a in title_a])
             if not href:
                 continue
 
             if limit is not None and idx >= limit:
                 break
 
-            # 'https://www.xs63b.com/{catalog}/{name}/' -> "{catalog}-{name}"
-            book_id = href.split("xs63b.com", 1)[-1].strip(" /").replace("/", "-")
+            # '/341_341309/' -> "341_341309"
+            book_id = href.strip("/")
             book_url = cls._abs_url(href)
 
-            title = "".join(row.xpath(".//p[@class='s1']//a//text()"))
-
-            latest_chapter = (
-                cls._first_str(row.xpath(".//p[@class='s2']//a/text()")) or "-"
-            )
-            author = cls._first_str(row.xpath(".//p[@class='s3']/text()")) or "-"
-            word_count = cls._first_str(row.xpath(".//p[@class='s4']/text()")) or "-"
-            update_date = cls._first_str(row.xpath(".//p[@class='s6']/text()")) or "-"
+            latest_chapter = cls._first_str(row.xpath("./td[2]/a/text()"))
+            author = cls._first_str(row.xpath("./td[3]/text()"))
+            word_count = cls._first_str(row.xpath("./td[4]/text()"))
+            update_date = cls._first_str(row.xpath("./td[5]/text()"))
 
             # Compute priority
             prio = cls.priority + idx
@@ -96,9 +98,3 @@ class Xs63bSearcher(BaseSearcher):
                 )
             )
         return results
-
-    @staticmethod
-    def _parse_token(html_str: str) -> str:
-        doc = html.fromstring(html_str)
-        vals = doc.xpath("//div[@id='search']//input[@name='_token']/@value")
-        return vals[0].strip() if vals else ""

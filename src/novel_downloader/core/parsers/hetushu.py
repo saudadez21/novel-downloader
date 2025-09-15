@@ -28,6 +28,7 @@ class HetushuParser(BaseParser):
     Parser for 和图书 book pages.
     """
 
+    site_name: str = "hetushu"
     BASE_URL = "https://www.hetushu.com"
 
     def parse_book_info(
@@ -64,8 +65,7 @@ class HetushuParser(BaseParser):
             if a.strip()
         ]
 
-        paras = tree.xpath('//div[@class="intro"]/p/text()')
-        summary = "\n".join(p.strip() for p in paras if p.strip())
+        summary = self._join_strs(tree.xpath('//div[@class="intro"]/p/text()'))
 
         # --- Chapter volumes & listings ---
         volumes: list[VolumeInfoDict] = []
@@ -135,5 +135,5 @@ class HetushuParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "hetushu"},
+            "extra": {"site": self.site_name},
         }

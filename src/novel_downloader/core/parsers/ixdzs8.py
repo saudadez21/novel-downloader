@@ -29,6 +29,8 @@ class Ixdzs8Parser(BaseParser):
     Parser for 爱下电子书 book pages.
     """
 
+    site_name: str = "ixdzs8"
+
     def parse_book_info(
         self,
         html_list: list[str],
@@ -178,7 +180,7 @@ class Ixdzs8Parser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "ixdzs8"},
+            "extra": {"site": self.site_name},
         }
 
     @classmethod

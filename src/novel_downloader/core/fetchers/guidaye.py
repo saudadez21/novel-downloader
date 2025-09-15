@@ -16,7 +16,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 )
 class GuidayeSession(BaseSession):
     """
-    A session class for interacting with the 名著阅读 (b.guidaye.com) novel website.
+    A session class for interacting with the 名著阅读 (b.guidaye.com) novel.
     """
 
     site_name: str = "guidaye"

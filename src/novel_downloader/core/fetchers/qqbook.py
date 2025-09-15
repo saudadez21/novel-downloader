@@ -18,7 +18,7 @@ from novel_downloader.models import LoginField
 )
 class QqbookSession(BaseSession):
     """
-    A session class for interacting with the QQ 阅读 (book.qq.com) novel website.
+    A session class for interacting with the QQ 阅读 (book.qq.com) novel.
     """
 
     site_name: str = "qqbook"
@@ -168,10 +168,10 @@ class QqbookSession(BaseSession):
             if payload.get("code") == 0:
                 return True
             self.logger.info(
-                "login invalid (code=%s): %s",
+                "QQ book login invalid (code=%s): %s",
                 payload.get("code"),
                 payload.get("msg"),
             )
         except Exception as e:
-            self.logger.info("login check failed: %s", e)
+            self.logger.info("QQ book login check failed: %s", e)
         return False

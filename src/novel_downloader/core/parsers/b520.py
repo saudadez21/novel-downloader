@@ -20,12 +20,14 @@ from novel_downloader.models import (
 
 
 @register_parser(
-    site_keys=["biquge", "b520"],
+    site_keys=["b520"],
 )
-class BiqugeParser(BaseParser):
+class B520Parser(BaseParser):
     """
     Parser for 笔趣阁 book pages.
     """
+
+    site_name: str = "b520"
 
     def parse_book_info(
         self,
@@ -51,8 +53,7 @@ class BiqugeParser(BaseParser):
             replaces=[("最后更新：", "")],
         )
 
-        intro_elem = tree.xpath('//div[@id="intro"]')
-        summary = "".join(intro_elem[0].itertext()).strip() if intro_elem else ""
+        summary = self._join_strs(tree.xpath("//div[@id='intro']//p/text()"))
 
         book_type = self._first_str(tree.xpath('//div[@class="con_top"]/a[2]/text()'))
         tags = [book_type] if book_type else []
@@ -112,5 +113,5 @@ class BiqugeParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "b520"},
+            "extra": {"site": self.site_name},
         }

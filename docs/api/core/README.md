@@ -43,7 +43,7 @@ async def _print_progress(done: int, total: int) -> None:
     print(f"下载进度: {done}/{total} 章")
 
 keyword = "关键词"
-sites = ["biquge"]
+sites = ["b520"]
 
 results = search(
     keyword=keyword,

@@ -27,6 +27,8 @@ class SfacgParser(BaseParser):
     Parser for sfacg book pages.
     """
 
+    site_name: str = "sfacg"
+
     # Book info XPaths
     _BOOK_NAME_XPATH = '//ul[@class="book_info"]//span[@class="book_newtitle"]/text()'
     _AUTHOR_INFO_XPATH = '//ul[@class="book_info"]//span[@class="book_info3"]/text()'
@@ -34,8 +36,8 @@ class SfacgParser(BaseParser):
     _COVER_URL_XPATH = '//ul[@class="book_info"]//li/img/@src'
     # _STATUS_XPATH = '//ul[@class="book_info"]//div[@class="book_info2"]/span/text()'
     _STATUS_XPATH = (
-        '//ul[@class="book_info"]//div[@class="book_info2"]/span/text()'
-        ' and (contains(., "完结") or contains(., "连载"))]/text()'
+        '//ul[@class="book_info"]//div[@class="book_info2"]/span'
+        '[contains(text(), "完结") or contains(text(), "连载")]/text()'
     )
     _SUMMARY_XPATH = '//ul[@class="book_profile"]/li[@class="book_bk_qs1"]/text()'
 
@@ -160,5 +162,5 @@ class SfacgParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "sfacg"},
+            "extra": {"site": self.site_name},
         }

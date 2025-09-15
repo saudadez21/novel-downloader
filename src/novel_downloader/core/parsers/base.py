@@ -23,6 +23,7 @@ class BaseParser(abc.ABC):
     Subclasses must implement actual parsing logic for specific sites.
     """
 
+    site_name: str
     ADS: set[str] = set()
 
     _SPACE_RE = re.compile(r"\s+")
@@ -117,7 +118,14 @@ class BaseParser(abc.ABC):
     def _first_str(xs: list[str], replaces: list[tuple[str, str]] | None = None) -> str:
         replaces = replaces or []
         value: str = xs[0].strip() if xs else ""
-        for replace in replaces:
-            old, new = replace
+        for old, new in replaces:
+            value = value.replace(old, new)
+        return value
+
+    @staticmethod
+    def _join_strs(xs: list[str], replaces: list[tuple[str, str]] | None = None) -> str:
+        replaces = replaces or []
+        value = "\n".join(s.strip() for s in xs if s and s.strip())
+        for old, new in replaces:
             value = value.replace(old, new)
         return value

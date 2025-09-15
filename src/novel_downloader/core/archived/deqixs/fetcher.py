@@ -8,16 +8,15 @@ novel_downloader.core.archived.deqixs.fetcher
 from typing import Any
 
 from novel_downloader.core.fetchers.base import BaseSession
+from novel_downloader.core.fetchers.registry import register_fetcher
 
-# from novel_downloader.core.fetchers.registry import register_fetcher
 
-
-# @register_fetcher(
-#     site_keys=["deqixs"],
-# )
+@register_fetcher(
+    site_keys=["deqixs"],
+)
 class DeqixsSession(BaseSession):
     """
-    A session class for interacting with the 得奇小说网 (www.deqixs.com) novel website.
+    A session class for interacting with the 得奇小说网 (www.deqixs.com) novel.
     """
 
     BASE_URL = "https://www.deqixs.com"
@@ -53,7 +52,7 @@ class DeqixsSession(BaseSession):
                 html = await self.fetch(full_url, **kwargs)
             except Exception as exc:
                 self.logger.warning(
-                    "[async] get_book_chapter(%s page %d) failed: %s",
+                    "deqixs get_book_chapter(%s page %d) failed: %s",
                     chapter_id,
                     idx,
                     exc,

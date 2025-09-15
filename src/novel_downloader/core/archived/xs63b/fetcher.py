@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.fetchers.xs63b
-------------------------------------
+novel_downloader.core.archived.xs63b.fetcher
+--------------------------------------------
 
 """
 
@@ -19,7 +19,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 )
 class Xs63bSession(BaseSession):
     """
-    A session class for interacting with the 小说路上 (m.xs63b.com) novel website.
+    A session class for interacting with the 小说路上 (m.xs63b.com) novel.
     """
 
     site_name: str = "xs63b"
@@ -78,11 +78,11 @@ class Xs63bSession(BaseSession):
                 html = await self.fetch(chapter_url, **kwargs)
             except Exception as exc:
                 self.logger.warning(
-                    "[async] get_book_chapter(%s page %d) failed: %s",
+                    "xs63b get_book_chapter(%s) failed: %s",
                     chapter_url,
                     exc,
                 )
-                break
+                return []
 
             html_pages.append(html)
             if "/xs635/mobile/images/nextpage.png" not in html:

@@ -28,6 +28,7 @@ class QbtrParser(BaseParser):
     Parser for 全本同人小说 book pages.
     """
 
+    site_name: str = "qbtr"
     BASE_URL = "https://www.qbtr.cc"
 
     def parse_book_info(
@@ -127,7 +128,7 @@ class QbtrParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "qbtr"},
+            "extra": {"site": self.site_name},
         }
 
     @classmethod

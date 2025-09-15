@@ -59,7 +59,7 @@ def _load_exporter(site_key: str) -> None:
     """
     Attempt to import the site-specific exporter module.
     """
-    modname = f"{_EXPORTERS_PKG}.{_normalize_key(site_key)}"
+    modname = f"{_EXPORTERS_PKG}.{site_key}"
     try:
         import_module(modname)
     except ModuleNotFoundError as e:

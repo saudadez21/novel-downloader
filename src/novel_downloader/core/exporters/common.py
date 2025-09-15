@@ -9,7 +9,7 @@ Shared exporter implementation for producing standard TXT and EPUB outputs.
 import re
 from html import escape
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from novel_downloader.core.exporters.base import BaseExporter
 from novel_downloader.models import (
@@ -85,31 +85,29 @@ class CommonExporter(BaseExporter):
 
         for v_idx, volume in enumerate(book_info.get("volumes", []), start=1):
             vol_title = volume.get("volume_name") or f"卷 {v_idx}"
-            vol_title = self._cleaner.clean_title(vol_title)
             parts.append(self._build_txt_volume_heading(vol_title, volume))
 
             # Collect chapter ids then batch fetch
-            chap_ids = [
+            cids = [
                 c["chapterId"] for c in volume.get("chapters", []) if c.get("chapterId")
             ]
-            if not chap_ids:
+            if not cids:
                 continue
-            chap_map = self._get_chapters(book_id, chap_ids)
+            chap_map = self._get_chapters(book_id, cids)
 
             # Append each chapter
             for ch_info in volume.get("chapters", []):
-                chap_id = ch_info.get("chapterId")
-                if not chap_id:
+                cid = ch_info.get("chapterId")
+                ch_title = ch_info.get("title", "")
+                if not cid:
                     continue
 
-                ch = chap_map.get(chap_id)
+                ch = chap_map.get(cid)
                 if not ch:
-                    self.logger.warning(
-                        "Missing chapter content for chapterId=%s", chap_id
-                    )
+                    self.logger.warning("Missing chapter content for chapterId=%s", cid)
                     continue
 
-                parts.append(self._build_txt_chapter(ch))
+                parts.append(self._build_txt_chapter(ch_title, ch))
 
         final_text = "\n".join(parts)
 
@@ -194,7 +192,6 @@ class CommonExporter(BaseExporter):
         # --- Compile columes ---
         for v_idx, vol in enumerate(book_info.get("volumes", []), start=1):
             vol_title = vol.get("volume_name") or f"卷 {v_idx}"
-            vol_title = self._cleaner.clean_title(vol_title.replace(name, ""))
 
             vol_cover_url = vol.get("volume_cover") or ""
             vol_cover: Path | None = None
@@ -218,27 +215,28 @@ class CommonExporter(BaseExporter):
             book.add_stylesheet(main_css)
 
             # Collect chapter ids then batch fetch
-            chap_ids = [
+            cids = [
                 c["chapterId"] for c in vol.get("chapters", []) if c.get("chapterId")
             ]
-            if not chap_ids:
+            if not cids:
                 continue
-            chap_map = self._get_chapters(book_id, chap_ids)
+            chap_map = self._get_chapters(book_id, cids)
 
             # Append each chapter
             for ch_info in vol.get("chapters", []):
-                chap_id = ch_info.get("chapterId")
-                if not chap_id:
+                cid = ch_info.get("chapterId")
+                ch_title = ch_info.get("title")
+                if not cid:
                     continue
 
-                ch = chap_map.get(chap_id)
+                ch = chap_map.get(cid)
                 if not ch:
-                    self.logger.warning(
-                        "Missing chapter content for chapterId=%s", chap_id
-                    )
+                    self.logger.warning("Missing chapter content for chapterId=%s", cid)
                     continue
 
-                title = self._cleaner.clean_title(ch.get("title", "")) or chap_id
+                title = (
+                    self._cleaner.clean_title(ch_title or ch.get("title", "")) or cid
+                )
                 content = self._cleaner.clean_content(ch.get("content", ""))
 
                 content = (
@@ -254,8 +252,8 @@ class CommonExporter(BaseExporter):
                 )
                 book.add_chapter(
                     Chapter(
-                        id=f"c_{chap_id}",
-                        filename=f"c{chap_id}.xhtml",
+                        id=f"c_{cid}",
+                        filename=f"c{cid}.xhtml",
                         title=title,
                         content=chap_html,
                         css=[main_css],
@@ -330,7 +328,6 @@ class CommonExporter(BaseExporter):
         # --- Compile columes ---
         for v_idx, vol in enumerate(book_info.get("volumes", []), start=1):
             vol_title = vol.get("volume_name") or f"卷 {v_idx}"
-            vol_title = self._cleaner.clean_title(vol_title.replace(name, ""))
 
             vol_cover_url = vol.get("volume_cover") or ""
             vol_cover: Path | None = None
@@ -348,28 +345,29 @@ class CommonExporter(BaseExporter):
             )
 
             # Collect chapter ids then batch fetch
-            chap_ids = [
+            cids = [
                 c["chapterId"] for c in vol.get("chapters", []) if c.get("chapterId")
             ]
-            if not chap_ids:
+            if not cids:
                 book.add_volume(curr_vol)
                 continue
-            chap_map = self._get_chapters(book_id, chap_ids)
+            chap_map = self._get_chapters(book_id, cids)
 
             # Append each chapter
             for ch_info in vol.get("chapters", []):
-                chap_id = ch_info.get("chapterId")
-                if not chap_id:
+                cid = ch_info.get("chapterId")
+                ch_title = ch_info.get("title")
+                if not cid:
                     continue
 
-                ch = chap_map.get(chap_id)
+                ch = chap_map.get(cid)
                 if not ch:
-                    self.logger.warning(
-                        "Missing chapter content for chapterId=%s", chap_id
-                    )
+                    self.logger.warning("Missing chapter content for chapterId=%s", cid)
                     continue
 
-                title = self._cleaner.clean_title(ch.get("title", "")) or chap_id
+                title = (
+                    self._cleaner.clean_title(ch_title or ch.get("title", "")) or cid
+                )
                 content = self._cleaner.clean_content(ch.get("content", ""))
 
                 content = (
@@ -386,8 +384,8 @@ class CommonExporter(BaseExporter):
 
                 curr_vol.chapters.append(
                     Chapter(
-                        id=f"c_{chap_id}",
-                        filename=f"c{chap_id}.xhtml",
+                        id=f"c_{cid}",
+                        filename=f"c{cid}.xhtml",
                         title=title,
                         content=chap_html,
                         css=[main_css],
@@ -442,7 +440,7 @@ class CommonExporter(BaseExporter):
         target_dir: Path,
         filename: str | None = None,
         *,
-        on_exist: str = "overwrite",
+        on_exist: Literal["overwrite", "skip", "rename"] = "overwrite",
     ) -> Path | None:
         """
         Download image from url to target dir with given name
@@ -454,7 +452,7 @@ class CommonExporter(BaseExporter):
             target_dir,
             filename=filename,
             headers=DEFAULT_HEADERS,
-            on_exist="overwrite",
+            on_exist=on_exist,
             default_suffix=DEFAULT_IMAGE_SUFFIX,
         )
 
@@ -504,12 +502,12 @@ class CommonExporter(BaseExporter):
         line = f"=== {vol_title.strip()} ==="
         return f"{line}\n" + ("\n".join(meta_bits) + "\n\n" if meta_bits else "\n\n")
 
-    def _build_txt_chapter(self, chap: ChapterDict) -> str:
+    def _build_txt_chapter(self, chap_title: str, chap: ChapterDict) -> str:
         """
         Render one chapter to text
         """
         # Title
-        raw_title = chap.get("title", "")
+        raw_title = chap_title or chap.get("title", "")
         title_line = self._cleaner.clean_title(raw_title).strip()
 
         cleaned = self._cleaner.clean_content(chap.get("content") or "").strip()

@@ -16,7 +16,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 )
 class AaatxtSession(BaseSession):
     """
-    A session class for interacting with the 3A电子书 (www.aaatxt.com) novel website.
+    A session class for interacting with the 3A电子书 (www.aaatxt.com) novel.
     """
 
     site_name: str = "aaatxt"

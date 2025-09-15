@@ -17,7 +17,7 @@ from novel_downloader.models import FetcherConfig
 )
 class TtkanSession(BaseSession):
     """
-    A session class for interacting with the 天天看小说 (www.ttkan.co) novel website.
+    A session class for interacting with the 天天看小说 (www.ttkan.co) novel.
     """
 
     site_name: str = "ttkan"

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.parsers.qianbi
-------------------------------------
+novel_downloader.core.parsers.n23qb
+-----------------------------------
 
 """
 
@@ -20,12 +20,14 @@ from novel_downloader.models import (
 
 
 @register_parser(
-    site_keys=["qianbi"],
+    site_keys=["n23qb"],
 )
-class QianbiParser(BaseParser):
+class N23qbParser(BaseParser):
     """
     Parser for 铅笔小说 book pages.
     """
+
+    site_name: str = "n23qb"
 
     def parse_book_info(
         self,
@@ -135,17 +137,15 @@ class QianbiParser(BaseParser):
         next_href = self._first_str(
             tree.xpath('//div[@class="footer"]/a[@class="f-right"]/@href')
         )
-        next_chapter_id = (
-            next_href.split("/")[-1].replace(".html", "") if next_href else ""
-        )
+        next_cid = next_href.split("/")[-1].replace(".html", "") if next_href else ""
 
         return {
             "id": chapter_id,
             "title": title_text,
             "content": content_text,
             "extra": {
-                "site": "qianbi",
+                "site": self.site_name,
                 "volume": volume_text,
-                "next_chapter_id": next_chapter_id,
+                "next_cid": next_cid,
             },
         }

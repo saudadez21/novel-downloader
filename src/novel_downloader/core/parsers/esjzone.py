@@ -27,6 +27,8 @@ class EsjzoneParser(BaseParser):
     Parser for esjzone book pages.
     """
 
+    site_name: str = "esjzone"
+
     # Chapter XPaths
     _CHAPTER_TEXT_XPATH = 'string(//div[contains(@class, "forum-content")])'
     _CHAPTER_CONTENT_NODES_XPATH = '//div[contains(@class, "forum-content")]/*'
@@ -210,7 +212,7 @@ class EsjzoneParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "esjzone", "updated_at": updated_at},
+            "extra": {"site": self.site_name, "updated_at": updated_at},
         }
 
     def _is_forum_page(self, html_str: list[str]) -> bool:

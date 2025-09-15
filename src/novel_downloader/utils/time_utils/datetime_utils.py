@@ -132,5 +132,5 @@ def time_diff(
         return days, hours, minutes, seconds
 
     except Exception as e:
-        logger.warning("[time] Failed to calculate time difference: %s", e)
+        logger.warning("Failed to calculate time difference: %s", e)
         return 999, 23, 59, 59

@@ -28,6 +28,8 @@ class Quanben5Parser(BaseParser):
     Parser for 全本小说网 book pages.
     """
 
+    site_name: str = "quanben5"
+
     def parse_book_info(
         self,
         html_list: list[str],
@@ -99,5 +101,5 @@ class Quanben5Parser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "quanben5"},
+            "extra": {"site": self.site_name},
         }

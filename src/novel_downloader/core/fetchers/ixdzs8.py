@@ -18,7 +18,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 )
 class Ixdzs8Session(BaseSession):
     """
-    A session class for interacting with the 爱下电子书 (ixdzs8.com) novel website.
+    A session class for interacting with the 爱下电子书 (ixdzs8.com) novel.
     """
 
     site_name: str = "ixdzs8"

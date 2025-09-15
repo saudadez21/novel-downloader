@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.parsers.xs63b
------------------------------------
+novel_downloader.core.archived.xs63b.parser
+-------------------------------------------
 
 """
 
@@ -9,7 +9,6 @@ import re
 from typing import Any
 
 from lxml import html
-
 from novel_downloader.core.parsers.base import BaseParser
 from novel_downloader.core.parsers.registry import register_parser
 from novel_downloader.models import (
@@ -27,6 +26,8 @@ class Xs63bParser(BaseParser):
     """
     Parser for 小说路上 book pages.
     """
+
+    site_name: str = "xs63b"
 
     TITLE_SELECTOR = "//div[@class='block_txt2']//h2/text()"
     AUTHOR_SELECTOR = "//p[contains(., '作者')]/a/text()"
@@ -157,5 +158,5 @@ class Xs63bParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "xs63b"},
+            "extra": {"site": self.site_name},
         }

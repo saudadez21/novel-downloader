@@ -16,7 +16,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 )
 class TongrenquanSession(BaseSession):
     """
-    A session class for interacting with the 同人圈 (www.tongrenquan.org) novel website.
+    A session class for interacting with the 同人圈 (www.tongrenquan.org) novel.
     """
 
     site_name: str = "tongrenquan"

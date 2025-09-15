@@ -17,7 +17,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 )
 class N8novelSession(BaseSession):
     """
-    A session class for interacting with the 无限轻小说 (www.8novel.com) novel website.
+    A session class for interacting with the 无限轻小说 (www.8novel.com) novel.
     """
 
     site_name: str = "n8novel"

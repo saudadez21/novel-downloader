@@ -18,7 +18,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 )
 class QbtrSession(BaseSession):
     """
-    A session class for interacting with the 全本同人小说 (www.qbtr.cc) novel website.
+    A session class for interacting with the 全本同人小说 (www.qbtr.cc) novel.
     """
 
     site_name: str = "qbtr"

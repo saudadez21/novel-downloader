@@ -27,6 +27,8 @@ class ShuhaigeParser(BaseParser):
     Parser for 书海阁小说网 book pages.
     """
 
+    site_name: str = "shuhaige"
+
     def parse_book_info(
         self,
         html_list: list[str],
@@ -107,5 +109,5 @@ class ShuhaigeParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "shuhaige"},
+            "extra": {"site": self.site_name},
         }

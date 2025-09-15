@@ -17,7 +17,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 )
 class I25zwSession(BaseSession):
     """
-    A session class for interacting with the 25中文网 (www.i25zw.com) novel website.
+    A session class for interacting with the 25中文网 (www.i25zw.com) novel.
     """
 
     site_name: str = "i25zw"

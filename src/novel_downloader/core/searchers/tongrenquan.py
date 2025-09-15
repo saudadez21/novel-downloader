@@ -32,8 +32,8 @@ class TongrenquanSearcher(BaseSearcher):
         classid = "0"
         body = f"keyboard={keyboard}&show={show}&classid={classid}"
         headers = {
-            "Origin": "https://www.tongrenquan.cc",
-            "Referer": "https://www.tongrenquan.cc/",
+            "Origin": "https://www.tongrenquan.org",
+            "Referer": "https://www.tongrenquan.org/",
             "Content-Type": "application/x-www-form-urlencoded",
         }
         try:

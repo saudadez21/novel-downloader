@@ -34,10 +34,10 @@ results = search(
     keyword="三体",
 )
 
-# 在 biquge 和 qianbi 站点搜索 '遮天'
+# 在 b520 和 n23qb 站点搜索 '遮天'
 results = search(
     keyword="遮天",
-    sites=["biquge", "qianbi"],
+    sites=["b520", "n23qb"],
     limit=20,
     per_site_limit=5,
 )
@@ -50,7 +50,7 @@ for item in results:
 
 ```python
 class SearchResult(TypedDict, total=True):
-    site: str        # 站点键, 如 'biquge'
+    site: str        # 站点键, 如 'b520'
     book_id: str     # 书籍在该站点中的唯一 ID
     title: str       # 小说标题
     author: str      # 作者

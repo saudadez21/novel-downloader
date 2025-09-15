@@ -29,6 +29,8 @@ class DxmwxParser(BaseParser):
     Parser for 大熊猫文学网 book pages.
     """
 
+    site_name: str = "dxmwx"
+
     _RE_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
     _RE_SPACES = re.compile(r"[ \t\u3000]+")
     _RE_NEWLINES = re.compile(r"\n{2,}")
@@ -141,7 +143,7 @@ class DxmwxParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "dxmwx"},
+            "extra": {"site": self.site_name},
         }
 
     @classmethod

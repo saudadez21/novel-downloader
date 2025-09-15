@@ -9,6 +9,7 @@ This entry point starts the local server and registers the app's pages.
 """
 
 import argparse
+import asyncio
 from pathlib import Path
 
 from nicegui import app, ui
@@ -59,7 +60,10 @@ def web_main() -> None:
     setup_logging(console_level=log_level)
 
     app.on_startup(mount_exports)
-    ui.run(host=host, port=args.port, reload=args.reload)
+    try:
+        ui.run(host=host, port=args.port, reload=args.reload)
+    except (KeyboardInterrupt, asyncio.CancelledError):
+        print("Server has stopped")
 
 
 if __name__ in {"__main__", "__mp_main__"}:

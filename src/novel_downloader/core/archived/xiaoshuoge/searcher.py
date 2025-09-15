@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 """
-novel_downloader.core.searchers.xiaoshuowu
-------------------------------------------
+novel_downloader.core.archived.xiaoshuoge.searcher
+--------------------------------------------------
 
 """
 
 import logging
 
 from lxml import html
-
 from novel_downloader.core.searchers.base import BaseSearcher
 from novel_downloader.core.searchers.registry import register_searcher
 from novel_downloader.models import SearchResult
@@ -17,10 +16,10 @@ logger = logging.getLogger(__name__)
 
 
 @register_searcher(
-    site_keys=["xiaoshuowu", "xiaoshuoge"],
+    site_keys=["xiaoshuoge"],
 )
-class XiaoshuowuSearcher(BaseSearcher):
-    site_name = "xiaoshuowu"
+class XiaoshuogeSearcher(BaseSearcher):
+    site_name = "xiaoshuoge"
     priority = 30
     SEARCH_URL = "http://www.xiaoshuoge.info/modules/article/search.php"
 

@@ -17,7 +17,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 )
 class ShencouSession(BaseSession):
     """
-    A session class for interacting with the 神凑轻小说 (www.shencou.com) novel website.
+    A session class for interacting with the 神凑轻小说 (www.shencou.com) novel.
     """
 
     site_name: str = "shencou"

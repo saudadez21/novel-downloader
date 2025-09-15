@@ -8,7 +8,10 @@ novel_downloader.core.searchers.registry
 __all__ = ["register_searcher", "search"]
 
 import asyncio
+import logging
+import pkgutil
 from collections.abc import AsyncIterator, Callable, Sequence
+from importlib import import_module
 from typing import TypeVar
 
 import aiohttp
@@ -18,7 +21,12 @@ from novel_downloader.models import SearchResult
 
 S = TypeVar("S", bound=BaseSearcher)
 
+_LOADED = False
+_EXCLUDES = {"__init__", "registry", "base"}
 _SEARCHER_REGISTRY: dict[str, type[BaseSearcher]] = {}
+_SEARCHERS_PKG = "novel_downloader.core.searchers"
+
+logger = logging.getLogger(__name__)
 
 
 def register_searcher(
@@ -34,6 +42,28 @@ def register_searcher(
         return cls
 
     return decorator
+
+
+def _load_all_searchers() -> None:
+    """
+    Attempt to import all site-specific searcher module.
+    """
+    global _LOADED
+    if _LOADED:
+        return
+
+    pkg = import_module(_SEARCHERS_PKG)
+
+    for m in pkgutil.walk_packages(pkg.__path__, prefix=pkg.__name__ + "."):
+        leaf = m.name.rsplit(".", 1)[-1]
+        if leaf in _EXCLUDES or leaf.startswith("_"):
+            continue
+        try:
+            import_module(m.name)
+        except BaseException as e:
+            logger.warning("Failed to import searcher %s: %s", m.name, e)
+
+    _LOADED = True
 
 
 async def search(
@@ -54,6 +84,8 @@ async def search(
     :param timeout: Per-request time budget (seconds)
     :return: A flat list of `SearchResult` objects.
     """
+    _load_all_searchers()
+
     keys = list(sites or _SEARCHER_REGISTRY.keys())
     to_call = {_SEARCHER_REGISTRY[key] for key in keys if key in _SEARCHER_REGISTRY}
 
@@ -96,6 +128,8 @@ async def search_stream(
     :param timeout: Timeout per-site (seconds).
     :yield: Lists of `SearchResult` objects from each completed site.
     """
+    _load_all_searchers()
+
     keys = list(sites or _SEARCHER_REGISTRY.keys())
     classes = {_SEARCHER_REGISTRY[k] for k in keys if k in _SEARCHER_REGISTRY}
 

@@ -27,6 +27,7 @@ class Jpxs123Parser(BaseParser):
     Parser for 精品小说网 book pages.
     """
 
+    site_name: str = "jpxs123"
     BASE_URL = "https://www.jpxs123.com"
 
     def parse_book_info(
@@ -59,8 +60,7 @@ class Jpxs123Parser(BaseParser):
         )
 
         # Summary from the <p> inside infos
-        paras = tree.xpath('//div[@class="infos"]/p//text()')
-        summary = "\n".join(p.strip() for p in paras if p.strip())
+        summary = self._join_strs(tree.xpath('//div[@class="infos"]/p//text()'))
 
         # Chapters from the book_list
         chapters: list[ChapterInfoDict] = []
@@ -128,7 +128,7 @@ class Jpxs123Parser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "jpxs123"},
+            "extra": {"site": self.site_name},
         }
 
     @classmethod

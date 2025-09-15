@@ -64,7 +64,7 @@ try:
 
 except ImportError:
     print(
-        "[crypto_utils] Falling back to pure-Python AES_CBC.\n"
+        "crypto_utils: Falling back to pure-Python AES_CBC.\n"
         "Tip: `pip install pycryptodome` for ~800x faster speed."
     )
     from novel_downloader.utils.crypto_utils.aes_v2 import AES_CBC

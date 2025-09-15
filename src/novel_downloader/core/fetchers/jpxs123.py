@@ -18,7 +18,7 @@ from novel_downloader.core.fetchers.registry import register_fetcher
 )
 class Jpxs123Session(BaseSession):
     """
-    A session class for interacting with the 精品小说网 (www.jpxs123.com) novel website.
+    A session class for interacting with the 精品小说网 (www.jpxs123.com) novel.
     """
 
     site_name: str = "jpxs123"

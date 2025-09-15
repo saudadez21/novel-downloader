@@ -17,7 +17,7 @@ from novel_downloader.models import LoginField
 )
 class SfacgSession(BaseSession):
     """
-    A session class for interacting with the SF轻小说 (m.sfacg.com) novel website.
+    A session class for interacting with the SF轻小说 (m.sfacg.com) novel.
     """
 
     site_name: str = "sfacg"
@@ -44,7 +44,7 @@ class SfacgSession(BaseSession):
 
         if await self._check_login_status():
             self._is_logged_in = True
-            self.logger.debug("[auth] Logged in via cookies.")
+            self.logger.debug("Logged in via cookies: sfacg")
             return True
 
         self._is_logged_in = False

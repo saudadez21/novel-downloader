@@ -9,16 +9,15 @@ import logging
 
 from lxml import html
 from novel_downloader.core.searchers.base import BaseSearcher
+from novel_downloader.core.searchers.registry import register_searcher
 from novel_downloader.models import SearchResult
-
-# from novel_downloader.core.searchers.registry import register_searcher
 
 logger = logging.getLogger(__name__)
 
 
-# @register_searcher(
-#     site_keys=["deqixs"],
-# )
+@register_searcher(
+    site_keys=["deqixs"],
+)
 class DeqixsSearcher(BaseSearcher):
     site_name = "deqixs"
     priority = 20

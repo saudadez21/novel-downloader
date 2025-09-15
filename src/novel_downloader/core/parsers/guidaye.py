@@ -28,6 +28,7 @@ class GuidayeParser(BaseParser):
     Parser for 名著阅读 book pages.
     """
 
+    site_name: str = "guidaye"
     BASE_URL = "https://b.guidaye.com"
 
     def parse_book_info(
@@ -124,5 +125,5 @@ class GuidayeParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "guidaye"},
+            "extra": {"site": self.site_name},
         }

@@ -27,6 +27,7 @@ class TongrenquanParser(BaseParser):
     Parser for 同人圈 book pages.
     """
 
+    site_name: str = "tongrenquan"
     BASE_URL = "https://www.tongrenquan.org"
 
     def parse_book_info(
@@ -58,14 +59,14 @@ class TongrenquanParser(BaseParser):
         summary = "\n".join(p.strip() for p in paras if p.strip())
 
         # Chapters extraction
-        chapters: list[ChapterInfoDict] = []
-        for a in tree.xpath('//div[contains(@class,"book_list")]//ul//li/a'):
-            url = a.get("href", "").strip()
-            title = a.text_content().strip()
-            # General pattern: /category/bookId/chapterId.html
-            # '/tongren/7562/462.html' -> '462'
-            chapter_id = url.rstrip(".html").split("/")[-1]
-            chapters.append({"title": title, "url": url, "chapterId": chapter_id})
+        chapters: list[ChapterInfoDict] = [
+            {
+                "title": (a.text or "").strip(),
+                "url": (a.get("href") or "").strip(),
+                "chapterId": (a.get("href") or "").rsplit("/", 1)[-1].split(".", 1)[0],
+            }
+            for a in tree.xpath('//div[contains(@class,"book_list")]//ul//li/a')
+        ]
 
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 
@@ -112,5 +113,5 @@ class TongrenquanParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "tongrenquan"},
+            "extra": {"site": self.site_name},
         }

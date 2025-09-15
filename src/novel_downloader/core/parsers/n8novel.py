@@ -28,6 +28,7 @@ class N8novelParser(BaseParser):
     Parser for 无限轻小说 book pages.
     """
 
+    site_name: str = "n8novel"
     BASE_URL = "https://www.8novel.com"
     _SPLIT_STR_PATTERN = re.compile(
         r'["\']([^"\']+)["\']\s*\.split\s*\(\s*["\']\s*,\s*["\']\s*\)', re.DOTALL
@@ -177,7 +178,7 @@ class N8novelParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": "n8novel"},
+            "extra": {"site": self.site_name},
         }
 
     @staticmethod

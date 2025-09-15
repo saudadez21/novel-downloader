@@ -22,11 +22,11 @@
 ### 快速开始
 
 ```bash
-# 下载指定书籍 (默认站点: qidian)
-novel-cli download 1234567890
+# 根据 URL 下载书籍
+novel-cli download https://www.hetushu.com/book/5763/index.html
 
-# 指定站点下载 (例如 biquge)
-novel-cli download --site biquge 8_8187
+# 指定站点下载 (例如 b520)
+novel-cli download --site b520 8_8187
 
 # 导出为 EPUB
 novel-cli export --format epub 88888
@@ -100,18 +100,25 @@ Commands:
 
 #### 1. download 子命令
 
-按书籍 ID 下载完整小说, 支持从命令行或配置文件读取 ID
+下载完整小说, 支持三种方式:
+
+1. **直接传入 URL**
+2. **指定站点 + 书籍 ID**
+3. **省略参数, 从配置文件读取 ID**
 
 **Synopsis**
 
 ```bash
-novel-cli download [-h] [--site SITE] [--config CONFIG] [--start START] [--end END] [--no-export] [book_ids ...]
+novel-cli download [-h] [--site SITE] [--config CONFIG] [--start START] [--end END] [--no-export] [book_ids | url]
 ```
 
 **Options**
 
-* `book_ids ...`: 要下载的书籍 ID (可选, 省略时将从配置文件读取)
-* `--site SITE`: 站点键 (如 `qidian`, `biquge`, ...), 默认 `qidian`
+* `book_ids | url`:
+  * 输入书籍 ID (配合 `--site` 使用)
+  * 输入书籍/章节 URL (自动解析站点与书籍 ID)
+  * 省略时将从配置文件读取 `book_ids`
+* `--site SITE`: 站点键 (如 `qidian`, `b520`, ...), 若直接传入 URL, 可省略
 * `--start START`: 起始章节**唯一 ID** (仅用于第一个 `book_id`)
 * `--end`: 结束章节**唯一 ID**, **包含** (仅用于第一个 `book_id`)
 * `--no-export`: 仅下载, 不进行导出。启用后将跳过导出步骤
@@ -125,20 +132,22 @@ novel-cli download [-h] [--site SITE] [--config CONFIG] [--start START] [--end E
 **Examples**
 
 ```bash
-# 下载指定起点小说的书籍
-novel-cli download 1234567890
+# 方式一: 直接通过 URL 启动下载
+novel-cli download https://www.hetushu.com/book/5763/index.html
 
-# 指定站点 (如 biquge)
-novel-cli download --site biquge 8_8187
+# 方式二: 指定站点 + 书籍 ID
+novel-cli download --site b520 8_8187
+novel-cli download --site n23qb 12282
+novel-cli download --site qidian 1010868264
 
-# 只下载起点小说的一部分章节
-novel-cli download --start 10001 --end 10200 1234567890
+# 只下载部分章节
+novel-cli download --site qidian 1010868264 --start 402902546 --end 406807540
 
 # 仅下载, 跳过导出步骤
-novel-cli download --no-export 1234567890
+novel-cli download --no-export --site qidian 1010868264
 
-# 从配置文件中读取 ID
-novel-cli download
+# 方式三: 从配置文件中读取 ID
+novel-cli download --site n23qb
 ```
 
 ---
@@ -166,17 +175,17 @@ novel-cli search [-h] [--site SITE] [--config CONFIG] [--limit N] [--site-limit 
 # 搜索所有站点 (默认全部)
 novel-cli search 三体
 
-# 指定单个站点 (如 biquge)
-novel-cli search --site biquge 三体
+# 指定单个站点 (如 b520)
+novel-cli search --site b520 三体
 
-# 搜索 biquge, 返回最多 5 条结果
-novel-cli search --site biquge --limit 5 三体
+# 搜索 b520, 返回最多 5 条结果
+novel-cli search --site b520 --limit 5 三体
 
 # 总体返回最多 20 条, 每站点最多 5 条
 novel-cli search --limit 20 --site-limit 5 三体
 
-# 指定多个站点 (biquge 和 qianbi)
-novel-cli search -s biquge -s qianbi 三体
+# 指定多个站点 (b520 和 n23qb)
+novel-cli search -s b520 -s n23qb 三体
 ```
 
 ---
@@ -195,7 +204,7 @@ novel-cli export [-h] [--format FORMAT] [--site SITE] [--config CONFIG] book_id 
 
 * `book_ids`: 要导出的一个或多个书籍 ID
 * `--format FORMAT`: 导出格式: `txt` / `epub` / `all`, 默认 `all`
-* `--site SITE`: 站点键 (如 `biquge`, `qidian`, ...), 默认 `qidian`
+* `--site SITE`: 站点键 (如 `b520`, `qidian`, ...), 默认 `qidian`
 
 **Examples**
 
@@ -207,7 +216,7 @@ novel-cli export 12345 23456
 novel-cli export --format epub 88888
 
 # 指定站点来源并导出多本书
-novel-cli export --site biquge 12345 23456
+novel-cli export --site b520 12345 23456
 ```
 
 > 必须提供至少一个 `book_id`。
@@ -289,6 +298,6 @@ novel-cli clean --all --yes
 
 ### 附录 A: 术语与约定
 
-* **SITE (站点键)**: 在命令中用于指明站点的短名称 (如 `qidian`, `biquge`, `qianbi`) 。完整列表见 [站点支持文档](./4-supported-sites.md)。
+* **SITE (站点键)**: 在命令中用于指明站点的短名称 (如 `qidian`, `b520`, `n23qb`) 。完整列表见 [站点支持文档](./4-supported-sites.md)。
 * **章节唯一 ID**: 站点侧用于标识章节的 ID, **不是**连续的 "第 N 章" 序号; 在 `--start`/`--end` 中应传入此 ID。
 * **配置文件路径**: 若未显式传入 `--config`, CLI 会按「配置优先级」自动解析。
