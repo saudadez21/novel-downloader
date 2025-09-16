@@ -312,7 +312,7 @@ class QidianParser(BaseParser):
             )
 
         # Run OCR + fallback mapping
-        char_set = {c for c in paragraphs_str if c not in {" ", "\n", "\u3000"}}
+        char_set = set(paragraphs_str) - {" ", "\n", "\u3000"}
         refl_set = set(refl_list)
         char_set = char_set - refl_set
         if self._save_font_debug:

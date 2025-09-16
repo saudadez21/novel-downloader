@@ -28,8 +28,9 @@ class EsjzoneSession(BaseSession):
     BOOK_INFO_URL = "https://www.esjzone.cc/detail/{book_id}.html"
     CHAPTER_URL = "https://www.esjzone.cc/forum/{book_id}/{chapter_id}.html"
 
-    API_LOGIN_URL_1 = "https://www.esjzone.cc/my/login"
-    API_LOGIN_URL_2 = "https://www.esjzone.cc/inc/mem_login.php"
+    _LOGIN_URL = "https://www.esjzone.cc/my/login"
+    _API_LOGIN_URL = "https://www.esjzone.cc/inc/mem_login.php"
+    _API_UNLOCK_URL = "https://www.esjzone.cc/inc/forum_pw.php"
 
     _TOKEN_RE = re.compile(r"<JinJing>(.*?)</JinJing>")
 
@@ -80,9 +81,12 @@ class EsjzoneSession(BaseSession):
         self,
         book_id: str,
         chapter_id: str,
+        password: str | None = None,
         **kwargs: Any,
     ) -> list[str]:
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
+        if password:
+            await self._api_unlock_chapter(url, password)
         return [await self.fetch(url, **kwargs)]
 
     async def get_bookcase(
@@ -148,45 +152,101 @@ class EsjzoneSession(BaseSession):
         """
         return cls.CHAPTER_URL.format(book_id=book_id, chapter_id=chapter_id)
 
+    async def _get_auth_token(self, url: str) -> str:
+        """
+        Equivalent logic to the JavaScript `getAuthToken` function:
+        retrieves an authentication token from the given URL for use
+        in subsequent requests.
+
+        The `url` is typically the page where the next request originates.
+
+        Note:
+            The site implements an older object-parameter-based callback
+            mechanism in JavaScript.
+        """
+        data = {"plxf": "getAuthToken"}
+        try:
+            resp = await self.post(url, data=data)
+            resp.raise_for_status()
+            # Example response: <JinJing>token_here</JinJing>
+            text = await resp.text()
+            return self._extract_token(text)
+        except Exception as exc:
+            self.logger.warning("esjzone getAuthToken failed for %s: %s", url, exc)
+        return ""
+
     async def _api_login(self, username: str, password: str) -> bool:
         """
         Login to the API using a 2-step token-based process.
 
         Step 1: Get auth token.
         Step 2: Use token and credentials to perform login.
-        Return True if login succeeds, False otherwise.
+
+        :return: True if login succeeds, False otherwise.
         """
-        data_1 = {
-            "plxf": "getAuthToken",
-        }
-        try:
-            resp_1 = await self.post(self.API_LOGIN_URL_1, data=data_1)
-            resp_1.raise_for_status()
-            # Example response: <JinJing>token_here</JinJing>
-            text_1 = await resp_1.text()
-            token = self._extract_token(text_1)
-        except Exception as exc:
-            self.logger.warning("esjzone _api_login failed at step 1: %s", exc)
+        token = await self._get_auth_token(self._LOGIN_URL)
+        if not token:
             return False
 
-        data_2 = {
+        payload = {
             "email": username,
             "pwd": password,
             "remember_me": "on",
         }
-        temp_headers = dict(self.headers)
-        temp_headers["Authorization"] = token
+        auth_headers = dict(self.headers)
+        auth_headers["Authorization"] = token
         try:
-            resp_2 = await self.post(
-                self.API_LOGIN_URL_2, data=data_2, headers=temp_headers
+            resp = await self.post(
+                self._API_LOGIN_URL, data=payload, headers=auth_headers
             )
-            resp_2.raise_for_status()
-            json_2 = await resp_2.json(content_type="text/html", encoding="utf-8")
-            resp_code: int = json_2.get("status", 301)
+            resp.raise_for_status()
+            resp_json = await resp.json(content_type="text/html", encoding="utf-8")
+            resp_code: int = resp_json.get("status", 301)
             return resp_code == 200
         except Exception as exc:
-            self.logger.warning("esjzone _api_login failed at step 2: %s", exc)
+            self.logger.warning("esjzone login failed: %s", exc)
         return False
+
+    async def _api_unlock_chapter(self, chap_url: str, password: str) -> str:
+        """
+        Unlock a password-protected chapter.
+
+        Step 1: Get auth token for the chapter page.
+        Step 2: Use token + password to request the unlocked content.
+
+        :param chap_url: The chapter page URL.
+        :param password: The forum/chapter password provided by the user.
+        :return: The unlocked chapter HTML if successful, else an empty string.
+        """
+        token = await self._get_auth_token(chap_url)
+        if not token:
+            return ""
+
+        payload = {"pw": password}
+        headers = dict(self.headers)
+        headers["Authorization"] = token
+
+        try:
+            resp = await self.post(self._API_UNLOCK_URL, data=payload, headers=headers)
+            resp.raise_for_status()
+            result = await resp.json(content_type="text/html", encoding="utf-8")
+            status_code: int = result.get("status", 301)
+
+            if status_code != 200:
+                self.logger.warning(
+                    "esjzone unlock failed for %s: %s", chap_url, result.get("msg", "")
+                )
+                return ""
+
+            reso_html: str = result.get("html", "")
+            return reso_html
+
+        except Exception as exc:
+            self.logger.warning(
+                "esjzone unlock request failed for %s: %s", chap_url, exc
+            )
+
+        return ""
 
     async def _check_login_status(self) -> bool:
         """

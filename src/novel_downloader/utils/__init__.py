@@ -8,16 +8,13 @@ A collection of helper functions and classes.
 
 __all__ = [
     "ChapterStorage",
-    "TextCleaner",
     "parse_cookies",
     "get_cookie_value",
     "sanitize_filename",
     "write_file",
     "download",
     "get_cleaner",
-    "content_prefix",
     "truncate_half_lines",
-    "diff_inline_display",
     "async_jitter_sleep",
     "jitter_sleep",
 ]
@@ -33,9 +30,6 @@ from .file_utils import (
 )
 from .network import download
 from .text_utils import (
-    TextCleaner,
-    content_prefix,
-    diff_inline_display,
     get_cleaner,
     truncate_half_lines,
 )
