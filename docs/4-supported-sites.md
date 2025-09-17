@@ -344,7 +344,7 @@ novel-cli download --site ttkan shengxu-chendong
 * **哔哩轻小说 (linovelib)**
   * 书籍: `https://www.linovelib.com/novel/1234.html` -> Book ID: `1234`
   * 章节: `https://www.linovelib.com/novel/1234/47800.html` -> Chapter ID: `47800`
-  * 风控: 请求过于频繁可能触发限制, 导致封禁或限流。
+  * 风控: 请求过于频繁可能触发限制, 导致封禁或限流 (推荐请求间隔大于 2 秒)
 
 * **无限轻小说 (n8novel)**
   * 书籍: `https://www.8novel.com/novelbooks/3365/` -> Book ID: `3365`
@@ -353,7 +353,9 @@ novel-cli download --site ttkan shengxu-chendong
 * **ESJ Zone (esjzone)**
   * 书籍: `https://www.esjzone.cc/detail/1660702902.html` -> Book ID: `1660702902`
   * 章节: `https://www.esjzone.cc/forum/1660702902/294593.html` -> Chapter ID: `294593`
-  * 注意: 未完成登录验证时, 部分页面会自动重定向至「論壇」页面导致内容加载失败。
+  * 注意:
+    * 未完成登录验证时, 部分页面会自动重定向至「論壇」页面导致内容加载失败。
+    * 若章节设有访问密码, 请先在网页端输入并解锁后, 再开始下载。
 
 * **神凑轻小说 (shencou)**
   * 书籍: `https://www.shencou.com/read/3/3540/index.html` -> Book ID: `3-3540`

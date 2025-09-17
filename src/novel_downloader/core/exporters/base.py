@@ -55,6 +55,7 @@ class BaseExporter(abc.ABC):
         self._make_md = config.make_md
         self._make_pdf = config.make_pdf
 
+        self._check_missing = config.check_missing
         self._include_cover = config.include_cover
         self._include_picture = config.include_picture
         self._split_mode = config.split_mode
@@ -225,6 +226,12 @@ class BaseExporter(abc.ABC):
             except Exception as e:
                 self.logger.warning("Failed to close storage %s: %s", storage, e)
         self._storage_cache.clear()
+
+    def _handle_missing_chapter(self, cid: str) -> None:
+        """If check_missing is enabled, log a warning."""
+        if not self._check_missing:
+            return
+        self.logger.warning("Missing chapter content for chapterId=%s", cid)
 
     def close(self) -> None:
         """

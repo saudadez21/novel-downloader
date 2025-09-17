@@ -96,8 +96,7 @@ class ConfigAdapter:
 
         :return: Fully populated configuration for the parser stage.
         """
-        g = self._gen_cfg
-        s = self._site_cfg
+        s, g = self._site_cfg, self._gen_cfg
         g_font = g.get("font_ocr") or {}
         s_font = s.get("font_ocr") or {}
         font_ocr: dict[str, Any] = {**g_font, **s_font}
@@ -117,7 +116,7 @@ class ConfigAdapter:
 
         :return: Fully populated configuration for text/ebook export.
         """
-        g = self._gen_cfg
+        s, g = self._site_cfg, self._gen_cfg
         out = self._config.get("output") or {}
         cln = self._config.get("cleaner") or {}
         fmt = out.get("formats") or {}
@@ -129,6 +128,7 @@ class ConfigAdapter:
             cache_dir=g.get("cache_dir", "./novel_cache"),
             raw_data_dir=g.get("raw_data_dir", "./raw_data"),
             output_dir=g.get("output_dir", "./downloads"),
+            check_missing=self._pick("check_missing", False, s, g),
             clean_text=cln.get("clean_text", False),
             make_txt=fmt.get("make_txt", True),
             make_epub=fmt.get("make_epub", True),

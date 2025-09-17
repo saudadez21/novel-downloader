@@ -300,7 +300,7 @@ class XiguashuwuParser(BaseParser):
             resp = requests.get(url, headers=DEFAULT_USER_HEADERS, timeout=15)
             resp.raise_for_status()
 
-            img_np = ocr.load_image_array_from_bytes(resp.content)
+            img_np = ocr.load_image_array_bytes(resp.content)
 
             char, score = ocr.predict([img_np])[0]
 

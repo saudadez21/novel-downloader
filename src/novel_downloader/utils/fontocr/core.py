@@ -160,7 +160,7 @@ class FontOCR:
         return img
 
     @staticmethod
-    def load_image_array_from_bytes(data: bytes) -> np.ndarray:
+    def load_image_array_bytes(data: bytes) -> np.ndarray:
         """
         Decode image bytes into an RGB NumPy array.
 
@@ -191,6 +191,19 @@ class FontOCR:
         return ImageFont.truetype(str(font_path), char_size)
 
     @staticmethod
+    def load_render_font_bytes(
+        font_bytes: bytes, char_size: int = 52
+    ) -> ImageFont.FreeTypeFont:
+        """
+        Load a FreeType font face directly from bytes for rendering helpers.
+
+        :param font_bytes: Raw TTF/OTF font data as bytes.
+        :param char_size: Target glyph size in pixels (e.g. 52).
+        :return: A PIL `ImageFont.FreeTypeFont` instance.
+        """
+        return ImageFont.truetype(io.BytesIO(font_bytes), char_size)
+
+    @staticmethod
     def extract_font_charset(font_path: Path | str) -> set[str]:
         """
         Extract the set of Unicode characters encoded by a TrueType/OpenType font.
@@ -207,6 +220,27 @@ class FontOCR:
         charset: set[str] = set()
         for cp in cmap:
             # guard against invalid/surrogate code points
+            if 0 <= cp <= 0x10FFFF and not (0xD800 <= cp <= 0xDFFF):
+                try:
+                    charset.add(chr(cp))
+                except ValueError:
+                    continue
+        return charset
+
+    @staticmethod
+    def extract_font_charset_bytes(font_bytes: bytes) -> set[str]:
+        """
+        Extract the set of Unicode characters encoded by a TrueType/OpenType font
+        provided as bytes.
+
+        :param font_bytes: Raw TTF/OTF/WOFF2 font data as bytes.
+        :return: A set of Unicode characters present in the font's cmap.
+        """
+        with TTFont(io.BytesIO(font_bytes)) as font_ttf:
+            cmap = font_ttf.getBestCmap() or {}
+
+        charset: set[str] = set()
+        for cp in cmap:
             if 0 <= cp <= 0x10FFFF and not (0xD800 <= cp <= 0xDFFF):
                 try:
                     charset.add(chr(cp))

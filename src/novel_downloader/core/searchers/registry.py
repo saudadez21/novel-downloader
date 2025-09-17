@@ -10,7 +10,7 @@ __all__ = ["register_searcher", "search"]
 import asyncio
 import logging
 import pkgutil
-from collections.abc import AsyncIterator, Callable, Sequence
+from collections.abc import AsyncGenerator, Callable, Sequence
 from importlib import import_module
 from typing import TypeVar
 
@@ -114,16 +114,14 @@ async def search(
 async def search_stream(
     keyword: str,
     sites: Sequence[str] | None = None,
-    limit: int | None = None,
     per_site_limit: int = 5,
     timeout: float = 5.0,
-) -> AsyncIterator[list[SearchResult]]:
+) -> AsyncGenerator[list[SearchResult]]:
     """
     Stream search results from registered sites as soon as each site finishes.
 
     :param keyword: Search keyword or term.
     :param sites: Optional list of site keys; if None, use all registered sites.
-    :param limit: Maximum total number of results to yield across all sites.
     :param per_site_limit: Maximum number of results per site.
     :param timeout: Timeout per-site (seconds).
     :yield: Lists of `SearchResult` objects from each completed site.
@@ -134,40 +132,34 @@ async def search_stream(
     classes = {_SEARCHER_REGISTRY[k] for k in keys if k in _SEARCHER_REGISTRY}
 
     site_timeout = aiohttp.ClientTimeout(total=timeout)
-    total_count = 0
 
     async with aiohttp.ClientSession(timeout=site_timeout) as session:
         for cls in classes:
             cls.configure(session)
 
         tasks = [
-            asyncio.create_task(cls.search(keyword, limit=per_site_limit))
+            asyncio.create_task(
+                cls.search(keyword, limit=per_site_limit),
+                name=f"{cls.__name__}.search",
+            )
             for cls in classes
         ]
 
         try:
-            for task in asyncio.as_completed(tasks):
+            for fut in asyncio.as_completed(tasks):
                 try:
-                    site_results = await task
-                except BaseException:
+                    site_results = await fut
+                except asyncio.CancelledError:
+                    raise
+                except Exception:
+                    # a site failed - skip it, keep streaming others
                     continue
 
-                chunk: list[SearchResult] = site_results or []
-                if limit is not None:
-                    remaining = limit - total_count
-                    if remaining <= 0:
-                        break
-                    if len(chunk) > remaining:
-                        chunk = chunk[:remaining]
-
-                if chunk:
-                    total_count += len(chunk)
-                    yield chunk
-
-                if limit is not None and total_count >= limit:
-                    for t in tasks:
-                        if not t.done():
-                            t.cancel()
-                    break
+                if site_results:
+                    yield site_results
         finally:
-            pass
+            # ensure no background tasks are left running after cancel/exit
+            for t in tasks:
+                if not t.done():
+                    t.cancel()
+            await asyncio.gather(*tasks, return_exceptions=True)

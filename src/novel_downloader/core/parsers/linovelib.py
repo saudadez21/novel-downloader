@@ -271,7 +271,7 @@ class LinovelibParser(BaseParser):
                 if i in img_map:
                     page_lines.extend(img_map[i])
 
-            page_content = "\n".join(line for line in page_lines if line).strip()
+            page_content = "\n".join(page_lines)
             if page_content:
                 contents.append(page_content)
 
