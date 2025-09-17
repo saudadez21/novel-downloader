@@ -37,6 +37,7 @@ class EsjzoneParser(BaseParser):
 
     site_name: str = "esjzone"
 
+    _VALID_TITLE_RE = re.compile(r"[^\W_]", re.UNICODE)
     _FONT_FAMILY_RE = re.compile(r"font-family\s*:\s*'([^']+)'")
     _BASE64_RE = re.compile(r"base64,([A-Za-z0-9+/=]+)")
 
@@ -92,16 +93,15 @@ class EsjzoneParser(BaseParser):
             if not vol_chaps:
                 return
 
-            vol_desc_str = "\n".join(vol_desc).strip()
-            if not vol_name and "\n" not in vol_desc and len(vol_desc) < 15:
-                vol_name = vol_desc_str
-                vol_desc_str = ""
+            # Try to infer volume name from description if not set
+            vol_name = vol_name or next(
+                (line for line in vol_desc if self._is_valid_title(line)), None
+            )
 
-            name = vol_name if vol_name else f"未命名卷 {vol_idx}"
             volumes.append(
                 {
-                    "volume_name": name,
-                    "volume_intro": vol_desc_str,
+                    "volume_name": vol_name or f"未命名卷 {vol_idx}",
+                    "volume_intro": "\n".join(vol_desc).strip(),
                     "chapters": vol_chaps,
                 }
             )
@@ -128,12 +128,6 @@ class EsjzoneParser(BaseParser):
                 href.split("/")[-1].split(".", 1)[0] if "www.esjzone.cc" in href else ""
             )
             return {"title": title, "url": href, "chapterId": cid}
-
-        def _is_heading_p(p: etree._Element) -> bool:
-            cls = (p.get("class") or "").split()
-            if "non" in cls:
-                return True
-            return bool(p.xpath(".//strong|.//b"))
 
         def walk(node: etree._Element) -> None:
             nonlocal vol_name, vol_desc, vol_chaps
@@ -186,12 +180,9 @@ class EsjzoneParser(BaseParser):
                 text = self._norm_space(node.xpath("string(.)"))
                 if not text:
                     return
-                if _is_heading_p(node):
-                    if vol_chaps:
-                        flush_volume()
-                    vol_name = text
-                else:
-                    vol_desc.append(text)
+                if vol_chaps:
+                    flush_volume()
+                vol_desc.append(text)
 
             # Recurse
             for child in node:
@@ -289,6 +280,16 @@ class EsjzoneParser(BaseParser):
             if s.strip()
         ]
         return breadcrumb == ["Home", "/", "論壇"]
+
+    @classmethod
+    def _is_valid_title(cls, title: str) -> bool:
+        """
+        Check if the title contains at least one valid character.
+
+        :param title: The title string to validate.
+        :return: True if valid, False otherwise.
+        """
+        return bool(cls._VALID_TITLE_RE.search(title))
 
     @staticmethod
     def _is_encrypted_chapter(html_str: str) -> bool:
