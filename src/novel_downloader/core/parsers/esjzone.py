@@ -197,42 +197,6 @@ class EsjzoneParser(BaseParser):
             for child in node:
                 walk(child)
 
-        # for node in tree.xpath('//div[@id="chapterList"]/*'):
-        #     tag = node.tag.lower() if isinstance(node.tag, str) else ""
-
-        #     if tag == "details":
-        #         flush_volume()
-        #         # ---- DETAILS-based layout ----
-        #         vol_name = node.xpath("string(./summary)").strip()
-        #         # all chapters inside this details
-        #         for a in node.findall("a"):
-        #             title = self._first_str(a.xpath(".//p//text()"))
-        #             href = a.get("href", "")
-        #             # "https://www.esjzone.cc/forum/12345/543.html" -> "543"
-        #             cid = href.split("/")[-1].split(".", 1)[0]
-        #             vol_chaps.append({"title": title, "url": href, "chapterId": cid})
-        #         flush_volume()
-
-        #     elif tag == "p":
-        #         if vol_chaps:
-        #             flush_volume()
-
-        #         curr_line = node.xpath("string()").strip()
-        #         if curr_line:
-        #             vol_desc.append(curr_line)
-
-        #     elif tag in {"h2", "summary"}:
-        #         vol_name = node.xpath("string()").strip()
-
-        #     elif tag == "a":
-        #         # ---- chapter link, attach to current volume ----
-        #         title = self._first_str(node.xpath(".//p//text()"))
-        #         href = node.get("href", "")
-        #         cid = href.split("/")[-1].split(".", 1)[0]
-        #         vol_chaps.append({"title": title, "url": href, "chapterId": cid})
-
-        # flush_volume()
-
         # Walk the chapter list container recursively
         chap_roots = tree.xpath('//div[@id="chapterList"]')
         if chap_roots:
