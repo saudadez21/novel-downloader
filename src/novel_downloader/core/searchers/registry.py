@@ -114,7 +114,6 @@ async def search(
 async def search_stream(
     keyword: str,
     sites: Sequence[str] | None = None,
-    limit: int | None = None,
     per_site_limit: int = 5,
     timeout: float = 5.0,
 ) -> AsyncIterator[list[SearchResult]]:
@@ -123,7 +122,6 @@ async def search_stream(
 
     :param keyword: Search keyword or term.
     :param sites: Optional list of site keys; if None, use all registered sites.
-    :param limit: Maximum total number of results to yield across all sites.
     :param per_site_limit: Maximum number of results per site.
     :param timeout: Timeout per-site (seconds).
     :yield: Lists of `SearchResult` objects from each completed site.
@@ -134,7 +132,6 @@ async def search_stream(
     classes = {_SEARCHER_REGISTRY[k] for k in keys if k in _SEARCHER_REGISTRY}
 
     site_timeout = aiohttp.ClientTimeout(total=timeout)
-    total_count = 0
 
     async with aiohttp.ClientSession(timeout=site_timeout) as session:
         for cls in classes:
@@ -145,29 +142,11 @@ async def search_stream(
             for cls in classes
         ]
 
-        try:
-            for task in asyncio.as_completed(tasks):
-                try:
-                    site_results = await task
-                except BaseException:
-                    continue
+        for task in asyncio.as_completed(tasks):
+            try:
+                site_results = await task
+            except BaseException:
+                continue
 
-                chunk: list[SearchResult] = site_results or []
-                if limit is not None:
-                    remaining = limit - total_count
-                    if remaining <= 0:
-                        break
-                    if len(chunk) > remaining:
-                        chunk = chunk[:remaining]
-
-                if chunk:
-                    total_count += len(chunk)
-                    yield chunk
-
-                if limit is not None and total_count >= limit:
-                    for t in tasks:
-                        if not t.done():
-                            t.cancel()
-                    break
-        finally:
-            pass
+            if site_results:
+                yield site_results

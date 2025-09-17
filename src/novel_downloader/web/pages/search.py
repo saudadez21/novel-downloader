@@ -363,7 +363,6 @@ def page_search() -> None:
             async for chunk in search_stream(
                 keyword=q,
                 sites=sites,
-                limit=None,  # show all
                 per_site_limit=per_site_limit,
                 timeout=timeout_val,
             ):
