@@ -10,7 +10,7 @@ __all__ = ["register_searcher", "search"]
 import asyncio
 import logging
 import pkgutil
-from collections.abc import AsyncIterator, Callable, Sequence
+from collections.abc import AsyncGenerator, Callable, Sequence
 from importlib import import_module
 from typing import TypeVar
 
@@ -116,7 +116,7 @@ async def search_stream(
     sites: Sequence[str] | None = None,
     per_site_limit: int = 5,
     timeout: float = 5.0,
-) -> AsyncIterator[list[SearchResult]]:
+) -> AsyncGenerator[list[SearchResult]]:
     """
     Stream search results from registered sites as soon as each site finishes.
 
@@ -138,15 +138,28 @@ async def search_stream(
             cls.configure(session)
 
         tasks = [
-            asyncio.create_task(cls.search(keyword, limit=per_site_limit))
+            asyncio.create_task(
+                cls.search(keyword, limit=per_site_limit),
+                name=f"{cls.__name__}.search",
+            )
             for cls in classes
         ]
 
-        for task in asyncio.as_completed(tasks):
-            try:
-                site_results = await task
-            except BaseException:
-                continue
+        try:
+            for fut in asyncio.as_completed(tasks):
+                try:
+                    site_results = await fut
+                except asyncio.CancelledError:
+                    raise
+                except Exception:
+                    # a site failed - skip it, keep streaming others
+                    continue
 
-            if site_results:
-                yield site_results
+                if site_results:
+                    yield site_results
+        finally:
+            # ensure no background tasks are left running after cancel/exit
+            for t in tasks:
+                if not t.done():
+                    t.cancel()
+            await asyncio.gather(*tasks, return_exceptions=True)

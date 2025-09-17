@@ -9,8 +9,8 @@ Search UI with a settings dropdown, persistent state, and paginated results.
 from __future__ import annotations
 
 import asyncio
-import contextlib
 from collections.abc import Callable
+from contextlib import aclosing, suppress
 from math import ceil
 from typing import Any
 
@@ -360,18 +360,21 @@ def page_search() -> None:
             state["page"] = 1
             render_results.refresh()
 
-            async for chunk in search_stream(
-                keyword=q,
-                sites=sites,
-                per_site_limit=per_site_limit,
-                timeout=timeout_val,
-            ):
-                if not chunk:
-                    continue
-                state["results"].extend(chunk)
-                # Refresh both status (count) and the visible list
-                render_status.refresh()
-                render_results.refresh()
+            async with aclosing(
+                search_stream(
+                    keyword=q,
+                    sites=sites,
+                    per_site_limit=per_site_limit,
+                    timeout=timeout_val,
+                )
+            ) as stream:
+                async for chunk in stream:
+                    if not chunk:
+                        continue
+                    state["results"].extend(chunk)
+                    # Refresh both status (count) and the visible list
+                    render_status.refresh()
+                    render_results.refresh()
 
         except asyncio.CancelledError:
             # cancellation when user starts a new search or presses Stop
@@ -410,5 +413,5 @@ def page_search() -> None:
     render_results()
 
     # clean up state on disconnect to avoid leaks
-    with contextlib.suppress(Exception):
+    with suppress(Exception):
         ui.context.client.on_disconnect(_cleanup_state)

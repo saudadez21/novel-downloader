@@ -29,6 +29,8 @@ class BaseSearcher(abc.ABC):
     @classmethod
     async def search(cls, keyword: str, limit: int | None = None) -> list[SearchResult]:
         html = await cls._fetch_html(keyword)
+        if not html:
+            return []
         return cls._parse_html(html, limit)
 
     @classmethod
