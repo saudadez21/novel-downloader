@@ -11,6 +11,7 @@ output_dir = "./downloads"         # 最终输出文件存放目录
 cache_dir = "./novel_cache"        # 本地缓存目录
 workers = 2                        # 工作协程数
 skip_existing = true               # 是否跳过已存在章节
+check_missing = false              # 是否检查并报告缺失章节
 storage_batch_size = 1             # SQLite 批量提交的章节数量
 locale_style = "simplified"        # simplified / traditional
 

@@ -104,7 +104,7 @@ class CommonExporter(BaseExporter):
 
                 ch = chap_map.get(cid)
                 if not ch:
-                    self.logger.warning("Missing chapter content for chapterId=%s", cid)
+                    self._handle_missing_chapter(cid)
                     continue
 
                 parts.append(self._build_txt_chapter(ch_title, ch))
@@ -231,7 +231,7 @@ class CommonExporter(BaseExporter):
 
                 ch = chap_map.get(cid)
                 if not ch:
-                    self.logger.warning("Missing chapter content for chapterId=%s", cid)
+                    self._handle_missing_chapter(cid)
                     continue
 
                 title = (
@@ -362,7 +362,7 @@ class CommonExporter(BaseExporter):
 
                 ch = chap_map.get(cid)
                 if not ch:
-                    self.logger.warning("Missing chapter content for chapterId=%s", cid)
+                    self._handle_missing_chapter(cid)
                     continue
 
                 title = (

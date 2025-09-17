@@ -74,6 +74,7 @@ class ExporterConfig:
     cache_dir: str = "./novel_cache"
     raw_data_dir: str = "./raw_data"
     output_dir: str = "./downloads"
+    check_missing: bool = True
     clean_text: bool = True
     make_txt: bool = True
     make_epub: bool = False
