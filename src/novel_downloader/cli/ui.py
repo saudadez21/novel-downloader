@@ -25,6 +25,7 @@ from rich.console import Console
 from rich.logging import RichHandler
 from rich.progress import Progress, TaskID
 from rich.prompt import Confirm, Prompt
+from rich.status import Status
 from rich.table import Table
 
 from novel_downloader.utils.constants import LOGGER_DIR, PACKAGE_NAME
@@ -59,6 +60,11 @@ def warn(message: str) -> None:
 def error(message: str) -> None:
     """Print an error message."""
     _CONSOLE.print(f"[red]{message}[/]")
+
+
+def status(message: str) -> Status:
+    """Context manager to show a spinner with a message."""
+    return _CONSOLE.status(f"[bold cyan]{message}[/]", spinner="dots")
 
 
 def confirm(message: str, *, default: bool = False) -> bool:

@@ -68,13 +68,16 @@ def handle_search(args: Namespace) -> None:
         return
 
     async def _run() -> None:
-        results = await search(
-            keyword=keyword,
-            sites=sites,
-            limit=overall_limit,
-            per_site_limit=per_site_limit,
-            timeout=timeout,
-        )
+        with ui.status(
+            t("searching", keyword=keyword, sites=", ".join(sites) if sites else "all")
+        ):
+            results = await search(
+                keyword=keyword,
+                sites=sites,
+                limit=overall_limit,
+                per_site_limit=per_site_limit,
+                timeout=timeout,
+            )
 
         chosen = _prompt_user_select(results)
         if chosen is None:
