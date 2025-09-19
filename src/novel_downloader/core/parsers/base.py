@@ -120,7 +120,7 @@ class BaseParser(abc.ABC):
         value: str = xs[0].strip() if xs else ""
         for old, new in replaces:
             value = value.replace(old, new)
-        return value
+        return value.strip()
 
     @staticmethod
     def _join_strs(xs: list[str], replaces: list[tuple[str, str]] | None = None) -> str:
@@ -128,4 +128,4 @@ class BaseParser(abc.ABC):
         value = "\n".join(s.strip() for s in xs if s and s.strip())
         for old, new in replaces:
             value = value.replace(old, new)
-        return value
+        return value.strip()

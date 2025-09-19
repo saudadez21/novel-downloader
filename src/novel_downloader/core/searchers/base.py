@@ -154,7 +154,7 @@ class BaseSearcher(abc.ABC):
         for replace in replaces:
             old, new = replace
             value = value.replace(old, new)
-        return value
+        return value.strip()
 
     @staticmethod
     def _build_url(base: str, params: dict[str, str]) -> str:
@@ -163,6 +163,8 @@ class BaseSearcher(abc.ABC):
 
     @classmethod
     def _abs_url(cls, url: str) -> str:
+        if url.startswith("//"):
+            return "https:" + url
         return (
             url
             if url.startswith(("http://", "https://"))
