@@ -12,7 +12,6 @@ from collections.abc import Callable, Sequence
 from importlib import import_module
 from typing import TypeVar
 
-from novel_downloader.core.downloaders.common import CommonDownloader
 from novel_downloader.core.interfaces import (
     DownloaderProtocol,
     FetcherProtocol,
@@ -98,6 +97,8 @@ def get_downloader(
         downloader_cls = _DOWNLOADER_MAP.get(site_key)
 
     if downloader_cls is None:
+        from novel_downloader.core.downloaders.common import CommonDownloader
+
         return CommonDownloader(fetcher, parser, config, site_key)
 
     return downloader_cls(fetcher, parser, config, site_key)

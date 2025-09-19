@@ -12,7 +12,6 @@ from collections.abc import Callable, Sequence
 from importlib import import_module
 from typing import TypeVar
 
-from novel_downloader.core.exporters.common import CommonExporter
 from novel_downloader.core.interfaces import ExporterProtocol
 from novel_downloader.models import ExporterConfig
 
@@ -84,6 +83,8 @@ def get_exporter(site: str, config: ExporterConfig) -> ExporterProtocol:
         exporter_cls = _EXPORTER_MAP.get(site_key)
 
     if exporter_cls is None:
+        from novel_downloader.core.exporters.common import CommonExporter
+
         return CommonExporter(config, site_key)
 
     return exporter_cls(config, site_key)
