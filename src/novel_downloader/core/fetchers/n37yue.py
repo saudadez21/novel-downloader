@@ -5,14 +5,14 @@ novel_downloader.core.fetchers.n37yue
 
 """
 
-from novel_downloader.core.fetchers.mangg_net import ManggNetSession
+from novel_downloader.core.fetchers.base import GenericSession
 from novel_downloader.core.fetchers.registry import register_fetcher
 
 
 @register_fetcher(
     site_keys=["n37yue"],
 )
-class N37yueSession(ManggNetSession):
+class N37yueSession(GenericSession):
     """
     A session class for interacting with the 37阅读网 (www.37yue.com) novel.
     """
@@ -20,6 +20,10 @@ class N37yueSession(ManggNetSession):
     site_name: str = "n37yue"
 
     BASE_URL = "https://www.37yue.com"
+    BOOK_ID_REPLACEMENTS = [("-", "/")]
+
+    USE_PAGINATED_INFO = True
+    USE_PAGINATED_CHAPTER = True
 
     @classmethod
     def relative_info_url(cls, book_id: str, idx: int) -> str:

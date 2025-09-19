@@ -5,14 +5,14 @@ novel_downloader.core.fetchers.ktshu
 
 """
 
-from novel_downloader.core.fetchers.mangg_net import ManggNetSession
+from novel_downloader.core.fetchers.base import GenericSession
 from novel_downloader.core.fetchers.registry import register_fetcher
 
 
 @register_fetcher(
     site_keys=["ktshu"],
 )
-class KtshuSession(ManggNetSession):
+class KtshuSession(GenericSession):
     """
     A session class for interacting with the 八一中文网 (www.ktshu.cc) novel.
     """
@@ -20,6 +20,9 @@ class KtshuSession(ManggNetSession):
     site_name: str = "ktshu"
 
     BASE_URL = "https://www.ktshu.cc"
+
+    USE_PAGINATED_INFO = True
+    USE_PAGINATED_CHAPTER = True
 
     @classmethod
     def relative_info_url(cls, book_id: str, idx: int) -> str:

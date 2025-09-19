@@ -99,33 +99,21 @@ class LinovelibSession(BaseSession):
         :param chapter_id: The chapter identifier.
         :return: The page content as string list.
         """
-        html_pages: list[str] = []
+        origin = self.BASE_URL.rstrip("/")
+        pages: list[str] = []
         idx = 1
+        suffix = self.relative_chapter_url(book_id, chapter_id, idx)
 
         while True:
-            chapter_suffix = chapter_id if idx == 1 else f"{chapter_id}_{idx}"
-            relative_path = self.relative_chapter_url(book_id, chapter_suffix)
-            full_url = self.BASE_URL + relative_path
-
-            if idx > 1 and relative_path not in html_pages[-1]:
-                break
-
-            try:
-                html = await self.fetch(full_url, **kwargs)
-            except Exception as exc:
-                self.logger.warning(
-                    "linovelib get_book_chapter(%s page %d) failed: %s",
-                    chapter_id,
-                    idx,
-                    exc,
-                )
-                return []
-
-            html_pages.append(html)
+            html = await self.fetch(origin + suffix, **kwargs)
+            pages.append(html)
             idx += 1
+            suffix = self.relative_chapter_url(book_id, chapter_id, idx)
+            if suffix not in html:
+                break
             await self._sleep()
 
-        return html_pages
+        return pages
 
     @classmethod
     def book_info_url(cls, book_id: str) -> str:
@@ -170,11 +158,15 @@ class LinovelibSession(BaseSession):
         return cls.CHAPTER_URL.format(book_id=book_id, chapter_id=chapter_id)
 
     @classmethod
-    def relative_chapter_url(cls, book_id: str, chapter_id: str) -> str:
+    def relative_chapter_url(cls, book_id: str, chapter_id: str, idx: int) -> str:
         """
         Return the relative URL path for a given chapter.
         """
-        return f"/novel/{book_id}/{chapter_id}.html"
+        return (
+            f"/novel/{book_id}/{chapter_id}.html"
+            if idx == 1
+            else f"/novel/{book_id}/{chapter_id}_{idx}.html"
+        )
 
     def _extract_vol_ids(self, html_str: str) -> list[str]:
         """

@@ -5,14 +5,14 @@ novel_downloader.core.fetchers.blqudu
 
 """
 
-from novel_downloader.core.fetchers.lewenn import LewennSession
+from novel_downloader.core.fetchers.base import GenericSession
 from novel_downloader.core.fetchers.registry import register_fetcher
 
 
 @register_fetcher(
     site_keys=["blqudu"],
 )
-class BlquduSession(LewennSession):
+class BlquduSession(GenericSession):
     """
     A session class for interacting with the 笔趣读 (www.blqudu.cc) novel.
     """

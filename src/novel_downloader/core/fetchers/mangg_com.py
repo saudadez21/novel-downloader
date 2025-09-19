@@ -5,14 +5,14 @@ novel_downloader.core.fetchers.mangg_com
 
 """
 
-from novel_downloader.core.fetchers.lewenn import LewennSession
+from novel_downloader.core.fetchers.base import GenericSession
 from novel_downloader.core.fetchers.registry import register_fetcher
 
 
 @register_fetcher(
     site_keys=["mangg_com"],
 )
-class ManggComSession(LewennSession):
+class ManggComSession(GenericSession):
     """
     A session class for interacting with the 追书网 (www.mangg.com) novel.
     """

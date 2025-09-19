@@ -11,7 +11,7 @@ import asyncio
 import json
 import logging
 import types
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import Any, Literal, Self
 from urllib.parse import unquote, urlparse
@@ -503,3 +503,201 @@ class BaseSession(abc.ABC):
         tb: types.TracebackType | None,
     ) -> None:
         await self.close()
+
+
+class GenericSession(BaseSession):
+    """
+    Generic mid-layer for novel sites.
+
+    Children override constants like:
+      * site_name
+      * BOOK_INFO_URL / CHAPTER_URL
+      * BOOK_CATALOG_URL (optional)
+      * BASE_URL (for sites that use relative page suffixes)
+      * BASE_URL_MAP / DEFAULT_BASE_URL (when URL depends on variant)
+      * BOOK_ID_REPLACEMENTS (e.g. [("-", "/")])
+
+    For paginated info/chapters, set:
+      * USE_PAGINATED_INFO = True and implement relative_info_url
+      * USE_PAGINATED_CATALOG = True and implement relative_catalog_url
+      * USE_PAGINATED_CHAPTER = True and implement relative_chapter_url
+
+    For catalogs:
+      * HAS_SEPARATE_CATALOG = True if site has a dedicated catalog page
+    """
+
+    BOOK_ID_REPLACEMENTS: list[tuple[str, str]] = []
+
+    # Simple template-style URLs (single page)
+    BOOK_INFO_URL: str | None = None
+    CHAPTER_URL: str | None = None
+
+    # Optional extra info page ([info, catalog])
+    HAS_SEPARATE_CATALOG: bool = False
+    BOOK_CATALOG_URL: str | None = None
+
+    # For sites that build full URLs with a BASE_URL + relative suffixes
+    BASE_URL: str | None = None
+
+    # Pagination toggles
+    USE_PAGINATED_INFO: bool = False
+    USE_PAGINATED_CATALOG: bool = False
+    USE_PAGINATED_CHAPTER: bool = False
+
+    async def get_book_info(self, book_id: str, **kwargs: Any) -> list[str]:
+        book_id = self._transform_book_id(book_id)
+        pages: list[str] = []
+
+        # --- 1) Info ---
+        if self.USE_PAGINATED_INFO:
+            pages = await self._paginate(
+                make_suffix=lambda idx: self.relative_info_url(book_id, idx),
+                page_type="info",
+                book_id=book_id,
+                **kwargs,
+            )
+            if not pages:
+                return []
+        else:
+            info_url = self.book_info_url(base_url=self._base_url, book_id=book_id)
+            pages = [await self.fetch(info_url, **kwargs)]
+
+        # --- 2) Catalog ---
+        if self.HAS_SEPARATE_CATALOG:
+            if self.USE_PAGINATED_CATALOG:
+                catalog_pages = await self._paginate(
+                    make_suffix=lambda idx: self.relative_catalog_url(book_id, idx),
+                    page_type="catalog",
+                    book_id=book_id,
+                    **kwargs,
+                )
+                if not catalog_pages:
+                    return []
+                pages.extend(catalog_pages)
+
+            elif self.BOOK_CATALOG_URL:
+                catalog_url = self.book_catalog_url(
+                    base_url=self._base_url, book_id=book_id
+                )
+                pages.append(await self.fetch(catalog_url, **kwargs))
+
+        return pages
+
+    async def get_book_chapter(
+        self, book_id: str, chapter_id: str, **kwargs: Any
+    ) -> list[str]:
+        book_id = self._transform_book_id(book_id)
+
+        if self.USE_PAGINATED_CHAPTER:
+            return await self._paginate(
+                make_suffix=lambda idx: self.relative_chapter_url(
+                    book_id, chapter_id, idx
+                ),
+                page_type="chapter",
+                book_id=book_id,
+                chapter_id=chapter_id,
+                **kwargs,
+            )
+
+        # Single chapter page
+        url = self.chapter_url(
+            base_url=self._base_url, book_id=book_id, chapter_id=chapter_id
+        )
+        return [await self.fetch(url, **kwargs)]
+
+    @classmethod
+    def relative_info_url(cls, book_id: str, idx: int) -> str:
+        """
+        Return the *relative* URL suffix (prefixed by "/") for the info page #idx.
+        """
+        raise NotImplementedError(f"{cls.__name__} must implement relative_info_url")
+
+    @classmethod
+    def relative_catalog_url(cls, book_id: str, idx: int) -> str:
+        """
+        Return the *relative* URL suffix (prefixed by "/") for the catalog page #idx.
+        """
+        raise NotImplementedError(f"{cls.__name__} must implement relative_catalog_url")
+
+    @classmethod
+    def relative_chapter_url(cls, book_id: str, chapter_id: str, idx: int) -> str:
+        """
+        Return the *relative* URL suffix (prefixed by "/") for the chapter page #idx.
+        """
+        raise NotImplementedError(f"{cls.__name__} must implement relative_chapter_url")
+
+    def should_continue_pagination(
+        self,
+        current_html: str,
+        next_suffix: str,
+        next_idx: int,
+        page_type: Literal["info", "catalog", "chapter"],
+        book_id: str,
+        chapter_id: str | None = None,
+    ) -> bool:
+        return next_suffix in current_html
+
+    def _transform_book_id(self, book_id: str) -> str:
+        for old, new in self.BOOK_ID_REPLACEMENTS:
+            book_id = book_id.replace(old, new)
+        return book_id
+
+    async def _paginate(
+        self,
+        *,
+        make_suffix: Callable[[int], str],
+        page_type: Literal["info", "catalog", "chapter"],
+        book_id: str,
+        chapter_id: str | None = None,
+        **fetch_kwargs: Any,
+    ) -> list[str]:
+        """
+        Generic pagination loop for info/catalog/chapter.
+
+        Starts at idx=1 and continues while should_continue_pagination(...) is True.
+        """
+        if not self.BASE_URL:
+            raise RuntimeError(
+                f"{self.site_name}: BASE_URL is required for {page_type}"
+            )
+        origin = self.BASE_URL.rstrip("/")
+
+        pages: list[str] = []
+        idx = 1
+        suffix = make_suffix(idx)
+
+        while True:
+            html = await self.fetch(origin + suffix, **fetch_kwargs)
+            pages.append(html)
+            idx += 1
+            suffix = make_suffix(idx)
+            if not self.should_continue_pagination(
+                current_html=html,
+                next_suffix=suffix,
+                next_idx=idx,
+                page_type=page_type,
+                book_id=book_id,
+                chapter_id=chapter_id,
+            ):
+                break
+            await self._sleep()
+
+        return pages
+
+    @classmethod
+    def book_info_url(cls, **kwargs: Any) -> str:
+        if not cls.BOOK_INFO_URL:
+            raise NotImplementedError(f"{cls.__name__}.BOOK_INFO_URL not set")
+        return cls.BOOK_INFO_URL.format(**kwargs)
+
+    @classmethod
+    def book_catalog_url(cls, **kwargs: Any) -> str:
+        if not cls.BOOK_CATALOG_URL:
+            raise NotImplementedError(f"{cls.__name__}.BOOK_CATALOG_URL not set")
+        return cls.BOOK_CATALOG_URL.format(**kwargs)
+
+    @classmethod
+    def chapter_url(cls, **kwargs: Any) -> str:
+        if not cls.CHAPTER_URL:
+            raise NotImplementedError(f"{cls.__name__}.CHAPTER_URL not set")
+        return cls.CHAPTER_URL.format(**kwargs)

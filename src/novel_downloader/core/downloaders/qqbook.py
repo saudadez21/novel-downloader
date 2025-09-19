@@ -69,7 +69,7 @@ class QqbookDownloader(BaseDownloader):
             return
 
         vols = book_info["volumes"]
-        plan = self._planned_chapter_ids(vols, start_id, end_id, ignore_set)
+        plan = self._select_chapter_ids(vols, start_id, end_id, ignore_set)
         if not plan:
             self.logger.info("Nothing to do after filtering: %s", book_id)
             return
@@ -226,7 +226,7 @@ class QqbookDownloader(BaseDownloader):
             )
 
     @staticmethod
-    def _planned_chapter_ids(
+    def _select_chapter_ids(
         vols: list[VolumeInfoDict],
         start_id: str | None,
         end_id: str | None,

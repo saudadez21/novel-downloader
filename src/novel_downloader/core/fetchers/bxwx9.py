@@ -5,14 +5,14 @@ novel_downloader.core.fetchers.bxwx9
 
 """
 
-from novel_downloader.core.fetchers.mangg_net import ManggNetSession
+from novel_downloader.core.fetchers.base import GenericSession
 from novel_downloader.core.fetchers.registry import register_fetcher
 
 
 @register_fetcher(
     site_keys=["bxwx9"],
 )
-class Bxwx9Session(ManggNetSession):
+class Bxwx9Session(GenericSession):
     """
     A session class for interacting with the 笔下文学网 (www.bxwx9.org) novel.
     """
@@ -20,6 +20,10 @@ class Bxwx9Session(ManggNetSession):
     site_name: str = "bxwx9"
 
     BASE_URL = "https://www.bxwx9.org"
+    BOOK_ID_REPLACEMENTS = [("-", "/")]
+
+    USE_PAGINATED_INFO = True
+    USE_PAGINATED_CHAPTER = True
 
     @classmethod
     def relative_info_url(cls, book_id: str, idx: int) -> str:

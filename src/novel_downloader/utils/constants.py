@@ -77,8 +77,11 @@ CSS_MAIN_PATH = files("novel_downloader.resources.css_styles").joinpath("main.cs
 CSS_INTRO_PATH = files("novel_downloader.resources.css_styles").joinpath("intro.css")
 
 # Images
+# VOLUME_BORDER_IMAGE_PATH = files("novel_downloader.resources.images").joinpath(
+#     "volume_border.png"
+# )
 VOLUME_BORDER_IMAGE_PATH = files("novel_downloader.resources.images").joinpath(
-    "volume_border.png"
+    "volume_border_tinify.png"
 )
 
 # JSON
