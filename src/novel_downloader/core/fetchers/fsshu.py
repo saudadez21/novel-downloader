@@ -5,14 +5,14 @@ novel_downloader.core.fetchers.fsshu
 
 """
 
-from novel_downloader.core.fetchers.mangg_net import ManggNetSession
+from novel_downloader.core.fetchers.base import GenericSession
 from novel_downloader.core.fetchers.registry import register_fetcher
 
 
 @register_fetcher(
     site_keys=["fsshu"],
 )
-class FsshuSession(ManggNetSession):
+class FsshuSession(GenericSession):
     """
     A session class for interacting with the 笔趣阁 (www.fsshu.com) novel.
     """
@@ -20,6 +20,9 @@ class FsshuSession(ManggNetSession):
     site_name: str = "fsshu"
 
     BASE_URL = "https://www.fsshu.com"
+
+    USE_PAGINATED_INFO = True
+    USE_PAGINATED_CHAPTER = True
 
     @classmethod
     def relative_info_url(cls, book_id: str, idx: int) -> str:

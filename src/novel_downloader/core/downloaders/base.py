@@ -187,19 +187,35 @@ class BaseDownloader(abc.ABC):
         Attempt to fetch and parse the book_info for a given book_id.
 
         :param book_id: identifier of the book
+        :return: parsed BookInfoDict or None if all attempts fail
         """
-        info_html = await self.fetcher.get_book_info(book_id)
-        self._save_html_pages(book_id, "info", info_html)
-        book_info = self.parser.parse_book_info(info_html)
-        if book_info:
-            self._save_book_info(book_id, book_info)
-        else:
-            info_path = self._raw_data_dir / book_id / "book_info.json"
+        book_info: BookInfoDict | None = None
+
+        try:
+            info_html = await self.fetcher.get_book_info(book_id)
+            self._save_html_pages(book_id, "info", info_html)
+            book_info = self.parser.parse_book_info(info_html)
+
+            if book_info:
+                self._save_book_info(book_id, book_info)
+                return book_info
+
+        except Exception as exc:
+            self.logger.warning(
+                "Failed to fetch/parse book_info for %s: %s", book_id, exc
+            )
+
+        info_path = self._raw_data_dir / book_id / "book_info.json"
+        if info_path.exists():
             try:
                 book_info = json.loads(info_path.read_text(encoding="utf-8"))
+                return book_info
             except json.JSONDecodeError:
-                return None
-        return book_info
+                self.logger.warning(
+                    "Corrupted book_info.json for %s: could not decode JSON", book_id
+                )
+
+        return None
 
     def _save_book_info(self, book_id: str, book_info: BookInfoDict) -> None:
         """
@@ -226,7 +242,7 @@ class BaseDownloader(abc.ABC):
         """
         If save_html is enabled, write each HTML snippet to a file.
 
-        Filenames will be {chap_id}_{index}.html in html_dir.
+        Filenames will be {book_id}_{filename}_{index}.html in html_dir.
 
         :param book_id: The book identifier
         :param filename: used as filename prefix
@@ -234,10 +250,12 @@ class BaseDownloader(abc.ABC):
         """
         if not self._save_html:
             return
-        html_dir = self._debug_dir / book_id / folder
+        html_dir = self._debug_dir / folder
         html_dir.mkdir(parents=True, exist_ok=True)
         for i, html in enumerate(html_list):
-            (html_dir / f"{filename}_{i}.html").write_text(html, encoding="utf-8")
+            (html_dir / f"{book_id}_{filename}_{i}.html").write_text(
+                html, encoding="utf-8"
+            )
 
     @classmethod
     def _extract_img_urls(cls, content: str) -> list[str]:
@@ -247,7 +265,7 @@ class BaseDownloader(abc.ABC):
         return cls._IMG_SRC_RE.findall(content)
 
     @staticmethod
-    def _planned_chapter_ids(
+    def _select_chapter_ids(
         vols: list[VolumeInfoDict],
         start_id: str | None,
         end_id: str | None,

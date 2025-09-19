@@ -5,14 +5,14 @@ novel_downloader.core.fetchers.biquguo
 
 """
 
-from novel_downloader.core.fetchers.mangg_net import ManggNetSession
+from novel_downloader.core.fetchers.base import GenericSession
 from novel_downloader.core.fetchers.registry import register_fetcher
 
 
 @register_fetcher(
     site_keys=["biquguo"],
 )
-class BiquguoSession(ManggNetSession):
+class BiquguoSession(GenericSession):
     """
     A session class for interacting with the 笔趣阁小说网 (www.biquguo.com) novel.
     """
@@ -20,6 +20,10 @@ class BiquguoSession(ManggNetSession):
     site_name: str = "biquguo"
 
     BASE_URL = "https://www.biquguo.com"
+    BOOK_ID_REPLACEMENTS = [("-", "/")]
+
+    USE_PAGINATED_INFO = True
+    USE_PAGINATED_CHAPTER = True
 
     @classmethod
     def relative_info_url(cls, book_id: str, idx: int) -> str:

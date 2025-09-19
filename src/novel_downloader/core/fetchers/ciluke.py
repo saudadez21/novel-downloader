@@ -5,14 +5,14 @@ novel_downloader.core.fetchers.ciluke
 
 """
 
-from novel_downloader.core.fetchers.mangg_net import ManggNetSession
+from novel_downloader.core.fetchers.base import GenericSession
 from novel_downloader.core.fetchers.registry import register_fetcher
 
 
 @register_fetcher(
     site_keys=["ciluke"],
 )
-class CilukeSession(ManggNetSession):
+class CilukeSession(GenericSession):
     """
     A session class for interacting with the 思路客 (www.ciluke.com) novel.
     """
@@ -20,6 +20,10 @@ class CilukeSession(ManggNetSession):
     site_name: str = "ciluke"
 
     BASE_URL = "https://www.ciluke.com"
+    BOOK_ID_REPLACEMENTS = [("-", "/")]
+
+    USE_PAGINATED_INFO = True
+    USE_PAGINATED_CHAPTER = True
 
     @classmethod
     def relative_info_url(cls, book_id: str, idx: int) -> str:
