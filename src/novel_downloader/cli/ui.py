@@ -22,10 +22,8 @@ from collections.abc import Awaitable, Callable, Iterable, Sequence
 from logging.handlers import TimedRotatingFileHandler
 
 from rich.console import Console
-from rich.progress import Progress, TaskID
 from rich.prompt import Confirm, Prompt
 from rich.status import Status
-from rich.table import Table
 
 from novel_downloader.utils.constants import LOGGER_DIR, PACKAGE_NAME
 
@@ -125,6 +123,8 @@ def render_table(
     :param columns: Column names.
     :param rows: Row data; each row must have the same length as `columns`.
     """
+    from rich.table import Table
+
     table = Table(title=title, show_lines=True, expand=True)
     for col in columns:
         table.add_column(col, overflow="fold")
@@ -175,6 +175,8 @@ def create_progress_hook(
     prefix: str = "Progress",
     unit: str = "item",
 ) -> tuple[Callable[[int, int], Awaitable[None]], Callable[[], None]]:
+    from rich.progress import Progress, TaskID
+
     progress = Progress(console=_CONSOLE)
     task_id: TaskID | None = None
 
