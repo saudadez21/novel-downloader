@@ -17,7 +17,6 @@ from pathlib import Path
 from novel_downloader.cli import ui
 from novel_downloader.cli.download import _download
 from novel_downloader.config import ConfigAdapter, load_config
-from novel_downloader.core.searchers import search
 from novel_downloader.models import BookConfig, SearchResult
 from novel_downloader.utils.i18n import t
 
@@ -54,6 +53,8 @@ def register_search_subcommand(subparsers: _SubParsersAction) -> None:  # type: 
 
 def handle_search(args: Namespace) -> None:
     """Handle the `search` subcommand."""
+    from novel_downloader.core.searchers import search
+
     sites: Sequence[str] | None = args.site or None
     keyword: str = args.keyword
     overall_limit = max(1, args.limit)
