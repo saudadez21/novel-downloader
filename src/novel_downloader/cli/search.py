@@ -32,12 +32,12 @@ def register_search_subcommand(subparsers: _SubParsersAction) -> None:  # type: 
     parser.add_argument("keyword", help=t("search_keyword_help"))
     parser.add_argument("--config", type=str, help=t("help_config"))
     parser.add_argument(
-        "--limit", "-l", type=int, default=20, metavar="N", help=t("search_limit_help")
+        "--limit", "-l", type=int, default=200, metavar="N", help=t("search_limit_help")
     )
     parser.add_argument(
         "--site-limit",
         type=int,
-        default=5,
+        default=10,
         metavar="M",
         help=t("search_site_limit_help"),
     )
@@ -87,9 +87,18 @@ def handle_search(args: Namespace) -> None:
     asyncio.run(_run())
 
 
-def _prompt_user_select(results: Sequence[SearchResult]) -> SearchResult | None:
+def _prompt_user_select(
+    results: Sequence[SearchResult],
+    per_page: int = 10,
+) -> SearchResult | None:
     """
-    Show a Rich table of results and ask the user to pick one by index.
+    Show results in pages and let user select by global index.
+
+    Navigation:
+      * number: select that item
+      * 'n': next page
+      * 'p': previous page
+      * Enter: cancel
 
     :param results: A sequence of SearchResult dicts.
     :return: The chosen SearchResult, or None if cancelled/no results.
@@ -98,10 +107,14 @@ def _prompt_user_select(results: Sequence[SearchResult]) -> SearchResult | None:
         ui.warn(t("no_results"))
         return None
 
+    total = len(results)
+    total_pages = max(1, (total + per_page - 1) // per_page)
+    page = 1
+
     columns = ["#", "Title", "Author", "Latest", "Updated", "Site", "Book ID"]
-    rows = []
+    all_rows = []
     for i, r in enumerate(results, 1):
-        rows.append(
+        all_rows.append(
             [
                 str(i),
                 r["title"],
@@ -112,9 +125,41 @@ def _prompt_user_select(results: Sequence[SearchResult]) -> SearchResult | None:
                 r["book_id"],
             ]
         )
-    ui.render_table("Search Results", columns, rows)
 
-    idx = ui.select_index(t("prompt_select_index"), len(results))
-    if idx is None:
-        return None
-    return results[idx - 1]
+    while True:
+        start = (page - 1) * per_page + 1
+        end = min(page * per_page, total)
+
+        page_rows = all_rows[start - 1 : end]
+
+        ui.render_table(
+            t("page_status", page=page, total_pages=total_pages),
+            columns,
+            page_rows,
+        )
+
+        numeric_choices = [str(i) for i in range(start, end + 1)]
+        nav_choices = []
+        if page < total_pages:
+            nav_choices.append("n")
+        if page > 1:
+            nav_choices.append("p")
+
+        choice = ui.prompt_choice(
+            t("prompt_select_index"),
+            numeric_choices + nav_choices,
+        )
+
+        if choice == "":
+            # Cancel
+            return None
+        if choice == "n" and page < total_pages:
+            page += 1
+            continue
+        if choice == "p" and page > 1:
+            page -= 1
+            continue
+        # Otherwise expect a number within the global range
+        if choice in numeric_choices:
+            idx = int(choice)
+            return results[idx - 1]

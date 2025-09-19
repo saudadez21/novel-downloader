@@ -166,8 +166,8 @@ novel-cli search [-h] [--site SITE] [--config CONFIG] [--limit N] [--site-limit 
 
 * `keyword`: 搜索关键字
 * `--site SITE`, `-s SITE`: 指定搜索站点, 可多次使用以指定多个站点, 不指定则搜索全部支持站点
-* `--limit N`: 总体结果上限 (最小 1), 默认为 `20`
-* `--site-limit M`: 单站点结果上限 (最小 1), 默认为 `5`
+* `--limit N`: 总体结果上限 (最小 1), 默认为 `200`
+* `--site-limit M`: 单站点结果上限 (最小 1), 默认为 `10`
 
 **Examples**
 

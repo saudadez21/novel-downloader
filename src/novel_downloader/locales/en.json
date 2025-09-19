@@ -76,5 +76,6 @@
   "search_timeout_help": "Per-request timeout in seconds (default: {secs})",
 
   "no_results": "No results found.",
-  "prompt_select_index": "Select a book by number (or press Enter to cancel)"
+  "prompt_select_index": "Enter a number to select, 'n' for next, 'p' for previous (press Enter to cancel)",
+  "page_status": "Search Results · Page {page}/{total_pages}"
 }

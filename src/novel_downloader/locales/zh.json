@@ -76,5 +76,6 @@
   "search_timeout_help": "每次请求的超时时间 (秒) (默认：{secs})",
 
   "no_results": "未找到结果",
-  "prompt_select_index": "通过编号选择书籍 (或按回车取消)"
+  "prompt_select_index": "输入编号选择, 'n' 下一页, 'p' 上一页 (回车取消)",
+  "page_status": "搜索结果 · 第 {page} / {total_pages} 页"
 }
