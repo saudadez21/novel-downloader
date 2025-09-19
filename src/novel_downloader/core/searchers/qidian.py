@@ -77,6 +77,7 @@ class QidianSearcher(BaseSearcher):
             author = cls._first_str(
                 item.xpath(
                     './/p[contains(@class,"author")]//a[contains(@class,"name")]/text()'
+                    ' | .//p[contains(@class,"author")]//i/text()'
                 )
             )
             latest_chapter = cls._first_str(
