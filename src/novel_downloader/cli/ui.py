@@ -22,7 +22,6 @@ from collections.abc import Awaitable, Callable, Iterable, Sequence
 from logging.handlers import TimedRotatingFileHandler
 
 from rich.console import Console
-from rich.logging import RichHandler
 from rich.progress import Progress, TaskID
 from rich.prompt import Confirm, Prompt
 from rich.status import Status
@@ -260,6 +259,8 @@ def setup_logging(
 
     # Console handler
     if console:
+        from rich.logging import RichHandler
+
         console_level = _normalize_level(console_level)
 
         ch = RichHandler(
