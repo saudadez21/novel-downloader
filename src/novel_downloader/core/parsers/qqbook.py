@@ -25,7 +25,6 @@ from novel_downloader.models import (
     ParserConfig,
     VolumeInfoDict,
 )
-from novel_downloader.utils import download
 from novel_downloader.utils.fontocr import get_font_ocr
 from novel_downloader.utils.node_decryptor import get_decryptor
 
@@ -309,6 +308,8 @@ class QqbookParser(BaseParser):
                 cid,
             )
             return ""
+
+        from novel_downloader.utils.network import download
 
         css_str = font_resp.get("css")
         random_font = font_resp.get("randomFont") or {}
