@@ -17,11 +17,6 @@ from novel_downloader.models import (
     ChapterDict,
     VolumeInfoDict,
 )
-from novel_downloader.utils import (
-    download,
-    sanitize_filename,
-    write_file,
-)
 from novel_downloader.utils.constants import (
     CSS_MAIN_PATH,
     DEFAULT_HEADERS,
@@ -32,6 +27,10 @@ from novel_downloader.utils.epub import (
     EpubBuilder,
     StyleSheet,
     Volume,
+)
+from novel_downloader.utils.file_utils import (
+    sanitize_filename,
+    write_file,
 )
 
 
@@ -447,6 +446,8 @@ class CommonExporter(BaseExporter):
 
         Subclasses may override this method if site need more info
         """
+        from novel_downloader.utils.network import download
+
         return download(
             img_url,
             target_dir,

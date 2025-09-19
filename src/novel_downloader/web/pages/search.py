@@ -48,6 +48,7 @@ _SUPPORT_SITES = {
     "n71ge": "新吾爱文学",
     "piaotia": "飘天文学网",
     "qbtr": "全本同人小说",
+    "qidian": "起点中文网",
     "quanben5": "全本小说网",
     "shuhaige": "书海阁小说网",
     "tongrenquan": "同人圈",

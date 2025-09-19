@@ -11,7 +11,6 @@ from typing import Literal
 
 from novel_downloader.core.exporters.common import CommonExporter
 from novel_downloader.core.exporters.registry import register_exporter
-from novel_downloader.utils import download
 from novel_downloader.utils.constants import (
     DEFAULT_HEADERS,
     DEFAULT_IMAGE_SUFFIX,
@@ -38,6 +37,8 @@ class LinovelibExporter(CommonExporter):
         """
         Download image from url to target dir with given name
         """
+        from novel_downloader.utils.network import download
+
         return download(
             img_url,
             target_dir,

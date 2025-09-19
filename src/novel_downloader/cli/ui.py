@@ -22,10 +22,8 @@ from collections.abc import Awaitable, Callable, Iterable, Sequence
 from logging.handlers import TimedRotatingFileHandler
 
 from rich.console import Console
-from rich.logging import RichHandler
-from rich.progress import Progress, TaskID
 from rich.prompt import Confirm, Prompt
-from rich.table import Table
+from rich.status import Status
 
 from novel_downloader.utils.constants import LOGGER_DIR, PACKAGE_NAME
 
@@ -59,6 +57,11 @@ def warn(message: str) -> None:
 def error(message: str) -> None:
     """Print an error message."""
     _CONSOLE.print(f"[red]{message}[/]")
+
+
+def status(message: str) -> Status:
+    """Context manager to show a spinner with a message."""
+    return _CONSOLE.status(f"[bold cyan]{message}[/]", spinner="dots")
 
 
 def confirm(message: str, *, default: bool = False) -> bool:
@@ -120,6 +123,8 @@ def render_table(
     :param columns: Column names.
     :param rows: Row data; each row must have the same length as `columns`.
     """
+    from rich.table import Table
+
     table = Table(title=title, show_lines=True, expand=True)
     for col in columns:
         table.add_column(col, overflow="fold")
@@ -128,27 +133,22 @@ def render_table(
     _CONSOLE.print(table)
 
 
-def select_index(prompt_text: str, total: int) -> int | None:
+def prompt_choice(prompt_text: str, choices: Sequence[str]) -> str:
     """
-    Prompt user to select an index in [1..total]. Empty input cancels.
+    Prompt user to select one of several choices.
 
-    :param prompt_text: Displayed prompt (e.g., 'Select index').
-    :param total: Maximum valid index (minimum is 1).
-    :return: Selected 1-based index, or None if user cancels.
+    :param prompt_text: Prompt message shown to the user.
+    :param choices: Valid choices (strings). Empty string is treated as cancel.
+    :return: The raw user input, lowercased and trimmed. Returns "" if cancelled.
     """
-    if total <= 0:
-        return None
-    valid_choices = [str(i) for i in range(1, total + 1)]
-    choice = Prompt.ask(
+    resp: str = Prompt.ask(
         prompt_text,
-        choices=valid_choices + [""],
+        choices=list(choices) + [""],
         show_choices=False,
         default="",
         show_default=False,
-    ).strip()
-    if not choice:
-        return None
-    return int(choice)
+    )
+    return resp.strip().lower()
 
 
 def print_progress(
@@ -175,6 +175,8 @@ def create_progress_hook(
     prefix: str = "Progress",
     unit: str = "item",
 ) -> tuple[Callable[[int, int], Awaitable[None]], Callable[[], None]]:
+    from rich.progress import Progress, TaskID
+
     progress = Progress(console=_CONSOLE)
     task_id: TaskID | None = None
 
@@ -259,6 +261,8 @@ def setup_logging(
 
     # Console handler
     if console:
+        from rich.logging import RichHandler
+
         console_level = _normalize_level(console_level)
 
         ch = RichHandler(

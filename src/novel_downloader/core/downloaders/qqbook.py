@@ -18,7 +18,8 @@ from novel_downloader.models import (
     ChapterDict,
     VolumeInfoDict,
 )
-from novel_downloader.utils import ChapterStorage, async_jitter_sleep
+from novel_downloader.utils.chapter_storage import ChapterStorage
+from novel_downloader.utils.time_utils import async_jitter_sleep
 
 
 @register_downloader(site_keys=["qqbook", "qq"])

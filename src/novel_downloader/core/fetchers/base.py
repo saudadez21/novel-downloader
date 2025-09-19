@@ -20,13 +20,14 @@ import aiohttp
 from aiohttp import ClientResponse, ClientSession, ClientTimeout, TCPConnector
 
 from novel_downloader.models import FetcherConfig, LoginField
-from novel_downloader.utils import async_jitter_sleep, sanitize_filename
 from novel_downloader.utils.constants import (
     DATA_DIR,
     DEFAULT_IMAGE_SUFFIX,
     DEFAULT_USER_HEADERS,
 )
+from novel_downloader.utils.file_utils import sanitize_filename
 from novel_downloader.utils.file_utils.io import _unique_path, write_file
+from novel_downloader.utils.time_utils import async_jitter_sleep
 
 from .rate_limiter import TokenBucketRateLimiter
 
