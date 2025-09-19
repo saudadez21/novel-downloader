@@ -111,7 +111,15 @@ def _prompt_user_select(
     total_pages = max(1, (total + per_page - 1) // per_page)
     page = 1
 
-    columns = ["#", "Title", "Author", "Latest", "Updated", "Site", "Book ID"]
+    columns = [
+        t("col_index"),
+        t("col_title"),
+        t("col_author"),
+        t("col_latest"),
+        t("col_updated"),
+        t("col_site"),
+        t("col_book_id"),
+    ]
     all_rows = []
     for i, r in enumerate(results, 1):
         all_rows.append(

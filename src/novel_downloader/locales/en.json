@@ -77,5 +77,12 @@
 
   "no_results": "No results found.",
   "prompt_select_index": "Enter a number to select, 'n' for next, 'p' for previous (press Enter to cancel)",
-  "page_status": "Search Results · Page {page}/{total_pages}"
+  "page_status": "Search Results · Page {page}/{total_pages}",
+  "col_index": "#",
+  "col_title": "Title",
+  "col_author": "Author",
+  "col_latest": "Latest",
+  "col_updated": "Updated",
+  "col_site": "Site",
+  "col_book_id": "Book ID"
 }

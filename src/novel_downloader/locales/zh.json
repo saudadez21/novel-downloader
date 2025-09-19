@@ -77,5 +77,12 @@
 
   "no_results": "未找到结果",
   "prompt_select_index": "输入编号选择, 'n' 下一页, 'p' 上一页 (回车取消)",
-  "page_status": "搜索结果 · 第 {page} / {total_pages} 页"
+  "page_status": "搜索结果 · 第 {page} / {total_pages} 页",
+  "col_index": "#",
+  "col_title": "书名",
+  "col_author": "作者",
+  "col_latest": "最新章节",
+  "col_updated": "更新时间",
+  "col_site": "站点",
+  "col_book_id": "书籍ID"
 }
