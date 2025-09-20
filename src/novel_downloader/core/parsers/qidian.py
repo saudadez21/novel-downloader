@@ -74,10 +74,10 @@ class QidianParser(BaseParser):
         self._fixed_map_dir = self._base_cache_dir / "qidian" / "fixed_font_map"
         self._debug_dir = Path.cwd() / "debug" / "qidian"
 
-        state_files = [
+        self._state_files = [
             DATA_DIR / "qidian" / "session_state.cookies",
         ]
-        self._fuid: str = fuid or get_cookie_value(state_files, "ywguid")
+        self._fuid = fuid
 
     def parse_book_info(
         self,
@@ -184,6 +184,7 @@ class QidianParser(BaseParser):
         raw_html = chapter_info.get("content", "")
         cid = str(chapter_info.get("chapterId") or chapter_id)
         fkp = chapter_info.get("fkp", "")
+        fuid = self._fuid or get_cookie_value(self._state_files, "ywguid")
         author_say = chapter_info.get("authorSay", "").strip()
         update_time = chapter_info.get("updateTime", "")
         update_timestamp = chapter_info.get("updateTimestamp", 0)
@@ -194,7 +195,7 @@ class QidianParser(BaseParser):
 
         if self._is_vip(chapter_info):
             decryptor = get_decryptor()
-            raw_html = decryptor.decrypt_qd(raw_html, cid, fkp, self._fuid)
+            raw_html = decryptor.decrypt_qd(raw_html, cid, fkp, fuid)
 
         chapter_text = (
             self._parse_font_encrypted(raw_html, chapter_info, cid)
