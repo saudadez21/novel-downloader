@@ -45,7 +45,14 @@ def parse_cookies(cookies: str | Mapping[str, str]) -> dict[str, str]:
 
 def get_cookie_value(state_files: list[Path], key: str) -> str:
     for state_file in state_files:
-        mtime = state_file.stat().st_mtime
+        if not state_file.exists():
+            continue
+
+        try:
+            mtime = state_file.stat().st_mtime
+        except OSError:
+            continue
+
         data = load_state_file(state_file, mtime)
         cookies = data.get("cookies", [])
         value = next(
