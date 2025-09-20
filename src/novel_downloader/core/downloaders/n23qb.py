@@ -8,6 +8,7 @@ Downloader implementation for Qianbi novels, with chapter ID repair logic.
 
 import asyncio
 from collections.abc import Awaitable, Callable
+from contextlib import suppress
 from typing import Any
 
 from novel_downloader.core.downloaders.base import BaseDownloader
@@ -65,6 +66,7 @@ class N23qbDownloader(BaseDownloader):
                 book_id,
                 book_info,
                 storage,
+                cancel_event=cancel_event,
             )
 
             vols = book_info["volumes"]
@@ -112,15 +114,34 @@ class N23qbDownloader(BaseDownloader):
                 flushes, and exits once all STOPs are seen.
                 """
                 stop_count = 0
+
+                async def drain_nonblocking() -> None:
+                    nonlocal stop_count
+                    while True:
+                        try:
+                            nxt = save_q.get_nowait()
+                        except asyncio.QueueEmpty:
+                            break
+                        if isinstance(nxt, StopToken):
+                            stop_count += 1
+                        else:
+                            batch.append(nxt)
+                            if len(batch) >= self._storage_batch_size:
+                                await flush_batch()
+
                 while True:
-                    item = await save_q.get()
+                    try:
+                        item = await save_q.get()
+                    except asyncio.CancelledError:
+                        # Shouldn't happen, but be defensive:
+                        await flush_batch()
+                        return
+
                     if isinstance(item, StopToken):
                         stop_count += 1
                         if stop_count == self._workers:
-                            # All chapter workers have exited.
                             await flush_batch()
                             return
-                        # else keep waiting for remaining STOPs
                         continue
 
                     # Normal chapter
@@ -129,23 +150,8 @@ class N23qbDownloader(BaseDownloader):
                         await flush_batch()
 
                     if cancelled():
-                        # Drain whatever is already in the queue
-                        try:
-                            while True:
-                                nxt = save_q.get_nowait()
-                                if isinstance(nxt, StopToken):
-                                    stop_count += 1
-                                else:
-                                    batch.append(nxt)
-                        except asyncio.QueueEmpty:
-                            pass
-                        # Final flush of everything
+                        await drain_nonblocking()
                         await flush_batch()
-                        # Wait for remaining STOPs so chapter workers can finish.
-                        while stop_count < self._workers:
-                            nxt = await save_q.get()
-                            if isinstance(nxt, StopToken):
-                                stop_count += 1
                         return
 
             # --- stage: chapter worker ---
@@ -155,28 +161,32 @@ class N23qbDownloader(BaseDownloader):
 
                 Exits on STOP, or early if cancel is set before starting a new fetch.
                 """
-                while True:
-                    cid = await cid_q.get()
-                    if isinstance(cid, StopToken):
-                        # Propagate one STOP to storage and exit.
-                        await save_q.put(STOP)
-                        return
+                try:
+                    while True:
+                        cid = await cid_q.get()
+                        if isinstance(cid, StopToken):
+                            with suppress(asyncio.QueueFull):
+                                save_q.put_nowait(STOP)
+                            return
 
-                    # If cancelled, don't start a new network call; let storage finish.
-                    if cancelled():
-                        await save_q.put(STOP)
-                        return
+                        if cancelled():
+                            with suppress(asyncio.QueueFull):
+                                save_q.put_nowait(STOP)
+                            return
 
-                    chap = await self._process_chapter(book_id, cid)
-                    if chap:
-                        await save_q.put(chap)
+                        chap = await self._process_chapter(book_id, cid)
+                        if chap:
+                            await save_q.put(chap)
 
-                    # polite pacing
-                    await async_jitter_sleep(
-                        self._request_interval,
-                        mul_spread=1.1,
-                        max_sleep=self._request_interval + 2,
-                    )
+                        await async_jitter_sleep(
+                            self._request_interval,
+                            mul_spread=1.1,
+                            max_sleep=self._request_interval + 2,
+                        )
+                except asyncio.CancelledError:
+                    with suppress(asyncio.QueueFull):
+                        save_q.put_nowait(STOP)
+                    return
 
             # --- stage: producer ---
             async def producer() -> None:
@@ -196,14 +206,30 @@ class N23qbDownloader(BaseDownloader):
                             await cid_q.put(cid)
                 finally:
                     for _ in range(self._workers):
-                        await cid_q.put(STOP)
+                        with suppress(asyncio.CancelledError):
+                            await cid_q.put(STOP)
 
             # --- run the pipeline ---
             async with asyncio.TaskGroup() as tg:
                 tg.create_task(storage_worker())
-                for _ in range(self._workers):
-                    tg.create_task(chapter_worker())
-                tg.create_task(producer())
+                worker_tasks = [
+                    tg.create_task(chapter_worker()) for _ in range(self._workers)
+                ]
+                producer_task = tg.create_task(producer())
+
+                if cancel_event:
+
+                    async def cancel_watcher() -> None:
+                        await cancel_event.wait()
+                        producer_task.cancel()
+                        for t in worker_tasks:
+                            t.cancel()
+
+                        with suppress(Exception):
+                            while True:
+                                cid_q.get_nowait()
+
+                    tg.create_task(cancel_watcher())
 
             # --- done ---
             if cancelled():
@@ -224,26 +250,38 @@ class N23qbDownloader(BaseDownloader):
         book_id: str,
         book_info: BookInfoDict,
         storage: ChapterStorage,
+        *,
+        cancel_event: asyncio.Event | None = None,
     ) -> BookInfoDict:
         """
         Fill in missing chapterId fields by retrieving the previous chapter
         and following its 'next_cid'. Uses storage to avoid refetching.
         """
+
+        def cancelled() -> bool:
+            return bool(cancel_event and cancel_event.is_set())
+
         prev_cid: str = ""
         for vol in book_info["volumes"]:
             for chap in vol["chapters"]:
+                if cancelled():
+                    self.logger.info("Repair cancelled for book %s", book_id)
+                    return book_info
+
                 cid = chap.get("chapterId")
                 if cid:
                     prev_cid = cid
                     continue
 
-                # no valid previous to follow
                 if not prev_cid:
                     continue
 
                 # missing id: try storage
                 data = storage.get_best_chapter(prev_cid)
                 if not data:
+                    if cancelled():
+                        return book_info
+
                     # fetch+parse previous to discover next
                     data = await self._process_chapter(book_id, prev_cid)
                     if not data:
@@ -253,6 +291,8 @@ class N23qbDownloader(BaseDownloader):
                         )
                         continue
                     storage.upsert_chapter(data, self.DEFAULT_SOURCE_ID)
+                    if cancelled():
+                        return book_info
                     await async_jitter_sleep(
                         self._request_interval,
                         mul_spread=1.1,
@@ -261,10 +301,7 @@ class N23qbDownloader(BaseDownloader):
 
                 next_cid = data.get("extra", {}).get("next_cid")
                 if not next_cid:
-                    self.logger.warning(
-                        "No next_cid in data for %s",
-                        prev_cid,
-                    )
+                    self.logger.warning("No next_cid in data for %s", prev_cid)
                     continue
 
                 self.logger.info(
