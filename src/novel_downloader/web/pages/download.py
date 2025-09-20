@@ -7,6 +7,7 @@ novel_downloader.web.pages.download
 
 from nicegui import ui
 
+from novel_downloader.utils.book_url_resolver import resolve_book_url
 from novel_downloader.web.components import navbar
 from novel_downloader.web.services import manager, setup_dialog
 
@@ -73,7 +74,21 @@ def page_download() -> None:
     ui.label("下载界面").classes("text-lg")
     setup_dialog()
 
-    with ui.card().classes("max-w-[600px]"):
+    with ui.card().classes("max-w-[600px] w-full"):
+        ui.label("选择输入方式").classes("text-md")
+
+        mode = (
+            ui.toggle(
+                {"url": "通过 URL", "id": "站点 + ID"},
+                value="url",
+            )
+            .props("dense")
+            .classes("w-full")
+        )
+
+        url_input = ui.input("小说 URL").props("outlined dense").classes("w-full")
+        url_preview = ui.label("").classes("text-sm text-gray-500")
+
         site = ui.select(
             _SUPPORT_SITES,
             value=_DEFAULT_SITE,
@@ -83,17 +98,99 @@ def page_download() -> None:
 
         book_id = ui.input("书籍ID").props("outlined dense").classes("w-full")
 
-        async def add_task() -> None:
+        def _apply_visibility() -> None:
+            is_url = mode.value == "url"
+            url_input.visible = is_url
+            url_preview.visible = is_url
+            site.visible = not is_url
+            book_id.visible = not is_url
+
+        mode.on_value_change(lambda e: _apply_visibility())
+        _apply_visibility()
+
+        async def _resolve(url: str) -> tuple[str | None, str | None]:
+            try:
+                info = resolve_book_url(url)
+            except Exception:
+                return None, None
+            if not info:
+                return None, None
+            site_key = str(info["site_key"])
+            bid = str(info["book"]["book_id"])
+            return site_key, bid
+
+        add_btn: ui.button | None = None  # forward reference
+
+        async def _add_task_from_url() -> None:
+            raw = (url_input.value or "").strip()
+            if not raw:
+                ui.notify("请输入小说 URL", type="warning")
+                return
+            site_key, bid = await _resolve(raw)
+            if not site_key or not bid:
+                ui.notify(
+                    "无法解析该 URL, 请确认链接是否正确或该站点是否受支持",
+                    type="warning",
+                )
+                return
+            site_display = _SUPPORT_SITES.get(site_key, site_key)
+            title = f"{site_display} (id = {bid})"
+            ui.notify(f"已添加任务: {title}")
+            await manager.add_task(title=title, site=site_key, book_id=bid)
+
+        async def _add_task_from_id() -> None:
             bid = (book_id.value or "").strip()
             if not bid:
                 ui.notify("请输入书籍ID", type="warning")
                 return
-            title = f"{site.value} (id = {bid})"
+            site_key = str(site.value)
+            site_display = _SUPPORT_SITES.get(site_key, site_key)
+            title = f"{site_display} (id = {bid})"
             ui.notify(f"已添加任务: {title}")
-            await manager.add_task(title=title, site=str(site.value), book_id=bid)
+            await manager.add_task(title=title, site=site_key, book_id=bid)
+
+        async def add_task() -> None:
+            # 防抖：禁用按钮
+            if add_btn is not None:
+                add_btn.props(remove="loading")
+                add_btn.props("loading")
+                add_btn.disable()
+            try:
+                if mode.value == "url":
+                    await _add_task_from_url()
+                else:
+                    bid = (book_id.value or "").strip()
+                    if bid.startswith("http://") or bid.startswith("https://"):
+                        mode.value = "url"
+                        _apply_visibility()
+                        url_input.value = bid
+                        await _add_task_from_url()
+                    else:
+                        await _add_task_from_id()
+            finally:
+                if add_btn is not None:
+                    add_btn.enable()
+                    add_btn.props(remove="loading")
+
+        async def _preview_on_blur() -> None:
+            raw = (url_input.value or "").strip()
+            if not raw:
+                url_preview.text = ""
+                return
+            site_key, bid = await _resolve(raw)
+            if site_key and bid:
+                site_display = _SUPPORT_SITES.get(site_key, site_key)
+                url_preview.text = f"解析结果：站点 = {site_display}, 书籍ID = {bid}"
+            else:
+                url_preview.text = "解析失败：该链接可能不受支持或格式不正确"
+
+        url_input.on("blur", _preview_on_blur)
+
+        url_input.on("keydown.enter", lambda e: add_task())
+        book_id.on("keydown.enter", lambda e: add_task())
 
         with ui.row().classes("justify-end w-full"):
-            ui.button(
+            add_btn = ui.button(
                 "添加到下载队列",
                 on_click=add_task,
                 color="primary",
