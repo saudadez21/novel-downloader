@@ -6,7 +6,6 @@ novel_downloader.web.pages.progress
 Layout for active/history tasks with compact cards and status chips.
 """
 
-
 from nicegui import ui
 
 from novel_downloader.web.components import navbar
@@ -43,14 +42,15 @@ def _progress_block(t: DownloadTask) -> None:
     # progress or summary depending on state
     if t.status == "running":
         if t.chapters_total <= 0:
-            label_text = f"{t.chapters_done}/? · 正在获取总章节..."
             ui.linear_progress().props("indeterminate striped").classes("w-full")
-            ui.label(label_text).classes("text-xs text-grey-7")
+            ui.label(f"{t.chapters_done}/? · 正在获取总章节...").classes(
+                "text-xs text-grey-7"
+            )  # noqa: E501
         else:
             ui.linear_progress(value=t.progress()).props("instant-feedback").classes(
                 "w-full"
             )
-            ui.label(f"{t.chapters_done}/{t.chapters_total} · running").classes(
+            ui.label(f"{t.chapters_done}/{t.chapters_total} · 运行中").classes(
                 "text-xs text-grey-7"
             )
     else:
@@ -75,11 +75,16 @@ def _progress_block(t: DownloadTask) -> None:
 
 def _task_card(t: DownloadTask, *, active: bool) -> None:
     with ui.card().classes("w-full"):
-        # header
+        # Header
         with ui.row().classes("items-center justify-between w-full"):
-            with ui.row().classes("items-center gap-2"):
-                ui.label(t.title).classes("text-sm font-medium")
-                _status_chip(t.status)
+            with ui.column().classes("gap-[2px]"):
+                with ui.row().classes("items-center gap-2"):
+                    ui.label(t.title).classes("text-sm font-medium")
+                    _status_chip(t.status)
+                # subtle meta line (task id)
+                ui.label(f"任务ID: {t.task_id[:8]}…").classes("text-xs text-grey-6")
+
+            # Cancel button (active tasks only)
             if active and t.status in ("running", "queued"):
 
                 async def cancel_this(tid: str = t.task_id) -> None:
@@ -89,14 +94,14 @@ def _task_card(t: DownloadTask, *, active: bool) -> None:
                         color=("primary" if ok else "negative"),
                     )
 
-                ui.button("取消", on_click=cancel_this)
+                ui.button("取消", on_click=cancel_this).props("outline")
             else:
                 ui.button(
                     "取消",
                     on_click=lambda: ui.notify("任务已结束，无法取消"),
-                ).props("disable")
+                ).props("disable outline")
 
-        # meta grid
+        # Meta grid
         with ui.column().classes("w-full gap-1 mt-2"):
             _meta_row("站点", t.site)
             _meta_row("书号", t.book_id)
@@ -105,7 +110,7 @@ def _task_card(t: DownloadTask, *, active: bool) -> None:
                     ui.label("错误").classes("text-xs text-grey-7")
                     ui.label(t.error).classes("text-xs text-negative q-ml-md")
 
-        # progress / summary
+        # Progress / summary
         with ui.column().classes("w-full mt-2"):
             _progress_block(t)
 
@@ -113,35 +118,36 @@ def _task_card(t: DownloadTask, *, active: bool) -> None:
 @ui.page("/progress")  # type: ignore[misc]
 def page_progress() -> None:
     navbar("progress")
-    ui.label("正在下载 / 历史记录").classes("text-lg")
     setup_dialog()
 
-    @ui.refreshable  # type: ignore[misc]
-    def section() -> None:
-        s = manager.snapshot()
+    with ui.column().classes("w-full max-w-screen-lg min-w-[320px] mx-auto gap-4"):
 
-        # Active first
-        ui.label("运行中 / 等待中").classes("text-base mt-2")
-        with ui.card().classes("w-full"):
-            running = s["running"]
-            pending = s["pending"]
-            if not running and not pending:
-                ui.label("暂无").classes("text-sm text-grey-6")
-            else:
-                if running:
-                    _task_card(running, active=True)
-                for t in pending:
-                    _task_card(t, active=True)
+        @ui.refreshable  # type: ignore[misc]
+        def section() -> None:
+            s = manager.snapshot()
 
-        # History next
-        ui.label("已完成 / 已取消 / 失败").classes("text-base mt-4")
-        with ui.card().classes("w-full"):
-            if not s["completed"]:
-                ui.label("暂无").classes("text-sm text-grey-6")
-            else:
-                for t in s["completed"]:
-                    _task_card(t, active=False)
+            # Active section
+            with ui.card().classes("w-full"):
+                ui.label("运行中 / 等待中").classes("text-base")
+                running = s["running"]
+                pending = s["pending"]
+                if not running and not pending:
+                    ui.label("暂无").classes("text-sm text-grey-6")
+                else:
+                    if running:
+                        _task_card(running, active=True)
+                    for t in pending:
+                        _task_card(t, active=True)
 
-    # periodic refresh
-    ui.timer(0.5, section.refresh)
-    section()
+            # History section
+            with ui.card().classes("w-full"):
+                ui.label("已完成 / 已取消 / 失败").classes("text-base")
+                if not s["completed"]:
+                    ui.label("暂无").classes("text-sm text-grey-6")
+                else:
+                    for t in s["completed"]:
+                        _task_card(t, active=False)
+
+        # periodic refresh
+        ui.timer(0.5, section.refresh)
+        section()
