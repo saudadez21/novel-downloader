@@ -66,7 +66,7 @@ class CommonDownloader(BaseDownloader):
         # --- queues & batching ---
         cid_q: asyncio.Queue[str | StopToken] = asyncio.Queue(maxsize=self._workers * 2)
         save_q: asyncio.Queue[ChapterDict | StopToken] = asyncio.Queue(
-            maxsize=self._workers * 2
+            maxsize=self._workers * 5
         )
         batch: list[ChapterDict] = []
 

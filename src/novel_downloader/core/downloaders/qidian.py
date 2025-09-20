@@ -87,8 +87,8 @@ class QidianDownloader(BaseDownloader):
         progress = Progress(total=len(plan), hook=progress_hook)
 
         # ---- queues & batching ---
-        cid_q: asyncio.Queue[str | StopToken] = asyncio.Queue()
-        save_q: asyncio.Queue[ChapterDict | StopToken] = asyncio.Queue()
+        cid_q: asyncio.Queue[str | StopToken] = asyncio.Queue(maxsize=10)
+        save_q: asyncio.Queue[ChapterDict | StopToken] = asyncio.Queue(maxsize=10)
         default_batch: list[ChapterDict] = []
         encrypted_batch: list[ChapterDict] = []
 

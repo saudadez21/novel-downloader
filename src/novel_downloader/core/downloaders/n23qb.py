@@ -82,7 +82,7 @@ class N23qbDownloader(BaseDownloader):
                 maxsize=self._workers * 2
             )
             save_q: asyncio.Queue[ChapterDict | StopToken] = asyncio.Queue(
-                maxsize=self._workers * 2
+                maxsize=self._workers * 5
             )
             batch: list[ChapterDict] = []
 
