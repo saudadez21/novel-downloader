@@ -68,45 +68,81 @@ _SUPPORT_SITES = {
 _DEFAULT_SITE = "qidian"
 
 
+def _chip(text: str) -> None:
+    with ui.element("span").classes(
+        "inline-flex items-center px-2 py-[2px] text-[11px] rounded bg-grey-2 text-grey-7"  # noqa: E501
+    ):
+        ui.label(text).classes("leading-none")
+
+
 @ui.page("/download")  # type: ignore[misc]
 def page_download() -> None:
     navbar("download")
-    ui.label("下载界面").classes("text-lg")
     setup_dialog()
 
-    with ui.card().classes("max-w-[600px] w-full"):
-        ui.label("选择输入方式").classes("text-md")
-
-        mode = (
-            ui.toggle(
-                {"url": "通过 URL", "id": "站点 + ID"},
-                value="url",
+    with ui.column().classes("w-full max-w-screen-lg min-w-[320px] mx-auto gap-4"):
+        with ui.row().classes("items-center justify-between w-full"):
+            ui.label("选择输入方式").classes("text-md")
+            # mode toggle on the right
+            mode = ui.toggle({"url": "通过 URL", "id": "站点 + ID"}, value="url").props(
+                "dense"
             )
-            .props("dense")
-            .classes("w-full")
-        )
 
-        url_input = ui.input("小说 URL").props("outlined dense").classes("w-full")
-        url_preview = ui.label("").classes("text-sm text-gray-500")
+        ui.separator()
 
-        site = ui.select(
-            _SUPPORT_SITES,
-            value=_DEFAULT_SITE,
-            label="站点",
-            with_input=True,
-        ).classes("w-full")
+        # --- URL mode controls ---
+        with ui.column().classes("gap-2 w-full") as url_section:
+            url_input = (
+                ui.input("小说 URL").props("outlined dense clearable").classes("w-full")
+            )
 
-        book_id = ui.input("书籍ID").props("outlined dense").classes("w-full")
+            preview_row = ui.row().classes("items-center gap-2 w-full")
+            with preview_row:
+                _chip("解析结果")
+                site_badge = ui.label("").classes("text-xs text-grey-7")
+                id_badge = ui.label("").classes("text-xs text-grey-7")
+            preview_row.visible = False
+
+            ui.label("粘贴完整的小说详情页链接，系统会自动解析站点和书籍ID").classes(
+                "text-xs text-grey-6"
+            )  # noqa: E501
+
+        ui.separator()
+
+        # --- Site + ID controls ---
+        with ui.column().classes("gap-2 w-full") as site_id_section:
+            with ui.row().classes("items-start gap-2 w-full"):
+                site = (
+                    ui.select(
+                        _SUPPORT_SITES,
+                        value=_DEFAULT_SITE,
+                        label="站点",
+                        with_input=True,
+                    )
+                    .props("outlined dense")
+                    .classes("w-full md:w-[40%]")
+                )
+                book_id = (
+                    ui.input("书籍ID")
+                    .props("outlined dense clearable")
+                    .classes("w-full md:w-[60%]")
+                )
+            ui.label("若已知站点与书籍ID，可在此直接输入").classes("text-xs text-grey-6")  # noqa: E501
+
+        # Shared actions
+        with ui.row().classes("justify-end items-center gap-2 w-full q-mt-sm"):
+            clear_btn = ui.button("清空").props("outline")
+            add_btn = ui.button("添加到下载队列", color="primary").props("unelevated")
+
+        # ---------- logic ----------
 
         def _apply_visibility() -> None:
             is_url = mode.value == "url"
-            url_input.visible = is_url
-            url_preview.visible = is_url
-            site.visible = not is_url
-            book_id.visible = not is_url
-
-        mode.on_value_change(lambda e: _apply_visibility())
-        _apply_visibility()
+            url_section.visible = is_url
+            site_id_section.visible = not is_url
+            preview_row.visible = (
+                is_url and bool(site_badge.text) and bool(id_badge.text)
+            )
 
         async def _resolve(url: str) -> tuple[str | None, str | None]:
             try:
@@ -119,7 +155,36 @@ def page_download() -> None:
             bid = str(info["book"]["book_id"])
             return site_key, bid
 
-        add_btn: ui.button | None = None  # forward reference
+        def _reset_preview() -> None:
+            site_badge.text = ""
+            id_badge.text = ""
+            preview_row.visible = False
+
+        def _clear_all() -> None:
+            url_input.value = ""
+            book_id.value = ""
+            site.value = _DEFAULT_SITE
+            _reset_preview()
+
+        mode.on_value_change(lambda _: _apply_visibility())
+        _apply_visibility()
+
+        async def _preview_on_blur() -> None:
+            raw = (url_input.value or "").strip()
+            if not raw:
+                _reset_preview()
+                return
+            site_key, bid = await _resolve(raw)
+            if site_key and bid:
+                site_display = _SUPPORT_SITES.get(site_key, site_key)
+                site_badge.text = f"站点: {site_display}"
+                id_badge.text = f"书籍ID: {bid}"
+                preview_row.visible = True
+            else:
+                _reset_preview()
+                ui.notify("解析失败：该链接可能不受支持或格式不正确", type="warning")
+
+        url_input.on("blur", _preview_on_blur)
 
         async def _add_task_from_url() -> None:
             raw = (url_input.value or "").strip()
@@ -128,10 +193,7 @@ def page_download() -> None:
                 return
             site_key, bid = await _resolve(raw)
             if not site_key or not bid:
-                ui.notify(
-                    "无法解析该 URL, 请确认链接是否正确或该站点是否受支持",
-                    type="warning",
-                )
+                ui.notify("无法解析该 URL，请检查链接或站点支持情况", type="warning")
                 return
             site_display = _SUPPORT_SITES.get(site_key, site_key)
             title = f"{site_display} (id = {bid})"
@@ -150,17 +212,17 @@ def page_download() -> None:
             await manager.add_task(title=title, site=site_key, book_id=bid)
 
         async def add_task() -> None:
-            # 防抖：禁用按钮
-            if add_btn is not None:
-                add_btn.props(remove="loading")
-                add_btn.props("loading")
-                add_btn.disable()
+            # disable button to prevent duplicate submissions
+            add_btn.props(remove="loading")
+            add_btn.props("loading")
+            add_btn.disable()
             try:
                 if mode.value == "url":
                     await _add_task_from_url()
                 else:
+                    # if pasted a URL into ID field
                     bid = (book_id.value or "").strip()
-                    if bid.startswith("http://") or bid.startswith("https://"):
+                    if bid.startswith(("http://", "https://")):
                         mode.value = "url"
                         _apply_visibility()
                         url_input.value = bid
@@ -168,30 +230,15 @@ def page_download() -> None:
                     else:
                         await _add_task_from_id()
             finally:
-                if add_btn is not None:
-                    add_btn.enable()
-                    add_btn.props(remove="loading")
+                add_btn.enable()
+                add_btn.props(remove="loading")
 
-        async def _preview_on_blur() -> None:
-            raw = (url_input.value or "").strip()
-            if not raw:
-                url_preview.text = ""
-                return
-            site_key, bid = await _resolve(raw)
-            if site_key and bid:
-                site_display = _SUPPORT_SITES.get(site_key, site_key)
-                url_preview.text = f"解析结果：站点 = {site_display}, 书籍ID = {bid}"
-            else:
-                url_preview.text = "解析失败：该链接可能不受支持或格式不正确"
+        # enter key submits in both modes
+        url_input.on("keydown.enter", lambda _: add_task())
+        book_id.on("keydown.enter", lambda _: add_task())
 
-        url_input.on("blur", _preview_on_blur)
+        add_btn.on("click", add_task)
+        clear_btn.on("click", lambda: _clear_all())
 
-        url_input.on("keydown.enter", lambda e: add_task())
-        book_id.on("keydown.enter", lambda e: add_task())
-
-        with ui.row().classes("justify-end w-full"):
-            add_btn = ui.button(
-                "添加到下载队列",
-                on_click=add_task,
-                color="primary",
-            ).props("unelevated")
+        # initial state
+        _apply_visibility()
