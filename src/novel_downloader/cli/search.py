@@ -31,7 +31,12 @@ def register_search_subcommand(subparsers: _SubParsersAction) -> None:  # type: 
     parser.add_argument("keyword", help=t("search_keyword_help"))
     parser.add_argument("--config", type=str, help=t("help_config"))
     parser.add_argument(
-        "--limit", "-l", type=int, default=200, metavar="N", help=t("search_limit_help")
+        "--limit",
+        "-l",
+        type=int,
+        default=None,
+        metavar="N",
+        help=t("search_limit_help"),
     )
     parser.add_argument(
         "--site-limit",
@@ -57,7 +62,7 @@ def handle_search(args: Namespace) -> None:
 
     sites: Sequence[str] | None = args.site or None
     keyword: str = args.keyword
-    overall_limit = max(1, args.limit)
+    overall_limit = None if args.limit is None else max(1, args.limit)
     per_site_limit = max(1, args.site_limit)
     timeout = max(0.1, float(args.timeout))
     config_path: Path | None = Path(args.config) if args.config else None
