@@ -11,12 +11,11 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable
 from contextlib import aclosing, suppress
-from math import ceil
 from typing import Any
 
 from nicegui import ui
 from nicegui.elements.number import Number
-from nicegui.events import ValueChangeEventArguments
+from nicegui.events import KeyEventArguments, ValueChangeEventArguments
 
 from novel_downloader.core.searchers import search_stream
 from novel_downloader.models import SearchResult
@@ -83,6 +82,8 @@ def _get_state() -> dict[str, Any]:
             "page_size": _PAGE_SIZE,
             "search_task": None,  # asyncio.Task | None
             "searching": False,  # bool
+            "sort_key": "priority",  # site | title | author | priority
+            "sort_order": "asc",  # asc | desc
         }
     return _STATE[cid]
 
@@ -119,7 +120,7 @@ def _coerce_psl(inp: Number) -> int:
         if v <= 0:
             raise ValueError
     except (TypeError, ValueError):
-        ui.notify("单站条数上限需为正整数，已重置为 5", type="warning")
+        ui.notify("单站条数上限需为正整数，已重置为 30", type="warning")
         v = _DEFAULT_SITE_LIMIT
     inp.set_value(v)
     inp.sanitize()
@@ -131,6 +132,52 @@ def _render_placeholder_cover() -> None:
         "w-[72px] h-[96px] bg-grey-3 rounded-md flex items-center justify-center"
     ):
         ui.icon("book").classes("text-grey-6 text-3xl")
+
+
+def _site_label(site_key: str) -> str:
+    return _SUPPORT_SITES.get(site_key, site_key)
+
+
+def _norm_text(v: Any) -> str:
+    return str(v or "").strip().casefold()
+
+
+def _apply_sort(state: dict[str, Any]) -> None:
+    """Sort state['results'] in place according to sort_key/order."""
+    key = state.get("sort_key") or "priority"
+    order = state.get("sort_order") or "desc"
+    reverse = order == "desc"
+
+    def k_site(r: SearchResult) -> tuple[str, str, str]:
+        # Sort by Chinese label; tie-break by site key for stability, then title
+        return (
+            _norm_text(_site_label(r.get("site", "unknown"))),
+            _norm_text(r.get("site")),
+            _norm_text(r.get("title")),
+        )
+
+    def k_title(r: SearchResult) -> tuple[str, str]:
+        return (_norm_text(r.get("title")), _norm_text(r.get("author")))
+
+    def k_author(r: SearchResult) -> tuple[str, str]:
+        return (_norm_text(r.get("author")), _norm_text(r.get("title")))
+
+    def k_priority(r: SearchResult) -> float:
+        try:
+            return float(r.get("priority", 0))
+        except Exception:
+            return 0.0
+
+    key_map: dict[str, Callable[[SearchResult], Any]] = {
+        "site": k_site,
+        "title": k_title,
+        "author": k_author,
+        "priority": k_priority,
+    }
+    key_fn = key_map.get(key, k_priority)
+
+    # NOTE: for numeric priority, reverse flag already handles desc/asc
+    state["results"].sort(key=key_fn, reverse=reverse)
 
 
 def _render_result_row(r: SearchResult) -> None:
@@ -152,7 +199,10 @@ def _render_result_row(r: SearchResult) -> None:
                 f"{r['author']} · {r['word_count']} · 更新于 {r['update_date']}"
             ).classes("text-xs text-grey-6")
             ui.label(r["latest_chapter"]).classes("text-sm text-grey-7")
-            ui.label(f"{r['site']} · ID: {r['book_id']}").classes("text-xs text-grey-5")
+
+            ui.label(f"{_site_label(r['site'])} · ID: {r['book_id']}").classes(
+                "text-xs text-grey-5"
+            )
 
         async def _add_task() -> None:
             title = r["title"]
@@ -251,31 +301,73 @@ def _build_settings_dropdown(
 @ui.page("/")  # type: ignore[misc]
 def page_search() -> None:
     navbar("search")
-    ui.label("搜索页面").classes("text-lg")
     setup_dialog()
 
     state = _get_state()
 
-    # settings (left) + query (middle) + search (right)
-    with ui.row().classes("items-center gap-2 my-2 w-full"):
-        get_sites, get_psl, get_timeout = _build_settings_dropdown(state)
+    # ---------- Outer container ----------
+    with ui.column().classes("w-full max-w-screen-lg min-w-[320px] mx-auto gap-4"):
+        # ---------- Sticky toolbar ----------
+        with ui.card().classes(
+            "w-full sticky top-0 z-10 backdrop-blur bg-white/70 border-0 shadow-sm"
+        ):
+            with ui.row().classes("items-center gap-2 w-full"):
+                get_sites, get_psl, get_timeout = _build_settings_dropdown(state)
 
-        query_in = (
-            ui.input("输入关键字", value=state["query"])
-            .props("outlined dense clearable")
-            .classes("min-w-[320px] grow")
-        )
+                query_in = (
+                    ui.input("输入关键字", value=state["query"])
+                    .props("outlined dense clearable")
+                    .classes("min-w-[320px] grow")
+                )
 
-        search_btn = ui.button("搜索", color="primary").props("unelevated")
+                search_btn = ui.button("搜索", color="primary").props("unelevated")
+                ui.button("停止", on_click=lambda: _cancel_current(state)).props(
+                    "outline"
+                )
 
-        ui.button("停止", on_click=lambda: _cancel_current(state)).props("outline")
+            with ui.row().classes("items-center gap-3 w-full q-mt-xs"):
+                sort_key_labels = {
+                    "priority": "优先级",
+                    "site": "站点",
+                    "title": "标题",
+                    "author": "作者",
+                }
+                sort_key_sel = (
+                    ui.select(
+                        sort_key_labels,
+                        value=state["sort_key"],
+                        label="排序",
+                        with_input=False,
+                    )
+                    .props("outlined dense")
+                    .classes("w-[180px]")
+                )
 
-    # status row (shows "searching..." and total count)
-    status_area = ui.row().classes("items-center gap-2 my-1 w-full")
+                sort_order_sel = (
+                    ui.toggle(
+                        {"asc": "升序", "desc": "降序"},
+                        value=state["sort_order"],
+                    )
+                    .props("dense")
+                    .classes("")
+                )
 
-    # results & pagination container
-    list_area = ui.column().classes("w-full")
-    pager_area = ui.row().classes("items-center justify-center w-full q-mt-md")
+                def _on_sort_change(_: Any = None) -> None:
+                    state["sort_key"] = sort_key_sel.value or "priority"
+                    state["sort_order"] = sort_order_sel.value or "desc"
+                    _apply_sort(state)
+                    state["page"] = 1
+                    render_results.refresh()
+
+                sort_key_sel.on_value_change(_on_sort_change)
+                sort_order_sel.on_value_change(_on_sort_change)
+
+        # ---------- Status ----------
+        status_area = ui.row().classes("items-center gap-2 my-2 w-full")
+
+        # ---------- Results + pager ----------
+        list_area = ui.column().classes("w-full gap-2")
+        pager_area = ui.row().classes("items-center justify-center w-full q-mt-md")
 
     @ui.refreshable  # type: ignore[misc]
     def render_status() -> None:
@@ -288,6 +380,10 @@ def page_search() -> None:
             if total > 0:
                 ui.label(f"当前已获取 {total} 条结果").classes("text-sm text-grey-7")
 
+    def _render_skeleton_card() -> None:
+        with ui.card().classes("w-full h-[120px] bg-grey-2 animate-pulse"):
+            pass
+
     @ui.refreshable  # type: ignore[misc]
     def render_results() -> None:
         list_area.clear()
@@ -296,7 +392,7 @@ def page_search() -> None:
         results: list[SearchResult] = state["results"]
         total = len(results)
         page_size = int(state["page_size"])
-        total_pages = max(1, ceil(total / page_size))
+        total_pages = max(1, (total + page_size - 1) // page_size)
         page = max(1, min(int(state["page"]), total_pages))
         state["page"] = page
 
@@ -304,19 +400,23 @@ def page_search() -> None:
         end = min(total, start + page_size)
         current = results[start:end]
 
-        tip = (
-            f"共 {total} 条结果（第 {page}/{total_pages} 页）"
-            if state["sites"]
-            else f"共 {total} 条结果（第 {page}/{total_pages} 页，已搜索全部站点）"
-        )
-
-        with list_area:
-            ui.label(tip).classes("text-sm text-grey-7")
-            with ui.column().classes("w-full gap-2"):
+        if total > 0:
+            tip = (
+                f"共 {total} 条结果（第 {page}/{total_pages} 页）"
+                if state["sites"]
+                else f"共 {total} 条结果（第 {page}/{total_pages} 页，已搜索全部站点）"
+            )
+            with list_area:
+                ui.label(tip).classes("text-sm text-grey-7")
                 for r in current:
                     _render_result_row(r)
+        elif state.get("searching"):
+            with list_area:
+                for _ in range(3):
+                    _render_skeleton_card()
+        else:
+            pass
 
-        # pagination (only show if more than 1 page)
         if total_pages > 1:
 
             def _on_page_change(e: ValueChangeEventArguments) -> None:
@@ -346,10 +446,6 @@ def page_search() -> None:
     async def _run_stream(
         q: str, sites: list[str] | None, per_site_limit: int, timeout_val: float
     ) -> None:
-        """
-        Runs search_stream, progressively appending chunks of results to state,
-        and refreshing UI after each chunk.
-        """
         try:
             # show loading state
             state["searching"] = True
@@ -373,7 +469,7 @@ def page_search() -> None:
                     if not chunk:
                         continue
                     state["results"].extend(chunk)
-                    # Refresh both status (count) and the visible list
+                    _apply_sort(state)
                     render_status.refresh()
                     render_results.refresh()
 
@@ -406,8 +502,27 @@ def page_search() -> None:
         )
         state["search_task"] = task
 
+    def _on_key(e: KeyEventArguments) -> None:
+        if not e.action.keyup:
+            return
+
+        total = len(state["results"])
+        if total == 0:
+            return
+        page_size = int(state["page_size"])
+        total_pages = max(1, (total + page_size - 1) // page_size)
+        page = state["page"]
+
+        if e.key == "ArrowLeft" and page > 1:
+            state["page"] -= 1
+            render_results.refresh()
+        elif e.key == "ArrowRight" and page < total_pages:
+            state["page"] += 1
+            render_results.refresh()
+
     search_btn.on("click", do_search)
     query_in.on("keydown.enter", do_search)
+    ui.keyboard(on_key=_on_key)
 
     # initial render
     render_status()
