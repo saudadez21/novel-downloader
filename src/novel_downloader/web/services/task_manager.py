@@ -288,22 +288,23 @@ class TaskManager:
 
     async def close(self) -> None:
         """Cancel or gracefully finish all workers before shutdown."""
-        for _, task in list(self._worker_tasks.items()):
-            if not task.done():
-                task.cancel()
-        self._worker_tasks.clear()
-
+        tasks = [t for t in self._worker_tasks.values() if not t.done()]
         if self._export_worker_task and not self._export_worker_task.done():
-            self._export_worker_task.cancel()
+            tasks.append(self._export_worker_task)
+
+        for t in tasks:
+            t.cancel()
+
+        self._worker_tasks.clear()
         self._export_worker_task = None
 
-        # for queue in self.pending.values():
-        #     for task in queue:
-        #         task.cancel()
-        #         self.completed.insert(0, task)
-        # self.pending.clear()
-
-        await asyncio.sleep(0)
+        if tasks:
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            for r in results:
+                if isinstance(r, Exception) and not isinstance(
+                    r, asyncio.CancelledError
+                ):
+                    print(f"Worker error during shutdown: {r!r}")
 
 
 manager = TaskManager()

@@ -7,11 +7,12 @@ novel_downloader.web.pages.history
 
 from __future__ import annotations
 
+import os
 import time
-from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
+from urllib.parse import quote
 
 from nicegui import ui
 from nicegui.events import KeyEventArguments, ValueChangeEventArguments
@@ -20,6 +21,7 @@ from novel_downloader.config import get_config_value
 from novel_downloader.web.components import navbar
 from novel_downloader.web.services import setup_dialog
 
+_EXTS = {"txt", "epub"}
 _OUTPUT_DIR = Path(get_config_value(["general", "output_dir"], "./downloads"))
 _PAGE_SIZE = 20
 _PAGER_WIDTH = 9
@@ -33,32 +35,43 @@ TypeFilter = Literal["All", "txt", "epub"]
 class FileItem:
     path: Path
     name: str
-    ext: str  # '.txt' or '.epub'
+    ext: str  # 'txt' or 'epub'
     mtime: float
 
 
-def _scan_files(output_dir: Path) -> list[FileItem]:
-    """Return all *.txt and *.epub files in output_dir as FileItem list."""
+def _scan_files() -> list[FileItem]:
+    """Scan the output directory for txt/epub files."""
+    try:
+        it = os.scandir(_OUTPUT_DIR)
+    except FileNotFoundError:
+        return []
     items: list[FileItem] = []
-    for ext in (".txt", ".epub"):
-        for p in output_dir.glob(f"*{ext}"):
-            if p.is_file():
-                items.append(
-                    FileItem(
-                        path=p,
-                        name=p.name,
-                        ext=p.suffix.lower(),
-                        mtime=p.stat().st_mtime,
-                    )
+    for entry in it:
+        try:
+            if not entry.is_file():
+                continue
+            ext = Path(entry.name).suffix.lower().lstrip(".")
+            if ext not in _EXTS:
+                continue
+            st = entry.stat()
+            items.append(
+                FileItem(
+                    path=Path(entry.path),
+                    name=entry.name,
+                    ext=ext,
+                    mtime=st.st_mtime,
                 )
+            )
+        except FileNotFoundError:
+            continue
     return items
 
 
-def _apply_filter(items: Iterable[FileItem], type_filter: TypeFilter) -> list[FileItem]:
+def _apply_filter(items: list[FileItem], type_filter: TypeFilter) -> list[FileItem]:
     """Filter by extension; 'All' returns everything."""
     if type_filter == "All":
-        return list(items)
-    return [it for it in items if it.ext == f".{type_filter}"]
+        return items
+    return [it for it in items if it.ext == type_filter]
 
 
 def _apply_sort(
@@ -73,13 +86,13 @@ def _apply_sort(
 
 def _render_file_card(item: FileItem) -> None:
     """Render a single file as a card with icon, meta, and a Download button."""
-    url = f"/downloads/{item.name}?v={int(item.mtime)}"
+    url = f"/downloads/{quote(item.name)}?v={int(item.mtime)}"
     human_mtime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(item.mtime))
 
     with ui.card().classes("w-full"), ui.row().classes("items-start gap-4"):
-        if item.ext == ".epub":
+        if item.ext == "epub":
             ui.icon("menu_book").classes("text-4xl")
-        else:  # .txt
+        else:  # txt
             ui.icon("description").classes("text-4xl")
 
         # Meta & actions
@@ -99,11 +112,15 @@ def page_history() -> None:
     navbar("history")
     setup_dialog()
 
-    # reactive state (closed over by handlers)
+    # reactive state
     page: int = 1
     type_filter: TypeFilter = "All"
     sort_by: SortKey = "mtime"
     sort_order: SortOrder = "desc"
+
+    # cached lists
+    all_items: list[FileItem] = []
+    sorted_items: list[FileItem] = []
 
     # centered, responsive container
     with ui.column().classes("w-full max-w-screen-lg min-w-[320px] mx-auto gap-4"):
@@ -143,6 +160,16 @@ def page_history() -> None:
                 {"asc": "升序", "desc": "降序"}, value=sort_order
             ).props("dense")
 
+            def _on_refresh() -> None:
+                _reload()
+                _refresh()
+
+            ui.button(
+                "刷新",
+                icon="refresh",
+                on_click=_on_refresh,
+            ).props("dense flat")
+
         # status line (counts)
         status_area = ui.row().classes("items-center gap-2 w-full text-sm text-grey-7")
 
@@ -150,8 +177,18 @@ def page_history() -> None:
         list_area = ui.column().classes("w-full gap-3")
         pager_area = ui.row().classes("justify-center my-2 w-full")
 
-        def _load_all() -> list[FileItem]:
-            return _scan_files(_OUTPUT_DIR)
+        def _reload() -> None:
+            """Scan filesystem and refresh full list."""
+            nonlocal all_items
+            all_items = _scan_files()
+            _recompute_from_cache()
+
+        def _recompute_from_cache() -> None:
+            """Recompute filtered+sorted items from cached all_items."""
+            nonlocal sorted_items, page
+            filtered = _apply_filter(all_items, type_filter)
+            sorted_items = _apply_sort(filtered, sort_by, sort_order)
+            page = 1
 
         def _refresh_status(total: int, filtered_total: int) -> None:
             status_area.clear()
@@ -163,16 +200,11 @@ def page_history() -> None:
 
         def _refresh() -> None:
             nonlocal page
-
-            all_items = _load_all()
-            filtered = _apply_filter(all_items, type_filter)
-            sorted_items = _apply_sort(filtered, sort_by, sort_order)
-
             total_all = len(all_items)
             total = len(sorted_items)
             total_pages = max(1, (total + _PAGE_SIZE - 1) // _PAGE_SIZE)
 
-            # clamp page after filter/sort changes
+            # clamp page
             page = min(max(page, 1), total_pages)
 
             start = (page - 1) * _PAGE_SIZE
@@ -211,35 +243,41 @@ def page_history() -> None:
 
         # Handlers
         def _on_type_change(e: ValueChangeEventArguments) -> None:
-            nonlocal type_filter, page
-            type_filter = e.value  # "All" | "txt" | "epub"
-            page = 1
+            nonlocal type_filter
+            type_filter = e.value
+            _recompute_from_cache()
             _refresh()
 
         def _on_sort_key_change(e: ValueChangeEventArguments) -> None:
-            nonlocal sort_by, page
-            sort_by = e.value  # "name" | "mtime"
-            page = 1
+            nonlocal sort_by
+            sort_by = e.value
+            _recompute_from_cache()
             _refresh()
 
         def _on_sort_order_change(e: ValueChangeEventArguments) -> None:
-            nonlocal sort_order, page
-            sort_order = e.value  # "asc" | "desc"
-            page = 1
-            _refresh()
+            nonlocal sort_order, sorted_items, page
+            new_order = e.value
+            # Optimization: if only order changes, reverse current list
+            if sort_order != new_order and len(sorted_items) > 1:
+                sorted_items.reverse()
+                sort_order = new_order
+                page = 1
+                _refresh()
+            else:
+                sort_order = new_order
+                _recompute_from_cache()
+                _refresh()
 
         type_sel.on_value_change(_on_type_change)
         sort_key_sel.on_value_change(_on_sort_key_change)
         sort_order_sel.on_value_change(_on_sort_order_change)
 
-        # Keyboard: left/right to change page (keydown only)
+        # Keyboard: left/right to change page (keyup only)
         def _on_key(e: KeyEventArguments) -> None:
             if not e.action.keyup:
                 return
             nonlocal page
-            # recompute total_pages from current state
-            filtered = _apply_filter(_scan_files(_OUTPUT_DIR), type_filter)
-            total = len(_apply_sort(filtered, sort_by, sort_order))
+            total = len(sorted_items)
             total_pages = max(1, (total + _PAGE_SIZE - 1) // _PAGE_SIZE)
 
             if e.key == "ArrowLeft" and page > 1:
@@ -252,4 +290,5 @@ def page_history() -> None:
         ui.keyboard(on_key=_on_key)
 
         # Initial render
+        _reload()
         _refresh()
