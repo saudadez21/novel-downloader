@@ -177,9 +177,6 @@ class TaskManager:
                     ):
                         task.chapters_total = total
                     task.chapters_done = done
-                    # allow cooperative cancel from UI
-                    if task._cancel_event.is_set():
-                        raise asyncio.CancelledError()
 
                 book_cfg: BookConfig = {"book_id": task.book_id}
                 try:
