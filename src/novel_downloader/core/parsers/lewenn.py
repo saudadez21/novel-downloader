@@ -29,9 +29,9 @@ class LewennParser(BaseParser):
 
     site_name: str = "lewenn"
     BASE_URL = "https://www.lewenn.net"
-    ADS: set[str] = {
+    ADS = {
         "记住乐文小说网",
-        "lewenn.net",
+        r"lewenn\.net",
     }
 
     def parse_book_info(

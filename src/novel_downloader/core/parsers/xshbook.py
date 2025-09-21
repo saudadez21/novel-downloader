@@ -28,6 +28,13 @@ class XshbookParser(BaseParser):
     site_name: str = "xshbook"
     BASE = "http://www.xshbook.com"
 
+    ADS = {
+        r"谨记我们的网址",
+        r"温馨提示",
+        r"^提示.{0,50}$",  # "提示" 开头且内容较短
+        r"^分享.{0,40}$",  # "分享" 开头且内容较短
+    }
+
     def parse_book_info(
         self,
         html_list: list[str],
@@ -97,33 +104,14 @@ class XshbookParser(BaseParser):
                 tree.xpath("//div[@class='con_top']/text()[last()]")
             )
 
-        cont_nodes = tree.xpath("//div[@id='content']")
-        if not cont_nodes:
-            return None
-        cont = cont_nodes[0]
-
-        # remove scripts under content
-        for s in cont.xpath(".//script"):
-            s.getparent().remove(s)
-
         paragraphs: list[str] = []
-        for p in cont.xpath(".//p"):
-            text = html.tostring(p, method="text", encoding="unicode")
-            text = text.replace("\xa0", " ")
-            # filter boilerplate lines
-            bad = (
-                "谨记我们的网址" in text
-                or "温馨提示" in text
-                or "提示" in text
-                and "本文" not in text
-                and len(text) < 60
-                or "分享" in text
-                and len(text) < 40
-            )
-            if not bad:
-                paragraphs.append(text)
+        for p in tree.xpath("//div[@id='content']//p"):
+            text = self._norm_space(p.text_content() or "")
+            if not text or self._is_ad_line(text):
+                continue
+            paragraphs.append(text)
 
-        content = "\n".join(self._norm_space(p) for p in paragraphs if p.strip())
+        content = "\n".join(paragraphs)
         if not content.strip():
             return None
 

@@ -36,8 +36,8 @@ class YibigeParser(BaseParser):
         "首发地址",
         "手机阅读",
         "一笔阁",
-        "site_con_ad(",
-        "chapter_content(",
+        "site_con_ad",
+        "chapter_content",
     }
 
     def parse_book_info(

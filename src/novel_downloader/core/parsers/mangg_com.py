@@ -31,7 +31,7 @@ class ManggComParser(BaseParser):
     BASE_URL = "https://www.mangg.com"
     ADS: set[str] = {
         "记住追书网网",
-        "mangg.com",
+        r"mangg\.com",
     }
 
     def parse_book_info(

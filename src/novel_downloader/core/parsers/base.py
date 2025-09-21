@@ -82,7 +82,7 @@ class BaseParser(abc.ABC):
         if not self.ADS:
             return None
 
-        return re.compile("|".join(map(re.escape, self.ADS)))
+        return re.compile("|".join(self.ADS))
 
     def _is_ad_line(self, line: str) -> bool:
         """
