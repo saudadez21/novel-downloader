@@ -5,8 +5,6 @@ novel_downloader.core.parsers.dxmwx
 
 """
 
-import re
-from datetime import datetime
 from typing import Any
 
 from lxml import html
@@ -30,11 +28,6 @@ class DxmwxParser(BaseParser):
     """
 
     site_name: str = "dxmwx"
-
-    _RE_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
-    _RE_SPACES = re.compile(r"[ \t\u3000]+")
-    _RE_NEWLINES = re.compile(r"\n{2,}")
-    _RE_TITLE_WS = re.compile(r"\s+")
 
     def parse_book_info(
         self,
@@ -64,27 +57,34 @@ class DxmwxParser(BaseParser):
             info_tree.xpath("//img[@class='imgwidth']/@src")
         )
 
-        raw_update = self._first_str(
+        update_time = self._join_strs(
             info_tree.xpath(
-                "normalize-space(string(//span[starts-with(normalize-space(.), '更新时间：')]))"  # noqa: E501
-            )
+                "//span[starts-with(normalize-space(.), '更新时间：')]/text()"
+            ),  # noqa: E501
+            replaces=[("更新时间：", "")],
         )
-        raw_update = raw_update.replace("更新时间：", "").strip()
-        update_time = self._normalize_update_date(raw_update)
-
-        nodes = info_tree.xpath(
-            "//div[contains(@style,'min-height') and "
-            "contains(@style,'padding-left') and contains(@style,'padding-right')][1]"
-        )
+        nodes = info_tree.xpath("(//div[contains(@style,'border-bottom')])[1]/div")
         summary = ""
         if nodes:
-            texts = [
-                t.replace("\xa0", " ").strip() for t in nodes[0].xpath(".//text()")
-            ]
-            lines = [t for t in texts if t]
+            node = nodes[0]
+            lines: list[str] = []
+
+            if node.text:
+                txt = self._norm_space(node.text)
+                if txt:
+                    lines.append(txt)
+
+            for child in node.iterchildren():
+                if child.tag.lower() == "p" and child.text:
+                    txt = self._norm_space(child.text)
+                    if txt:
+                        lines.append(txt)
+                if child.tail:
+                    txt = self._norm_space(child.tail)
+                    if txt:
+                        lines.append(txt)
+
             summary = "\n".join(lines)
-            summary = re.sub(r"^\s*[:：]\s*", "", summary)
-            summary = self._clean_spaces(summary)
 
         chapters: list[ChapterInfoDict] = []
         for a in catalog_tree.xpath(
@@ -121,14 +121,16 @@ class DxmwxParser(BaseParser):
 
         tree = html.fromstring(html_list[0])
 
-        title = self._first_str(tree.xpath("//h1[@id='ChapterTitle']/text()"))
-        title = self._RE_TITLE_WS.sub(" ", title).strip()
+        title = self._norm_space(
+            self._first_str(tree.xpath("//h1[@id='ChapterTitle']/text()"))
+        )
         if not title:
             title = f"第 {chapter_id} 章"
 
         paragraphs: list[str] = []
         for p in tree.xpath("//div[@id='Lab_Contents']//p"):
-            text = self._clean_spaces(p.text_content())
+            text = (p.text_content() or "").replace("\xa0", " ").replace("\u3000", " ")
+            text = text.strip()
             if not text:
                 continue
             if "点这里听书" in text or "大熊猫文学" in text:
@@ -145,20 +147,3 @@ class DxmwxParser(BaseParser):
             "content": content,
             "extra": {"site": self.site_name},
         }
-
-    @classmethod
-    def _clean_spaces(cls, s: str) -> str:
-        s = s.replace("\xa0", " ")
-        s = cls._RE_SPACES.sub(" ", s)
-        s = cls._RE_NEWLINES.sub("\n", s)
-        return s.strip()
-
-    @classmethod
-    def _normalize_update_date(cls, raw: str) -> str:
-        """Return a YYYY-MM-DD string."""
-        if not raw:
-            return datetime.now().strftime("%Y-%m-%d")
-        m = cls._RE_DATE.search(raw)
-        if m:
-            return m.group(0)
-        return datetime.now().strftime("%Y-%m-%d")

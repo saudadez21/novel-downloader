@@ -19,7 +19,7 @@ class BlquduParser(LewennParser):
 
     site_name: str = "blqudu"
     BASE_URL = "https://www.blqudu.cc"
-    ADS: set[str] = {
+    ADS = {
         "记住笔趣阁",
-        "biqudv.cc",
+        r"biqudv\.cc",
     }

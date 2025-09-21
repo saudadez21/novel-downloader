@@ -28,7 +28,7 @@ class AaatxtParser(BaseParser):
     """
 
     site_name: str = "aaatxt"
-    ADS: set[str] = {
+    ADS = {
         "按键盘上方向键",
         "未阅读完",
         "加入书签",

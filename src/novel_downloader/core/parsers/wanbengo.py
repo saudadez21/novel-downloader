@@ -59,7 +59,7 @@ class WanbengoParser(BaseParser):
         "完本神站", "本站网址", "报错", "键盘", "客户端", "收藏", "书架",
         "猜你喜欢", "上一章", "下一章", "章节目录", "LastRead", "贴吧",
         "倾心打造", "全文无错", "分享本站", "点此章节报错", "温馨提示", "域名",
-        "wanbentxt.com", "wanbengo.com",
+        r"wanbentxt\.com", r"wanbengo\.com",
     }
     # fmt: on
     _PUNCT_ONLY = re.compile(

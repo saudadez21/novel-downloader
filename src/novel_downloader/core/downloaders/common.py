@@ -63,9 +63,9 @@ class CommonDownloader(BaseDownloader):
         progress = Progress(total=len(plan), hook=progress_hook)
 
         # --- queues & batching ---
-        cid_q: asyncio.Queue[str | StopToken] = asyncio.Queue(maxsize=self._workers * 2)
+        cid_q: asyncio.Queue[str] = asyncio.Queue(maxsize=self._workers)
         save_q: asyncio.Queue[ChapterDict | StopToken] = asyncio.Queue(
-            maxsize=self._workers * 2
+            maxsize=self._workers * 5
         )
         batch: list[ChapterDict] = []
 
@@ -86,111 +86,82 @@ class CommonDownloader(BaseDownloader):
             finally:
                 batch.clear()
 
-        # --- stage: storage worker ---
+        # --- storage worker ---
         async def storage_worker() -> None:
-            """
-            Consumes parsed chapters, writes in batches.
-
-            Terminates after receiving STOP from each chapter worker.
-
-            On cancel: keeps consuming (to avoid blocking producers),
-            flushes, and exits once all STOPs are seen.
-            """
-            stop_count = 0
             while True:
                 item = await save_q.get()
                 if isinstance(item, StopToken):
-                    stop_count += 1
-                    if stop_count == self._workers:
-                        # All chapter workers have exited.
-                        await flush_batch()
-                        return
-                    # else keep waiting for remaining STOPs
-                    continue
-
-                # Normal chapter
+                    # drain any remaining items before exiting
+                    while not save_q.empty():
+                        nxt = save_q.get_nowait()
+                        if not isinstance(nxt, StopToken):
+                            batch.append(nxt)
+                            if len(batch) >= self._storage_batch_size:
+                                await flush_batch()
+                    await flush_batch()
+                    return
                 batch.append(item)
                 if len(batch) >= self._storage_batch_size:
                     await flush_batch()
 
-                if cancelled():
-                    # Drain whatever is already in the queue
-                    try:
-                        while True:
-                            nxt = save_q.get_nowait()
-                            if isinstance(nxt, StopToken):
-                                stop_count += 1
-                            else:
-                                batch.append(nxt)
-                    except asyncio.QueueEmpty:
-                        pass
-                    # Final flush of everything
-                    await flush_batch()
-                    # Wait for remaining STOPs so chapter workers can finish.
-                    while stop_count < self._workers:
-                        nxt = await save_q.get()
-                        if isinstance(nxt, StopToken):
-                            stop_count += 1
-                    return
-
-        # --- stage: chapter worker ---
+        # --- chapter worker ---
         async def chapter_worker() -> None:
-            """
-            Fetch + parse with retry, then enqueue to save_q.
-
-            Exits on STOP, or early if cancel is set before starting a new fetch.
-            """
-            while True:
-                cid = await cid_q.get()
-                if isinstance(cid, StopToken):
-                    # Propagate one STOP to storage and exit.
-                    await save_q.put(STOP)
-                    return
-
-                # If cancelled, don't start a new network call; let storage finish.
-                if cancelled():
-                    await save_q.put(STOP)
-                    return
-
-                chap = await self._process_chapter(book_id, cid)
-                if chap:
-                    await save_q.put(chap)
-
-                # polite pacing
-                await async_jitter_sleep(
-                    self._request_interval,
-                    mul_spread=1.1,
-                    max_sleep=self._request_interval + 2,
-                )
-
-        # --- stage: producer ---
-        async def producer() -> None:
-            """
-            Enqueue chapter IDs (respecting start/end/skip_existing).
-
-            Always sends STOP x workers at the end (even if cancelled early),
-            so chapter workers can exit deterministically.
-            """
             try:
-                for cid in plan:
-                    if cancelled():
-                        break
-                    if self._skip_existing and storage.exists(cid):
-                        # Count as completed but don't enqueue.
-                        await progress.bump(1)
-                    else:
-                        await cid_q.put(cid)
-            finally:
-                for _ in range(self._workers):
-                    await cid_q.put(STOP)
+                while True:
+                    if cancelled() and cid_q.empty():
+                        return
+                    try:
+                        cid = await asyncio.wait_for(cid_q.get(), timeout=0.5)
+                    except TimeoutError:
+                        if producer_task.done() and cid_q.empty():
+                            return
+                        continue
+
+                    chap = await self._process_chapter(book_id, cid)
+                    if chap:
+                        await save_q.put(chap)
+
+                    # polite pacing
+                    await async_jitter_sleep(
+                        self._request_interval,
+                        mul_spread=1.1,
+                        max_sleep=self._request_interval + 2,
+                    )
+            except asyncio.CancelledError:
+                # allow graceful unwinding
+                return
+
+        # --- producer ---
+        async def producer() -> None:
+            for cid in plan:
+                if cancelled():
+                    break
+                if self._skip_existing and storage.exists(cid):
+                    await progress.bump(1)
+                else:
+                    await cid_q.put(cid)
 
         # --- run the pipeline ---
         with ChapterStorage(raw_base, priorities=self.PRIORITIES_MAP) as storage:
+            storage_task = asyncio.create_task(storage_worker())
             async with asyncio.TaskGroup() as tg:
-                tg.create_task(storage_worker())
-                for _ in range(self._workers):
-                    tg.create_task(chapter_worker())
-                tg.create_task(producer())
+                worker_tasks = [
+                    tg.create_task(chapter_worker()) for _ in range(self._workers)
+                ]
+                producer_task = tg.create_task(producer())
+
+            if cancel_event:
+
+                async def cancel_watcher() -> None:
+                    await cancel_event.wait()
+                    producer_task.cancel()
+                    for t in worker_tasks:
+                        t.cancel()
+
+                asyncio.create_task(cancel_watcher())
+
+            await save_q.put(STOP)
+            await storage_task
 
         # --- done ---
         if cancelled():

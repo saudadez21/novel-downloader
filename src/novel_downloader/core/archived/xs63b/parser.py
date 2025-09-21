@@ -48,7 +48,6 @@ class Xs63bParser(BaseParser):
 
     _RE_STRIP_DIV = re.compile(r"^<div[^>]*>|</div>$", re.I)
     _RE_STRIP_JIANJIE = re.compile(r"^\s*简介\s*[:：]\s*", re.I)
-    _RE_SPACES = re.compile(r"[ \t]+")
 
     ADS = {"如章节缺失", "本章未完", "下一页继续阅读", "xs63b.com"}
 
@@ -143,8 +142,7 @@ class Xs63bParser(BaseParser):
                 if "hid-pages" in cls or "pages" in cls or "contentTip" in pid:
                     continue
 
-                txt = (p.text_content() or "").replace("\xa0", " ")
-                txt = self._RE_SPACES.sub(" ", txt).strip()
+                txt = self._norm_space(p.text_content() or "")
                 if not txt or self._is_ad_line(txt):
                     continue
 

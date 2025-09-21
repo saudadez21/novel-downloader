@@ -18,18 +18,18 @@
 
 ---
 
-## 安装
+## 安装与更新
 
-使用 `pip` 安装稳定版:
+使用 `pip` 安装或更新到最新稳定版:
 
 ```bash
-pip install novel-downloader
+pip install -U novel-downloader
 ```
 
-启用字体解密功能 (`decode_font`):
+若需要启用字体解密功能 (`decode_font`), 请使用:
 
 ```bash
-pip install "novel-downloader[font-recovery]"
+pip install -U "novel-downloader[font-recovery]"
 ```
 
 > 参见: [安装](docs/1-installation.md)

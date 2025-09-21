@@ -28,10 +28,10 @@ class BiquyueduParser(BaseParser):
     """
 
     site_name: str = "biquyuedu"
-    ADS: set[str] = {
+    ADS = {
         "笔趣阁",
         "请记住本书首发域名",
-        "www.biquyuedu.com",
+        r"www\.biquyuedu\.com",
     }
 
     def parse_book_info(

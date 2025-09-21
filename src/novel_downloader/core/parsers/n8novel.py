@@ -33,8 +33,6 @@ class N8novelParser(BaseParser):
     _SPLIT_STR_PATTERN = re.compile(
         r'["\']([^"\']+)["\']\s*\.split\s*\(\s*["\']\s*,\s*["\']\s*\)', re.DOTALL
     )
-    _RE_AUTHOR = re.compile(r"作者[:：]?\s*")
-    _RE_UPDATE = re.compile(r"更新[:：]?\s*")
 
     def parse_book_info(
         self,
@@ -49,19 +47,19 @@ class N8novelParser(BaseParser):
         # --- Basic metadata ---
         book_name = self._first_str(tree.xpath("//li[contains(@class,'h2')]/text()"))
 
-        author_raw = self._first_str(
-            tree.xpath("//span[contains(@class,'item-info-author')]/text()")
+        author = self._first_str(
+            tree.xpath("//span[contains(@class,'item-info-author')]/text()"),
+            replaces=[("作者: ", ""), ("作者：", "")],
         )
-        author = self._RE_AUTHOR.sub("", author_raw)
 
         cover_url = self.BASE_URL + self._first_str(
             tree.xpath("//div[contains(@class,'item-cover')]//img/@src")
         )
 
-        update_raw = self._first_str(
-            tree.xpath("//span[contains(@class,'item-info-date')]/text()")
+        update_time = self._first_str(
+            tree.xpath("//span[contains(@class,'item-info-date')]/text()"),
+            replaces=[("更新: ", ""), ("更新：", "")],
         )
-        update_time = self._RE_UPDATE.sub("", update_raw)
 
         counts = tree.xpath(
             "//li[@class='small text-gray']//span[contains(@class,'item-info-num')]/text()"  # noqa: E501
@@ -71,14 +69,11 @@ class N8novelParser(BaseParser):
         tags = tree.xpath("//meta[@property='og:novel:category']/@content")
 
         # --- Summary ---
-        summary_nodes = tree.xpath(
-            "//li[contains(@class,'full_text') and contains(@class,'mt-2')]"
+        summary = self._join_strs(
+            tree.xpath(
+                "//li[contains(@class,'full_text') and contains(@class,'mt-2')]//text()"
+            )
         )
-        if summary_nodes:
-            texts = [t.strip() for t in summary_nodes[0].itertext()]
-            summary = "\n".join(line for line in texts if line)
-        else:
-            summary = ""
 
         # --- Chapters / Volumes ---
         volumes: list[VolumeInfoDict] = []
