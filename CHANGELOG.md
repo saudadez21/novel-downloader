@@ -1,3 +1,16 @@
+## v2.2.0 (2025-09-21)
+
+### Feat
+
+- **web**: enhance all pages and fix downloader cancellation (#87)
+- **web**: add URL input mode to download page (#86)
+- **qidian**: add search support and paginate search results (#85)
+- **fetcher**: add GenericSession as mid-layer for novel sites (#84)
+
+### Fix
+
+- **esjzone**: rewrite parser for book info, chapters, and content using recursion (#83)
+
 ## v2.1.0 (2025-09-15)
 
 ### Feat
