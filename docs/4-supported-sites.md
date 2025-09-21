@@ -223,8 +223,8 @@ novel-cli download --site ttkan shengxu-chendong
   * 章节: `https://www.laoyaoxs.org/list/7359/21385.html` -> Chapter ID: `21385`
 
 * **书林文学 (shu111)**
-  * 书籍: `https://www.shu111.com/book/282944.html` -> Book ID: `282944`
-  * 章节: `https://www.shu111.com/book/282944/96171674.html` -> Chapter ID: `96171674`
+  * 书籍: `http://www.shu111.com/book/282944.html` -> Book ID: `282944`
+  * 章节: `http://www.shu111.com/book/282944/96171674.html` -> Chapter ID: `96171674`
   * 注意: 网站加载速度较慢
 
 * **鲲弩小说 (kunnu)**

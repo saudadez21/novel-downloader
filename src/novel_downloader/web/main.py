@@ -17,6 +17,7 @@ from nicegui import app, ui
 import novel_downloader.web.pages  # noqa: F401
 from novel_downloader.config import get_config_value
 from novel_downloader.utils.logger import setup_logging
+from novel_downloader.web.services import manager
 
 
 def mount_exports() -> None:
@@ -25,6 +26,11 @@ def mount_exports() -> None:
     out.mkdir(parents=True, exist_ok=True)
     # serves /downloads/<filename> from the export dir
     app.add_static_files("/downloads", local_directory=out)
+
+
+async def shutdown() -> None:
+    print("Shutting down workers...")
+    await manager.close()
 
 
 def web_main() -> None:
@@ -60,6 +66,7 @@ def web_main() -> None:
     setup_logging(console_level=log_level)
 
     app.on_startup(mount_exports)
+    app.on_shutdown(shutdown)
     try:
         ui.run(host=host, port=args.port, reload=args.reload)
     except (KeyboardInterrupt, asyncio.CancelledError):

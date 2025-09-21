@@ -15,7 +15,8 @@ from novel_downloader.web.services import DownloadTask, Status, manager, setup_d
 def _status_chip(status: Status) -> None:
     label_map = {
         "queued": "已排队",
-        "running": "运行中",
+        "running": "下载中",
+        "exporting": "导出中",
         "completed": "完成",
         "cancelled": "已取消",
         "failed": "失败",
@@ -23,6 +24,7 @@ def _status_chip(status: Status) -> None:
     color_map = {
         "queued": "warning",
         "running": "primary",
+        "exporting": "secondary",
         "completed": "positive",
         "cancelled": "grey-6",
         "failed": "negative",
@@ -53,6 +55,11 @@ def _progress_block(t: DownloadTask) -> None:
             ui.label(f"{t.chapters_done}/{t.chapters_total} · 运行中").classes(
                 "text-xs text-grey-7"
             )
+
+    elif t.status == "exporting":
+        ui.linear_progress().props("indeterminate striped").classes("w-full")
+        ui.label("正在导出...").classes("text-xs text-grey-7")
+
     else:
         suffix = {"completed": "完成", "cancelled": "已取消", "failed": "失败"}.get(
             t.status, ""
@@ -82,7 +89,7 @@ def _task_card(t: DownloadTask, *, active: bool) -> None:
                     ui.label(t.title).classes("text-sm font-medium")
                     _status_chip(t.status)
                 # subtle meta line (task id)
-                ui.label(f"任务ID: {t.task_id[:8]}…").classes("text-xs text-grey-6")
+                ui.label(f"任务ID: {t.task_id[:8]}...").classes("text-xs text-grey-6")
 
             # Cancel button (active tasks only)
             if active and t.status in ("running", "queued"):
@@ -134,8 +141,8 @@ def page_progress() -> None:
                 if not running and not pending:
                     ui.label("暂无").classes("text-sm text-grey-6")
                 else:
-                    if running:
-                        _task_card(running, active=True)
+                    for t in running:
+                        _task_card(t, active=True)
                     for t in pending:
                         _task_card(t, active=True)
 

@@ -20,5 +20,5 @@ class Shu111Session(GenericSession):
 
     site_name: str = "shu111"
 
-    BOOK_INFO_URL = "https://www.shu111.com/book/{book_id}.html"
-    CHAPTER_URL = "https://www.shu111.com/book/{book_id}/{chapter_id}.html"
+    BOOK_INFO_URL = "http://www.shu111.com/book/{book_id}.html"
+    CHAPTER_URL = "http://www.shu111.com/book/{book_id}/{chapter_id}.html"

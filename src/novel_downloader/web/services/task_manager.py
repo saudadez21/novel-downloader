@@ -3,11 +3,11 @@
 novel_downloader.web.services.task_manager
 ------------------------------------------
 
-Single-worker FIFO task manager for download jobs
 """
 
 import asyncio
 import contextlib
+from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal
@@ -22,6 +22,7 @@ from novel_downloader.core import (
 )
 from novel_downloader.models import (
     BookConfig,
+    ExporterConfig,
     LoginField,
 )
 from novel_downloader.utils.cookies import parse_cookies
@@ -33,7 +34,7 @@ from .cred_broker import (
     create_cred_request,
 )
 
-Status = Literal["queued", "running", "completed", "cancelled", "failed"]
+Status = Literal["queued", "running", "exporting", "completed", "cancelled", "failed"]
 
 
 @dataclass
@@ -67,93 +68,102 @@ class DownloadTask:
 
 class TaskManager:
     """
-    A cooperative, single-worker queue that executes download tasks in order.
+    A multi-site task manager:
+      * Each site has its own queue and a single worker.
+      * Tasks from the same site run sequentially.
+      * Tasks from different sites can run in parallel.
+      * Workers automatically exit when their site's queue becomes empty.
+      * A dedicated export worker runs synchronous export tasks sequentially.
     """
 
     def __init__(self) -> None:
-        self.pending: list[DownloadTask] = []
-        self.running: DownloadTask | None = None
+        self.pending: dict[str, list[DownloadTask]] = defaultdict(list)
+        self.running: dict[str, DownloadTask] = {}
         self.completed: list[DownloadTask] = []
-        self._new_item = asyncio.Event()
-        self._worker_task: asyncio.Task[None] | None = None
-        self._lock = asyncio.Lock()
 
+        self._worker_tasks: dict[str, asyncio.Task[None]] = {}
+        self._export_waiting: list[tuple[DownloadTask, ExporterConfig]] = []
+        self._export_worker_task: asyncio.Task[None] | None = None
+
+        self._lock = asyncio.Lock()
         self._settings = load_config()
 
     # ---------- public API ----------
     async def add_task(self, *, title: str, site: str, book_id: str) -> DownloadTask:
         """
-        Enqueue a new task and ensure the worker is running; return the created task.
+        Add a new task and ensure a worker for its site is running.
         """
-        t = DownloadTask(title=title, site=site, book_id=book_id)
+        task = DownloadTask(title=title, site=site, book_id=book_id)
         async with self._lock:
-            self.pending.append(t)
-            self._new_item.set()
-            if not self._worker_task or self._worker_task.done():
-                self._worker_task = asyncio.create_task(self._worker())
-        return t
+            self.pending[site].append(task)
+            # start a new worker if needed
+            if site not in self._worker_tasks or self._worker_tasks[site].done():
+                self._worker_tasks[site] = asyncio.create_task(self._site_worker(site))
+        return task
 
     async def cancel_task(self, task_id: str) -> bool:
-        """Cancel a task by id (pending or currently running)"""
+        """
+        Cancel a task by id (either pending or currently running).
+        """
         async with self._lock:
             # cancel pending
-            for i, t in enumerate(self.pending):
-                if t.task_id == task_id:
-                    t.cancel()
-                    self.completed.insert(0, t)
-                    del self.pending[i]
-                    return True
+            for _, queue in self.pending.items():
+                for i, pending_task in enumerate(queue):
+                    if pending_task.task_id == task_id:
+                        pending_task.cancel()
+                        self.completed.insert(0, pending_task)
+                        del queue[i]
+                        return True
             # cancel running
-            if self.running and self.running.task_id == task_id:
-                self.running.cancel()
-                return True
+            for _, running_task in self.running.items():
+                if running_task and running_task.task_id == task_id:
+                    running_task.cancel()
+                    return True
         return False
 
-    def snapshot(self) -> dict[str, Any]:
+    def snapshot(self) -> dict[str, list[DownloadTask]]:
         """
         Return a shallow copy of the current queue state (running, pending, completed).
         """
         return {
-            "running": self.running,
-            "pending": list(self.pending),
+            "running": [t for t in self.running.values() if t],
+            "pending": [t for q in self.pending.values() for t in q],
             "completed": list(self.completed),
         }
 
     # ---------- internals ----------
-    async def _worker(self) -> None:
+    async def _site_worker(self, site: str) -> None:
+        """
+        Sequentially run tasks for a specific site until its queue is empty.
+        """
         while True:
-            await self._new_item.wait()
-            self._new_item.clear()
-            while True:
-                async with self._lock:
-                    if self.running is not None:
-                        break
-                    if not self.pending:
-                        break
-                    task = self.pending.pop(0)
-                    self.running = task
+            async with self._lock:
+                if not self.pending[site]:
+                    self.running.pop(site, None)
+                    self._worker_tasks.pop(site, None)
+                    return
+                task = self.pending[site].pop(0)
+                self.running[site] = task
 
-                await self._run_task(task)
+            await self._run_task(task)
 
-                async with self._lock:
-                    self.completed.insert(0, task)
-                    self.running = None
+            async with self._lock:
+                self.completed.insert(0, task)
+                self.running.pop(site, None)
 
     async def _run_task(self, task: DownloadTask) -> None:
         task.status = "running"
+        adapter = ConfigAdapter(config=self._settings, site=task.site)
+        downloader_cfg = adapter.get_downloader_config()
+        fetcher_cfg = adapter.get_fetcher_config()
+        parser_cfg = adapter.get_parser_config()
+        exporter_cfg = adapter.get_exporter_config()
+        login_cfg = adapter.get_login_config()
+
+        parser = get_parser(task.site, parser_cfg)
+
         try:
-            adapter = ConfigAdapter(config=self._settings, site=task.site)
-            downloader_cfg = adapter.get_downloader_config()
-            fetcher_cfg = adapter.get_fetcher_config()
-            parser_cfg = adapter.get_parser_config()
-            exporter_cfg = adapter.get_exporter_config()
-            login_cfg = adapter.get_login_config()
-
-            parser = get_parser(task.site, parser_cfg)
-            exporter = get_exporter(task.site, exporter_cfg)
-
             async with get_fetcher(task.site, fetcher_cfg) as fetcher:
-                # login if required
                 if downloader_cfg.login_required and not await fetcher.load_state():
                     login_data = await self._prompt_login_fields(
                         task, fetcher.login_fields, login_cfg
@@ -179,34 +189,52 @@ class TaskManager:
                     task.chapters_done = done
 
                 book_cfg: BookConfig = {"book_id": task.book_id}
-                try:
-                    await downloader.download(
-                        book_cfg,
-                        progress_hook=_progress_hook,
-                        cancel_event=task._cancel_event,
-                    )
-                except asyncio.CancelledError:
-                    task.status = "cancelled"
-                    return
+                await downloader.download(
+                    book_cfg,
+                    progress_hook=_progress_hook,
+                    cancel_event=task._cancel_event,
+                )
 
                 if task.is_cancelled():
                     task.status = "cancelled"
                     return
 
-                task.exported_paths = await asyncio.to_thread(
-                    exporter.export, task.book_id
-                )
+                task.status = "exporting"
+                self._export_waiting.append((task, exporter_cfg))
+                if not self._export_worker_task or self._export_worker_task.done():
+                    self._export_worker_task = asyncio.create_task(
+                        self._export_worker()
+                    )
 
-                if downloader_cfg.login_required and fetcher.is_logged_in:
-                    await fetcher.save_state()
-
-                task.status = "completed"
-
-            exporter.close()
-
+        except asyncio.CancelledError:
+            task.status = "cancelled"
+            raise
         except Exception as e:
             task.status = "failed"
             task.error = str(e)
+
+    async def _export_worker(self) -> None:
+        """Dedicated worker for synchronous export tasks."""
+        while self._export_waiting:
+            task, exporter_cfg = self._export_waiting.pop()
+            exporter = get_exporter(task.site, exporter_cfg)
+            try:
+                if task.is_cancelled():
+                    task.status = "cancelled"
+                    continue
+                task.exported_paths = await asyncio.to_thread(
+                    exporter.export, task.book_id
+                )
+                task.status = "completed"
+            except asyncio.CancelledError:
+                task.status = "cancelled"
+                break
+            except Exception as e:
+                task.status = "failed"
+                task.error = str(e)
+            finally:
+                with contextlib.suppress(Exception):
+                    exporter.close()
 
     async def _prompt_login_fields(
         self,
@@ -217,7 +245,6 @@ class TaskManager:
         """
         Prompt UI login; supports text/password/cookie fields.
         """
-
         prefill = (login_config or {}).copy()
         req = await create_cred_request(
             task_id=task.task_id,
@@ -258,6 +285,25 @@ class TaskManager:
                         merged[f.name] = parse_cookies(raw)
 
         return merged
+
+    async def close(self) -> None:
+        """Cancel or gracefully finish all workers before shutdown."""
+        for _, task in list(self._worker_tasks.items()):
+            if not task.done():
+                task.cancel()
+        self._worker_tasks.clear()
+
+        if self._export_worker_task and not self._export_worker_task.done():
+            self._export_worker_task.cancel()
+        self._export_worker_task = None
+
+        # for queue in self.pending.values():
+        #     for task in queue:
+        #         task.cancel()
+        #         self.completed.insert(0, task)
+        # self.pending.clear()
+
+        await asyncio.sleep(0)
 
 
 manager = TaskManager()
