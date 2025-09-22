@@ -5,6 +5,7 @@ novel_downloader.core.fetchers.sfacg
 
 """
 
+import base64
 from typing import Any
 
 from novel_downloader.core.fetchers.base import BaseSession
@@ -27,6 +28,7 @@ class SfacgSession(BaseSession):
     BOOK_INFO_URL = "https://m.sfacg.com/b/{book_id}/"
     BOOK_CATALOG_URL = "https://m.sfacg.com/i/{book_id}/"
     CHAPTER_URL = "https://m.sfacg.com/c/{chapter_id}/"
+    VIP_CHAPTER_URL = "https://m.sfacg.com/ajax/ashx/common.ashx"
 
     async def login(
         self,
@@ -78,7 +80,27 @@ class SfacgSession(BaseSession):
         **kwargs: Any,
     ) -> list[str]:
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
-        return [await self.fetch(url, **kwargs)]
+        raw_html = await self.fetch(url, **kwargs)
+
+        results: list[str] = [raw_html]
+
+        # If the chapter contains VIP image content
+        if "/ajax/ashx/common.ashx" in raw_html:
+            params = {
+                "op": "getChapPic",
+                "cid": chapter_id,
+                "nid": book_id,
+                "w": "375",
+                "font": "20",
+                "quick": "true",
+            }
+            resp = await self.get(self.VIP_CHAPTER_URL, params=params)
+            img_bytes = await resp.read()
+
+            img_base64 = base64.b64encode(img_bytes).decode("utf-8")
+            results.append(img_base64)
+
+        return results
 
     async def get_bookcase(
         self,

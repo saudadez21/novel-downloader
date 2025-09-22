@@ -5,6 +5,8 @@ novel_downloader.core.parsers.sfacg
 
 """
 
+import base64
+import logging
 from typing import Any
 
 from lxml import html
@@ -17,6 +19,9 @@ from novel_downloader.models import (
     ChapterInfoDict,
     VolumeInfoDict,
 )
+from novel_downloader.utils.fontocr import get_font_ocr
+
+logger = logging.getLogger(__name__)
 
 
 @register_parser(
@@ -28,32 +33,6 @@ class SfacgParser(BaseParser):
     """
 
     site_name: str = "sfacg"
-
-    # Book info XPaths
-    _BOOK_NAME_XPATH = '//ul[@class="book_info"]//span[@class="book_newtitle"]/text()'
-    _AUTHOR_INFO_XPATH = '//ul[@class="book_info"]//span[@class="book_info3"]/text()'
-    _UPDATE_TIME_XPATH = '//ul[@class="book_info"]//span[@class="book_info3"]/br/following-sibling::text()'  # noqa: E501
-    _COVER_URL_XPATH = '//ul[@class="book_info"]//li/img/@src'
-    # _STATUS_XPATH = '//ul[@class="book_info"]//div[@class="book_info2"]/span/text()'
-    _STATUS_XPATH = (
-        '//ul[@class="book_info"]//div[@class="book_info2"]/span'
-        '[contains(text(), "完结") or contains(text(), "连载")]/text()'
-    )
-    _SUMMARY_XPATH = '//ul[@class="book_profile"]/li[@class="book_bk_qs1"]/text()'
-
-    # Catalog XPaths
-    _VOLUME_TITLE_XPATH = '//div[@class="mulu"]/text()'
-    _VOLUME_CONTENT_XPATH = '//div[@class="Content_Frame"]'
-    _CHAPTER_LIST_XPATH = './/ul[@class="mulu_list"]/a'
-
-    # Chapter XPaths
-    _CHAPTER_TEXT_XPATH = (
-        '//div[@class="yuedu Content_Frame"]//div[@style="text-indent: 2em;"]/text()'
-    )
-    _CHAPTER_CONTENT_NODES_XPATH = (
-        '//div[@class="yuedu Content_Frame"]//div[@style="text-indent: 2em;"]/*'
-    )
-    _CHAPTER_TITLE_XPATH = '//ul[@class="menu_top_list book_view_top"]/li[2]/text()'
 
     def parse_book_info(
         self,
@@ -67,41 +46,61 @@ class SfacgParser(BaseParser):
         catalog_tree = html.fromstring(html_list[1])
 
         # Book metadata
-        book_name = self._first_str(info_tree.xpath(self._BOOK_NAME_XPATH))
+        book_name = self._first_str(
+            info_tree.xpath('//span[@class="book_newtitle"]/text()')
+        )
 
-        book_info3_str = self._first_str(info_tree.xpath(self._AUTHOR_INFO_XPATH))
-        author, _, word_count = (p.strip() for p in book_info3_str.partition("/"))
+        book_info2 = info_tree.xpath('//div[@class="book_info2"]/span/text()')
+        book_type = self._first_str(book_info2[0:1])
+        serial_status = self._first_str(book_info2[1:2])
 
-        update_time = self._first_str(info_tree.xpath(self._UPDATE_TIME_XPATH))
+        # author / word_count / update_time
+        book_info3_nodes = info_tree.xpath('//span[@class="book_info3"]//text()')
+        author, word_count, update_time = "", "", ""
+        if book_info3_nodes:
+            # first part "author / word_count / skipped"
+            parts = [p.strip() for p in book_info3_nodes[0].split("/") if p.strip()]
+            if len(parts) >= 2:
+                author = parts[0]
+                word_count = parts[1]  # keep with "字"
+            if len(book_info3_nodes) >= 2:
+                update_time = book_info3_nodes[-1].strip()
 
-        cover_url = "https:" + self._first_str(info_tree.xpath(self._COVER_URL_XPATH))
+        cover_url = "https:" + self._first_str(
+            info_tree.xpath('//ul[@class="book_info"]//img/@src')
+        )
 
-        serial_status = self._first_str(info_tree.xpath(self._STATUS_XPATH))
+        summary = self._join_strs(
+            info_tree.xpath(
+                '//ul[@class="book_profile"]/li[@class="book_bk_qs1"]//text()'
+            )
+        )
 
-        summary_elem = info_tree.xpath(self._SUMMARY_XPATH)
-        summary = "".join(summary_elem).strip()
-
-        # Chapter structure
-        volume_titles = catalog_tree.xpath(self._VOLUME_TITLE_XPATH)
-        volume_blocks = catalog_tree.xpath(self._VOLUME_CONTENT_XPATH)
-
+        # --- catalog parsing ---
         volumes: list[VolumeInfoDict] = []
-        for vol_title, vol_block in zip(volume_titles, volume_blocks, strict=False):
+        vol_nodes = catalog_tree.xpath('//div[@class="mulu"]')
+        for vol_node in vol_nodes:
+            vol_name = vol_node.text_content().strip()
+            ul = vol_node.getnext()
             chapters: list[ChapterInfoDict] = []
-            for a in vol_block.xpath(self._CHAPTER_LIST_XPATH):
-                href = a.xpath("./@href")[0] if a.xpath("./@href") else ""
-                title = "".join(a.xpath(".//li//text()")).strip()
-                chapter_id = href.split("/")[-2] if href else ""
-                chapters.append(
-                    {
+            if ul is not None:
+                for a in ul.xpath('.//ul[@class="mulu_list"]/a'):
+                    url = self._first_str(a.xpath("./@href"))
+                    if not url:
+                        continue
+                    chapter_id = url.strip("/").rsplit("/", 1)[-1]
+                    title_texts = a.xpath(".//li//text()")
+                    title = self._join_strs(title_texts)
+
+                    chap: ChapterInfoDict = {
                         "title": title,
-                        "url": href,
+                        "url": url,
                         "chapterId": chapter_id,
                     }
-                )
+                    chapters.append(chap)
             volumes.append(
                 {
-                    "volume_name": vol_title.strip(),
+                    "volume_name": vol_name,
                     "chapters": chapters,
                 }
             )
@@ -114,6 +113,7 @@ class SfacgParser(BaseParser):
             "word_count": word_count,
             "serial_status": serial_status,
             "summary": summary,
+            "tags": [book_type] if book_type else [],
             "volumes": volumes,
             "extra": {},
         }
@@ -126,41 +126,115 @@ class SfacgParser(BaseParser):
     ) -> ChapterDict | None:
         if not html_list:
             return None
-        keywords = [
-            "本章为VIP章节",  # 本章为VIP章节，订阅后可立即阅读
-        ]
+
+        # check if chapter is locked
+        keywords = ["本章为VIP章节"]  # 本章为VIP章节，订阅后可立即阅读
         if any(kw in html_list[0] for kw in keywords):
             return None
+
         tree = html.fromstring(html_list[0])
+        content = ""
 
-        content_lines: list[str] = []
-        content_nodes = tree.xpath(self._CHAPTER_CONTENT_NODES_XPATH)
-        for node in content_nodes:
-            tag = node.tag.lower()
-            if tag == "p":
-                text = "".join(node.xpath(".//text()")).strip()
-                if text:
-                    content_lines.append(text)
-            elif tag == "img":
-                src = node.get("src", "").strip()
-                if src:
-                    # embed image as HTML tag
-                    content_lines.append(f'<img src="{src}" />')
+        is_vip = "/ajax/ashx/common.ashx" in html_list[0]
 
-        if not content_lines:
-            raw_text_parts = tree.xpath(self._CHAPTER_TEXT_XPATH)
-            content_lines = [txt.strip() for txt in raw_text_parts if txt.strip()]
+        # case: VIP chapter -> needs OCR from base64 image
+        if is_vip:
+            if not self._decode_font:
+                logger.warning(
+                    "sfacg chapter %s :: vip decryption skipped "
+                    "(set `decode_font=True` to enable)",
+                    chapter_id,
+                )
+                return None
 
-        content = "\n".join(content_lines).strip()
+            if len(html_list) < 2:
+                logger.warning("sfacg chapter %s :: missing VIP img data", chapter_id)
+                return None
+
+            content = self.parse_vip_chapter(html_list[1])
+
+        # case: normal HTML text chapter
+        else:
+            content_div = tree.xpath('//div[@class="yuedu Content_Frame"]/div[1]')
+            if not content_div:
+                logger.warning("sfacg chapter %s :: missing content div", chapter_id)
+                return None
+
+            content = self.parse_normal_chapter(content_div[0])
+
         if not content:
             return None
 
-        title_part = tree.xpath(self._CHAPTER_TITLE_XPATH)
-        title = title_part[0].strip() if title_part else ""
+        title = self._first_str(
+            tree.xpath('//ul[@class="menu_top_list book_view_top"]/li[2]/text()')
+        )
 
         return {
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": self.site_name},
+            "extra": {
+                "site": self.site_name,
+                "vip": is_vip,
+            },
         }
+
+    def parse_normal_chapter(self, content_div: html.HtmlElement) -> str:
+        result = []
+        for elem in content_div.iter():
+            if elem.text and elem.tag not in ("img",):
+                text = elem.text.strip()
+                if text:
+                    result.append(text)
+
+            if elem.tag == "img":
+                src = elem.get("src")
+                if src:
+                    result.append(f'<img src="{src}" />')
+
+            if elem is content_div:
+                continue
+            if elem.tail and elem.tail.strip():
+                result.append(elem.tail.strip())
+
+        return "\n".join(result)
+
+    def parse_vip_chapter(self, img_base64: str) -> str:
+        ocr = get_font_ocr(self._fontocr_cfg)
+        if not ocr:
+            logger.warning("fail to load OCR")
+            return ""
+
+        img_bytes = base64.b64decode(img_base64)
+        paragraphs: list[str] = []
+        cache: list[str] = []
+
+        # decode & preprocess
+        img = ocr.gif_to_array_bytes(img_bytes)
+        img = ocr.filter_orange_watermark(img)
+        lines = ocr.split_by_height(
+            img,
+            height=38,
+            top_offset=10,
+            bottom_offset=10,
+            per_chunk_top_ignore=10,
+        )
+
+        # filter out completely empty (white) lines
+        non_empty_lines = [line for line in lines if not ocr.is_empty_image(line)]
+
+        preds = ocr.predict(non_empty_lines, batch_size=32)
+        for line, (text, _) in zip(non_empty_lines, preds, strict=False):
+            first_2 = ocr.crop_chars_region(line, 2, left_margin=14, char_width=28)
+            if ocr.is_empty_image(first_2) and cache:
+                paragraphs.append("".join(cache))
+                cache.clear()
+
+            if text.strip():
+                cache.append(text.strip())
+
+        # flush cache
+        if cache:
+            paragraphs.append("".join(cache))
+
+        return "\n".join(paragraphs)

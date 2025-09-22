@@ -69,6 +69,12 @@ split_mode = "book"                # 导出方式: book / volume
 login_required = false
 request_interval = 2.5
 
+[sites.sfacg]
+login_required = true
+
+[sites.yamibo]
+login_required = false
+
 [sites.common]
 login_required = false
 
