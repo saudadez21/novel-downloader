@@ -75,7 +75,7 @@
   "search_site_limit_help": "Maximum number of search results per site",
   "search_timeout_help": "Per-request timeout in seconds (default: {secs})",
 
-  "searching": "Searching for '{keyword}' on {sites}...",
+  "searching": "Searching for '{keyword}'...",
   "no_results": "No results found.",
   "prompt_select_index": "Enter a number to select, 'n' for next, 'p' for previous (press Enter to cancel)",
   "page_status": "Search Results · Page {page}/{total_pages}",

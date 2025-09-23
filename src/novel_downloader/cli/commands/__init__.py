@@ -9,5 +9,6 @@ __all__ = ["commands"]
 
 from .download import DownloadCmd
 from .export import ExportCmd
+from .search import SearchCmd
 
-commands = [DownloadCmd, ExportCmd]
+commands = [DownloadCmd, ExportCmd, SearchCmd]
