@@ -11,7 +11,7 @@ import logging
 from pathlib import Path
 from typing import Any, TypeVar
 
-from novel_downloader.utils.constants import SETTING_FILE
+from novel_downloader.utils.constants import BASE_CONFIG_PATH, SETTING_FILE
 
 T = TypeVar("T")
 logger = logging.getLogger(__name__)
@@ -140,8 +140,7 @@ def load_config(
     try:
         return _load_by_extension(path)
     except Exception as e:
-        logger.warning("Failed to load config file: %s", e)
-    return {}
+        raise ValueError(f"Failed to load config file {path}: {e}") from e
 
 
 def get_config_value(keys: list[str], default: T) -> T:
@@ -157,6 +156,17 @@ def get_config_value(keys: list[str], default: T) -> T:
             return val if isinstance(val, type(default)) else default
         cur = cur.get(k, {})
     return default
+
+
+def copy_default_config(target: Path) -> None:
+    """
+    Copy the bundled default config (settings.toml) to the given target path.
+
+    :param target: Destination path where the config file will be written.
+    """
+    target.parent.mkdir(parents=True, exist_ok=True)
+    data = BASE_CONFIG_PATH.read_bytes()
+    target.write_bytes(data)
 
 
 def save_config(
