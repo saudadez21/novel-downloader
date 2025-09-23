@@ -10,7 +10,7 @@ from pathlib import Path
 
 from novel_downloader.cli import ui
 from novel_downloader.config import copy_default_config, save_config_file
-from novel_downloader.utils.constants import BASE_CONFIG_PATH
+from novel_downloader.utils.constants import DEFAULT_CONFIG_FILENAME
 from novel_downloader.utils.i18n import t
 from novel_downloader.utils.state import state_mgr
 
@@ -48,40 +48,40 @@ class ConfigInitCmd(Command):
 
     @classmethod
     def run(cls, args: Namespace) -> None:
-        target_path = Path.cwd() / BASE_CONFIG_PATH.name
+        target_path = Path.cwd() / DEFAULT_CONFIG_FILENAME
         should_copy = True
 
         if target_path.exists():
             if args.force:
                 ui.warn(
                     t("Overwriting existing file: {filename}").format(
-                        filename=BASE_CONFIG_PATH.name
+                        filename=DEFAULT_CONFIG_FILENAME
                     )
                 )
             else:
                 ui.info(
                     t("File already exists: {filename}").format(
-                        filename=BASE_CONFIG_PATH.name
+                        filename=DEFAULT_CONFIG_FILENAME
                     )
                 )
                 should_copy = ui.confirm(
                     t("Do you want to overwrite {filename}?").format(
-                        filename=BASE_CONFIG_PATH.name
+                        filename=DEFAULT_CONFIG_FILENAME
                     ),
                     default=False,
                 )
 
         if not should_copy:
-            ui.warn(t("Skipped: {filename}").format(filename=BASE_CONFIG_PATH.name))
+            ui.warn(t("Skipped: {filename}").format(filename=DEFAULT_CONFIG_FILENAME))
             return
 
         try:
             copy_default_config(target_path)
-            ui.success(t("Copied: {filename}").format(filename=BASE_CONFIG_PATH.name))
+            ui.success(t("Copied: {filename}").format(filename=DEFAULT_CONFIG_FILENAME))
         except Exception as e:
             ui.error(
                 t("Failed to copy {filename}: {err}").format(
-                    filename=BASE_CONFIG_PATH.name, err=str(e)
+                    filename=DEFAULT_CONFIG_FILENAME, err=str(e)
                 )
             )
             raise
