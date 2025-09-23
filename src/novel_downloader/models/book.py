@@ -43,3 +43,4 @@ class BookInfoDict(TypedDict):
     word_count: NotRequired[str]
     serial_status: NotRequired[str]
     summary_brief: NotRequired[str]
+    last_checked: NotRequired[float]  # Unix timestamp

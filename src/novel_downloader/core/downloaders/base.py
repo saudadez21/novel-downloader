@@ -11,6 +11,7 @@ import asyncio
 import json
 import logging
 import re
+import time
 from collections.abc import Awaitable, Callable, Sequence
 from pathlib import Path
 from typing import Any, ClassVar
@@ -22,6 +23,8 @@ from novel_downloader.models import (
     DownloaderConfig,
     VolumeInfoDict,
 )
+
+ONE_DAY = 86400  # seconds
 
 
 class BaseDownloader(abc.ABC):
@@ -189,14 +192,27 @@ class BaseDownloader(abc.ABC):
         :param book_id: identifier of the book
         :return: parsed BookInfoDict or None if all attempts fail
         """
+        info_path = self._raw_data_dir / book_id / "book_info.json"
         book_info: BookInfoDict | None = None
+
+        if info_path.exists():
+            try:
+                book_info = json.loads(info_path.read_text(encoding="utf-8"))
+                last_checked = book_info.get("last_checked", 0.0) if book_info else 0.0
+                if time.time() - last_checked < ONE_DAY:
+                    return book_info
+            except json.JSONDecodeError:
+                self.logger.warning(
+                    "Corrupted book_info.json for %s: could not decode JSON", book_id
+                )
 
         try:
             info_html = await self.fetcher.get_book_info(book_id)
             self._save_html_pages(book_id, "info", info_html)
-            book_info = self.parser.parse_book_info(info_html)
 
+            book_info = self.parser.parse_book_info(info_html)
             if book_info:
+                book_info["last_checked"] = time.time()
                 self._save_book_info(book_id, book_info)
                 return book_info
 
@@ -205,17 +221,7 @@ class BaseDownloader(abc.ABC):
                 "Failed to fetch/parse book_info for %s: %s", book_id, exc
             )
 
-        info_path = self._raw_data_dir / book_id / "book_info.json"
-        if info_path.exists():
-            try:
-                book_info = json.loads(info_path.read_text(encoding="utf-8"))
-                return book_info
-            except json.JSONDecodeError:
-                self.logger.warning(
-                    "Corrupted book_info.json for %s: could not decode JSON", book_id
-                )
-
-        return None
+        return book_info
 
     def _save_book_info(self, book_id: str, book_info: BookInfoDict) -> None:
         """
