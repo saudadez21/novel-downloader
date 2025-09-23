@@ -1,0 +1,103 @@
+#!/usr/bin/env python3
+"""
+novel_downloader.cli.commands.config
+------------------------------------
+
+"""
+
+from argparse import ArgumentParser, Namespace, _SubParsersAction
+from pathlib import Path
+
+from novel_downloader.cli import ui
+from novel_downloader.config import copy_default_config, save_config_file
+from novel_downloader.utils.constants import BASE_CONFIG_PATH
+from novel_downloader.utils.i18n import t
+from novel_downloader.utils.state import state_mgr
+
+from .base import Command
+
+
+class ConfigCmd(Command):
+    name = "config"
+    help = t("help_config")
+
+    @classmethod
+    def register(cls, subparsers: _SubParsersAction[ArgumentParser]) -> None:
+        parser = subparsers.add_parser(cls.name, help=cls.help)
+        sub = parser.add_subparsers(dest="subcommand", required=True)
+
+        for subcmd in (ConfigInitCmd, ConfigSetLangCmd, ConfigSetConfigCmd):
+            subcmd.register(sub)
+
+    @classmethod
+    def run(cls, args: Namespace) -> None:
+        raise NotImplementedError("ConfigCmd should not be executed directly")
+
+
+class ConfigInitCmd(Command):
+    name = "init"
+    help = t("config_init_help")
+
+    @classmethod
+    def add_arguments(cls, parser: ArgumentParser) -> None:
+        parser.add_argument(
+            "--force", action="store_true", help=t("config_init_force_help")
+        )
+
+    @classmethod
+    def run(cls, args: Namespace) -> None:
+        target_path = Path.cwd() / BASE_CONFIG_PATH.name
+        should_copy = True
+
+        if target_path.exists():
+            if args.force:
+                ui.warn(t("config_init_overwrite", filename=BASE_CONFIG_PATH.name))
+            else:
+                ui.info(t("config_init_exists", filename=BASE_CONFIG_PATH.name))
+                should_copy = ui.confirm(
+                    t("config_init_confirm_overwrite", filename=BASE_CONFIG_PATH.name),
+                    default=False,
+                )
+
+        if not should_copy:
+            ui.warn(t("config_init_skip", filename=BASE_CONFIG_PATH.name))
+            return
+
+        try:
+            copy_default_config(target_path)
+            ui.success(t("config_init_copy", filename=BASE_CONFIG_PATH.name))
+        except Exception as e:
+            ui.error(t("config_init_error", filename=BASE_CONFIG_PATH.name, err=str(e)))
+            raise
+
+
+class ConfigSetLangCmd(Command):
+    name = "set-lang"
+    help = t("config_set_lang_help")
+
+    @classmethod
+    def add_arguments(cls, parser: ArgumentParser) -> None:
+        parser.add_argument("lang", choices=["zh", "en"], help="Language code")
+
+    @classmethod
+    def run(cls, args: Namespace) -> None:
+        state_mgr.set_language(args.lang)
+        ui.success(t("config_set_lang", lang=args.lang))
+
+
+class ConfigSetConfigCmd(Command):
+    name = "set-config"
+    help = t("config_set_config_help")
+
+    @classmethod
+    def add_arguments(cls, parser: ArgumentParser) -> None:
+        parser.add_argument("path", type=str, help="Path to config file")
+
+    @classmethod
+    def run(cls, args: Namespace) -> None:
+        try:
+            save_config_file(args.path)
+            ui.success(t("config_set_config", path=args.path))
+        except Exception as e:
+            ui.error(t("config_set_config_fail", err=str(e)))
+            raise
