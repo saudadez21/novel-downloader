@@ -16,6 +16,11 @@ from novel_downloader.utils.state import state_mgr
 
 from .base import Command
 
+LANG_MAP = {
+    "zh": "zh_CN",
+    "en": "en_US",
+}
+
 
 class ConfigCmd(Command):
     name = "config"
@@ -93,12 +98,14 @@ class ConfigSetLangCmd(Command):
 
     @classmethod
     def add_arguments(cls, parser: ArgumentParser) -> None:
-        parser.add_argument("lang", choices=["zh", "en"], help="Language code")
+        parser.add_argument("lang", help="Language code (e.g. zh, zh_CN)")
 
     @classmethod
     def run(cls, args: Namespace) -> None:
-        state_mgr.set_language(args.lang)
-        ui.success(t("Language switched to {lang}").format(lang=args.lang))
+        lang_input: str = args.lang
+        lang_std = LANG_MAP.get(lang_input, lang_input)
+        state_mgr.set_language(lang_std)
+        ui.success(t("Language switched to {lang}").format(lang=lang_std))
 
 
 class ConfigSetConfigCmd(Command):
