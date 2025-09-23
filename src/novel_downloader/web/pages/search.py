@@ -19,6 +19,7 @@ from nicegui.events import KeyEventArguments, ValueChangeEventArguments
 
 from novel_downloader.core.searchers import search_stream
 from novel_downloader.models import SearchResult
+from novel_downloader.utils.i18n import t
 from novel_downloader.web.components import navbar
 from novel_downloader.web.services import manager, setup_dialog
 
@@ -106,7 +107,7 @@ def _coerce_timeout(inp: Number) -> float:
         if v <= 0:
             raise ValueError
     except (TypeError, ValueError):
-        ui.notify("超时需 > 0 秒，已重置为 10.0", type="warning")
+        ui.notify(t("Timeout must be > 0 seconds, reset to 10.0"), type="warning")
         v = _DEFAULT_TIMEOUT
     inp.set_value(v)
     inp.sanitize()
@@ -120,7 +121,9 @@ def _coerce_psl(inp: Number) -> int:
         if v <= 0:
             raise ValueError
     except (TypeError, ValueError):
-        ui.notify("单站条数上限需为正整数，已重置为 30", type="warning")
+        ui.notify(
+            t("Per-site limit must be a positive integer, reset to 30"), type="warning"
+        )
         v = _DEFAULT_SITE_LIMIT
     inp.set_value(v)
     inp.sanitize()
@@ -196,7 +199,9 @@ def _render_result_row(r: SearchResult) -> None:
                 "text-base font-medium"
             )
             ui.label(
-                f"{r['author']} · {r['word_count']} · 更新于 {r['update_date']}"
+                t("{author} · {words} · Updated at {date}").format(
+                    author=r["author"], words=r["word_count"], date=r["update_date"]
+                )
             ).classes("text-xs text-grey-6")
             ui.label(r["latest_chapter"]).classes("text-sm text-grey-7")
 
@@ -206,10 +211,12 @@ def _render_result_row(r: SearchResult) -> None:
 
         async def _add_task() -> None:
             title = r["title"]
-            ui.notify(f"已添加任务：{title}")
+            ui.notify(t("Task added: {title}").format(title=title))
             await manager.add_task(title=title, site=r["site"], book_id=r["book_id"])
 
-        ui.button("下载", color="primary", on_click=_add_task).props("unelevated")
+        ui.button(t("Download"), color="primary", on_click=_add_task).props(
+            "unelevated"
+        )
 
 
 def _build_settings_dropdown(
@@ -225,11 +232,11 @@ def _build_settings_dropdown(
     """
     site_cbs: dict[str, Any] = {}
 
-    settings_btn = ui.button("设置").props("outline icon=settings")
+    settings_btn = ui.button(t("Settings")).props("outline icon=settings")
     with settings_btn:
         menu = ui.menu().props("no-parent-event")
         with menu:
-            ui.label("站点选择").classes("text-sm text-grey-7 q-mb-xs")
+            ui.label(t("Site Selection")).classes("text-sm text-grey-7 q-mb-xs")
 
             with ui.row().classes("gap-2"):
 
@@ -241,8 +248,8 @@ def _build_settings_dropdown(
                     for cb in site_cbs.values():
                         cb.set_value(False)
 
-                ui.button("全选", on_click=_select_all).props("dense")
-                ui.button("清空", on_click=_clear_all).props("dense")
+                ui.button(t("Select All"), on_click=_select_all).props("dense")
+                ui.button(t("Clear"), on_click=_clear_all).props("dense")
 
             ui.separator()
 
@@ -255,11 +262,11 @@ def _build_settings_dropdown(
                     site_cbs[key] = ui.checkbox(label, value=(key in selected))
 
             ui.separator()
-            ui.label("高级设置").classes("text-sm text-grey-7 q-mt-sm")
+            ui.label(t("Advanced Settings")).classes("text-sm text-grey-7 q-mt-sm")
 
             psl_in = (
                 ui.number(
-                    "单站条数上限",
+                    t("Per-site Limit"),
                     value=state["per_site_limit"],
                     min=1,
                     step=1,
@@ -269,7 +276,7 @@ def _build_settings_dropdown(
             )
             timeout_in = (
                 ui.number(
-                    "超时(秒)",
+                    t("Timeout (seconds)"),
                     value=state["timeout"],
                     format="%.1f",
                     min=0.1,
@@ -315,28 +322,28 @@ def page_search() -> None:
                 get_sites, get_psl, get_timeout = _build_settings_dropdown(state)
 
                 query_in = (
-                    ui.input("输入关键字", value=state["query"])
+                    ui.input(t("Enter keyword"), value=state["query"])
                     .props("outlined dense clearable")
                     .classes("min-w-[320px] grow")
                 )
 
-                search_btn = ui.button("搜索", color="primary").props("unelevated")
-                ui.button("停止", on_click=lambda: _cancel_current(state)).props(
+                search_btn = ui.button(t("Search"), color="primary").props("unelevated")
+                ui.button(t("Stop"), on_click=lambda: _cancel_current(state)).props(
                     "outline"
                 )
 
             with ui.row().classes("items-center gap-3 w-full q-mt-xs"):
                 sort_key_labels = {
-                    "priority": "优先级",
-                    "site": "站点",
-                    "title": "标题",
-                    "author": "作者",
+                    "priority": t("Priority"),
+                    "site": t("Site"),
+                    "title": t("Title"),
+                    "author": t("Author"),
                 }
                 sort_key_sel = (
                     ui.select(
                         sort_key_labels,
                         value=state["sort_key"],
-                        label="排序",
+                        label=t("Sort"),
                         with_input=False,
                     )
                     .props("outlined dense")
@@ -345,7 +352,7 @@ def page_search() -> None:
 
                 sort_order_sel = (
                     ui.toggle(
-                        {"asc": "升序", "desc": "降序"},
+                        {"asc": t("Ascending"), "desc": t("Descending")},
                         value=state["sort_order"],
                     )
                     .props("dense")
@@ -375,10 +382,14 @@ def page_search() -> None:
         with status_area:
             if state.get("searching"):
                 ui.icon("hourglass_top").classes("text-grey-6")
-                ui.label("正在搜索（结果将陆续显示）...").classes("text-sm text-grey-7")
+                ui.label(t("Searching (results will appear progressively)...")).classes(
+                    "text-sm text-grey-7"
+                )
             total = len(state.get("results") or [])
             if total > 0:
-                ui.label(f"当前已获取 {total} 条结果").classes("text-sm text-grey-7")
+                ui.label(
+                    t("Currently retrieved {total} results").format(total=total)
+                ).classes("text-sm text-grey-7")
 
     def _render_skeleton_card() -> None:
         with ui.card().classes("w-full h-[120px] bg-grey-2 animate-pulse"):
@@ -401,10 +412,8 @@ def page_search() -> None:
         current = results[start:end]
 
         if total > 0:
-            tip = (
-                f"共 {total} 条结果（第 {page}/{total_pages} 页）"
-                if state["sites"]
-                else f"共 {total} 条结果（第 {page}/{total_pages} 页，已搜索全部站点）"
+            tip = t("Total {total} results (page {page}/{pages})").format(
+                total=total, page=page, pages=total_pages
             )
             with list_area:
                 ui.label(tip).classes("text-sm text-grey-7")
@@ -484,7 +493,7 @@ def page_search() -> None:
     async def do_search() -> None:
         q = (query_in.value or "").strip()
         if not q:
-            ui.notify("请输入关键词", type="warning")
+            ui.notify(t("Please enter a keyword"), type="warning")
             return
 
         # Cancel any previous search

@@ -18,6 +18,7 @@ from nicegui import ui
 from nicegui.events import KeyEventArguments, ValueChangeEventArguments
 
 from novel_downloader.config import get_config_value
+from novel_downloader.utils.i18n import t
 from novel_downloader.web.components import navbar
 from novel_downloader.web.services import setup_dialog
 
@@ -124,13 +125,13 @@ def page_history() -> None:
 
     # centered, responsive container
     with ui.column().classes("w-full max-w-screen-lg min-w-[320px] mx-auto gap-4"):
-        ui.label("下载历史").classes("text-lg")
+        ui.label(t("Download History")).classes("text-lg")
 
         # Toolbar (filters & sorting)
         with ui.card().classes("w-full"), ui.row().classes(
             "items-center gap-3 w-full flex-wrap"
         ):
-            ui.label("类型").classes("text-sm text-grey-6")
+            ui.label(t("Type")).classes("text-sm text-grey-6")
             type_sel = (
                 ui.select(
                     ["All", "txt", "epub"],
@@ -145,10 +146,10 @@ def page_history() -> None:
                 "mx-1 self-stretch hidden md:block"
             )
 
-            ui.label("排序字段").classes("text-sm text-grey-6")
+            ui.label(t("Sort Field")).classes("text-sm text-grey-6")
             sort_key_sel = (
                 ui.select(
-                    {"name": "文件名", "mtime": "修改时间"},
+                    {"name": t("Filename"), "mtime": t("Modified Time")},
                     value=sort_by,
                     with_input=False,
                 )
@@ -157,7 +158,7 @@ def page_history() -> None:
             )
 
             sort_order_sel = ui.toggle(
-                {"asc": "升序", "desc": "降序"}, value=sort_order
+                {"asc": t("Ascending"), "desc": t("Descending")}, value=sort_order
             ).props("dense")
 
             def _on_refresh() -> None:
@@ -165,7 +166,7 @@ def page_history() -> None:
                 _refresh()
 
             ui.button(
-                "刷新",
+                t("Refresh"),
                 icon="refresh",
                 on_click=_on_refresh,
             ).props("dense flat")
@@ -194,9 +195,13 @@ def page_history() -> None:
             status_area.clear()
             with status_area:
                 if filtered_total == total:
-                    ui.label(f"共 {total} 个文件")
+                    ui.label(t("Total {total} files").format(total=total))
                 else:
-                    ui.label(f"共 {total} 个文件 · 当前筛选后 {filtered_total} 个")
+                    ui.label(
+                        t("Total {total} files · After filter {filtered} files").format(
+                            total=total, filtered=filtered_total
+                        )
+                    )
 
         def _refresh() -> None:
             nonlocal page
@@ -216,7 +221,7 @@ def page_history() -> None:
             list_area.clear()
             with list_area:
                 if not current_slice:
-                    ui.label("暂无文件").classes("text-grey-6")
+                    ui.label(t("No files")).classes("text-grey-6")
                 else:
                     for item in current_slice:
                         _render_file_card(item)
