@@ -336,6 +336,10 @@ novel-cli download --site ttkan shengxu-chendong
   * 书籍: `https://m.sfacg.com/b/456123/` -> Book ID: `456123`
   * 章节: `https://m.sfacg.com/c/5417665/` -> Chapter ID: `5417665`
   * 登录: 需提供有效的 Cookie 才能访问订阅章节。
+  * 其它:
+    * VIP 章节以图片形式返回, 可通过开启 `decode_font` 参数配合 OCR 识别为文本。
+    * OCR 识别结果并非完全可靠, 准确率大约在 **80%+**, 可能存在错误或缺字。
+    * OCR 运算在 CPU 环境下较为耗时, 解析 VIP 章节速度会明显变慢, 建议在具备 GPU 的环境中运行。
 
 * **三七轻小说 (n37yq)**
   * 书籍: `https://www.37yq.com/lightnovel/2362.html` -> Book ID: `2362`
