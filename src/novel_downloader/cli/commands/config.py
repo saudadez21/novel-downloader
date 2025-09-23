@@ -19,10 +19,10 @@ from .base import Command
 
 class ConfigCmd(Command):
     name = "config"
-    help = t("help_config")
+    help = t("Manage application configuration and settings")
 
     @classmethod
-    def register(cls, subparsers: _SubParsersAction[ArgumentParser]) -> None:
+    def register(cls, subparsers: "_SubParsersAction[ArgumentParser]") -> None:
         parser = subparsers.add_parser(cls.name, help=cls.help)
         sub = parser.add_subparsers(dest="subcommand", required=True)
 
@@ -36,12 +36,14 @@ class ConfigCmd(Command):
 
 class ConfigInitCmd(Command):
     name = "init"
-    help = t("config_init_help")
+    help = t("Initialize default configuration files in the current directory.")
 
     @classmethod
     def add_arguments(cls, parser: ArgumentParser) -> None:
         parser.add_argument(
-            "--force", action="store_true", help=t("config_init_force_help")
+            "--force",
+            action="store_true",
+            help=t("Force overwrite if the file already exists."),
         )
 
     @classmethod
@@ -51,29 +53,43 @@ class ConfigInitCmd(Command):
 
         if target_path.exists():
             if args.force:
-                ui.warn(t("config_init_overwrite", filename=BASE_CONFIG_PATH.name))
+                ui.warn(
+                    t("Overwriting existing file: {filename}").format(
+                        filename=BASE_CONFIG_PATH.name
+                    )
+                )
             else:
-                ui.info(t("config_init_exists", filename=BASE_CONFIG_PATH.name))
+                ui.info(
+                    t("File already exists: {filename}").format(
+                        filename=BASE_CONFIG_PATH.name
+                    )
+                )
                 should_copy = ui.confirm(
-                    t("config_init_confirm_overwrite", filename=BASE_CONFIG_PATH.name),
+                    t("Do you want to overwrite {filename}?").format(
+                        filename=BASE_CONFIG_PATH.name
+                    ),
                     default=False,
                 )
 
         if not should_copy:
-            ui.warn(t("config_init_skip", filename=BASE_CONFIG_PATH.name))
+            ui.warn(t("Skipped: {filename}").format(filename=BASE_CONFIG_PATH.name))
             return
 
         try:
             copy_default_config(target_path)
-            ui.success(t("config_init_copy", filename=BASE_CONFIG_PATH.name))
+            ui.success(t("Copied: {filename}").format(filename=BASE_CONFIG_PATH.name))
         except Exception as e:
-            ui.error(t("config_init_error", filename=BASE_CONFIG_PATH.name, err=str(e)))
+            ui.error(
+                t("Failed to copy {filename}: {err}").format(
+                    filename=BASE_CONFIG_PATH.name, err=str(e)
+                )
+            )
             raise
 
 
 class ConfigSetLangCmd(Command):
     name = "set-lang"
-    help = t("config_set_lang_help")
+    help = t("Set the interface language.")
 
     @classmethod
     def add_arguments(cls, parser: ArgumentParser) -> None:
@@ -82,22 +98,24 @@ class ConfigSetLangCmd(Command):
     @classmethod
     def run(cls, args: Namespace) -> None:
         state_mgr.set_language(args.lang)
-        ui.success(t("config_set_lang", lang=args.lang))
+        ui.success(t("Language switched to {lang}").format(lang=args.lang))
 
 
 class ConfigSetConfigCmd(Command):
     name = "set-config"
-    help = t("config_set_config_help")
+    help = t("Set and save a custom TOML configuration file.")
 
     @classmethod
     def add_arguments(cls, parser: ArgumentParser) -> None:
-        parser.add_argument("path", type=str, help="Path to config file")
+        parser.add_argument("path", type=str, help="Path to the configuration file")
 
     @classmethod
     def run(cls, args: Namespace) -> None:
         try:
             save_config_file(args.path)
-            ui.success(t("config_set_config", path=args.path))
+            ui.success(
+                t("Configuration file saved from {path}.").format(path=args.path)
+            )
         except Exception as e:
-            ui.error(t("config_set_config_fail", err=str(e)))
+            ui.error(t("Failed to save configuration file: {err}").format(err=str(e)))
             raise

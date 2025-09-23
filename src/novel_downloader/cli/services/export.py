@@ -30,20 +30,20 @@ def export_books(
         for book in books:
             book_id = book["book_id"]
 
-            ui.info(t("export_processing", book_id=book_id))
+            ui.info(t("Exporting book {book_id}...").format(book_id=book_id))
             if formats is None:
-                # based on config
                 try:
                     exporter.export(book_id)
-                    ui.success(t("export_success", book_id=book_id, format="default"))
+                    ui.success(
+                        t(
+                            "Book {book_id} exported successfully (default format)."
+                        ).format(book_id=book_id)
+                    )
                 except Exception as e:
                     ui.error(
                         t(
-                            "export_failed",
-                            book_id=book_id,
-                            format="default",
-                            err=str(e),
-                        )
+                            "Failed to export book {book_id} with default format: {err}"
+                        ).format(book_id=book_id, err=str(e))
                     )
                 continue
 
@@ -53,13 +53,23 @@ def export_books(
                 export_fn = getattr(exporter, method_name, None)
 
                 if not callable(export_fn):
-                    ui.warn(t("export_unsupported", format=fmt))
+                    ui.warn(
+                        t("Export format '{format}' is not supported.").format(
+                            format=fmt
+                        )
+                    )
                     continue
 
                 try:
                     export_fn(book_id)
-                    ui.success(t("export_success", book_id=book_id, format=fmt))
+                    ui.success(
+                        t("Book {book_id} exported successfully as {format}.").format(
+                            book_id=book_id, format=fmt
+                        )
+                    )
                 except Exception as e:
                     ui.error(
-                        t("export_failed", book_id=book_id, format=fmt, err=str(e))
+                        t("Failed to export book {book_id} as {format}: {err}").format(
+                            book_id=book_id, format=fmt, err=str(e)
+                        )
                     )

@@ -101,19 +101,19 @@ class YamiboSession(BaseSession):
         return [
             LoginField(
                 name="username",
-                label="用户名",
+                label="Username",
                 type="text",
                 required=True,
-                placeholder="请输入你的用户名",
-                description="用于登录 www.yamibo.com 的用户名",
+                placeholder="Enter your username",
+                description="The username used for login",
             ),
             LoginField(
                 name="password",
-                label="密码",
+                label="Password",
                 type="password",
                 required=True,
-                placeholder="请输入你的密码",
-                description="用于登录 www.yamibo.com 的密码",
+                placeholder="Enter your password",
+                description="The password used for login",
             ),
         ]
 

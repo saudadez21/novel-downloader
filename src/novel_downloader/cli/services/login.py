@@ -20,12 +20,14 @@ async def ensure_login(
 ) -> bool:
     if await fetcher.load_state():
         return True
-
     login_data = await _prompt_login_fields(fetcher.login_fields, login_config)
     if not await fetcher.login(**login_data):
-        ui.error(t("download_login_failed"))
+        ui.error(
+            t(
+                "Login failed: please check your cookies or account credentials and try again."  # noqa: E501
+            )
+        )
         return False
-
     await fetcher.save_state()
     return True
 
@@ -45,33 +47,31 @@ async def _prompt_login_fields(
     result: dict[str, Any] = {}
 
     for field in fields:
-        ui.info(f"\n{field.label} ({field.name})")
+        ui.info(f"\n{t(field.label)} ({field.name})")
         if field.description:
-            ui.info(f"{t('login_description')}: {field.description}")
+            ui.info(f"{t('Description')}: {t(field.description)}")
         if field.placeholder:
-            ui.info(f"{t('login_hint')}: {field.placeholder}")
-
+            ui.info(f"{t('Hint')}: {t(field.placeholder)}")
         existing_value = login_config.get(field.name, "").strip()
         if existing_value:
             result[field.name] = existing_value
-            ui.info(t("login_use_config"))
+            ui.info(t("Using configured value."))
             continue
 
         value: str | dict[str, str] = ""
         for _ in range(5):
             if field.type == "password":
-                value = ui.prompt_password(t("login_enter_password"))
+                value = ui.prompt_password(t("Enter your password"))
             elif field.type == "cookie":
-                value = ui.prompt(t("login_enter_cookie"))
+                value = ui.prompt(t("Enter your cookies"))
                 value = parse_cookies(value)
             else:
-                value = ui.prompt(t("login_enter_value"))
-
+                value = ui.prompt(t("Enter a value"))
             if not value and field.default:
                 value = field.default
 
             if not value and field.required:
-                ui.warn(t("login_required_field"))
+                ui.warn(t("This field is required. Please provide a value."))
             else:
                 break
 

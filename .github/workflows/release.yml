@@ -30,6 +30,11 @@ jobs:
         run: |
           sed -i 's#](docs/#](https://github.com/saudadez21/novel-downloader/blob/main/docs/#g' README.md
 
+      - name: Compile translations
+        run: |
+          pip install babel
+          pybabel compile -d src/novel_downloader/locales
+
       - name: Build package
         run: |
           python -m build

@@ -1,0 +1,421 @@
+# Novel Downloader Translation Template.
+# Copyright (C) 2025 Novel Downloader contributors
+# This file is distributed under the same license as the novel-downloader package.
+# Novel Downloader contributors, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: novel-downloader 2.2.1\n"
+"Report-Msgid-Bugs-To: https://github.com/saudadez21/novel-downloader/issues\n"
+"POT-Creation-Date: 2025-09-22 22:43-0400\n"
+"PO-Revision-Date: 2025-09-22 22:43-0400\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src\novel_downloader\cli\main.py:16
+msgid "Novel Downloader CLI tool."
+msgstr "小说下载器 CLI 工具"
+
+#: src\novel_downloader\cli\commands\clean.py:26
+msgid "Clear application logs, caches, and configs"
+msgstr "清理应用日志、缓存和配置文件"
+
+#: src\novel_downloader\cli\commands\clean.py:31
+msgid "Clear log directory"
+msgstr "清理日志目录"
+
+#: src\novel_downloader\cli\commands\clean.py:34
+msgid "Clear script and cookie cache"
+msgstr "清理脚本和 Cookie 缓存"
+
+#: src\novel_downloader\cli\commands\clean.py:36
+msgid "Clear data files"
+msgstr "清理数据文件"
+
+#: src\novel_downloader\cli\commands\clean.py:38
+msgid "Clear configuration files"
+msgstr "清理配置文件"
+
+#: src\novel_downloader\cli\commands\clean.py:43
+msgid "Clear all settings, caches, and data files"
+msgstr "清理所有设置、缓存和数据文件"
+
+#: src\novel_downloader\cli\commands\clean.py:46
+msgid "Skip confirmation prompt"
+msgstr "跳过确认提示"
+
+#: src\novel_downloader\cli\commands\clean.py:56
+msgid "Are you sure you want to delete all local data?"
+msgstr "确定要删除所有本地数据吗？"
+
+#: src\novel_downloader\cli\commands\clean.py:59
+msgid "Clean operation cancelled."
+msgstr "清理操作已取消。"
+
+#: src\novel_downloader\cli\commands\clean.py:73
+msgid "No clean option specified."
+msgstr "未指定清理选项。"
+
+#: src\novel_downloader\cli\commands\clean.py:83
+#, python-brace-format
+msgid "Cleaning {path}..."
+msgstr "正在清理 {path}..."
+
+#: src\novel_downloader\cli\commands\clean.py:89
+#, python-brace-format
+msgid "Deleted {path}"
+msgstr "已删除 {path}"
+
+#: src\novel_downloader\cli\commands\clean.py:92
+#, python-brace-format
+msgid "Failed to delete {path}: {err}"
+msgstr "删除 {path} 失败：{err}"
+
+#: src\novel_downloader\cli\commands\clean.py:95
+#, python-brace-format
+msgid "Not found: {path}"
+msgstr "未找到：{path}"
+
+#: src\novel_downloader\cli\commands\config.py:22
+msgid "Manage application configuration and settings"
+msgstr "管理应用配置和设置"
+
+#: src\novel_downloader\cli\commands\config.py:39
+msgid "Initialize default configuration files in the current directory."
+msgstr "在当前目录初始化默认配置文件"
+
+#: src\novel_downloader\cli\commands\config.py:46
+msgid "Force overwrite if the file already exists."
+msgstr "如果文件已存在则强制覆盖"
+
+#: src\novel_downloader\cli\commands\config.py:57
+#, python-brace-format
+msgid "Overwriting existing file: {filename}"
+msgstr "正在覆盖已存在的文件：{filename}"
+
+#: src\novel_downloader\cli\commands\config.py:63
+#, python-brace-format
+msgid "File already exists: {filename}"
+msgstr "文件已存在：{filename}"
+
+#: src\novel_downloader\cli\commands\config.py:68
+#, python-brace-format
+msgid "Do you want to overwrite {filename}?"
+msgstr "是否要覆盖 {filename}？"
+
+#: src\novel_downloader\cli\commands\config.py:75
+#, python-brace-format
+msgid "Skipped: {filename}"
+msgstr "已跳过：{filename}"
+
+#: src\novel_downloader\cli\commands\config.py:80
+#, python-brace-format
+msgid "Copied: {filename}"
+msgstr "已复制：{filename}"
+
+#: src\novel_downloader\cli\commands\config.py:83
+#, python-brace-format
+msgid "Failed to copy {filename}: {err}"
+msgstr "复制 {filename} 失败：{err}"
+
+#: src\novel_downloader\cli\commands\config.py:92
+msgid "Set the interface language."
+msgstr "设置界面语言"
+
+#: src\novel_downloader\cli\commands\config.py:101
+#, python-brace-format
+msgid "Language switched to {lang}"
+msgstr "语言已切换为 {lang}"
+
+#: src\novel_downloader\cli\commands\config.py:106
+msgid "Set and save a custom TOML configuration file."
+msgstr "设置并保存自定义 TOML 配置文件"
+
+#: src\novel_downloader\cli\commands\config.py:117
+#, python-brace-format
+msgid "Configuration file saved from {path}."
+msgstr "配置文件已保存：{path}"
+
+#: src\novel_downloader\cli\commands\config.py:120
+#, python-brace-format
+msgid "Failed to save configuration file: {err}"
+msgstr "保存配置文件失败：{err}"
+
+#: src\novel_downloader\cli\commands\download.py:21
+msgid "Download novels by book ID or URL."
+msgstr "通过书籍 ID 或 URL 下载小说"
+
+#: src\novel_downloader\cli\commands\download.py:26
+msgid "Book ID(s) or URL to download"
+msgstr "要下载的书籍 ID 或 URL"
+
+#: src\novel_downloader\cli\commands\download.py:30
+msgid "Source site key (auto-detected if omitted and URL is provided)"
+msgstr "来源站点标识（若省略且提供了 URL，将自动检测）"
+
+#: src\novel_downloader\cli\commands\download.py:33
+#: src\novel_downloader\cli\commands\export.py:42
+#: src\novel_downloader\cli\commands\search.py:35
+msgid "Path to the configuration file"
+msgstr "配置文件路径"
+
+#: src\novel_downloader\cli\commands\download.py:38
+msgid "Start chapter ID (applies only to the first book)"
+msgstr "起始章节 ID（仅对第一本书生效）"
+
+#: src\novel_downloader\cli\commands\download.py:43
+msgid "End chapter ID (applies only to the first book)"
+msgstr "结束章节 ID（仅对第一本书生效）"
+
+#: src\novel_downloader\cli\commands\download.py:48
+msgid "Skip export step (download only)"
+msgstr "跳过导出步骤（仅下载）"
+
+#: src\novel_downloader\cli\commands\download.py:62
+msgid "No --site provided; detecting site from URL..."
+msgstr "未提供 --site；正在从 URL 检测站点..."
+
+#: src\novel_downloader\cli\commands\download.py:66
+#, python-brace-format
+msgid "Expected exactly one URL argument when --site is omitted (got {n})."
+msgstr "省略 --site 时应只提供一个 URL 参数（收到 {n} 个）"
+
+#: src\novel_downloader\cli\commands\download.py:75
+#, python-brace-format
+msgid "Could not resolve site and book from URL: {url}"
+msgstr "无法从 URL 解析站点和书籍：{url}"
+
+#: src\novel_downloader\cli\commands\download.py:89
+#, python-brace-format
+msgid "Resolved URL to site '{site}' with book ID '{book_id}'."
+msgstr "已解析 URL：站点 '{site}'，书籍 ID '{book_id}'"
+
+#: src\novel_downloader\cli\commands\download.py:94
+#: src\novel_downloader\cli\commands\export.py:53
+#, python-brace-format
+msgid "Using site: {site}"
+msgstr "使用站点：{site}"
+
+#: src\novel_downloader\cli\commands\download.py:102
+#: src\novel_downloader\cli\commands\export.py:61
+#: src\novel_downloader\cli\commands\search.py:82
+#, python-brace-format
+msgid "No config found; created at {path}."
+msgstr "未找到配置；已在 {path} 创建新配置"
+
+#: src\novel_downloader\cli\commands\download.py:108
+#: src\novel_downloader\cli\commands\export.py:67
+#: src\novel_downloader\cli\commands\search.py:88
+#, python-brace-format
+msgid "Failed to load configuration: {err}"
+msgstr "加载配置失败：{err}"
+
+#: src\novel_downloader\cli\commands\download.py:117
+#, python-brace-format
+msgid "Failed to read book IDs from configuration: {err}"
+msgstr "从配置读取书籍 ID 失败：{err}"
+
+#: src\novel_downloader\cli\commands\download.py:124
+msgid "No book IDs provided. Exiting."
+msgstr "未提供书籍 ID，已退出"
+
+#: src\novel_downloader\cli\commands\download.py:152
+msgid "Export skipped (--no-export)"
+msgstr "已跳过导出 (--no-export)"
+
+#: src\novel_downloader\cli\commands\export.py:21
+msgid "Export previously downloaded novels."
+msgstr "导出已下载的小说"
+
+#: src\novel_downloader\cli\commands\export.py:28
+msgid "Book ID(s) to export"
+msgstr "要导出的书籍 ID"
+
+#: src\novel_downloader\cli\commands\export.py:34
+msgid "Output format(s) (default: config)"
+msgstr "输出格式（默认：配置文件）"
+
+#: src\novel_downloader\cli\commands\export.py:39
+#, python-brace-format
+msgid "Source site key (default: {default})"
+msgstr "来源站点标识（默认：{default}）"
+
+#: src\novel_downloader\cli\commands\search.py:22
+msgid "Search for books across one or more sites."
+msgstr "在一个或多个站点搜索书籍"
+
+#: src\novel_downloader\cli\commands\search.py:31
+msgid "Restrict search to specific site key(s). Default: all sites."
+msgstr "限制搜索范围为指定站点（默认：全部站点）"
+
+#: src\novel_downloader\cli\commands\search.py:33
+msgid "Search keyword"
+msgstr "搜索关键词"
+
+#: src\novel_downloader\cli\commands\search.py:43
+msgid "Maximum number of total results"
+msgstr "最大总结果数"
+
+#: src\novel_downloader\cli\commands\search.py:50
+msgid "Maximum number of results per site (default: 10)"
+msgstr "每个站点的最大结果数（默认：10）"
+
+#: src\novel_downloader\cli\commands\search.py:57
+msgid "Request timeout in seconds (default: 5.0)"
+msgstr "请求超时时间（秒，默认：5.0）"
+
+#: src\novel_downloader\cli\commands\search.py:92
+#, python-brace-format
+msgid "Searching for '{keyword}'..."
+msgstr "正在搜索 '{keyword}'..."
+
+#: src\novel_downloader\cli\commands\search.py:138
+msgid "No results found."
+msgstr "未找到结果"
+
+#: src\novel_downloader\cli\commands\search.py:146
+msgid "#"
+msgstr "序号"
+
+#: src\novel_downloader\cli\commands\search.py:147
+msgid "Title"
+msgstr "书名"
+
+#: src\novel_downloader\cli\commands\search.py:148
+msgid "Author"
+msgstr "作者"
+
+#: src\novel_downloader\cli\commands\search.py:149
+msgid "Latest"
+msgstr "最新章节"
+
+#: src\novel_downloader\cli\commands\search.py:150
+msgid "Updated"
+msgstr "更新时间"
+
+#: src\novel_downloader\cli\commands\search.py:151
+msgid "Site"
+msgstr "站点"
+
+#: src\novel_downloader\cli\commands\search.py:152
+msgid "Book ID"
+msgstr "书籍 ID"
+
+#: src\novel_downloader\cli\commands\search.py:174
+#, python-brace-format
+msgid "Search Results · Page {page}/{total_pages}"
+msgstr "搜索结果 · 第 {page}/{total_pages} 页"
+
+#: src\novel_downloader\cli\commands\search.py:190
+msgid ""
+"Enter a number to select, 'n' for next, 'p' for previous (press Enter to "
+"cancel)"
+msgstr "输入序号选择, 'n' 下一页, 'p' 上一页 (回车取消)"
+
+#: src\novel_downloader\cli\services\download.py:64
+#, python-brace-format
+msgid "Downloading book {book_id} from {site}..."
+msgstr "正在从 {site} 下载书籍 {book_id}..."
+
+#: src\novel_downloader\cli\services\download.py:70
+msgid "Download progress"
+msgstr "下载进度"
+
+#: src\novel_downloader\cli\services\export.py:33
+#, python-brace-format
+msgid "Exporting book {book_id}..."
+msgstr "正在导出书籍 {book_id}..."
+
+#: src\novel_downloader\cli\services\export.py:39
+#, python-brace-format
+msgid "Book {book_id} exported successfully (default format)."
+msgstr "书籍 {book_id} 已成功导出（默认格式）"
+
+#: src\novel_downloader\cli\services\export.py:45
+#, python-brace-format
+msgid "Failed to export book {book_id} with default format: {err}"
+msgstr "书籍 {book_id} 使用默认格式导出失败：{err}"
+
+#: src\novel_downloader\cli\services\export.py:57
+#, python-brace-format
+msgid "Export format '{format}' is not supported."
+msgstr "不支持导出格式 '{format}'"
+
+#: src\novel_downloader\cli\services\export.py:66
+#, python-brace-format
+msgid "Book {book_id} exported successfully as {format}."
+msgstr "书籍 {book_id} 已成功导出为 {format}"
+
+#: src\novel_downloader\cli\services\export.py:72
+#, python-brace-format
+msgid "Failed to export book {book_id} as {format}: {err}"
+msgstr "书籍 {book_id} 导出为 {format} 失败：{err}"
+
+#: src\novel_downloader\cli\services\login.py:27
+msgid ""
+"Login failed: please check your cookies or account credentials and try again."
+msgstr "登录失败：请检查您的 Cookies 或账户凭据后重试"
+
+#: src\novel_downloader\cli\services\login.py:52
+msgid "Description"
+msgstr "描述"
+
+#: src\novel_downloader\cli\services\login.py:54
+msgid "Hint"
+msgstr "提示"
+
+#: src\novel_downloader\cli\services\login.py:58
+msgid "Using configured value."
+msgstr "使用已配置的值"
+
+#: src\novel_downloader\cli\services\login.py:64 scripts\i18n_strings.py:19
+msgid "Enter your password"
+msgstr "请输入密码"
+
+#: src\novel_downloader\cli\services\login.py:66
+msgid "Enter your cookies"
+msgstr "请输入 Cookies"
+
+#: src\novel_downloader\cli\services\login.py:69
+msgid "Enter a value"
+msgstr "请输入值"
+
+#: src\novel_downloader\cli\services\login.py:74
+msgid "This field is required. Please provide a value."
+msgstr "该字段为必填项，请输入值"
+
+#: scripts\i18n_strings.py:16
+msgid "Username"
+msgstr "用户名"
+
+#: scripts\i18n_strings.py:17
+msgid "Password"
+msgstr "密码"
+
+#: scripts\i18n_strings.py:18
+msgid "Enter your username"
+msgstr "请输入用户名"
+
+#: scripts\i18n_strings.py:20
+msgid "The username used for login"
+msgstr "用于登录的用户名"
+
+#: scripts\i18n_strings.py:21
+msgid "The password used for login"
+msgstr "用于登录的密码"
+
+#: scripts\i18n_strings.py:24
+msgid "Cookie"
+msgstr "Cookie"
+
+#: scripts\i18n_strings.py:25
+msgid "Paste your login cookies here"
+msgstr "在此粘贴您的登录 Cookies"
+
+#: scripts\i18n_strings.py:26
+msgid "Copy the cookies from your browser's developer tools while logged in."
+msgstr "请在已登录状态下从浏览器开发者工具复制 Cookies"

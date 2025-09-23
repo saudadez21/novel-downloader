@@ -13,7 +13,7 @@ from novel_downloader.utils.i18n import t
 
 
 def cli_main() -> None:
-    parser = argparse.ArgumentParser(description=t("help_cli"))
+    parser = argparse.ArgumentParser(description=t("Novel Downloader CLI tool."))
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     for cmd in commands:

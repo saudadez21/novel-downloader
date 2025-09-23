@@ -14,7 +14,7 @@ class Command(ABC):
     help: str
 
     @classmethod
-    def register(cls, subparsers: _SubParsersAction[ArgumentParser]) -> None:
+    def register(cls, subparsers: "_SubParsersAction[ArgumentParser]") -> None:
         parser = subparsers.add_parser(cls.name, help=cls.help)
         cls.add_arguments(parser)
         parser.set_defaults(func=cls.run)

@@ -47,8 +47,8 @@ async def download_books(
     parser = get_parser(site, parser_cfg)
 
     async with get_fetcher(site, fetcher_cfg) as fetcher:
-        if downloader_cfg.login_required and not await ensure_login(
-            fetcher, login_config
+        if downloader_cfg.login_required and (
+            not await ensure_login(fetcher, login_config)
         ):
             return
 
@@ -60,10 +60,14 @@ async def download_books(
         )
 
         for book in books:
-            ui.info(t("download_downloading", book_id=book["book_id"], site=site))
+            ui.info(
+                t("Downloading book {book_id} from {site}...").format(
+                    book_id=book["book_id"], site=site
+                )
+            )
 
             hook, close = ui.create_progress_hook(
-                prefix=t("download_progress_prefix"), unit="chapters"
+                prefix=t("Download progress"), unit="chapters"
             )
             try:
                 await downloader.download(book, progress_hook=hook)

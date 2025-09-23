@@ -3,40 +3,34 @@
 novel_downloader.utils.i18n
 ---------------------------
 
-Multilingual text dictionary and utility for CLI and interactive mode.
 """
 
 __all__ = ["t"]
 
-import json
-from typing import Any
+import gettext
+from importlib.resources import files
 
-from novel_downloader.utils.constants import LOCALES_DIR
 from novel_downloader.utils.state import state_mgr
 
-_TRANSLATIONS: dict[str, dict[str, str]] = {}
+LANG_MAP = {
+    "zh": "zh_CN",
+    "en": "en_US",
+}
 
-for locale_path in LOCALES_DIR.glob("*.json"):
-    lang = locale_path.stem
+
+def get_translation(lang: str) -> gettext.NullTranslations:
     try:
-        with open(locale_path, encoding="utf-8") as f:
-            _TRANSLATIONS[lang] = json.load(f)
-    except Exception:
-        continue
+        mo_path = files("novel_downloader.locales").joinpath(
+            lang, "LC_MESSAGES", "messages.mo"
+        )
+        with mo_path.open("rb") as f:
+            return gettext.GNUTranslations(f)
+    except FileNotFoundError:
+        return gettext.NullTranslations()
 
 
-def t(key: str, **kwargs: Any) -> str:
-    """
-    Retrieve a localized string by key and language.
+_lang = state_mgr.get_language()
+_locale = LANG_MAP.get(_lang, _lang)
+_translation = get_translation(_locale)
 
-    :param key: The string key.
-    :param kwargs: Optional formatting arguments.
-    :return: The translated string, or the key if not found.
-    """
-    lang = state_mgr.get_language() or "zh"
-    txt = (
-        _TRANSLATIONS.get(lang, {}).get(key)
-        or _TRANSLATIONS.get("en", {}).get(key)
-        or key
-    )
-    return txt.format(**kwargs)
+t = _translation.gettext

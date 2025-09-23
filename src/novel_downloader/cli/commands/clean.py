@@ -23,24 +23,40 @@ from .base import Command
 
 class CleanCmd(Command):
     name = "clean"
-    help = t("help_clean")
+    help = t("Clear application logs, caches, and configs")
 
     @classmethod
     def add_arguments(cls, parser: ArgumentParser) -> None:
-        parser.add_argument("--logs", action="store_true", help=t("clean_logs"))
-        parser.add_argument("--cache", action="store_true", help=t("clean_cache"))
-        parser.add_argument("--data", action="store_true", help=t("clean_data"))
-        parser.add_argument("--config", action="store_true", help=t("clean_config"))
-        parser.add_argument("--all", action="store_true", help=t("clean_all"))
-        parser.add_argument("-y", "--yes", action="store_true", help=t("clean_yes"))
+        parser.add_argument(
+            "--logs", action="store_true", help=t("Clear log directory")
+        )
+        parser.add_argument(
+            "--cache", action="store_true", help=t("Clear script and cookie cache")
+        )
+        parser.add_argument("--data", action="store_true", help=t("Clear data files"))
+        parser.add_argument(
+            "--config", action="store_true", help=t("Clear configuration files")
+        )
+        parser.add_argument(
+            "--all",
+            action="store_true",
+            help=t("Clear all settings, caches, and data files"),
+        )
+        parser.add_argument(
+            "-y", "--yes", action="store_true", help=t("Skip confirmation prompt")
+        )
 
     @classmethod
     def run(cls, args: Namespace) -> None:
         targets: list[Path] = []
 
         if args.all:
-            if not args.yes and not ui.confirm(t("clean_confirm"), default=False):
-                ui.warn(t("clean_cancelled"))
+            if not args.yes and (
+                not ui.confirm(
+                    t("Are you sure you want to delete all local data?"), default=False
+                )
+            ):
+                ui.warn(t("Clean operation cancelled."))
                 return
             targets = [LOGGER_DIR, JS_SCRIPT_DIR, DATA_DIR, CONFIG_DIR]
         else:
@@ -54,7 +70,7 @@ class CleanCmd(Command):
                 targets.append(CONFIG_DIR)
 
         if not targets:
-            ui.warn(t("clean_nothing"))
+            ui.warn(t("No clean option specified."))
             return
 
         for path in targets:
@@ -64,14 +80,16 @@ class CleanCmd(Command):
     def _delete_path(p: Path) -> None:
         """Delete file or directory at `p`, printing a colored result line."""
         if p.exists():
-            with ui.status(t("cleaning", path=p)):
+            with ui.status(t("Cleaning {path}...").format(path=p)):
                 try:
                     if p.is_file():
                         p.unlink()
                     else:
                         shutil.rmtree(p, ignore_errors=True)
-                    ui.success(t("clean_deleted", path=p))
+                    ui.success(t("Deleted {path}").format(path=p))
                 except Exception as e:
-                    ui.error(t("clean_failed", path=p, err=str(e)))
+                    ui.error(
+                        t("Failed to delete {path}: {err}").format(path=p, err=str(e))
+                    )
         else:
-            ui.warn(t("clean_not_found", path=p))
+            ui.warn(t("Not found: {path}").format(path=p))

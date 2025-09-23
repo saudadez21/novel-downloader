@@ -19,36 +19,42 @@ from .base import Command
 
 class SearchCmd(Command):
     name = "search"
-    help = t("help_search")
+    help = t("Search for books across one or more sites.")
 
     @classmethod
     def add_arguments(cls, parser: ArgumentParser) -> None:
         parser.add_argument(
-            "--site", "-s", action="append", metavar="SITE", help=t("search_sites_help")
+            "--site",
+            "-s",
+            action="append",
+            metavar="SITE",
+            help=t("Restrict search to specific site key(s). Default: all sites."),
         )
-        parser.add_argument("keyword", help=t("search_keyword_help"))
-        parser.add_argument("--config", type=str, help=t("help_config"))
+        parser.add_argument("keyword", help=t("Search keyword"))
+        parser.add_argument(
+            "--config", type=str, help=t("Path to the configuration file")
+        )
         parser.add_argument(
             "--limit",
             "-l",
             type=int,
             default=None,
             metavar="N",
-            help=t("search_limit_help"),
+            help=t("Maximum number of total results"),
         )
         parser.add_argument(
             "--site-limit",
             type=int,
             default=10,
             metavar="M",
-            help=t("search_site_limit_help"),
+            help=t("Maximum number of results per site (default: 10)"),
         )
         parser.add_argument(
             "--timeout",
             type=float,
             default=5.0,
             metavar="SECS",
-            help=t("search_timeout_help", secs="5.0"),
+            help=t("Request timeout in seconds (default: 5.0)"),
         )
 
     @classmethod
@@ -72,14 +78,18 @@ class SearchCmd(Command):
             if config_path is None:
                 config_path = Path("settings.toml")
             copy_default_config(config_path)
-            ui.warn(t("config_initialized", path=str(config_path.resolve())))
+            ui.warn(
+                t("No config found; created at {path}.").format(
+                    path=str(config_path.resolve())
+                )
+            )
             return
         except ValueError as e:
-            ui.error(t("download_config_load_fail", err=str(e)))
+            ui.error(t("Failed to load configuration: {err}").format(err=str(e)))
             return
 
         async def _run() -> None:
-            with ui.status(t("searching", keyword=keyword)):
+            with ui.status(t("Searching for '{keyword}'...").format(keyword=keyword)):
                 results = await search(
                     keyword=keyword,
                     sites=sites,
@@ -95,7 +105,6 @@ class SearchCmd(Command):
             adapter = ConfigAdapter(config=config_data, site=chosen["site"])
             books: list[BookConfig] = [{"book_id": chosen["book_id"]}]
 
-            # logging
             log_level = adapter.get_log_level()
             ui.setup_logging(console_level=log_level)
 
@@ -126,7 +135,7 @@ class SearchCmd(Command):
         Show results in pages and let user select by global index.
         """
         if not results:
-            ui.warn(t("no_results"))
+            ui.warn(t("No results found."))
             return None
 
         total = len(results)
@@ -134,13 +143,13 @@ class SearchCmd(Command):
         page = 1
 
         columns = [
-            t("col_index"),
-            t("col_title"),
-            t("col_author"),
-            t("col_latest"),
-            t("col_updated"),
-            t("col_site"),
-            t("col_book_id"),
+            t("#"),
+            t("Title"),
+            t("Author"),
+            t("Latest"),
+            t("Updated"),
+            t("Site"),
+            t("Book ID"),
         ]
         all_rows = [
             [
@@ -162,7 +171,9 @@ class SearchCmd(Command):
             page_rows = all_rows[start - 1 : end]
 
             ui.render_table(
-                t("page_status", page=page, total_pages=total_pages),
+                t("Search Results · Page {page}/{total_pages}").format(
+                    page=page, total_pages=total_pages
+                ),
                 columns,
                 page_rows,
             )
@@ -175,7 +186,9 @@ class SearchCmd(Command):
                 nav_choices.append("p")
 
             choice = ui.prompt_choice(
-                t("prompt_select_index"),
+                t(
+                    "Enter a number to select, 'n' for next, 'p' for previous (press Enter to cancel)"  # noqa: E501
+                ),
                 numeric_choices + nav_choices,
             )
 

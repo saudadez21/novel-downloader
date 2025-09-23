@@ -48,7 +48,8 @@ dev = [
     "types-lxml",
     "types-PyYAML",
     "pre-commit",
-    "commitizen"
+    "commitizen",
+    "babel",
 ]
 
 [project.scripts]
@@ -75,9 +76,9 @@ include = ["novel_downloader", "novel_downloader.*"]
 "novel_downloader.resources.text" = ["*.txt"]
 "novel_downloader.resources.js_scripts" = ["*.js"]
 "novel_downloader.resources.json" = ["*.json"]
-"novel_downloader.locales" = ["*.json"]
 "novel_downloader.resources.css_styles" = ["*.css"]
 "novel_downloader.resources.images" = ["*.png"]
+"novel_downloader.locales" = ["*/LC_MESSAGES/*.mo"]
 
 [tool.setuptools.dynamic]
 version = {attr = "novel_downloader.__version__"}

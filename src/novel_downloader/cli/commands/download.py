@@ -18,19 +18,34 @@ from .base import Command
 
 class DownloadCmd(Command):
     name = "download"
-    help = t("help_download")
+    help = t("Download novels by book ID or URL.")
 
     @classmethod
     def add_arguments(cls, parser: ArgumentParser) -> None:
-        parser.add_argument("book_ids", nargs="*", help=t("download_book_ids"))
-        parser.add_argument("--site", help=t("download_option_site"))
-        parser.add_argument("--config", type=str, help=t("help_config"))
-        parser.add_argument("--start", type=str, help=t("download_option_start"))
-        parser.add_argument("--end", type=str, help=t("download_option_end"))
+        parser.add_argument(
+            "book_ids", nargs="*", help=t("Book ID(s) or URL to download")
+        )
+        parser.add_argument(
+            "--site",
+            help=t("Source site key (auto-detected if omitted and URL is provided)"),
+        )
+        parser.add_argument(
+            "--config", type=str, help=t("Path to the configuration file")
+        )
+        parser.add_argument(
+            "--start",
+            type=str,
+            help=t("Start chapter ID (applies only to the first book)"),
+        )
+        parser.add_argument(
+            "--end",
+            type=str,
+            help=t("End chapter ID (applies only to the first book)"),
+        )
         parser.add_argument(
             "--no-export",
             action="store_true",
-            help=t("download_option_no_export"),
+            help=t("Skip export step (download only)"),
         )
 
     @classmethod
@@ -44,15 +59,23 @@ class DownloadCmd(Command):
         else:  # URL MODE
             from novel_downloader.utils.book_url_resolver import resolve_book_url
 
-            ui.info(t("download_url_mode"))
+            ui.info(t("No --site provided; detecting site from URL..."))
             if len(args.book_ids) != 1:
-                ui.error(t("download_url_expected", n=len(args.book_ids)))
+                ui.error(
+                    t(
+                        "Expected exactly one URL argument when --site is omitted (got {n})."  # noqa: E501
+                    ).format(n=len(args.book_ids))
+                )
                 return
 
             raw_url = args.book_ids[0]
             resolved = resolve_book_url(raw_url)
             if not resolved:
-                ui.error(t("download_url_parse_fail", url=raw_url))
+                ui.error(
+                    t("Could not resolve site and book from URL: {url}").format(
+                        url=raw_url
+                    )
+                )
                 return
 
             site = resolved["site_key"]
@@ -62,19 +85,27 @@ class DownloadCmd(Command):
             if args.end:
                 first["end_id"] = args.end
             book_ids = [first]
-            ui.info(t("download_resolved", site=site, book_id=first["book_id"]))
+            ui.info(
+                t("Resolved URL to site '{site}' with book ID '{book_id}'.").format(
+                    site=site, book_id=first["book_id"]
+                )
+            )
 
-        ui.info(t("download_site_info", site=site))
+        ui.info(t("Using site: {site}").format(site=site))
         try:
             config_data = load_config(config_path)
         except FileNotFoundError:
             if config_path is None:
                 config_path = Path("settings.toml")
             copy_default_config(config_path)
-            ui.warn(t("config_initialized", path=str(config_path.resolve())))
+            ui.warn(
+                t("No config found; created at {path}.").format(
+                    path=str(config_path.resolve())
+                )
+            )
             return
         except ValueError as e:
-            ui.error(t("download_config_load_fail", err=str(e)))
+            ui.error(t("Failed to load configuration: {err}").format(err=str(e)))
             return
         adapter = ConfigAdapter(config=config_data, site=site)
 
@@ -82,14 +113,17 @@ class DownloadCmd(Command):
             try:
                 book_ids = adapter.get_book_ids()
             except Exception as e:
-                ui.error(t("download_fail_get_ids", err=str(e)))
+                ui.error(
+                    t("Failed to read book IDs from configuration: {err}").format(
+                        err=str(e)
+                    )
+                )
                 return
 
         if not book_ids:
-            ui.warn(t("download_no_ids"))
+            ui.warn(t("No book IDs provided. Exiting."))
             return
 
-        # logging
         log_level = adapter.get_log_level()
         ui.setup_logging(console_level=log_level)
 
@@ -115,7 +149,7 @@ class DownloadCmd(Command):
 
             export_books(site, book_ids, adapter.get_exporter_config())
         else:
-            ui.info(t("download_export_skipped"))
+            ui.info(t("Export skipped (--no-export)"))
 
     @staticmethod
     def _parse_book_args(

@@ -18,21 +18,29 @@ from .base import Command
 
 class ExportCmd(Command):
     name = "export"
-    help = t("help_export")
+    help = t("Export previously downloaded novels.")
 
     @classmethod
     def add_arguments(cls, parser: ArgumentParser) -> None:
-        parser.add_argument("book_ids", nargs="+", help=t("download_book_ids"))
+        parser.add_argument(
+            "book_ids",
+            nargs="+",
+            help=t("Book ID(s) to export"),
+        )
         parser.add_argument(
             "--format",
             choices=["txt", "epub"],
             nargs="+",
-            help=t("export_format_help"),
+            help=t("Output format(s) (default: config)"),
         )
         parser.add_argument(
-            "--site", default="qidian", help=t("export_option_site", default="qidian")
+            "--site",
+            default="qidian",
+            help=t("Source site key (default: {default})").format(default="qidian"),
         )
-        parser.add_argument("--config", type=str, help=t("help_config"))
+        parser.add_argument(
+            "--config", type=str, help=t("Path to the configuration file")
+        )
 
     @classmethod
     def run(cls, args: Namespace) -> None:
@@ -42,18 +50,21 @@ class ExportCmd(Command):
         config_path: Path | None = Path(args.config) if args.config else None
         formats: list[str] | None = args.format
 
-        ui.info(t("download_site_info", site=site))
-
+        ui.info(t("Using site: {site}").format(site=site))
         try:
             config_data = load_config(config_path)
         except FileNotFoundError:
             if config_path is None:
                 config_path = Path("settings.toml")
             copy_default_config(config_path)
-            ui.warn(t("config_initialized", path=str(config_path.resolve())))
+            ui.warn(
+                t("No config found; created at {path}.").format(
+                    path=str(config_path.resolve())
+                )
+            )
             return
         except ValueError as e:
-            ui.error(t("download_config_load_fail", err=str(e)))
+            ui.error(t("Failed to load configuration: {err}").format(err=str(e)))
             return
 
         adapter = ConfigAdapter(config=config_data, site=site)
