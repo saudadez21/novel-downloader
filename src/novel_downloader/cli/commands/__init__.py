@@ -7,8 +7,9 @@ novel_downloader.cli.commands
 
 __all__ = ["commands"]
 
+from .clean import CleanCmd
 from .download import DownloadCmd
 from .export import ExportCmd
 from .search import SearchCmd
 
-commands = [DownloadCmd, ExportCmd, SearchCmd]
+commands = [CleanCmd, DownloadCmd, ExportCmd, SearchCmd]
