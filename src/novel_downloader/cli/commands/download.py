@@ -55,7 +55,7 @@ class DownloadCmd(Command):
 
         # book_ids
         if site:  # SITE MODE
-            book_ids = cls._parse_book_args(args.book_ids, args.start, args.end)
+            books = cls._parse_book_args(args.book_ids, args.start, args.end)
         else:  # URL MODE
             from novel_downloader.utils.book_url_resolver import resolve_book_url
 
@@ -84,7 +84,7 @@ class DownloadCmd(Command):
                 first["start_id"] = args.start
             if args.end:
                 first["end_id"] = args.end
-            book_ids = [first]
+            books = [first]
             ui.info(
                 t("Resolved URL to site '{site}' with book ID '{book_id}'.").format(
                     site=site, book_id=first["book_id"]
@@ -109,9 +109,9 @@ class DownloadCmd(Command):
             return
         adapter = ConfigAdapter(config=config_data, site=site)
 
-        if not book_ids and args.site:
+        if not books and args.site:
             try:
-                book_ids = adapter.get_book_ids()
+                books = adapter.get_book_ids()
             except Exception as e:
                 ui.error(
                     t("Failed to read book IDs from configuration: {err}").format(
@@ -120,7 +120,7 @@ class DownloadCmd(Command):
                 )
                 return
 
-        if not book_ids:
+        if not books:
             ui.warn(t("No book IDs provided. Exiting."))
             return
 
@@ -135,7 +135,7 @@ class DownloadCmd(Command):
         asyncio.run(
             download_books(
                 site,
-                book_ids,
+                books,
                 adapter.get_downloader_config(),
                 adapter.get_fetcher_config(),
                 adapter.get_parser_config(),
@@ -147,7 +147,7 @@ class DownloadCmd(Command):
         if not args.no_export:
             from novel_downloader.cli.services.export import export_books
 
-            export_books(site, book_ids, adapter.get_exporter_config())
+            export_books(site, books, adapter.get_exporter_config())
         else:
             ui.info(t("Export skipped (--no-export)"))
 

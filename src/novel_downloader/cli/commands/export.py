@@ -41,6 +41,16 @@ class ExportCmd(Command):
         parser.add_argument(
             "--config", type=str, help=t("Path to the configuration file")
         )
+        parser.add_argument(
+            "--start",
+            type=str,
+            help=t("Start chapter ID (applies only to the first book)"),
+        )
+        parser.add_argument(
+            "--end",
+            type=str,
+            help=t("End chapter ID (applies only to the first book)"),
+        )
 
     @classmethod
     def run(cls, args: Namespace) -> None:
@@ -72,7 +82,7 @@ class ExportCmd(Command):
         log_level = adapter.get_log_level()
         ui.setup_logging(console_level=log_level)
 
-        books: list[BookConfig] = [{"book_id": bid} for bid in args.book_ids]
+        books = cls._parse_book_args(args.book_ids, args.start, args.end)
 
         export_books(
             site=site,
@@ -80,3 +90,28 @@ class ExportCmd(Command):
             exporter_cfg=adapter.get_exporter_config(),
             formats=formats,
         )
+
+    @staticmethod
+    def _parse_book_args(
+        book_ids: list[str],
+        start_id: str | None,
+        end_id: str | None,
+    ) -> list[BookConfig]:
+        """
+        Convert CLI arguments into a list of `BookConfig`.
+        """
+        if not book_ids:
+            return []
+
+        result: list[BookConfig] = []
+        first: BookConfig = {"book_id": book_ids[0]}
+        if start_id:
+            first["start_id"] = start_id
+        if end_id:
+            first["end_id"] = end_id
+        result.append(first)
+
+        for book_id in book_ids[1:]:
+            result.append({"book_id": book_id})
+
+        return result

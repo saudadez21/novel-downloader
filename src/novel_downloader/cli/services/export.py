@@ -33,7 +33,7 @@ def export_books(
             ui.info(t("Exporting book {book_id}...").format(book_id=book_id))
             if formats is None:
                 try:
-                    exporter.export(book_id)
+                    exporter.export(book)
                     ui.success(
                         t(
                             "Book {book_id} exported successfully (default format)."
@@ -61,7 +61,7 @@ def export_books(
                     continue
 
                 try:
-                    export_fn(book_id)
+                    export_fn(book)
                     ui.success(
                         t("Book {book_id} exported successfully as {format}.").format(
                             book_id=book_id, format=fmt

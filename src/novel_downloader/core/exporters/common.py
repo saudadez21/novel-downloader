@@ -13,8 +13,10 @@ from typing import Any, Literal
 
 from novel_downloader.core.exporters.base import BaseExporter
 from novel_downloader.models import (
+    BookConfig,
     BookInfoDict,
     ChapterDict,
+    ChapterInfoDict,
     VolumeInfoDict,
 )
 from novel_downloader.utils.constants import (
@@ -50,7 +52,7 @@ class CommonExporter(BaseExporter):
         re.IGNORECASE,
     )
 
-    def export_as_txt(self, book_id: str) -> Path | None:
+    def export_as_txt(self, book: BookConfig) -> Path | None:
         """
         Export a novel as a single text file by merging all chapter data.
 
@@ -63,15 +65,24 @@ class CommonExporter(BaseExporter):
           3. Build a header with book metadata.
           4. Concatenate header and all chapter contents.
           5. Save the resulting .txt file to the output directory
-
-        :param book_id: The book identifier (used to locate raw data)
         """
-        book_id = self._normalize_book_id(book_id)
+        book_id = self._normalize_book_id(book["book_id"])
+        start_id = book.get("start_id")
+        end_id = book.get("end_id")
+        ignore_set = set(book.get("ignore_ids", []))
+
         self._init_chapter_storages(book_id)
 
         # --- Load book_info.json ---
         book_info = self._load_book_info(book_id)
         if not book_info:
+            return None
+
+        # --- Filter volumes & chapters ---
+        orig_vols = book_info.get("volumes", [])
+        vols = self._filter_volumes(orig_vols, start_id, end_id, ignore_set)
+        if not vols:
+            self.logger.info("Nothing to do after filtering: %s", book_id)
             return None
 
         # --- Prepare header (book metadata) ---
@@ -82,7 +93,7 @@ class CommonExporter(BaseExporter):
         # --- Build body by volumes & chapters ---
         parts: list[str] = [header_txt]
 
-        for v_idx, volume in enumerate(book_info.get("volumes", []), start=1):
+        for v_idx, volume in enumerate(vols, start=1):
             vol_title = volume.get("volume_name") or f"卷 {v_idx}"
             parts.append(self._build_txt_volume_heading(vol_title, volume))
 
@@ -129,23 +140,15 @@ class CommonExporter(BaseExporter):
             return None
         return result
 
-    def export_as_epub(self, book_id: str) -> Path | None:
-        """
-        Persist the assembled book as EPUB (.epub) file.
-
-        :param book_id: The book identifier.
-        """
-        book_id = self._normalize_book_id(book_id)
-        self._init_chapter_storages(book_id)
-
+    def export_as_epub(self, book: BookConfig) -> Path | None:
         mode = self._split_mode
         if mode == "book":
-            return self._export_epub_by_book(book_id)
+            return self._export_epub_by_book(book)
         if mode == "volume":
-            return self._export_epub_by_volume(book_id)
+            return self._export_epub_by_volume(book)
         raise ValueError(f"Unsupported split_mode: {mode!r}")
 
-    def _export_epub_by_volume(self, book_id: str) -> Path | None:
+    def _export_epub_by_volume(self, book: BookConfig) -> Path | None:
         """
         Export each volume of a novel as a separate EPUB file.
 
@@ -157,12 +160,24 @@ class CommonExporter(BaseExporter):
           c. Initialize an EPUB builder for the volume, including cover and intro.
           d. For each chapter: clean title & content, inline remote images.
           e. Finalize and write the volume EPUB.
-
-        :param book_id: Identifier of the novel (used as subdirectory name).
         """
+        book_id = self._normalize_book_id(book["book_id"])
+        start_id = book.get("start_id")
+        end_id = book.get("end_id")
+        ignore_set = set(book.get("ignore_ids", []))
+
+        self._init_chapter_storages(book_id)
+
         # --- Load book_info.json ---
         book_info = self._load_book_info(book_id)
         if not book_info:
+            return None
+
+        # --- Filter volumes & chapters ---
+        orig_vols = book_info.get("volumes", [])
+        vols = self._filter_volumes(orig_vols, start_id, end_id, ignore_set)
+        if not vols:
+            self.logger.info("Nothing to do after filtering: %s", book_id)
             return None
 
         # --- Prepare path ---
@@ -189,7 +204,7 @@ class CommonExporter(BaseExporter):
         main_css = StyleSheet(id="main_style", content=css_text, filename="main.css")
 
         # --- Compile columes ---
-        for v_idx, vol in enumerate(book_info.get("volumes", []), start=1):
+        for v_idx, vol in enumerate(vols, start=1):
             vol_title = vol.get("volume_name") or f"卷 {v_idx}"
 
             vol_cover_url = vol.get("volume_cover") or ""
@@ -201,7 +216,7 @@ class CommonExporter(BaseExporter):
                 )
             vol_cover = vol_cover or cover_path
 
-            book = EpubBuilder(
+            epub = EpubBuilder(
                 title=f"{name} - {vol_title}",
                 author=author,
                 description=vol.get("volume_intro") or book_summary,
@@ -211,7 +226,7 @@ class CommonExporter(BaseExporter):
                 word_count=vol.get("word_count", ""),
                 uid=f"{self._site}_{book_id}_v{v_idx}",
             )
-            book.add_stylesheet(main_css)
+            epub.add_stylesheet(main_css)
 
             # Collect chapter ids then batch fetch
             cids = [
@@ -239,7 +254,7 @@ class CommonExporter(BaseExporter):
                 content = self._cleaner.clean_content(ch.get("content", ""))
 
                 content = (
-                    self._inline_remote_images(book, content, img_dir)
+                    self._inline_remote_images(epub, content, img_dir)
                     if self._include_picture
                     else self._remove_all_images(content)
                 )
@@ -249,7 +264,7 @@ class CommonExporter(BaseExporter):
                     paragraphs=content,
                     extras=ch.get("extra", {}),
                 )
-                book.add_chapter(
+                epub.add_chapter(
                     Chapter(
                         id=f"c_{cid}",
                         filename=f"c{cid}.xhtml",
@@ -263,7 +278,7 @@ class CommonExporter(BaseExporter):
             out_path = self._output_dir / sanitize_filename(out_name)
 
             try:
-                book.export(out_path)
+                epub.export(out_path)
                 self.logger.info("Exported EPUB: %s", out_path)
             except Exception as e:
                 self.logger.error(
@@ -272,7 +287,7 @@ class CommonExporter(BaseExporter):
 
         return None
 
-    def _export_epub_by_book(self, book_id: str) -> Path | None:
+    def _export_epub_by_book(self, book: BookConfig) -> Path | None:
         """
         Export a single novel (identified by `book_id`) to an EPUB file.
 
@@ -285,9 +300,23 @@ class CommonExporter(BaseExporter):
 
         :param book_id: Identifier of the novel (used as subdirectory name).
         """
+        book_id = self._normalize_book_id(book["book_id"])
+        start_id = book.get("start_id")
+        end_id = book.get("end_id")
+        ignore_set = set(book.get("ignore_ids", []))
+
+        self._init_chapter_storages(book_id)
+
         # --- Load book_info.json ---
         book_info = self._load_book_info(book_id)
         if not book_info:
+            return None
+
+        # --- Filter volumes & chapters ---
+        orig_vols = book_info.get("volumes", [])
+        vols = self._filter_volumes(orig_vols, start_id, end_id, ignore_set)
+        if not vols:
+            self.logger.info("Nothing to do after filtering: %s", book_id)
             return None
 
         # --- Prepare path ---
@@ -310,7 +339,7 @@ class CommonExporter(BaseExporter):
             )
 
         # --- Initialize EPUB ---
-        book = EpubBuilder(
+        epub = EpubBuilder(
             title=name,
             author=author,
             description=book_info.get("summary", ""),
@@ -322,10 +351,10 @@ class CommonExporter(BaseExporter):
         )
         css_text = CSS_MAIN_PATH.read_text(encoding="utf-8")
         main_css = StyleSheet(id="main_style", content=css_text, filename="main.css")
-        book.add_stylesheet(main_css)
+        epub.add_stylesheet(main_css)
 
         # --- Compile columes ---
-        for v_idx, vol in enumerate(book_info.get("volumes", []), start=1):
+        for v_idx, vol in enumerate(vols, start=1):
             vol_title = vol.get("volume_name") or f"卷 {v_idx}"
 
             vol_cover_url = vol.get("volume_cover") or ""
@@ -348,7 +377,7 @@ class CommonExporter(BaseExporter):
                 c["chapterId"] for c in vol.get("chapters", []) if c.get("chapterId")
             ]
             if not cids:
-                book.add_volume(curr_vol)
+                epub.add_volume(curr_vol)
                 continue
             chap_map = self._get_chapters(book_id, cids)
 
@@ -370,7 +399,7 @@ class CommonExporter(BaseExporter):
                 content = self._cleaner.clean_content(ch.get("content", ""))
 
                 content = (
-                    self._inline_remote_images(book, content, img_dir)
+                    self._inline_remote_images(epub, content, img_dir)
                     if self._include_picture
                     else self._remove_all_images(content)
                 )
@@ -391,14 +420,14 @@ class CommonExporter(BaseExporter):
                     )
                 )
 
-            book.add_volume(curr_vol)
+            epub.add_volume(curr_vol)
 
         # --- Finalize EPUB ---
         out_name = self.get_filename(title=name, author=author, ext="epub")
         out_path = self._output_dir / sanitize_filename(out_name)
 
         try:
-            book.export(out_path)
+            epub.export(out_path)
             self.logger.info("Exported EPUB: %s", out_path)
         except Exception as e:
             self.logger.error(
@@ -456,6 +485,67 @@ class CommonExporter(BaseExporter):
             on_exist=on_exist,
             default_suffix=DEFAULT_IMAGE_SUFFIX,
         )
+
+    @staticmethod
+    def _filter_volumes(
+        vols: list[VolumeInfoDict],
+        start_id: str | None,
+        end_id: str | None,
+        ignore: set[str],
+    ) -> list[VolumeInfoDict]:
+        """
+        Rebuild volumes to include only chapters within
+        the [start_id, end_id] range (inclusive),
+        while excluding any chapter IDs in `ignore`.
+
+        :param vols: List of volume dicts.
+        :param start_id: Range start chapter ID (inclusive) or None to start.
+        :param end_id: Range end chapter ID (inclusive) or None to go till the end.
+        :param ignore: Set of chapter IDs to exclude (regardless of range).
+        :return: New list of volumes with chapters filtered accordingly.
+        """
+        if start_id is None and end_id is None and not ignore:
+            return vols
+
+        started = start_id is None
+        finished = False
+        result: list[VolumeInfoDict] = []
+
+        for vol in vols:
+            if finished:
+                break
+
+            kept: list[ChapterInfoDict] = []
+
+            for ch in vol.get("chapters", []):
+                cid = ch.get("chapterId")
+                if not cid:
+                    continue
+
+                # wait until hit the start_id
+                if not started:
+                    if cid == start_id:
+                        started = True
+                    else:
+                        continue
+
+                if cid not in ignore:
+                    kept.append(ch)
+
+                # check for end_id after keeping
+                if end_id is not None and cid == end_id:
+                    finished = True
+                    break
+
+            if kept:
+                result.append(
+                    {
+                        **vol,
+                        "chapters": kept,
+                    }
+                )
+
+        return result
 
     def _build_txt_header(self, book_info: BookInfoDict, name: str, author: str) -> str:
         """
