@@ -14,7 +14,7 @@ novel-cli config init
 
 # 如果想强制覆盖
 novel-cli config init --force
-````
+```
 
 ### 2. 编辑生成的 `settings.toml`
 

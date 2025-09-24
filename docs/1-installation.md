@@ -34,6 +34,10 @@ pip install novel-downloader
 git clone https://github.com/saudadez21/novel-downloader.git
 cd novel-downloader
 
+# (可选) 编译多语言支持
+pip install babel
+pybabel compile -d src/novel_downloader/locales
+
 # 安装为库并生成 CLI
 pip install .
 ```
