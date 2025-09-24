@@ -8,64 +8,11 @@ novel_downloader.web.pages.download
 from nicegui import ui
 
 from novel_downloader.utils.book_url_resolver import resolve_book_url
+from novel_downloader.utils.constants import DOWNLOAD_SUPPORT_SITES
 from novel_downloader.utils.i18n import t
 from novel_downloader.web.components import navbar
 from novel_downloader.web.services import manager, setup_dialog
 
-_SUPPORT_SITES = {
-    "aaatxt": "3A电子书 (aaatxt)",
-    "b520": "笔趣阁 (b520)",
-    "biquge5": "笔趣阁 (biquge5)",
-    "biquguo": "笔趣阁小说网 (biquguo)",
-    "biquyuedu": "精彩小说 (biquyuedu)",
-    "blqudu": "笔趣读 (blqudu)",
-    "bxwx9": "笔下文学网 (bxwx9)",
-    "ciluke": "思路客 (ciluke)",
-    "dxmwx": "大熊猫文学网 (dxmwx)",
-    "esjzone": "ESJ Zone (esjzone)",
-    "fsshu": "笔趣阁 (fsshu)",
-    "guidaye": "名著阅读 (guidaye)",
-    "hetushu": "和图书 (hetushu)",
-    "i25zw": "25中文网 (i25zw)",
-    "ixdzs8": "爱下电子书 (ixdzs8)",
-    "jpxs123": "精品小说网 (jpxs123)",
-    "ktshu": "八一中文网 (ktshu)",
-    "kunnu": "鲲弩小说 (kunnu)",
-    "laoyaoxs": "老幺小说网 (laoyaoxs)",
-    "lewenn": "乐文小说网 (lewenn)",
-    "linovelib": "哔哩轻小说 (linovelib)",
-    "lnovel": "轻小说百科 (lnovel)",
-    "mangg_com": "追书网.com (mangg_com)",
-    "mangg_net": "追书网.net (mangg_net)",
-    "n8novel": "无限轻小说 (n8novel)",
-    # "n8tsw": "笔趣阁 (n8tsw)",
-    "n23ddw": "顶点小说网 (n23ddw)",
-    "n23qb": "铅笔小说 (n23qb)",
-    "n37yq": "三七轻小说 (n37yq)",
-    "n37yue": "37阅读网 (n37yue)",
-    "n71ge": "新吾爱文学 (n71ge)",
-    "piaotia": "飘天文学网 (piaotia)",
-    "qbtr": "全本同人小说 (qbtr)",
-    "qidian": "起点中文网 (qidian)",
-    "qqbook": "QQ阅读 (qqbook)",
-    "quanben5": "全本小说网 (quanben5)",
-    "sfacg": "SF轻小说 (sfacg)",
-    "shencou": "神凑轻小说 (shencou)",
-    "shu111": "书林文学 (shu111)",
-    "shuhaige": "书海阁小说网 (shuhaige)",
-    "tongrenquan": "同人圈 (tongrenquan)",
-    "trxs": "同人小说网 (trxs)",
-    "ttkan": "天天看小说 (ttkan)",
-    "wanbengo": "完本神站 (wanbengo)",
-    # "xiaoshuoge": "小说屋 (xiaoshuoge)",
-    "xiguashuwu": "西瓜书屋 (xiguashuwu)",
-    # "xs63b": "小说路上 (xs63b)",
-    "xshbook": "小说虎 (xshbook)",
-    "yamibo": "百合会 (yamibo)",
-    "yibige": "一笔阁 (yibige)",
-    "yodu": "有度中文网 (yodu)",
-    "zhenhunxiaoshuo": "镇魂小说网 (zhenhunxiaoshuo)",
-}
 _DEFAULT_SITE = "qidian"
 
 
@@ -119,7 +66,7 @@ def page_download() -> None:
             with ui.row().classes("items-start gap-2 w-full"):
                 site = (
                     ui.select(
-                        _SUPPORT_SITES,
+                        DOWNLOAD_SUPPORT_SITES,
                         value=_DEFAULT_SITE,
                         label=t("Site"),
                         with_input=True,
@@ -187,7 +134,7 @@ def page_download() -> None:
                 return
             site_key, bid = await _resolve(raw)
             if site_key and bid:
-                site_display = _SUPPORT_SITES.get(site_key, site_key)
+                site_display = DOWNLOAD_SUPPORT_SITES.get(site_key, site_key)
                 site_badge.text = t("Site: {site}").format(site=site_display)
                 id_badge.text = t("Book ID: {bid}").format(bid=bid)
                 preview_row.visible = True
@@ -212,7 +159,7 @@ def page_download() -> None:
                     type="warning",
                 )
                 return
-            site_display = _SUPPORT_SITES.get(site_key, site_key)
+            site_display = DOWNLOAD_SUPPORT_SITES.get(site_key, site_key)
             title = f"{site_display} (id = {bid})"
             ui.notify(t("Task added: {title}").format(title=title))
             await manager.add_task(title=title, site=site_key, book_id=bid)
@@ -223,7 +170,7 @@ def page_download() -> None:
                 ui.notify(t("Please enter a Book ID"), type="warning")
                 return
             site_key = str(site.value)
-            site_display = _SUPPORT_SITES.get(site_key, site_key)
+            site_display = DOWNLOAD_SUPPORT_SITES.get(site_key, site_key)
             title = f"{site_display} (id = {bid})"
             ui.notify(t("Task added: {title}").format(title=title))
             await manager.add_task(title=title, site=site_key, book_id=bid)

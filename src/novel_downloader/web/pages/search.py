@@ -19,48 +19,10 @@ from nicegui.events import KeyEventArguments, ValueChangeEventArguments
 
 from novel_downloader.core.searchers import search_stream
 from novel_downloader.models import SearchResult
+from novel_downloader.utils.constants import SEARCH_SUPPORT_SITES
 from novel_downloader.utils.i18n import t
 from novel_downloader.web.components import navbar
 from novel_downloader.web.services import manager, setup_dialog
-
-_SUPPORT_SITES = {
-    "aaatxt": "3A电子书",
-    "b520": "笔趣阁",
-    "biquge5": "笔趣阁",
-    "biquguo": "笔趣阁小说网",
-    "bxwx9": "笔下文学网",
-    "ciluke": "思路客",
-    "dxmwx": "大熊猫文学网",
-    "esjzone": "ESJ Zone",
-    "fsshu": "笔趣阁",
-    "hetushu": "和图书",
-    "i25zw": "25中文网",
-    "ixdzs8": "爱下电子书",
-    "jpxs123": "精品小说网",
-    "ktshu": "八一中文网",
-    "laoyaoxs": "老幺小说网",
-    "mangg_net": "追书网.net",
-    "n8novel": "无限轻小说",
-    "n23ddw": "顶点小说网",
-    "n23qb": "铅笔小说",
-    "n37yq": "三七轻小说",
-    "n37yue": "37阅读网",
-    "n71ge": "新吾爱文学",
-    "piaotia": "飘天文学网",
-    "qbtr": "全本同人小说",
-    "qidian": "起点中文网",
-    "quanben5": "全本小说网",
-    "shuhaige": "书海阁小说网",
-    "tongrenquan": "同人圈",
-    "trxs": "同人小说网",
-    "ttkan": "天天看小说",
-    "wanbengo": "完本神站",
-    # "xiaoshuoge": "小说屋",
-    "xiguashuwu": "西瓜书屋",
-    # "xs63b": "小说路上",
-    "xshbook": "小说虎",
-    "yodu": "有度中文网",
-}
 
 _DEFAULT_TIMEOUT = 10.0
 _DEFAULT_SITE_LIMIT = 30
@@ -138,7 +100,7 @@ def _render_placeholder_cover() -> None:
 
 
 def _site_label(site_key: str) -> str:
-    return _SUPPORT_SITES.get(site_key, site_key)
+    return SEARCH_SUPPORT_SITES.get(site_key, site_key)
 
 
 def _norm_text(v: Any) -> str:
@@ -258,7 +220,7 @@ def _build_settings_dropdown(
                 ui.column().classes("gap-1"),
             ):
                 selected = set(state.get("sites") or [])
-                for key, label in _SUPPORT_SITES.items():
+                for key, label in SEARCH_SUPPORT_SITES.items():
                     site_cbs[key] = ui.checkbox(label, value=(key in selected))
 
             ui.separator()

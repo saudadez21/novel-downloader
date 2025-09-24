@@ -12,6 +12,7 @@ from pathlib import Path
 from novel_downloader.cli import ui
 from novel_downloader.config import ConfigAdapter, copy_default_config, load_config
 from novel_downloader.models import BookConfig, SearchResult
+from novel_downloader.utils.constants import SEARCH_SUPPORT_SITES
 from novel_downloader.utils.i18n import t
 
 from .base import Command
@@ -166,7 +167,7 @@ class SearchCmd(Command):
                 r["author"],
                 r["latest_chapter"],
                 r["update_date"],
-                r["site"],
+                SEARCH_SUPPORT_SITES.get(r["site"], r["site"]),
                 r["book_id"],
             ]
             for i, r in enumerate(results, 1)
