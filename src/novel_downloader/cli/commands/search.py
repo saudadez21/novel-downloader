@@ -157,7 +157,7 @@ class SearchCmd(Command):
             t("Author"),
             t("Latest"),
             t("Updated"),
-            t("Site"),
+            t("Site Name"),
             t("Book ID"),
         ]
         all_rows = [
@@ -196,7 +196,7 @@ class SearchCmd(Command):
 
             choice = ui.prompt_choice(
                 t(
-                    "Enter a number to select, 'n' for next, 'p' for previous (press Enter to cancel)"  # noqa: E501
+                    "Enter a number, 'n' for next, 'p' for previous (press Enter to cancel)"  # noqa: E501
                 ),
                 numeric_choices + nav_choices,
             )
