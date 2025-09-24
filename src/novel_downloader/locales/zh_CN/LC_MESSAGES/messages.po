@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: novel-downloader 2.2.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-23 17:30-0400\n"
+"POT-Creation-Date: 2025-09-24 06:57-0400\n"
 "PO-Revision-Date: 2025-09-22 22:43-0400\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -164,10 +164,12 @@ msgid "Path to the configuration file"
 msgstr "配置文件路径"
 
 #: src\novel_downloader\cli\commands\download.py:38
+#: src\novel_downloader\cli\commands\export.py:47
 msgid "Start chapter ID (applies only to the first book)"
 msgstr "起始章节 ID（仅对第一本书生效）"
 
 #: src\novel_downloader\cli\commands\download.py:43
+#: src\novel_downloader\cli\commands\export.py:52
 msgid "End chapter ID (applies only to the first book)"
 msgstr "结束章节 ID（仅对第一本书生效）"
 
@@ -195,35 +197,54 @@ msgid "Resolved URL to site '{site}' with book ID '{book_id}'."
 msgstr "已解析 URL：站点 '{site}'，书籍 ID '{book_id}'"
 
 #: src\novel_downloader\cli\commands\download.py:94
-#: src\novel_downloader\cli\commands\export.py:53
+#: src\novel_downloader\cli\commands\export.py:63
 #, python-brace-format
 msgid "Using site: {site}"
 msgstr "使用站点：{site}"
 
-#: src\novel_downloader\cli\commands\download.py:102
-#: src\novel_downloader\cli\commands\export.py:61
-#: src\novel_downloader\cli\commands\search.py:82
+#: src\novel_downloader\cli\commands\download.py:101
+#: src\novel_downloader\cli\commands\export.py:70
+#: src\novel_downloader\cli\commands\search.py:81
 #, python-brace-format
-msgid "No config found; created at {path}."
-msgstr "未找到配置；已在 {path} 创建新配置"
+msgid "No config found at {path}."
+msgstr "在 {path} 未找到配置文件。"
+
+#: src\novel_downloader\cli\commands\download.py:104
+#: src\novel_downloader\cli\commands\export.py:73
+#: src\novel_downloader\cli\commands\search.py:84
+msgid "Would you like to create a default config?"
+msgstr "是否要创建一个默认配置文件？"
 
 #: src\novel_downloader\cli\commands\download.py:108
-#: src\novel_downloader\cli\commands\export.py:67
+#: src\novel_downloader\cli\commands\export.py:77
 #: src\novel_downloader\cli\commands\search.py:88
+#, python-brace-format
+msgid "Created default config at {path}."
+msgstr "已在 {path} 创建默认配置文件。"
+
+#: src\novel_downloader\cli\commands\download.py:113
+#: src\novel_downloader\cli\commands\export.py:82
+#: src\novel_downloader\cli\commands\search.py:93
+msgid "Cannot continue without a config file."
+msgstr "没有配置文件，无法继续执行。"
+
+#: src\novel_downloader\cli\commands\download.py:116
+#: src\novel_downloader\cli\commands\export.py:85
+#: src\novel_downloader\cli\commands\search.py:96
 #, python-brace-format
 msgid "Failed to load configuration: {err}"
 msgstr "加载配置失败：{err}"
 
-#: src\novel_downloader\cli\commands\download.py:117
+#: src\novel_downloader\cli\commands\download.py:125
 #, python-brace-format
 msgid "Failed to read book IDs from configuration: {err}"
 msgstr "从配置读取书籍 ID 失败：{err}"
 
-#: src\novel_downloader\cli\commands\download.py:124
+#: src\novel_downloader\cli\commands\download.py:132
 msgid "No book IDs provided. Exiting."
 msgstr "未提供书籍 ID，已退出"
 
-#: src\novel_downloader\cli\commands\download.py:152
+#: src\novel_downloader\cli\commands\download.py:160
 msgid "Export skipped (--no-export)"
 msgstr "已跳过导出 (--no-export)"
 
@@ -268,56 +289,56 @@ msgstr "每个站点的最大结果数（默认：10）"
 msgid "Request timeout in seconds (default: 5.0)"
 msgstr "请求超时时间（秒，默认：5.0）"
 
-#: src\novel_downloader\cli\commands\search.py:92
+#: src\novel_downloader\cli\commands\search.py:100
 #, python-brace-format
 msgid "Searching for '{keyword}'..."
 msgstr "正在搜索 '{keyword}'..."
 
-#: src\novel_downloader\cli\commands\search.py:138
+#: src\novel_downloader\cli\commands\search.py:146
 msgid "No results found."
 msgstr "未找到结果"
 
-#: src\novel_downloader\cli\commands\search.py:146
+#: src\novel_downloader\cli\commands\search.py:154
 msgid "#"
 msgstr "序号"
 
-#: src\novel_downloader\cli\commands\search.py:147
+#: src\novel_downloader\cli\commands\search.py:155
 #: src\novel_downloader\web\pages\search.py:339
 msgid "Title"
 msgstr "书名"
 
-#: src\novel_downloader\cli\commands\search.py:148
+#: src\novel_downloader\cli\commands\search.py:156
 #: src\novel_downloader\web\pages\search.py:340
 msgid "Author"
 msgstr "作者"
 
-#: src\novel_downloader\cli\commands\search.py:149
+#: src\novel_downloader\cli\commands\search.py:157
 msgid "Latest"
 msgstr "最新章节"
 
-#: src\novel_downloader\cli\commands\search.py:150
+#: src\novel_downloader\cli\commands\search.py:158
 msgid "Updated"
 msgstr "更新时间"
 
-#: src\novel_downloader\cli\commands\search.py:151
+#: src\novel_downloader\cli\commands\search.py:159
 #: src\novel_downloader\web\pages\download.py:124
 #: src\novel_downloader\web\pages\progress.py:120
 #: src\novel_downloader\web\pages\search.py:338
 msgid "Site"
 msgstr "站点"
 
-#: src\novel_downloader\cli\commands\search.py:152
+#: src\novel_downloader\cli\commands\search.py:160
 #: src\novel_downloader\web\pages\download.py:131
 #: src\novel_downloader\web\pages\progress.py:121
 msgid "Book ID"
 msgstr "书籍 ID"
 
-#: src\novel_downloader\cli\commands\search.py:174
+#: src\novel_downloader\cli\commands\search.py:182
 #, python-brace-format
 msgid "Search Results · Page {page}/{total_pages}"
 msgstr "搜索结果 · 第 {page}/{total_pages} 页"
 
-#: src\novel_downloader\cli\commands\search.py:190
+#: src\novel_downloader\cli\commands\search.py:198
 msgid ""
 "Enter a number to select, 'n' for next, 'p' for previous (press Enter to "
 "cancel)"

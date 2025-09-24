@@ -77,12 +77,20 @@ class SearchCmd(Command):
         except FileNotFoundError:
             if config_path is None:
                 config_path = Path("settings.toml")
-            copy_default_config(config_path)
             ui.warn(
-                t("No config found; created at {path}.").format(
-                    path=str(config_path.resolve())
-                )
+                t("No config found at {path}.").format(path=str(config_path.resolve()))
             )
+            if ui.confirm(
+                t("Would you like to create a default config?"), default=True
+            ):
+                copy_default_config(config_path)
+                ui.success(
+                    t("Created default config at {path}.").format(
+                        path=str(config_path.resolve())
+                    )
+                )
+            else:
+                ui.error(t("Cannot continue without a config file."))
             return
         except ValueError as e:
             ui.error(t("Failed to load configuration: {err}").format(err=str(e)))
