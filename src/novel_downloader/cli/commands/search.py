@@ -63,7 +63,6 @@ class SearchCmd(Command):
         import asyncio
 
         from novel_downloader.cli.services.download import download_books
-        from novel_downloader.cli.services.export import export_books
         from novel_downloader.core.searchers import search
 
         sites: Sequence[str] | None = args.site or None
@@ -117,7 +116,7 @@ class SearchCmd(Command):
             log_level = adapter.get_log_level()
             ui.setup_logging(console_level=log_level)
 
-            await download_books(
+            success = await download_books(
                 chosen["site"],
                 books,
                 adapter.get_downloader_config(),
@@ -125,8 +124,12 @@ class SearchCmd(Command):
                 adapter.get_parser_config(),
                 adapter.get_login_config(),
             )
+            if not success:
+                return
 
             # export
+            from novel_downloader.cli.services.export import export_books
+
             export_books(
                 site=chosen["site"],
                 books=books,

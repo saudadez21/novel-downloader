@@ -140,7 +140,7 @@ class DownloadCmd(Command):
 
         from novel_downloader.cli.services.download import download_books
 
-        asyncio.run(
+        success = asyncio.run(
             download_books(
                 site,
                 books,
@@ -150,6 +150,8 @@ class DownloadCmd(Command):
                 adapter.get_login_config(),
             )
         )
+        if not success:
+            return
 
         # export
         if not args.no_export:

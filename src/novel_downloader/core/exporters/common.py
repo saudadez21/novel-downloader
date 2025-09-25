@@ -71,7 +71,8 @@ class CommonExporter(BaseExporter):
         end_id = book.get("end_id")
         ignore_set = set(book.get("ignore_ids", []))
 
-        self._init_chapter_storages(book_id)
+        if not self._init_chapter_storages(book_id):
+            return None
 
         # --- Load book_info.json ---
         book_info = self._load_book_info(book_id)
@@ -166,7 +167,8 @@ class CommonExporter(BaseExporter):
         end_id = book.get("end_id")
         ignore_set = set(book.get("ignore_ids", []))
 
-        self._init_chapter_storages(book_id)
+        if not self._init_chapter_storages(book_id):
+            return None
 
         # --- Load book_info.json ---
         book_info = self._load_book_info(book_id)
@@ -305,7 +307,8 @@ class CommonExporter(BaseExporter):
         end_id = book.get("end_id")
         ignore_set = set(book.get("ignore_ids", []))
 
-        self._init_chapter_storages(book_id)
+        if not self._init_chapter_storages(book_id):
+            return None
 
         # --- Load book_info.json ---
         book_info = self._load_book_info(book_id)

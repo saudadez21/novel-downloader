@@ -25,8 +25,8 @@ async def download_book(
     fetcher_cfg: FetcherConfig,
     parser_cfg: ParserConfig,
     login_config: dict[str, str] | None = None,
-) -> None:
-    await download_books(
+) -> bool:
+    return await download_books(
         site,
         [book],
         downloader_cfg,
@@ -43,14 +43,14 @@ async def download_books(
     fetcher_cfg: FetcherConfig,
     parser_cfg: ParserConfig,
     login_config: dict[str, str] | None = None,
-) -> None:
+) -> bool:
     parser = get_parser(site, parser_cfg)
 
     async with get_fetcher(site, fetcher_cfg) as fetcher:
         if downloader_cfg.login_required and (
             not await ensure_login(fetcher, login_config)
         ):
-            return
+            return False
 
         downloader = get_downloader(
             fetcher=fetcher,
@@ -76,3 +76,4 @@ async def download_books(
 
         if downloader_cfg.login_required and fetcher.is_logged_in:
             await fetcher.save_state()
+    return True
