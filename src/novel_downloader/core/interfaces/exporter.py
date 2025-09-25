@@ -10,47 +10,49 @@ import types
 from pathlib import Path
 from typing import Protocol, Self, runtime_checkable
 
+from novel_downloader.models import BookConfig
+
 
 @runtime_checkable
 class ExporterProtocol(Protocol):
-    def export(self, book_id: str) -> dict[str, Path]:
+    def export(self, book: BookConfig) -> dict[str, Path]:
         """
         Export the book in the formats specified in config.
         If a method is not implemented or fails, log the error and continue.
 
-        :param book_id: The book identifier (used for filename, lookup, etc.)
+        :param book: BookConfig with at least 'book_id'.
         """
         ...
 
-    def export_as_txt(self, book_id: str) -> Path | None:
+    def export_as_txt(self, book: BookConfig) -> Path | None:
         """
         Persist the assembled book as a .txt file.
 
-        :param book_id: The book identifier (used for filename or lookup).
+        :param book: BookConfig with at least 'book_id'.
         """
         ...
 
-    def export_as_epub(self, book_id: str) -> Path | None:
+    def export_as_epub(self, book: BookConfig) -> Path | None:
         """
         Optional: Persist the assembled book as an .epub file.
 
-        :param book_id: The book identifier.
+        :param book: BookConfig with at least 'book_id'.
         """
         ...
 
-    def export_as_md(self, book_id: str) -> Path | None:
+    def export_as_md(self, book: BookConfig) -> Path | None:
         """
         Optional: Persist the assembled book as a Markdown (.md) file.
 
-        :param book_id: The book identifier.
+        :param book: BookConfig with at least 'book_id'.
         """
         ...
 
-    def export_as_pdf(self, book_id: str) -> Path | None:
+    def export_as_pdf(self, book: BookConfig) -> Path | None:
         """
         Optional: Persist the assembled book as a PDF file.
 
-        :param book_id: The book identifier.
+        :param book: BookConfig with at least 'book_id'.
         """
         ...
 

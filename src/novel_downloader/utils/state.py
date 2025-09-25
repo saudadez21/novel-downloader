@@ -24,6 +24,23 @@ class StateManager:
         self._path = path
         self._data = self._load()
 
+    def get_language(self) -> str:
+        """
+        Load the user's language preference.
+
+        :return: Language code string
+        """
+        return self._data.get("lang") or self._get_system_locale() or "zh_CN"
+
+    def set_language(self, lang: str) -> None:
+        """
+        Save the user's language preference.
+
+        :param lang: Language code
+        """
+        self._data["lang"] = lang
+        self._save()
+
     def _load(self) -> dict[str, Any]:
         """
         Load the configuration file into a Python dictionary.
@@ -48,23 +65,12 @@ class StateManager:
         content = json.dumps(self._data, ensure_ascii=False, indent=2)
         self._path.write_text(content, encoding="utf-8")
 
-    def get_language(self) -> str:
-        """
-        Load the user's language preference, defaulting to 'zh'.
+    @staticmethod
+    def _get_system_locale() -> str | None:
+        import locale
 
-        :return: Language code string
-        """
-        lang = self._data.get("general", {}).get("lang", "zh")
-        return str(lang)
-
-    def set_language(self, lang: str) -> None:
-        """
-        Save the user's language preference.
-
-        :param lang: Language code (e.g. 'zh', 'en')
-        """
-        self._data.setdefault("general", {})["lang"] = lang
-        self._save()
+        lang, _ = locale.getdefaultlocale()
+        return lang
 
 
 state_mgr = StateManager()

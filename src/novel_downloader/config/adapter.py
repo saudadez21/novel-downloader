@@ -186,13 +186,14 @@ class ConfigAdapter:
 
         result: list[BookConfig] = []
         for item in raw:
-            try:
-                if isinstance(item, (str | int)):
-                    result.append({"book_id": str(item)})
-                elif isinstance(item, dict):
-                    result.append(self._dict_to_book_cfg(item))
-            except ValueError:
-                continue
+            if isinstance(item, (str | int)):
+                result.append({"book_id": str(item)})
+            elif isinstance(item, dict):
+                result.append(self._dict_to_book_cfg(item))
+            else:
+                raise ValueError(
+                    f"Invalid book_id entry: expected str|int|dict, got {type(item).__name__}"  # noqa: E501
+                )
         return result
 
     def get_log_level(self) -> str:

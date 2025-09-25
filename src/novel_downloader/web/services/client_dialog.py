@@ -13,6 +13,7 @@ from typing import Any
 from nicegui import ui
 
 from novel_downloader.models import LoginField
+from novel_downloader.utils.i18n import t
 
 from .cred_broker import (
     claim_next_request,
@@ -32,7 +33,7 @@ def setup_dialog() -> None:
     curr_req_id: str | None = None
 
     with ui.dialog() as dialog, ui.card().classes("min-w-[360px]"):
-        title_label = ui.label("登录请求").classes("text-base font-medium")
+        title_label = ui.label(t("Login Request")).classes("text-base font-medium")
 
         # dynamic form container
         form_col = ui.column().classes("w-full gap-2 mt-2")
@@ -51,7 +52,7 @@ def setup_dialog() -> None:
                     with ui.column().classes("w-full gap-1"):
                         ui.label(f.label).classes("text-sm font-medium")
                         if getattr(f, "description", ""):
-                            ui.label(f.description).classes("text-xs text-grey-6")
+                            ui.label(t(f.description)).classes("text-xs text-grey-6")
 
                         initial = prefill.get(f.name, f.default or "")
 
@@ -59,10 +60,10 @@ def setup_dialog() -> None:
                         if f.type == "password":
                             w = (
                                 ui.input(
-                                    f.label,
+                                    t(f.label),
                                     password=True,
                                     value=initial,
-                                    placeholder=f.placeholder or "",
+                                    placeholder=t(f.placeholder) or "",
                                 )
                                 .props("dense")
                                 .classes("w-full")
@@ -72,9 +73,9 @@ def setup_dialog() -> None:
                             # cookie can be long
                             w = (
                                 ui.textarea(
-                                    f.label,
+                                    t(f.label),
                                     value=initial,
-                                    placeholder=f.placeholder or "",
+                                    placeholder=t(f.placeholder) or "",
                                 )
                                 .props("dense")
                                 .classes("w-full")
@@ -84,9 +85,9 @@ def setup_dialog() -> None:
                             # default: text
                             w = (
                                 ui.input(
-                                    f.label,
+                                    t(f.label),
                                     value=initial,
-                                    placeholder=f.placeholder or "",
+                                    placeholder=t(f.placeholder) or "",
                                 )
                                 .props("dense")
                                 .classes("w-full")
@@ -107,7 +108,7 @@ def setup_dialog() -> None:
                 asyncio.create_task(complete_request(curr_req_id, None))
             curr_req_id = None
             dialog.close()
-            ui.notify("已取消登录")
+            ui.notify(t("Login canceled"))
 
         def on_submit() -> None:
             nonlocal curr_req_id
@@ -121,11 +122,11 @@ def setup_dialog() -> None:
             asyncio.create_task(complete_request(curr_req_id, values))
             curr_req_id = None
             dialog.close()
-            ui.notify("提交成功")
+            ui.notify(t("Submitted successfully"))
 
         with ui.row().classes("justify-end w-full mt-2"):
-            ui.button("取消", on_click=on_cancel).props("flat color=grey-7")
-            ui.button("提交", on_click=on_submit)
+            ui.button(t("Cancel"), on_click=on_cancel).props("flat color=grey-7")
+            ui.button(t("Submit"), on_click=on_submit)
 
     dialog.props("persistent")
 

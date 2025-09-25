@@ -15,7 +15,12 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, ClassVar, Self, cast
 
-from novel_downloader.models import BookInfoDict, ChapterDict, ExporterConfig
+from novel_downloader.models import (
+    BookConfig,
+    BookInfoDict,
+    ChapterDict,
+    ExporterConfig,
+)
 from novel_downloader.utils.chapter_storage import ChapterStorage
 from novel_downloader.utils.text_utils import get_cleaner
 
@@ -73,11 +78,11 @@ class BaseExporter(abc.ABC):
 
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
-    def export(self, book_id: str) -> dict[str, Path]:
+    def export(self, book: BookConfig) -> dict[str, Path]:
         """
         Export the book in the formats specified in config.
 
-        :param book_id: The book identifier (used for filename, lookup, etc.)
+        :param book: BookConfig with at least 'book_id'.
         """
         results: dict[str, Path] = {}
 
@@ -93,10 +98,10 @@ class BaseExporter(abc.ABC):
                 try:
                     self.logger.info(
                         "Attempting to export book_id '%s' as %s...",
-                        book_id,
+                        book["book_id"],
                         fmt_key,
                     )
-                    path = export_method(book_id)
+                    path = export_method(book)
 
                     if isinstance(path, Path):
                         results[fmt_key] = path
@@ -113,39 +118,38 @@ class BaseExporter(abc.ABC):
 
         return results
 
-    def export_as_txt(self, book_id: str) -> Path | None:
+    def export_as_txt(self, book: BookConfig) -> Path | None:
         """
         Persist the assembled book as a .txt file.
 
-        This method must be implemented by all subclasses.
-
-        :param book_id: The book identifier (used for filename, lookup, etc.)
+        :param book: BookConfig with at least 'book_id'.
+        :raises NotImplementedError: If the method is not overridden.
         """
         raise NotImplementedError("TXT export not supported by this Exporter.")
 
-    def export_as_epub(self, book_id: str) -> Path | None:
+    def export_as_epub(self, book: BookConfig) -> Path | None:
         """
         Optional: Persist the assembled book as a EPUB (.epub) file.
 
-        :param book_id: The book identifier.
+        :param book: BookConfig with at least 'book_id'.
         :raises NotImplementedError: If the method is not overridden.
         """
         raise NotImplementedError("EPUB export not supported by this Exporter.")
 
-    def export_as_md(self, book_id: str) -> Path | None:
+    def export_as_md(self, book: BookConfig) -> Path | None:
         """
         Optional: Persist the assembled book as a Markdown file.
 
-        :param book_id: The book identifier.
+        :param book: BookConfig with at least 'book_id'.
         :raises NotImplementedError: If the method is not overridden.
         """
         raise NotImplementedError("Markdown export not supported by this Exporter.")
 
-    def export_as_pdf(self, book_id: str) -> Path | None:
+    def export_as_pdf(self, book: BookConfig) -> Path | None:
         """
         Optional: Persist the assembled book as a PDF file.
 
-        :param book_id: The book identifier.
+        :param book: BookConfig with at least 'book_id'.
         :raises NotImplementedError: If the method is not overridden.
         """
         raise NotImplementedError("PDF export not supported by this Exporter.")

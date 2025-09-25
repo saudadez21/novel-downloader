@@ -38,6 +38,18 @@ pip install -U "novel-downloader[font-recovery]"
 
 ## 快速开始
 
+### 0. 设置语言 (可选)
+
+支持多语言界面 (i18n), 可通过命令切换:
+
+```bash
+# 设置为中文
+novel-cli config set-lang zh_CN
+
+# 设置为英文
+novel-cli config set-lang en_US
+```
+
 ### 1. 初始化配置
 
 ```bash
@@ -88,6 +100,11 @@ cd novel-downloader
 pip install .
 # 或安装带可选功能:
 # pip install .[font-recovery]
+
+# 可选: 启用多语言支持
+# 安装 Babel 并编译翻译文件
+# pip install babel
+# pybabel compile -d src/novel_downloader/locales
 ```
 
 ---

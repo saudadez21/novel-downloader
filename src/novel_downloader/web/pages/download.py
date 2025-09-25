@@ -8,63 +8,11 @@ novel_downloader.web.pages.download
 from nicegui import ui
 
 from novel_downloader.utils.book_url_resolver import resolve_book_url
+from novel_downloader.utils.constants import DOWNLOAD_SUPPORT_SITES
+from novel_downloader.utils.i18n import t
 from novel_downloader.web.components import navbar
 from novel_downloader.web.services import manager, setup_dialog
 
-_SUPPORT_SITES = {
-    "aaatxt": "3A电子书 (aaatxt)",
-    "b520": "笔趣阁 (b520)",
-    "biquge5": "笔趣阁 (biquge5)",
-    "biquguo": "笔趣阁小说网 (biquguo)",
-    "biquyuedu": "精彩小说 (biquyuedu)",
-    "blqudu": "笔趣读 (blqudu)",
-    "bxwx9": "笔下文学网 (bxwx9)",
-    "ciluke": "思路客 (ciluke)",
-    "dxmwx": "大熊猫文学网 (dxmwx)",
-    "esjzone": "ESJ Zone (esjzone)",
-    "fsshu": "笔趣阁 (fsshu)",
-    "guidaye": "名著阅读 (guidaye)",
-    "hetushu": "和图书 (hetushu)",
-    "i25zw": "25中文网 (i25zw)",
-    "ixdzs8": "爱下电子书 (ixdzs8)",
-    "jpxs123": "精品小说网 (jpxs123)",
-    "ktshu": "八一中文网 (ktshu)",
-    "kunnu": "鲲弩小说 (kunnu)",
-    "laoyaoxs": "老幺小说网 (laoyaoxs)",
-    "lewenn": "乐文小说网 (lewenn)",
-    "linovelib": "哔哩轻小说 (linovelib)",
-    "lnovel": "轻小说百科 (lnovel)",
-    "mangg_com": "追书网.com (mangg_com)",
-    "mangg_net": "追书网.net (mangg_net)",
-    "n8novel": "无限轻小说 (n8novel)",
-    # "n8tsw": "笔趣阁 (n8tsw)",
-    "n23ddw": "顶点小说网 (n23ddw)",
-    "n23qb": "铅笔小说 (n23qb)",
-    "n37yq": "三七轻小说 (n37yq)",
-    "n37yue": "37阅读网 (n37yue)",
-    "n71ge": "新吾爱文学 (n71ge)",
-    "piaotia": "飘天文学网 (piaotia)",
-    "qbtr": "全本同人小说 (qbtr)",
-    "qidian": "起点中文网 (qidian)",
-    "qqbook": "QQ阅读 (qqbook)",
-    "quanben5": "全本小说网 (quanben5)",
-    "sfacg": "SF轻小说 (sfacg)",
-    "shencou": "神凑轻小说 (shencou)",
-    "shu111": "书林文学 (shu111)",
-    "shuhaige": "书海阁小说网 (shuhaige)",
-    "tongrenquan": "同人圈 (tongrenquan)",
-    "trxs": "同人小说网 (trxs)",
-    "ttkan": "天天看小说 (ttkan)",
-    "wanbengo": "完本神站 (wanbengo)",
-    # "xiaoshuoge": "小说屋 (xiaoshuoge)",
-    "xiguashuwu": "西瓜书屋 (xiguashuwu)",
-    # "xs63b": "小说路上 (xs63b)",
-    "xshbook": "小说虎 (xshbook)",
-    "yamibo": "百合会 (yamibo)",
-    "yibige": "一笔阁 (yibige)",
-    "yodu": "有度中文网 (yodu)",
-    "zhenhunxiaoshuo": "镇魂小说网 (zhenhunxiaoshuo)",
-}
 _DEFAULT_SITE = "qidian"
 
 
@@ -82,30 +30,34 @@ def page_download() -> None:
 
     with ui.column().classes("w-full max-w-screen-lg min-w-[320px] mx-auto gap-4"):
         with ui.row().classes("items-center justify-between w-full"):
-            ui.label("选择输入方式").classes("text-md")
+            ui.label(t("Select input method")).classes("text-md")
             # mode toggle on the right
-            mode = ui.toggle({"url": "通过 URL", "id": "站点 + ID"}, value="url").props(
-                "dense"
-            )
+            mode = ui.toggle(
+                {"url": t("Via URL"), "id": t("Site + ID")}, value="url"
+            ).props("dense")
 
         ui.separator()
 
         # --- URL mode controls ---
         with ui.column().classes("gap-2 w-full") as url_section:
             url_input = (
-                ui.input("小说 URL").props("outlined dense clearable").classes("w-full")
+                ui.input(t("Novel URL"))
+                .props("outlined dense clearable")
+                .classes("w-full")
             )
 
             preview_row = ui.row().classes("items-center gap-2 w-full")
             with preview_row:
-                _chip("解析结果")
+                _chip(t("Parsed result"))
                 site_badge = ui.label("").classes("text-xs text-grey-7")
                 id_badge = ui.label("").classes("text-xs text-grey-7")
             preview_row.visible = False
 
-            ui.label("粘贴完整的小说详情页链接，系统会自动解析站点和书籍ID").classes(
-                "text-xs text-grey-6"
-            )  # noqa: E501
+            ui.label(
+                t(
+                    "Paste the full novel detail page link, the system will automatically parse the site and book ID"  # noqa: E501
+                )
+            ).classes("text-xs text-grey-6")
 
         ui.separator()
 
@@ -114,25 +66,31 @@ def page_download() -> None:
             with ui.row().classes("items-start gap-2 w-full"):
                 site = (
                     ui.select(
-                        _SUPPORT_SITES,
+                        DOWNLOAD_SUPPORT_SITES,
                         value=_DEFAULT_SITE,
-                        label="站点",
+                        label=t("Site"),
                         with_input=True,
                     )
                     .props("outlined dense")
                     .classes("w-full md:w-[40%]")
                 )
                 book_id = (
-                    ui.input("书籍ID")
+                    ui.input(t("Book ID"))
                     .props("outlined dense clearable")
                     .classes("w-full md:w-[60%]")
                 )
-            ui.label("若已知站点与书籍ID，可在此直接输入").classes("text-xs text-grey-6")  # noqa: E501
+            ui.label(
+                t(
+                    "If you already know the site and book ID, you can enter them directly here"  # noqa: E501
+                )
+            ).classes("text-xs text-grey-6")
 
         # Shared actions
         with ui.row().classes("justify-end items-center gap-2 w-full q-mt-sm"):
-            clear_btn = ui.button("清空").props("outline")
-            add_btn = ui.button("添加到下载队列", color="primary").props("unelevated")
+            clear_btn = ui.button(t("Clear")).props("outline")
+            add_btn = ui.button(t("Add to download queue"), color="primary").props(
+                "unelevated"
+            )
 
         # ---------- logic ----------
 
@@ -176,39 +134,45 @@ def page_download() -> None:
                 return
             site_key, bid = await _resolve(raw)
             if site_key and bid:
-                site_display = _SUPPORT_SITES.get(site_key, site_key)
-                site_badge.text = f"站点: {site_display}"
-                id_badge.text = f"书籍ID: {bid}"
+                site_display = DOWNLOAD_SUPPORT_SITES.get(site_key, site_key)
+                site_badge.text = t("Site: {site}").format(site=site_display)
+                id_badge.text = t("Book ID: {bid}").format(bid=bid)
                 preview_row.visible = True
             else:
                 _reset_preview()
-                ui.notify("解析失败：该链接可能不受支持或格式不正确", type="warning")
+                ui.notify(
+                    t("Parsing failed: The link may not be supported or is invalid"),
+                    type="warning",
+                )
 
         url_input.on("blur", _preview_on_blur)
 
         async def _add_task_from_url() -> None:
             raw = (url_input.value or "").strip()
             if not raw:
-                ui.notify("请输入小说 URL", type="warning")
+                ui.notify(t("Please enter a novel URL"), type="warning")
                 return
             site_key, bid = await _resolve(raw)
             if not site_key or not bid:
-                ui.notify("无法解析该 URL，请检查链接或站点支持情况", type="warning")
+                ui.notify(
+                    t("Unable to parse the URL, please check the link or site support"),
+                    type="warning",
+                )
                 return
-            site_display = _SUPPORT_SITES.get(site_key, site_key)
+            site_display = DOWNLOAD_SUPPORT_SITES.get(site_key, site_key)
             title = f"{site_display} (id = {bid})"
-            ui.notify(f"已添加任务: {title}")
+            ui.notify(t("Task added: {title}").format(title=title))
             await manager.add_task(title=title, site=site_key, book_id=bid)
 
         async def _add_task_from_id() -> None:
             bid = (book_id.value or "").strip()
             if not bid:
-                ui.notify("请输入书籍ID", type="warning")
+                ui.notify(t("Please enter a Book ID"), type="warning")
                 return
             site_key = str(site.value)
-            site_display = _SUPPORT_SITES.get(site_key, site_key)
+            site_display = DOWNLOAD_SUPPORT_SITES.get(site_key, site_key)
             title = f"{site_display} (id = {bid})"
-            ui.notify(f"已添加任务: {title}")
+            ui.notify(t("Task added: {title}").format(title=title))
             await manager.add_task(title=title, site=site_key, book_id=bid)
 
         async def add_task() -> None:

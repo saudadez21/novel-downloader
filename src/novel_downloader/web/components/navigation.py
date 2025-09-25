@@ -8,6 +8,8 @@ A tiny NiceGUI component that renders the app's top navigation bar
 
 from nicegui import ui
 
+from novel_downloader.utils.i18n import t
+
 
 def navbar(active: str) -> None:
     """
@@ -19,10 +21,12 @@ def navbar(active: str) -> None:
         ui.header().classes("px-3 items-center justify-between bg-primary text-white"),
         ui.row().classes("items-center gap-2 flex-wrap"),
     ):
-        _nav_btn("搜索", "/", active == "search", icon="search")
-        _nav_btn("下载", "/download", active == "download", icon="download")
-        _nav_btn("正在下载", "/progress", active == "progress", icon="cloud_download")
-        _nav_btn("历史记录", "/history", active == "history", icon="history")
+        _nav_btn(t("Search"), "/", active == "search", icon="search")
+        _nav_btn(t("Download"), "/download", active == "download", icon="download")
+        _nav_btn(
+            t("In Progress"), "/progress", active == "progress", icon="cloud_download"
+        )
+        _nav_btn(t("History"), "/history", active == "history", icon="history")
 
 
 def _nav_btn(label: str, path: str, is_active: bool, icon: str | None = None) -> None:

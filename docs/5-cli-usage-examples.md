@@ -197,19 +197,22 @@ novel-cli search -s b520 -s n23qb 三体
 **Synopsis**
 
 ```bash
-novel-cli export [-h] [--format FORMAT] [--site SITE] [--config CONFIG] book_id [book_ids ...]
+novel-cli export [-h] [--format FORMAT] [--site SITE] [--config CONFIG] [book_id ...]
 ```
 
 **Options**
 
-* `book_ids`: 要导出的一个或多个书籍 ID
-* `--format FORMAT`: 导出格式: `txt` / `epub` / `all`, 默认 `all`
-* `--site SITE`: 站点键 (如 `b520`, `qidian`, ...), 默认 `qidian`
+* `book_ids`: 要导出的一个或多个书籍 ID (可选; 若省略则会交互式选择)
+* `--format FORMAT`: 导出格式: `txt` / `epub`, 默认使用配置文件设定
+* `--site SITE`: 站点键 (如 `b520`, `qidian`, ...), (可选; 若省略则会交互式选择)
+* `--config CONFIG`: 指定配置文件路径 (可选)
+* `--start`: 起始章节 ID, 仅应用于第一本书
+* `--end`: 结束章节 ID, 仅应用于第一本书
 
 **Examples**
 
 ```bash
-# 导出指定起点小说为默认格式 (txt + epub)
+# 导出指定起点小说为默认格式 (根据配置)
 novel-cli export 12345 23456
 
 # 指定导出格式为 EPUB
@@ -217,9 +220,12 @@ novel-cli export --format epub 88888
 
 # 指定站点来源并导出多本书
 novel-cli export --site b520 12345 23456
+
+# 省略 site 和 book_ids, 进入交互模式选择站点和书籍
+novel-cli export
 ```
 
-> 必须提供至少一个 `book_id`。
+> 提示: 未指定 `--site` 或 `book_id` 时, 将进入交互模式, 从已有下载的站点和书籍中进行选择。
 
 ---
 

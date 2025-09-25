@@ -3,15 +3,17 @@
 novel_downloader.config.file_io
 -------------------------------
 
-Provides functionality to load Toml configuration files into Python dict
+Utilities to load, validate, and save configuration files.
 """
+
+from __future__ import annotations
 
 import json
 import logging
 from pathlib import Path
 from typing import Any, TypeVar
 
-from novel_downloader.utils.constants import SETTING_FILE
+from novel_downloader.utils.constants import DEFAULT_CONFIG_FILE, SETTING_FILE
 
 T = TypeVar("T")
 logger = logging.getLogger(__name__)
@@ -19,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 def _resolve_file_path(
     user_path: str | Path | None,
-    local_filename: str | list[str],
+    local_filename: list[str],
     fallback_path: Path,
 ) -> Path | None:
     """
@@ -30,10 +32,7 @@ def _resolve_file_path(
       2. A file in the current working directory with the given name
       3. A globally registered fallback path
 
-    :param user_path: Optional user-specified file path.
-    :param local_filename: File name to check in the current working directory.
-    :param fallback_path: Fallback path used if other options are not available.
-    :return: A valid Path object if found, otherwise None.
+    :return: Resolved Path or None if not found.
     """
     if user_path:
         path = Path(user_path).expanduser().resolve()
@@ -41,18 +40,15 @@ def _resolve_file_path(
             return path
         logger.warning("Specified file not found: %s", path)
 
-    filenames = [local_filename] if isinstance(local_filename, str) else local_filename
-    for name in filenames:
-        local_path = Path.cwd() / name
+    for name in local_filename:
+        local_path = (Path.cwd() / name).resolve()
         if local_path.is_file():
             logger.debug("Using local file: %s", local_path)
             return local_path
 
     if fallback_path.is_file():
-        logger.debug("Using fallback file: %s", fallback_path)
-        return fallback_path
+        return fallback_path.resolve()
 
-    logger.warning("No file found at any location for: %s", local_filename)
     return None
 
 
@@ -79,39 +75,33 @@ def _load_by_extension(path: Path) -> dict[str, Any]:
     """
     Load a configuration file by its file extension.
 
-    Supports `.toml`, `.json`, and `.yaml`/`.yml` formats.
+    Supports: .toml, .json
 
     :param path: Path to the configuration file.
     :return: Parsed configuration as a dictionary.
     :raises ValueError: If the file extension is unsupported.
     """
     ext = path.suffix.lower()
+
     if ext == ".json":
-        with path.open("r", encoding="utf-8") as f:
-            data = json.load(f)
-            return _validate_dict(data, path, "json")
+        try:
+            with path.open("r", encoding="utf-8") as f:
+                data = json.load(f)
+        except Exception as e:
+            raise ValueError(f"Invalid JSON in {path}: {e}") from e
+        return _validate_dict(data, path, "json")
 
     elif ext == ".toml":
-        import tomllib
-
-        with path.open("rb") as f:
-            data = tomllib.load(f)
-            return _validate_dict(data, path, "toml")
-
-    elif ext in {".yaml", ".yml"}:
         try:
-            import yaml
-        except ImportError as err:
-            raise ImportError(
-                "YAML config support requires PyYAML. "
-                "Install it via: pip install PyYAML"
-            ) from err
-        with path.open("r", encoding="utf-8") as f:
-            data = yaml.safe_load(f)
-            return _validate_dict(data, path, "yaml")
+            import tomllib
 
-    else:
-        raise ValueError(f"Unsupported config file extension: {ext}")
+            with path.open("rb") as f:
+                data = tomllib.load(f)
+        except Exception as e:
+            raise ValueError(f"Invalid TOML in {path}: {e}") from e
+        return _validate_dict(data, path, "toml")
+
+    raise ValueError(f"Unsupported config file extension: {ext}")
 
 
 def load_config(
@@ -122,31 +112,25 @@ def load_config(
 
     :param config_path: Optional path to the Toml configuration file.
     :return: Parsed configuration as a dict.
+    :raises FileNotFoundError: If no viable config is found.
+    :raises ValueError: If parsing fails.
     """
     path = _resolve_file_path(
         user_path=config_path,
-        local_filename=[
-            "settings.toml",
-            "settings.yaml",
-            "settings.yml",
-            "settings.json",
-        ],
+        local_filename=["settings.toml", "settings.json"],
         fallback_path=SETTING_FILE,
     )
 
     if not path or not path.is_file():
         raise FileNotFoundError("No valid config file found.")
 
-    try:
-        return _load_by_extension(path)
-    except Exception as e:
-        logger.warning("Failed to load config file: %s", e)
-    return {}
+    logger.debug("Loading configuration from: %s", path)
+    return _load_by_extension(path)
 
 
 def get_config_value(keys: list[str], default: T) -> T:
     """
-    Safely retrieve a nested config value.
+    Safely retrieve a nested config value from the current config.
     """
     cur = load_config()
     for i, k in enumerate(keys):
@@ -159,16 +143,21 @@ def get_config_value(keys: list[str], default: T) -> T:
     return default
 
 
+def copy_default_config(target: Path) -> None:
+    """
+    Copy the bundled default config to the given target path.
+    """
+    target.parent.mkdir(parents=True, exist_ok=True)
+    data = DEFAULT_CONFIG_FILE.read_bytes()
+    target.write_bytes(data)
+
+
 def save_config(
     config: dict[str, Any],
     output_path: str | Path = SETTING_FILE,
 ) -> None:
     """
     Save configuration data to disk in JSON format.
-
-    :param config: Dictionary containing configuration data to save.
-    :param output_path: Destination path to save the config (default: SETTING_FILE).
-    :raises Exception: If writing to the file fails.
     """
     output = Path(output_path).expanduser().resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -180,8 +169,7 @@ def save_config(
         logger.error("Failed to write config JSON '%s': %s", output, e)
         raise
 
-    logger.info("Configuration successfully saved to JSON: %s", output)
-    return
+    logger.info("Configuration saved to JSON: %s", output)
 
 
 def save_config_file(
@@ -189,23 +177,12 @@ def save_config_file(
     output_path: str | Path = SETTING_FILE,
 ) -> None:
     """
-    Validate a TOML/YAML/JSON config file, load it into a dict,
-    and then dump it as JSON to the internal SETTING_FILE.
-
-    :param source_path: The user-provided TOML file path.
-    :param output_path: Destination path to save the config (default: SETTING_FILE).
-    :raises Exception: If writing to the file fails.
+    Validate a TOML/JSON config file, load it into a dict,
+    then dump it as JSON to `output_path`.
     """
     source = Path(source_path).expanduser().resolve()
-
     if not source.is_file():
         raise FileNotFoundError(f"Source file not found: {source}")
 
-    try:
-        data = _load_by_extension(source)
-    except (ValueError, ImportError) as e:
-        logger.error("Failed to load config file: %s", e)
-        raise ValueError(f"Invalid config file: {source}") from e
-
+    data = _load_by_extension(source)
     save_config(data, output_path)
-    return

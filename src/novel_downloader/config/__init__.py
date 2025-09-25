@@ -7,6 +7,7 @@ Unified interface for loading and adapting configuration files.
 """
 
 __all__ = [
+    "copy_default_config",
     "get_config_value",
     "load_config",
     "save_config",
@@ -16,6 +17,7 @@ __all__ = [
 
 from .adapter import ConfigAdapter
 from .file_io import (
+    copy_default_config,
     get_config_value,
     load_config,
     save_config,

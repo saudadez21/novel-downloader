@@ -8,24 +8,16 @@ Unified CLI entry point. Parses arguments and delegates to parser or interactive
 
 import argparse
 
+from novel_downloader.cli.commands import commands
 from novel_downloader.utils.i18n import t
-
-from .clean import register_clean_subcommand
-from .config import register_config_subcommand
-from .download import register_download_subcommand
-from .export import register_export_subcommand
-from .search import register_search_subcommand
 
 
 def cli_main() -> None:
-    parser = argparse.ArgumentParser(description=t("help_cli"))
+    parser = argparse.ArgumentParser(description=t("Novel Downloader CLI tool."))
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    register_clean_subcommand(subparsers)
-    register_config_subcommand(subparsers)
-    register_download_subcommand(subparsers)
-    register_export_subcommand(subparsers)
-    register_search_subcommand(subparsers)
+    for cmd in commands:
+        cmd.register(subparsers)
 
     args = parser.parse_args()
     if hasattr(args, "func"):

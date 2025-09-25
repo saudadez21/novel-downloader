@@ -222,9 +222,8 @@ class TaskManager:
                 if task.is_cancelled():
                     task.status = "cancelled"
                     continue
-                task.exported_paths = await asyncio.to_thread(
-                    exporter.export, task.book_id
-                )
+                book_cfg: BookConfig = {"book_id": task.book_id}
+                task.exported_paths = await asyncio.to_thread(exporter.export, book_cfg)
                 task.status = "completed"
             except asyncio.CancelledError:
                 task.status = "cancelled"

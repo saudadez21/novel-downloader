@@ -100,8 +100,8 @@ class QqbookSession(BaseSession):
                 label="Cookie",
                 type="cookie",
                 required=True,
-                placeholder="请输入你的登录 Cookie",
-                description="可以通过浏览器开发者工具复制已登录状态下的 Cookie",
+                placeholder="Paste your login cookies here",
+                description="Copy the cookies from your browser's developer tools while logged in.",  # noqa: E501
             ),
         ]
 
