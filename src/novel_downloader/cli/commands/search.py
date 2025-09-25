@@ -10,7 +10,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from novel_downloader.cli import ui
-from novel_downloader.config import ConfigAdapter, copy_default_config, load_config
+from novel_downloader.config import ConfigAdapter
 from novel_downloader.models import BookConfig, SearchResult
 from novel_downloader.utils.constants import SEARCH_SUPPORT_SITES
 from novel_downloader.utils.i18n import t
@@ -60,10 +60,7 @@ class SearchCmd(Command):
 
     @classmethod
     def run(cls, args: Namespace) -> None:
-        import asyncio
-
-        from novel_downloader.cli.services.download import download_books
-        from novel_downloader.core.searchers import search
+        from novel_downloader.cli.services.config import load_or_init_config
 
         sites: Sequence[str] | None = args.site or None
         keyword: str = args.keyword
@@ -72,31 +69,13 @@ class SearchCmd(Command):
         timeout = max(0.1, float(args.timeout))
         config_path: Path | None = Path(args.config) if args.config else None
 
-        try:
-            config_data = load_config(config_path)
-        except FileNotFoundError:
-            if config_path is None:
-                config_path = Path("settings.toml")
-            ui.warn(
-                t("No config found at {path}.").format(path=str(config_path.resolve()))
-            )
-            if ui.confirm(
-                t("Would you like to create a default config?"), default=True
-            ):
-                copy_default_config(config_path)
-                ui.success(
-                    t("Created default config at {path}.").format(
-                        path=str(config_path.resolve())
-                    )
-                )
-            else:
-                ui.error(t("Cannot continue without a config file."))
-            return
-        except ValueError as e:
-            ui.error(t("Failed to load configuration: {err}").format(err=str(e)))
+        config_data = load_or_init_config(config_path)
+        if config_data is None:
             return
 
         async def _run() -> None:
+            from novel_downloader.core.searchers import search
+
             with ui.status(t("Searching for '{keyword}'...").format(keyword=keyword)):
                 results = await search(
                     keyword=keyword,
@@ -115,6 +94,8 @@ class SearchCmd(Command):
 
             log_level = adapter.get_log_level()
             ui.setup_logging(console_level=log_level)
+
+            from novel_downloader.cli.services.download import download_books
 
             success = await download_books(
                 chosen["site"],
@@ -135,6 +116,8 @@ class SearchCmd(Command):
                 books=books,
                 exporter_cfg=adapter.get_exporter_config(),
             )
+
+        import asyncio
 
         asyncio.run(_run())
 

@@ -9,7 +9,7 @@ from argparse import ArgumentParser, Namespace
 from pathlib import Path
 
 from novel_downloader.cli import ui
-from novel_downloader.config import ConfigAdapter, copy_default_config, load_config
+from novel_downloader.config import ConfigAdapter
 from novel_downloader.models import BookConfig
 from novel_downloader.utils.constants import DOWNLOAD_SUPPORT_SITES
 from novel_downloader.utils.i18n import t
@@ -54,35 +54,15 @@ class ExportCmd(Command):
 
     @classmethod
     def run(cls, args: Namespace) -> None:
-        from novel_downloader.cli.services.export import export_books
+        from novel_downloader.cli.services.config import load_or_init_config
 
         site: str | None = args.site
         book_ids: list[str] = list(args.book_ids or [])
         config_path: Path | None = Path(args.config) if args.config else None
         formats: list[str] | None = args.format
 
-        try:
-            config_data = load_config(config_path)
-        except FileNotFoundError:
-            if config_path is None:
-                config_path = Path("settings.toml")
-            ui.warn(
-                t("No config found at {path}.").format(path=str(config_path.resolve()))
-            )
-            if ui.confirm(
-                t("Would you like to create a default config?"), default=True
-            ):
-                copy_default_config(config_path)
-                ui.success(
-                    t("Created default config at {path}.").format(
-                        path=str(config_path.resolve())
-                    )
-                )
-            else:
-                ui.error(t("Cannot continue without a config file."))
-            return
-        except ValueError as e:
-            ui.error(t("Failed to load configuration: {err}").format(err=str(e)))
+        config_data = load_or_init_config(config_path)
+        if config_data is None:
             return
 
         raw_cfg = config_data.get("general") or {}
@@ -114,6 +94,8 @@ class ExportCmd(Command):
         ui.setup_logging(console_level=adapter.get_log_level())
 
         books = cls._parse_book_args(book_ids, args.start, args.end)
+
+        from novel_downloader.cli.services.export import export_books
 
         export_books(
             site=site,

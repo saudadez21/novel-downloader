@@ -9,7 +9,7 @@ from argparse import ArgumentParser, Namespace
 from pathlib import Path
 
 from novel_downloader.cli import ui
-from novel_downloader.config import ConfigAdapter, copy_default_config, load_config
+from novel_downloader.config import ConfigAdapter
 from novel_downloader.models import BookConfig
 from novel_downloader.utils.i18n import t
 
@@ -50,6 +50,8 @@ class DownloadCmd(Command):
 
     @classmethod
     def run(cls, args: Namespace) -> None:
+        from novel_downloader.cli.services.config import load_or_init_config
+
         config_path: Path | None = Path(args.config) if args.config else None
         site: str | None = args.site
 
@@ -91,30 +93,11 @@ class DownloadCmd(Command):
                 )
             )
 
+        config_data = load_or_init_config(config_path)
+        if config_data is None:
+            return
+
         ui.info(t("Using site: {site}").format(site=site))
-        try:
-            config_data = load_config(config_path)
-        except FileNotFoundError:
-            if config_path is None:
-                config_path = Path("settings.toml")
-            ui.warn(
-                t("No config found at {path}.").format(path=str(config_path.resolve()))
-            )
-            if ui.confirm(
-                t("Would you like to create a default config?"), default=True
-            ):
-                copy_default_config(config_path)
-                ui.success(
-                    t("Created default config at {path}.").format(
-                        path=str(config_path.resolve())
-                    )
-                )
-            else:
-                ui.error(t("Cannot continue without a config file."))
-            return
-        except ValueError as e:
-            ui.error(t("Failed to load configuration: {err}").format(err=str(e)))
-            return
         adapter = ConfigAdapter(config=config_data, site=site)
 
         if not books and args.site:
