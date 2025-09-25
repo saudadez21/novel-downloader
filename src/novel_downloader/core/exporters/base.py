@@ -215,14 +215,21 @@ class BaseExporter(abc.ABC):
             self.logger.error("Corrupt JSON in %s: %s", info_path, e)
         return None
 
-    def _init_chapter_storages(self, book_id: str) -> None:
+    def _init_chapter_storages(self, book_id: str) -> bool:
         if book_id in self._storage_cache:
-            return
+            return True
+        raw_base = self._raw_data_dir / book_id
+        if not raw_base.is_dir():
+            self.logger.warning(
+                "Chapter storage base does not exist for book_id=%s", book_id
+            )
+            return False
         self._storage_cache[book_id] = ChapterStorage(
-            raw_base=self._raw_data_dir / book_id,
+            raw_base=raw_base,
             priorities=self.PRIORITIES_MAP,
         )
         self._storage_cache[book_id].connect()
+        return True
 
     def _close_chapter_storages(self) -> None:
         for storage in self._storage_cache.values():
