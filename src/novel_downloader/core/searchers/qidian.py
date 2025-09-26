@@ -16,8 +16,8 @@ from lxml import html
 
 from novel_downloader.core.searchers.base import BaseSearcher
 from novel_downloader.core.searchers.registry import register_searcher
+from novel_downloader.libs.crypto.rc4 import rc4_init, rc4_stream
 from novel_downloader.models import SearchResult
-from novel_downloader.utils.crypto_utils.rc4 import rc4_init, rc4_stream
 
 logger = logging.getLogger(__name__)
 

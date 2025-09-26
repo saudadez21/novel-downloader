@@ -12,9 +12,9 @@ from typing import Any
 from novel_downloader.core.downloaders.base import BaseDownloader
 from novel_downloader.core.downloaders.registry import register_downloader
 from novel_downloader.core.downloaders.signals import STOP, Progress, StopToken
+from novel_downloader.infra.persistence.chapter_storage import ChapterStorage
+from novel_downloader.libs.time_utils import async_jitter_sleep
 from novel_downloader.models import BookConfig, ChapterDict
-from novel_downloader.utils.chapter_storage import ChapterStorage
-from novel_downloader.utils.time_utils import async_jitter_sleep
 
 
 @register_downloader(site_keys=["sfacg"])

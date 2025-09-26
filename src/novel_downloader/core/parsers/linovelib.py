@@ -13,15 +13,15 @@ from lxml import html
 
 from novel_downloader.core.parsers.base import BaseParser
 from novel_downloader.core.parsers.registry import register_parser
+from novel_downloader.infra.paths import (
+    LINOVELIB_MAP_PATH,
+    LINOVELIB_PCTHEMA_MAP_PATH,
+)
 from novel_downloader.models import (
     BookInfoDict,
     ChapterDict,
     ChapterInfoDict,
     VolumeInfoDict,
-)
-from novel_downloader.utils.constants import (
-    LINOVELIB_MAP_PATH,
-    LINOVELIB_PCTHEMA_MAP_PATH,
 )
 
 logger = logging.getLogger(__name__)

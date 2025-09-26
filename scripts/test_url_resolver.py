@@ -17,7 +17,7 @@ import logging
 import os
 import sys
 
-from novel_downloader.utils.book_url_resolver import resolve_book_url
+from novel_downloader.libs.book_url_resolver import resolve_book_url
 
 _USE_COLOR = sys.stdout.isatty() and os.getenv("NO_COLOR") is None
 

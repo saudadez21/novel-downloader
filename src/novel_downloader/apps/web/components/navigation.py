@@ -8,7 +8,7 @@ A tiny NiceGUI component that renders the app's top navigation bar
 
 from nicegui import ui
 
-from novel_downloader.utils.i18n import t
+from novel_downloader.infra.i18n import t
 
 
 def navbar(active: str) -> None:

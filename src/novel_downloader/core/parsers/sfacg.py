@@ -13,13 +13,13 @@ from lxml import html
 
 from novel_downloader.core.parsers.base import BaseParser
 from novel_downloader.core.parsers.registry import register_parser
+from novel_downloader.infra.fontocr import get_font_ocr
 from novel_downloader.models import (
     BookInfoDict,
     ChapterDict,
     ChapterInfoDict,
     VolumeInfoDict,
 )
-from novel_downloader.utils.fontocr import get_font_ocr
 
 logger = logging.getLogger(__name__)
 

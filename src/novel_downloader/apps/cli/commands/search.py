@@ -10,10 +10,10 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from novel_downloader.apps.cli import ui
-from novel_downloader.config import ConfigAdapter
+from novel_downloader.apps.constants import SEARCH_SUPPORT_SITES
+from novel_downloader.infra.config import ConfigAdapter
+from novel_downloader.infra.i18n import t
 from novel_downloader.models import BookConfig, SearchResult
-from novel_downloader.utils.constants import SEARCH_SUPPORT_SITES
-from novel_downloader.utils.i18n import t
 
 from .base import Command
 
@@ -60,7 +60,7 @@ class SearchCmd(Command):
 
     @classmethod
     def run(cls, args: Namespace) -> None:
-        from novel_downloader.apps.cli.actions.config import load_or_init_config
+        from ..actions.config import load_or_init_config
 
         sites: Sequence[str] | None = args.site or None
         keyword: str = args.keyword
@@ -95,7 +95,7 @@ class SearchCmd(Command):
             log_level = adapter.get_log_level()
             ui.setup_logging(console_level=log_level)
 
-            from novel_downloader.apps.cli.actions.download import download_books
+            from ..actions.download import download_books
 
             success = await download_books(
                 chosen["site"],
@@ -109,7 +109,7 @@ class SearchCmd(Command):
                 return
 
             # export
-            from novel_downloader.apps.cli.actions.export import export_books
+            from ..actions.export import export_books
 
             export_books(
                 site=chosen["site"],

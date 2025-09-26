@@ -9,7 +9,7 @@ Unified CLI entry point. Parses arguments and delegates to parser or interactive
 import argparse
 
 from novel_downloader.apps.cli.commands import commands
-from novel_downloader.utils.i18n import t
+from novel_downloader.infra.i18n import t
 
 
 def cli_main() -> None:

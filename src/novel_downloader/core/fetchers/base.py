@@ -19,15 +19,15 @@ from urllib.parse import unquote, urlparse
 import aiohttp
 from aiohttp import ClientResponse, ClientSession, ClientTimeout, TCPConnector
 
-from novel_downloader.models import FetcherConfig, LoginField
-from novel_downloader.utils.constants import (
-    DATA_DIR,
+from novel_downloader.infra.http_defaults import (
     DEFAULT_IMAGE_SUFFIX,
     DEFAULT_USER_HEADERS,
 )
-from novel_downloader.utils.file_utils import sanitize_filename
-from novel_downloader.utils.file_utils.io import _unique_path, write_file
-from novel_downloader.utils.time_utils import async_jitter_sleep
+from novel_downloader.infra.paths import DATA_DIR
+from novel_downloader.libs.fs import sanitize_filename
+from novel_downloader.libs.fs.file import _unique_path, write_file
+from novel_downloader.libs.time_utils import async_jitter_sleep
+from novel_downloader.models import FetcherConfig, LoginField
 
 from .rate_limiter import TokenBucketRateLimiter
 

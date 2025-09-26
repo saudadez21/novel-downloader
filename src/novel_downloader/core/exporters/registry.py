@@ -12,7 +12,7 @@ from collections.abc import Callable, Sequence
 from importlib import import_module
 from typing import TypeVar
 
-from novel_downloader.core.apps import ExporterProtocol
+from novel_downloader.core.interfaces import ExporterProtocol
 from novel_downloader.models import ExporterConfig
 
 ExporterBuilder = Callable[[ExporterConfig, str], ExporterProtocol]

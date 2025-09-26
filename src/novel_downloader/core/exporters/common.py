@@ -12,27 +12,21 @@ from pathlib import Path
 from typing import Any, Literal
 
 from novel_downloader.core.exporters.base import BaseExporter
+from novel_downloader.infra.http_defaults import DEFAULT_HEADERS, DEFAULT_IMAGE_SUFFIX
+from novel_downloader.infra.paths import CSS_MAIN_PATH
+from novel_downloader.libs.epub import (
+    Chapter,
+    EpubBuilder,
+    StyleSheet,
+    Volume,
+)
+from novel_downloader.libs.fs import sanitize_filename, write_file
 from novel_downloader.models import (
     BookConfig,
     BookInfoDict,
     ChapterDict,
     ChapterInfoDict,
     VolumeInfoDict,
-)
-from novel_downloader.utils.constants import (
-    CSS_MAIN_PATH,
-    DEFAULT_HEADERS,
-    DEFAULT_IMAGE_SUFFIX,
-)
-from novel_downloader.utils.epub import (
-    Chapter,
-    EpubBuilder,
-    StyleSheet,
-    Volume,
-)
-from novel_downloader.utils.file_utils import (
-    sanitize_filename,
-    write_file,
 )
 
 
@@ -478,7 +472,7 @@ class CommonExporter(BaseExporter):
 
         Subclasses may override this method if site need more info
         """
-        from novel_downloader.utils.network import download
+        from novel_downloader.infra.network import download
 
         return download(
             img_url,

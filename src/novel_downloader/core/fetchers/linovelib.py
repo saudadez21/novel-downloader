@@ -11,8 +11,8 @@ from typing import Any, Literal
 
 from novel_downloader.core.fetchers.base import BaseSession
 from novel_downloader.core.fetchers.registry import register_fetcher
-from novel_downloader.utils.constants import DEFAULT_HEADERS, DEFAULT_IMAGE_SUFFIX
-from novel_downloader.utils.file_utils import write_file
+from novel_downloader.infra.http_defaults import DEFAULT_HEADERS, DEFAULT_IMAGE_SUFFIX
+from novel_downloader.libs.fs import write_file
 
 _IMG_HEADERS = DEFAULT_HEADERS.copy()
 _IMG_HEADERS["Referer"] = "https://www.linovelib.com/"

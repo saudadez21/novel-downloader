@@ -9,9 +9,9 @@ from argparse import ArgumentParser, Namespace
 from pathlib import Path
 
 from novel_downloader.apps.cli import ui
-from novel_downloader.config import ConfigAdapter
+from novel_downloader.infra.config import ConfigAdapter
+from novel_downloader.infra.i18n import t
 from novel_downloader.models import BookConfig
-from novel_downloader.utils.i18n import t
 
 from .base import Command
 
@@ -50,7 +50,7 @@ class DownloadCmd(Command):
 
     @classmethod
     def run(cls, args: Namespace) -> None:
-        from novel_downloader.apps.cli.actions.config import load_or_init_config
+        from ..actions.config import load_or_init_config
 
         config_path: Path | None = Path(args.config) if args.config else None
         site: str | None = args.site
@@ -59,7 +59,7 @@ class DownloadCmd(Command):
         if site:  # SITE MODE
             books = cls._parse_book_args(args.book_ids, args.start, args.end)
         else:  # URL MODE
-            from novel_downloader.utils.book_url_resolver import resolve_book_url
+            from novel_downloader.libs.book_url_resolver import resolve_book_url
 
             ui.info(t("No --site provided; detecting site from URL..."))
             if len(args.book_ids) != 1:
@@ -121,7 +121,7 @@ class DownloadCmd(Command):
         # download
         import asyncio
 
-        from novel_downloader.apps.cli.actions.download import download_books
+        from ..actions.download import download_books
 
         success = asyncio.run(
             download_books(
@@ -138,7 +138,7 @@ class DownloadCmd(Command):
 
         # export
         if not args.no_export:
-            from novel_downloader.apps.cli.actions.export import export_books
+            from ..actions.export import export_books
 
             export_books(site, books, adapter.get_exporter_config())
         else:

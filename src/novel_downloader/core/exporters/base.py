@@ -15,14 +15,14 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, ClassVar, Self, cast
 
+from novel_downloader.infra.persistence.chapter_storage import ChapterStorage
+from novel_downloader.libs.text import get_cleaner
 from novel_downloader.models import (
     BookConfig,
     BookInfoDict,
     ChapterDict,
     ExporterConfig,
 )
-from novel_downloader.utils.chapter_storage import ChapterStorage
-from novel_downloader.utils.text_utils import get_cleaner
 
 
 class SafeDict(dict[str, Any]):

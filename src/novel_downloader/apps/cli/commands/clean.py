@@ -10,13 +10,13 @@ from argparse import ArgumentParser, Namespace
 from pathlib import Path
 
 from novel_downloader.apps.cli import ui
-from novel_downloader.utils.constants import (
+from novel_downloader.infra.i18n import t
+from novel_downloader.infra.paths import (
     CONFIG_DIR,
     DATA_DIR,
     JS_SCRIPT_DIR,
     LOGGER_DIR,
 )
-from novel_downloader.utils.i18n import t
 
 from .base import Command
 

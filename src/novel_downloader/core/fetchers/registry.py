@@ -12,7 +12,7 @@ from collections.abc import Callable, Sequence
 from importlib import import_module
 from typing import TypeVar
 
-from novel_downloader.core.apps import FetcherProtocol
+from novel_downloader.core.interfaces import FetcherProtocol
 from novel_downloader.models import FetcherConfig
 
 FetcherBuilder = Callable[[FetcherConfig], FetcherProtocol]

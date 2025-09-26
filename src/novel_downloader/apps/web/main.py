@@ -16,8 +16,8 @@ from nicegui import app, ui
 
 import novel_downloader.apps.web.pages  # noqa: F401
 from novel_downloader.apps.web.services import manager
-from novel_downloader.config import get_config_value
-from novel_downloader.utils.logger import setup_logging
+from novel_downloader.infra.config import get_config_value
+from novel_downloader.infra.logger import setup_logging
 
 
 def mount_exports() -> None:

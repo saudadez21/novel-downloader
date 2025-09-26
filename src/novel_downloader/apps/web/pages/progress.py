@@ -8,14 +8,15 @@ Layout for active/history tasks with compact cards and status chips.
 
 from nicegui import ui
 
-from novel_downloader.apps.web.components import navbar
-from novel_downloader.apps.web.services import (
+from novel_downloader.infra.i18n import t
+
+from ..components import navbar
+from ..services import (
     DownloadTask,
     Status,
     manager,
     setup_dialog,
 )
-from novel_downloader.utils.i18n import t
 
 
 def _status_chip(status: Status) -> None:

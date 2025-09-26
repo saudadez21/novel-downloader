@@ -18,6 +18,11 @@ from lxml import html
 
 from novel_downloader.core.parsers.base import BaseParser
 from novel_downloader.core.parsers.registry import register_parser
+from novel_downloader.infra.cookies import get_cookie_value
+from novel_downloader.infra.decrypt import get_decryptor
+from novel_downloader.infra.fontocr import get_font_ocr
+from novel_downloader.infra.paths import DATA_DIR
+from novel_downloader.libs.text import truncate_half_lines
 from novel_downloader.models import (
     BookInfoDict,
     ChapterDict,
@@ -25,11 +30,6 @@ from novel_downloader.models import (
     ParserConfig,
     VolumeInfoDict,
 )
-from novel_downloader.utils.constants import DATA_DIR
-from novel_downloader.utils.cookies import get_cookie_value
-from novel_downloader.utils.fontocr import get_font_ocr
-from novel_downloader.utils.node_decryptor import get_decryptor
-from novel_downloader.utils.text_utils import truncate_half_lines
 
 logger = logging.getLogger(__name__)
 
@@ -262,7 +262,7 @@ class QidianParser(BaseParser):
             )
             return ""
 
-        from novel_downloader.utils.network import download
+        from novel_downloader.infra.network import download
 
         css_str = chapter_info.get("css")
         random_font_str = chapter_info.get("randomFont")

@@ -9,10 +9,10 @@ from argparse import ArgumentParser, Namespace, _SubParsersAction
 from pathlib import Path
 
 from novel_downloader.apps.cli import ui
-from novel_downloader.config import copy_default_config, save_config_file
-from novel_downloader.utils.constants import DEFAULT_CONFIG_FILENAME
-from novel_downloader.utils.i18n import t
-from novel_downloader.utils.state import state_mgr
+from novel_downloader.infra.config import copy_default_config, save_config_file
+from novel_downloader.infra.i18n import t
+from novel_downloader.infra.paths import DEFAULT_CONFIG_FILENAME
+from novel_downloader.infra.persistence.state import state_mgr
 
 from .base import Command
 

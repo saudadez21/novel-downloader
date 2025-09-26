@@ -25,14 +25,8 @@ from rich.console import Console
 from rich.prompt import Confirm, Prompt
 from rich.status import Status
 
-from novel_downloader.utils.constants import LOGGER_DIR, PACKAGE_NAME
+from novel_downloader.infra.paths import LOGGER_DIR, PACKAGE_NAME
 
-_LOG_LEVELS: dict[str, int] = {
-    "DEBUG": logging.DEBUG,
-    "INFO": logging.INFO,
-    "WARNING": logging.WARNING,
-    "ERROR": logging.ERROR,
-}
 _MUTE_LOGGERS: set[str] = {
     "fontTools.ttLib.tables._p_o_s_t",
 }
@@ -203,9 +197,7 @@ def _normalize_level(level: int | str) -> int:
     if isinstance(level, int):
         return level
     if isinstance(level, str):
-        lvl = _LOG_LEVELS.get(level.upper())
-        if isinstance(lvl, int):
-            return lvl
+        return logging._nameToLevel.get(level.upper(), logging.INFO)
     return logging.INFO
 
 

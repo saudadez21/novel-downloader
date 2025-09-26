@@ -17,10 +17,11 @@ from urllib.parse import quote
 from nicegui import ui
 from nicegui.events import KeyEventArguments, ValueChangeEventArguments
 
-from novel_downloader.apps.web.components import navbar
-from novel_downloader.apps.web.services import setup_dialog
-from novel_downloader.config import get_config_value
-from novel_downloader.utils.i18n import t
+from novel_downloader.infra.config import get_config_value
+from novel_downloader.infra.i18n import t
+
+from ..components import navbar
+from ..services import setup_dialog
 
 _EXTS = {"txt", "epub"}
 _OUTPUT_DIR = Path(get_config_value(["general", "output_dir"], "./downloads"))

@@ -9,9 +9,9 @@ from typing import Any
 
 from novel_downloader.apps.cli import ui
 from novel_downloader.core.interfaces import FetcherProtocol
+from novel_downloader.infra.cookies import parse_cookies
+from novel_downloader.infra.i18n import t
 from novel_downloader.models import LoginField
-from novel_downloader.utils.cookies import parse_cookies
-from novel_downloader.utils.i18n import t
 
 
 async def ensure_login(

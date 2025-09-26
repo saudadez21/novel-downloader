@@ -10,7 +10,7 @@ This file provides dummy `t("...")` calls so that such strings are
 included in `messages.pot`.
 """
 
-from novel_downloader.utils.i18n import t
+from novel_downloader.infra.i18n import t
 
 # Login fields: username & password
 t("Username")

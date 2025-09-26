@@ -7,8 +7,8 @@ novel_downloader.apps.cli.actions.export
 
 from novel_downloader.apps.cli import ui
 from novel_downloader.core import get_exporter
+from novel_downloader.infra.i18n import t
 from novel_downloader.models import BookConfig, ExporterConfig
-from novel_downloader.utils.i18n import t
 
 
 def export_book(

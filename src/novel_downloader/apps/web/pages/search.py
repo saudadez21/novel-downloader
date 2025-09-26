@@ -17,12 +17,13 @@ from nicegui import ui
 from nicegui.elements.number import Number
 from nicegui.events import KeyEventArguments, ValueChangeEventArguments
 
-from novel_downloader.apps.web.components import navbar
-from novel_downloader.apps.web.services import manager, setup_dialog
+from novel_downloader.apps.constants import SEARCH_SUPPORT_SITES
 from novel_downloader.core.searchers import search_stream
+from novel_downloader.infra.i18n import t
 from novel_downloader.models import SearchResult
-from novel_downloader.utils.constants import SEARCH_SUPPORT_SITES
-from novel_downloader.utils.i18n import t
+
+from ..components import navbar
+from ..services import manager, setup_dialog
 
 _DEFAULT_TIMEOUT = 10.0
 _DEFAULT_SITE_LIMIT = 30

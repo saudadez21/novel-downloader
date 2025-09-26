@@ -7,11 +7,12 @@ novel_downloader.apps.web.pages.download
 
 from nicegui import ui
 
-from novel_downloader.apps.web.components import navbar
-from novel_downloader.apps.web.services import manager, setup_dialog
-from novel_downloader.utils.book_url_resolver import resolve_book_url
-from novel_downloader.utils.constants import DOWNLOAD_SUPPORT_SITES
-from novel_downloader.utils.i18n import t
+from novel_downloader.apps.constants import DOWNLOAD_SUPPORT_SITES
+from novel_downloader.infra.i18n import t
+from novel_downloader.libs.book_url_resolver import resolve_book_url
+
+from ..components import navbar
+from ..services import manager, setup_dialog
 
 _DEFAULT_SITE = "qidian"
 

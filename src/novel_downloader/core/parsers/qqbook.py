@@ -18,6 +18,8 @@ from lxml import html
 
 from novel_downloader.core.parsers.base import BaseParser
 from novel_downloader.core.parsers.registry import register_parser
+from novel_downloader.infra.decrypt import get_decryptor
+from novel_downloader.infra.fontocr import get_font_ocr
 from novel_downloader.models import (
     BookInfoDict,
     ChapterDict,
@@ -25,8 +27,6 @@ from novel_downloader.models import (
     ParserConfig,
     VolumeInfoDict,
 )
-from novel_downloader.utils.fontocr import get_font_ocr
-from novel_downloader.utils.node_decryptor import get_decryptor
 
 logger = logging.getLogger(__name__)
 
@@ -309,7 +309,7 @@ class QqbookParser(BaseParser):
             )
             return ""
 
-        from novel_downloader.utils.network import download
+        from novel_downloader.infra.network import download
 
         css_str = font_resp.get("css")
         random_font = font_resp.get("randomFont") or {}
