@@ -3,7 +3,7 @@
 novel_downloader.core.interfaces
 --------------------------------
 
-Protocol interfaces defining the contracts for core components.
+Protocol apps defining the contracts for core components.
 """
 
 __all__ = [

@@ -12,7 +12,7 @@ from collections.abc import Callable, Sequence
 from importlib import import_module
 from typing import TypeVar
 
-from novel_downloader.core.interfaces import ParserProtocol
+from novel_downloader.core.apps import ParserProtocol
 from novel_downloader.models import ParserConfig
 
 ParserBuilder = Callable[[ParserConfig], ParserProtocol]
