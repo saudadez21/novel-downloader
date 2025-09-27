@@ -87,35 +87,78 @@ class QidianParser(BaseParser):
 
         doc = html.fromstring(html_list[0])
 
+        # --- Book name ---
         book_name = self._first_str(doc.xpath('//h1[@id="bookName"]/text()'))
-        author = self._first_str(doc.xpath('//a[@class="writer-name"]/text()'))
+        if not book_name:
+            book_name = self._first_str(
+                doc.xpath('//meta[@property="og:novel:book_name"]/@content')
+            )
 
+        # --- Author ---
+        author = self._first_str(doc.xpath('//a[@class="writer-name"]/text()'))
+        if not author:
+            author = self._first_str(
+                doc.xpath('//meta[@property="og:novel:author"]/@content')
+            )
+        if not author:
+            author = self._first_str(
+                doc.xpath('//span[contains(@class,"author")]/text()'),
+                replaces=[("作者:", "")],
+            )
+
+        # --- Book ID + cover ---
         book_id = doc.xpath('//a[@id="bookImg"]/@data-bid')[0]
         cover_url = f"https://bookcover.yuewen.com/qdbimg/349573/{book_id}/600.webp"
 
+        # --- Update time ---
         update_time = self._first_str(
             doc.xpath('//span[@class="update-time"]/text()'),
             replaces=[("更新时间:", "")],
         )
+        if not update_time:
+            update_time = self._first_str(
+                doc.xpath('//meta[@property="og:novel:update_time"]/@content')
+            )
+
+        # --- Status ---
         serial_status = self._first_str(
             doc.xpath('//p[@class="book-attribute"]/span[1]/text()')
         )
+        if not serial_status:
+            serial_status = self._first_str(
+                doc.xpath('//meta[@property="og:novel:status"]/@content')
+            )
 
+        # --- Tags ---
         tags = [
             t.strip()
             for t in doc.xpath('//p[contains(@class,"all-label")]//a/text()')
             if t.strip()
         ]
+        if not tags:
+            # fallback meta category
+            tag = self._first_str(
+                doc.xpath('//meta[@property="og:novel:category"]/@content')
+            )
+            if tag:
+                tags = [tag]
 
+        # --- Word count ---
         word_count = self._first_str(doc.xpath('//p[@class="count"]/em[1]/text()'))
+
+        # --- Summaries ---
         summary_brief = self._first_str(doc.xpath('//p[@class="intro"]/text()'))
+        if not summary_brief:
+            summary_brief = self._first_str(
+                doc.xpath('//meta[@property="og:description"]/@content')
+            )
 
         raw_lines = [
             s.strip()
             for s in doc.xpath('//p[@id="book-intro-detail"]//text()')
             if s.strip()
         ]
-        summary = "\n".join(raw_lines)
+        summary = "\n".join(raw_lines) if raw_lines else summary_brief
 
         volumes: list[VolumeInfoDict] = []
         for vol in doc.xpath('//div[@id="allCatalog"]//div[@class="catalog-volume"]'):
