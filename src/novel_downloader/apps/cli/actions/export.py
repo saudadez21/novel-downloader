@@ -6,9 +6,9 @@ novel_downloader.apps.cli.actions.export
 """
 
 from novel_downloader.apps.cli import ui
-from novel_downloader.core import get_exporter
 from novel_downloader.infra.i18n import t
 from novel_downloader.models import BookConfig, ExporterConfig
+from novel_downloader.plugins import registrar
 
 
 def export_book(
@@ -26,7 +26,7 @@ def export_books(
     exporter_cfg: ExporterConfig,
     formats: list[str] | None = None,
 ) -> None:
-    with get_exporter(site, exporter_cfg) as exporter:
+    with registrar.get_exporter(site, exporter_cfg) as exporter:
         for book in books:
             book_id = book["book_id"]
 

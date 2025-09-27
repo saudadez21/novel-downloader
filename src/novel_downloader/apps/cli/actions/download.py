@@ -6,7 +6,6 @@ novel_downloader.apps.cli.actions.download
 """
 
 from novel_downloader.apps.cli import ui
-from novel_downloader.core import get_downloader, get_fetcher, get_parser
 from novel_downloader.infra.i18n import t
 from novel_downloader.models import (
     BookConfig,
@@ -14,6 +13,7 @@ from novel_downloader.models import (
     FetcherConfig,
     ParserConfig,
 )
+from novel_downloader.plugins import registrar
 
 from .login import ensure_login
 
@@ -44,15 +44,15 @@ async def download_books(
     parser_cfg: ParserConfig,
     login_config: dict[str, str] | None = None,
 ) -> bool:
-    parser = get_parser(site, parser_cfg)
+    parser = registrar.get_parser(site, parser_cfg)
 
-    async with get_fetcher(site, fetcher_cfg) as fetcher:
+    async with registrar.get_fetcher(site, fetcher_cfg) as fetcher:
         if downloader_cfg.login_required and (
             not await ensure_login(fetcher, login_config)
         ):
             return False
 
-        downloader = get_downloader(
+        downloader = registrar.get_downloader(
             fetcher=fetcher,
             parser=parser,
             site=site,

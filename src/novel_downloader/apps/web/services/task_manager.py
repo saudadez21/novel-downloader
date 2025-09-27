@@ -13,12 +13,6 @@ from pathlib import Path
 from typing import Any, Literal
 from uuid import uuid4
 
-from novel_downloader.core import (
-    get_downloader,
-    get_exporter,
-    get_fetcher,
-    get_parser,
-)
 from novel_downloader.infra.config import ConfigAdapter, load_config
 from novel_downloader.infra.cookies import parse_cookies
 from novel_downloader.models import (
@@ -26,6 +20,7 @@ from novel_downloader.models import (
     ExporterConfig,
     LoginField,
 )
+from novel_downloader.plugins import registrar
 
 from .cred_broker import (
     REQUEST_TIMEOUT,
@@ -160,10 +155,10 @@ class TaskManager:
         exporter_cfg = adapter.get_exporter_config()
         login_cfg = adapter.get_login_config()
 
-        parser = get_parser(task.site, parser_cfg)
+        parser = registrar.get_parser(task.site, parser_cfg)
 
         try:
-            async with get_fetcher(task.site, fetcher_cfg) as fetcher:
+            async with registrar.get_fetcher(task.site, fetcher_cfg) as fetcher:
                 if downloader_cfg.login_required and not await fetcher.load_state():
                     login_data = await self._prompt_login_fields(
                         task, fetcher.login_fields, login_cfg
@@ -174,7 +169,7 @@ class TaskManager:
                         return
                     await fetcher.save_state()
 
-                downloader = get_downloader(
+                downloader = registrar.get_downloader(
                     fetcher=fetcher,
                     parser=parser,
                     site=task.site,
@@ -217,7 +212,7 @@ class TaskManager:
         """Dedicated worker for synchronous export tasks."""
         while self._export_waiting:
             task, exporter_cfg = self._export_waiting.pop()
-            exporter = get_exporter(task.site, exporter_cfg)
+            exporter = registrar.get_exporter(task.site, exporter_cfg)
             try:
                 if task.is_cancelled():
                     task.status = "cancelled"

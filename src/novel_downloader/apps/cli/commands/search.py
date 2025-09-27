@@ -74,7 +74,7 @@ class SearchCmd(Command):
             return
 
         async def _run() -> None:
-            from novel_downloader.core.searchers import search
+            from novel_downloader.plugins.searching import search
 
             with ui.status(t("Searching for '{keyword}'...").format(keyword=keyword)):
                 results = await search(
