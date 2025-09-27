@@ -8,12 +8,11 @@ Protocol defining the interface for asynchronous fetching, login, and session ma
 
 import types
 from pathlib import Path
-from typing import Any, Literal, Protocol, Self, runtime_checkable
+from typing import Any, Literal, Protocol, Self
 
 from novel_downloader.schemas import LoginField
 
 
-@runtime_checkable
 class FetcherProtocol(Protocol):
     """
     An async requester must be able to fetch raw HTML/data for:

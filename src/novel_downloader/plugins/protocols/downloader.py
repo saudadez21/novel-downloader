@@ -8,12 +8,11 @@ Protocol defining the interface for asynchronous book downloaders.
 
 import asyncio
 from collections.abc import Awaitable, Callable
-from typing import Any, Protocol, runtime_checkable
+from typing import Any, Protocol
 
 from novel_downloader.schemas import BookConfig
 
 
-@runtime_checkable
 class DownloaderProtocol(Protocol):
     """
     Protocol for async downloader implementations.

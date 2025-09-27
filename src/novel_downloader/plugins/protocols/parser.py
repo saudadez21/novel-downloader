@@ -6,12 +6,11 @@ novel_downloader.plugins.protocols.parser
 Protocol defining the interface for parsing book metadata and chapter content.
 """
 
-from typing import Any, Protocol, runtime_checkable
+from typing import Any, Protocol
 
 from novel_downloader.schemas import BookInfoDict, ChapterDict
 
 
-@runtime_checkable
 class ParserProtocol(Protocol):
     """
     A parser must be able to:

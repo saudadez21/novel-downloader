@@ -8,12 +8,11 @@ Protocol defining the interface for exporting books to text, EPUB, and other for
 
 import types
 from pathlib import Path
-from typing import Protocol, Self, runtime_checkable
+from typing import Protocol, Self
 
 from novel_downloader.schemas import BookConfig
 
 
-@runtime_checkable
 class ExporterProtocol(Protocol):
     def export(self, book: BookConfig) -> dict[str, Path]:
         """
