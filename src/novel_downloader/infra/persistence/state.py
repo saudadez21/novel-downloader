@@ -30,7 +30,7 @@ class StateManager:
 
         :return: Language code string
         """
-        return self._data.get("lang") or self._get_system_locale() or "zh_CN"
+        return self._data.get("lang") or "zh_CN"
 
     def set_language(self, lang: str) -> None:
         """
@@ -64,13 +64,6 @@ class StateManager:
         self._path.parent.mkdir(parents=True, exist_ok=True)
         content = json.dumps(self._data, ensure_ascii=False, indent=2)
         self._path.write_text(content, encoding="utf-8")
-
-    @staticmethod
-    def _get_system_locale() -> str | None:
-        import locale
-
-        lang, _ = locale.getdefaultlocale()
-        return lang
 
 
 state_mgr = StateManager()
