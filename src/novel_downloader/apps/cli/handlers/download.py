@@ -7,13 +7,13 @@ novel_downloader.apps.cli.actions.download
 
 from novel_downloader.apps.cli import ui
 from novel_downloader.infra.i18n import t
-from novel_downloader.models import (
+from novel_downloader.plugins import registrar
+from novel_downloader.schemas import (
     BookConfig,
     DownloaderConfig,
     FetcherConfig,
     ParserConfig,
 )
-from novel_downloader.plugins import registrar
 
 from .login import ensure_login
 

@@ -14,14 +14,14 @@ from urllib.parse import unquote
 from lxml import etree, html
 
 from novel_downloader.infra.fontocr import get_font_ocr
-from novel_downloader.models import (
+from novel_downloader.plugins.base.parser import BaseParser
+from novel_downloader.plugins.registry import registrar
+from novel_downloader.schemas import (
     BookInfoDict,
     ChapterDict,
     ChapterInfoDict,
     VolumeInfoDict,
 )
-from novel_downloader.plugins.base.parser import BaseParser
-from novel_downloader.plugins.registry import registrar
 
 logger = logging.getLogger(__name__)
 Token = tuple[Literal["text", "html"], str]

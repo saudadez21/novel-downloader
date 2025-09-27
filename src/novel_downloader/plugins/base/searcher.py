@@ -13,7 +13,7 @@ from urllib.parse import quote_plus, urljoin
 import aiohttp
 
 from novel_downloader.infra.http_defaults import DEFAULT_USER_HEADERS
-from novel_downloader.models import SearchResult
+from novel_downloader.schemas import SearchResult
 
 
 class BaseSearcher(abc.ABC):

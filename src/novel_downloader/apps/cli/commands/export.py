@@ -12,7 +12,7 @@ from novel_downloader.apps.cli import ui
 from novel_downloader.apps.constants import DOWNLOAD_SUPPORT_SITES
 from novel_downloader.infra.config import ConfigAdapter
 from novel_downloader.infra.i18n import t
-from novel_downloader.models import BookConfig
+from novel_downloader.schemas import BookConfig
 
 from .base import Command
 
@@ -54,7 +54,7 @@ class ExportCmd(Command):
 
     @classmethod
     def run(cls, args: Namespace) -> None:
-        from ..actions.config import load_or_init_config
+        from ..handlers.config import load_or_init_config
 
         site: str | None = args.site
         book_ids: list[str] = list(args.book_ids or [])
@@ -95,7 +95,7 @@ class ExportCmd(Command):
 
         books = cls._parse_book_args(book_ids, args.start, args.end)
 
-        from ..actions.export import export_books
+        from ..handlers.export import export_books
 
         export_books(
             site=site,

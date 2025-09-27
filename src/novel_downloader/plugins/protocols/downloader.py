@@ -10,7 +10,7 @@ import asyncio
 from collections.abc import Awaitable, Callable
 from typing import Any, Protocol, runtime_checkable
 
-from novel_downloader.models import BookConfig
+from novel_downloader.schemas import BookConfig
 
 
 @runtime_checkable

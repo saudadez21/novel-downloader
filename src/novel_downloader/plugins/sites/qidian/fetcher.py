@@ -17,9 +17,9 @@ import aiohttp
 
 from novel_downloader.libs.crypto.rc4 import rc4_init, rc4_stream
 from novel_downloader.libs.time_utils import async_jitter_sleep
-from novel_downloader.models import FetcherConfig, LoginField
 from novel_downloader.plugins.base.fetcher import BaseSession
 from novel_downloader.plugins.registry import registrar
+from novel_downloader.schemas import FetcherConfig, LoginField
 
 
 @registrar.register_fetcher()

@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 from novel_downloader.infra.http_defaults import DEFAULT_HEADERS, DEFAULT_IMAGE_SUFFIX
-from novel_downloader.libs.fs import write_file
+from novel_downloader.libs.filesystem import write_file
 from novel_downloader.plugins.base.fetcher import BaseSession
 from novel_downloader.plugins.registry import registrar
 

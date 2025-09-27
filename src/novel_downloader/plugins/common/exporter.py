@@ -19,15 +19,15 @@ from novel_downloader.libs.epub import (
     StyleSheet,
     Volume,
 )
-from novel_downloader.libs.fs import sanitize_filename, write_file
-from novel_downloader.models import (
+from novel_downloader.libs.filesystem import sanitize_filename, write_file
+from novel_downloader.plugins.base.exporter import BaseExporter
+from novel_downloader.schemas import (
     BookConfig,
     BookInfoDict,
     ChapterDict,
     ChapterInfoDict,
     VolumeInfoDict,
 )
-from novel_downloader.plugins.base.exporter import BaseExporter
 
 
 class CommonExporter(BaseExporter):

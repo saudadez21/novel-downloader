@@ -17,19 +17,19 @@ from typing import Any, TypedDict
 from lxml import html
 
 from novel_downloader.infra.cookies import get_cookie_value
-from novel_downloader.infra.decrypt import get_decryptor
 from novel_downloader.infra.fontocr import get_font_ocr
+from novel_downloader.infra.jsbridge import get_decryptor
 from novel_downloader.infra.paths import DATA_DIR
-from novel_downloader.libs.text import truncate_half_lines
-from novel_downloader.models import (
+from novel_downloader.libs.textutils import truncate_half_lines
+from novel_downloader.plugins.base.parser import BaseParser
+from novel_downloader.plugins.registry import registrar
+from novel_downloader.schemas import (
     BookInfoDict,
     ChapterDict,
     ChapterInfoDict,
     ParserConfig,
     VolumeInfoDict,
 )
-from novel_downloader.plugins.base.parser import BaseParser
-from novel_downloader.plugins.registry import registrar
 
 logger = logging.getLogger(__name__)
 

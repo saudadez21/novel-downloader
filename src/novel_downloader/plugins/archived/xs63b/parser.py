@@ -9,13 +9,13 @@ import re
 from typing import Any
 
 from lxml import html
-from novel_downloader.models import (
+from novel_downloader.plugins.base.parser import BaseParser
+from novel_downloader.schemas import (
     BookInfoDict,
     ChapterDict,
     ChapterInfoDict,
     VolumeInfoDict,
 )
-from novel_downloader.plugins.base.parser import BaseParser
 
 
 class Xs63bParser(BaseParser):

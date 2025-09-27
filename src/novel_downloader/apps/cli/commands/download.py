@@ -11,7 +11,7 @@ from pathlib import Path
 from novel_downloader.apps.cli import ui
 from novel_downloader.infra.config import ConfigAdapter
 from novel_downloader.infra.i18n import t
-from novel_downloader.models import BookConfig
+from novel_downloader.schemas import BookConfig
 
 from .base import Command
 
@@ -50,7 +50,7 @@ class DownloadCmd(Command):
 
     @classmethod
     def run(cls, args: Namespace) -> None:
-        from ..actions.config import load_or_init_config
+        from ..handlers.config import load_or_init_config
 
         config_path: Path | None = Path(args.config) if args.config else None
         site: str | None = args.site
@@ -121,7 +121,7 @@ class DownloadCmd(Command):
         # download
         import asyncio
 
-        from ..actions.download import download_books
+        from ..handlers.download import download_books
 
         success = asyncio.run(
             download_books(
@@ -138,7 +138,7 @@ class DownloadCmd(Command):
 
         # export
         if not args.no_export:
-            from ..actions.export import export_books
+            from ..handlers.export import export_books
 
             export_books(site, books, adapter.get_exporter_config())
         else:

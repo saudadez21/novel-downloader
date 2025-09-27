@@ -9,13 +9,13 @@ from typing import Any
 
 from lxml import html
 
-from novel_downloader.models import (
+from novel_downloader.plugins.registry import registrar
+from novel_downloader.plugins.sites.tongrenquan.parser import TongrenquanParser
+from novel_downloader.schemas import (
     BookInfoDict,
     ChapterInfoDict,
     VolumeInfoDict,
 )
-from novel_downloader.plugins.registry import registrar
-from novel_downloader.plugins.sites.tongrenquan.parser import TongrenquanParser
 
 
 @registrar.register_parser()

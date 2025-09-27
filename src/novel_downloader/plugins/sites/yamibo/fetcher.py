@@ -10,9 +10,9 @@ from typing import Any
 
 from lxml import html
 
-from novel_downloader.models import LoginField
 from novel_downloader.plugins.base.fetcher import BaseSession
 from novel_downloader.plugins.registry import registrar
+from novel_downloader.schemas import LoginField
 
 
 @registrar.register_fetcher()

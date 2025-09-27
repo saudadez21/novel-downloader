@@ -15,9 +15,9 @@ import time
 from lxml import html
 
 from novel_downloader.libs.crypto.rc4 import rc4_init, rc4_stream
-from novel_downloader.models import SearchResult
 from novel_downloader.plugins.base.searcher import BaseSearcher
 from novel_downloader.plugins.searching import register_searcher
+from novel_downloader.schemas import SearchResult
 
 logger = logging.getLogger(__name__)
 

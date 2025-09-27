@@ -12,7 +12,7 @@ import asyncio
 from dataclasses import dataclass, field
 from uuid import uuid4
 
-from novel_downloader.models import LoginField
+from novel_downloader.schemas import LoginField
 
 
 @dataclass

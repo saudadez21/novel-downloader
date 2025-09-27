@@ -12,10 +12,10 @@ from typing import Any, ClassVar
 
 from novel_downloader.infra.persistence.chapter_storage import ChapterStorage
 from novel_downloader.libs.time_utils import async_jitter_sleep
-from novel_downloader.models import BookConfig, ChapterDict, VolumeInfoDict
 from novel_downloader.plugins.base.downloader import BaseDownloader
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.plugins.utils.signals import STOP, Progress, StopToken
+from novel_downloader.schemas import BookConfig, ChapterDict, VolumeInfoDict
 
 
 @registrar.register_downloader()

@@ -16,13 +16,13 @@ from collections.abc import Awaitable, Callable, Sequence
 from pathlib import Path
 from typing import Any, ClassVar
 
-from novel_downloader.models import (
+from novel_downloader.plugins.protocols import FetcherProtocol, ParserProtocol
+from novel_downloader.schemas import (
     BookConfig,
     BookInfoDict,
     DownloaderConfig,
     VolumeInfoDict,
 )
-from novel_downloader.plugins.protocols import FetcherProtocol, ParserProtocol
 
 ONE_DAY = 86400  # seconds
 

@@ -13,7 +13,7 @@ from typing import Any
 from nicegui import ui
 
 from novel_downloader.infra.i18n import t
-from novel_downloader.models import LoginField
+from novel_downloader.schemas import LoginField
 
 from .cred_broker import (
     claim_next_request,

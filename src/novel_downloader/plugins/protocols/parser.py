@@ -8,7 +8,7 @@ Protocol defining the interface for parsing book metadata and chapter content.
 
 from typing import Any, Protocol, runtime_checkable
 
-from novel_downloader.models import BookInfoDict, ChapterDict
+from novel_downloader.schemas import BookInfoDict, ChapterDict
 
 
 @runtime_checkable

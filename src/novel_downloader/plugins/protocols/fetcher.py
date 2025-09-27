@@ -10,7 +10,7 @@ import types
 from pathlib import Path
 from typing import Any, Literal, Protocol, Self, runtime_checkable
 
-from novel_downloader.models import LoginField
+from novel_downloader.schemas import LoginField
 
 
 @runtime_checkable

@@ -15,14 +15,14 @@ from novel_downloader.infra.paths import (
     LINOVELIB_MAP_PATH,
     LINOVELIB_PCTHEMA_MAP_PATH,
 )
-from novel_downloader.models import (
+from novel_downloader.plugins.base.parser import BaseParser
+from novel_downloader.plugins.registry import registrar
+from novel_downloader.schemas import (
     BookInfoDict,
     ChapterDict,
     ChapterInfoDict,
     VolumeInfoDict,
 )
-from novel_downloader.plugins.base.parser import BaseParser
-from novel_downloader.plugins.registry import registrar
 
 logger = logging.getLogger(__name__)
 

@@ -17,7 +17,7 @@ from dataclasses import dataclass
 from typing import TypedDict
 from urllib.parse import urlparse
 
-from novel_downloader.models import BookConfig
+from novel_downloader.schemas import BookConfig
 
 logger = logging.getLogger(__name__)
 

@@ -12,7 +12,7 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
-from novel_downloader.models import BookInfoDict, ChapterDict, ParserConfig
+from novel_downloader.schemas import BookInfoDict, ChapterDict, ParserConfig
 
 
 class BaseParser(abc.ABC):

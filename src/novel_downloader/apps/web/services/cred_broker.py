@@ -11,7 +11,7 @@ from __future__ import annotations
 import asyncio
 import time
 
-from novel_downloader.models import LoginField
+from novel_downloader.schemas import LoginField
 
 from .cred_models import CredRequest
 

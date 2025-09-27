@@ -9,7 +9,7 @@ Lazily load the FontOCR class.
 import logging
 from typing import TYPE_CHECKING
 
-from novel_downloader.models import FontOCRConfig
+from novel_downloader.schemas import FontOCRConfig
 
 if TYPE_CHECKING:
     from .core import FontOCR

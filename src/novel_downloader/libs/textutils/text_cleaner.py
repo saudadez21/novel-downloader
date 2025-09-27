@@ -11,7 +11,7 @@ import re
 from re import Match, Pattern
 from typing import Protocol, runtime_checkable
 
-from novel_downloader.models import TextCleanerConfig
+from novel_downloader.schemas import TextCleanerConfig
 
 
 @runtime_checkable

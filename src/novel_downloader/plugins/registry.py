@@ -8,17 +8,17 @@ from collections.abc import Callable
 from importlib import import_module
 from typing import TypeVar
 
-from novel_downloader.models import (
-    DownloaderConfig,
-    ExporterConfig,
-    FetcherConfig,
-    ParserConfig,
-)
 from novel_downloader.plugins.protocols import (
     DownloaderProtocol,
     ExporterProtocol,
     FetcherProtocol,
     ParserProtocol,
+)
+from novel_downloader.schemas import (
+    DownloaderConfig,
+    ExporterConfig,
+    FetcherConfig,
+    ParserConfig,
 )
 
 DownloaderBuilder = Callable[

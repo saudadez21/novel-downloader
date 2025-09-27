@@ -15,7 +15,7 @@ import types
 from pathlib import Path
 from typing import Any, Self
 
-from novel_downloader.models import ChapterDict
+from novel_downloader.schemas import ChapterDict
 
 _CREATE_TABLE_SQL = """
 CREATE TABLE IF NOT EXISTS chapters (

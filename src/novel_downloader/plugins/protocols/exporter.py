@@ -10,7 +10,7 @@ import types
 from pathlib import Path
 from typing import Protocol, Self, runtime_checkable
 
-from novel_downloader.models import BookConfig
+from novel_downloader.schemas import BookConfig
 
 
 @runtime_checkable

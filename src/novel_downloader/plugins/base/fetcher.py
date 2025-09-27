@@ -24,11 +24,11 @@ from novel_downloader.infra.http_defaults import (
     DEFAULT_USER_HEADERS,
 )
 from novel_downloader.infra.paths import DATA_DIR
-from novel_downloader.libs.fs import sanitize_filename
-from novel_downloader.libs.fs.file import _unique_path, write_file
+from novel_downloader.libs.filesystem import sanitize_filename
+from novel_downloader.libs.filesystem.file import _unique_path, write_file
 from novel_downloader.libs.time_utils import async_jitter_sleep
-from novel_downloader.models import FetcherConfig, LoginField
 from novel_downloader.plugins.utils.rate_limiter import TokenBucketRateLimiter
+from novel_downloader.schemas import FetcherConfig, LoginField
 
 
 class BaseSession(abc.ABC):

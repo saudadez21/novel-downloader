@@ -9,13 +9,13 @@ from typing import Any
 
 from lxml import etree, html
 
-from novel_downloader.models import (
+from novel_downloader.plugins.base.parser import BaseParser
+from novel_downloader.plugins.registry import registrar
+from novel_downloader.schemas import (
     BookInfoDict,
     ChapterDict,
     VolumeInfoDict,
 )
-from novel_downloader.plugins.base.parser import BaseParser
-from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_parser()

@@ -8,13 +8,13 @@ novel_downloader.plugins.archived.n8tsw.parser
 from typing import Any
 
 from lxml import html
-from novel_downloader.models import (
+from novel_downloader.plugins.base.parser import BaseParser
+from novel_downloader.schemas import (
     BookInfoDict,
     ChapterDict,
     ChapterInfoDict,
     VolumeInfoDict,
 )
-from novel_downloader.plugins.base.parser import BaseParser
 
 
 class N8tswParser(BaseParser):

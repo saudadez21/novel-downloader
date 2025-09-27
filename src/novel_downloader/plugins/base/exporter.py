@@ -16,8 +16,8 @@ from pathlib import Path
 from typing import Any, ClassVar, Self, cast
 
 from novel_downloader.infra.persistence.chapter_storage import ChapterStorage
-from novel_downloader.libs.text import get_cleaner
-from novel_downloader.models import (
+from novel_downloader.libs.textutils import get_cleaner
+from novel_downloader.schemas import (
     BookConfig,
     BookInfoDict,
     ChapterDict,

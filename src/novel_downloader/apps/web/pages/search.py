@@ -19,8 +19,8 @@ from nicegui.events import KeyEventArguments, ValueChangeEventArguments
 
 from novel_downloader.apps.constants import SEARCH_SUPPORT_SITES
 from novel_downloader.infra.i18n import t
-from novel_downloader.models import SearchResult
 from novel_downloader.plugins.searching import search_stream
+from novel_downloader.schemas import SearchResult
 
 from ..components import navbar
 from ..services import manager, setup_dialog

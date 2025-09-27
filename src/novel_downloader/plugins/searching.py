@@ -16,8 +16,8 @@ from typing import TypeVar
 
 import aiohttp
 
-from novel_downloader.models import SearchResult
 from novel_downloader.plugins.base.searcher import BaseSearcher
+from novel_downloader.schemas import SearchResult
 
 S = TypeVar("S", bound=BaseSearcher)
 

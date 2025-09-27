@@ -12,7 +12,7 @@ import json
 from collections.abc import Mapping
 from typing import Any, TypeVar
 
-from novel_downloader.models import (
+from novel_downloader.schemas import (
     BookConfig,
     DownloaderConfig,
     ExporterConfig,

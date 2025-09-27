@@ -15,12 +15,12 @@ from uuid import uuid4
 
 from novel_downloader.infra.config import ConfigAdapter, load_config
 from novel_downloader.infra.cookies import parse_cookies
-from novel_downloader.models import (
+from novel_downloader.plugins import registrar
+from novel_downloader.schemas import (
     BookConfig,
     ExporterConfig,
     LoginField,
 )
-from novel_downloader.plugins import registrar
 
 from .cred_broker import (
     REQUEST_TIMEOUT,

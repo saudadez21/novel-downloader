@@ -17,8 +17,8 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 from novel_downloader.infra.http_defaults import DEFAULT_HEADERS
-from novel_downloader.libs.fs import sanitize_filename
-from novel_downloader.libs.fs.file import _unique_path, write_file
+from novel_downloader.libs.filesystem import sanitize_filename
+from novel_downloader.libs.filesystem.file import _unique_path, write_file
 
 
 def _normalize_url(url: str) -> str:
