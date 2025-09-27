@@ -190,8 +190,8 @@ novel-cli download --site ttkan shengxu-chendong
     * 图片资源可能无法加载 (404)
 
 * **飘天文学网 (piaotia)**
-  * 书籍: `https://www.piaotia.com/bookinfo/13/12345.html` -> Book ID: `13-12345`
-  * 章节: `https://www.piaotia.com/html/13/12345/114514.html` -> Chapter ID: `114514`
+  * 书籍: `https://www.piaotia.com/bookinfo/1/1705.html` -> Book ID: `1-1705`
+  * 章节: `https://www.piaotia.com/html/1/1705/762992.html` -> Chapter ID: `762992`
 
 * **新吾爱文学 (n71ge)**
   * 书籍: `https://www.71ge.com/65_65536/` -> Book ID: `65_65536`
