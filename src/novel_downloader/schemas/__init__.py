@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-novel_downloader.models
------------------------
+novel_downloader.schemas
+------------------------
 
-Data models and configuration classes.
+Data contracts and type definitions.
 """
 
 __all__ = [

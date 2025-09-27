@@ -3,7 +3,7 @@
 novel_downloader.apps.web.components
 ------------------------------------
 
-Entry point for reusable web UI components
+Reusable web UI components.
 """
 
 __all__ = ["navbar"]

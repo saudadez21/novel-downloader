@@ -2,6 +2,9 @@
 """
 novel_downloader.plugins
 ------------------------
+
+Plugin system core. Includes protocols, site implementations,
+common utilities, and the plugin registry.
 """
 
 __all__ = [

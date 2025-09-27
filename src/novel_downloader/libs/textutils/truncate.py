@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.libs.text.truncate
------------------------------------
+novel_downloader.libs.textutils.truncate
+----------------------------------------
 
 Tools for truncating text.
 """

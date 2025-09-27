@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.apps.cli.actions.download
-------------------------------------------
+novel_downloader.apps.cli.handlers.download
+-------------------------------------------
 
 """
 

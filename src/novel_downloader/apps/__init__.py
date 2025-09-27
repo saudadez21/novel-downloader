@@ -3,4 +3,5 @@
 novel_downloader.apps
 ---------------------
 
+Adapters / UI layer. Provides CLI and Web interfaces.
 """

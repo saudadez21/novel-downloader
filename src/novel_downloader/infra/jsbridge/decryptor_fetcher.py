@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.infra.decrypt.decryptor_fetcher
-------------------------------------------------
+novel_downloader.infra.jsbridge.decryptor_fetcher
+-------------------------------------------------
 
 Download and cache the *qidian-decryptor* executable from the project's
 GitHub releases.

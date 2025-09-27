@@ -3,7 +3,7 @@
 novel_downloader.apps.web.pages
 -------------------------------
 
-NiceGUI page registrations; importing this package exposes and registers all routes.
+Page definitions for the web interface. Each file corresponds to a feature page.
 """
 
 __all__ = [

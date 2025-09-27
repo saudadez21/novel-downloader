@@ -3,7 +3,7 @@
 novel_downloader.apps.cli
 -------------------------
 
-This module exposes the CLI entry point.
+Command-line interface layer built on top of rich.
 """
 
 __all__ = ["cli_main"]

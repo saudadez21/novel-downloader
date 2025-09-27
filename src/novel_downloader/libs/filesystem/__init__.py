@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-novel_downloader.libs.fs
-------------------------
+novel_downloader.libs.filesystem
+--------------------------------
 
-High-level file I/O utility re-exports for convenience.
+Filesystem utilities, including file I/O and filename sanitization.
 """
 
 __all__ = [

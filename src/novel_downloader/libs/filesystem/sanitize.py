@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.libs.fs.sanitize
----------------------------------
+novel_downloader.libs.filesystem.sanitize
+-----------------------------------------
 
 Utility functions for cleaning and validating filenames for safe use
 on different operating systems.

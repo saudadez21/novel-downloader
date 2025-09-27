@@ -3,6 +3,7 @@
 novel_downloader.apps.cli.commands
 ----------------------------------
 
+CLI command definitions. Each file corresponds to a subcommand.
 """
 
 __all__ = ["commands"]

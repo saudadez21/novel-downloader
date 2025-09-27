@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.libs.text.text_cleaner
----------------------------------------
+novel_downloader.libs.textutils.text_cleaner
+--------------------------------------------
 
 Provides utilities to clean novel titles and content
 by removing unwanted patterns, replacing strings.

@@ -3,5 +3,5 @@
 novel_downloader.libs.crypto
 ----------------------------
 
-Generic cryptographic utilities
+Cryptographic algorithms such as AES and RC4.
 """

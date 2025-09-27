@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.libs.text.numbers
-----------------------------------
+novel_downloader.libs.textutils.numbers
+---------------------------------------
 
 Utility functions to convert between Chinese numeral strings
 and Python integers.

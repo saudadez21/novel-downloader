@@ -3,8 +3,7 @@
 novel_downloader.infra.fontocr
 ------------------------------
 
-Lazy-loading interface for FontOCR. Provides a safe entry point
-to obtain an OCR utility instance if optional dependencies are available.
+Font-based OCR utilities for parsing and restoring obfuscated text.
 """
 
 __all__ = ["get_font_ocr"]

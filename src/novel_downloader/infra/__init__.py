@@ -2,4 +2,6 @@
 """
 novel_downloader.infra
 ----------------------
+
+Infrastructure layer. Provides integration with external systems.
 """

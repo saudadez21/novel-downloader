@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.models.config
-------------------------------
+novel_downloader.schemas.config
+-------------------------------
 
 Defines structured configuration models using dataclasses for each
 major component in the novel_downloader pipeline.

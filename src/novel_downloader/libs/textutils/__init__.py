@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-novel_downloader.libs.text
---------------------------
+novel_downloader.libs.textutils
+-------------------------------
 
-Utility modules for text formatting, cleaning, and diff display.
+Text processing helpers such as number handling, text cleaning, and truncation.
 """
 
 __all__ = [

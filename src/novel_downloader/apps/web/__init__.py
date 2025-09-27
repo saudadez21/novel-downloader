@@ -3,7 +3,7 @@
 novel_downloader.apps.web
 -------------------------
 
-This module exposes the WEB entry point.
+Web interface layer built with nicegui.
 """
 
 __all__ = [

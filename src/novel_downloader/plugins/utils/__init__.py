@@ -2,4 +2,6 @@
 """
 novel_downloader.plugins.utils
 ------------------------------
+
+Plugin-related helpers.
 """

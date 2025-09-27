@@ -3,7 +3,8 @@
 novel_downloader.plugins.protocols
 ----------------------------------
 
-Protocol apps defining the contracts for core components.
+Plugin protocols defining contracts for downloader, exporter,
+parser, and searcher interfaces.
 """
 
 __all__ = [

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.models.search
-------------------------------
+novel_downloader.schemas.search
+-------------------------------
 
 """
 
