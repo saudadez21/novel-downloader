@@ -131,6 +131,8 @@ novel-cli download [-h] [--site SITE] [--config CONFIG] [--start START] [--end E
 
 **Examples**
 
+![cli_download](./images/cli_download.gif)
+
 ```bash
 # 方式一: 直接通过 URL 启动下载
 novel-cli download https://www.hetushu.com/book/5763/index.html
@@ -170,6 +172,8 @@ novel-cli search [-h] [--site SITE] [--config CONFIG] [--limit N] [--site-limit 
 * `--site-limit M`: 单站点结果上限 (最小 1), 默认为 `10`
 
 **Examples**
+
+![cli_search](./images/cli_search_santi.gif)
 
 ```bash
 # 搜索所有站点 (默认全部)
@@ -211,10 +215,9 @@ novel-cli export [-h] [--format FORMAT] [--site SITE] [--config CONFIG] [book_id
 
 **Examples**
 
-```bash
-# 导出指定起点小说为默认格式 (根据配置)
-novel-cli export 12345 23456
+![cli_search](./images/cli_export.gif)
 
+```bash
 # 指定导出格式为 EPUB
 novel-cli export --format epub 88888
 

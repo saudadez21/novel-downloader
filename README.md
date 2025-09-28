@@ -61,6 +61,8 @@ novel-cli config init
 
 ### 2. 命令行 (CLI)
 
+![cli_download](./docs/images/cli_download.gif)
+
 ```bash
 # 使用书籍页面 URL 自动解析并下载
 novel-cli download https://www.hetushu.com/book/5763/index.html
@@ -86,6 +88,8 @@ novel-web
 # novel-web --listen public
 ```
 
+* 支持站点见: [支持站点列表](docs/4-supported-sites.md)
+* 更多示例见: [WEB 使用示例](docs/6-web-usage-examples.md)
 * 运行中可使用 `CTRL+C` 停止服务
 
 ---
@@ -97,14 +101,15 @@ novel-web
 ```bash
 git clone https://github.com/saudadez21/novel-downloader.git
 cd novel-downloader
-pip install .
-# 或安装带可选功能:
-# pip install .[font-recovery]
 
 # 可选: 启用多语言支持
 # 安装 Babel 并编译翻译文件
 # pip install babel
 # pybabel compile -d src/novel_downloader/locales
+
+pip install .
+# 或安装带可选功能:
+# pip install .[font-recovery]
 ```
 
 ---
@@ -116,6 +121,7 @@ pip install .
 * [settings.toml 配置说明](docs/3-settings-schema.md)
 * [支持站点列表](docs/4-supported-sites.md)
 * [CLI 使用示例](docs/5-cli-usage-examples.md)
+* [WEB 使用示例](docs/6-web-usage-examples.md)
 * [复制 Cookies](docs/copy-cookies.md)
 * [文件保存](docs/file-saving.md)
 * [模块与接口文档](docs/api/README.md)

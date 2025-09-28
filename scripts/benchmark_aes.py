@@ -6,8 +6,8 @@ import timeit
 
 from Crypto.Cipher import AES as PyAES
 
-# from novel_downloader.utils.crypto_utils.aes_v1 import AES_CBC
-from novel_downloader.utils.crypto_utils.aes_v2 import AES_CBC
+# from novel_downloader.libs.crypto.aes_v1 import AES_CBC
+from novel_downloader.libs.crypto.aes_v2 import AES_CBC
 
 # =======================
 # Configuration constants

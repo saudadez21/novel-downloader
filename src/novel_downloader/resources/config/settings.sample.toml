@@ -78,6 +78,10 @@ login_required = false
 [sites.common]
 login_required = false
 
+[plugins]
+enable_local_plugins = false
+local_plugins_path = ""
+
 # 输出文件格式及相关选项
 [output.formats]
 make_txt = true                    # 是否生成完整 TXT 文件

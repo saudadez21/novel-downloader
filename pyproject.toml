@@ -53,8 +53,8 @@ dev = [
 ]
 
 [project.scripts]
-novel-cli = "novel_downloader.cli.main:cli_main"
-novel-web = "novel_downloader.web.main:web_main"
+novel-cli = "novel_downloader.apps.cli.main:cli_main"
+novel-web = "novel_downloader.apps.web.main:web_main"
 
 [project.urls]
 Homepage = "https://github.com/saudadez21/novel-downloader"
