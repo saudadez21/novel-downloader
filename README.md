@@ -61,6 +61,8 @@ novel-cli config init
 
 ### 2. 命令行 (CLI)
 
+![cli_download](./docs/images/cli_download.gif)
+
 ```bash
 # 使用书籍页面 URL 自动解析并下载
 novel-cli download https://www.hetushu.com/book/5763/index.html
