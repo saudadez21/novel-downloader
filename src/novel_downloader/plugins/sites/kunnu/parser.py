@@ -26,6 +26,9 @@ class KunnuParser(BaseParser):
     """
 
     site_name: str = "kunnu"
+    ADS = {
+        r"鲲\W*弩\W*小\W*说",
+    }
 
     def parse_book_info(
         self,
@@ -144,7 +147,7 @@ class KunnuParser(BaseParser):
         paragraphs: list[str] = []
         for p in tree.xpath('//div[@id="nr1"]//p'):
             txt = self._join_strs(p.xpath(".//text()"))
-            if txt:
+            if txt and not self._is_ad_line(txt):
                 paragraphs.append(txt)
 
         content = "\n".join(paragraphs)
