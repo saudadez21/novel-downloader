@@ -52,7 +52,7 @@ def setup_dialog() -> None:
                     with ui.column().classes("w-full gap-1"):
                         ui.label(f.label).classes("text-sm font-medium")
                         if getattr(f, "description", ""):
-                            ui.label(t(f.description)).classes("text-xs text-grey-6")
+                            ui.label(t(f.description)).classes("text-xs text-caption")
 
                         initial = prefill.get(f.name, f.default or "")
 
@@ -125,7 +125,7 @@ def setup_dialog() -> None:
             ui.notify(t("Submitted successfully"))
 
         with ui.row().classes("justify-end w-full mt-2"):
-            ui.button(t("Cancel"), on_click=on_cancel).props("flat color=grey-7")
+            ui.button(t("Cancel"), on_click=on_cancel).props("flat color=secondary")
             ui.button(t("Submit"), on_click=on_submit)
 
     dialog.props("persistent")

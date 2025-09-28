@@ -97,7 +97,7 @@ def _render_placeholder_cover() -> None:
     with ui.element("div").classes(
         "w-[72px] h-[96px] bg-grey-3 rounded-md flex items-center justify-center"
     ):
-        ui.icon("book").classes("text-grey-6 text-3xl")
+        ui.icon("book").classes("text-secondary text-3xl")
 
 
 def _site_label(site_key: str) -> str:
@@ -165,11 +165,11 @@ def _render_result_row(r: SearchResult) -> None:
                 t("{author} · {words} · Updated at {date}").format(
                     author=r["author"], words=r["word_count"], date=r["update_date"]
                 )
-            ).classes("text-xs text-grey-6")
-            ui.label(r["latest_chapter"]).classes("text-sm text-grey-7")
+            ).classes("text-xs text-caption")
+            ui.label(r["latest_chapter"]).classes("text-sm text-secondary")
 
             ui.label(f"{_site_label(r['site'])} · ID: {r['book_id']}").classes(
-                "text-xs text-grey-5"
+                "text-xs text-caption"
             )
 
         async def _add_task() -> None:
@@ -199,7 +199,7 @@ def _build_settings_dropdown(
     with settings_btn:
         menu = ui.menu().props("no-parent-event")
         with menu:
-            ui.label(t("Site Selection")).classes("text-sm text-grey-7 q-mb-xs")
+            ui.label(t("Site Selection")).classes("text-sm text-secondary q-mb-xs")
 
             with ui.row().classes("gap-2"):
 
@@ -225,7 +225,7 @@ def _build_settings_dropdown(
                     site_cbs[key] = ui.checkbox(label, value=(key in selected))
 
             ui.separator()
-            ui.label(t("Advanced Settings")).classes("text-sm text-grey-7 q-mt-sm")
+            ui.label(t("Advanced Settings")).classes("text-sm text-secondary q-mt-sm")
 
             psl_in = (
                 ui.number(
@@ -278,16 +278,16 @@ def page_search() -> None:
     # ---------- Outer container ----------
     with ui.column().classes("w-full max-w-screen-lg min-w-[320px] mx-auto gap-4"):
         # ---------- Sticky toolbar ----------
-        with ui.card().classes(
-            "w-full sticky top-0 z-10 backdrop-blur bg-white/70 border-0 shadow-sm"
+        with ui.card().props("flat bordered").classes(
+            "w-full sticky top-0 z-10 backdrop-blur"
         ):
-            with ui.row().classes("items-center gap-2 w-full"):
+            with ui.row().classes("items-center gap-2 w-full flex-wrap"):
                 get_sites, get_psl, get_timeout = _build_settings_dropdown(state)
 
                 query_in = (
                     ui.input(t("Enter keyword"), value=state["query"])
-                    .props("outlined dense clearable")
-                    .classes("min-w-[320px] grow")
+                    .props("outlined dense clearable autocomplete=off")
+                    .classes("min-w-[260px] grow")
                 )
 
                 search_btn = ui.button(t("Search"), color="primary").props("unelevated")
@@ -295,7 +295,7 @@ def page_search() -> None:
                     "outline"
                 )
 
-            with ui.row().classes("items-center gap-3 w-full q-mt-xs"):
+            with ui.row().classes("items-center gap-3 w-full q-mt-xs flex-wrap"):
                 sort_key_labels = {
                     "priority": t("Priority"),
                     "site": t("Site"),
@@ -313,14 +313,10 @@ def page_search() -> None:
                     .classes("w-[180px]")
                 )
 
-                sort_order_sel = (
-                    ui.toggle(
-                        {"asc": t("Ascending"), "desc": t("Descending")},
-                        value=state["sort_order"],
-                    )
-                    .props("dense")
-                    .classes("")
-                )
+                sort_order_sel = ui.toggle(
+                    {"asc": t("Ascending"), "desc": t("Descending")},
+                    value=state["sort_order"],
+                ).props("dense")
 
                 def _on_sort_change(_: Any = None) -> None:
                     state["sort_key"] = sort_key_sel.value or "priority"
@@ -333,10 +329,12 @@ def page_search() -> None:
                 sort_order_sel.on_value_change(_on_sort_change)
 
         # ---------- Status ----------
-        status_area = ui.row().classes("items-center gap-2 my-2 w-full")
+        status_area = ui.row().classes(
+            "items-center gap-2 my-2 w-full text-sm text-caption"
+        )
 
         # ---------- Results + pager ----------
-        list_area = ui.column().classes("w-full gap-2")
+        list_area = ui.column().classes("w-full gap-3")
         pager_area = ui.row().classes("items-center justify-center w-full q-mt-md")
 
     @ui.refreshable  # type: ignore[misc]
@@ -344,18 +342,18 @@ def page_search() -> None:
         status_area.clear()
         with status_area:
             if state.get("searching"):
-                ui.icon("hourglass_top").classes("text-grey-6")
+                ui.icon("hourglass_top").classes("text-secondary")
                 ui.label(t("Searching (results will appear progressively)...")).classes(
-                    "text-sm text-grey-7"
+                    "text-caption"
                 )
             total = len(state.get("results") or [])
             if total > 0:
                 ui.label(
                     t("Currently retrieved {total} results").format(total=total)
-                ).classes("text-sm text-grey-7")
+                ).classes("text-caption")
 
     def _render_skeleton_card() -> None:
-        with ui.card().classes("w-full h-[120px] bg-grey-2 animate-pulse"):
+        with ui.card().props("flat bordered").classes("w-full h-[120px] animate-pulse"):
             pass
 
     @ui.refreshable  # type: ignore[misc]
@@ -379,7 +377,7 @@ def page_search() -> None:
                 total=total, page=page, pages=total_pages
             )
             with list_area:
-                ui.label(tip).classes("text-sm text-grey-7")
+                ui.label(tip).classes("text-sm text-caption")
                 for r in current:
                     _render_result_row(r)
         elif state.get("searching"):

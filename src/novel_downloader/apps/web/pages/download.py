@@ -17,13 +17,6 @@ from ..services import manager, setup_dialog
 _DEFAULT_SITE = "qidian"
 
 
-def _chip(text: str) -> None:
-    with ui.element("span").classes(
-        "inline-flex items-center px-2 py-[2px] text-[11px] rounded bg-grey-2 text-grey-7"  # noqa: E501
-    ):
-        ui.label(text).classes("leading-none")
-
-
 @ui.page("/download")  # type: ignore[misc]
 def page_download() -> None:
     navbar("download")
@@ -43,22 +36,22 @@ def page_download() -> None:
         with ui.column().classes("gap-2 w-full") as url_section:
             url_input = (
                 ui.input(t("Novel URL"))
-                .props("outlined dense clearable")
+                .props("outlined dense clearable autocomplete=off")
                 .classes("w-full")
             )
 
             preview_row = ui.row().classes("items-center gap-2 w-full")
             with preview_row:
-                _chip(t("Parsed result"))
-                site_badge = ui.label("").classes("text-xs text-grey-7")
-                id_badge = ui.label("").classes("text-xs text-grey-7")
+                ui.chip(t("Parsed result")).props("dense outline color=secondary")
+                site_badge = ui.label("").classes("text-xs text-secondary")
+                id_badge = ui.label("").classes("text-xs text-secondary")
             preview_row.visible = False
 
             ui.label(
                 t(
                     "Paste the full novel detail page link, the system will automatically parse the site and book ID"  # noqa: E501
                 )
-            ).classes("text-xs text-grey-6")
+            ).classes("text-caption q-ml-sm")
 
         ui.separator()
 
@@ -77,18 +70,18 @@ def page_download() -> None:
                 )
                 book_id = (
                     ui.input(t("Book ID"))
-                    .props("outlined dense clearable")
+                    .props("outlined dense clearable autocomplete=off")
                     .classes("w-full md:w-[60%]")
                 )
             ui.label(
                 t(
                     "If you already know the site and book ID, you can enter them directly here"  # noqa: E501
                 )
-            ).classes("text-xs text-grey-6")
+            ).classes("text-caption q-ml-sm")
 
         # Shared actions
         with ui.row().classes("justify-end items-center gap-2 w-full q-mt-sm"):
-            clear_btn = ui.button(t("Clear")).props("outline")
+            clear_btn = ui.button(t("Clear"), color="secondary").props("outline")
             add_btn = ui.button(t("Add to download queue"), color="primary").props(
                 "unelevated"
             )

@@ -33,7 +33,7 @@ def _status_chip(status: Status) -> None:
         "running": "primary",
         "exporting": "secondary",
         "completed": "positive",
-        "cancelled": "grey-6",
+        "cancelled": "info",
         "failed": "negative",
     }
     ui.chip(label_map[status]).props(
@@ -42,7 +42,7 @@ def _status_chip(status: Status) -> None:
 
 
 def _meta_row(label: str, value: str) -> None:
-    with ui.row().classes("items-center justify-between text-xs text-grey-7 w-full"):
+    with ui.row().classes("items-center justify-between text-xs text-caption w-full"):
         ui.label(label)
         ui.label(value)
 
@@ -56,7 +56,7 @@ def _progress_block(tsk: DownloadTask) -> None:
                 t("{done}/? · Fetching total chapters...").format(
                     done=tsk.chapters_done
                 )
-            ).classes("text-xs text-grey-7")
+            ).classes("text-xs text-caption")
         else:
             ui.linear_progress(value=tsk.progress()).props("instant-feedback").classes(
                 "w-full"
@@ -65,11 +65,11 @@ def _progress_block(tsk: DownloadTask) -> None:
                 t("{done}/{total} · Running").format(
                     done=tsk.chapters_done, total=tsk.chapters_total
                 )
-            ).classes("text-xs text-grey-7")
+            ).classes("text-xs text-caption")
 
     elif tsk.status == "exporting":
         ui.linear_progress().props("indeterminate striped").classes("w-full")
-        ui.label(t("Exporting...")).classes("text-xs text-grey-7")
+        ui.label(t("Exporting...")).classes("text-xs text-caption")
 
     else:
         suffix = {
@@ -80,10 +80,12 @@ def _progress_block(tsk: DownloadTask) -> None:
 
         if tsk.chapters_total > 0:
             ui.label(f"{tsk.chapters_done}/{tsk.chapters_total} · {suffix}").classes(
-                "text-xs text-grey-7"
+                "text-xs text-caption"
             )
         else:
-            ui.label(f"{tsk.chapters_done}/? · {suffix}").classes("text-xs text-grey-7")
+            ui.label(f"{tsk.chapters_done}/? · {suffix}").classes(
+                "text-xs text-caption"
+            )
 
         if tsk.status == "completed" and tsk.exported_paths:
             with ui.row().classes("w-full gap-2 mt-1"):
@@ -127,7 +129,7 @@ def _task_card(tsk: DownloadTask, *, active: bool) -> None:
             _meta_row(t("Book ID"), tsk.book_id)
             if tsk.status == "failed" and tsk.error:
                 with ui.row().classes("items-start justify-between w-full"):
-                    ui.label(t("Error")).classes("text-xs text-grey-7")
+                    ui.label(t("Error")).classes("text-xs text-caption")
                     ui.label(tsk.error).classes("text-xs text-negative q-ml-md")
 
         # Progress / summary
@@ -152,7 +154,7 @@ def page_progress() -> None:
                 running = s["running"]
                 pending = s["pending"]
                 if not running and not pending:
-                    ui.label(t("None")).classes("text-sm text-grey-6")
+                    ui.label(t("None")).classes("text-sm text-caption")
                 else:
                     for tsk in running:
                         _task_card(tsk, active=True)
@@ -163,7 +165,7 @@ def page_progress() -> None:
             with ui.card().classes("w-full"):
                 ui.label(t("Completed / Cancelled / Failed")).classes("text-base")
                 if not s["completed"]:
-                    ui.label(t("None")).classes("text-sm text-grey-6")
+                    ui.label(t("None")).classes("text-sm text-caption")
                 else:
                     for tsk in s["completed"]:
                         _task_card(tsk, active=False)

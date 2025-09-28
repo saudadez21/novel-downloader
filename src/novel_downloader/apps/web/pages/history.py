@@ -100,7 +100,7 @@ def _render_file_card(item: FileItem) -> None:
         # Meta & actions
         with ui.column().classes("min-w-0"):
             ui.label(item.name).classes("text-base font-medium break-words")
-            ui.label(f"Modified: {human_mtime}").classes("text-xs text-gray-500")
+            ui.label(f"Modified: {human_mtime}").classes("text-xs text-caption")
             with ui.row().classes("mt-2"):
                 ui.button(
                     "Download",
@@ -132,7 +132,7 @@ def page_history() -> None:
         with ui.card().classes("w-full"), ui.row().classes(
             "items-center gap-3 w-full flex-wrap"
         ):
-            ui.label(t("Type")).classes("text-sm text-grey-6")
+            ui.label(t("Type")).classes("text-sm text-caption")
             type_sel = (
                 ui.select(
                     ["All", "txt", "epub"],
@@ -147,7 +147,7 @@ def page_history() -> None:
                 "mx-1 self-stretch hidden md:block"
             )
 
-            ui.label(t("Sort Field")).classes("text-sm text-grey-6")
+            ui.label(t("Sort Field")).classes("text-sm text-caption")
             sort_key_sel = (
                 ui.select(
                     {"name": t("Filename"), "mtime": t("Modified Time")},
@@ -173,7 +173,9 @@ def page_history() -> None:
             ).props("dense flat")
 
         # status line (counts)
-        status_area = ui.row().classes("items-center gap-2 w-full text-sm text-grey-7")
+        status_area = ui.row().classes(
+            "items-center gap-2 w-full text-sm text-secondary"
+        )
 
         # list + pager
         list_area = ui.column().classes("w-full gap-3")
@@ -222,7 +224,7 @@ def page_history() -> None:
             list_area.clear()
             with list_area:
                 if not current_slice:
-                    ui.label(t("No files")).classes("text-grey-6")
+                    ui.label(t("No files")).classes("text-caption")
                 else:
                     for item in current_slice:
                         _render_file_card(item)
