@@ -115,7 +115,7 @@ testpaths = ["tests"]
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "2.2.0"
+version = "2.3.0"
 version_files = [
     "src/novel_downloader/__init__.py"
 ]

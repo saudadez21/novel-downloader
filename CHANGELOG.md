@@ -1,3 +1,19 @@
+## v2.3.0 (2025-09-28)
+
+### Feat
+
+- **sfacg**: add support for VIP content with OCR (#90)
+
+### Fix
+
+- **cli**: prevent export when download step fails (#92)
+
+### Refactor
+
+- **project**: restructure directories and core (#94)
+- **cli**: extract config loading into  service (#93)
+- **cli**: restructure command system and improve export flow (#91)
+
 ## v2.2.0 (2025-09-21)
 
 ### Feat
