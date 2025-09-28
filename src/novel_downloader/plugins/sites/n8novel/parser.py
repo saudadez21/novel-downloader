@@ -31,7 +31,7 @@ class N8novelParser(BaseParser):
     _SPLIT_STR_PATTERN = re.compile(
         r'["\']([^"\']+)["\']\s*\.split\s*\(\s*["\']\s*,\s*["\']\s*\)', re.DOTALL
     )
-    NOVEL_COM_SETS: list[set[str]] = [
+    SITE_AD_SETS: list[set[str]] = [
         {"8", "⑧", "⑻", "⒏", "８"},
         {"N", "Ν", "Ｎ", "ｎ"},
         {"O", "o", "ο", "σ", "О", "Ｏ", "ｏ"},
@@ -196,11 +196,11 @@ class N8novelParser(BaseParser):
     @classmethod
     def _is_ad(cls, line: str) -> bool:
         """Check if a line matches the obfuscated 'novel.com' ad pattern."""
-        if len(line) != 10:
+        if len(line) != len(cls.SITE_AD_SETS):
             return False
         mismatches = 0
         for i, ch in enumerate(line):
-            if ch not in cls.NOVEL_COM_SETS[i]:
+            if ch not in cls.SITE_AD_SETS[i]:
                 mismatches += 1
                 if mismatches > 2:
                     return False

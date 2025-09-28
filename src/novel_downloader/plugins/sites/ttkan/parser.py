@@ -28,6 +28,21 @@ class TtkanParser(BaseParser):
 
     site_name: str = "ttkan"
 
+    SITE_AD_SETS: list[set[str]] = [
+        {"W", "w", "ω", "ш", "щ"},  # w/ш variants
+        {"W", "w", "ω", "ш", "щ"},
+        {"W", "w", "ω", "ш", "щ"},
+        {".", "¤", "¸", "•", "⊕", "⊙", "▪", "▲", "◆", "●", "★", "☢", "✿", "＿"},
+        {"T", "t", "т", "ⓣ"},
+        {"T", "t", "т", "ⓣ"},
+        {"K", "k", "κ", "К", "к", "ⓚ"},
+        {"a", "á", "ā", "ǎ", "Λ", "д", "ⓐ"},
+        {"N", "n", "ⓝ"},
+        {".", "¤", "¸", "•", "⊕", "⊙", "▪", "▲", "◆", "●", "★", "☢", "✿", "＿"},
+        {"C", "c", "С", "℃", "￠"},
+        {"O", "o", "Ο", "○", "〇"},
+    ]
+
     def parse_book_info(
         self,
         html_list: list[str],
@@ -117,7 +132,7 @@ class TtkanParser(BaseParser):
         lines = []
         for p in paras:
             text = p.text_content().strip()
-            if text:
+            if text and not self._is_ad(text):
                 lines.append(text)
 
         content = "\n".join(lines)
@@ -130,3 +145,17 @@ class TtkanParser(BaseParser):
             "content": content,
             "extra": {"site": self.site_name},
         }
+
+    @classmethod
+    def _is_ad(cls, line: str) -> bool:
+        """Check if a line matches the obfuscated ad pattern."""
+        cleaned = line.replace(" ", "")
+        if len(cleaned) != len(cls.SITE_AD_SETS):
+            return False
+        mismatches = 0
+        for i, ch in enumerate(cleaned):
+            if ch not in cls.SITE_AD_SETS[i]:
+                mismatches += 1
+                if mismatches > 2:
+                    return False
+        return True
