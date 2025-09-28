@@ -5,6 +5,7 @@ novel_downloader.plugins.sites.xshbook.parser
 
 """
 
+import re
 from typing import Any
 
 from lxml import html
@@ -32,6 +33,10 @@ class XshbookParser(BaseParser):
         r"^提示.{0,50}$",  # "提示" 开头且内容较短
         r"^分享.{0,40}$",  # "分享" 开头且内容较短
     }
+    # Inline ads like “本文搜：xxx.com 免费阅读”
+    _INLINE_AD_PATTERN = re.compile(
+        r"(本文搜|搜索[:：]?)\s*.*?\s*(免费阅读|本文免费阅读)"
+    )  # noqa: E501
 
     def parse_book_info(
         self,
@@ -105,6 +110,7 @@ class XshbookParser(BaseParser):
         paragraphs: list[str] = []
         for p in tree.xpath("//div[@id='content']//p"):
             text = self._norm_space(p.text_content() or "")
+            text = self._INLINE_AD_PATTERN.sub("", text).strip()
             if not text or self._is_ad_line(text):
                 continue
             paragraphs.append(text)
