@@ -43,6 +43,7 @@ class PluginRegistry:
         self._exporters: dict[str, ExporterBuilder] = {}
         self._fetchers: dict[str, FetcherBuilder] = {}
         self._parsers: dict[str, ParserBuilder] = {}
+        self._sources: list[str] = [_SITES_PKG]
 
     def register_fetcher(
         self, site_key: str | None = None
@@ -152,16 +153,41 @@ class PluginRegistry:
             return f"n{key}"
         return key
 
-    @staticmethod
-    def _try_import(site_key: str, kind: str) -> None:
-        """Attempt to import `plugins.sites.<site>.<kind>`."""
-        modname = f"{_SITES_PKG}.{site_key}.{kind}"
-        try:
-            import_module(modname)
-        except ModuleNotFoundError as e:
-            if e.name == modname:
+    def _try_import(self, site_key: str, kind: str) -> None:
+        """
+        Attempt to import plugins for a given site/kind in order:
+          1. built-in: `plugins.sites.<site>.<kind>`
+          2. user-level: `novel_plugins.<site>.<kind>`
+        """
+        for base in self._sources:
+            modname = f"{base}.{site_key}.{kind}"
+            try:
+                import_module(modname)
                 return
-            raise
+            except ModuleNotFoundError as e:
+                if e.name and modname.startswith(e.name):
+                    continue
+                raise
+
+    def enable_local_plugins(self, local_plugins_path: str | None = None) -> None:
+        """
+        Enable user-provided plugins under the `novel_plugins` namespace.
+        """
+        import os
+        import sys
+
+        base = local_plugins_path or os.getcwd()
+        base = os.path.abspath(base)
+
+        parent = base
+        if os.path.basename(base) == "novel_plugins":
+            parent = os.path.dirname(base)
+
+        if parent not in sys.path:
+            sys.path.insert(0, parent)
+
+        if "novel_plugins" not in self._sources:
+            self._sources.append("novel_plugins")
 
 
 registrar = PluginRegistry()

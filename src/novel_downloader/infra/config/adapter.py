@@ -158,6 +158,16 @@ class ConfigAdapter:
                     out[key] = s
         return out
 
+    def get_plugins_config(self) -> dict[str, Any]:
+        """
+        Return the plugin-related configuration section.
+        """
+        plugins_cfg = self._config.get("plugins") or {}
+        return {
+            "enable_local_plugins": plugins_cfg.get("enable_local_plugins", False),
+            "local_plugins_path": plugins_cfg.get("local_plugins_path") or "",
+        }
+
     def get_book_ids(self) -> list[BookConfig]:
         """
         Extract and normalize the list of target books for the current site.

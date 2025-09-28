@@ -118,6 +118,12 @@ class DownloadCmd(Command):
         log_level = adapter.get_log_level()
         ui.setup_logging(console_level=log_level)
 
+        plugins_cfg = adapter.get_plugins_config()
+        if plugins_cfg.get("enable_local_plugins"):
+            from novel_downloader.plugins.registry import registrar
+
+            registrar.enable_local_plugins(plugins_cfg.get("local_plugins_path"))
+
         # download
         import asyncio
 
