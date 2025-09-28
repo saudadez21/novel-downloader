@@ -47,6 +47,18 @@ def _meta_row(label: str, value: str) -> None:
         ui.label(value)
 
 
+def _format_seconds(sec: float | None) -> str:
+    if sec is None:
+        return "?"
+    if sec > 86400:
+        return "> 1 day"
+    m, s = divmod(int(sec), 60)
+    h, m = divmod(m, 60)
+    if h > 0:
+        return f"{h}h {m}m"
+    return f"{m}m {s}s"
+
+
 def _progress_block(tsk: DownloadTask) -> None:
     # progress or summary depending on state
     if tsk.status == "running":
@@ -61,9 +73,10 @@ def _progress_block(tsk: DownloadTask) -> None:
             ui.linear_progress(value=tsk.progress()).props("instant-feedback").classes(
                 "w-full"
             )
+            eta_str = _format_seconds(tsk.eta())
             ui.label(
-                t("{done}/{total} · Running").format(
-                    done=tsk.chapters_done, total=tsk.chapters_total
+                t("{done}/{total} · ETA {eta}").format(
+                    done=tsk.chapters_done, total=tsk.chapters_total, eta=eta_str
                 )
             ).classes("text-xs text-caption")
 

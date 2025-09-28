@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: novel-downloader 2.2.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-27 01:13-0400\n"
+"POT-Creation-Date: 2025-09-28 00:32-0400\n"
 "PO-Revision-Date: 2025-09-22 22:43-0400\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -296,8 +296,8 @@ msgstr "{site} 的可用书籍 · 第 {page}/{total} 页"
 
 #: src\novel_downloader\apps\cli\commands\export.py:235
 #: src\novel_downloader\apps\cli\commands\search.py:147
-#: src\novel_downloader\apps\web\pages\download.py:79
-#: src\novel_downloader\apps\web\pages\progress.py:127
+#: src\novel_downloader\apps\web\pages\download.py:72
+#: src\novel_downloader\apps\web\pages\progress.py:142
 msgid "Book ID"
 msgstr "书籍 ID"
 
@@ -469,100 +469,100 @@ msgstr "请输入值"
 msgid "This field is required. Please provide a value."
 msgstr "该字段为必填项，请输入值"
 
-#: src\novel_downloader\apps\web\components\navigation.py:24
+#: src\novel_downloader\apps\web\components\navigation.py:38
 #: src\novel_downloader\apps\web\pages\search.py:293
 msgid "Search"
 msgstr "搜索"
 
-#: src\novel_downloader\apps\web\components\navigation.py:25
+#: src\novel_downloader\apps\web\components\navigation.py:39
 #: src\novel_downloader\apps\web\pages\search.py:180
 msgid "Download"
 msgstr "下载"
 
-#: src\novel_downloader\apps\web\components\navigation.py:27
+#: src\novel_downloader\apps\web\components\navigation.py:41
 msgid "In Progress"
 msgstr "正在下载"
 
-#: src\novel_downloader\apps\web\components\navigation.py:29
+#: src\novel_downloader\apps\web\components\navigation.py:46
 msgid "History"
 msgstr "历史记录"
 
-#: src\novel_downloader\apps\web\pages\download.py:34
+#: src\novel_downloader\apps\web\pages\download.py:27
 msgid "Select input method"
 msgstr "选择输入方式"
 
-#: src\novel_downloader\apps\web\pages\download.py:37
+#: src\novel_downloader\apps\web\pages\download.py:30
 msgid "Via URL"
 msgstr "通过 URL"
 
-#: src\novel_downloader\apps\web\pages\download.py:37
+#: src\novel_downloader\apps\web\pages\download.py:30
 msgid "Site + ID"
 msgstr "站点 + ID"
 
-#: src\novel_downloader\apps\web\pages\download.py:45
+#: src\novel_downloader\apps\web\pages\download.py:38
 msgid "Novel URL"
 msgstr "小说 URL"
 
-#: src\novel_downloader\apps\web\pages\download.py:52
+#: src\novel_downloader\apps\web\pages\download.py:45
 msgid "Parsed result"
 msgstr "解析结果"
 
-#: src\novel_downloader\apps\web\pages\download.py:59
+#: src\novel_downloader\apps\web\pages\download.py:52
 msgid ""
 "Paste the full novel detail page link, the system will automatically parse "
 "the site and book ID"
 msgstr "粘贴完整的小说详情页链接，系统会自动解析站点和书籍ID"
 
-#: src\novel_downloader\apps\web\pages\download.py:72
-#: src\novel_downloader\apps\web\pages\progress.py:126
+#: src\novel_downloader\apps\web\pages\download.py:65
+#: src\novel_downloader\apps\web\pages\progress.py:141
 #: src\novel_downloader\apps\web\pages\search.py:301
 msgid "Site"
 msgstr "站点"
 
-#: src\novel_downloader\apps\web\pages\download.py:85
+#: src\novel_downloader\apps\web\pages\download.py:78
 msgid ""
 "If you already know the site and book ID, you can enter them directly here"
 msgstr "若已知站点与书籍ID，可在此直接输入"
 
-#: src\novel_downloader\apps\web\pages\download.py:91
+#: src\novel_downloader\apps\web\pages\download.py:84
 #: src\novel_downloader\apps\web\pages\search.py:215
 msgid "Clear"
 msgstr "清空"
 
-#: src\novel_downloader\apps\web\pages\download.py:92
+#: src\novel_downloader\apps\web\pages\download.py:85
 msgid "Add to download queue"
 msgstr "添加到下载队列"
 
-#: src\novel_downloader\apps\web\pages\download.py:139
+#: src\novel_downloader\apps\web\pages\download.py:132
 #, python-brace-format
 msgid "Site: {site}"
 msgstr "站点：{site}"
 
-#: src\novel_downloader\apps\web\pages\download.py:140
+#: src\novel_downloader\apps\web\pages\download.py:133
 #, python-brace-format
 msgid "Book ID: {bid}"
 msgstr "书籍 ID: {bid}"
 
-#: src\novel_downloader\apps\web\pages\download.py:145
+#: src\novel_downloader\apps\web\pages\download.py:138
 msgid "Parsing failed: The link may not be supported or is invalid"
 msgstr "解析失败：该链接可能不受支持或格式不正确"
 
-#: src\novel_downloader\apps\web\pages\download.py:154
+#: src\novel_downloader\apps\web\pages\download.py:147
 msgid "Please enter a novel URL"
 msgstr "请输入小说链接"
 
-#: src\novel_downloader\apps\web\pages\download.py:159
+#: src\novel_downloader\apps\web\pages\download.py:152
 msgid "Unable to parse the URL, please check the link or site support"
 msgstr "无法解析该 URL，请检查链接或站点支持情况"
 
-#: src\novel_downloader\apps\web\pages\download.py:165
-#: src\novel_downloader\apps\web\pages\download.py:176
+#: src\novel_downloader\apps\web\pages\download.py:158
+#: src\novel_downloader\apps\web\pages\download.py:169
 #: src\novel_downloader\apps\web\pages\search.py:177
 #, python-brace-format
 msgid "Task added: {title}"
 msgstr "已添加任务: {title}"
 
-#: src\novel_downloader\apps\web\pages\download.py:171
+#: src\novel_downloader\apps\web\pages\download.py:164
 msgid "Please enter a Book ID"
 msgstr "请输入书籍ID"
 
@@ -587,12 +587,12 @@ msgid "Modified Time"
 msgstr "修改时间"
 
 #: src\novel_downloader\apps\web\pages\history.py:162
-#: src\novel_downloader\apps\web\pages\search.py:318
+#: src\novel_downloader\apps\web\pages\search.py:317
 msgid "Ascending"
 msgstr "升序"
 
 #: src\novel_downloader\apps\web\pages\history.py:162
-#: src\novel_downloader\apps\web\pages\search.py:318
+#: src\novel_downloader\apps\web\pages\search.py:317
 msgid "Descending"
 msgstr "降序"
 
@@ -600,17 +600,17 @@ msgstr "降序"
 msgid "Refresh"
 msgstr "刷新"
 
-#: src\novel_downloader\apps\web\pages\history.py:199
+#: src\novel_downloader\apps\web\pages\history.py:201
 #, python-brace-format
 msgid "Total {total} files"
 msgstr "共 {total} 个文件"
 
-#: src\novel_downloader\apps\web\pages\history.py:202
+#: src\novel_downloader\apps\web\pages\history.py:204
 #, python-brace-format
 msgid "Total {total} files · After filter {filtered} files"
 msgstr "共 {total} 个文件 · 当前筛选后 {filtered} 个"
 
-#: src\novel_downloader\apps\web\pages\history.py:225
+#: src\novel_downloader\apps\web\pages\history.py:227
 msgid "No files"
 msgstr "暂无文件"
 
@@ -627,63 +627,63 @@ msgid "Exporting"
 msgstr "导出中"
 
 #: src\novel_downloader\apps\web\pages\progress.py:27
-#: src\novel_downloader\apps\web\pages\progress.py:76
+#: src\novel_downloader\apps\web\pages\progress.py:89
 msgid "Completed"
 msgstr "已完成"
 
 #: src\novel_downloader\apps\web\pages\progress.py:28
-#: src\novel_downloader\apps\web\pages\progress.py:77
-#: src\novel_downloader\apps\web\pages\progress.py:111
+#: src\novel_downloader\apps\web\pages\progress.py:90
+#: src\novel_downloader\apps\web\pages\progress.py:126
 msgid "Cancelled"
 msgstr "已取消"
 
 #: src\novel_downloader\apps\web\pages\progress.py:29
-#: src\novel_downloader\apps\web\pages\progress.py:78
+#: src\novel_downloader\apps\web\pages\progress.py:91
 msgid "Failed"
 msgstr "失败"
 
-#: src\novel_downloader\apps\web\pages\progress.py:56
+#: src\novel_downloader\apps\web\pages\progress.py:68
 #, python-brace-format
 msgid "{done}/? · Fetching total chapters..."
 msgstr "{done}/? · 正在获取总章节..."
 
-#: src\novel_downloader\apps\web\pages\progress.py:65
+#: src\novel_downloader\apps\web\pages\progress.py:78
 #, python-brace-format
-msgid "{done}/{total} · Running"
-msgstr "{done}/{total} · 运行中"
+msgid "{done}/{total} · ETA {eta}"
+msgstr "{done}/{total} · 预计剩余 {eta}"
 
-#: src\novel_downloader\apps\web\pages\progress.py:72
+#: src\novel_downloader\apps\web\pages\progress.py:85
 msgid "Exporting..."
 msgstr "正在导出..."
 
-#: src\novel_downloader\apps\web\pages\progress.py:111
+#: src\novel_downloader\apps\web\pages\progress.py:126
 msgid "Cancel failed"
 msgstr "取消失败"
 
-#: src\novel_downloader\apps\web\pages\progress.py:115
-#: src\novel_downloader\apps\web\pages\progress.py:118
+#: src\novel_downloader\apps\web\pages\progress.py:130
+#: src\novel_downloader\apps\web\pages\progress.py:133
 #: src\novel_downloader\apps\web\services\client_dialog.py:128
 msgid "Cancel"
 msgstr "取消"
 
-#: src\novel_downloader\apps\web\pages\progress.py:120
+#: src\novel_downloader\apps\web\pages\progress.py:135
 msgid "Task has ended and cannot be cancelled"
 msgstr "任务已结束，无法取消"
 
-#: src\novel_downloader\apps\web\pages\progress.py:130
+#: src\novel_downloader\apps\web\pages\progress.py:145
 msgid "Error"
 msgstr "错误"
 
-#: src\novel_downloader\apps\web\pages\progress.py:151
+#: src\novel_downloader\apps\web\pages\progress.py:166
 msgid "Running / Queued"
 msgstr "运行中 / 等待中"
 
-#: src\novel_downloader\apps\web\pages\progress.py:155
-#: src\novel_downloader\apps\web\pages\progress.py:166
+#: src\novel_downloader\apps\web\pages\progress.py:170
+#: src\novel_downloader\apps\web\pages\progress.py:181
 msgid "None"
 msgstr "无"
 
-#: src\novel_downloader\apps\web\pages\progress.py:164
+#: src\novel_downloader\apps\web\pages\progress.py:179
 msgid "Completed / Cancelled / Failed"
 msgstr "已完成 / 已取消 / 失败"
 
@@ -740,21 +740,21 @@ msgstr "优先级"
 msgid "Sort"
 msgstr "排序"
 
-#: src\novel_downloader\apps\web\pages\search.py:348
+#: src\novel_downloader\apps\web\pages\search.py:346
 msgid "Searching (results will appear progressively)..."
 msgstr "正在搜索（结果将陆续显示）..."
 
-#: src\novel_downloader\apps\web\pages\search.py:354
+#: src\novel_downloader\apps\web\pages\search.py:352
 #, python-brace-format
 msgid "Currently retrieved {total} results"
 msgstr "当前已获取 {total} 条结果"
 
-#: src\novel_downloader\apps\web\pages\search.py:378
+#: src\novel_downloader\apps\web\pages\search.py:376
 #, python-brace-format
 msgid "Total {total} results (page {page}/{pages})"
 msgstr "共 {total} 条结果（第 {page}/{pages} 页）"
 
-#: src\novel_downloader\apps\web\pages\search.py:459
+#: src\novel_downloader\apps\web\pages\search.py:457
 msgid "Please enter a keyword"
 msgstr "请输入关键词"
 
