@@ -31,6 +31,18 @@ class N8novelParser(BaseParser):
     _SPLIT_STR_PATTERN = re.compile(
         r'["\']([^"\']+)["\']\s*\.split\s*\(\s*["\']\s*,\s*["\']\s*\)', re.DOTALL
     )
+    NOVEL_COM_SETS: list[set[str]] = [
+        {"8", "⑧", "⑻", "⒏", "８"},
+        {"N", "Ν", "Ｎ", "ｎ"},
+        {"O", "o", "ο", "σ", "О", "Ｏ", "ｏ"},
+        {"v", "ν", "Ｖ"},
+        {"E", "Ε", "Ё", "Е", "ヨ", "Ｅ", "ｅ"},
+        {"L", "└", "┕", "┗", "Ｌ", "ｌ"},
+        {".", "·", "。", "．"},
+        {"C", "c", "С", "с", "Ｃ", "ｃ"},
+        {"o", "Ο", "ο", "О", "о", "Ｏ"},
+        {"m", "м", "ｍ"},
+    ]
 
     def parse_book_info(
         self,
@@ -159,10 +171,6 @@ class N8novelParser(BaseParser):
                 self._append_segment(segments, node.text_content())
                 self._append_segment(segments, node.tail)
 
-        # Remove final ad line if present
-        if segments and segments[-1] and segments[-1][0] in ("8", "⑧", "⒏"):
-            segments.pop()
-
         content = "\n".join(segments).strip()
         if not content.strip():
             return None
@@ -174,16 +182,29 @@ class N8novelParser(BaseParser):
             "extra": {"site": self.site_name},
         }
 
-    @staticmethod
-    def _append_segment(segments: list[str], text: str | None) -> None:
+    @classmethod
+    def _append_segment(cls, segments: list[str], text: str | None) -> None:
         """
         Strip, filter out the '8novel' ad, and append non-empty text to segments.
         """
         if not text:
             return
         cleaned = text.strip()
-        if cleaned:
+        if cleaned and not cls._is_ad(cleaned):
             segments.append(cleaned)
+
+    @classmethod
+    def _is_ad(cls, line: str) -> bool:
+        """Check if a line matches the obfuscated 'novel.com' ad pattern."""
+        if len(line) != 10:
+            return False
+        mismatches = 0
+        for i, ch in enumerate(line):
+            if ch not in cls.NOVEL_COM_SETS[i]:
+                mismatches += 1
+                if mismatches > 2:
+                    return False
+        return True
 
     @classmethod
     def _build_id_title_map(cls, html_str: str) -> dict[str, str]:
