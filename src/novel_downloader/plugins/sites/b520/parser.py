@@ -100,8 +100,6 @@ class B520Parser(BaseParser):
         paragraphs = [
             "".join(p.itertext()).strip() for p in content_elem[0].xpath(".//p")
         ]
-        if paragraphs and "www.shuhaige.net" in paragraphs[-1]:
-            paragraphs.pop()
 
         content = "\n".join(paragraphs)
         if not content.strip():

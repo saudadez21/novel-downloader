@@ -26,6 +26,11 @@ class ShuhaigeParser(BaseParser):
     """
 
     site_name: str = "shuhaige"
+    ADS = {
+        r"www\.shuhaige\.net",
+        "书海阁小说网",
+        "点击下一页",
+    }
 
     def parse_book_info(
         self,
@@ -84,22 +89,27 @@ class ShuhaigeParser(BaseParser):
     ) -> ChapterDict | None:
         if not html_list:
             return None
-        tree = html.fromstring(html_list[0])
 
-        title = self._first_str(tree.xpath('//div[@class="bookname"]/h1/text()'))
-        if not title:
-            title = f"第 {chapter_id} 章"
+        title = ""
+        contents: list[str] = []
+        for curr_html in html_list:
+            tree = html.fromstring(curr_html)
+            if not title:
+                title = self._first_str(
+                    tree.xpath('//div[@class="bookname"]/h1/text()')
+                )
 
-        content_elem = tree.xpath('//div[@id="content"]')
-        if not content_elem:
-            return None
-        paragraphs = [
-            "".join(p.itertext()).strip() for p in content_elem[0].xpath(".//p")
-        ]
-        if paragraphs and "www.shuhaige.net" in paragraphs[-1]:
-            paragraphs.pop()
+            paragraphs = [
+                text
+                for p in tree.xpath('//div[@id="content"]//p')
+                if (text := "".join(p.itertext()).strip())
+                and not self._is_ad_line(text)
+            ]
+            page_text = "\n".join(paragraphs)
+            if page_text:
+                contents.append(page_text)
 
-        content = "\n".join(paragraphs)
+        content = "\n".join(contents)
         if not content.strip():
             return None
 

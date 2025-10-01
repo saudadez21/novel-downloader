@@ -19,5 +19,15 @@ class ShuhaigeSession(GenericSession):
 
     site_name: str = "shuhaige"
 
+    BASE_URL = "https://www.shuhaige.net"
     BOOK_INFO_URL = "https://www.shuhaige.net/{book_id}/"
-    CHAPTER_URL = "https://www.shuhaige.net/{book_id}/{chapter_id}.html"
+
+    USE_PAGINATED_CHAPTER = True
+
+    @classmethod
+    def relative_chapter_url(cls, book_id: str, chapter_id: str, idx: int) -> str:
+        return (
+            f"/{book_id}/{chapter_id}_{idx}.html"
+            if idx > 1
+            else f"/{book_id}/{chapter_id}.html"
+        )
