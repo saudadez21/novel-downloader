@@ -112,6 +112,10 @@ SAMPLES: dict[str, list[tuple[str, str, str | None]]] = {
         ("https://www.i25zw.com/book/64371.html", "i25zw", "64371"),
         ("https://www.i25zw.com/64371/", "i25zw", "64371"),
         ("https://www.i25zw.com/64371/153149757.html", "i25zw", "64371"),
+        # n69yue
+        ("https://www.69yue.top/articlecategroy/15yu.html", "n69yue", "15yu"),
+        ("https://www.69yue.top/mulu.html?pid=15yu", "n69yue", "15yu"),
+        ("https://www.69yue.top/article/15185363014257741.html", "n69yue", None),
         # laoyaoxs
         ("https://www.laoyaoxs.org/info/7359.html", "laoyaoxs", "7359"),
         ("https://www.laoyaoxs.org/list/7359/", "laoyaoxs", "7359"),

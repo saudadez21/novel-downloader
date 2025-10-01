@@ -142,6 +142,8 @@ class Processor(Protocol):
 * [息壤中文网](https://www.xrzww.com/)
 * [有毒小说网](https://www.youdubook.com/)
 * [纵横中文网](https://www.zongheng.com/)
+* [69书吧](https://www.69shuba.com/)
+  * 几乎所有请求都需要 Cloudflare 验证
 
 #### 日文
 

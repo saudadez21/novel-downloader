@@ -31,6 +31,8 @@ class BookURLInfo(TypedDict):
 class BookIdExtractor:
     pattern: str
     build_book_id: Callable[[re.Match[str]], str]
+    pattern_query: str | None = None
+    build_book_id_query: Callable[[re.Match[str]], str] | None = None
 
 
 @dataclass
@@ -83,7 +85,7 @@ HOST_ALIASES: dict[str, str] = {
 }
 
 
-def _normalize_host_and_path(url: str) -> tuple[str, str]:
+def _normalize_host_and_path(url: str) -> tuple[str, str, str]:
     """
     Normalize a given URL:
       * Apply HOST_ALIASES mapping to unify different netlocs.
@@ -95,7 +97,8 @@ def _normalize_host_and_path(url: str) -> tuple[str, str]:
     netloc = parsed.netloc.lower()
     host = HOST_ALIASES.get(netloc, netloc)
     path = parsed.path or "/"
-    return host, path
+    query = parsed.query or ""
+    return host, path, query
 
 
 # -----------------------
@@ -465,6 +468,27 @@ SITE_RULES: dict[str, SiteRuleSet] = {
         ],
         hints=[],
     ),
+    "www.69yue.top": SiteRuleSet(
+        site_key="n69yue",
+        extractors=[
+            BookIdExtractor(
+                pattern=r"^/articlecategroy/([^.]+)\.html",
+                build_book_id=lambda m: m.group(1),
+            ),
+            BookIdExtractor(
+                pattern=r"^/mulu\.html$",
+                build_book_id=lambda m: "",
+                pattern_query=r"pid=([A-Za-z0-9]+)",
+                build_book_id_query=lambda m: m.group(1),
+            ),
+        ],
+        hints=[
+            HintRule(
+                pattern=r"^/article/\d+\.html",
+                hint="章节 URL 不包含书籍 ID, 请复制目录页或书籍详情页的链接",
+            )
+        ],
+    ),
     "www.71ge.com": SiteRuleSet(
         site_key="n71ge",
         extractors=[
@@ -750,7 +774,7 @@ def resolve_book_url(url: str) -> BookURLInfo | None:
     :param url: URL string.
     :return: BookURLInfo dict or None if unresolved.
     """
-    host, path = _normalize_host_and_path(url)
+    host, path, query = _normalize_host_and_path(url)
     ruleset = SITE_RULES.get(host)
     if not ruleset:
         return None
@@ -764,8 +788,16 @@ def resolve_book_url(url: str) -> BookURLInfo | None:
     # check extractors
     for extractor in ruleset.extractors:
         match = re.search(extractor.pattern, path, re.I)
+        book_id: str | None = None
         if match:
             book_id = extractor.build_book_id(match)
+
+        if extractor.pattern_query and extractor.build_book_id_query and query:
+            match_q = re.search(extractor.pattern_query, query, re.I)
+            if match_q:
+                book_id = extractor.build_book_id_query(match_q)
+
+        if book_id:
             return {"book": {"book_id": book_id}, "site_key": ruleset.site_key}
 
     return None
