@@ -13,7 +13,7 @@ import time
 
 from novel_downloader.schemas import LoginField
 
-from .cred_models import CredRequest
+from ..models import CredRequest
 
 # wait time for credentials before timing out (seconds)
 REQUEST_TIMEOUT: int = 120

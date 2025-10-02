@@ -18,7 +18,7 @@ Public API:
 from __future__ import annotations
 
 import logging
-from collections.abc import Awaitable, Callable, Iterable, Sequence
+from collections.abc import Iterable, Sequence
 from logging.handlers import TimedRotatingFileHandler
 
 from rich.console import Console
@@ -145,52 +145,32 @@ def prompt_choice(prompt_text: str, choices: Sequence[str]) -> str:
     return resp.strip().lower()
 
 
-def print_progress(
-    done: int,
-    total: int,
-    *,
-    prefix: str = "Progress",
-    unit: str = "item",
-) -> None:
-    """
-    Print a lightweight progress line.
+class ProgressUI:
+    def __init__(self, prefix: str = "Progress", unit: str = "item"):
+        from rich.progress import Progress, TaskID
 
-    :param done: Completed count.
-    :param total: Total count.
-    :param prefix: Text prefix shown before numbers.
-    :param unit: Logical unit name (e.g., 'item').
-    """
-    total = max(1, total)
-    pct = done / total * 100.0
-    _CONSOLE.print(f"[dim]{prefix}[/] {done}/{total} {unit} ({pct:.2f}%)")
+        self._progress = Progress(console=_CONSOLE)
+        self._task_id: TaskID | None = None
+        self._prefix = prefix
+        self._unit = unit
 
+    def start(self) -> None:
+        self._progress.start()
 
-def create_progress_hook(
-    prefix: str = "Progress",
-    unit: str = "item",
-) -> tuple[Callable[[int, int], Awaitable[None]], Callable[[], None]]:
-    from rich.progress import Progress, TaskID
+    def stop(self) -> None:
+        self._progress.stop()
 
-    progress = Progress(console=_CONSOLE)
-    task_id: TaskID | None = None
-
-    async def hook(done: int, total: int) -> None:
-        nonlocal task_id
-        if task_id is None:
-            progress.start()
-            task_id = progress.add_task(f"[cyan]{prefix}[/]", total=max(1, total))
-
-        progress.update(
-            task_id,
+    async def update(self, done: int, total: int) -> None:
+        if self._task_id is None:
+            self._task_id = self._progress.add_task(
+                f"[cyan]{self._prefix}[/]", total=max(1, total)
+            )
+        self._progress.update(
+            self._task_id,
             completed=done,
             total=max(1, total),
-            description=f"{prefix} ({done}/{total} {unit})",
+            description=f"{self._prefix} ({done}/{total} {self._unit})",
         )
-
-    def close() -> None:
-        progress.stop()
-
-    return hook, close
 
 
 def _normalize_level(level: int | str) -> int:

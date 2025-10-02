@@ -98,7 +98,7 @@ class BaseExporter(abc.ABC):
                 try:
                     self.logger.info(
                         "Attempting to export book_id '%s' as %s...",
-                        book["book_id"],
+                        book.book_id,
                         fmt_key,
                     )
                     path = export_method(book)

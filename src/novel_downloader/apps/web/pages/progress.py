@@ -11,12 +11,8 @@ from nicegui import ui
 from novel_downloader.infra.i18n import t
 
 from ..components import navbar
-from ..services import (
-    DownloadTask,
-    Status,
-    manager,
-    setup_dialog,
-)
+from ..models import DownloadTask, Status
+from ..services import manager, setup_dialog
 
 
 def _status_chip(status: Status) -> None:

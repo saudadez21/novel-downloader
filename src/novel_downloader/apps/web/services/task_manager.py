@@ -6,83 +6,15 @@ novel_downloader.apps.web.services.task_manager
 """
 
 import asyncio
-import contextlib
-import time
-from collections import defaultdict, deque
-from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Any, Literal
-from uuid import uuid4
+from collections import defaultdict
 
 from novel_downloader.infra.config import ConfigAdapter, load_config
-from novel_downloader.infra.cookies import parse_cookies
-from novel_downloader.plugins import registrar
-from novel_downloader.schemas import (
-    BookConfig,
-    ExporterConfig,
-    LoginField,
-)
+from novel_downloader.schemas import BookConfig, ExporterConfig
+from novel_downloader.usecases.download import download_books
+from novel_downloader.usecases.export import export_books
 
-from .cred_broker import (
-    REQUEST_TIMEOUT,
-    cleanup_request,
-    complete_request,
-    create_cred_request,
-)
-
-Status = Literal["queued", "running", "exporting", "completed", "cancelled", "failed"]
-
-
-@dataclass
-class DownloadTask:
-    title: str
-    site: str
-    book_id: str
-
-    # runtime state
-    task_id: str = field(default_factory=lambda: uuid4().hex)
-    status: Status = "queued"
-    chapters_total: int = 0
-    chapters_done: int = 0
-    error: str | None = None
-    exported_paths: dict[str, Path] | None = None
-
-    _cancel_event: asyncio.Event = field(default_factory=asyncio.Event, repr=False)
-
-    _recent_times: deque[float] = field(
-        default_factory=lambda: deque(maxlen=20), repr=False
-    )
-    _last_timestamp: float = field(default_factory=time.monotonic, repr=False)
-
-    def progress(self) -> float:
-        if self.chapters_total <= 0:
-            return 0.0
-        return round(self.chapters_done / self.chapters_total, 2)
-
-    def record_chapter_time(self) -> None:
-        """Record elapsed time for one finished chapter."""
-        now = time.monotonic()
-        elapsed = now - self._last_timestamp
-        self._last_timestamp = now
-        if elapsed > 0:
-            self._recent_times.append(elapsed)
-
-    def eta(self) -> float | None:
-        """Return ETA in seconds if estimable, else None."""
-        if self.chapters_total <= 0 or self.chapters_done >= self.chapters_total:
-            return None
-        if not self._recent_times:
-            return None
-        avg = sum(self._recent_times) / len(self._recent_times)
-        remaining = self.chapters_total - self.chapters_done
-        return avg * remaining
-
-    def cancel(self) -> None:
-        self._cancel_event.set()
-        self.status = "cancelled"
-
-    def is_cancelled(self) -> bool:
-        return self._cancel_event.is_set()
+from ..models import DownloadTask
+from ..ui_adapters import WebDownloadUI, WebExportUI, WebLoginUI
 
 
 class TaskManager:
@@ -179,53 +111,29 @@ class TaskManager:
         exporter_cfg = adapter.get_exporter_config()
         login_cfg = adapter.get_login_config()
 
-        parser = registrar.get_parser(task.site, parser_cfg)
+        login_ui = WebLoginUI(task)
+        download_ui = WebDownloadUI(task)
 
         try:
-            async with registrar.get_fetcher(task.site, fetcher_cfg) as fetcher:
-                if downloader_cfg.login_required and not await fetcher.load_state():
-                    login_data = await self._prompt_login_fields(
-                        task, fetcher.login_fields, login_cfg
-                    )
-                    if not await fetcher.login(**login_data):
-                        task.status = "failed"
-                        task.error = "登录失败或已取消"
-                        return
-                    await fetcher.save_state()
+            await download_books(
+                site=task.site,
+                books=[BookConfig(book_id=task.book_id)],
+                downloader_cfg=downloader_cfg,
+                fetcher_cfg=fetcher_cfg,
+                parser_cfg=parser_cfg,
+                login_ui=login_ui,
+                download_ui=download_ui,
+                login_config=login_cfg,
+            )
 
-                downloader = registrar.get_downloader(
-                    fetcher=fetcher,
-                    parser=parser,
-                    site=task.site,
-                    config=downloader_cfg,
-                )
+            if task.is_cancelled():
+                task.status = "cancelled"
+                return
 
-                async def _progress_hook(done: int, total: int) -> None:
-                    if total and (
-                        task.chapters_total <= 0 or total > task.chapters_total
-                    ):
-                        task.chapters_total = total
-                    if done > task.chapters_done:
-                        task.record_chapter_time()
-                    task.chapters_done = done
-
-                book_cfg: BookConfig = {"book_id": task.book_id}
-                await downloader.download(
-                    book_cfg,
-                    progress_hook=_progress_hook,
-                    cancel_event=task._cancel_event,
-                )
-
-                if task.is_cancelled():
-                    task.status = "cancelled"
-                    return
-
-                task.status = "exporting"
-                self._export_waiting.append((task, exporter_cfg))
-                if not self._export_worker_task or self._export_worker_task.done():
-                    self._export_worker_task = asyncio.create_task(
-                        self._export_worker()
-                    )
+            task.status = "exporting"
+            self._export_waiting.append((task, exporter_cfg))
+            if not self._export_worker_task or self._export_worker_task.done():
+                self._export_worker_task = asyncio.create_task(self._export_worker())
 
         except asyncio.CancelledError:
             task.status = "cancelled"
@@ -238,73 +146,32 @@ class TaskManager:
         """Dedicated worker for synchronous export tasks."""
         while self._export_waiting:
             task, exporter_cfg = self._export_waiting.pop()
-            exporter = registrar.get_exporter(task.site, exporter_cfg)
             try:
                 if task.is_cancelled():
                     task.status = "cancelled"
                     continue
-                book_cfg: BookConfig = {"book_id": task.book_id}
-                task.exported_paths = await asyncio.to_thread(exporter.export, book_cfg)
+
+                export_ui = WebExportUI(task)
+                await asyncio.to_thread(
+                    export_books,
+                    site=task.site,
+                    books=[BookConfig(book_id=task.book_id)],
+                    exporter_cfg=exporter_cfg,
+                    export_ui=export_ui,
+                )
+
+                if task.is_cancelled():
+                    task.status = "cancelled"
+                    continue
+
                 task.status = "completed"
+
             except asyncio.CancelledError:
                 task.status = "cancelled"
                 break
             except Exception as e:
                 task.status = "failed"
                 task.error = str(e)
-            finally:
-                with contextlib.suppress(Exception):
-                    exporter.close()
-
-    async def _prompt_login_fields(
-        self,
-        task: DownloadTask,
-        fields: list[LoginField],
-        login_config: dict[str, str] | None = None,
-    ) -> dict[str, Any]:
-        """
-        Prompt UI login; supports text/password/cookie fields.
-        """
-        prefill = (login_config or {}).copy()
-        req = await create_cred_request(
-            task_id=task.task_id,
-            title=task.title,
-            fields=fields,
-            prefill=prefill,
-        )
-
-        # wait for UI to submit or cancel
-        try:
-            await asyncio.wait_for(req.event.wait(), timeout=REQUEST_TIMEOUT)
-        except TimeoutError:
-            await complete_request(req.req_id, None)
-            cleanup_request(req.req_id)
-            return prefill
-
-        if task.is_cancelled():
-            await complete_request(req.req_id, None)
-            cleanup_request(req.req_id)
-            return prefill
-
-        # merge values: prefill -> UI (UI wins)
-        ui_vals: dict[str, str] = req.result or {}
-        cleanup_request(req.req_id)
-
-        merged: dict[str, Any] = {
-            k: v.strip() for k, v in prefill.items() if isinstance(v, str)
-        }
-        merged.update({k: v.strip() for k, v in ui_vals.items() if isinstance(v, str)})
-
-        # parse cookie fields into dicts
-        for f in fields:
-            if f.type == "cookie":
-                raw = merged.get(f.name, "")
-                if isinstance(raw, str) and raw:
-                    with contextlib.suppress(Exception):
-                        # keep raw string if parsing fails
-                        merged[f.name] = parse_cookies(raw)
-
-        return merged
 
     async def close(self) -> None:
         """Cancel or gracefully finish all workers before shutdown."""

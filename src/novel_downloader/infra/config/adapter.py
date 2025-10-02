@@ -188,7 +188,7 @@ class ConfigAdapter:
         raw = self._site_cfg.get("book_ids", [])
 
         if isinstance(raw, (str | int)):
-            return [{"book_id": str(raw)}]
+            return [BookConfig(book_id=str(raw))]
 
         if isinstance(raw, dict):
             return [self._dict_to_book_cfg(raw)]
@@ -201,7 +201,7 @@ class ConfigAdapter:
         result: list[BookConfig] = []
         for item in raw:
             if isinstance(item, (str | int)):
-                result.append({"book_id": str(item)})
+                result.append(BookConfig(book_id=str(item)))
             elif isinstance(item, dict):
                 result.append(self._dict_to_book_cfg(item))
             else:
@@ -291,16 +291,21 @@ class ConfigAdapter:
         if "book_id" not in data:
             raise ValueError("Missing required field 'book_id'")
 
-        out: BookConfig = {"book_id": str(data["book_id"])}
+        book_id = str(data["book_id"])
+        start_id = str(data["start_id"]) if "start_id" in data else None
+        end_id = str(data["end_id"]) if "end_id" in data else None
 
-        if "start_id" in data:
-            out["start_id"] = str(data["start_id"])
-        if "end_id" in data:
-            out["end_id"] = str(data["end_id"])
+        ignore_ids: tuple[str, ...] = ()
         if "ignore_ids" in data:
             with contextlib.suppress(Exception):
-                out["ignore_ids"] = [str(x) for x in data["ignore_ids"]]
-        return out
+                ignore_ids = tuple(str(x) for x in data["ignore_ids"])
+
+        return BookConfig(
+            book_id=book_id,
+            start_id=start_id,
+            end_id=end_id,
+            ignore_ids=ignore_ids,
+        )
 
     @staticmethod
     def _dict_to_fontocr_cfg(data: dict[str, Any]) -> FontOCRConfig:

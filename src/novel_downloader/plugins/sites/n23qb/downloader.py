@@ -40,10 +40,10 @@ class N23qbDownloader(BaseDownloader):
 
         :param book: BookConfig with at least 'book_id'.
         """
-        book_id = book["book_id"]
-        start_id = book.get("start_id")
-        end_id = book.get("end_id")
-        ignore_set = set(book.get("ignore_ids", []))
+        book_id = book.book_id
+        start_id = book.start_id
+        end_id = book.end_id
+        ignore_set = set(book.ignore_ids or [])
 
         raw_base = self._raw_data_dir / book_id
         raw_base.mkdir(parents=True, exist_ok=True)

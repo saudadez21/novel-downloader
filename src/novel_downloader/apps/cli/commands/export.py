@@ -54,14 +54,16 @@ class ExportCmd(Command):
 
     @classmethod
     def run(cls, args: Namespace) -> None:
-        from ..handlers.config import load_or_init_config
+        from novel_downloader.usecases.config import load_or_init_config
+
+        from ..ui_adapters import CLIConfigUI, CLIExportUI
 
         site: str | None = args.site
         book_ids: list[str] = list(args.book_ids or [])
         config_path: Path | None = Path(args.config) if args.config else None
         formats: list[str] | None = args.format
 
-        config_data = load_or_init_config(config_path)
+        config_data = load_or_init_config(config_path, CLIConfigUI())
         if config_data is None:
             return
 
@@ -101,12 +103,14 @@ class ExportCmd(Command):
 
         books = cls._parse_book_args(book_ids, args.start, args.end)
 
-        from ..handlers.export import export_books
+        from novel_downloader.usecases.export import export_books
 
+        export_ui = CLIExportUI()
         export_books(
             site=site,
             books=books,
             exporter_cfg=adapter.get_exporter_config(),
+            export_ui=export_ui,
             formats=formats,
         )
 
@@ -123,15 +127,16 @@ class ExportCmd(Command):
             return []
 
         result: list[BookConfig] = []
-        first: BookConfig = {"book_id": book_ids[0]}
-        if start_id:
-            first["start_id"] = start_id
-        if end_id:
-            first["end_id"] = end_id
-        result.append(first)
+        result.append(
+            BookConfig(
+                book_id=book_ids[0],
+                start_id=start_id,
+                end_id=end_id,
+            )
+        )
 
         for book_id in book_ids[1:]:
-            result.append({"book_id": book_id})
+            result.append(BookConfig(book_id=book_id))
 
         return result
 

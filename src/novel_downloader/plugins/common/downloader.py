@@ -38,10 +38,10 @@ class CommonDownloader(BaseDownloader):
         On cancel: stop producing, workers finish at most one chapter,
         storage drains, flushes, and exits.
         """
-        book_id = self._normalize_book_id(book["book_id"])
-        start_id = book.get("start_id")
-        end_id = book.get("end_id")
-        ignore_set = set(book.get("ignore_ids", []))
+        book_id = self._normalize_book_id(book.book_id)
+        start_id = book.start_id
+        end_id = book.end_id
+        ignore_set = set(book.ignore_ids or [])
 
         raw_base = self._raw_data_dir / book_id
         raw_base.mkdir(parents=True, exist_ok=True)
