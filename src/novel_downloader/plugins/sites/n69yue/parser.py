@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.plugins.sites.n37yq.parser
--------------------------------------------
+novel_downloader.plugins.sites.n69yue.parser
+--------------------------------------------
 
 """
 
@@ -65,16 +65,21 @@ class N69yueParser(BaseParser):
             info_tree.xpath("//p[contains(., '更新')]/text()"),
             replaces=[("更新：", "")],
         )
-        tags = [
-            self._first_str([x])
-            for x in info_tree.xpath("//div[@class='tags-container']//span/text()")
-        ]
+        tags = list(
+            {
+                self._first_str([x])
+                for x in info_tree.xpath("//div[@class='tags-container']//span/text()")
+            }
+        )
         summary = self._join_strs(
             info_tree.xpath("//div[contains(@class, 'summary')]/text()")
         )
 
         if use_font:
             book_name = self._map_fonts(book_name)
+            serial_status = self._map_fonts(serial_status)
+            word_count = self._map_fonts(word_count)
+            update_time = self._map_fonts(update_time)
             tags = [self._map_fonts(t) for t in tags]
             summary = self._map_fonts(summary)
 
@@ -84,6 +89,8 @@ class N69yueParser(BaseParser):
         for item in reversed(items):
             title = item.get("cn", "").strip()
             cid = item.get("cid", "").strip()
+            if use_font:
+                title = self._map_fonts(title)
             chapters.append(
                 {
                     "title": title,
@@ -123,20 +130,10 @@ class N69yueParser(BaseParser):
         )
 
         paragraphs: list[str] = []
-        for p in tree.xpath(
-            "//article[@class='reading-content']//p[contains(@class,'cntCls')]"
+        for article in tree.xpath(
+            "//article[contains(@class,'reading-content')]/article"
         ):
-            cache: list[str] = []
-            for node in p.iter():
-                if node.text:
-                    cache.append(node.text)
-                if node.tag == "br" and cache:
-                    paragraphs.append("".join(cache).strip())
-                    cache = []
-                if node.tail:
-                    cache.append(node.tail)
-            if cache:
-                paragraphs.append("".join(cache).strip())
+            self._extract_node(article, paragraphs)
 
         if not paragraphs:
             return None
@@ -187,3 +184,13 @@ class N69yueParser(BaseParser):
                 "Please report this issue so the handler can be updated."
             )
         return obfuscated
+
+    def _extract_node(self, node: html.HtmlElement, paragraphs: list[str]) -> None:
+        if node.text and (line := node.text.strip()):
+            paragraphs.append(line)
+
+        for child in node:
+            self._extract_node(child, paragraphs)
+
+            if child.tail and (line := child.tail.strip()):
+                paragraphs.append(line)
