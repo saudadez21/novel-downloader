@@ -71,6 +71,12 @@ async def download_books(
             )
             try:
                 await downloader.download(book, progress_hook=hook)
+            except Exception as e:
+                ui.warn(
+                    t("Failed to download {book_id}: {exc}").format(
+                        book_id=book["book_id"], exc=str(e)
+                    )
+                )
             finally:
                 close()
 

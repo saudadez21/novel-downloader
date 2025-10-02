@@ -81,51 +81,6 @@ class BaseDownloader(abc.ABC):
 
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
-    async def download_many(
-        self,
-        books: list[BookConfig],
-        *,
-        progress_hook: Callable[[int, int], Awaitable[None]] | None = None,
-        cancel_event: asyncio.Event | None = None,
-        **kwargs: Any,
-    ) -> None:
-        """
-        Download multiple books with pre-download hook and error handling.
-
-        :param books: List of BookConfig entries.
-        :param progress_hook: Optional async callback after each chapter.
-                                args: completed_count, total_count.
-        :param cancel_event: Optional asyncio.Event to allow cancellation.
-        """
-        if not self._check_login():
-            book_ids = [b["book_id"] for b in books]
-            self.logger.warning(
-                "%s login failed, skipping download of books: %s",
-                self._site,
-                ", ".join(book_ids) or "<none>",
-            )
-            return
-
-        for book in books:
-            # stop early if cancellation requested
-            if cancel_event and cancel_event.is_set():
-                self.logger.info(
-                    "%s download cancelled before book: %s",
-                    self._site,
-                    book["book_id"],
-                )
-                break
-
-            try:
-                await self._download_one(
-                    book,
-                    progress_hook=progress_hook,
-                    cancel_event=cancel_event,
-                    **kwargs,
-                )
-            except Exception as e:
-                self._handle_download_exception(book, e)
-
     async def download(
         self,
         book: BookConfig,
@@ -161,15 +116,12 @@ class BaseDownloader(abc.ABC):
             )
             return
 
-        try:
-            await self._download_one(
-                book,
-                progress_hook=progress_hook,
-                cancel_event=cancel_event,
-                **kwargs,
-            )
-        except Exception as e:
-            self._handle_download_exception(book, e)
+        await self._download_one(
+            book,
+            progress_hook=progress_hook,
+            cancel_event=cancel_event,
+            **kwargs,
+        )
 
     @abc.abstractmethod
     async def _download_one(
@@ -185,12 +137,12 @@ class BaseDownloader(abc.ABC):
         """
         ...
 
-    async def _load_book_info(self, book_id: str) -> BookInfoDict | None:
+    async def _load_book_info(self, book_id: str) -> BookInfoDict:
         """
         Attempt to fetch and parse the book_info for a given book_id.
 
         :param book_id: identifier of the book
-        :return: parsed BookInfoDict or None if all attempts fail
+        :return: parsed BookInfoDict
         """
         info_path = self._raw_data_dir / book_id / "book_info.json"
         book_info: BookInfoDict | None = None
@@ -198,8 +150,10 @@ class BaseDownloader(abc.ABC):
         if info_path.exists():
             try:
                 book_info = json.loads(info_path.read_text(encoding="utf-8"))
-                last_checked = book_info.get("last_checked", 0.0) if book_info else 0.0
-                if time.time() - last_checked < ONE_DAY:
+                if (
+                    book_info
+                    and time.time() - book_info.get("last_checked", 0.0) < ONE_DAY
+                ):
                     return book_info
             except json.JSONDecodeError:
                 self.logger.warning(
@@ -220,6 +174,9 @@ class BaseDownloader(abc.ABC):
             self.logger.warning(
                 "Failed to fetch/parse book_info for %s: %s", book_id, exc
             )
+
+        if book_info is None:
+            raise LookupError(f"Unable to load book_info for {book_id}")
 
         return book_info
 
@@ -302,24 +259,6 @@ class BaseDownloader(abc.ABC):
     @property
     def parser(self) -> ParserProtocol:
         return self._parser
-
-    def _handle_download_exception(self, book: BookConfig, error: Exception) -> None:
-        """
-        Handle download errors in a consistent way.
-
-        This method can be overridden or extended to implement retry logic, etc.
-
-        :param book: The book that failed.
-        :param error: The exception raised during download.
-        """
-        self.logger.warning(
-            "%s Failed to download (book_id=%s, start=%s, end=%s): %s",
-            self.__class__.__name__,
-            book.get("book_id", "<unknown>"),
-            book.get("start_id", "-"),
-            book.get("end_id", "-"),
-            error,
-        )
 
     def _check_login(self) -> bool:
         """

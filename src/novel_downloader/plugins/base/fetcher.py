@@ -17,7 +17,13 @@ from typing import Any, Literal, Self
 from urllib.parse import unquote, urlparse
 
 import aiohttp
-from aiohttp import ClientResponse, ClientSession, ClientTimeout, TCPConnector
+from aiohttp import (
+    BasicAuth,
+    ClientResponse,
+    ClientSession,
+    ClientTimeout,
+    TCPConnector,
+)
 
 from novel_downloader.infra.http_defaults import (
     DEFAULT_IMAGE_SUFFIX,
@@ -59,6 +65,8 @@ class BaseSession(abc.ABC):
         self._timeout = config.timeout
         self._max_connections = config.max_connections
         self._verify_ssl = config.verify_ssl
+        self._proxy = config.proxy
+        self._trust_env = config.trust_env
         self._init_cookies = cookies or {}
         self._is_logged_in = False
 
@@ -76,6 +84,9 @@ class BaseSession(abc.ABC):
         self._rate_limiter: TokenBucketRateLimiter | None = (
             TokenBucketRateLimiter(config.max_rps) if config.max_rps > 0 else None
         )
+        self._proxy_auth: BasicAuth | None = None
+        if config.proxy_user and config.proxy_pass:
+            self._proxy_auth = BasicAuth(config.proxy_user, config.proxy_pass)
 
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
@@ -95,6 +106,9 @@ class BaseSession(abc.ABC):
             timeout=timeout,
             connector=connector,
             cookies=self._init_cookies,
+            proxy=self._proxy,
+            proxy_auth=self._proxy_auth,
+            trust_env=self._trust_env,
         )
 
     async def close(self) -> None:

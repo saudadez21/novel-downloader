@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.schemas.login
-------------------------------
+novel_downloader.schemas.auth
+-----------------------------
 
 """
 

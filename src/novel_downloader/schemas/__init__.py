@@ -20,8 +20,11 @@ __all__ = [
     "VolumeInfoDict",
     "LoginField",
     "SearchResult",
+    "BookDownloadResult",
+    "BookExportResult",
 ]
 
+from .auth import LoginField
 from .book import (
     BookInfoDict,
     ChapterDict,
@@ -37,5 +40,5 @@ from .config import (
     ParserConfig,
     TextCleanerConfig,
 )
-from .login import LoginField
+from .result import BookDownloadResult, BookExportResult
 from .search import SearchResult
