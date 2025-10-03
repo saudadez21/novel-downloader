@@ -798,6 +798,6 @@ def resolve_book_url(url: str) -> BookURLInfo | None:
                 book_id = extractor.build_book_id_query(match_q)
 
         if book_id:
-            return {"book": {"book_id": book_id}, "site_key": ruleset.site_key}
+            return {"book": BookConfig(book_id=book_id), "site_key": ruleset.site_key}
 
     return None

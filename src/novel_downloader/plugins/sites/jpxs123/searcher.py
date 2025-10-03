@@ -10,22 +10,21 @@ import logging
 from lxml import html
 
 from novel_downloader.plugins.base.searcher import BaseSearcher
-from novel_downloader.plugins.searching import register_searcher
+from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import SearchResult
 
 logger = logging.getLogger(__name__)
 
 
-@register_searcher()
+@registrar.register_searcher()
 class Jpxs123Searcher(BaseSearcher):
     site_name = "jpxs123"
     priority = 30
     BASE_URL = "https://www.jpxs123.com"
     SEARCH_URL = "https://www.jpxs123.com/e/search/indexsearch.php"
 
-    @classmethod
-    async def _fetch_html(cls, keyword: str) -> str:
-        keyboard = cls._quote(keyword, encoding="gbk", errors="replace")
+    async def _fetch_html(self, keyword: str) -> str:
+        keyboard = self._quote(keyword, encoding="gbk", errors="replace")
         show = "title"
         classid = "0"
         body = f"keyboard={keyboard}&show={show}&classid={classid}"
@@ -35,27 +34,28 @@ class Jpxs123Searcher(BaseSearcher):
             "Content-Type": "application/x-www-form-urlencoded",
         }
         try:
-            async with cls._http_post(
-                cls.SEARCH_URL, data=body, headers=headers
+            async with self._http_post(
+                self.SEARCH_URL, data=body, headers=headers
             ) as resp:
                 resp.raise_for_status()
-                return await cls._response_to_str(resp)
+                return await self._response_to_str(resp)
         except Exception:
             logger.error(
                 "Failed to fetch HTML for keyword '%s' from '%s'",
                 keyword,
-                cls.SEARCH_URL,
+                self.SEARCH_URL,
             )
             return ""
 
-    @classmethod
-    def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
+    def _parse_html(
+        self, html_str: str, limit: int | None = None
+    ) -> list[SearchResult]:
         doc = html.fromstring(html_str)
         rows = doc.xpath('//div[@class="books m-cols"]/div[@class="bk"]')
         results: list[SearchResult] = []
 
         for idx, row in enumerate(rows):
-            href = cls._first_str(row.xpath(".//h3/a/@href"))
+            href = self._first_str(row.xpath(".//h3/a/@href"))
             if not href:
                 continue
 
@@ -63,35 +63,35 @@ class Jpxs123Searcher(BaseSearcher):
                 break
 
             book_id = href.strip("/").split(".", 1)[0].replace("/", "-")
-            book_url = cls._abs_url(href)
+            book_url = self._abs_url(href)
 
-            title = cls._first_str(row.xpath(".//h3/a//text()"))
+            title = self._first_str(row.xpath(".//h3/a//text()"))
 
-            cover_rel = cls._first_str(
+            cover_rel = self._first_str(
                 row.xpath(".//div[contains(@class,'pic')]//a//img/@src")
             )
-            cover_url = cls._abs_url(cover_rel) if cover_rel else ""
+            cover_url = self._abs_url(cover_rel) if cover_rel else ""
 
             author = (
-                cls._first_str(
+                self._first_str(
                     row.xpath(".//div[contains(@class,'booknews')]/text()"),
                     replaces=[("作者：", "")],
                 )
                 or "-"
             )
 
-            update_date = cls._first_str(
+            update_date = self._first_str(
                 row.xpath(
                     ".//div[contains(@class,'booknews')]/label[contains(@class,'date')]/text()"
                 )
             )
 
             # Compute priority
-            prio = cls.priority + idx
+            prio = self.priority + idx
 
             results.append(
                 SearchResult(
-                    site=cls.site_name,
+                    site=self.site_name,
                     book_id=book_id,
                     book_url=book_url,
                     cover_url=cover_url,

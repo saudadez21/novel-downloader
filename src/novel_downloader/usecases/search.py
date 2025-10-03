@@ -1,64 +1,18 @@
 #!/usr/bin/env python3
 """
-novel_downloader.plugins.searching
-----------------------------------
+novel_downloader.usecases.search
+--------------------------------
 
 """
 
-__all__ = ["register_searcher", "search", "search_stream"]
+__all__ = ["search", "search_stream"]
 
 import asyncio
-import logging
-import pkgutil
-from collections.abc import AsyncGenerator, Callable, Sequence
-from importlib import import_module
-from typing import TypeVar
+from collections.abc import AsyncGenerator, Sequence
 
 import aiohttp
-
-from novel_downloader.plugins.base.searcher import BaseSearcher
+from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import SearchResult
-
-S = TypeVar("S", bound=BaseSearcher)
-
-_LOADED = False
-_SEARCHER_REGISTRY: dict[str, type[BaseSearcher]] = {}
-_SITES_PKG = "novel_downloader.plugins.sites"
-
-logger = logging.getLogger(__name__)
-
-
-def register_searcher(site_key: str | None = None) -> Callable[[type[S]], type[S]]:
-    """
-    Decorator to register a searcher class under given name.
-    """
-
-    def decorator(cls: type[S]) -> type[S]:
-        key = site_key or cls.__module__.split(".")[-2].lower()
-        _SEARCHER_REGISTRY[key] = cls
-        return cls
-
-    return decorator
-
-
-def _load_all_searchers() -> None:
-    """
-    Attempt to import all site-specific searcher module.
-    """
-    global _LOADED
-    if _LOADED:
-        return
-
-    pkg = import_module(_SITES_PKG)
-    for _, name, ispkg in pkgutil.iter_modules(pkg.__path__, pkg.__name__ + "."):
-        if not ispkg:
-            continue
-        try:
-            import_module(f"{name}.searcher")
-        except ModuleNotFoundError:
-            continue
-
-    _LOADED = True
 
 
 async def search(
@@ -79,24 +33,19 @@ async def search(
     :param timeout: Per-request time budget (seconds)
     :return: A flat list of `SearchResult` objects.
     """
-    _load_all_searchers()
+    classes = registrar.get_searcher_classes(sites, load_all_if_none=True)
 
-    keys = list(sites or _SEARCHER_REGISTRY.keys())
-    to_call = {_SEARCHER_REGISTRY[key] for key in keys if key in _SEARCHER_REGISTRY}
+    if not classes:
+        return []
 
-    site_timeout = aiohttp.ClientTimeout(total=timeout)
-
+    timeout_cfg = aiohttp.ClientTimeout(total=timeout)
     results: list[SearchResult] = []
-    async with aiohttp.ClientSession(timeout=site_timeout) as session:
-        # Give all searchers the same session
-        for cls in to_call:
-            cls.configure(session)
 
-        # Kick off all sites in parallel
-        coros = [cls.search(keyword, limit=per_site_limit) for cls in to_call]
+    async with aiohttp.ClientSession(timeout=timeout_cfg) as session:
+        instances = [cls(session) for cls in classes]
+        coros = [inst.search(keyword, limit=per_site_limit) for inst in instances]
         site_lists = await asyncio.gather(*coros, return_exceptions=True)
 
-    # Collect successful results; skip failures
     for item in site_lists:
         if isinstance(item, Exception | BaseException):
             continue
@@ -111,7 +60,7 @@ async def search_stream(
     sites: Sequence[str] | None = None,
     per_site_limit: int = 5,
     timeout: float = 5.0,
-) -> AsyncGenerator[list[SearchResult]]:
+) -> AsyncGenerator[list[SearchResult], None]:
     """
     Stream search results from registered sites as soon as each site finishes.
 
@@ -121,23 +70,21 @@ async def search_stream(
     :param timeout: Timeout per-site (seconds).
     :yield: Lists of `SearchResult` objects from each completed site.
     """
-    _load_all_searchers()
+    classes = registrar.get_searcher_classes(sites, load_all_if_none=True)
+    if not classes:
+        if False:
+            yield []
+        return
 
-    keys = list(sites or _SEARCHER_REGISTRY.keys())
-    classes = {_SEARCHER_REGISTRY[k] for k in keys if k in _SEARCHER_REGISTRY}
-
-    site_timeout = aiohttp.ClientTimeout(total=timeout)
-
-    async with aiohttp.ClientSession(timeout=site_timeout) as session:
-        for cls in classes:
-            cls.configure(session)
-
+    timeout_cfg = aiohttp.ClientTimeout(total=timeout)
+    async with aiohttp.ClientSession(timeout=timeout_cfg) as session:
+        instances = [cls(session) for cls in classes]
         tasks = [
             asyncio.create_task(
-                cls.search(keyword, limit=per_site_limit),
+                inst.search(keyword, limit=per_site_limit),
                 name=f"{cls.__name__}.search",
             )
-            for cls in classes
+            for cls, inst in zip(classes, instances, strict=False)
         ]
 
         try:
@@ -147,9 +94,7 @@ async def search_stream(
                 except asyncio.CancelledError:
                     raise
                 except Exception:
-                    # a site failed - skip it, keep streaming others
                     continue
-
                 if site_results:
                     yield site_results
         finally:

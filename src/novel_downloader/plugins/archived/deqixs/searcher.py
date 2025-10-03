@@ -20,23 +20,23 @@ class DeqixsSearcher(BaseSearcher):
     BASE_URL = "https://www.deqixs.com"
     SEARCH_URL = "https://www.deqixs.com/tag/"
 
-    @classmethod
-    async def _fetch_html(cls, keyword: str) -> str:
+    async def _fetch_html(self, keyword: str) -> str:
         params = {"key": keyword}
         try:
-            async with cls._http_get(cls.SEARCH_URL, params=params) as resp:
+            async with self._http_get(self.SEARCH_URL, params=params) as resp:
                 resp.raise_for_status()
-                return await cls._response_to_str(resp)
+                return await self._response_to_str(resp)
         except Exception:
             logger.error(
                 "Failed to fetch HTML for keyword '%s' from '%s'",
                 keyword,
-                cls.SEARCH_URL,
+                self.SEARCH_URL,
             )
             return ""
 
-    @classmethod
-    def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
+    def _parse_html(
+        self, html_str: str, limit: int | None = None
+    ) -> list[SearchResult]:
         doc = html.fromstring(html_str)
         rows = doc.xpath("//div[@class='container']/div[@class='item']")
         results: list[SearchResult] = []
@@ -49,7 +49,7 @@ class DeqixsSearcher(BaseSearcher):
             book_id = href.strip("/ ").split("/")[-1]
             if not book_id:
                 continue
-            book_url = cls.BASE_URL + href
+            book_url = self._abs_url(href)
             img_src = row.xpath(".//a/img/@src")[0]
             cover_url = "https:" + img_src if img_src.startswith("//") else img_src
             title = row.xpath(".//h3/a/text()")[0].strip()
@@ -66,11 +66,11 @@ class DeqixsSearcher(BaseSearcher):
             latest_chapter = first_li.xpath("./a/text()")[0].strip()
 
             # Compute priority
-            prio = cls.priority + idx
+            prio = self.priority + idx
 
             results.append(
                 SearchResult(
-                    site=cls.site_name,
+                    site=self.site_name,
                     book_id=book_id,
                     book_url=book_url,
                     cover_url=cover_url,

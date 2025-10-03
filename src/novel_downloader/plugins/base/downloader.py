@@ -101,9 +101,9 @@ class BaseDownloader(abc.ABC):
             self.logger.warning(
                 "%s login failed, skipping download of book: %s (%s-%s)",
                 self._site,
-                book["book_id"],
-                book.get("start_id", "-"),
-                book.get("end_id", "-"),
+                book.book_id,
+                book.start_id or "-",
+                book.end_id or "-",
             )
             return
 
@@ -112,7 +112,7 @@ class BaseDownloader(abc.ABC):
             self.logger.info(
                 "%s download cancelled before start of book: %s",
                 self._site,
-                book["book_id"],
+                book.book_id,
             )
             return
 

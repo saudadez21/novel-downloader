@@ -4,37 +4,45 @@ novel_downloader.plugins.registry
 ---------------------------------
 """
 
-from collections.abc import Callable
+from __future__ import annotations
+
+import contextlib
+import pkgutil
 from importlib import import_module
-from typing import TypeVar
+from typing import TYPE_CHECKING, TypeVar
 
-from novel_downloader.plugins.protocols import (
-    DownloaderProtocol,
-    ExporterProtocol,
-    FetcherProtocol,
-    ParserProtocol,
-)
-from novel_downloader.schemas import (
-    DownloaderConfig,
-    ExporterConfig,
-    FetcherConfig,
-    ParserConfig,
-)
+if TYPE_CHECKING:
+    from collections.abc import Callable, Sequence
 
-DownloaderBuilder = Callable[
-    [FetcherProtocol, ParserProtocol, DownloaderConfig, str],
-    DownloaderProtocol,
-]
-ExporterBuilder = Callable[[ExporterConfig, str], ExporterProtocol]
-FetcherBuilder = Callable[[FetcherConfig], FetcherProtocol]
-ParserBuilder = Callable[[ParserConfig], ParserProtocol]
+    from novel_downloader.plugins.base.searcher import BaseSearcher
+    from novel_downloader.plugins.protocols import (
+        DownloaderProtocol,
+        ExporterProtocol,
+        FetcherProtocol,
+        ParserProtocol,
+    )
+    from novel_downloader.schemas import (
+        DownloaderConfig,
+        ExporterConfig,
+        FetcherConfig,
+        ParserConfig,
+    )
 
-D = TypeVar("D", bound=DownloaderProtocol)
-E = TypeVar("E", bound=ExporterProtocol)
-F = TypeVar("F", bound=FetcherProtocol)
-P = TypeVar("P", bound=ParserProtocol)
+    DownloaderBuilder = Callable[
+        [FetcherProtocol, ParserProtocol, DownloaderConfig, str],
+        DownloaderProtocol,
+    ]
+    ExporterBuilder = Callable[[ExporterConfig, str], ExporterProtocol]
+    FetcherBuilder = Callable[[FetcherConfig], FetcherProtocol]
+    ParserBuilder = Callable[[ParserConfig], ParserProtocol]
 
-_SITES_PKG = "novel_downloader.plugins.sites"
+    D = TypeVar("D", bound=DownloaderProtocol)
+    E = TypeVar("E", bound=ExporterProtocol)
+    F = TypeVar("F", bound=FetcherProtocol)
+    P = TypeVar("P", bound=ParserProtocol)
+    S = TypeVar("S", bound=type[BaseSearcher])
+
+_PLUGINS_PKG = "novel_downloader.plugins"
 
 
 class PluginRegistry:
@@ -43,7 +51,8 @@ class PluginRegistry:
         self._exporters: dict[str, ExporterBuilder] = {}
         self._fetchers: dict[str, FetcherBuilder] = {}
         self._parsers: dict[str, ParserBuilder] = {}
-        self._sources: list[str] = [_SITES_PKG]
+        self._searchers: dict[str, type[BaseSearcher]] = {}
+        self._sources: list[str] = [_PLUGINS_PKG]
 
     def register_fetcher(
         self, site_key: str | None = None
@@ -85,11 +94,19 @@ class PluginRegistry:
 
         return deco
 
+    def register_searcher(self, site_key: str | None = None) -> Callable[[S], S]:
+        def deco(cls: S) -> S:
+            key = site_key or cls.__module__.split(".")[-2].lower()
+            self._searchers[key] = cls
+            return cls
+
+        return deco
+
     def get_fetcher(self, site: str, config: FetcherConfig) -> FetcherProtocol:
         key = self._normalize_key(site)
         cls = self._fetchers.get(key)
         if cls is None:
-            self._try_import(key, "fetcher")
+            self._try_import_site(key, "fetcher")
             cls = self._fetchers.get(key)
 
         if cls is None:
@@ -100,7 +117,7 @@ class PluginRegistry:
         key = self._normalize_key(site)
         cls = self._parsers.get(key)
         if cls is None:
-            self._try_import(key, "parser")
+            self._try_import_site(key, "parser")
             cls = self._parsers.get(key)
 
         if cls is None:
@@ -117,7 +134,7 @@ class PluginRegistry:
         key = self._normalize_key(site)
         cls = self._downloaders.get(key)
         if cls is None:
-            self._try_import(key, "downloader")
+            self._try_import_site(key, "downloader")
             cls = self._downloaders.get(key)
 
         if cls is None:
@@ -130,7 +147,7 @@ class PluginRegistry:
         key = self._normalize_key(site)
         cls = self._exporters.get(key)
         if cls is None:
-            self._try_import(key, "exporter")
+            self._try_import_site(key, "exporter")
             cls = self._exporters.get(key)
 
         if cls is None:
@@ -138,6 +155,33 @@ class PluginRegistry:
 
             return CommonExporter(config, key)
         return cls(config, key)
+
+    def get_searcher_class(self, site: str) -> type[BaseSearcher]:
+        key = self._normalize_key(site)
+        cls = self._searchers.get(key)
+        if cls is None:
+            self._try_import_site(key, "searcher")
+            cls = self._searchers.get(key)
+        if cls is None:
+            raise ValueError(f"Unsupported site: {site!r}")
+        return cls
+
+    def get_searcher_classes(
+        self,
+        sites: Sequence[str] | None = None,
+        *,
+        load_all_if_none: bool = True,
+    ) -> list[type[BaseSearcher]]:
+        if sites:
+            classes: list[type[BaseSearcher]] = []
+            for site in sites:
+                with contextlib.suppress(ValueError):
+                    classes.append(self.get_searcher_class(site))
+            return classes
+
+        if load_all_if_none:
+            self._load_all("searcher")
+        return list(self._searchers.values())
 
     @staticmethod
     def _normalize_key(site_key: str) -> str:
@@ -153,14 +197,14 @@ class PluginRegistry:
             return f"n{key}"
         return key
 
-    def _try_import(self, site_key: str, kind: str) -> None:
+    def _try_import_site(self, site_key: str, kind: str) -> None:
         """
         Attempt to import plugins for a given site/kind in order:
           1. built-in: `plugins.sites.<site>.<kind>`
-          2. user-level: `novel_plugins.<site>.<kind>`
+          2. user-level: `<base>.sites.<site>.<kind>`
         """
         for base in self._sources:
-            modname = f"{base}.{site_key}.{kind}"
+            modname = f"{base}.sites.{site_key}.{kind}"
             try:
                 import_module(modname)
                 return
@@ -169,25 +213,66 @@ class PluginRegistry:
                     continue
                 raise
 
-    def enable_local_plugins(self, local_plugins_path: str | None = None) -> None:
+    def _load_all(self, kind: str) -> None:
+        """
+        Scan all known plugin and import every `{namespace}.sites.<site>.<kind>`
+        without failing if a site has no module for that kind.
+        """
+        for base in self._sources:
+            try:
+                pkg = import_module(f"{base}.sites")
+            except ModuleNotFoundError:
+                continue
+
+            # iterate over site packages under *.sites
+            for _, name, ispkg in pkgutil.iter_modules(
+                pkg.__path__, pkg.__name__ + "."
+            ):
+                if not ispkg:
+                    continue
+                modname = f"{name}.{kind}"
+                try:
+                    import_module(modname)
+                except ModuleNotFoundError as e:
+                    if e.name and modname.startswith(e.name):
+                        continue
+                    raise
+
+    def enable_local_plugins(
+        self,
+        local_plugins_path: str | None = None,
+        override: bool = False,
+    ) -> None:
         """
         Enable user-provided plugins under the `novel_plugins` namespace.
+
+        Behavior:
+          * If `local_plugins_path` is provided.
+            * Add its parent dir to `sys.path`
+            * Add its basename as a search base (namespace) to `self._sources`
+          * If not provided, default to:
+            * parent = os.getcwd()
+            * namespace = "novel_plugins"
         """
         import os
         import sys
 
-        base = local_plugins_path or os.getcwd()
-        base = os.path.abspath(base)
-
-        parent = base
-        if os.path.basename(base) == "novel_plugins":
+        if local_plugins_path:
+            base = os.path.abspath(local_plugins_path)
             parent = os.path.dirname(base)
+            namespace = os.path.basename(base)
+        else:
+            parent = os.getcwd()
+            namespace = "novel_plugins"
 
         if parent not in sys.path:
-            sys.path.insert(0, parent)
+            sys.path.append(parent)
 
-        if "novel_plugins" not in self._sources:
-            self._sources.append("novel_plugins")
+        if namespace not in self._sources:
+            if override:
+                self._sources.insert(0, namespace)
+            else:
+                self._sources.append(namespace)
 
 
 registrar = PluginRegistry()

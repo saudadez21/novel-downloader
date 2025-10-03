@@ -5,11 +5,11 @@ novel_downloader.plugins.sites.n37yue.searcher
 
 """
 
-from novel_downloader.plugins.searching import register_searcher
+from novel_downloader.plugins.registry import registrar
 from novel_downloader.plugins.sites.mangg_net.searcher import ManggNetSearcher
 
 
-@register_searcher()
+@registrar.register_searcher()
 class N37yueSearcher(ManggNetSearcher):
     site_name = "n37yue"
     priority = 30

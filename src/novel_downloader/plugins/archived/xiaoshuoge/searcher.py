@@ -19,23 +19,23 @@ class XiaoshuogeSearcher(BaseSearcher):
     priority = 30
     SEARCH_URL = "http://www.xiaoshuoge.info/modules/article/search.php"
 
-    @classmethod
-    async def _fetch_html(cls, keyword: str) -> str:
+    async def _fetch_html(self, keyword: str) -> str:
         params = {"q": keyword}
         try:
-            async with cls._http_get(cls.SEARCH_URL, params=params) as resp:
+            async with self._http_get(self.SEARCH_URL, params=params) as resp:
                 resp.raise_for_status()
-                return await cls._response_to_str(resp)
+                return await self._response_to_str(resp)
         except Exception:
             logger.error(
                 "Failed to fetch HTML for keyword '%s' from '%s'",
                 keyword,
-                cls.SEARCH_URL,
+                self.SEARCH_URL,
             )
             return ""
 
-    @classmethod
-    def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
+    def _parse_html(
+        self, html_str: str, limit: int | None = None
+    ) -> list[SearchResult]:
         """
         Parse raw HTML from Xiaoshuowu search results into list of SearchResult.
 
@@ -48,7 +48,7 @@ class XiaoshuogeSearcher(BaseSearcher):
         results: list[SearchResult] = []
 
         for idx, row in enumerate(rows):
-            href = cls._first_str(row.xpath(".//span[@class='c_subject']/a/@href"))
+            href = self._first_str(row.xpath(".//span[@class='c_subject']/a/@href"))
             if not href:
                 continue
 
@@ -57,15 +57,15 @@ class XiaoshuogeSearcher(BaseSearcher):
 
             # 'http://www.xiaoshuoge.info/book/374339/' -> "374339"
             book_id = href.split("book/")[-1].strip("/")
-            book_url = cls._abs_url(href)
+            book_url = self._abs_url(href)
 
-            cover_rel = cls._first_str(row.xpath(".//div[@class='fl']//img/@src"))
-            cover_url = cls._abs_url(cover_rel) if cover_rel else ""
+            cover_rel = self._first_str(row.xpath(".//div[@class='fl']//img/@src"))
+            cover_url = self._abs_url(cover_rel) if cover_rel else ""
 
-            title = cls._first_str(row.xpath(".//span[@class='c_subject']/a/text()"))
+            title = self._first_str(row.xpath(".//span[@class='c_subject']/a/text()"))
 
             author = (
-                cls._first_str(
+                self._first_str(
                     row.xpath(
                         ".//div[@class='c_tag'][1]/span[@class='c_label'][contains(.,'作者')]/following-sibling::span[@class='c_value'][1]/text()"
                     )
@@ -73,7 +73,7 @@ class XiaoshuogeSearcher(BaseSearcher):
                 or "-"
             )
             word_count = (
-                cls._first_str(
+                self._first_str(
                     row.xpath(
                         ".//div[@class='c_tag'][1]/span[@class='c_label'][contains(.,'字数')]/following-sibling::span[@class='c_value'][1]/text()"
                     )
@@ -82,7 +82,7 @@ class XiaoshuogeSearcher(BaseSearcher):
             )
 
             latest_chapter = (
-                cls._first_str(
+                self._first_str(
                     row.xpath(
                         ".//div[@class='c_tag'][last()]/span[@class='c_label'][contains(.,'最新')]/following-sibling::span[@class='c_value'][1]//a//text()"
                     )
@@ -90,7 +90,7 @@ class XiaoshuogeSearcher(BaseSearcher):
                 or "-"
             )
             update_date = (
-                cls._first_str(
+                self._first_str(
                     row.xpath(
                         ".//div[@class='c_tag'][last()]/span[@class='c_label'][contains(.,'更新')]/following-sibling::span[@class='c_value'][1]/text()"
                     )
@@ -99,11 +99,11 @@ class XiaoshuogeSearcher(BaseSearcher):
             )
 
             # Priority
-            prio = cls.priority + idx
+            prio = self.priority + idx
 
             results.append(
                 SearchResult(
-                    site=cls.site_name,
+                    site=self.site_name,
                     book_id=book_id,
                     book_url=book_url,
                     cover_url=cover_url,

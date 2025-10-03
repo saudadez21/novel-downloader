@@ -13,13 +13,13 @@ import time
 from lxml import html
 
 from novel_downloader.plugins.base.searcher import BaseSearcher
-from novel_downloader.plugins.searching import register_searcher
+from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import SearchResult
 
 logger = logging.getLogger(__name__)
 
 
-@register_searcher()
+@registrar.register_searcher()
 class Quanben5Searcher(BaseSearcher):
     site_name = "quanben5"
     priority = 30
@@ -28,12 +28,11 @@ class Quanben5Searcher(BaseSearcher):
 
     STATIC_CHARS = "PXhw7UT1B0a9kQDKZsjIASmOezxYG4CHo5Jyfg2b8FLpEvRr3WtVnlqMidu6cN"
 
-    @classmethod
-    async def _fetch_html(cls, keyword: str) -> str:
+    async def _fetch_html(self, keyword: str) -> str:
         t = str(int(time.time() * 1000))
-        uri_keyword = cls._quote(keyword)
-        b_raw = cls._base64(uri_keyword)
-        b = cls._quote(b_raw)
+        uri_keyword = self._quote(keyword)
+        b_raw = self._base64(uri_keyword)
+        b = self._quote(b_raw)
 
         params = {
             "c": "book",
@@ -43,7 +42,7 @@ class Quanben5Searcher(BaseSearcher):
             "keywords": uri_keyword,
             "b": b,
         }
-        full_url = cls._build_url(cls.SEARCH_URL, params)
+        full_url = self._build_url(self.SEARCH_URL, params)
 
         headers = {
             "Host": "quanben5.com",
@@ -51,19 +50,20 @@ class Quanben5Searcher(BaseSearcher):
         }
 
         try:
-            async with cls._http_get(full_url, headers=headers) as resp:
+            async with self._http_get(full_url, headers=headers) as resp:
                 resp.raise_for_status()
-                return await cls._response_to_str(resp)
+                return await self._response_to_str(resp)
         except Exception:
             logger.error(
                 "Failed to fetch HTML for keyword '%s' from '%s'",
                 keyword,
-                cls.SEARCH_URL,
+                self.SEARCH_URL,
             )
             return ""
 
-    @classmethod
-    def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
+    def _parse_html(
+        self, html_str: str, limit: int | None = None
+    ) -> list[SearchResult]:
         # Unwrap JSONP: search({...});
         prefix, suffix = "search(", ");"
         json_str = (
@@ -86,7 +86,7 @@ class Quanben5Searcher(BaseSearcher):
         results: list[SearchResult] = []
 
         for idx, row in enumerate(rows):
-            href = cls._first_str(row.xpath(".//h3/a/@href"))
+            href = self._first_str(row.xpath(".//h3/a/@href"))
             if not href:
                 continue
 
@@ -95,10 +95,10 @@ class Quanben5Searcher(BaseSearcher):
 
             # '/n/douposanqian/' -> "douposanqian"
             book_id = href.rstrip("/").split("/")[-1]
-            book_url = cls._abs_url(href)
+            book_url = self._abs_url(href)
 
-            cover_rel = cls._first_str(row.xpath(".//div[@class='pic']//img/@src"))
-            cover_url = cls._abs_url(cover_rel) if cover_rel else ""
+            cover_rel = self._first_str(row.xpath(".//div[@class='pic']//img/@src"))
+            cover_url = self._abs_url(cover_rel) if cover_rel else ""
 
             title = "".join(
                 t.strip()
@@ -106,16 +106,16 @@ class Quanben5Searcher(BaseSearcher):
                 if t and t.strip()
             )
 
-            author = cls._first_str(
+            author = self._first_str(
                 row.xpath(".//p[@class='info']//span[contains(@class,'author')]/text()")
             )
 
             # Bump priority by result index
-            prio = cls.priority + idx
+            prio = self.priority + idx
 
             results.append(
                 SearchResult(
-                    site=cls.site_name,
+                    site=self.site_name,
                     book_id=book_id,
                     book_url=book_url,
                     cover_url=cover_url,

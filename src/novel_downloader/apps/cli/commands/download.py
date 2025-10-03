@@ -50,7 +50,14 @@ class DownloadCmd(Command):
 
     @classmethod
     def run(cls, args: Namespace) -> None:
-        from ..handlers.config import load_or_init_config
+        from novel_downloader.usecases.config import load_or_init_config
+
+        from ..ui_adapters import (
+            CLIConfigUI,
+            CLIDownloadUI,
+            CLIExportUI,
+            CLILoginUI,
+        )
 
         config_path: Path | None = Path(args.config) if args.config else None
         site: str | None = args.site
@@ -81,28 +88,28 @@ class DownloadCmd(Command):
                 return
 
             site = resolved["site_key"]
-            first: BookConfig = {"book_id": resolved["book"]["book_id"]}
-            if args.start:
-                first["start_id"] = args.start
-            if args.end:
-                first["end_id"] = args.end
+            first = BookConfig(
+                book_id=resolved["book"].book_id,
+                start_id=args.start,
+                end_id=args.end,
+            )
             books = [first]
             ui.info(
                 t("Resolved URL to site '{site}' with book ID '{book_id}'.").format(
-                    site=site, book_id=first["book_id"]
+                    site=site, book_id=first.book_id
                 )
             )
 
-        config_data = load_or_init_config(config_path)
+        config_data = load_or_init_config(config_path, CLIConfigUI())
         if config_data is None:
             return
 
         ui.info(t("Using site: {site}").format(site=site))
-        adapter = ConfigAdapter(config=config_data, site=site)
+        adapter = ConfigAdapter(config=config_data)
 
         if not books and args.site:
             try:
-                books = adapter.get_book_ids()
+                books = adapter.get_book_ids(site)
             except Exception as e:
                 ui.error(
                     t("Failed to read book IDs from configuration: {err}").format(
@@ -122,31 +129,45 @@ class DownloadCmd(Command):
         if plugins_cfg.get("enable_local_plugins"):
             from novel_downloader.plugins.registry import registrar
 
-            registrar.enable_local_plugins(plugins_cfg.get("local_plugins_path"))
+            registrar.enable_local_plugins(
+                plugins_cfg.get("local_plugins_path"),
+                override=plugins_cfg.get("override_builtins", False),
+            )
 
         # download
         import asyncio
 
-        from ..handlers.download import download_books
+        from novel_downloader.usecases.download import download_books
 
-        success = asyncio.run(
+        login_ui = CLILoginUI()
+        download_ui = CLIDownloadUI()
+
+        asyncio.run(
             download_books(
                 site,
                 books,
-                adapter.get_downloader_config(),
-                adapter.get_fetcher_config(),
-                adapter.get_parser_config(),
-                adapter.get_login_config(),
+                adapter.get_downloader_config(site),
+                adapter.get_fetcher_config(site),
+                adapter.get_parser_config(site),
+                login_ui=login_ui,
+                download_ui=download_ui,
+                login_config=adapter.get_login_config(site),
             )
         )
-        if not success:
+        if not download_ui.completed_books:
             return
 
         # export
         if not args.no_export:
-            from ..handlers.export import export_books
+            from novel_downloader.usecases.export import export_books
 
-            export_books(site, books, adapter.get_exporter_config())
+            export_ui = CLIExportUI()
+            export_books(
+                site,
+                list(download_ui.completed_books),
+                adapter.get_exporter_config(site),
+                export_ui=export_ui,
+            )
         else:
             ui.info(t("Export skipped (--no-export)"))
 
@@ -163,14 +184,15 @@ class DownloadCmd(Command):
             return []
 
         result: list[BookConfig] = []
-        first: BookConfig = {"book_id": book_ids[0]}
-        if start_id:
-            first["start_id"] = start_id
-        if end_id:
-            first["end_id"] = end_id
-        result.append(first)
+        result.append(
+            BookConfig(
+                book_id=book_ids[0],
+                start_id=start_id,
+                end_id=end_id,
+            )
+        )
 
         for book_id in book_ids[1:]:
-            result.append({"book_id": book_id})
+            result.append(BookConfig(book_id=book_id))
 
         return result

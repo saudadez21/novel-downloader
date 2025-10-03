@@ -20,42 +20,42 @@ class Xs63bSearcher(BaseSearcher):
     BASE_URL = "https://www.xs63b.com"
     SEARCH_URL = "https://www.xs63b.com/search/"
 
-    @classmethod
-    async def _fetch_html(cls, keyword: str) -> str:
+    async def _fetch_html(self, keyword: str) -> str:
         headers = {
             "Host": "www.xs63b.com",
             "Origin": "https://www.xs63b.com",
             "Referer": "https://www.xs63b.com/",
         }
         try:
-            async with cls._http_get(cls.BASE_URL, headers=headers) as resp:
+            async with self._http_get(self.BASE_URL, headers=headers) as resp:
                 resp.raise_for_status()
-                base_html = await cls._response_to_str(resp)
+                base_html = await self._response_to_str(resp)
             data = {
-                "_token": cls._parse_token(base_html),
+                "_token": self._parse_token(base_html),
                 "kw": keyword,
             }
-            async with cls._http_post(
-                cls.SEARCH_URL, data=data, headers=headers
+            async with self._http_post(
+                self.SEARCH_URL, data=data, headers=headers
             ) as resp:
                 resp.raise_for_status()
-                return await cls._response_to_str(resp)
+                return await self._response_to_str(resp)
         except Exception:
             logger.error(
                 "Failed to fetch HTML for keyword '%s' from '%s'",
                 keyword,
-                cls.SEARCH_URL,
+                self.SEARCH_URL,
             )
             return ""
 
-    @classmethod
-    def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
+    def _parse_html(
+        self, html_str: str, limit: int | None = None
+    ) -> list[SearchResult]:
         doc = html.fromstring(html_str)
         rows = doc.xpath("//div[@class='toplist']/ul/li")
         results: list[SearchResult] = []
 
         for idx, row in enumerate(rows):
-            href = cls._first_str(row.xpath(".//p[@class='s1']/a[1]/@href"))
+            href = self._first_str(row.xpath(".//p[@class='s1']/a[1]/@href"))
             if not href:
                 continue
 
@@ -64,23 +64,23 @@ class Xs63bSearcher(BaseSearcher):
 
             # 'https://www.xs63b.com/{catalog}/{name}/' -> "{catalog}-{name}"
             book_id = href.split("xs63b.com", 1)[-1].strip(" /").replace("/", "-")
-            book_url = cls._abs_url(href)
+            book_url = self._abs_url(href)
 
             title = "".join(row.xpath(".//p[@class='s1']//a//text()"))
 
             latest_chapter = (
-                cls._first_str(row.xpath(".//p[@class='s2']//a/text()")) or "-"
+                self._first_str(row.xpath(".//p[@class='s2']//a/text()")) or "-"
             )
-            author = cls._first_str(row.xpath(".//p[@class='s3']/text()")) or "-"
-            word_count = cls._first_str(row.xpath(".//p[@class='s4']/text()")) or "-"
-            update_date = cls._first_str(row.xpath(".//p[@class='s6']/text()")) or "-"
+            author = self._first_str(row.xpath(".//p[@class='s3']/text()")) or "-"
+            word_count = self._first_str(row.xpath(".//p[@class='s4']/text()")) or "-"
+            update_date = self._first_str(row.xpath(".//p[@class='s6']/text()")) or "-"
 
             # Compute priority
-            prio = cls.priority + idx
+            prio = self.priority + idx
 
             results.append(
                 SearchResult(
-                    site=cls.site_name,
+                    site=self.site_name,
                     book_id=book_id,
                     book_url=book_url,
                     cover_url="",

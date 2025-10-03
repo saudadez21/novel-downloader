@@ -4,15 +4,52 @@
 
 ## 1. 概览与分层
 
-* **apps/**
-  * **cli/**：命令行界面（`argparse` + `rich` 封装的 `ui`）
-  * **web/**：NiceGUI Web 前端（页面、组件、下载任务调度与登录对话）
-  * **constants.py**：站点显示名映射（`dict[str, str]`，如 `aaatxt -> "3A电子书"`）
-* **infra/**：基础设施（配置加载与适配、网络下载、路径、日志、i18n、OCR/JSBridge、持久化）
-* **libs/**：通用库（EPUB 构建、文件系统工具、加解密、文本清洗、URL 解析、时间工具）
-* **plugins/**：站点插件（`fetcher / parser / downloader / exporter / searcher`；注册器与公共实现）
-* **schemas/**：配置与数据的类型定义（`TypedDict` / `dataclass`）
-* **locales/**：多语言资源
+整个项目采用分层架构，主要目录与职责如下:
+
+* **apps/** (应用层): 具体入口与界面
+  * **cli/**：命令行界面
+    使用 `argparse` 解析参数，结合 `rich` 输出，`ui_adapters` 实现 `usecases/protocols.py` 定义的 UI 协议。
+  * **web/**：Web 前端 (基于 NiceGUI)
+    提供页面与组件，管理下载任务、登录对话；同样通过 `ui_adapters` 实现 UI 协议。
+  * **constants.py**：站点显示名映射
+    保存 `dict[str, str]`，例如 `aaatxt -> "3A电子书"`，供界面展示。
+
+* **usecases/** (应用用例层):  封装完整的业务流程，对外暴露可直接调用的函数
+  * `download.py`：下载流程（依赖 `LoginUI`、`DownloadUI` 协议）
+  * `export.py`：导出流程（依赖 `ExportUI` 协议）
+  * `login.py`：登录辅助（依赖 `LoginUI` 协议）
+  * `config.py`：配置加载与初始化（依赖 `ConfigUI` 协议）
+  * `search.py`：多站点搜索（聚合/流式 API）
+  * `protocols.py`：UI 协议定义（`LoginUI` / `DownloadUI` / `ExportUI` / `ConfigUI`）
+
+* **infra/** (基础设施层): 提供与外部环境交互的能力，例如:
+  * 配置加载与适配
+  * 网络下载（`aiohttp` 默认参数等）
+  * 路径与文件管理
+  * 日志
+  * 国际化（i18n）
+  * OCR/JSBridge
+  * 持久化（状态存储）
+
+* **libs/** (通用库), 与业务无关的工具集合：
+  * EPUB 构建
+  * 文件系统工具
+  * 加解密
+  * 文本清洗
+  * URL 解析
+  * 时间工具
+
+* **plugins/** (站点插件层): 实现具体站点的抓取/解析/导出逻辑，统一通过注册器 (`registry`) 管理。
+  * **fetcher**：负责获取页面（含登录、状态保存）
+  * **parser**：负责解析 HTML，提取书籍与章节
+  * **downloader**：协调 fetcher 与 parser 完成下载
+  * **exporter**：负责导出到本地格式（txt、epub 等）
+  * **searcher**：站点搜索入口
+  * **registry**：统一注册与获取插件的接口
+
+* **schemas/** (数据模型层): 定义统一的数据结构，方便在各层传递，主要采用 `TypedDict` 与 `dataclass`。
+
+* **locales/** (多语言资源): 存放界面与提示语的本地化文本。
 
 ---
 
@@ -21,45 +58,61 @@
 ### 2.1 按书籍 ID/URL 下载并导出 (与 CLI 同流程)
 
 ```python
+import asyncio
 from pathlib import Path
-from novel_downloader.infra.config import ConfigAdapter, load_config
-from novel_downloader.apps.cli.handlers.download import download_book
-from novel_downloader.apps.cli.handlers.export import export_book
+
+from novel_downloader.infra.config import load_config, ConfigAdapter
 from novel_downloader.libs.book_url_resolver import resolve_book_url
 
-config = load_config(Path("./settings.toml"))
-resolved = resolve_book_url("https://example.com/book/123")  # -> {"site_key": "...", "book": {"book_id": "..."}}
+from novel_downloader.usecases.download import download_books
+from novel_downloader.usecases.export import export_books
 
-site = resolved["site_key"]
-adapter = ConfigAdapter(config=config, site=site)
+# CLI 侧 UI 适配器
+from novel_downloader.apps.cli.ui_adapters import CLILoginUI, CLIDownloadUI, CLIExportUI
 
-# 下载
-import asyncio
-ok = asyncio.run(
-    download_book(
-        site,
-        resolved["book"],
-        adapter.get_downloader_config(),
-        adapter.get_fetcher_config(),
-        adapter.get_parser_config(),
-        adapter.get_login_config(),
+async def main():
+    config = load_config(Path("./settings.toml"))
+
+    resolved = resolve_book_url("https://example.com/book/123")
+    if resolved is None:
+        return
+
+    site = resolved["site_key"]
+    book = resolved["book"]
+    adapter = ConfigAdapter(config=config)
+
+    await download_books(
+        site=site,
+        books=[book],
+        downloader_cfg=adapter.get_downloader_config(site),
+        fetcher_cfg=adapter.get_fetcher_config(site),
+        parser_cfg=adapter.get_parser_config(site),
+        login_ui=CLILoginUI(),
+        download_ui=CLIDownloadUI(),
+        login_config=adapter.get_login_config(site),
     )
-)
-if ok:
-    export_book(site, resolved["book"], adapter.get_exporter_config())
+
+    export_books(
+        site=site,
+        books=[book],
+        exporter_cfg=adapter.get_exporter_config(site),
+        export_ui=CLIExportUI(),
+    )
+
+asyncio.run(main())
 ```
 
 ### 2.2 直接通过插件注册器使用
 
 ```python
 from novel_downloader.plugins import registrar  # 插件注册器单例
-from novel_downloader.schemas.config import FetcherConfig, ParserConfig, DownloaderConfig
+from novel_downloader.schemas import BookConfig, FetcherConfig, ParserConfig, DownloaderConfig
 
 parser = registrar.get_parser("aaatxt", ParserConfig())
 async def run():
     async with registrar.get_fetcher("aaatxt", FetcherConfig()) as fetcher:
         downloader = registrar.get_downloader(fetcher, parser, "aaatxt", DownloaderConfig())
-        await downloader.download({"book_id": "123"})
+        await downloader.download(BookConfig(book_id="123"))
 ```
 
 ---
@@ -107,7 +160,7 @@ class Command(ABC):
 
 按书籍 **ID 或 URL** 下载（可选导出）。
 
-* 位置参数：`book_ids...`（与 `--site` 搭配为 ID 模式；不带 `--site` 时必须是单个 URL）
+* 位置参数：`book_ids...`（与 `--site` 搭配为 ID 模式; 不带 `--site` 时必须是单个 URL）
 * 选项：
   * `--site <key>` 指定站点（省略且传 URL 时自动识别）
   * `--config <path>` 指定配置文件
@@ -144,12 +197,13 @@ class Command(ABC):
 * **pages/**：搜索、下载、进度、历史页面（NiceGUI）
 * **services/**
   * `task_manager.py`：接收页面发起的下载任务（需要时触发登录）
-  * `client_dialog.py`：注册登录输入弹窗；配合 `fetcher.login_fields` 动态渲染
-  * `cred_broker.py / cred_models.py`：登录凭据管理与数据模型
+  * `client_dialog.py`：注册登录输入弹窗; 配合 `fetcher.login_fields` 动态渲染
+  * `cred_broker.py`：登录凭据请求/回传
+* **ui_adapters.py**：实现 `LoginUI` / `DownloadUI` / `ExportUI`（写入/更新 `DownloadTask` 状态）
 * **components/**：UI 组件（如导航）
 * **main.py**：应用入口
 
-> 交互流程：`page -> task_manager -> (need login?) -> client_dialog.prompt(...) -> download_book(...) -> exporter`
+> 交互: `page -> task_manager -> (need login?) -> WebLoginUI.prompt(...) -> download_books(...) -> export_books(...)`
 
 ---
 
@@ -164,17 +218,28 @@ class Command(ABC):
 将通用配置映射为结构化数据类，按字段优先级解析：
 
 1. `config["sites"][<site>]`
-2. `config["general"]`
-3. 调用方提供的默认值
+2. `config["sites"]["common"]`
+3. `config["general"]`
+3. 默认值
 
-可用方法：
+**构造:**
 
 ```python
-get_fetcher_config() -> FetcherConfig
-get_downloader_config() -> DownloaderConfig
-get_parser_config() -> ParserConfig
-get_exporter_config() -> ExporterConfig
-get_login_config() -> dict[str, str]
+adapter = ConfigAdapter(config)
+```
+
+**方法:**
+
+```python
+get_fetcher_config(site: str)   -> FetcherConfig
+get_downloader_config(site: str)-> DownloaderConfig
+get_parser_config(site: str)    -> ParserConfig
+get_exporter_config(site: str)  -> ExporterConfig
+get_login_config(site: str)     -> dict[str, str]
+get_book_ids(site: str)         -> list[BookConfig]
+
+get_plugins_config() -> dict[str, Any]
+get_log_level()      -> str
 ```
 
 ---
@@ -217,235 +282,282 @@ registrar.get_downloader(fetcher, parser, site, DownloaderConfig) -> DownloaderP
 registrar.get_exporter(site, ExporterConfig) -> ExporterProtocol  # 无站点实现时回退 CommonExporter
 ```
 
-> 站点包命名要求：`plugins.sites.<site_key>.<kind>`；若首字符为数字，规范化为前缀 `n`（如 `3xx` -> `n3xx`）。
-
-### 6.3 搜索注册（`plugins/searching.py`）
-
-```python
-@register_searcher("aaatxt")
-class AAASearcher(...): ...
-```
-
-统一入口：
-
-```python
-async def search(keyword, sites=None, limit=None, per_site_limit=5, timeout=5.0) -> list[SearchResult]
-async def search_stream(...) -> AsyncGenerator[list[SearchResult]]
-```
+> 站点包命名要求：`plugins.sites.<site_key>.<kind>`; 若首字符为数字，规范化为前缀 `n`（如 `3xx` -> `n3xx`）。
 
 ---
 
-## 7. 核心库 API
+## 7. 用例层（`usecases`）
 
-### 7.1 下载与导出
+位于框架最上层，提供可直接调用的高阶业务流程：登录、下载、导出、配置管理、搜索等。
+
+### 7.1 协议（`usecases/protocols.py`）
+
+以下协议定义与界面交互的回调事件。实现这些协议即可接收进度、错误等通知。
+
+* **LoginUI**：登录交互
+  * `prompt`：提示用户输入账号/密码或其他登录字段
+  * `on_login_failed`：登录失败时回调
+  * `on_login_success`：登录成功时回调
+
+* **DownloadUI**：下载过程交互
+  * `on_start`：开始下载一本书时
+  * `on_progress`：下载进度更新
+  * `on_complete`：一本书下载完成
+  * `on_book_error`：某本书下载失败
+  * `on_site_error`：站点不可用或不支持
+
+* **ExportUI**：导出过程交互
+  * `on_start`：开始导出一本书时
+  * `on_success`：导出成功
+  * `on_error`：导出失败
+  * `on_unsupported`：格式不受支持
+
+* **ConfigUI**：配置文件交互
+  * `on_missing`：配置文件不存在
+  * `on_created`：配置文件已新建
+  * `on_invalid`：配置文件损坏或无效
+  * `on_abort`：用户放弃加载/创建配置
+  * `confirm_create`：确认是否新建配置
 
 ```python
-# apps/cli/handlers/download.py
+class LoginUI(Protocol):
+    async def prompt(self, fields: list[LoginField], prefill: dict[str, Any] | None = None) -> dict[str, Any]: ...
+    def on_login_failed(self) -> None: ...
+    def on_login_success(self) -> None: ...
+
+class DownloadUI(Protocol):
+    async def on_start(self, book: BookConfig) -> None: ...
+    async def on_progress(self, done: int, total: int) -> None: ...
+    async def on_complete(self, book: BookConfig) -> None: ...
+    async def on_book_error(self, book: BookConfig, error: Exception) -> None: ...
+    async def on_site_error(self, site: str, error: Exception) -> None: ...
+
+class ExportUI(Protocol):
+    def on_start(self, book: BookConfig, fmt: str | None = None) -> None: ...
+    def on_success(self, book: BookConfig, fmt: str, path: Path) -> None: ...
+    def on_error(self, book: BookConfig, fmt: str | None, error: Exception) -> None: ...
+    def on_unsupported(self, book: BookConfig, fmt: str) -> None: ...
+
+class ConfigUI(Protocol):
+    def on_missing(self, path: Path) -> None: ...
+    def on_created(self, path: Path) -> None: ...
+    def on_invalid(self, error: Exception) -> None: ...
+    def on_abort(self) -> None: ...
+    def confirm_create(self) -> bool: ...
+```
+
+### 7.2 流程函数
+
+以下函数封装了对插件注册表 (`registrar`) 的调用，直接调用即可完成对应任务:
+
+```python
+# 登录辅助
+async def ensure_login(
+    fetcher: FetcherProtocol,
+    login_ui: LoginUI,
+    login_config: dict[str, str] | None = None,
+) -> bool: ...
+
+# 下载
 async def download_books(
     site: str,
     books: list[BookConfig],
     downloader_cfg: DownloaderConfig,
     fetcher_cfg: FetcherConfig,
     parser_cfg: ParserConfig,
+    login_ui: LoginUI,
+    download_ui: DownloadUI,
     login_config: dict[str, str] | None = None,
-) -> bool
+) -> None: ...
 
-# apps/cli/handlers/export.py
+# 导出
 def export_books(
     site: str,
     books: list[BookConfig],
     exporter_cfg: ExporterConfig,
+    export_ui: ExportUI,
     formats: list[str] | None = None,
-) -> None
+) -> None: ...
+
+# 配置加载/初始化
+def load_or_init_config(
+    config_path: Path | None,
+    config_ui: ConfigUI,
+) -> dict[str, Any] | None: ...
 ```
 
-### 7.2 EPUB 构建（`libs/epub/builder.py`）
+---
+
+### 7.3 搜索（`usecases/search.py`）
+
+支持在多个站点并行搜索，返回聚合结果，或以流式方式按站点依次返回。
 
 ```python
-class EpubBuilder:
-    def __init__(self, title, author="", description="", cover_path=None,
-                 subject=None, serial_status="", word_count="0", uid="", language="zh-Hans")
-    def add_image(self, image_path: Path) -> str
-    def add_chapter(self, chap: models.Chapter) -> None
-    def add_volume(self, volume: models.Volume) -> None
-    def export(self, output_path: str|Path) -> Path
+# 聚合搜索
+async def search(
+    keyword: str,
+    sites: Sequence[str] | None = None,
+    limit: int | None = None,
+    per_site_limit: int = 5,
+    timeout: float = 5.0,
+) -> list[SearchResult]: ...
 ```
 
-### 7.3 文本与时间
-
-* 文本清理：`libs/textutils`（`Cleaner` 协议、`truncate_half_lines(text)`）
-* 异步抖动睡眠：`libs/time_utils.async_jitter_sleep(base, add_spread=0.0, mul_spread=1.0, max_sleep=None)`
-
-### 7.4 URL 解析（`libs/book_url_resolver.py`）
+* `keyword`: 搜索关键词
+* `sites`: 限定搜索的站点 key，默认搜索所有已注册站点
+* `limit`: 总结果数量上限
+* `per_site_limit`: 每个站点的结果数量上限
+* `timeout`: 每个请求的超时时间 (秒)
+* 返回：按优先级排序的搜索结果列表
 
 ```python
-def resolve_book_url(url: str) -> BookURLInfo | None
-# -> {"site_key": str, "book": {"book_id": str, ...}}
+# 流式搜索
+async def search_stream(
+    keyword: str,
+    sites: Sequence[str] | None = None,
+    per_site_limit: int = 5,
+    timeout: float = 5.0,
+) -> AsyncGenerator[list[SearchResult], None]: ...
 ```
 
-### 7.5 OCR 与 JS 解密
-
-* **FontOCR**（`infra/fontocr/core.py`）
-  * `predict(images: list[np.ndarray], batch_size=1) -> list[tuple[str, float]]`
-  * `render_char_image(char, render_font, is_reflect=False, size=64) -> PIL.Image`
-* **NodeDecryptor**（`infra/jsbridge/decryptor.py`）
-  * `decrypt_qd(ciphertext, chapter_id, fkp, fuid) -> str`（起点；Node 优先，带二进制回退）
-  * `decrypt_qq(ciphertext, chapter_id, fkp, fuid) -> str`（QQ；仅 Node）
-
-### 7.6 持久化（`infra/persistence`）
-
-* `ChapterStorage`
-  * `upsert_chapter(data: ChapterDict, source_id: int) -> None`
-  * `upsert_chapters(data: list[ChapterDict], source_id: int) -> None`
-  * `get_chapter(chap_id: str, source_id: int) -> ChapterDict | None`
-  * `get_chapters(chap_ids: list[str], source_id: int) -> dict[str, ChapterDict | None]`
-* `StateManager`
-  * `get_language() -> str`
-  * `set_language(lang: str) -> None`
-
-### 7.7 其它
-
-* `infra/cookies.parse_cookies(cookies: str | Mapping[str, str]) -> dict[str, str]`
-* `infra/logger.setup_logging(...)`
-* `infra/paths`：应用目录与资源定位（如 `DATA_DIR`, `JS_SCRIPT_DIR`, `DEFAULT_CONFIG_FILE`, `CSS_MAIN_PATH`）
-* `infra/i18n.t`：`gettext` 封装（全局 `t()`）
+* 与 `search` 相同，但以异步生成器形式逐站点返回结果，适合需要实时展示的场景。
 
 ---
 
 ## 8. 数据模型（`schemas/*.py`）
 
-> 下述选摘用于理解 I/O 形状；以实际代码为准。
+> 下述选摘用于理解 I/O 形状; 以实际代码为准。
 
-* **章节与书籍**
+### 章节与书籍
 
-  ```python
-  class ChapterDict(TypedDict):
-      id: str
-      title: str
-      content: str
-      extra: dict[str, Any]
+```python
+class ChapterDict(TypedDict):
+    id: str
+    title: str
+    content: str
+    extra: dict[str, Any]
 
-  class ChapterInfoDict(TypedDict):
-      title: str
-      url: str
-      chapterId: str
-      accessible: NotRequired[bool]
+class ChapterInfoDict(TypedDict):
+    title: str
+    url: str
+    chapterId: str
+    accessible: NotRequired[bool]
 
-  class VolumeInfoDict(TypedDict):
-      volume_name: str
-      volume_cover: NotRequired[str]
-      update_time: NotRequired[str]
-      word_count: NotRequired[str]
-      volume_intro: NotRequired[str]
-      chapters: list[ChapterInfoDict]
+class VolumeInfoDict(TypedDict):
+    volume_name: str
+    volume_cover: NotRequired[str]
+    update_time: NotRequired[str]
+    word_count: NotRequired[str]
+    volume_intro: NotRequired[str]
+    chapters: list[ChapterInfoDict]
 
-  class BookInfoDict(TypedDict):
-      book_name: str
-      author: str
-      cover_url: str
-      update_time: str
-      summary: str
-      extra: dict[str, Any]
-      volumes: list[VolumeInfoDict]
-      tags: NotRequired[list[str]]
-      word_count: NotRequired[str]
-      serial_status: NotRequired[str]
-      summary_brief: NotRequired[str]
-      last_checked: NotRequired[float]  # Unix timestamp
-  ```
+class BookInfoDict(TypedDict):
+    book_name: str
+    author: str
+    cover_url: str
+    update_time: str
+    summary: str
+    extra: dict[str, Any]
+    volumes: list[VolumeInfoDict]
+    tags: NotRequired[list[str]]
+    word_count: NotRequired[str]
+    serial_status: NotRequired[str]
+    summary_brief: NotRequired[str]
+    last_checked: NotRequired[float]  # Unix timestamp
+```
 
-* **配置数据类**
+### 配置数据类
 
-  ```python
-  @dataclass
-  class FetcherConfig:
-      request_interval: float = 2.0
-      retry_times: int = 3
-      backoff_factor: float = 2.0
-      timeout: float = 30.0
-      max_connections: int = 10
-      max_rps: float = 1000.0
-      user_agent: str | None = None
-      headers: dict[str, str] | None = None
-      verify_ssl: bool = True
-      locale_style: str = "simplified"
+```python
+@dataclass
+class FetcherConfig:
+    request_interval: float = 2.0
+    retry_times: int = 3
+    backoff_factor: float = 2.0
+    timeout: float = 30.0
+    max_connections: int = 10
+    max_rps: float = 1000.0
+    user_agent: str | None = None
+    headers: dict[str, str] | None = None
+    verify_ssl: bool = True
+    locale_style: str = "simplified"
 
-  @dataclass
-  class DownloaderConfig:
-      request_interval: float = 2.0
-      retry_times: int = 3
-      backoff_factor: float = 2.0
-      raw_data_dir: str = "./raw_data"
-      cache_dir: str = "./novel_cache"
-      workers: int = 4
-      skip_existing: bool = True
-      login_required: bool = False
-      save_html: bool = False
-      storage_batch_size: int = 1
+@dataclass
+class DownloaderConfig:
+    request_interval: float = 2.0
+    retry_times: int = 3
+    backoff_factor: float = 2.0
+    raw_data_dir: str = "./raw_data"
+    cache_dir: str = "./novel_cache"
+    workers: int = 4
+    skip_existing: bool = True
+    login_required: bool = False
+    save_html: bool = False
+    storage_batch_size: int = 1
 
-  @dataclass
-  class FontOCRConfig: ...
-  @dataclass
-  class ParserConfig:
-      cache_dir: str = "./novel_cache"
-      use_truncation: bool = True
-      decode_font: bool = False
-      batch_size: int = 32
-      save_font_debug: bool = False
-      fontocr_cfg: FontOCRConfig = field(default_factory=FontOCRConfig)
+@dataclass
+class FontOCRConfig: ...
+@dataclass
+class ParserConfig:
+    cache_dir: str = "./novel_cache"
+    use_truncation: bool = True
+    decode_font: bool = False
+    batch_size: int = 32
+    save_font_debug: bool = False
+    fontocr_cfg: FontOCRConfig = field(default_factory=FontOCRConfig)
 
-  @dataclass
-  class TextCleanerConfig: ...
-  @dataclass
-  class ExporterConfig:
-      cache_dir: str = "./novel_cache"
-      raw_data_dir: str = "./raw_data"
-      output_dir: str = "./downloads"
-      check_missing: bool = True
-      clean_text: bool = True
-      make_txt: bool = True
-      make_epub: bool = False
-      make_md: bool = False
-      make_pdf: bool = False
-      append_timestamp: bool = True
-      filename_template: str = "{title}_{author}"
-      include_cover: bool = True
-      include_picture: bool = True
-      split_mode: str = "book"
-      cleaner_cfg: TextCleanerConfig = field(default_factory=TextCleanerConfig)
+@dataclass
+class TextCleanerConfig: ...
+@dataclass
+class ExporterConfig:
+    cache_dir: str = "./novel_cache"
+    raw_data_dir: str = "./raw_data"
+    output_dir: str = "./downloads"
+    check_missing: bool = True
+    clean_text: bool = True
+    make_txt: bool = True
+    make_epub: bool = False
+    make_md: bool = False
+    make_pdf: bool = False
+    append_timestamp: bool = True
+    filename_template: str = "{title}_{author}"
+    include_cover: bool = True
+    include_picture: bool = True
+    split_mode: str = "book"
+    cleaner_cfg: TextCleanerConfig = field(default_factory=TextCleanerConfig)
 
-  class BookConfig(TypedDict):
-      book_id: str
-      start_id: NotRequired[str]
-      end_id: NotRequired[str]
-      ignore_ids: NotRequired[list[str]]
-  ```
+class BookConfig(TypedDict):
+    book_id: str
+    start_id: NotRequired[str]
+    end_id: NotRequired[str]
+    ignore_ids: NotRequired[list[str]]
+```
 
-* **登录与搜索**
+### 登录与搜索
 
-  ```python
-  @dataclass
-  class LoginField:
-      name: str
-      label: str
-      type: Literal["text", "password", "cookie"]
-      required: bool
-      default: str = ""
-      placeholder: str = ""
-      description: str = ""
+```python
+@dataclass
+class LoginField:
+    name: str
+    label: str
+    type: Literal["text", "password", "cookie"]
+    required: bool
+    default: str = ""
+    placeholder: str = ""
+    description: str = ""
 
-  class SearchResult(TypedDict):
-      site: str
-      book_id: str
-      book_url: str
-      cover_url: str
-      title: str
-      author: str
-      latest_chapter: str
-      update_date: str
-      word_count: str
-      priority: int
-  ```
+class SearchResult(TypedDict):
+    site: str
+    book_id: str
+    book_url: str
+    cover_url: str
+    title: str
+    author: str
+    latest_chapter: str
+    update_date: str
+    word_count: str
+    priority: int
+```
 
 ---
 
@@ -467,46 +579,63 @@ def resolve_book_url(url: str) -> BookURLInfo | None
 
 ## 10. 常见用法片段
 
-**A. 仅导出为 EPUB**
+### A. 仅导出为 EPUB
 
 ```python
-from novel_downloader.apps.cli.handlers.export import export_books
-from novel_downloader.infra.config.file_io import load_config
-from novel_downloader.infra.config.adapter import ConfigAdapter
+from pathlib import Path
+from novel_downloader.infra.config import load_config, ConfigAdapter
+from novel_downloader.usecases.export import export_books
+from novel_downloader.apps.cli.ui_adapters import CLIExportUI
+from novel_downloader.schemas import BookConfig
 
-cfg = load_config("./settings.toml")
-adapter = ConfigAdapter(cfg, "aaatxt")
+cfg = load_config(Path("./settings.toml"))
+adapter = ConfigAdapter(cfg)
+
 export_books(
-    "aaatxt",
-    [{"book_id": "123"}],
-    adapter.get_exporter_config(),
+    site="aaatxt",
+    books=[BookConfig(book_id="123")],
+    exporter_cfg=adapter.get_exporter_config("aaatxt"),
+    export_ui=CLIExportUI(),
     formats=["epub"],
 )
 ```
 
-**B. 通过搜索后立即下载+导出**
+### B. 通过搜索后立即下载+导出
 
 ```python
 import asyncio
-from novel_downloader.plugins.searching import search
-from novel_downloader.apps.cli.handlers.download import download_books
-from novel_downloader.apps.cli.handlers.export import export_books
-from novel_downloader.infra.config.file_io import load_config
-from novel_downloader.infra.config.adapter import ConfigAdapter
+from novel_downloader.usecases.download import download_books
+from novel_downloader.usecases.export import export_books
+from novel_downloader.usecases.search import search
+from novel_downloader.infra.config import load_config, ConfigAdapter
+from novel_downloader.apps.cli.ui_adapters import CLILoginUI, CLIDownloadUI, CLIExportUI
+from novel_downloader.schemas import BookConfig
 
 async def main():
-    results = await search("诡秘之主", sites=["aaatxt"], per_site_limit=3)
+    results = await search("诡秘之主", sites=["hetushu"], per_site_limit=3)
     pick = results[0]
-    adapter = ConfigAdapter(load_config("./settings.toml"), pick["site"])
-    books = [{"book_id": pick["book_id"]}]
-    if await download_books(
-        pick["site"], books,
-        adapter.get_downloader_config(),
-        adapter.get_fetcher_config(),
-        adapter.get_parser_config(),
-        adapter.get_login_config(),
-    ):
-        export_books(pick["site"], books, adapter.get_exporter_config())
+    site = pick["site"]
+    book = BookConfig(book_id=pick["book_id"])
+
+    adapter = ConfigAdapter(load_config("./settings.toml"))
+
+    await download_books(
+        site=site,
+        books=[book],
+        downloader_cfg=adapter.get_downloader_config(site),
+        fetcher_cfg=adapter.get_fetcher_config(site),
+        parser_cfg=adapter.get_parser_config(site),
+        login_ui=CLILoginUI(),
+        download_ui=CLIDownloadUI(),
+        login_config=adapter.get_login_config(site),
+    )
+
+    export_books(
+        site=site,
+        books=[book],
+        exporter_cfg=adapter.get_exporter_config(site),
+        export_ui=CLIExportUI(),
+    )
 
 asyncio.run(main())
 ```

@@ -5,11 +5,11 @@ novel_downloader.plugins.sites.biquguo.searcher
 
 """
 
-from novel_downloader.plugins.searching import register_searcher
+from novel_downloader.plugins.registry import registrar
 from novel_downloader.plugins.sites.mangg_net.searcher import ManggNetSearcher
 
 
-@register_searcher()
+@registrar.register_searcher()
 class BiquguoSearcher(ManggNetSearcher):
     site_name = "biquguo"
     priority = 30

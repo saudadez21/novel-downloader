@@ -8,7 +8,6 @@ major component in the novel_downloader pipeline.
 """
 
 from dataclasses import dataclass, field
-from typing import NotRequired, TypedDict
 
 
 @dataclass
@@ -92,8 +91,9 @@ class ExporterConfig:
     cleaner_cfg: TextCleanerConfig = field(default_factory=TextCleanerConfig)
 
 
-class BookConfig(TypedDict):
+@dataclass(frozen=True, slots=True)
+class BookConfig:
     book_id: str
-    start_id: NotRequired[str]
-    end_id: NotRequired[str]
-    ignore_ids: NotRequired[list[str]]
+    start_id: str | None = None
+    end_id: str | None = None
+    ignore_ids: tuple[str, ...] = field(default_factory=tuple)

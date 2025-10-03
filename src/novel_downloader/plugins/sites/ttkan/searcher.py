@@ -10,36 +10,36 @@ import logging
 from lxml import html
 
 from novel_downloader.plugins.base.searcher import BaseSearcher
-from novel_downloader.plugins.searching import register_searcher
+from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import SearchResult
 
 logger = logging.getLogger(__name__)
 
 
-@register_searcher()
+@registrar.register_searcher()
 class TtkanSearcher(BaseSearcher):
     site_name = "ttkan"
     priority = 100
     BASE_URL = "https://www.ttkan.co"
     SEARCH_URL = "https://www.ttkan.co/novel/search"
 
-    @classmethod
-    async def _fetch_html(cls, keyword: str) -> str:
+    async def _fetch_html(self, keyword: str) -> str:
         params = {"q": keyword}
         try:
-            async with cls._http_get(cls.SEARCH_URL, params=params) as resp:
+            async with self._http_get(self.SEARCH_URL, params=params) as resp:
                 resp.raise_for_status()
-                return await cls._response_to_str(resp)
+                return await self._response_to_str(resp)
         except Exception:
             logger.error(
                 "Failed to fetch HTML for keyword '%s' from '%s'",
                 keyword,
-                cls.SEARCH_URL,
+                self.SEARCH_URL,
             )
             return ""
 
-    @classmethod
-    def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
+    def _parse_html(
+        self, html_str: str, limit: int | None = None
+    ) -> list[SearchResult]:
         doc = html.fromstring(html_str)
         items = doc.xpath(
             '//div[contains(@class,"frame_body")]//div[@class="pure-g"]/div[contains(@class,"novel_cell")]'
@@ -49,7 +49,7 @@ class TtkanSearcher(BaseSearcher):
         results: list[SearchResult] = []
 
         for idx, item in enumerate(items):
-            href = cls._first_str(item.xpath(".//a[@href][1]/@href"))
+            href = self._first_str(item.xpath(".//a[@href][1]/@href"))
             if not href:
                 continue
 
@@ -58,25 +58,25 @@ class TtkanSearcher(BaseSearcher):
 
             # link -> /novel/chapters/<book_id>
             book_id = href.strip("/").split("/")[-1]
-            book_url = cls._abs_url(href)
+            book_url = self._abs_url(href)
 
-            cover_rel = cls._first_str(item.xpath(".//amp-img/@src"))
-            cover_url = cls._abs_url(cover_rel) if cover_rel else ""
+            cover_rel = self._first_str(item.xpath(".//amp-img/@src"))
+            cover_url = self._abs_url(cover_rel) if cover_rel else ""
 
-            title = cls._first_str(item.xpath(".//h3/text()"))
+            title = self._first_str(item.xpath(".//h3/text()"))
 
             author = (
-                cls._first_str(
+                self._first_str(
                     item.xpath(".//li[starts-with(normalize-space(.),'作者')]/text()"),
                     replaces=[("作者：", "")],
                 )
                 or "-"
             )
 
-            prio = cls.priority + idx
+            prio = self.priority + idx
             results.append(
                 SearchResult(
-                    site=cls.site_name,
+                    site=self.site_name,
                     book_id=book_id,
                     book_url=book_url,
                     cover_url=cover_url,

@@ -16,27 +16,26 @@ from lxml import html
 
 from novel_downloader.libs.crypto.rc4 import rc4_init, rc4_stream
 from novel_downloader.plugins.base.searcher import BaseSearcher
-from novel_downloader.plugins.searching import register_searcher
+from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import SearchResult
 
 logger = logging.getLogger(__name__)
 
 
-@register_searcher()
+@registrar.register_searcher()
 class QidianSearcher(BaseSearcher):
     site_name = "qidian"
     priority = 0
     SEARCH_URL = "https://www.qidian.com/so/{query}.html"
     _E1_VAL = {"l6": "", "l7": "", "l1": "", "l3": "", "pid": "qd_p_qidian", "eid": ""}
 
-    @classmethod
-    async def _fetch_html(cls, keyword: str) -> str:
-        url = cls.SEARCH_URL.format(query=cls._quote(keyword))
+    async def _fetch_html(self, keyword: str) -> str:
+        url = self.SEARCH_URL.format(query=self._quote(keyword))
         try:
-            cookies = cls._calc_cookies(url)
-            async with cls._http_get(url, cookies=cookies) as resp:
+            cookies = self._calc_cookies(url)
+            async with self._http_get(url, cookies=cookies) as resp:
                 resp.raise_for_status()
-                return await cls._response_to_str(resp)
+                return await self._response_to_str(resp)
         except Exception:
             logger.error(
                 "Failed to fetch HTML for keyword '%s' from '%s'",
@@ -45,8 +44,9 @@ class QidianSearcher(BaseSearcher):
             )
             return ""
 
-    @classmethod
-    def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
+    def _parse_html(
+        self, html_str: str, limit: int | None = None
+    ) -> list[SearchResult]:
         doc = html.fromstring(html_str)
         items = doc.xpath(
             '//div[@id="result-list"]//li[contains(@class, "res-book-item")]'
@@ -54,8 +54,8 @@ class QidianSearcher(BaseSearcher):
         results: list[SearchResult] = []
 
         for idx, item in enumerate(items):
-            book_id = cls._first_str(item.xpath("./@data-bid"))
-            book_url = cls._first_str(
+            book_id = self._first_str(item.xpath("./@data-bid"))
+            book_url = self._first_str(
                 item.xpath('.//h3[contains(@class,"book-info-title")]//a/@href')
             )
             if not book_id or not book_url:
@@ -63,30 +63,30 @@ class QidianSearcher(BaseSearcher):
             if limit is not None and idx >= limit:
                 break
 
-            cover_url = cls._first_str(
+            cover_url = self._first_str(
                 item.xpath('.//div[contains(@class,"book-img-box")]//img/@src')
             )
-            book_url = cls._abs_url(book_url)
-            cover_url = cls._abs_url(cover_url)
+            book_url = self._abs_url(book_url)
+            cover_url = self._abs_url(cover_url)
 
-            title = cls._first_str(
+            title = self._first_str(
                 item.xpath('.//h3[contains(@class,"book-info-title")]//a/@title'),
                 replaces=[("在线阅读", "")],
             )
-            author = cls._first_str(
+            author = self._first_str(
                 item.xpath(
                     './/p[contains(@class,"author")]//a[contains(@class,"name")]/text()'
                     ' | .//p[contains(@class,"author")]//i/text()'
                 )
             )
-            latest_chapter = cls._first_str(
+            latest_chapter = self._first_str(
                 item.xpath('.//p[contains(@class,"update")]//a/text()'),
                 replaces=[("最新更新", "")],
             )
-            update_date = cls._first_str(
+            update_date = self._first_str(
                 item.xpath('.//p[contains(@class,"update")]//span/text()')
             )
-            word_count = cls._first_str(
+            word_count = self._first_str(
                 item.xpath(
                     './/div[contains(@class,"book-right-info")]//div[contains(@class,"total")]/p[1]/span/text()'
                 )
@@ -94,7 +94,7 @@ class QidianSearcher(BaseSearcher):
 
             results.append(
                 SearchResult(
-                    site=cls.site_name,
+                    site=self.site_name,
                     book_id=book_id,
                     book_url=book_url,
                     cover_url=cover_url,
@@ -103,7 +103,7 @@ class QidianSearcher(BaseSearcher):
                     latest_chapter=latest_chapter,
                     update_date=update_date,
                     word_count=word_count,
-                    priority=cls.priority + idx,
+                    priority=self.priority + idx,
                 )
             )
         return results

@@ -60,10 +60,10 @@ class CommonExporter(BaseExporter):
           4. Concatenate header and all chapter contents.
           5. Save the resulting .txt file to the output directory
         """
-        book_id = self._normalize_book_id(book["book_id"])
-        start_id = book.get("start_id")
-        end_id = book.get("end_id")
-        ignore_set = set(book.get("ignore_ids", []))
+        book_id = self._normalize_book_id(book.book_id)
+        start_id = book.start_id
+        end_id = book.end_id
+        ignore_set = set(book.ignore_ids or [])
 
         if not self._init_chapter_storages(book_id):
             return None
@@ -156,10 +156,10 @@ class CommonExporter(BaseExporter):
           d. For each chapter: clean title & content, inline remote images.
           e. Finalize and write the volume EPUB.
         """
-        book_id = self._normalize_book_id(book["book_id"])
-        start_id = book.get("start_id")
-        end_id = book.get("end_id")
-        ignore_set = set(book.get("ignore_ids", []))
+        book_id = self._normalize_book_id(book.book_id)
+        start_id = book.start_id
+        end_id = book.end_id
+        ignore_set = set(book.ignore_ids or [])
 
         if not self._init_chapter_storages(book_id):
             return None
@@ -296,10 +296,10 @@ class CommonExporter(BaseExporter):
 
         :param book_id: Identifier of the novel (used as subdirectory name).
         """
-        book_id = self._normalize_book_id(book["book_id"])
-        start_id = book.get("start_id")
-        end_id = book.get("end_id")
-        ignore_set = set(book.get("ignore_ids", []))
+        book_id = self._normalize_book_id(book.book_id)
+        start_id = book.start_id
+        end_id = book.end_id
+        ignore_set = set(book.ignore_ids or [])
 
         if not self._init_chapter_storages(book_id):
             return None
