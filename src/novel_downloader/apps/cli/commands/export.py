@@ -99,7 +99,10 @@ class ExportCmd(Command):
         if plugins_cfg.get("enable_local_plugins"):
             from novel_downloader.plugins.registry import registrar
 
-            registrar.enable_local_plugins(plugins_cfg.get("local_plugins_path"))
+            registrar.enable_local_plugins(
+                plugins_cfg.get("local_plugins_path"),
+                override=plugins_cfg.get("override_builtins", False),
+            )
 
         books = cls._parse_book_args(book_ids, args.start, args.end)
 

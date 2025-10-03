@@ -169,6 +169,7 @@ class ConfigAdapter:
         return {
             "enable_local_plugins": plugins_cfg.get("enable_local_plugins", False),
             "local_plugins_path": plugins_cfg.get("local_plugins_path") or "",
+            "override_builtins": plugins_cfg.get("override_builtins", False),
         }
 
     def get_book_ids(self, site: str) -> list[BookConfig]:
