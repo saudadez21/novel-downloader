@@ -22,6 +22,10 @@ class FetcherConfig:
     user_agent: str | None = None
     headers: dict[str, str] | None = None
     verify_ssl: bool = True
+    proxy: str | None = None
+    proxy_user: str | None = None
+    proxy_pass: str | None = None
+    trust_env: bool = False
     locale_style: str = "simplified"
 
 

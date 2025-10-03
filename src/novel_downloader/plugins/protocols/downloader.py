@@ -38,21 +38,3 @@ class DownloaderProtocol(Protocol):
         :param cancel_event: Optional asyncio.Event to allow cancellation.
         """
         ...
-
-    async def download_many(
-        self,
-        books: list[BookConfig],
-        *,
-        progress_hook: Callable[[int, int], Awaitable[None]] | None = None,
-        cancel_event: asyncio.Event | None = None,
-        **kwargs: Any,
-    ) -> None:
-        """
-        Download multiple books.
-
-        :param books: List of BookConfig entries.
-        :param progress_hook: Optional async callback after each chapter.
-                                args: completed_count, total_count.
-        :param cancel_event: Optional asyncio.Event to allow cancellation.
-        """
-        ...

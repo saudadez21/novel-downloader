@@ -74,8 +74,6 @@ class QidianDownloader(BaseDownloader):
 
         # ---- metadata ---
         book_info = await self._load_book_info(book_id=book_id)
-        if not book_info:
-            return
 
         vols = book_info["volumes"]
         plan = self._select_chapter_ids(vols, start_id, end_id, ignore_set)

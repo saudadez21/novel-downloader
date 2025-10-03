@@ -22,7 +22,7 @@ from novel_downloader.schemas import (
 @registrar.register_parser()
 class N37yqParser(BaseParser):
     """
-    Parser for 哔哩轻小说 book pages.
+    Parser for 三七轻小说 book pages.
     """
 
     site_name: str = "n37yq"

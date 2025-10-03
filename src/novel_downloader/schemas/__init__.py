@@ -22,6 +22,7 @@ __all__ = [
     "SearchResult",
 ]
 
+from .auth import LoginField
 from .book import (
     BookInfoDict,
     ChapterDict,
@@ -37,5 +38,4 @@ from .config import (
     ParserConfig,
     TextCleanerConfig,
 )
-from .login import LoginField
 from .search import SearchResult

@@ -64,6 +64,10 @@ class ConfigAdapter:
             user_agent=self._pick("user_agent", None, s, g),
             headers=self._pick("headers", None, s, g),
             verify_ssl=self._pick("verify_ssl", True, s, g),
+            proxy=self._pick("proxy", None, s, g),
+            proxy_user=self._pick("proxy_user", None, s, g),
+            proxy_pass=self._pick("proxy_pass", None, s, g),
+            trust_env=self._pick("trust_env", False, s, g),
             locale_style=self._pick("locale_style", "simplified", s, g),
         )
 

@@ -83,6 +83,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [大熊猫文学网](https://www.dxmwx.org/)                        | dxmwx    | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [完本神站](https://www.wanbengo.com/)                        | wanbengo  | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [25中文网](https://www.i25zw.com/)                           | i25zw     | ❌     | ❌     | ❌     | ✅     | 简      |
+| [69阅读](https://www.69yue.top/index.html)                   | n69yue    | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [老幺小说网](hhttps://www.laoyaoxs.org/)                     | laoyaoxs  | ❌     | ❌     | ❌     | ✅     | 简      |
 | [全本小说网](https://quanben5.com/)                          | quanben5  | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [鲲弩小说](https://www.kunnu.com/)                           | kunnu     | ✅     | ❌     | ❌     | ❌     | 简      |
@@ -217,6 +218,10 @@ novel-cli download --site ttkan shengxu-chendong
 * **25中文网 (i25zw)**
   * 书籍: `https://www.i25zw.com/book/64371.html` -> Book ID: `64371`
   * 章节: `https://www.i25zw.com/64371/153149757.html` -> Chapter ID: `153149757`
+
+* **69阅读 (n69yue)**
+  * 书籍: `https://www.69yue.top/articlecategroy/15yu.html` -> Book ID: `15yu`
+  * 章节: `https://www.69yue.top/article/15185363014257741.html` -> Chapter ID: `15185363014257741`
 
 * **老幺小说网 (laoyaoxs)**
   * 书籍: `https://www.laoyaoxs.org/info/7359.html` -> Book ID: `7359`
