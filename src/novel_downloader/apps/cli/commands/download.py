@@ -105,11 +105,11 @@ class DownloadCmd(Command):
             return
 
         ui.info(t("Using site: {site}").format(site=site))
-        adapter = ConfigAdapter(config=config_data, site=site)
+        adapter = ConfigAdapter(config=config_data)
 
         if not books and args.site:
             try:
-                books = adapter.get_book_ids()
+                books = adapter.get_book_ids(site)
             except Exception as e:
                 ui.error(
                     t("Failed to read book IDs from configuration: {err}").format(
@@ -143,12 +143,12 @@ class DownloadCmd(Command):
             download_books(
                 site,
                 books,
-                adapter.get_downloader_config(),
-                adapter.get_fetcher_config(),
-                adapter.get_parser_config(),
+                adapter.get_downloader_config(site),
+                adapter.get_fetcher_config(site),
+                adapter.get_parser_config(site),
                 login_ui=login_ui,
                 download_ui=download_ui,
-                login_config=adapter.get_login_config(),
+                login_config=adapter.get_login_config(site),
             )
         )
         if not download_ui.completed_books:
@@ -162,7 +162,7 @@ class DownloadCmd(Command):
             export_books(
                 site,
                 list(download_ui.completed_books),
-                adapter.get_exporter_config(),
+                adapter.get_exporter_config(site),
                 export_ui=export_ui,
             )
         else:

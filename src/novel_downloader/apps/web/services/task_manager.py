@@ -9,7 +9,7 @@ import asyncio
 from collections import defaultdict
 
 from novel_downloader.infra.config import ConfigAdapter, load_config
-from novel_downloader.schemas import BookConfig, ExporterConfig
+from novel_downloader.schemas import BookConfig
 from novel_downloader.usecases.download import download_books
 from novel_downloader.usecases.export import export_books
 
@@ -33,11 +33,11 @@ class TaskManager:
         self.completed: list[DownloadTask] = []
 
         self._worker_tasks: dict[str, asyncio.Task[None]] = {}
-        self._export_waiting: list[tuple[DownloadTask, ExporterConfig]] = []
+        self._export_waiting: list[DownloadTask] = []
         self._export_worker_task: asyncio.Task[None] | None = None
 
         self._lock = asyncio.Lock()
-        self._settings = load_config()
+        self._adapter = ConfigAdapter(load_config())
 
     # ---------- public API ----------
     async def add_task(self, *, title: str, site: str, book_id: str) -> DownloadTask:
@@ -104,12 +104,11 @@ class TaskManager:
 
     async def _run_task(self, task: DownloadTask) -> None:
         task.status = "running"
-        adapter = ConfigAdapter(config=self._settings, site=task.site)
-        downloader_cfg = adapter.get_downloader_config()
-        fetcher_cfg = adapter.get_fetcher_config()
-        parser_cfg = adapter.get_parser_config()
-        exporter_cfg = adapter.get_exporter_config()
-        login_cfg = adapter.get_login_config()
+        adapter = self._adapter
+        downloader_cfg = adapter.get_downloader_config(task.site)
+        fetcher_cfg = adapter.get_fetcher_config(task.site)
+        parser_cfg = adapter.get_parser_config(task.site)
+        login_cfg = adapter.get_login_config(task.site)
 
         login_ui = WebLoginUI(task)
         download_ui = WebDownloadUI(task)
@@ -131,7 +130,7 @@ class TaskManager:
                 return
 
             task.status = "exporting"
-            self._export_waiting.append((task, exporter_cfg))
+            self._export_waiting.append(task)
             if not self._export_worker_task or self._export_worker_task.done():
                 self._export_worker_task = asyncio.create_task(self._export_worker())
 
@@ -145,12 +144,13 @@ class TaskManager:
     async def _export_worker(self) -> None:
         """Dedicated worker for synchronous export tasks."""
         while self._export_waiting:
-            task, exporter_cfg = self._export_waiting.pop()
+            task = self._export_waiting.pop()
             try:
                 if task.is_cancelled():
                     task.status = "cancelled"
                     continue
 
+                exporter_cfg = self._adapter.get_exporter_config(task.site)
                 export_ui = WebExportUI(task)
                 await asyncio.to_thread(
                     export_books,

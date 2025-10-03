@@ -47,23 +47,24 @@ async def main():
         return
 
     site = resolved["site_key"]
-    adapter = ConfigAdapter(config=config, site=site)
+    book = resolved["book"]
+    adapter = ConfigAdapter(config=config)
 
     await download_books(
         site=site,
-        books=[resolved["book"]],
-        downloader_cfg=adapter.get_downloader_config(),
-        fetcher_cfg=adapter.get_fetcher_config(),
-        parser_cfg=adapter.get_parser_config(),
+        books=[book],
+        downloader_cfg=adapter.get_downloader_config(site),
+        fetcher_cfg=adapter.get_fetcher_config(site),
+        parser_cfg=adapter.get_parser_config(site),
         login_ui=CLILoginUI(),
         download_ui=CLIDownloadUI(),
-        login_config=adapter.get_login_config(),
+        login_config=adapter.get_login_config(site),
     )
 
     export_books(
         site=site,
-        books=[resolved["book"]],
-        exporter_cfg=adapter.get_exporter_config(),
+        books=[book],
+        exporter_cfg=adapter.get_exporter_config(site),
         export_ui=CLIExportUI(),
     )
 
@@ -74,13 +75,13 @@ asyncio.run(main())
 
 ```python
 from novel_downloader.plugins import registrar  # 插件注册器单例
-from novel_downloader.schemas.config import FetcherConfig, ParserConfig, DownloaderConfig
+from novel_downloader.schemas import BookConfig, FetcherConfig, ParserConfig, DownloaderConfig
 
 parser = registrar.get_parser("aaatxt", ParserConfig())
 async def run():
     async with registrar.get_fetcher("aaatxt", FetcherConfig()) as fetcher:
         downloader = registrar.get_downloader(fetcher, parser, "aaatxt", DownloaderConfig())
-        await downloader.download({"book_id": "123"})
+        await downloader.download(BookConfig(book_id="123"))
 ```
 
 ---
@@ -186,18 +187,28 @@ class Command(ABC):
 将通用配置映射为结构化数据类，按字段优先级解析：
 
 1. `config["sites"][<site>]`
-2. `config["general"]`
-3. 调用方提供的默认值
+2. `config["sites"]["common"]`
+3. `config["general"]`
+3. 默认值
 
-可用方法：
+**构造:**
 
 ```python
-get_fetcher_config() -> FetcherConfig
-get_downloader_config() -> DownloaderConfig
-get_parser_config() -> ParserConfig
-get_exporter_config() -> ExporterConfig
-get_login_config() -> dict[str, str]
-get_book_ids() -> list[BookConfig]
+adapter = ConfigAdapter(config)
+```
+
+**方法:**
+
+```python
+get_fetcher_config(site: str)   -> FetcherConfig
+get_downloader_config(site: str)-> DownloaderConfig
+get_parser_config(site: str)    -> ParserConfig
+get_exporter_config(site: str)  -> ExporterConfig
+get_login_config(site: str)     -> dict[str, str]
+get_book_ids(site: str)         -> list[BookConfig]
+
+get_plugins_config() -> dict[str, Any]
+get_log_level()      -> str
 ```
 
 ---
@@ -272,7 +283,8 @@ class DownloadUI(Protocol):
     async def on_start(self, book: BookConfig) -> None: ...
     async def on_progress(self, done: int, total: int) -> None: ...
     async def on_complete(self, book: BookConfig) -> None: ...
-    async def on_error(self, book: BookConfig, error: Exception) -> None: ...
+    async def on_book_error(self, book: BookConfig, error: Exception) -> None: ...
+    async def on_site_error(self, site: str, error: Exception) -> None: ...
 
 class ExportUI(Protocol):
     def on_start(self, book: BookConfig, fmt: str | None = None) -> None: ...
@@ -493,12 +505,12 @@ from novel_downloader.apps.cli.ui_adapters import CLIExportUI
 from novel_downloader.schemas import BookConfig
 
 cfg = load_config(Path("./settings.toml"))
-adapter = ConfigAdapter(cfg, "aaatxt")
+adapter = ConfigAdapter(cfg)
 
 export_books(
     site="aaatxt",
     books=[BookConfig(book_id="123")],
-    exporter_cfg=adapter.get_exporter_config(),
+    exporter_cfg=adapter.get_exporter_config("aaatxt"),
     export_ui=CLIExportUI(),
     formats=["epub"],
 )
@@ -516,26 +528,28 @@ from novel_downloader.apps.cli.ui_adapters import CLILoginUI, CLIDownloadUI, CLI
 from novel_downloader.schemas import BookConfig
 
 async def main():
-    results = await search("诡秘之主", sites=["aaatxt"], per_site_limit=3)
+    results = await search("诡秘之主", sites=["hetushu"], per_site_limit=3)
     pick = results[0]
-    adapter = ConfigAdapter(load_config("./settings.toml"), pick["site"])
+    site = pick["site"]
     book = BookConfig(book_id=pick["book_id"])
 
+    adapter = ConfigAdapter(load_config("./settings.toml"))
+
     await download_books(
-        site=pick["site"],
+        site=site,
         books=[book],
-        downloader_cfg=adapter.get_downloader_config(),
-        fetcher_cfg=adapter.get_fetcher_config(),
-        parser_cfg=adapter.get_parser_config(),
+        downloader_cfg=adapter.get_downloader_config(site),
+        fetcher_cfg=adapter.get_fetcher_config(site),
+        parser_cfg=adapter.get_parser_config(site),
         login_ui=CLILoginUI(),
         download_ui=CLIDownloadUI(),
-        login_config=adapter.get_login_config(),
+        login_config=adapter.get_login_config(site),
     )
 
     export_books(
-        site=pick["site"],
+        site=site,
         books=[book],
-        exporter_cfg=adapter.get_exporter_config(),
+        exporter_cfg=adapter.get_exporter_config(site),
         export_ui=CLIExportUI(),
     )
 

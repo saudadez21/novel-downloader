@@ -44,13 +44,6 @@
 
 ### 架构与插件扩展
 
-#### Hook / Reporter 抽象
-
-* 将 CLI / Web 公用逻辑抽取到 `/usecases/`，避免重复代码
-* 在 `/usecases/protocols.py` 定义 `LoginPrompter`、`DownloadReporter`、`ExportReporter` 协议
-* CLI 与 Web 分别在 `apps/cli/reporters.py` 和 `apps/web/reporters.py` 实现具体行为
-* download/export 流程统一调用这些协议，解耦 UI 与业务
-
 #### Processor 插件化
 
 * 在 `/plugins/protocols/processor.py` 定义统一协议:

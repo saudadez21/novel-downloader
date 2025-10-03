@@ -96,7 +96,8 @@ class SearchCmd(Command):
             if chosen is None:
                 return
 
-            adapter = ConfigAdapter(config=config_data, site=chosen["site"])
+            site = chosen["site"]
+            adapter = ConfigAdapter(config=config_data)
             books: list[BookConfig] = [BookConfig(book_id=chosen["book_id"])]
 
             log_level = adapter.get_log_level()
@@ -109,12 +110,12 @@ class SearchCmd(Command):
             await download_books(
                 chosen["site"],
                 books,
-                adapter.get_downloader_config(),
-                adapter.get_fetcher_config(),
-                adapter.get_parser_config(),
+                adapter.get_downloader_config(site),
+                adapter.get_fetcher_config(site),
+                adapter.get_parser_config(site),
                 login_ui=login_ui,
                 download_ui=download_ui,
-                login_config=adapter.get_login_config(),
+                login_config=adapter.get_login_config(site),
             )
             if not download_ui.completed_books:
                 return
@@ -126,7 +127,7 @@ class SearchCmd(Command):
             export_books(
                 site=chosen["site"],
                 books=list(download_ui.completed_books),
-                exporter_cfg=adapter.get_exporter_config(),
+                exporter_cfg=adapter.get_exporter_config(site),
                 export_ui=export_ui,
             )
 

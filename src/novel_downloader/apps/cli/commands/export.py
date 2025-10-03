@@ -92,7 +92,7 @@ class ExportCmd(Command):
                 return
             book_ids = selected
 
-        adapter = ConfigAdapter(config=config_data, site=site)
+        adapter = ConfigAdapter(config=config_data)
         ui.setup_logging(console_level=adapter.get_log_level())
 
         plugins_cfg = adapter.get_plugins_config()
@@ -109,7 +109,7 @@ class ExportCmd(Command):
         export_books(
             site=site,
             books=books,
-            exporter_cfg=adapter.get_exporter_config(),
+            exporter_cfg=adapter.get_exporter_config(site),
             export_ui=export_ui,
             formats=formats,
         )
