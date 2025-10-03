@@ -21,7 +21,11 @@ def cli_main() -> None:
 
     args = parser.parse_args()
     if hasattr(args, "func"):
-        args.func(args)
+        try:
+            args.func(args)
+        except KeyboardInterrupt as err:
+            print("\nAborted.")
+            raise SystemExit(1) from err
     else:
         parser.print_help()
 
