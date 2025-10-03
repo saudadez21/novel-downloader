@@ -8,7 +8,7 @@ Downloader implementation for QQ novels, with unpurchased chapter ID skip logic.
 
 import asyncio
 from collections.abc import Awaitable, Callable
-from typing import Any, ClassVar
+from typing import Any
 
 from novel_downloader.infra.persistence.chapter_storage import ChapterStorage
 from novel_downloader.libs.time_utils import async_jitter_sleep
@@ -26,13 +26,6 @@ class QqbookDownloader(BaseDownloader):
     Processes each chapter in a single worker that skip non-accessible
     and handles fetch -> parse -> enqueue storage.
     """
-
-    DEFAULT_SOURCE_ID: ClassVar[int] = 0
-    ENCRYPTED_SOURCE_ID: ClassVar[int] = 1
-    PRIORITIES_MAP: ClassVar[dict[int, int]] = {
-        DEFAULT_SOURCE_ID: 0,
-        ENCRYPTED_SOURCE_ID: 1,
-    }
 
     async def _download_one(
         self,
@@ -77,22 +70,22 @@ class QqbookDownloader(BaseDownloader):
         default_batch: list[ChapterDict] = []
         encrypted_batch: list[ChapterDict] = []
 
-        def select_batch(chap: ChapterDict) -> tuple[list[ChapterDict], int]:
+        def select_batch(chap: ChapterDict) -> tuple[list[ChapterDict], bool]:
             # set extra.encrypted (by parser); default to plain if absent.
-            if chap.get("extra", {}).get("font_encrypt", False):
-                return encrypted_batch, self.ENCRYPTED_SOURCE_ID
-            return default_batch, self.DEFAULT_SOURCE_ID
+            is_encrypted = bool(chap.get("extra", {}).get("font_encrypt", False))
+            return (encrypted_batch if is_encrypted else default_batch), is_encrypted
 
-        async def flush_batch(batch: list[ChapterDict], src: int) -> None:
+        async def flush_batch(batch: list[ChapterDict], need_refetch: bool) -> None:
             if not batch:
                 return
             try:
-                storage.upsert_chapters(batch, src)
+                # need_refetch=True for encrypted, False for plain
+                storage.upsert_chapters(batch, need_refetch=need_refetch)
             except Exception as e:
                 self.logger.error(
-                    "Storage batch upsert failed (size=%d, src=%d): %s",
+                    "Storage batch upsert failed (size=%d, need_refetch=%s): %s",
                     len(batch),
-                    src,
+                    need_refetch,
                     e,
                     exc_info=True,
                 )
@@ -102,29 +95,29 @@ class QqbookDownloader(BaseDownloader):
                 batch.clear()
 
         async def flush_all() -> None:
-            await flush_batch(default_batch, self.DEFAULT_SOURCE_ID)
-            await flush_batch(encrypted_batch, self.ENCRYPTED_SOURCE_ID)
+            await flush_batch(default_batch, need_refetch=False)
+            await flush_batch(encrypted_batch, need_refetch=True)
 
         # ---- workers ---
         async def storage_worker() -> None:
             while True:
                 item = await save_q.get()
                 if isinstance(item, StopToken):
-                    # drain remaining items before exiting
+                    # drain any remaining chapters, then flush both batches
                     while not save_q.empty():
                         nxt = save_q.get_nowait()
                         if not isinstance(nxt, StopToken):
-                            nbatch, nsrc = select_batch(nxt)
+                            nbatch, n_need = select_batch(nxt)
                             nbatch.append(nxt)
                             if len(nbatch) >= self._storage_batch_size:
-                                await flush_batch(nbatch, nsrc)
+                                await flush_batch(nbatch, n_need)
                     await flush_all()
                     return
 
-                batch, src = select_batch(item)
+                batch, need = select_batch(item)
                 batch.append(item)
                 if len(batch) >= self._storage_batch_size:
-                    await flush_batch(batch, src)
+                    await flush_batch(batch, need)
 
         async def chapter_worker() -> None:
             try:
@@ -156,14 +149,15 @@ class QqbookDownloader(BaseDownloader):
             for cid in plan:
                 if cancelled():
                     break
-                if self._skip_existing and storage.exists(cid, self.DEFAULT_SOURCE_ID):
-                    # already have plain chapter
+                # Skip only if *know* it exists and does NOT need refetch.
+                # Unknown ids default to need_refetch=True -> not skipped.
+                if self._skip_existing and not storage.need_refetch(cid):
                     await progress.bump(1)
                 else:
                     await cid_q.put(cid)
 
         # ---- run tasks ---
-        with ChapterStorage(raw_base, priorities=self.PRIORITIES_MAP) as storage:
+        with ChapterStorage(raw_base, filename="chapter_raw") as storage:
             storage_task = asyncio.create_task(storage_worker())
             async with asyncio.TaskGroup() as tg:
                 worker_tasks = [

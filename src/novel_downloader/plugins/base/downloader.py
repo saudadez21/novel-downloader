@@ -14,7 +14,7 @@ import re
 import time
 from collections.abc import Awaitable, Callable, Sequence
 from pathlib import Path
-from typing import Any, ClassVar
+from typing import Any
 
 from novel_downloader.plugins.protocols import FetcherProtocol, ParserProtocol
 from novel_downloader.schemas import (
@@ -37,11 +37,6 @@ class BaseDownloader(abc.ABC):
     Subclasses are required to implement methods for downloading
     a single book, using the provided fetcher and parser components.
     """
-
-    DEFAULT_SOURCE_ID: ClassVar[int] = 0
-    PRIORITIES_MAP: ClassVar[dict[int, int]] = {
-        DEFAULT_SOURCE_ID: 0,
-    }
 
     _IMG_SRC_RE = re.compile(
         r'<img[^>]*\bsrc\s*=\s*["\'](https?://[^"\']+)["\'][^>]*>',

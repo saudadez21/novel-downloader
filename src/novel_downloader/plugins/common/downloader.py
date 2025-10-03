@@ -71,7 +71,7 @@ class CommonDownloader(BaseDownloader):
             if not batch:
                 return
             try:
-                storage.upsert_chapters(batch, self.DEFAULT_SOURCE_ID)
+                storage.upsert_chapters(batch)
             except Exception as e:
                 self.logger.error(
                     "Storage batch upsert failed (size=%d): %s",
@@ -140,7 +140,7 @@ class CommonDownloader(BaseDownloader):
                     await cid_q.put(cid)
 
         # --- run the pipeline ---
-        with ChapterStorage(raw_base, priorities=self.PRIORITIES_MAP) as storage:
+        with ChapterStorage(raw_base, filename="chapter_raw") as storage:
             storage_task = asyncio.create_task(storage_worker())
             async with asyncio.TaskGroup() as tg:
                 worker_tasks = [

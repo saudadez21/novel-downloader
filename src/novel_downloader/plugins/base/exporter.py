@@ -7,13 +7,12 @@ Abstract base class providing common structure and utilities for book exporters
 """
 
 import abc
-import contextlib
 import json
 import logging
 import types
 from datetime import datetime
 from pathlib import Path
-from typing import Any, ClassVar, Self, cast
+from typing import Any, Self, cast
 
 from novel_downloader.infra.persistence.chapter_storage import ChapterStorage
 from novel_downloader.libs.textutils import get_cleaner
@@ -37,10 +36,7 @@ class BaseExporter(abc.ABC):
     such as TXT, EPUB, Markdown, or PDF.
     """
 
-    DEFAULT_SOURCE_ID: ClassVar[int] = 0
-    PRIORITIES_MAP: ClassVar[dict[int, int]] = {
-        DEFAULT_SOURCE_ID: 0,
-    }
+    DEFAULT_CHAPTER_DB_FILENAME = "chapter_raw"
 
     def __init__(
         self,
@@ -182,54 +178,83 @@ class BaseExporter(abc.ABC):
         book_id: str,
         chap_id: str,
     ) -> ChapterDict | None:
-        if book_id not in self._storage_cache:
+        """
+        Retrieve one chapter from the cached storage.
+
+        :param book_id: Book identifier.
+        :param chap_id: Chapter identifier.
+        :return: ChapterDict if found, else None.
+        """
+        storage = self._storage_cache.get(book_id)
+        if storage is None:
             return None
-        return self._storage_cache[book_id].get_best_chapter(chap_id)
+        return storage.get_chapter(chap_id)
 
     def _get_chapters(
         self,
         book_id: str,
         chap_ids: list[str],
     ) -> dict[str, ChapterDict | None]:
-        if book_id not in self._storage_cache:
-            return {}
-        return self._storage_cache[book_id].get_best_chapters(chap_ids)
+        """
+        Retrieve multiple chapters in one call from the cached storage.
 
-    def _load_book_info(self, book_id: str) -> BookInfoDict | None:
+        :param book_id: Book identifier.
+        :param chap_ids: List of chapter identifiers.
+        :return: Mapping chap_id -> ChapterDict (or None if missing).
+        """
+        storage = self._storage_cache.get(book_id)
+        if storage is None:
+            return {}
+        return storage.get_chapters(chap_ids)
+
+    def _load_book_info(self, book_id: str) -> BookInfoDict:
+        """
+        Load and return the `book_info.json` payload for the given book.
+
+        :param book_id: Book identifier.
+        :raises FileNotFoundError: if the metadata file does not exist.
+        :raises ValueError: if the JSON is invalid or has an unexpected structure.
+        :return: Parsed BookInfoDict.
+        """
         info_path = self._raw_data_dir / book_id / "book_info.json"
         if not info_path.is_file():
-            self.logger.error("Missing metadata file: %s", info_path)
-            return None
+            raise FileNotFoundError(f"Missing metadata file: {info_path}")
 
         try:
             text = info_path.read_text(encoding="utf-8")
-            data: Any = json.loads(text)
-            if not isinstance(data, dict):
-                self.logger.error(
-                    "Invalid JSON structure in %s: expected an object at the top",
-                    info_path,
-                )
-                return None
-            return cast(BookInfoDict, data)
+            data = json.loads(text)
         except json.JSONDecodeError as e:
-            self.logger.error("Corrupt JSON in %s: %s", info_path, e)
-        return None
+            raise ValueError(f"Corrupt JSON in {info_path}: {e}") from e
 
-    def _init_chapter_storages(self, book_id: str) -> bool:
-        if book_id in self._storage_cache:
-            return True
-        raw_base = self._raw_data_dir / book_id
-        if not raw_base.is_dir():
-            self.logger.warning(
-                "Chapter storage base does not exist for book_id=%s", book_id
+        if not isinstance(data, dict):
+            raise ValueError(
+                f"Invalid JSON structure in {info_path}: expected an object at the top"
             )
-            return False
-        self._storage_cache[book_id] = ChapterStorage(
-            raw_base=raw_base,
-            priorities=self.PRIORITIES_MAP,
-        )
-        self._storage_cache[book_id].connect()
-        return True
+
+        return cast(BookInfoDict, data)
+
+    def _init_chapter_storages(self, book_id: str) -> None:
+        """
+        Ensure a ChapterStorage is open and cached for the given book_id.
+
+        :param book_id: Book identifier.
+        :param filename: Chapter DB filename (without .sqlite).
+        :return: True if storage is ready, False if base dir is missing.
+        """
+        if book_id in self._storage_cache:
+            return
+
+        fname = self.DEFAULT_CHAPTER_DB_FILENAME
+        raw_base = self._raw_data_dir / book_id
+
+        if not raw_base.is_dir():
+            raise FileNotFoundError(
+                f"Chapter storage does not exist for book_id={book_id} ({raw_base})"
+            )
+
+        storage = ChapterStorage(base_dir=raw_base, filename=fname)
+        storage.connect()
+        self._storage_cache[book_id] = storage
 
     def _close_chapter_storages(self) -> None:
         for storage in self._storage_cache.values():
@@ -261,7 +286,3 @@ class BaseExporter(abc.ABC):
         tb: types.TracebackType | None,
     ) -> None:
         self.close()
-
-    def __del__(self) -> None:
-        with contextlib.suppress(Exception):
-            self.close()

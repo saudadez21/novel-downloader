@@ -8,7 +8,7 @@ Exporter implementation for Qidian novels, supporting plain and encrypted source
 
 __all__ = ["QidianExporter"]
 
-from typing import Any, ClassVar
+from typing import Any
 
 from novel_downloader.plugins.common.exporter import CommonExporter
 from novel_downloader.plugins.registry import registrar
@@ -19,13 +19,6 @@ class QidianExporter(CommonExporter):
     """
     Exporter for Qidian (起点) novels.
     """
-
-    DEFAULT_SOURCE_ID: ClassVar[int] = 0
-    ENCRYPTED_SOURCE_ID: ClassVar[int] = 1
-    PRIORITIES_MAP: ClassVar[dict[int, int]] = {
-        DEFAULT_SOURCE_ID: 0,
-        ENCRYPTED_SOURCE_ID: 1,
-    }
 
     def _render_txt_extras(self, extras: dict[str, Any]) -> str:
         """

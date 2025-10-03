@@ -65,13 +65,9 @@ class CommonExporter(BaseExporter):
         end_id = book.end_id
         ignore_set = set(book.ignore_ids or [])
 
-        if not self._init_chapter_storages(book_id):
-            return None
-
-        # --- Load book_info.json ---
+        # --- Load book data ---
+        self._init_chapter_storages(book_id)
         book_info = self._load_book_info(book_id)
-        if not book_info:
-            return None
 
         # --- Filter volumes & chapters ---
         orig_vols = book_info.get("volumes", [])
@@ -98,9 +94,8 @@ class CommonExporter(BaseExporter):
             ]
             if not cids:
                 continue
-            chap_map = self._get_chapters(book_id, cids)
 
-            # Append each chapter
+            chap_map = self._get_chapters(book_id, cids)
             for ch_info in volume.get("chapters", []):
                 cid = ch_info.get("chapterId")
                 ch_title = ch_info.get("title", "")
@@ -123,9 +118,7 @@ class CommonExporter(BaseExporter):
         # --- Save final text ---
         try:
             result = write_file(
-                content=final_text,
-                filepath=out_path,
-                on_exist="overwrite",
+                content=final_text, filepath=out_path, on_exist="overwrite"
             )
             self.logger.info("Exported TXT: %s", out_path)
         except Exception as e:
@@ -161,13 +154,9 @@ class CommonExporter(BaseExporter):
         end_id = book.end_id
         ignore_set = set(book.ignore_ids or [])
 
-        if not self._init_chapter_storages(book_id):
-            return None
-
-        # --- Load book_info.json ---
+        # --- Load book data ---
+        self._init_chapter_storages(book_id)
         book_info = self._load_book_info(book_id)
-        if not book_info:
-            return None
 
         # --- Filter volumes & chapters ---
         orig_vols = book_info.get("volumes", [])
@@ -301,13 +290,9 @@ class CommonExporter(BaseExporter):
         end_id = book.end_id
         ignore_set = set(book.ignore_ids or [])
 
-        if not self._init_chapter_storages(book_id):
-            return None
-
-        # --- Load book_info.json ---
+        # --- Load book data ---
+        self._init_chapter_storages(book_id)
         book_info = self._load_book_info(book_id)
-        if not book_info:
-            return None
 
         # --- Filter volumes & chapters ---
         orig_vols = book_info.get("volumes", [])
