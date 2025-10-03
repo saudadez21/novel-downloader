@@ -44,7 +44,10 @@ class DownloadUI(Protocol):
     async def on_complete(self, book: BookConfig) -> None:
         ...
 
-    async def on_error(self, book: BookConfig, error: Exception) -> None:
+    async def on_book_error(self, book: BookConfig, error: Exception) -> None:
+        ...
+
+    async def on_site_error(self, site: str, error: Exception) -> None:
         ...
 
 

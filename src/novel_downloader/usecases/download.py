@@ -27,9 +27,14 @@ async def download_books(
     download_ui: DownloadUI,
     login_config: dict[str, str] | None = None,
 ) -> None:
-    parser = registrar.get_parser(site, parser_cfg)
+    try:
+        parser = registrar.get_parser(site, parser_cfg)
+        fetcher = registrar.get_fetcher(site, fetcher_cfg)
+    except ValueError as e:
+        await download_ui.on_site_error(site, e)
+        return
 
-    async with registrar.get_fetcher(site, fetcher_cfg) as fetcher:
+    async with fetcher:
         if downloader_cfg.login_required and (
             not await ensure_login(fetcher, login_ui, login_config)
         ):
@@ -49,7 +54,7 @@ async def download_books(
                 await downloader.download(book, progress_hook=download_ui.on_progress)
                 await download_ui.on_complete(book)
             except Exception as e:
-                await download_ui.on_error(book, e)
+                await download_ui.on_book_error(book, e)
 
         if downloader_cfg.login_required and fetcher.is_logged_in:
             await fetcher.save_state()

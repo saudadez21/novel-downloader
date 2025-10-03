@@ -33,7 +33,7 @@ class CLIDownloadUI:
             self._progress = None
         ui.success(t("Book {book_id} downloaded.").format(book_id=book.book_id))
 
-    async def on_error(self, book: BookConfig, error: Exception) -> None:
+    async def on_book_error(self, book: BookConfig, error: Exception) -> None:
         if self._progress:
             self._progress.stop()
             self._progress = None
@@ -42,6 +42,12 @@ class CLIDownloadUI:
                 book_id=book.book_id, err=error
             )
         )
+
+    async def on_site_error(self, site: str, error: Exception) -> None:
+        if self._progress:
+            self._progress.stop()
+            self._progress = None
+        ui.error(t("Site error ({site}): {err}").format(site=site, err=error))
 
 
 class CLIExportUI:
