@@ -17,25 +17,23 @@ from novel_downloader.schemas import SearchResult
 
 
 class BaseSearcher(abc.ABC):
-    site_name: str
-    priority: int = 1000
-    BASE_URL: str = ""
-    _session: ClassVar[aiohttp.ClientSession | None] = None
+    site_name: ClassVar[str]
+    priority: ClassVar[int] = 1000
+    BASE_URL: ClassVar[str] = ""
 
-    @classmethod
-    def configure(cls, session: aiohttp.ClientSession) -> None:
-        cls._session = session
+    def __init__(self, session: aiohttp.ClientSession) -> None:
+        self._session = session
 
-    @classmethod
-    async def search(cls, keyword: str, limit: int | None = None) -> list[SearchResult]:
-        html = await cls._fetch_html(keyword)
+    async def search(
+        self, keyword: str, limit: int | None = None
+    ) -> list[SearchResult]:
+        html = await self._fetch_html(keyword)
         if not html:
             return []
-        return cls._parse_html(html, limit)
+        return self._parse_html(html, limit)
 
-    @classmethod
     @abc.abstractmethod
-    async def _fetch_html(cls, keyword: str) -> str:
+    async def _fetch_html(self, keyword: str) -> str:
         """
         Fetch raw HTML from search API or page
 
@@ -44,9 +42,10 @@ class BaseSearcher(abc.ABC):
         """
         pass
 
-    @classmethod
     @abc.abstractmethod
-    def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
+    def _parse_html(
+        self, html_str: str, limit: int | None = None
+    ) -> list[SearchResult]:
         """
         Parse raw HTML from search API or page into list of SearchResult.
 
@@ -56,9 +55,8 @@ class BaseSearcher(abc.ABC):
         """
         pass
 
-    @classmethod
     def _http_get(
-        cls,
+        self,
         url: str,
         *,
         params: dict[str, str] | None = None,
@@ -68,13 +66,11 @@ class BaseSearcher(abc.ABC):
         """
         Helper for GET requests with default headers.
         """
-        session = cls._ensure_session()
         hdrs = {**DEFAULT_USER_HEADERS, **(headers or {})}
-        return session.get(url, params=params, headers=hdrs, **kwargs)
+        return self._session.get(url, params=params, headers=hdrs, **kwargs)
 
-    @classmethod
     def _http_post(
-        cls,
+        self,
         url: str,
         *,
         data: dict[str, str] | str | None = None,
@@ -84,18 +80,8 @@ class BaseSearcher(abc.ABC):
         """
         Helper for POST requests with default headers.
         """
-        session = cls._ensure_session()
         hdrs = {**DEFAULT_USER_HEADERS, **(headers or {})}
-        return session.post(url, data=data, headers=hdrs, **kwargs)
-
-    @classmethod
-    def _ensure_session(cls) -> aiohttp.ClientSession:
-        if cls._session is None:
-            raise RuntimeError(
-                f"{cls.__name__} has no aiohttp session. "
-                "Call .configure(session) first."
-            )
-        return cls._session
+        return self._session.post(url, data=data, headers=hdrs, **kwargs)
 
     @staticmethod
     def _quote(q: str, encoding: str | None = None, errors: str | None = None) -> str:

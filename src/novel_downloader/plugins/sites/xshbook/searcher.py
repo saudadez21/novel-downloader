@@ -5,11 +5,11 @@ novel_downloader.plugins.sites.xshbook.searcher
 
 """
 
-from novel_downloader.plugins.searching import register_searcher
+from novel_downloader.plugins.registry import registrar
 from novel_downloader.plugins.sites.sososhu.searcher import SososhuSearcher
 
 
-@register_searcher()
+@registrar.register_searcher()
 class XshbookSearcher(SososhuSearcher):
     site_name = "xshbook"
     SOSOSHU_KEY = "xshbook"

@@ -4,21 +4,52 @@
 
 ## 1. 概览与分层
 
-* **apps/**
-  * **cli/**：命令行界面（`argparse` + `rich` 封装的 `ui`; `ui_adapters` 实现 UI 协议）
-  * **web/**：NiceGUI Web 前端（页面、组件、下载任务调度与登录对话; `ui_adapters` 实现 UI 协议）
-  * **constants.py**：站点显示名映射（`dict[str, str]`，如 `aaatxt -> "3A电子书"`）
-* **usecases/**：应用用例
+整个项目采用分层架构，主要目录与职责如下:
+
+* **apps/** (应用层): 具体入口与界面
+  * **cli/**：命令行界面
+    使用 `argparse` 解析参数，结合 `rich` 输出，`ui_adapters` 实现 `usecases/protocols.py` 定义的 UI 协议。
+  * **web/**：Web 前端 (基于 NiceGUI)
+    提供页面与组件，管理下载任务、登录对话；同样通过 `ui_adapters` 实现 UI 协议。
+  * **constants.py**：站点显示名映射
+    保存 `dict[str, str]`，例如 `aaatxt -> "3A电子书"`，供界面展示。
+
+* **usecases/** (应用用例层):  封装完整的业务流程，对外暴露可直接调用的函数
   * `download.py`：下载流程（依赖 `LoginUI`、`DownloadUI` 协议）
   * `export.py`：导出流程（依赖 `ExportUI` 协议）
   * `login.py`：登录辅助（依赖 `LoginUI` 协议）
-  * `config.py`：配置加载/初始化（依赖 `ConfigUI` 协议）
-  * `protocols.py`：UI 协议（`LoginUI` / `DownloadUI` / `ExportUI` / `ConfigUI`）
-* **infra/**：基础设施（配置加载与适配、网络下载、路径、日志、i18n、OCR/JSBridge、持久化）
-* **libs/**：通用库（EPUB 构建、文件系统工具、加解密、文本清洗、URL 解析、时间工具）
-* **plugins/**：站点插件（`fetcher / parser / downloader / exporter / searcher`; 注册器）
-* **schemas/**：类型与数据模型（`TypedDict` / `dataclass`）
-* **locales/**：多语言资源
+  * `config.py`：配置加载与初始化（依赖 `ConfigUI` 协议）
+  * `search.py`：多站点搜索（聚合/流式 API）
+  * `protocols.py`：UI 协议定义（`LoginUI` / `DownloadUI` / `ExportUI` / `ConfigUI`）
+
+* **infra/** (基础设施层): 提供与外部环境交互的能力，例如:
+  * 配置加载与适配
+  * 网络下载（`aiohttp` 默认参数等）
+  * 路径与文件管理
+  * 日志
+  * 国际化（i18n）
+  * OCR/JSBridge
+  * 持久化（状态存储）
+
+* **libs/** (通用库), 与业务无关的工具集合：
+  * EPUB 构建
+  * 文件系统工具
+  * 加解密
+  * 文本清洗
+  * URL 解析
+  * 时间工具
+
+* **plugins/** (站点插件层): 实现具体站点的抓取/解析/导出逻辑，统一通过注册器 (`registry`) 管理。
+  * **fetcher**：负责获取页面（含登录、状态保存）
+  * **parser**：负责解析 HTML，提取书籍与章节
+  * **downloader**：协调 fetcher 与 parser 完成下载
+  * **exporter**：负责导出到本地格式（txt、epub 等）
+  * **searcher**：站点搜索入口
+  * **registry**：统一注册与获取插件的接口
+
+* **schemas/** (数据模型层): 定义统一的数据结构，方便在各层传递，主要采用 `TypedDict` 与 `dataclass`。
+
+* **locales/** (多语言资源): 存放界面与提示语的本地化文本。
 
 ---
 
@@ -253,25 +284,40 @@ registrar.get_exporter(site, ExporterConfig) -> ExporterProtocol  # 无站点实
 
 > 站点包命名要求：`plugins.sites.<site_key>.<kind>`; 若首字符为数字，规范化为前缀 `n`（如 `3xx` -> `n3xx`）。
 
-### 6.3 搜索注册（`plugins/searching.py`）
-
-```python
-@register_searcher("aaatxt")
-class AAASearcher(...): ...
-```
-
-统一入口：
-
-```python
-async def search(keyword, sites=None, limit=None, per_site_limit=5, timeout=5.0) -> list[SearchResult]
-async def search_stream(...) -> AsyncGenerator[list[SearchResult]]
-```
-
 ---
 
 ## 7. 用例层（`usecases`）
 
+位于框架最上层，提供可直接调用的高阶业务流程：登录、下载、导出、配置管理、搜索等。
+
 ### 7.1 协议（`usecases/protocols.py`）
+
+以下协议定义与界面交互的回调事件。实现这些协议即可接收进度、错误等通知。
+
+* **LoginUI**：登录交互
+  * `prompt`：提示用户输入账号/密码或其他登录字段
+  * `on_login_failed`：登录失败时回调
+  * `on_login_success`：登录成功时回调
+
+* **DownloadUI**：下载过程交互
+  * `on_start`：开始下载一本书时
+  * `on_progress`：下载进度更新
+  * `on_complete`：一本书下载完成
+  * `on_book_error`：某本书下载失败
+  * `on_site_error`：站点不可用或不支持
+
+* **ExportUI**：导出过程交互
+  * `on_start`：开始导出一本书时
+  * `on_success`：导出成功
+  * `on_error`：导出失败
+  * `on_unsupported`：格式不受支持
+
+* **ConfigUI**：配置文件交互
+  * `on_missing`：配置文件不存在
+  * `on_created`：配置文件已新建
+  * `on_invalid`：配置文件损坏或无效
+  * `on_abort`：用户放弃加载/创建配置
+  * `confirm_create`：确认是否新建配置
 
 ```python
 class LoginUI(Protocol):
@@ -301,6 +347,8 @@ class ConfigUI(Protocol):
 ```
 
 ### 7.2 流程函数
+
+以下函数封装了对插件注册表 (`registrar`) 的调用，直接调用即可完成对应任务:
 
 ```python
 # 登录辅助
@@ -337,6 +385,42 @@ def load_or_init_config(
     config_ui: ConfigUI,
 ) -> dict[str, Any] | None: ...
 ```
+
+---
+
+### 7.3 搜索（`usecases/search.py`）
+
+支持在多个站点并行搜索，返回聚合结果，或以流式方式按站点依次返回。
+
+```python
+# 聚合搜索
+async def search(
+    keyword: str,
+    sites: Sequence[str] | None = None,
+    limit: int | None = None,
+    per_site_limit: int = 5,
+    timeout: float = 5.0,
+) -> list[SearchResult]: ...
+```
+
+* `keyword`: 搜索关键词
+* `sites`: 限定搜索的站点 key，默认搜索所有已注册站点
+* `limit`: 总结果数量上限
+* `per_site_limit`: 每个站点的结果数量上限
+* `timeout`: 每个请求的超时时间 (秒)
+* 返回：按优先级排序的搜索结果列表
+
+```python
+# 流式搜索
+async def search_stream(
+    keyword: str,
+    sites: Sequence[str] | None = None,
+    per_site_limit: int = 5,
+    timeout: float = 5.0,
+) -> AsyncGenerator[list[SearchResult], None]: ...
+```
+
+* 与 `search` 相同，但以异步生成器形式逐站点返回结果，适合需要实时展示的场景。
 
 ---
 
@@ -520,9 +604,9 @@ export_books(
 
 ```python
 import asyncio
-from novel_downloader.plugins.searching import search
 from novel_downloader.usecases.download import download_books
 from novel_downloader.usecases.export import export_books
+from novel_downloader.usecases.search import search
 from novel_downloader.infra.config import load_config, ConfigAdapter
 from novel_downloader.apps.cli.ui_adapters import CLILoginUI, CLIDownloadUI, CLIExportUI
 from novel_downloader.schemas import BookConfig

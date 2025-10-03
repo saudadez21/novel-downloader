@@ -5,11 +5,11 @@ novel_downloader.plugins.sites.ktshu.searcher
 
 """
 
-from novel_downloader.plugins.searching import register_searcher
+from novel_downloader.plugins.registry import registrar
 from novel_downloader.plugins.sites.mangg_net.searcher import ManggNetSearcher
 
 
-@register_searcher()
+@registrar.register_searcher()
 class KtshuSearcher(ManggNetSearcher):
     site_name = "ktshu"
     priority = 30

@@ -4,35 +4,43 @@ novel_downloader.plugins.registry
 ---------------------------------
 """
 
-from collections.abc import Callable
+from __future__ import annotations
+
+import contextlib
+import pkgutil
 from importlib import import_module
-from typing import TypeVar
+from typing import TYPE_CHECKING, TypeVar
 
-from novel_downloader.plugins.protocols import (
-    DownloaderProtocol,
-    ExporterProtocol,
-    FetcherProtocol,
-    ParserProtocol,
-)
-from novel_downloader.schemas import (
-    DownloaderConfig,
-    ExporterConfig,
-    FetcherConfig,
-    ParserConfig,
-)
+if TYPE_CHECKING:
+    from collections.abc import Callable, Sequence
 
-DownloaderBuilder = Callable[
-    [FetcherProtocol, ParserProtocol, DownloaderConfig, str],
-    DownloaderProtocol,
-]
-ExporterBuilder = Callable[[ExporterConfig, str], ExporterProtocol]
-FetcherBuilder = Callable[[FetcherConfig], FetcherProtocol]
-ParserBuilder = Callable[[ParserConfig], ParserProtocol]
+    from novel_downloader.plugins.base.searcher import BaseSearcher
+    from novel_downloader.plugins.protocols import (
+        DownloaderProtocol,
+        ExporterProtocol,
+        FetcherProtocol,
+        ParserProtocol,
+    )
+    from novel_downloader.schemas import (
+        DownloaderConfig,
+        ExporterConfig,
+        FetcherConfig,
+        ParserConfig,
+    )
 
-D = TypeVar("D", bound=DownloaderProtocol)
-E = TypeVar("E", bound=ExporterProtocol)
-F = TypeVar("F", bound=FetcherProtocol)
-P = TypeVar("P", bound=ParserProtocol)
+    DownloaderBuilder = Callable[
+        [FetcherProtocol, ParserProtocol, DownloaderConfig, str],
+        DownloaderProtocol,
+    ]
+    ExporterBuilder = Callable[[ExporterConfig, str], ExporterProtocol]
+    FetcherBuilder = Callable[[FetcherConfig], FetcherProtocol]
+    ParserBuilder = Callable[[ParserConfig], ParserProtocol]
+
+    D = TypeVar("D", bound=DownloaderProtocol)
+    E = TypeVar("E", bound=ExporterProtocol)
+    F = TypeVar("F", bound=FetcherProtocol)
+    P = TypeVar("P", bound=ParserProtocol)
+    S = TypeVar("S", bound=type[BaseSearcher])
 
 _PLUGINS_PKG = "novel_downloader.plugins"
 
@@ -43,6 +51,7 @@ class PluginRegistry:
         self._exporters: dict[str, ExporterBuilder] = {}
         self._fetchers: dict[str, FetcherBuilder] = {}
         self._parsers: dict[str, ParserBuilder] = {}
+        self._searchers: dict[str, type[BaseSearcher]] = {}
         self._sources: list[str] = [_PLUGINS_PKG]
 
     def register_fetcher(
@@ -81,6 +90,14 @@ class PluginRegistry:
         def deco(cls: type[E]) -> type[E]:
             key = site_key or cls.__module__.split(".")[-2].lower()
             self._exporters[key] = cls
+            return cls
+
+        return deco
+
+    def register_searcher(self, site_key: str | None = None) -> Callable[[S], S]:
+        def deco(cls: S) -> S:
+            key = site_key or cls.__module__.split(".")[-2].lower()
+            self._searchers[key] = cls
             return cls
 
         return deco
@@ -139,6 +156,33 @@ class PluginRegistry:
             return CommonExporter(config, key)
         return cls(config, key)
 
+    def get_searcher_class(self, site: str) -> type[BaseSearcher]:
+        key = self._normalize_key(site)
+        cls = self._searchers.get(key)
+        if cls is None:
+            self._try_import_site(key, "searcher")
+            cls = self._searchers.get(key)
+        if cls is None:
+            raise ValueError(f"Unsupported site: {site!r}")
+        return cls
+
+    def get_searcher_classes(
+        self,
+        sites: Sequence[str] | None = None,
+        *,
+        load_all_if_none: bool = True,
+    ) -> list[type[BaseSearcher]]:
+        if sites:
+            classes: list[type[BaseSearcher]] = []
+            for site in sites:
+                with contextlib.suppress(ValueError):
+                    classes.append(self.get_searcher_class(site))
+            return classes
+
+        if load_all_if_none:
+            self._load_all("searcher")
+        return list(self._searchers.values())
+
     @staticmethod
     def _normalize_key(site_key: str) -> str:
         """
@@ -168,6 +212,31 @@ class PluginRegistry:
                 if e.name and modname.startswith(e.name):
                     continue
                 raise
+
+    def _load_all(self, kind: str) -> None:
+        """
+        Scan all known plugin and import every `{namespace}.sites.<site>.<kind>`
+        without failing if a site has no module for that kind.
+        """
+        for base in self._sources:
+            try:
+                pkg = import_module(f"{base}.sites")
+            except ModuleNotFoundError:
+                continue
+
+            # iterate over site packages under *.sites
+            for _, name, ispkg in pkgutil.iter_modules(
+                pkg.__path__, pkg.__name__ + "."
+            ):
+                if not ispkg:
+                    continue
+                modname = f"{name}.{kind}"
+                try:
+                    import_module(modname)
+                except ModuleNotFoundError as e:
+                    if e.name and modname.startswith(e.name):
+                        continue
+                    raise
 
     def enable_local_plugins(
         self,

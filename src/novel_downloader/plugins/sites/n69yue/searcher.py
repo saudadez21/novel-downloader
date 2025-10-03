@@ -9,13 +9,13 @@ import logging
 
 from novel_downloader.infra.paths import N69YUE_MAP_PATH
 from novel_downloader.plugins.base.searcher import BaseSearcher
-from novel_downloader.plugins.searching import register_searcher
+from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import SearchResult
 
 logger = logging.getLogger(__name__)
 
 
-@register_searcher()
+@registrar.register_searcher()
 class N69yueSearcher(BaseSearcher):
     site_name = "n69yue"
     priority = 20
@@ -25,29 +25,29 @@ class N69yueSearcher(BaseSearcher):
 
     _FONT_MAP: dict[str, str] = {}
 
-    @classmethod
-    async def _fetch_html(cls, keyword: str) -> str:
+    async def _fetch_html(self, keyword: str) -> str:
         data = {"q": keyword}
         headers = {
             "Origin": "https://www.69yue.top",
-            "Referer": cls._build_url(cls.SEARCH_PAGE_URL, data),
+            "Referer": self._build_url(self.SEARCH_PAGE_URL, data),
         }
         try:
-            async with cls._http_post(
-                cls.SEARCH_URL, data=data, headers=headers
+            async with self._http_post(
+                self.SEARCH_URL, data=data, headers=headers
             ) as resp:
                 resp.raise_for_status()
-                return await cls._response_to_str(resp)
+                return await self._response_to_str(resp)
         except Exception:
             logger.error(
                 "Failed to fetch HTML for keyword '%s' from '%s'",
                 keyword,
-                cls.SEARCH_URL,
+                self.SEARCH_URL,
             )
             return ""
 
-    @classmethod
-    def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
+    def _parse_html(
+        self, html_str: str, limit: int | None = None
+    ) -> list[SearchResult]:
         data = json.loads(html_str)
         rows = data.get("results", [])
         results: list[SearchResult] = []
@@ -63,17 +63,17 @@ class N69yueSearcher(BaseSearcher):
 
             # '/articlecategroy/1a6l.html' -> "1a6l"
             book_id = infourl.rsplit("/", 1)[-1].split(".")[0]
-            book_url = cls._abs_url(infourl)
-            title = cls._map_fonts(row.get("title", "").strip())
-            author = cls._map_fonts(row.get("author", "").strip())
+            book_url = self._abs_url(infourl)
+            title = self._map_fonts(row.get("title", "").strip())
+            author = self._map_fonts(row.get("author", "").strip())
             update_date = row.get("updateTime", "-").strip()
 
-            prio = cls.priority + count
+            prio = self.priority + count
             count += 1
 
             results.append(
                 SearchResult(
-                    site=cls.site_name,
+                    site=self.site_name,
                     book_id=book_id,
                     book_url=book_url,
                     cover_url="",

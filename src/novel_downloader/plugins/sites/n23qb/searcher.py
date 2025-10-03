@@ -10,39 +10,39 @@ import logging
 from lxml import html
 
 from novel_downloader.plugins.base.searcher import BaseSearcher
-from novel_downloader.plugins.searching import register_searcher
+from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import SearchResult
 
 logger = logging.getLogger(__name__)
 
 
-@register_searcher()
+@registrar.register_searcher()
 class N23qbSearcher(BaseSearcher):
     site_name = "n23qb"
     priority = 10
     BASE_URL = "https://www.23qb.com/"
     SEARCH_URL = "https://www.23qb.com/search.html"
 
-    @classmethod
-    async def _fetch_html(cls, keyword: str) -> str:
+    async def _fetch_html(self, keyword: str) -> str:
         params = {"searchkey": keyword}
         try:
-            async with cls._http_get(cls.SEARCH_URL, params=params) as resp:
+            async with self._http_get(self.SEARCH_URL, params=params) as resp:
                 resp.raise_for_status()
-                return await cls._response_to_str(resp)
+                return await self._response_to_str(resp)
         except Exception:
             logger.error(
                 "Failed to fetch HTML for keyword '%s' from '%s'",
                 keyword,
-                cls.SEARCH_URL,
+                self.SEARCH_URL,
             )
             return ""
 
-    @classmethod
-    def _parse_html(cls, html_str: str, limit: int | None = None) -> list[SearchResult]:
+    def _parse_html(
+        self, html_str: str, limit: int | None = None
+    ) -> list[SearchResult]:
         if html_str.find('<meta property="og:url"') != -1:
-            return cls._parse_detail_html(html_str)
-        return cls._parse_search_list_html(html_str, limit)
+            return self._parse_detail_html(html_str)
+        return self._parse_search_list_html(html_str, limit)
 
     @classmethod
     def _parse_detail_html(cls, html_str: str) -> list[SearchResult]:
