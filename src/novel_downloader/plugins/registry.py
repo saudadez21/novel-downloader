@@ -9,7 +9,7 @@ from __future__ import annotations
 import contextlib
 import pkgutil
 from importlib import import_module
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Sequence
@@ -20,6 +20,7 @@ if TYPE_CHECKING:
         ExporterProtocol,
         FetcherProtocol,
         ParserProtocol,
+        ProcessorProtocol,
     )
     from novel_downloader.schemas import (
         DownloaderConfig,
@@ -35,11 +36,13 @@ if TYPE_CHECKING:
     ExporterBuilder = Callable[[ExporterConfig, str], ExporterProtocol]
     FetcherBuilder = Callable[[FetcherConfig], FetcherProtocol]
     ParserBuilder = Callable[[ParserConfig], ParserProtocol]
+    ProcessorBuilder = Callable[[dict[str, Any]], ProcessorProtocol]
 
     D = TypeVar("D", bound=DownloaderProtocol)
     E = TypeVar("E", bound=ExporterProtocol)
     F = TypeVar("F", bound=FetcherProtocol)
     P = TypeVar("P", bound=ParserProtocol)
+    R = TypeVar("R", bound=ProcessorProtocol)  # Processor
     S = TypeVar("S", bound=type[BaseSearcher])
 
 _PLUGINS_PKG = "novel_downloader.plugins"
@@ -51,6 +54,7 @@ class PluginRegistry:
         self._exporters: dict[str, ExporterBuilder] = {}
         self._fetchers: dict[str, FetcherBuilder] = {}
         self._parsers: dict[str, ParserBuilder] = {}
+        self._processors: dict[str, ProcessorBuilder] = {}
         self._searchers: dict[str, type[BaseSearcher]] = {}
         self._sources: list[str] = [_PLUGINS_PKG]
 
@@ -58,7 +62,7 @@ class PluginRegistry:
         self, site_key: str | None = None
     ) -> Callable[[type[F]], type[F]]:
         def deco(cls: type[F]) -> type[F]:
-            key = site_key or cls.__module__.split(".")[-2].lower()
+            key = (site_key or cls.__module__.split(".")[-2]).lower()
             self._fetchers[key] = cls
             return cls
 
@@ -68,7 +72,7 @@ class PluginRegistry:
         self, site_key: str | None = None
     ) -> Callable[[type[P]], type[P]]:
         def deco(cls: type[P]) -> type[P]:
-            key = site_key or cls.__module__.split(".")[-2].lower()
+            key = (site_key or cls.__module__.split(".")[-2]).lower()
             self._parsers[key] = cls
             return cls
 
@@ -78,7 +82,7 @@ class PluginRegistry:
         self, site_key: str | None = None
     ) -> Callable[[type[D]], type[D]]:
         def deco(cls: type[D]) -> type[D]:
-            key = site_key or cls.__module__.split(".")[-2].lower()
+            key = (site_key or cls.__module__.split(".")[-2]).lower()
             self._downloaders[key] = cls
             return cls
 
@@ -88,8 +92,18 @@ class PluginRegistry:
         self, site_key: str | None = None
     ) -> Callable[[type[E]], type[E]]:
         def deco(cls: type[E]) -> type[E]:
-            key = site_key or cls.__module__.split(".")[-2].lower()
+            key = (site_key or cls.__module__.split(".")[-2]).lower()
             self._exporters[key] = cls
+            return cls
+
+        return deco
+
+    def register_processor(
+        self, name: str | None = None
+    ) -> Callable[[type[R]], type[R]]:
+        def deco(cls: type[R]) -> type[R]:
+            key = (name or self._derive_processor_key(cls.__module__)).lower()
+            self._processors[key] = cls
             return cls
 
         return deco
@@ -156,6 +170,16 @@ class PluginRegistry:
             return CommonExporter(config, key)
         return cls(config, key)
 
+    def get_processor(self, name: str, config: dict[str, Any]) -> ProcessorProtocol:
+        key = name.strip().lower()
+        builder = self._processors.get(key)
+        if builder is None:
+            self._try_import_processor(key)
+            builder = self._processors.get(key)
+        if builder is None:
+            raise ValueError(f"Unsupported processor: {name!r}")
+        return builder(config)
+
     def get_searcher_class(self, site: str) -> type[BaseSearcher]:
         key = self._normalize_key(site)
         cls = self._searchers.get(key)
@@ -180,7 +204,7 @@ class PluginRegistry:
             return classes
 
         if load_all_if_none:
-            self._load_all("searcher")
+            self._load_all_sites("searcher")
         return list(self._searchers.values())
 
     @staticmethod
@@ -196,6 +220,16 @@ class PluginRegistry:
         if key[0].isdigit():
             return f"n{key}"
         return key
+
+    @staticmethod
+    def _derive_processor_key(modname: str) -> str:
+        """
+        Take module path after '.processors.' as key.
+        Fallback to the last module segment if '.processors.' is not found.
+        """
+        if ".processors." in modname:
+            return modname.split(".processors.", 1)[1]
+        return modname.split(".")[-1]
 
     def _try_import_site(self, site_key: str, kind: str) -> None:
         """
@@ -213,7 +247,23 @@ class PluginRegistry:
                     continue
                 raise
 
-    def _load_all(self, kind: str) -> None:
+    def _try_import_processor(self, key: str) -> None:
+        """
+        Attempt to import plugins for a given site/kind in order:
+          1. built-in: `plugins.processors.<key>`
+          2. user-level: `<base>.processors.<key>`
+        """
+        for base in self._sources:
+            modname = f"{base}.processors.{key}"
+            try:
+                import_module(modname)
+                return
+            except ModuleNotFoundError as e:
+                if e.name and modname.startswith(e.name):
+                    continue
+                raise
+
+    def _load_all_sites(self, kind: str) -> None:
         """
         Scan all known plugin and import every `{namespace}.sites.<site>.<kind>`
         without failing if a site has no module for that kind.

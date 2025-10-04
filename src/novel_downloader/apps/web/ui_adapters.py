@@ -116,3 +116,37 @@ class WebExportUI:
 
     def on_unsupported(self, book: BookConfig, fmt: str) -> None:
         self.task.error = f"Export format '{fmt}' is not supported."
+
+
+class WebProcessUI:
+    def __init__(self, task: DownloadTask) -> None:
+        self.task = task
+
+    def on_stage_start(self, book: BookConfig, stage: str) -> None:
+        self.task.status = "processing"
+        self.task.chapters_done = 0
+        self.task._recent_times.clear()
+
+    def on_stage_progress(
+        self, book: BookConfig, stage: str, done: int, total: int
+    ) -> None:
+        self.task.chapters_total = total
+        self.task.chapters_done = done
+        self.task.record_chapter_time()
+
+    def on_stage_complete(self, book: BookConfig, stage: str) -> None:
+        # could store per-stage artifacts later if needed
+        pass
+
+    def on_missing(self, book: BookConfig, what: str, path: Path) -> None:
+        self.task.status = "failed"
+        self.task.error = f"Missing required data ({what}): {path}"
+
+    def on_book_error(
+        self, book: BookConfig, stage: str | None, error: Exception
+    ) -> None:
+        self.task.status = "failed"
+        if stage:
+            self.task.error = f"Stage '{stage}' error: {error}"
+        else:
+            self.task.error = str(error)

@@ -51,7 +51,7 @@ class N23qbDownloader(BaseDownloader):
         def cancelled() -> bool:
             return bool(cancel_event and cancel_event.is_set())
 
-        with ChapterStorage(raw_base, filename="chapter_raw") as storage:
+        with ChapterStorage(raw_base, filename="chapter.raw.sqlite") as storage:
             # --- metadata ---
             book_info = await self._load_book_info(book_id=book_id)
 

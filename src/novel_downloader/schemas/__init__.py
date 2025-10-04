@@ -13,13 +13,16 @@ __all__ = [
     "FetcherConfig",
     "FontOCRConfig",
     "ExporterConfig",
-    "TextCleanerConfig",
+    "ProcessorConfig",
+    "PipelineConfig",
     "BookInfoDict",
     "ChapterDict",
     "ChapterInfoDict",
     "VolumeInfoDict",
     "LoginField",
     "SearchResult",
+    "ExecutedStageMeta",
+    "PipelineMeta",
 ]
 
 from .auth import LoginField
@@ -36,6 +39,8 @@ from .config import (
     FetcherConfig,
     FontOCRConfig,
     ParserConfig,
-    TextCleanerConfig,
+    PipelineConfig,
+    ProcessorConfig,
 )
+from .process import ExecutedStageMeta, PipelineMeta
 from .search import SearchResult

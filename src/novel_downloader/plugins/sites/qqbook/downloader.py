@@ -157,7 +157,7 @@ class QqbookDownloader(BaseDownloader):
                     await cid_q.put(cid)
 
         # ---- run tasks ---
-        with ChapterStorage(raw_base, filename="chapter_raw") as storage:
+        with ChapterStorage(raw_base, filename="chapter.raw.sqlite") as storage:
             storage_task = asyncio.create_task(storage_worker())
             async with asyncio.TaskGroup() as tg:
                 worker_tasks = [

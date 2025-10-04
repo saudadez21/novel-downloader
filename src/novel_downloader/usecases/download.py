@@ -4,7 +4,6 @@ novel_downloader.usecases.download
 ----------------------------------
 """
 
-
 from novel_downloader.plugins import registrar
 from novel_downloader.schemas import (
     BookConfig,

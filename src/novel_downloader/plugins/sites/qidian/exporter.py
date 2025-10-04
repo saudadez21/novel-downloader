@@ -27,7 +27,7 @@ class QidianExporter(CommonExporter):
           * Strip leading/trailing blanks
           * Drop multiple blank lines (keep only non-empty lines)
         """
-        note = self._cleaner.clean_content(extras.get("author_say") or "").strip()
+        note = (extras.get("author_say") or "").strip()
         if not note:
             return ""
 
@@ -42,7 +42,7 @@ class QidianExporter(CommonExporter):
           * Keep as HTML-safe via _render_html_block
           * Wrap with `<hr/>` + `<h3>作者说</h3>`
         """
-        note = self._cleaner.clean_content(extras.get("author_say") or "").strip()
+        note = (extras.get("author_say") or "").strip()
         if not note:
             return ""
 

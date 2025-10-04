@@ -6,7 +6,6 @@ novel_downloader.plugins.base.exporter
 Abstract base class providing common structure and utilities for book exporters
 """
 
-import abc
 import json
 import logging
 import types
@@ -15,7 +14,6 @@ from pathlib import Path
 from typing import Any, Self, cast
 
 from novel_downloader.infra.persistence.chapter_storage import ChapterStorage
-from novel_downloader.libs.textutils import get_cleaner
 from novel_downloader.schemas import (
     BookConfig,
     BookInfoDict,
@@ -29,14 +27,12 @@ class SafeDict(dict[str, Any]):
         return f"{{{key}}}"
 
 
-class BaseExporter(abc.ABC):
+class BaseExporter:
     """
     BaseExporter defines the interface and common structure for
     saving assembled book content into various formats
     such as TXT, EPUB, Markdown, or PDF.
     """
-
-    DEFAULT_CHAPTER_DB_FILENAME = "chapter_raw"
 
     def __init__(
         self,
@@ -66,11 +62,6 @@ class BaseExporter(abc.ABC):
 
         self._raw_data_dir = Path(config.raw_data_dir) / site
         self._output_dir = Path(config.output_dir)
-
-        self._cleaner = get_cleaner(
-            enabled=config.clean_text,
-            config=config.cleaner_cfg,
-        )
 
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
@@ -207,22 +198,30 @@ class BaseExporter(abc.ABC):
             return {}
         return storage.get_chapters(chap_ids)
 
-    def _load_book_info(self, book_id: str) -> BookInfoDict:
+    def _load_book_info(self, book_id: str, stage: str | None = None) -> BookInfoDict:
         """
-        Load and return the `book_info.json` payload for the given book.
+        Load and return the book_info payload for the given book.
 
         :param book_id: Book identifier.
         :raises FileNotFoundError: if the metadata file does not exist.
         :raises ValueError: if the JSON is invalid or has an unexpected structure.
         :return: Parsed BookInfoDict.
         """
-        info_path = self._raw_data_dir / book_id / "book_info.json"
+        stg = stage or self._resolve_stage_selection(book_id)
+        base_dir = self._raw_data_dir / book_id
+
+        info_path = base_dir / f"book_info.{stg}.json"
+        if stg != "raw" and not info_path.is_file():
+            # graceful fallback to raw metadata
+            fallback = base_dir / "book_info.raw.json"
+            if fallback.is_file():
+                info_path = fallback
+
         if not info_path.is_file():
             raise FileNotFoundError(f"Missing metadata file: {info_path}")
 
         try:
-            text = info_path.read_text(encoding="utf-8")
-            data = json.loads(text)
+            data = json.loads(info_path.read_text(encoding="utf-8"))
         except json.JSONDecodeError as e:
             raise ValueError(f"Corrupt JSON in {info_path}: {e}") from e
 
@@ -233,18 +232,15 @@ class BaseExporter(abc.ABC):
 
         return cast(BookInfoDict, data)
 
-    def _init_chapter_storages(self, book_id: str) -> None:
+    def _init_chapter_storages(self, book_id: str, stage: str | None = None) -> None:
         """
         Ensure a ChapterStorage is open and cached for the given book_id.
 
         :param book_id: Book identifier.
-        :param filename: Chapter DB filename (without .sqlite).
-        :return: True if storage is ready, False if base dir is missing.
         """
         if book_id in self._storage_cache:
             return
 
-        fname = self.DEFAULT_CHAPTER_DB_FILENAME
         raw_base = self._raw_data_dir / book_id
 
         if not raw_base.is_dir():
@@ -252,9 +248,25 @@ class BaseExporter(abc.ABC):
                 f"Chapter storage does not exist for book_id={book_id} ({raw_base})"
             )
 
-        storage = ChapterStorage(base_dir=raw_base, filename=fname)
+        stg = stage or self._resolve_stage_selection(book_id)
+        fname_base = f"chapter.{stg}.sqlite"
+
+        storage = ChapterStorage(base_dir=raw_base, filename=fname_base)
         storage.connect()
         self._storage_cache[book_id] = storage
+
+    def _load_stage_data(self, book_id: str) -> BookInfoDict:
+        """
+        Resolve the stage, open the corresponding chapter storage,
+        and load the matching book_info.
+
+          * Uses `chapter.<stage>.sqlite`
+          * Uses `book_info.raw.json` or `book_info.<stage>.json`,
+            falling back to raw `book_info.raw.json` if staged file is missing.
+        """
+        stage = self._resolve_stage_selection(book_id)
+        self._init_chapter_storages(book_id, stage)
+        return self._load_book_info(book_id, stage)
 
     def _close_chapter_storages(self) -> None:
         for storage in self._storage_cache.values():
@@ -263,6 +275,36 @@ class BaseExporter(abc.ABC):
             except Exception as e:
                 self.logger.warning("Failed to close storage %s: %s", storage, e)
         self._storage_cache.clear()
+
+    def _resolve_stage_selection(self, book_id: str) -> str:
+        """
+        Return the chosen stage name for export (e.g., 'raw', 'cleaner', 'corrector').
+        Strategy:
+          * If pipeline.json exists, walk pipeline in reverse and pick the last stage
+            whose recorded sqlite file exists.
+          * Fallback: any executed record with an existing sqlite file.
+          * Else: 'raw'.
+        """
+        base_dir = self._raw_data_dir / book_id
+        pipeline_path = base_dir / "pipeline.json"
+        if not pipeline_path.is_file():
+            return "raw"
+
+        try:
+            meta = json.loads(pipeline_path.read_text(encoding="utf-8"))
+        except Exception:
+            return "raw"
+
+        pipeline: list[str] = meta.get("pipeline", [])
+        if not pipeline:
+            return "raw"
+
+        for stg in reversed(pipeline):
+            fname = f"chapter.{stg}.sqlite"
+            if (base_dir / fname).is_file():
+                return stg
+
+        return "raw"
 
     def _handle_missing_chapter(self, cid: str) -> None:
         """If check_missing is enabled, log a warning."""

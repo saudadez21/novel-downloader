@@ -19,6 +19,7 @@ def _status_chip(status: Status) -> None:
     label_map = {
         "queued": t("Queued"),
         "running": t("Downloading"),
+        "processing": t("Processing"),
         "exporting": t("Exporting"),
         "completed": t("Completed"),
         "cancelled": t("Cancelled"),
@@ -27,6 +28,7 @@ def _status_chip(status: Status) -> None:
     color_map = {
         "queued": "warning",
         "running": "primary",
+        "processing": "accent",
         "exporting": "secondary",
         "completed": "positive",
         "cancelled": "info",

@@ -16,12 +16,15 @@
 
 ---
 
-或:
+### 或使用更简单的方式
 
-1. 打开浏览器, 登录 [https://www.qidian.com](https://www.qidian.com)
+如果只是需要当前已登录用户的 Cookie，可直接在控制台中复制:
+
+1. 打开浏览器并登录目标站点，例如 [https://www.qidian.com](https://www.qidian.com)
 2. 按 `F12` 打开开发者工具
-3. 切到「Console」控制台
-4. 粘贴下面这行代码并回车:
-    ```js
-    copy(document.cookie)
-    ```
+3. 切换到 **Console (控制台)** 标签
+4. 粘贴以下代码并按回车:
+   ```js
+   copy(document.cookie)
+   ```
+5. 现在 Cookies 已复制到剪贴板，可直接粘贴到对应位置使用

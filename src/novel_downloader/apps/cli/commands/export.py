@@ -56,7 +56,7 @@ class ExportCmd(Command):
     def run(cls, args: Namespace) -> None:
         from novel_downloader.usecases.config import load_or_init_config
 
-        from ..ui_adapters import CLIConfigUI, CLIExportUI
+        from ..ui_adapters import CLIConfigUI, CLIExportUI, CLIProcessUI
 
         site: str | None = args.site
         book_ids: list[str] = list(args.book_ids or [])
@@ -107,13 +107,19 @@ class ExportCmd(Command):
         books = cls._parse_book_args(book_ids, args.start, args.end)
 
         from novel_downloader.usecases.export import export_books
+        from novel_downloader.usecases.process import process_books
 
-        export_ui = CLIExportUI()
+        process_books(
+            site,
+            books=books,
+            pipeline_cfg=adapter.get_pipeline_config(site),
+            ui=CLIProcessUI(),
+        )
         export_books(
             site=site,
             books=books,
             exporter_cfg=adapter.get_exporter_config(site),
-            export_ui=export_ui,
+            export_ui=CLIExportUI(),
             formats=formats,
         )
 
@@ -222,7 +228,7 @@ class ExportCmd(Command):
         for i, p in enumerate(book_dirs, 1):
             book_id = p.name
             book_name, author = "", ""
-            info_path = p / "book_info.json"
+            info_path = p / "book_info.raw.json"
             if info_path.exists():
                 try:
                     with info_path.open("r", encoding="utf-8") as f:

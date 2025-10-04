@@ -155,3 +155,60 @@ class CLIConfigUI:
 
     def confirm_create(self) -> bool:
         return ui.confirm(t("Would you like to create a default config?"), default=True)
+
+
+class CLIProcessUI:
+    def __init__(self) -> None:
+        self._progress: ui.ProgressUI | None = None
+
+    def on_stage_start(self, book: BookConfig, stage: str) -> None:
+        if self._progress:
+            self._progress.stop()
+            self._progress = None
+
+        ui.info(
+            t("Stage '{stage}' started for {book_id}.").format(
+                stage=stage, book_id=book.book_id
+            )
+        )
+        self._progress = ui.ProgressUI(prefix=f"{t('Stage')} {stage}", unit="chapters")
+        self._progress.start()
+
+    def on_stage_progress(
+        self, book: BookConfig, stage: str, done: int, total: int
+    ) -> None:
+        if self._progress:
+            self._progress.update_sync(done, total)
+
+    def on_stage_complete(self, book: BookConfig, stage: str) -> None:
+        if self._progress:
+            self._progress.stop()
+            self._progress = None
+        ui.success(
+            t("Stage '{stage}' completed for {book_id}").format(
+                stage=stage, book_id=book.book_id
+            )
+        )
+
+    def on_missing(self, book: BookConfig, what: str, path: Path) -> None:
+        ui.warn(
+            t("Missing data ({what}) for {book_id}: {path}").format(
+                what=what,
+                book_id=book.book_id,
+                path=str(path),
+            )
+        )
+
+    def on_book_error(
+        self, book: BookConfig, stage: str | None, error: Exception
+    ) -> None:
+        if self._progress:
+            self._progress.stop()
+            self._progress = None
+
+        stage_label = stage or "Unknown"
+        ui.error(
+            t("Error processing {book_id} at stage '{stage}': {err}").format(
+                book_id=book.book_id, stage=stage_label, err=str(error)
+            )
+        )

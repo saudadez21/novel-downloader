@@ -139,7 +139,7 @@ class BaseDownloader(abc.ABC):
         :param book_id: identifier of the book
         :return: parsed BookInfoDict
         """
-        info_path = self._raw_data_dir / book_id / "book_info.json"
+        info_path = self._raw_data_dir / book_id / "book_info.raw.json"
         book_info: BookInfoDict | None = None
 
         if info_path.exists():
@@ -152,7 +152,8 @@ class BaseDownloader(abc.ABC):
                     return book_info
             except json.JSONDecodeError:
                 self.logger.warning(
-                    "Corrupted book_info.json for %s: could not decode JSON", book_id
+                    "Corrupted book_info.raw.json for %s: could not decode JSON",
+                    book_id,
                 )
 
         try:
@@ -184,7 +185,7 @@ class BaseDownloader(abc.ABC):
         """
         target_dir = self._raw_data_dir / book_id
         target_dir.mkdir(parents=True, exist_ok=True)
-        (target_dir / "book_info.json").write_text(
+        (target_dir / "book_info.raw.json").write_text(
             json.dumps(book_info, ensure_ascii=False, indent=2),
             encoding="utf-8",
         )

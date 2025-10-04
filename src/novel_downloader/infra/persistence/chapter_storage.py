@@ -40,9 +40,9 @@ class ChapterStorage:
         Initialize storage for a specific book.
 
         :param base_dir: Directory path where the SQLite file will be stored.
-        :param filename: SQLite filename (without extension).
+        :param filename: SQLite filename.
         """
-        self._db_path = Path(base_dir) / f"{filename}.sqlite"
+        self._db_path = Path(base_dir) / filename
         self._conn: sqlite3.Connection | None = None
         # Cache: chapter id -> need_refetch flag
         self._refetch_flags: dict[str, bool] = {}
@@ -79,6 +79,24 @@ class ChapterStorage:
         :param chap_id: Chapter identifier.
         """
         return self._refetch_flags.get(chap_id, True)
+
+    def existing_ids(self) -> set[str]:
+        """
+        All chapter IDs currently present in this store.
+        """
+        return set(self._refetch_flags.keys())
+
+    def clean_ids(self) -> set[str]:
+        """
+        Chapter IDs present in this store that DO NOT need refetch.
+        """
+        return {cid for cid, need in self._refetch_flags.items() if need is False}
+
+    def dirty_ids(self) -> set[str]:
+        """
+        Chapter IDs present in this store that DO need refetch.
+        """
+        return {cid for cid, need in self._refetch_flags.items() if need is True}
 
     def upsert_chapter(self, data: ChapterDict, need_refetch: bool = False) -> None:
         """
