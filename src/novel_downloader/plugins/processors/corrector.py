@@ -5,55 +5,7 @@ novel_downloader.plugins.processors.corrector
 
 Runs Chinese text correction using pycorrector engines (kenlm/MacBERT/T5/etc.)
 on book metadata and chapter content.
-
-Config:
-
-# --- kenlm (statistical LM) ---
-[[plugins.processors]]
-name = "corrector"
-engine = "kenlm"
-
-# processing switches (optional)
-apply_title   = true
-apply_content = true
-apply_author  = false
-apply_tags    = false
-skip_if_len_le = 1       # skip very short strings (optional)
-
-# engine options (paths are optional)
-language_model_path = "/path/to/zh_giga.no_cna_cmn.prune01244.klm"
-custom_confusion_path_or_dict = "/path/to/my_confusion.txt"
-proper_name_path = "/path/to/my_proper.txt"
-
-# --- MacBERT (transformer) ---
-[[plugins.processors]]
-name = "corrector"
-engine = "macbert"
-model_name_or_path = "shibing624/macbert4csc-base-chinese"
-
-apply_title   = true
-apply_content = true
-skip_if_len_le = 1
-
-# --- T5 (transformer; model REQUIRED) ---
-[[plugins.processors]]
-name = "corrector"
-engine = "t5"
-model_name_or_path = "your/t5-model-or-local-path"  # REQUIRED
-
-apply_title   = true
-apply_content = true
-
-# --- Other engines (no extra params typically) ---
-# engine = "ernie_csc" | "gpt" | "mucgec_bart"
-[[plugins.processors]]
-name = "corrector"
-engine = "ernie_csc"
-
-apply_title   = true
-apply_content = true
 """
-
 
 from __future__ import annotations
 

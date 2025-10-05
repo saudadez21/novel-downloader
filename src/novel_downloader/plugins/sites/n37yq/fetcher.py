@@ -5,7 +5,6 @@ novel_downloader.plugins.sites.n37yq.fetcher
 
 """
 
-
 from novel_downloader.plugins.base.fetcher import GenericSession
 from novel_downloader.plugins.registry import registrar
 

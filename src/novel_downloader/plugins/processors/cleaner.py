@@ -5,20 +5,7 @@ novel_downloader.plugins.processors.cleaner
 
 A text cleaner that removes invisible characters, deletes unwanted patterns,
 and applies literal replacements for both book-level metadata and chapters.
-
-Config:
-
-[[plugins.processors]]
-name = "cleaner"
-remove_invisible = true
-
-title_removes  = "path/to/title-remove.json"   # JSON array: ["regex1", ...]
-title_replace  = "path/to/title-replace.json"  # JSON object: {"old": "new", ...}
-
-content_removes = "path/to/content-remove.json"
-content_replace = "path/to/content-replace.json"
 """
-
 
 from __future__ import annotations
 

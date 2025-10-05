@@ -4,25 +4,7 @@ novel_downloader.plugins.processors.zh_convert
 ----------------------------------------------
 
 Converts Chinese text between 简体 <-> 繁体 using pycorrector utilities.
-
-Config:
-
-# 简体 <- 繁体 (t2s)
-[[plugins.processors]]
-name = "zh_convert"
-direction = "t2s"
-
-apply_title   = true
-apply_content = true
-apply_author  = false
-apply_tags    = false
-
-# 繁体 <- 简体 (s2t)
-[[plugins.processors]]
-name = "zh_convert"
-direction = "s2t"
 """
-
 
 from __future__ import annotations
 

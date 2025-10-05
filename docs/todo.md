@@ -37,6 +37,13 @@
 * 在缓存完整的情况下，`snakeviz` 分析结果显示 95% 以上耗时集中在 zip IO
 * 可探索更高效的压缩/写入方式
 
+### 对比 OpenCC 与 opencc-python
+
+* 对比 [opencc-python](https://github.com/yichen0831/opencc-python) 与 [OpenCC](https://github.com/BYVoid/OpenCC) 的差异
+* 字典更新与维护情况
+* 转换性能表现
+* 安装方式与兼容性
+
 ### 命令行交互
 
 * 在未输入 sub-command 时提供 TUI 界面，提升可用性
