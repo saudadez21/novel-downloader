@@ -11,10 +11,7 @@ from typing import Any
 
 from lxml import html
 
-from novel_downloader.infra.paths import (
-    LINOVELIB_MAP_PATH,
-    LINOVELIB_PCTHEMA_MAP_PATH,
-)
+from novel_downloader.infra.paths import LINOVELIB_MAP_PATH
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
@@ -36,8 +33,6 @@ class LinovelibParser(BaseParser):
     site_name: str = "linovelib"
 
     _PCTHEMA_MAP: dict[str, str] = {}
-    _FONT_MAP: dict[str, str] = {}
-    _BLANK_SET: set[str] = set()
 
     def parse_book_info(
         self,
@@ -214,7 +209,6 @@ class LinovelibParser(BaseParser):
                 continue
             tc = tcs[0]
 
-            use_fonts = self._has_fonts(curr_html)
             use_substitution = self._has_subst(curr_html)
             use_shuffle = self._has_shuffle(curr_html)
 
@@ -233,8 +227,6 @@ class LinovelibParser(BaseParser):
 
                     if use_substitution:
                         txt = self._map_subst(txt)
-                    if use_fonts:
-                        txt = self._map_fonts(txt)
 
                     txt = self._norm_space(txt)
 
@@ -285,58 +277,34 @@ class LinovelibParser(BaseParser):
         }
 
     @staticmethod
-    def _has_fonts(html_str: str) -> bool:
-        """
-        Determine whether HTML content likely uses obfuscated fonts.
-        """
-        return "CSSStyleSheet" in html_str
-
-    @staticmethod
     def _has_shuffle(html_str: str) -> bool:
         """
-        Determine whether the HTML content likely applies paragraph shuffling.
+        Determine whether the HTML likely applies paragraph shuffling.
         """
-        shuffled = "/scripts/chapterlog.js" in html_str
-        if shuffled and "/scripts/chapterlog.js?v1006b8" not in html_str:
-            logger.warning(
-                "Detected potential chapter shuffling: script version mismatch. "
-                "This may cause paragraphs to appear out of order. "
-                "Please report this issue so the handler can be updated."
-            )
-        return shuffled
+        return LinovelibParser._check_script(
+            html_str,
+            "/scripts/chapterlog.js",
+            "v1006b8-5",
+            "Detected potential chapter shuffling: script version mismatch. "
+            "This may cause paragraphs to appear out of order. "
+            "Please report this issue so the handler can be updated.",
+        )
 
     @staticmethod
     def _has_subst(html_str: str) -> bool:
         """
-        Determine whether the HTML content likely applies PC theme
-        character substitution (via the yuedu() function).
+        Determine whether the HTML likely applies PC theme character substitution
         """
-        uses_substitution = (
-            "/themes/zhpc/js/pctheme.js" in html_str and "yuedu()" in html_str
+        if "yuedu()" not in html_str:
+            return False
+        return LinovelibParser._check_script(
+            html_str,
+            "/themes/zhpc/js/pctheme.js",
+            "v0917",
+            "Detected potential character substitution: script version mismatch. "
+            "This may cause incorrect character decoding. "
+            "Please report this issue so the handler can be updated.",
         )
-        if uses_substitution and "/themes/zhpc/js/pctheme.js?v0917" not in html_str:
-            logger.warning(
-                "Detected potential character substitution: script version mismatch. "
-                "This may cause incorrect character decoding. "
-                "Please report this issue so the handler can be updated."
-            )
-        return uses_substitution
-
-    @classmethod
-    def _map_fonts(cls, text: str) -> str:
-        """
-        Apply font mapping to the input text.
-
-        Characters in the blank set are skipped, while all others are mapped
-        according to the font map.
-        """
-        if not cls._FONT_MAP:
-            from itertools import islice
-
-            cls._FONT_MAP = json.loads(LINOVELIB_MAP_PATH.read_text(encoding="utf-8"))
-            cls._BLANK_SET = set(islice(cls._FONT_MAP.values(), 3500))
-
-        return "".join(cls._FONT_MAP.get(c, c) for c in text if c not in cls._BLANK_SET)
 
     @classmethod
     def _map_subst(cls, text: str) -> str:
@@ -345,7 +313,7 @@ class LinovelibParser(BaseParser):
         """
         if not cls._PCTHEMA_MAP:
             cls._PCTHEMA_MAP = json.loads(
-                LINOVELIB_PCTHEMA_MAP_PATH.read_text(encoding="utf-8")
+                LINOVELIB_MAP_PATH.read_text(encoding="utf-8")
             )
 
         return "".join(cls._PCTHEMA_MAP.get(c, c) for c in text)
@@ -370,7 +338,7 @@ class LinovelibParser(BaseParser):
         m = 233_280
         a = 9_302
         c = 49_397
-        s = cid * 132 + 237  # seed
+        s = cid * 127 + 235  # seed
         for i in range(len(rest) - 1, 0, -1):
             s = (s * a + c) % m
             # floor((s / m) * (i + 1)) == (s * (i + 1)) // m
@@ -379,20 +347,16 @@ class LinovelibParser(BaseParser):
 
         return fixed + rest
 
-    @classmethod
-    def _reorder_paras(cls, paragraphs: list[str], cid: int) -> list[str]:
+    @staticmethod
+    def _check_script(
+        html_str: str, script_path: str, version: str, warn_msg: str
+    ) -> bool:
         """
-        Reorder non-empty <p> nodes to match /scripts/chapterlog.js.
-
-        Input: paragraphs extracted from `#TextContent` in raw HTML order.
+        Generic helper for detecting site scripts and checking version consistency.
         """
-        n = len(paragraphs)
-        if n == 0:
-            return paragraphs
+        if script_path not in html_str:
+            return False
 
-        order = cls._chapterlog_order(n, cid)
-        out: list[str] = [""] * n
-        for i, p in enumerate(paragraphs):
-            out[order[i]] = p
-
-        return out
+        if f"{script_path}?{version}" not in html_str:
+            logger.warning(warn_msg)
+        return True
