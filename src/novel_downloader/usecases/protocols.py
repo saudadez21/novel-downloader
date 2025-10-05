@@ -80,3 +80,24 @@ class ConfigUI(Protocol):
 
     def confirm_create(self) -> bool:
         ...
+
+
+class ProcessUI(Protocol):
+    def on_stage_start(self, book: BookConfig, stage: str) -> None:
+        ...
+
+    def on_stage_progress(
+        self, book: BookConfig, stage: str, done: int, total: int
+    ) -> None:
+        ...
+
+    def on_stage_complete(self, book: BookConfig, stage: str) -> None:
+        ...
+
+    def on_missing(self, book: BookConfig, what: str, path: Path) -> None:
+        ...
+
+    def on_book_error(
+        self, book: BookConfig, stage: str | None, error: Exception
+    ) -> None:
+        ...

@@ -65,13 +65,8 @@ class CommonExporter(BaseExporter):
         end_id = book.end_id
         ignore_set = set(book.ignore_ids or [])
 
-        if not self._init_chapter_storages(book_id):
-            return None
-
-        # --- Load book_info.json ---
-        book_info = self._load_book_info(book_id)
-        if not book_info:
-            return None
+        # --- Load book data ---
+        book_info = self._load_stage_data(book_id)
 
         # --- Filter volumes & chapters ---
         orig_vols = book_info.get("volumes", [])
@@ -98,9 +93,8 @@ class CommonExporter(BaseExporter):
             ]
             if not cids:
                 continue
-            chap_map = self._get_chapters(book_id, cids)
 
-            # Append each chapter
+            chap_map = self._get_chapters(book_id, cids)
             for ch_info in volume.get("chapters", []):
                 cid = ch_info.get("chapterId")
                 ch_title = ch_info.get("title", "")
@@ -123,9 +117,7 @@ class CommonExporter(BaseExporter):
         # --- Save final text ---
         try:
             result = write_file(
-                content=final_text,
-                filepath=out_path,
-                on_exist="overwrite",
+                content=final_text, filepath=out_path, on_exist="overwrite"
             )
             self.logger.info("Exported TXT: %s", out_path)
         except Exception as e:
@@ -148,7 +140,7 @@ class CommonExporter(BaseExporter):
         Export each volume of a novel as a separate EPUB file.
 
         Steps:
-        1. Load metadata from `book_info.json`.
+          1. Load `book_info` for metadata.
         2. For each volume:
           a. Clean the volume title and determine output filename.
           b. Batch-fetch all chapters in this volume to minimize SQLite overhead.
@@ -161,13 +153,8 @@ class CommonExporter(BaseExporter):
         end_id = book.end_id
         ignore_set = set(book.ignore_ids or [])
 
-        if not self._init_chapter_storages(book_id):
-            return None
-
-        # --- Load book_info.json ---
-        book_info = self._load_book_info(book_id)
-        if not book_info:
-            return None
+        # --- Load book data ---
+        book_info = self._load_stage_data(book_id)
 
         # --- Filter volumes & chapters ---
         orig_vols = book_info.get("volumes", [])
@@ -244,10 +231,11 @@ class CommonExporter(BaseExporter):
                     self._handle_missing_chapter(cid)
                     continue
 
-                title = (
-                    self._cleaner.clean_title(ch_title or ch.get("title", "")) or cid
+                raw_title = (
+                    ch_title if isinstance(ch_title, str) else ch.get("title", "")
                 )
-                content = self._cleaner.clean_content(ch.get("content", ""))
+                title = (raw_title or "").strip() or str(cid)
+                content = ch.get("content", "")
 
                 content = (
                     self._inline_remote_images(epub, content, img_dir)
@@ -288,7 +276,7 @@ class CommonExporter(BaseExporter):
         Export a single novel (identified by `book_id`) to an EPUB file.
 
         This function will:
-          1. Load `book_info.json` for metadata.
+          1. Load `book_info` for metadata.
           2. Generate introductory HTML and optionally include the cover image.
           3. Initialize the EPUB container.
           4. Iterate through volumes and chapters in volume-batches, convert to XHTML.
@@ -301,13 +289,8 @@ class CommonExporter(BaseExporter):
         end_id = book.end_id
         ignore_set = set(book.ignore_ids or [])
 
-        if not self._init_chapter_storages(book_id):
-            return None
-
-        # --- Load book_info.json ---
-        book_info = self._load_book_info(book_id)
-        if not book_info:
-            return None
+        # --- Load book data ---
+        book_info = self._load_stage_data(book_id)
 
         # --- Filter volumes & chapters ---
         orig_vols = book_info.get("volumes", [])
@@ -365,7 +348,7 @@ class CommonExporter(BaseExporter):
             curr_vol = Volume(
                 id=f"vol_{v_idx}",
                 title=vol_title,
-                intro=self._cleaner.clean_content(vol.get("volume_intro") or ""),
+                intro=vol.get("volume_intro", ""),
                 cover=vol_cover,
             )
 
@@ -390,10 +373,11 @@ class CommonExporter(BaseExporter):
                     self._handle_missing_chapter(cid)
                     continue
 
-                title = (
-                    self._cleaner.clean_title(ch_title or ch.get("title", "")) or cid
+                raw_title = (
+                    ch_title if isinstance(ch_title, str) else ch.get("title", "")
                 )
-                content = self._cleaner.clean_content(ch.get("content", ""))
+                title = (raw_title or "").strip() or str(cid)
+                content = ch.get("content", "")
 
                 content = (
                     self._inline_remote_images(epub, content, img_dir)
@@ -595,10 +579,9 @@ class CommonExporter(BaseExporter):
         Render one chapter to text
         """
         # Title
-        raw_title = chap_title or chap.get("title", "")
-        title_line = self._cleaner.clean_title(raw_title).strip()
+        title_line = chap_title or chap.get("title", "").strip()
 
-        cleaned = self._cleaner.clean_content(chap.get("content") or "").strip()
+        cleaned = chap.get("content", "").strip()
         cleaned = self._remove_all_images(cleaned)
         body = "\n".join(s for line in cleaned.splitlines() if (s := line.strip()))
 

@@ -172,6 +172,21 @@ class ProgressUI:
             description=f"{self._prefix} ({done}/{total} {self._unit})",
         )
 
+    def update_sync(self, done: int, total: int) -> None:
+        """Sync wrapper for update()."""
+        import asyncio
+
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = None
+
+        if loop and loop.is_running():
+            # If running in async context, schedule without blocking
+            loop.create_task(self.update(done, total))
+        else:
+            asyncio.run(self.update(done, total))
+
 
 def _normalize_level(level: int | str) -> int:
     if isinstance(level, int):

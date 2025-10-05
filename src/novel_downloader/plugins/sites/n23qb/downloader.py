@@ -51,7 +51,7 @@ class N23qbDownloader(BaseDownloader):
         def cancelled() -> bool:
             return bool(cancel_event and cancel_event.is_set())
 
-        with ChapterStorage(raw_base, priorities=self.PRIORITIES_MAP) as storage:
+        with ChapterStorage(raw_base, filename="chapter.raw.sqlite") as storage:
             # --- metadata ---
             book_info = await self._load_book_info(book_id=book_id)
 
@@ -85,7 +85,7 @@ class N23qbDownloader(BaseDownloader):
                 if not batch:
                     return
                 try:
-                    storage.upsert_chapters(batch, self.DEFAULT_SOURCE_ID)
+                    storage.upsert_chapters(batch)
                 except Exception as e:
                     self.logger.error(
                         "Storage batch upsert failed (size=%d): %s",
@@ -224,7 +224,7 @@ class N23qbDownloader(BaseDownloader):
                     continue
 
                 # missing id: try storage
-                data = storage.get_best_chapter(prev_cid)
+                data = storage.get_chapter(prev_cid)
                 if not data:
                     if cancelled():
                         return book_info
@@ -237,7 +237,7 @@ class N23qbDownloader(BaseDownloader):
                             prev_cid,
                         )
                         continue
-                    storage.upsert_chapter(data, self.DEFAULT_SOURCE_ID)
+                    storage.upsert_chapter(data)
                     if cancelled():
                         return book_info
                     await async_jitter_sleep(

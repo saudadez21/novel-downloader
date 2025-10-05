@@ -5,9 +5,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: novel-downloader 2.3.1\n"
+"Project-Id-Version: novel-downloader 2.4.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-02 20:54-0400\n"
+"POT-Creation-Date: 2025-10-04 18:17-0400\n"
 "PO-Revision-Date: 2025-09-22 22:43-0400\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -123,6 +123,30 @@ msgstr "没有配置文件，无法继续执行。"
 #: src\novel_downloader\apps\cli\ui_adapters.py:157
 msgid "Would you like to create a default config?"
 msgstr "是否要创建一个默认配置文件？"
+
+#: src\novel_downloader\apps\cli\ui_adapters.py:170
+#, python-brace-format
+msgid "Stage '{stage}' started for {book_id}."
+msgstr "开始阶段 '{stage}' (书籍 {book_id})"
+
+#: src\novel_downloader\apps\cli\ui_adapters.py:174
+msgid "Stage"
+msgstr "阶段"
+
+#: src\novel_downloader\apps\cli\ui_adapters.py:188
+#, python-brace-format
+msgid "Stage '{stage}' completed for {book_id}"
+msgstr "完成阶段 '{stage}' (书籍 {book_id})"
+
+#: src\novel_downloader\apps\cli\ui_adapters.py:195
+#, python-brace-format
+msgid "Missing data ({what}) for {book_id}: {path}"
+msgstr "书籍 {book_id} 缺少数据 ({what}): {path}"
+
+#: src\novel_downloader\apps\cli\ui_adapters.py:211
+#, python-brace-format
+msgid "Error processing {book_id} at stage '{stage}': {err}"
+msgstr "处理书籍 {book_id} 的阶段 {stage} 时出错：{err}"
 
 #: src\novel_downloader\apps\cli\commands\clean.py:26
 msgid "Clear application logs, caches, and configs"
@@ -281,41 +305,41 @@ msgstr "结束章节 ID（仅对第一本书生效）"
 msgid "Skip export step (download only)"
 msgstr "跳过导出步骤（仅下载）"
 
-#: src\novel_downloader\apps\cli\commands\download.py:71
+#: src\novel_downloader\apps\cli\commands\download.py:72
 msgid "No --site provided; detecting site from URL..."
 msgstr "未提供 --site；正在从 URL 检测站点..."
 
-#: src\novel_downloader\apps\cli\commands\download.py:75
+#: src\novel_downloader\apps\cli\commands\download.py:76
 #, python-brace-format
 msgid "Expected exactly one URL argument when --site is omitted (got {n})."
 msgstr "省略 --site 时应只提供一个 URL 参数（收到 {n} 个）"
 
-#: src\novel_downloader\apps\cli\commands\download.py:84
+#: src\novel_downloader\apps\cli\commands\download.py:85
 #, python-brace-format
 msgid "Could not resolve site and book from URL: {url}"
 msgstr "无法从 URL 解析站点和书籍：{url}"
 
-#: src\novel_downloader\apps\cli\commands\download.py:98
+#: src\novel_downloader\apps\cli\commands\download.py:99
 #, python-brace-format
 msgid "Resolved URL to site '{site}' with book ID '{book_id}'."
 msgstr "已解析 URL：站点 '{site}'，书籍 ID '{book_id}'"
 
-#: src\novel_downloader\apps\cli\commands\download.py:107
+#: src\novel_downloader\apps\cli\commands\download.py:108
 #: src\novel_downloader\apps\cli\commands\export.py:82
 #, python-brace-format
 msgid "Using site: {site}"
 msgstr "使用站点：{site}"
 
-#: src\novel_downloader\apps\cli\commands\download.py:115
+#: src\novel_downloader\apps\cli\commands\download.py:116
 #, python-brace-format
 msgid "Failed to read book IDs from configuration: {err}"
 msgstr "从配置读取书籍 ID 失败：{err}"
 
-#: src\novel_downloader\apps\cli\commands\download.py:122
+#: src\novel_downloader\apps\cli\commands\download.py:123
 msgid "No book IDs provided. Exiting."
 msgstr "未提供书籍 ID，已退出"
 
-#: src\novel_downloader\apps\cli\commands\download.py:169
+#: src\novel_downloader\apps\cli\commands\download.py:179
 msgid "Export skipped (--no-export)"
 msgstr "已跳过导出 (--no-export)"
 
@@ -343,91 +367,91 @@ msgstr "未选择任何站点。"
 msgid "No books selected."
 msgstr "未选择任何书籍。"
 
-#: src\novel_downloader\apps\cli\commands\export.py:146
+#: src\novel_downloader\apps\cli\commands\export.py:155
 #, python-brace-format
 msgid "Raw data directory does not exist: {p}"
 msgstr "原始数据目录不存在：{p}"
 
-#: src\novel_downloader\apps\cli\commands\export.py:151
+#: src\novel_downloader\apps\cli\commands\export.py:160
 #, python-brace-format
 msgid "No sites found under {p}."
 msgstr "在 {p} 下未找到任何站点。"
 
-#: src\novel_downloader\apps\cli\commands\export.py:169
+#: src\novel_downloader\apps\cli\commands\export.py:178
 #, python-brace-format
 msgid "Available Sites · Page {page}/{total}"
 msgstr "可用站点 · 第 {page}/{total} 页"
 
-#: src\novel_downloader\apps\cli\commands\export.py:172
-#: src\novel_downloader\apps\cli\commands\export.py:246
-#: src\novel_downloader\apps\cli\commands\search.py:154
+#: src\novel_downloader\apps\cli\commands\export.py:181
+#: src\novel_downloader\apps\cli\commands\export.py:255
+#: src\novel_downloader\apps\cli\commands\search.py:162
 msgid "#"
 msgstr "序号"
 
-#: src\novel_downloader\apps\cli\commands\export.py:172
-#: src\novel_downloader\apps\cli\commands\search.py:159
+#: src\novel_downloader\apps\cli\commands\export.py:181
+#: src\novel_downloader\apps\cli\commands\search.py:167
 msgid "Site Name"
 msgstr "站点名称"
 
-#: src\novel_downloader\apps\cli\commands\export.py:172
+#: src\novel_downloader\apps\cli\commands\export.py:181
 msgid "Site Key"
 msgstr "站点键"
 
-#: src\novel_downloader\apps\cli\commands\export.py:185
-#: src\novel_downloader\apps\cli\commands\search.py:198
+#: src\novel_downloader\apps\cli\commands\export.py:194
+#: src\novel_downloader\apps\cli\commands\search.py:206
 msgid "Enter a number, 'n' for next, 'p' for previous (press Enter to cancel)"
 msgstr "输入序号选择，'n' 下一页，'p' 上一页（回车取消）"
 
-#: src\novel_downloader\apps\cli\commands\export.py:210
+#: src\novel_downloader\apps\cli\commands\export.py:219
 #, python-brace-format
 msgid "Site directory does not exist: {p}"
 msgstr "站点目录不存在：{p}"
 
-#: src\novel_downloader\apps\cli\commands\export.py:215
+#: src\novel_downloader\apps\cli\commands\export.py:224
 #, python-brace-format
 msgid "No books found under site '{site}'."
 msgstr "在站点 '{site}' 下未找到任何书籍。"
 
-#: src\novel_downloader\apps\cli\commands\export.py:230
+#: src\novel_downloader\apps\cli\commands\export.py:239
 #, python-brace-format
 msgid "Failed to read metadata for {bid}"
 msgstr "读取 {bid} 的元数据失败"
 
-#: src\novel_downloader\apps\cli\commands\export.py:243
+#: src\novel_downloader\apps\cli\commands\export.py:252
 #, python-brace-format
 msgid "Available Books for {site} · Page {page}/{total}"
 msgstr "{site} 的可用书籍 · 第 {page}/{total} 页"
 
-#: src\novel_downloader\apps\cli\commands\export.py:246
-#: src\novel_downloader\apps\cli\commands\search.py:160
+#: src\novel_downloader\apps\cli\commands\export.py:255
+#: src\novel_downloader\apps\cli\commands\search.py:168
 #: src\novel_downloader\apps\web\pages\download.py:72
-#: src\novel_downloader\apps\web\pages\progress.py:138
+#: src\novel_downloader\apps\web\pages\progress.py:140
 msgid "Book ID"
 msgstr "书籍 ID"
 
-#: src\novel_downloader\apps\cli\commands\export.py:246
-#: src\novel_downloader\apps\cli\commands\search.py:155
+#: src\novel_downloader\apps\cli\commands\export.py:255
+#: src\novel_downloader\apps\cli\commands\search.py:163
 #: src\novel_downloader\apps\web\pages\search.py:302
 msgid "Title"
 msgstr "书名"
 
-#: src\novel_downloader\apps\cli\commands\export.py:246
-#: src\novel_downloader\apps\cli\commands\search.py:156
+#: src\novel_downloader\apps\cli\commands\export.py:255
+#: src\novel_downloader\apps\cli\commands\search.py:164
 #: src\novel_downloader\apps\web\pages\search.py:303
 msgid "Author"
 msgstr "作者"
 
-#: src\novel_downloader\apps\cli\commands\export.py:259
+#: src\novel_downloader\apps\cli\commands\export.py:268
 msgid ""
 "Enter numbers (e.g. 1,3,5), 'a' for all, 'n' next, 'p' previous (Enter to "
 "cancel)"
 msgstr "输入序号 (如 1,3,5)，'a' 全选，'n' 下一页，'p' 上一页（回车取消）"
 
-#: src\novel_downloader\apps\cli\commands\export.py:278
+#: src\novel_downloader\apps\cli\commands\export.py:287
 msgid "Invalid input."
 msgstr "输入无效。"
 
-#: src\novel_downloader\apps\cli\commands\export.py:281
+#: src\novel_downloader\apps\cli\commands\export.py:290
 msgid "One or more indices out of range."
 msgstr "一个或多个索引超出范围。"
 
@@ -455,24 +479,24 @@ msgstr "每个站点的最大结果数（默认：10）"
 msgid "Request timeout in seconds (default: 5.0)"
 msgstr "请求超时时间（秒，默认：5.0）"
 
-#: src\novel_downloader\apps\cli\commands\search.py:86
+#: src\novel_downloader\apps\cli\commands\search.py:87
 #, python-brace-format
 msgid "Searching for '{keyword}'..."
 msgstr "正在搜索 '{keyword}'..."
 
-#: src\novel_downloader\apps\cli\commands\search.py:146
+#: src\novel_downloader\apps\cli\commands\search.py:154
 msgid "No results found."
 msgstr "未找到结果"
 
-#: src\novel_downloader\apps\cli\commands\search.py:157
+#: src\novel_downloader\apps\cli\commands\search.py:165
 msgid "Latest"
 msgstr "最新章节"
 
-#: src\novel_downloader\apps\cli\commands\search.py:158
+#: src\novel_downloader\apps\cli\commands\search.py:166
 msgid "Updated"
 msgstr "更新时间"
 
-#: src\novel_downloader\apps\cli\commands\search.py:182
+#: src\novel_downloader\apps\cli\commands\search.py:190
 #, python-brace-format
 msgid "Search Results · Page {page}/{total_pages}"
 msgstr "搜索结果 · 第 {page}/{total_pages} 页"
@@ -522,7 +546,7 @@ msgid ""
 msgstr "粘贴完整的小说详情页链接，系统会自动解析站点和书籍ID"
 
 #: src\novel_downloader\apps\web\pages\download.py:65
-#: src\novel_downloader\apps\web\pages\progress.py:137
+#: src\novel_downloader\apps\web\pages\progress.py:139
 #: src\novel_downloader\apps\web\pages\search.py:301
 msgid "Site"
 msgstr "站点"
@@ -631,67 +655,71 @@ msgid "Downloading"
 msgstr "下载中"
 
 #: src\novel_downloader\apps\web\pages\progress.py:22
+msgid "Processing"
+msgstr "处理中"
+
+#: src\novel_downloader\apps\web\pages\progress.py:23
 msgid "Exporting"
 msgstr "导出中"
 
-#: src\novel_downloader\apps\web\pages\progress.py:23
-#: src\novel_downloader\apps\web\pages\progress.py:85
+#: src\novel_downloader\apps\web\pages\progress.py:24
+#: src\novel_downloader\apps\web\pages\progress.py:87
 msgid "Completed"
 msgstr "已完成"
 
-#: src\novel_downloader\apps\web\pages\progress.py:24
-#: src\novel_downloader\apps\web\pages\progress.py:86
-#: src\novel_downloader\apps\web\pages\progress.py:122
+#: src\novel_downloader\apps\web\pages\progress.py:25
+#: src\novel_downloader\apps\web\pages\progress.py:88
+#: src\novel_downloader\apps\web\pages\progress.py:124
 msgid "Cancelled"
 msgstr "已取消"
 
-#: src\novel_downloader\apps\web\pages\progress.py:25
-#: src\novel_downloader\apps\web\pages\progress.py:87
+#: src\novel_downloader\apps\web\pages\progress.py:26
+#: src\novel_downloader\apps\web\pages\progress.py:89
 msgid "Failed"
 msgstr "失败"
 
-#: src\novel_downloader\apps\web\pages\progress.py:64
+#: src\novel_downloader\apps\web\pages\progress.py:66
 #, python-brace-format
 msgid "{done}/? · Fetching total chapters..."
 msgstr "{done}/? · 正在获取总章节..."
 
-#: src\novel_downloader\apps\web\pages\progress.py:74
+#: src\novel_downloader\apps\web\pages\progress.py:76
 #, python-brace-format
 msgid "{done}/{total} · ETA {eta}"
 msgstr "{done}/{total} · 预计剩余 {eta}"
 
-#: src\novel_downloader\apps\web\pages\progress.py:81
+#: src\novel_downloader\apps\web\pages\progress.py:83
 msgid "Exporting..."
 msgstr "正在导出..."
 
-#: src\novel_downloader\apps\web\pages\progress.py:122
+#: src\novel_downloader\apps\web\pages\progress.py:124
 msgid "Cancel failed"
 msgstr "取消失败"
 
-#: src\novel_downloader\apps\web\pages\progress.py:126
-#: src\novel_downloader\apps\web\pages\progress.py:129
+#: src\novel_downloader\apps\web\pages\progress.py:128
+#: src\novel_downloader\apps\web\pages\progress.py:131
 #: src\novel_downloader\apps\web\services\client_dialog.py:128
 msgid "Cancel"
 msgstr "取消"
 
-#: src\novel_downloader\apps\web\pages\progress.py:131
+#: src\novel_downloader\apps\web\pages\progress.py:133
 msgid "Task has ended and cannot be cancelled"
 msgstr "任务已结束，无法取消"
 
-#: src\novel_downloader\apps\web\pages\progress.py:141
+#: src\novel_downloader\apps\web\pages\progress.py:143
 msgid "Error"
 msgstr "错误"
 
-#: src\novel_downloader\apps\web\pages\progress.py:162
+#: src\novel_downloader\apps\web\pages\progress.py:164
 msgid "Running / Queued"
 msgstr "运行中 / 等待中"
 
-#: src\novel_downloader\apps\web\pages\progress.py:166
-#: src\novel_downloader\apps\web\pages\progress.py:177
+#: src\novel_downloader\apps\web\pages\progress.py:168
+#: src\novel_downloader\apps\web\pages\progress.py:179
 msgid "None"
 msgstr "无"
 
-#: src\novel_downloader\apps\web\pages\progress.py:175
+#: src\novel_downloader\apps\web\pages\progress.py:177
 msgid "Completed / Cancelled / Failed"
 msgstr "已完成 / 已取消 / 失败"
 

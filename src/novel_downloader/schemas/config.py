@@ -8,6 +8,7 @@ major component in the novel_downloader pipeline.
 """
 
 from dataclasses import dataclass, field
+from typing import Any
 
 
 @dataclass
@@ -64,21 +65,11 @@ class ParserConfig:
 
 
 @dataclass
-class TextCleanerConfig:
-    remove_invisible: bool = True
-    title_remove_patterns: list[str] = field(default_factory=list)
-    title_replacements: dict[str, str] = field(default_factory=dict)
-    content_remove_patterns: list[str] = field(default_factory=list)
-    content_replacements: dict[str, str] = field(default_factory=dict)
-
-
-@dataclass
 class ExporterConfig:
     cache_dir: str = "./novel_cache"
     raw_data_dir: str = "./raw_data"
     output_dir: str = "./downloads"
     check_missing: bool = True
-    clean_text: bool = True
     make_txt: bool = True
     make_epub: bool = False
     make_md: bool = False
@@ -88,7 +79,19 @@ class ExporterConfig:
     include_cover: bool = True
     include_picture: bool = True
     split_mode: str = "book"
-    cleaner_cfg: TextCleanerConfig = field(default_factory=TextCleanerConfig)
+
+
+@dataclass
+class ProcessorConfig:
+    name: str  # "cleaner" | "corrector" | ...
+    overwrite: bool = False
+    options: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class PipelineConfig:
+    raw_data_dir: str = "./raw_data"
+    processors: list[ProcessorConfig] = field(default_factory=list)
 
 
 @dataclass(frozen=True, slots=True)

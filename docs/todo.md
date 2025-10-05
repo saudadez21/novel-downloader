@@ -37,33 +37,18 @@
 * 在缓存完整的情况下，`snakeviz` 分析结果显示 95% 以上耗时集中在 zip IO
 * 可探索更高效的压缩/写入方式
 
+### 对比 OpenCC 与 opencc-python
+
+* 对比 [opencc-python](https://github.com/yichen0831/opencc-python) 与 [OpenCC](https://github.com/BYVoid/OpenCC) 的差异
+* 字典更新与维护情况
+* 转换性能表现
+* 安装方式与兼容性
+
 ### 命令行交互
 
 * 在未输入 sub-command 时提供 TUI 界面，提升可用性
 * 整理并精简命令行参数
-
-### 架构与插件扩展
-
-#### Processor 插件化
-
-* 在 `/plugins/protocols/processor.py` 定义统一协议:
-
-```python
-class Processor(Protocol):
-    def process(self, chapter: ChapterDict) -> ChapterDict: ...
-```
-
-* 新建 `/plugins/processors/` 目录，存放翻译、清理、纠错等实现
-* `register.py` 增加 `register_processor` / `get_processor` 工厂方法
-* 将原本嵌在 exporter 内部的 cleaner 提取到 processor 阶段
-* 文本纠错功能可考虑基于 [pycorrector](https://github.com/shibing624/pycorrector)
-
-#### Pipeline 抽象
-
-* 新建 `/usecases/pipeline.py`，实现一个 `run_pipeline(site, book_id, cfg)` 函数
-* `PipelineConfig` 定义 processor 顺序及其配置，内部调用 `get_processor` 工厂动态构造
-* 流程：从存储中获取章节 -> 顺序执行 processors -> 输出并保存新的章节文件
-* 与 download/export 风格保持一致
+* 支持 `--export-stage=<stage>` 手动选择导出阶段 (用于覆盖自动推断)
 
 ### 导出模板支持
 

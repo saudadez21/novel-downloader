@@ -219,7 +219,7 @@ novel-cli export [-h] [--format FORMAT] [--site SITE] [--config CONFIG] [book_id
 
 ```bash
 # 指定导出格式为 EPUB
-novel-cli export --format epub 88888
+novel-cli export --format epub
 
 # 指定站点来源并导出多本书
 novel-cli export --site b520 12345 23456

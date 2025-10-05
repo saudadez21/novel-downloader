@@ -12,9 +12,10 @@ from novel_downloader.infra.config import ConfigAdapter, load_config
 from novel_downloader.schemas import BookConfig
 from novel_downloader.usecases.download import download_books
 from novel_downloader.usecases.export import export_books
+from novel_downloader.usecases.process import process_books
 
 from ..models import DownloadTask
-from ..ui_adapters import WebDownloadUI, WebExportUI, WebLoginUI
+from ..ui_adapters import WebDownloadUI, WebExportUI, WebLoginUI, WebProcessUI
 
 
 class TaskManager:
@@ -33,6 +34,10 @@ class TaskManager:
         self.completed: list[DownloadTask] = []
 
         self._worker_tasks: dict[str, asyncio.Task[None]] = {}
+
+        self._process_waiting: list[DownloadTask] = []
+        self._process_worker_task: asyncio.Task[None] | None = None
+
         self._export_waiting: list[DownloadTask] = []
         self._export_worker_task: asyncio.Task[None] | None = None
 
@@ -129,10 +134,21 @@ class TaskManager:
                 task.status = "cancelled"
                 return
 
-            task.status = "exporting"
-            self._export_waiting.append(task)
-            if not self._export_worker_task or self._export_worker_task.done():
-                self._export_worker_task = asyncio.create_task(self._export_worker())
+            pipeline_cfg = adapter.get_pipeline_config(task.site)
+            if pipeline_cfg and pipeline_cfg.processors:
+                task.status = "processing"
+                self._process_waiting.append(task)
+                if not self._process_worker_task or self._process_worker_task.done():
+                    self._process_worker_task = asyncio.create_task(
+                        self._process_worker()
+                    )
+            else:
+                task.status = "exporting"
+                self._export_waiting.append(task)
+                if not self._export_worker_task or self._export_worker_task.done():
+                    self._export_worker_task = asyncio.create_task(
+                        self._export_worker()
+                    )
 
         except asyncio.CancelledError:
             task.status = "cancelled"
@@ -140,6 +156,53 @@ class TaskManager:
         except Exception as e:
             task.status = "failed"
             task.error = str(e)
+
+    async def _process_worker(self) -> None:
+        while self._process_waiting:
+            task = self._process_waiting.pop()
+            try:
+                if task.is_cancelled():
+                    task.status = "cancelled"
+                    continue
+
+                pipeline_cfg = self._adapter.get_pipeline_config(task.site)
+                if not pipeline_cfg or not pipeline_cfg.processors:
+                    # nothing to process; forward to export
+                    task.status = "exporting"
+                    self._export_waiting.append(task)
+                    if not self._export_worker_task or self._export_worker_task.done():
+                        self._export_worker_task = asyncio.create_task(
+                            self._export_worker()
+                        )
+                    continue
+
+                proc_ui = WebProcessUI(task)
+                await asyncio.to_thread(
+                    process_books,
+                    task.site,
+                    [BookConfig(book_id=task.book_id)],
+                    pipeline_cfg,
+                    proc_ui,
+                )
+
+                if task.is_cancelled():
+                    task.status = "cancelled"
+                    continue
+
+                # Processing done -> hand off to export
+                task.status = "exporting"
+                self._export_waiting.append(task)
+                if not self._export_worker_task or self._export_worker_task.done():
+                    self._export_worker_task = asyncio.create_task(
+                        self._export_worker()
+                    )
+
+            except asyncio.CancelledError:
+                task.status = "cancelled"
+                break
+            except Exception as e:
+                task.status = "failed"
+                task.error = str(e)
 
     async def _export_worker(self) -> None:
         """Dedicated worker for synchronous export tasks."""

@@ -67,6 +67,7 @@ class SearchCmd(Command):
             CLIDownloadUI,
             CLIExportUI,
             CLILoginUI,
+            CLIProcessUI,
         )
 
         sites: Sequence[str] | None = args.site or None
@@ -122,13 +123,19 @@ class SearchCmd(Command):
 
             # export
             from novel_downloader.usecases.export import export_books
+            from novel_downloader.usecases.process import process_books
 
-            export_ui = CLIExportUI()
+            process_books(
+                site,
+                list(download_ui.completed_books),
+                adapter.get_pipeline_config(site),
+                ui=CLIProcessUI(),
+            )
             export_books(
                 site=chosen["site"],
                 books=list(download_ui.completed_books),
                 exporter_cfg=adapter.get_exporter_config(site),
-                export_ui=export_ui,
+                export_ui=CLIExportUI(),
             )
 
         import asyncio

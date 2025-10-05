@@ -14,7 +14,9 @@ from uuid import uuid4
 
 from novel_downloader.schemas import LoginField
 
-Status = Literal["queued", "running", "exporting", "completed", "cancelled", "failed"]
+Status = Literal[
+    "queued", "running", "processing", "exporting", "completed", "cancelled", "failed"
+]
 
 
 @dataclass

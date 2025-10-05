@@ -5,7 +5,6 @@ novel_downloader.plugins.sites.dxmwx.fetcher
 
 """
 
-
 from novel_downloader.plugins.base.fetcher import GenericSession
 from novel_downloader.plugins.registry import registrar
 

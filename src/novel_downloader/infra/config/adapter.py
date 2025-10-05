@@ -8,7 +8,6 @@ site into structured dataclass-based config models.
 """
 
 import contextlib
-import json
 from collections.abc import Mapping
 from typing import Any, TypeVar
 
@@ -19,7 +18,8 @@ from novel_downloader.schemas import (
     FetcherConfig,
     FontOCRConfig,
     ParserConfig,
-    TextCleanerConfig,
+    PipelineConfig,
+    ProcessorConfig,
 )
 
 T = TypeVar("T")
@@ -120,18 +120,15 @@ class ConfigAdapter:
         """
         s, g = self._site_cfg(site), self._gen_cfg()
         out = self._config.get("output") or {}
-        cln = self._config.get("cleaner") or {}
         fmt = out.get("formats") or {}
         naming = out.get("naming") or {}
         epub_opts = out.get("epub") or {}
 
-        cleaner_cfg = self._dict_to_cleaner_cfg(cln)
         return ExporterConfig(
             cache_dir=g.get("cache_dir", "./novel_cache"),
             raw_data_dir=g.get("raw_data_dir", "./raw_data"),
             output_dir=g.get("output_dir", "./downloads"),
             check_missing=self._pick("check_missing", False, s, g),
-            clean_text=cln.get("clean_text", False),
             make_txt=fmt.get("make_txt", True),
             make_epub=fmt.get("make_epub", True),
             make_md=fmt.get("make_md", False),
@@ -141,7 +138,6 @@ class ConfigAdapter:
             include_cover=epub_opts.get("include_cover", True),
             include_picture=epub_opts.get("include_picture", True),
             split_mode=s.get("split_mode", "book"),
-            cleaner_cfg=cleaner_cfg,
         )
 
     def get_login_config(self, site: str) -> dict[str, str]:
@@ -171,6 +167,28 @@ class ConfigAdapter:
             "local_plugins_path": plugins_cfg.get("local_plugins_path") or "",
             "override_builtins": plugins_cfg.get("override_builtins", False),
         }
+
+    def get_pipeline_config(self, site: str) -> PipelineConfig:
+        """
+        Build a PipelineConfig from [[plugins.processors]].
+
+        Precedence:
+          * If site has plugins.processors, use those.
+          * Else use global plugins.processors.
+        """
+        g = self._gen_cfg()
+        s = self._site_cfg(site)
+        plugins = self._config.get("plugins") or {}
+
+        raw_data_dir = g.get("raw_data_dir", "./raw_data")
+
+        site_rows = s.get("processors") or []
+        site_procs = self._to_processor_cfgs(site_rows)
+        plugin_rows = plugins.get("processors") or []
+        global_procs = self._to_processor_cfgs(plugin_rows)
+
+        processors = site_procs if site_procs else global_procs
+        return PipelineConfig(raw_data_dir=raw_data_dir, processors=processors)
 
     def get_book_ids(self, site: str) -> list[BookConfig]:
         """
@@ -329,75 +347,26 @@ class ConfigAdapter:
             enable_hpi=data.get("enable_hpi", False),
         )
 
-    @classmethod
-    def _dict_to_cleaner_cfg(cls, cfg: dict[str, Any]) -> TextCleanerConfig:
-        """
-        Convert a nested ``cleaner`` block into a
-        :class:`novel_downloader.models.TextCleanerConfig`.
-
-        :param cfg: configuration dictionary
-        :return: Aggregated title/content rules with external file contents merged
-        """
-        t_remove, t_replace = cls._merge_rules(cfg.get("title", {}) or {})
-        c_remove, c_replace = cls._merge_rules(cfg.get("content", {}) or {})
-        return TextCleanerConfig(
-            remove_invisible=cfg.get("remove_invisible", True),
-            title_remove_patterns=t_remove,
-            title_replacements=t_replace,
-            content_remove_patterns=c_remove,
-            content_replacements=c_replace,
-        )
-
-    @classmethod
-    def _merge_rules(cls, section: dict[str, Any]) -> tuple[list[str], dict[str, str]]:
-        """
-        Merge inline patterns/replacements with any enabled external files.
-
-        :param section: Mapping describing either the ``title`` or ``content`` rules.
-        :return: Tuple ``(remove_patterns, replace)`` after merging.
-        """
-        remove = list(section.get("remove_patterns") or [])
-        replace = dict(section.get("replace") or {})
-        ext = section.get("external") or {}
-        if ext.get("enabled", False):
-            rm_path = ext.get("remove_patterns") or ""
-            rp_path = ext.get("replace") or ""
-            remove += cls._load_str_list(rm_path)
-            replace.update(cls._load_str_dict(rp_path))
-        return remove, replace
-
     @staticmethod
-    def _load_str_list(path: str) -> list[str]:
+    def _to_processor_cfgs(data: list[dict[str, Any]]) -> list[ProcessorConfig]:
         """
-        Load a JSON file containing a list of strings.
-
-        :param path: File path to a JSON array (e.g., ``["a", "b"]``).
-        :return: Parsed list on success; empty list if ``path`` is empty, file is
-                 missing, or content is invalid.
+        Convert a list of raw processor table dicts into ProcessorConfig objects.
         """
-        if not path:
-            return []
-        try:
-            with open(path, encoding="utf-8") as f:
-                data = json.load(f)
-                return list(data) if isinstance(data, list) else []
-        except Exception:
+        if not isinstance(data, list):
             return []
 
-    @staticmethod
-    def _load_str_dict(path: str) -> dict[str, str]:
-        """
-        Load a JSON file containing a dict of string-to-string mappings.
+        result: list[ProcessorConfig] = []
+        for row in data:
+            if not isinstance(row, dict):
+                continue
 
-        :param path: File path to a JSON object (e.g., ``{"old":"new"}``).
-        :return: Parsed dict on success; empty dict if ``path`` is empty, file is
-                 missing, or content is invalid.
-        """
-        if not path:
-            return {}
-        try:
-            with open(path, encoding="utf-8") as f:
-                data = json.load(f)
-                return dict(data) if isinstance(data, dict) else {}
-        except Exception:
-            return {}
+            name = str(row.get("name", "")).strip().lower()
+            if not name:
+                continue
+
+            overwrite = bool(row.get("overwrite", False))
+            # pass everything else as options
+            opts = {k: v for k, v in row.items() if k not in ("name", "overwrite")}
+            result.append(ProcessorConfig(name=name, overwrite=overwrite, options=opts))
+
+        return result

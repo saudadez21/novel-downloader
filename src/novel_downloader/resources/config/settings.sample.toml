@@ -86,6 +86,17 @@ override_builtins = false
 # 本地插件路径 (可选)
 local_plugins_path = "./novel_plugins"
 
+# [[plugins.processors]]
+# name = "cleaner"
+# overwrite = false
+# remove_invisible = true
+
+# title_removes = "path/to/title-remove.json"
+# title_replace = "path/to/title-replace.json"
+
+# content_removes = "path/to/content-remove.json"
+# content_replace = "path/to/content-replace.json"
+
 # 输出文件格式及相关选项
 [output.formats]
 make_txt = true                    # 是否生成完整 TXT 文件
@@ -98,33 +109,3 @@ filename_template = "{title}_{author}"  # 文件命名规则
 [output.epub]
 include_cover = true               # 是否在 EPUB 中包含封面
 include_picture = true             # 是否下载章节图片 (体积较大)
-
-[cleaner]
-clean_text = false                 # 是否对章节文本做清理
-remove_invisible = true
-
-[cleaner.title]
-remove_patterns = [
-  '【[^】]*?】',
-  '[(（][^()（）]*?求票[^()（）]*?[)）]',
-]
-
-[cleaner.title.replace]
-'：' = ':'
-
-[cleaner.title.external]
-enabled = false
-remove_patterns = "path/to/title-remove.json"
-replace         = "path/to/title-replace.json"
-
-[cleaner.content]
-remove_patterns = []
-
-[cleaner.content.replace]
-'li子' = '例子'
-'pinbi词' = '屏蔽词'
-
-[cleaner.content.external]
-enabled = false
-remove_patterns = "path/to/content-remove.json"
-replace         = "path/to/content-replace.json"

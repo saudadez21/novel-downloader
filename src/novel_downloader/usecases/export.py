@@ -20,21 +20,29 @@ def export_books(
     export_ui: ExportUI,
     formats: list[str] | None = None,
 ) -> None:
+    if formats is not None:
+        run_formats: list[str] = [f.lower() for f in formats]
+    else:
+        run_formats = [
+            fmt
+            for fmt, enabled in [
+                ("txt", exporter_cfg.make_txt),
+                ("epub", exporter_cfg.make_epub),
+                ("md", exporter_cfg.make_md),
+                ("pdf", exporter_cfg.make_pdf),
+            ]
+            if enabled
+        ]
+
     with registrar.get_exporter(site, exporter_cfg) as exporter:
         for book in books:
-            if formats is None:
-                export_ui.on_start(book)
-                try:
-                    paths = exporter.export(book)
-                    for fmt, path in paths.items():
-                        export_ui.on_success(book, fmt, path)
-                except Exception as e:
-                    export_ui.on_error(book, "default", e)
+            if not run_formats:
+                export_ui.on_unsupported(book, "default")
                 continue
 
-            for fmt in formats:
+            for fmt in run_formats:
                 export_fn: Callable[[BookConfig], Path | None] | None = getattr(
-                    exporter, f"export_as_{fmt.lower()}", None
+                    exporter, f"export_as_{fmt}", None
                 )
 
                 if not callable(export_fn):

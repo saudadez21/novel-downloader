@@ -57,6 +57,7 @@ class DownloadCmd(Command):
             CLIDownloadUI,
             CLIExportUI,
             CLILoginUI,
+            CLIProcessUI,
         )
 
         config_path: Path | None = Path(args.config) if args.config else None
@@ -160,13 +161,19 @@ class DownloadCmd(Command):
         # export
         if not args.no_export:
             from novel_downloader.usecases.export import export_books
+            from novel_downloader.usecases.process import process_books
 
-            export_ui = CLIExportUI()
+            process_books(
+                site,
+                list(download_ui.completed_books),
+                adapter.get_pipeline_config(site),
+                ui=CLIProcessUI(),
+            )
             export_books(
                 site,
                 list(download_ui.completed_books),
                 adapter.get_exporter_config(site),
-                export_ui=export_ui,
+                export_ui=CLIExportUI(),
             )
         else:
             ui.info(t("Export skipped (--no-export)"))
