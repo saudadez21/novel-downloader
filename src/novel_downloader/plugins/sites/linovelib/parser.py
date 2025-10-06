@@ -7,6 +7,7 @@ novel_downloader.plugins.sites.linovelib.parser
 
 import json
 import logging
+import re
 from typing import Any
 
 from lxml import html
@@ -285,9 +286,7 @@ class LinovelibParser(BaseParser):
             html_str,
             "/scripts/chapterlog.js",
             "v1006b8-5",
-            "Detected potential chapter shuffling: script version mismatch. "
-            "This may cause paragraphs to appear out of order. "
-            "Please report this issue so the handler can be updated.",
+            "chapter shuffling",
         )
 
     @staticmethod
@@ -301,9 +300,7 @@ class LinovelibParser(BaseParser):
             html_str,
             "/themes/zhpc/js/pctheme.js",
             "v0917",
-            "Detected potential character substitution: script version mismatch. "
-            "This may cause incorrect character decoding. "
-            "Please report this issue so the handler can be updated.",
+            "character substitution",
         )
 
     @classmethod
@@ -349,7 +346,7 @@ class LinovelibParser(BaseParser):
 
     @staticmethod
     def _check_script(
-        html_str: str, script_path: str, version: str, warn_msg: str
+        html_str: str, script_path: str, expected_version: str, issue_type: str
     ) -> bool:
         """
         Generic helper for detecting site scripts and checking version consistency.
@@ -357,6 +354,23 @@ class LinovelibParser(BaseParser):
         if script_path not in html_str:
             return False
 
-        if f"{script_path}?{version}" not in html_str:
-            logger.warning(warn_msg)
+        matches = re.findall(rf"{re.escape(script_path)}\?([a-zA-Z0-9._-]+)", html_str)
+
+        if not matches:
+            logger.warning("No version found for %s", script_path)
+            return True
+
+        found_version = matches[0]
+        if found_version != expected_version:
+            logger.warning(
+                "Detected %s: script version mismatch. "
+                "This may cause the content to be incorrect. "
+                "Please report this issue so the handler can be updated.\n"
+                "Script: %s\nFound version: %s\nExpected version: %s",
+                issue_type,
+                script_path,
+                found_version,
+                expected_version,
+            )
+
         return True
