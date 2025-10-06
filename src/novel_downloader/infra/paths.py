@@ -51,7 +51,6 @@ VOLUME_BORDER_IMAGE_PATH = RES.joinpath("images", "volume_border_tinify.png")
 
 # JSON
 LINOVELIB_MAP_PATH = RES.joinpath("json", "linovelib.json")
-LINOVELIB_PCTHEMA_MAP_PATH = RES.joinpath("json", "linovelib_pctheme.json")
 N69YUE_MAP_PATH = RES.joinpath("json", "n69yue.json")
 XIGUASHUWU_MAP_PATH = RES.joinpath("json", "xiguashuwu.json")
 YODU_MAP_PATH = RES.joinpath("json", "yodu.json")

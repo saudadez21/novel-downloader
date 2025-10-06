@@ -4,19 +4,6 @@
 
 插件可放在本地目录中启用, 也可选择是否覆盖内置实现。
 
-
-### 在 `settings.toml` 中启用
-
-```toml
-[plugins]
-# 是否启用本地插件目录
-enable_local_plugins = true
-# 是否允许本地插件覆盖内置实现
-override_builtins = false
-# 本地插件路径 (可选)
-local_plugins_path = "./novel_plugins"
-```
-
 ### 在 `settings.toml` 中启用
 
 ```toml
@@ -49,7 +36,6 @@ local_plugins_path = "./novel_plugins"
 > `sites/<site_key>/` 中的 `<site_key>` 即命令行 `--site` 的值, 例如:
 >
 > `novel-cli download --site ciweimao 123456`
-
 
 ---
 
