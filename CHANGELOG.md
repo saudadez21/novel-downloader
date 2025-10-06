@@ -1,3 +1,20 @@
+## v2.4.0 (2025-10-06)
+
+### Feat
+
+- **processors**: introduce processing pipeline and redesign ChapterStorage (#103)
+- **site**: add support for n69yue (#99)
+- **minijs**: add IIFE parse note and MiniJS module (#96)
+
+### Fix
+
+- **linovelib**: update chapterlog to v1006b8-5 to fix chapter order issues (#104)
+- **shuhaige**: handle multi-page chapters and filter ads (#97)
+
+### Refactor
+
+- **usecases**: extract reporters/hooks and decouple UI from business logic (#100)
+
 ## v2.3.0 (2025-09-28)
 
 ### Feat
