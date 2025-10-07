@@ -1,8 +1,5 @@
 ## `settings.toml` 配置说明
 
-* 配置分为三层: `[general]` (全局)、`[sites.<site>]` (站点级)、`[output]`/`[cleaner]` (产物与清洗)
-* **优先级**: 同名/相关行为**站点级覆盖全局** (`sites.<site> > general`)
-
 ### 目录
 
 - [`settings.toml` 配置说明](#settingstoml-配置说明)
@@ -44,7 +41,7 @@
 | `timeout`            | float   | 30.0              | 单次请求超时 (秒)                            |
 | `max_connections`    | int     | 10                | 最大并发连接数                               |
 | `max_rps`            | float   | 1000.0            | 全局 RPS 上限 (requests per second)         |
-| `request_interval`   | float   | 2.0               | **同一本书**章节请求的间隔 (秒)               |
+| `request_interval`   | float   | 0.5               | **同一本书**章节请求的间隔 (秒)               |
 | `raw_data_dir`       | string  | `"./raw_data"`    | 书籍数据存放目录                             |
 | `output_dir`         | string  | `"./downloads"`   | 最终导出文件目录                             |
 | `cache_dir`          | string  | `"./novel_cache"` | 本地缓存目录 (字体 / 图片等)                  |
@@ -260,7 +257,7 @@ include_picture = true
 
 > 说明: `processors` 为 **有序列表**, 按声明顺序执行。
 
-> 更多插件编写说明 (自定义站点、处理器、导出器) , 见: [插件系统文档](./plugins.md)
+> 更多插件编写说明 (自定义站点、处理器、导出器), 见: [插件系统文档](./plugins.md)
 
 #### 示例配置
 
@@ -308,7 +305,7 @@ direction = "s2t"
 | 参数名                | 类型   | 默认值   | 说明                                               |
 | ------------------ | ---- | ----- | ------------------------------------------------ |
 | `remove_invisible` | bool | true  | 移除常见不可见字符 (如零宽字符等)                       |
-| `title_removes`    | str  | -     | **可选**; JSON 文件路径, 内容为**字符串数组** (正则) , 逐条删除           |
+| `title_removes`    | str  | -     | **可选**; JSON 文件路径, 内容为**字符串数组** (正则), 逐条删除           |
 | `title_replace`    | str  | -     | **可选**; JSON 文件路径, 内容为**字典** (`{"old": "new"}`) 逐条替换 |
 | `content_removes`  | str  | -     | 同上, 作用于正文                                         |
 | `content_replace`  | str  | -     | 同上, 作用于正文                                         |
