@@ -26,6 +26,7 @@ class DxmwxParser(BaseParser):
     """
 
     site_name: str = "dxmwx"
+    ADS = {"大熊猫文学", "点这里听书"}
 
     def parse_book_info(
         self,
@@ -125,15 +126,14 @@ class DxmwxParser(BaseParser):
 
         paragraphs: list[str] = []
         for p in tree.xpath("//div[@id='Lab_Contents']//p"):
-            text = (p.text_content() or "").replace("\xa0", " ").replace("\u3000", " ")
-            text = text.strip()
+            text = self._norm_space(p.text_content() or "")
             if not text:
                 continue
-            if "点这里听书" in text or "大熊猫文学" in text:
+            if self._is_ad_line(text):
                 continue
             paragraphs.append(text)
 
-        content = "\n".join(paragraphs).strip()
+        content = "\n".join(paragraphs)
         if not content:
             return None
 
