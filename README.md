@@ -1,13 +1,16 @@
 # novel-downloader
 
 [![PyPI](https://img.shields.io/pypi/v/novel-downloader.svg)](https://pypi.org/project/novel-downloader/)
-![Python](https://img.shields.io/pypi/pyversions/novel-downloader.svg)
-![License](https://img.shields.io/github/license/saudadez21/novel-downloader)
-![Downloads](https://img.shields.io/pypi/dm/novel-downloader.svg)
+[![Python](https://img.shields.io/pypi/pyversions/novel-downloader.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/github/license/saudadez21/novel-downloader.svg)](https://github.com/saudadez21/novel-downloader/blob/main/LICENSE)
+[![Downloads](https://img.shields.io/pypi/dm/novel-downloader.svg)](https://pypistats.org/packages/novel-downloader)
+[![Dependencies](https://img.shields.io/librariesio/release/pypi/novel-downloader)](https://libraries.io/pypi/novel-downloader)
 
 异步小说下载工具 / 库。支持断点续传、广告过滤与 TXT/EPUB 导出, 提供 CLI 与 Web 图形界面。
 
 > 运行要求: **Python 3.11+** (开发环境: Python 3.12)
+
+> 基于 [aiohttp](https://github.com/aio-libs/aiohttp)
 
 ## 功能特性
 
@@ -22,8 +25,6 @@
 * **双形态使用**: 命令行 (CLI) 与 Web 图形界面 (GUI)
 * **文本处理流水线 (processors)**: 正则清理 / 繁简转换 / 文本纠错等
 * **插件系统**: 可扩展站点、处理器、导出器等能力
-
-> 基于 [aiohttp](https://github.com/aio-libs/aiohttp)
 
 ---
 
