@@ -91,8 +91,6 @@ class B520Parser(BaseParser):
         tree = html.fromstring(html_list[0])
 
         title = self._first_str(tree.xpath('//div[@class="bookname"]/h1/text()'))
-        if not title:
-            title = f"第 {chapter_id} 章"
 
         content_elem = tree.xpath('//div[@id="content"]')
         if not content_elem:

@@ -122,8 +122,6 @@ class DxmwxParser(BaseParser):
         title = self._norm_space(
             self._first_str(tree.xpath("//h1[@id='ChapterTitle']/text()"))
         )
-        if not title:
-            title = f"第 {chapter_id} 章"
 
         paragraphs: list[str] = []
         for p in tree.xpath("//div[@id='Lab_Contents']//p"):
