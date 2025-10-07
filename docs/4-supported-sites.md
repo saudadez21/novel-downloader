@@ -100,7 +100,6 @@ novel-cli download --site ttkan shengxu-chendong
 | [顶点小说网](https://www.23ddw.net/)                         | n23ddw    | ❌     | ❌     | ❌     | ✅     | 简      |
 | [一笔阁](https://www.yibige.org/)                            | yibige    | ❌     | ❌     | ⚠️     | ⚠️     | 简 / 繁 |
 | [乐文小说网](https://www.lewenn.net/)                        | lewenn    | ❌     | ❌     | ⚠️     | ❌     | 简      |
-| [精彩小说](https://biquyuedu.com/)                           | biquyuedu | ❌     | ❌     | ⚠️     | ❌     | 简      |
 | [笔趣读](https://www.blqudu.cc/)                             | blqudu    | ❌     | ❌     | ⚠️     | ❌     | 简      |
 | [追书网](https://www.mangg.com/) (com)                       | mangg_com | ❌     | ❌     | ⚠️     | ❌     | 简      |
 | [追书网](https://www.mangg.net/) (net)                       | mangg_net | ❌     | ❌     | ❌     | ✅     | 简      |
@@ -146,6 +145,7 @@ novel-cli download --site ttkan shengxu-chendong
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 | 支持语言 |
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
 | [笔趣阁](https://www.8tsw.com/)                              | n8tsw     | ❌     | ❌     | ⚠️     | ⚠️     | 简      |
+| [精彩小说](https://biquyuedu.com/)                           | biquyuedu | ❌     | ❌     | ⚠️     | ❌     | 简      |
 | [得奇小说网](https://www.deqixs.com/)                        | deqixs    | ❌     | ❌     | ❌     | ✅     | 简      |
 | [小说屋](http://www.xiaoshuoge.info/)                       | xiaoshuoge | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [小说路上](https://m.xs63b.com/)                              | xs63b    | ❌     | ❌     | ⚠️     | ✅     | 简      |
@@ -270,10 +270,6 @@ novel-cli download --site ttkan shengxu-chendong
   * 书籍: `https://www.lewenn.net/lw1/` -> Book ID: `lw1`
   * 章节: `https://www.lewenn.net/lw1/30038546.html` -> Chapter ID: `30038546`
   * 其它: 该站点的搜索结果是 `3A小说网` 的...
-
-* **精彩小说 (biquyuedu)**
-  * 书籍: `https://biquyuedu.com/novel/GDr1I1.html` -> Book ID: `GDr1I1`
-  * 章节: `https://biquyuedu.com/novel/GDr1I1/1.html` -> Chapter ID: `1`
 
 * **笔趣读 (blqudu)**
   * 书籍: `https://www.blqudu.cc/137_137144/` -> Book ID: `137_137144`
@@ -403,6 +399,10 @@ novel-cli download --site ttkan shengxu-chendong
 * **笔趣阁 (n8tsw)**
   * 书籍: `https://www.8tsw.com/0_1/` -> Book ID: `0_1`
   * 章节: `https://www.8tsw.com/0_1/1.html` -> Chapter ID: `1`
+
+* **精彩小说 (biquyuedu)**
+  * 书籍: `https://biquyuedu.com/novel/GDr1I1.html` -> Book ID: `GDr1I1`
+  * 章节: `https://biquyuedu.com/novel/GDr1I1/1.html` -> Chapter ID: `1`
 
 * **得奇小说网 (deqixs)**
   * 书籍: `https://www.deqixs.com/xiaoshuo/2026/` -> Book ID: `2026`

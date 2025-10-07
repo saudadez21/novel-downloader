@@ -14,7 +14,7 @@ DOWNLOAD_SUPPORT_SITES = {
     "b520": "笔趣阁 (b520)",
     "biquge5": "笔趣阁 (biquge5)",
     "biquguo": "笔趣阁小说网 (biquguo)",
-    "biquyuedu": "精彩小说 (biquyuedu)",
+    # "biquyuedu": "精彩小说 (biquyuedu)",
     "blqudu": "笔趣读 (blqudu)",
     "bxwx9": "笔下文学网 (bxwx9)",
     "ciluke": "思路客 (ciluke)",

@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 """
-novel_downloader.plugins.sites.biquyuedu.parser
------------------------------------------------
+novel_downloader.plugins.archived.biquyuedu.parser
+--------------------------------------------------
 
 """
 
 from typing import Any
 
 from lxml import etree, html
-
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (

@@ -149,20 +149,20 @@ SITE_RULES: dict[str, SiteRuleSet] = {
         ],
         hints=[],
     ),
-    "biquyuedu.com": SiteRuleSet(
-        site_key="biquyuedu",
-        extractors=[
-            BookIdExtractor(
-                pattern=r"^/novel/([^/]+)/\d+\.html$",
-                build_book_id=lambda m: m.group(1),
-            ),
-            BookIdExtractor(
-                pattern=r"^/novel/([^.]+)\.html",
-                build_book_id=lambda m: m.group(1),
-            ),
-        ],
-        hints=[],
-    ),
+    # "biquyuedu.com": SiteRuleSet(
+    #     site_key="biquyuedu",
+    #     extractors=[
+    #         BookIdExtractor(
+    #             pattern=r"^/novel/([^/]+)/\d+\.html$",
+    #             build_book_id=lambda m: m.group(1),
+    #         ),
+    #         BookIdExtractor(
+    #             pattern=r"^/novel/([^.]+)\.html",
+    #             build_book_id=lambda m: m.group(1),
+    #         ),
+    #     ],
+    #     hints=[],
+    # ),
     "blqudu.cc": SiteRuleSet(
         site_key="blqudu",
         extractors=[
