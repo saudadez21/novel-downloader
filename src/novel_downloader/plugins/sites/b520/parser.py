@@ -92,16 +92,16 @@ class B520Parser(BaseParser):
 
         title = self._first_str(tree.xpath('//div[@class="bookname"]/h1/text()'))
 
-        content_elem = tree.xpath('//div[@id="content"]')
-        if not content_elem:
-            return None
         paragraphs = [
-            "".join(p.itertext()).strip() for p in content_elem[0].xpath(".//p")
+            text
+            for p in tree.xpath('//div[@id="content"]//p')
+            if (text := self._norm_space(p.text_content()))
         ]
 
-        content = "\n".join(paragraphs)
-        if not content.strip():
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,
