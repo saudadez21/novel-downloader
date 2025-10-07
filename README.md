@@ -2,9 +2,9 @@
 
 [![PyPI](https://img.shields.io/pypi/v/novel-downloader.svg)](https://pypi.org/project/novel-downloader/)
 [![Python](https://img.shields.io/pypi/pyversions/novel-downloader.svg)](https://www.python.org/downloads/)
-[![License](https://img.shields.io/github/license/saudadez21/novel-downloader.svg)](https://github.com/saudadez21/novel-downloader/blob/main/LICENSE)
+[![Build and Publish](https://github.com/saudadez21/novel-downloader/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/saudadez21/novel-downloader/actions/workflows/release.yml)
 [![Downloads](https://img.shields.io/pypi/dm/novel-downloader.svg)](https://pypistats.org/packages/novel-downloader)
-[![Dependencies](https://img.shields.io/librariesio/release/pypi/novel-downloader)](https://libraries.io/pypi/novel-downloader)
+[![Hits-of-Code](https://hitsofcode.com/github/saudadez21/novel-downloader?branch=main&label=Hits-of-Code)](https://hitsofcode.com/github/saudadez21/novel-downloader/view?branch=main&label=Hits-of-Code)
 
 异步小说下载工具 / 库。支持断点续传、广告过滤与 TXT/EPUB 导出, 提供 CLI 与 Web 图形界面。
 
