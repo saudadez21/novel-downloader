@@ -213,8 +213,8 @@ class N8novelParser(BaseParser):
           * A numeric list of IDs (one element longer)
           * A list of titles
         """
-        id_list = None
-        title_list = None
+        id_list: list[str] | None = None
+        title_list: list[str] | None = None
 
         for content in cls._SPLIT_STR_PATTERN.findall(html_str):
             items = [s.strip() for s in content.split(",")]
