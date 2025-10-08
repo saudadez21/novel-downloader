@@ -128,27 +128,9 @@ class YamiboParser(BaseParser):
             [tree.xpath("string(//section[contains(@class,'col-md-9')]//h3)")]
         )
 
-        updated_at = self._first_str(
-            tree.xpath(
-                "//div[contains(@class,'row')]//div[contains(text(),'更新时间')]/text()"
-            ),
-            replaces=[("更新时间：", "")],
-        )
-        word_str = self._first_str(
-            tree.xpath(
-                "//div[contains(@class,'row')]//div[contains(text(),'章节字数')]/text()"
-            ),
-            replaces=[("章节字数：", "")],
-        )
-        word_count = int(word_str) if word_str.isdigit() else 0
-
         return {
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {
-                "site": self.site_name,
-                "word_count": word_count,
-                "updated_at": updated_at,
-            },
+            "extra": {"site": self.site_name},
         }

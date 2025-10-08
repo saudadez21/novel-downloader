@@ -200,9 +200,10 @@ class YoduParser(BaseParser):
                     if src:
                         paragraphs.append(f'<img src="{src}" />')
 
-        content = "\n".join(paragraphs)
-        if not content.strip():
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         m = self._NEXTPAGE_RE.search(html_list[-1])
         next_cid = m.group(1) if m else None

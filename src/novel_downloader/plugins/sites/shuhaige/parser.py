@@ -109,9 +109,10 @@ class ShuhaigeParser(BaseParser):
             if page_text:
                 contents.append(page_text)
 
-        content = "\n".join(contents)
-        if not content.strip():
+        if not contents:
             return None
+
+        content = "\n".join(contents)
 
         return {
             "id": chapter_id,

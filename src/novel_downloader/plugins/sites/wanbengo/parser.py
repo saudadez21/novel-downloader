@@ -6,7 +6,6 @@ novel_downloader.plugins.sites.wanbengo.parser
 """
 
 import re
-from datetime import datetime
 from html import unescape
 from typing import Any
 
@@ -128,7 +127,7 @@ class WanbengoParser(BaseParser):
         title = self._first_str(tree.xpath(self.X_CHAP_TITLE))
 
         parts = self._CHAP_SPLIT_RE.split(inner.group(1))
-        lines: list[str] = []
+        paragraphs: list[str] = []
         for part in parts:
             if not part:
                 continue
@@ -138,11 +137,12 @@ class WanbengoParser(BaseParser):
                 continue
             s = self._norm_space(self._scrub_ascii_gibberish(s.strip()))
             if s:
-                lines.append(s)
+                paragraphs.append(s)
 
-        content = "\n".join(lines)
-        if not content:
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,
@@ -162,7 +162,7 @@ class WanbengoParser(BaseParser):
         m = re.search(r"\b(\d{4}-\d{2}-\d{2})\b", joined)
         if m:
             return m.group(1)
-        return datetime.now().strftime("%Y-%m-%d")
+        return ""
 
     def _is_noise_line(self, s: str) -> bool:
         """Heuristic to drop obvious ad/footer/noise lines."""

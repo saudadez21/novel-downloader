@@ -113,7 +113,7 @@ class N71geParser(BaseParser):
             return None
 
         title_text: str = ""
-        contents: list[str] = []
+        paragraphs: list[str] = []
         for curr_html in html_list:
             tree = html.fromstring(curr_html)
 
@@ -128,21 +128,26 @@ class N71geParser(BaseParser):
                 "//div[@id='nr_content']//div[@class='novelcontent']//p"
             ):
                 for elem in p.iter():
-                    if elem.text:
-                        contents.append(elem.text.strip())
-                    if elem.tail:
-                        contents.append(elem.tail.strip())
+                    if txt := elem.text and elem.text.strip():
+                        paragraphs.append(txt)
+                    if tail := elem.tail and elem.tail.strip():
+                        paragraphs.append(tail)
 
-            if not contents:
+            if not paragraphs:
                 continue
-            if contents[-1].startswith("本章未完") or contents[-1].startswith(
+            if paragraphs[-1].startswith("本章未完") or paragraphs[-1].startswith(
                 "本章已完"
             ):  # noqa: E501
-                contents.pop()
+                paragraphs.pop()
+
+        if not paragraphs:
+            return None
+
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,
             "title": title_text,
-            "content": "\n".join(contents),
+            "content": content,
             "extra": {"site": self.site_name},
         }

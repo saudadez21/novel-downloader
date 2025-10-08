@@ -5,7 +5,6 @@ novel_downloader.plugins.sites.n23qb.parser
 
 """
 
-from datetime import datetime
 from typing import Any
 
 from lxml import html
@@ -62,8 +61,6 @@ class N23qbParser(BaseParser):
         else:
             summary = ""
 
-        update_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
         volumes: list[VolumeInfoDict] = []
         current_volume: VolumeInfoDict | None = None
 
@@ -105,7 +102,7 @@ class N23qbParser(BaseParser):
             "book_name": book_name,
             "author": author,
             "cover_url": cover_url,
-            "update_time": update_time,
+            "update_time": "",
             "word_count": word_count,
             "serial_status": serial_status,
             "summary": summary,

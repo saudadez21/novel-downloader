@@ -111,16 +111,15 @@ class QbtrParser(BaseParser):
 
         title = raw_title.replace(book_name, "").strip()
 
-        paragraphs = tree.xpath('//div[contains(@class,"read_chapterDetail")]/p')
-        texts = []
-        for p in paragraphs:
-            txt = p.text_content().strip()
-            if txt:
-                texts.append(txt)
-
-        content = "\n".join(texts)
-        if not content:
+        paragraphs = [
+            txt
+            for p in tree.xpath('//div[contains(@class,"read_chapterDetail")]/p')
+            if (txt := p.text_content().strip())
+        ]
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,

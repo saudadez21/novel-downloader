@@ -5,7 +5,6 @@ novel_downloader.plugins.sites.ttkan.parser
 
 """
 
-from datetime import datetime
 from typing import Any
 
 from lxml import html
@@ -74,8 +73,6 @@ class TtkanParser(BaseParser):
             )
         )
 
-        update_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
         # Summary
         summary_nodes = tree.xpath('//div[@class="description"]//p/text()')
         summary = "".join(summary_nodes).strip()
@@ -106,7 +103,7 @@ class TtkanParser(BaseParser):
             "book_name": book_name,
             "author": author,
             "cover_url": cover_url,
-            "update_time": update_time,
+            "update_time": "",
             "serial_status": serial_status,
             "summary": summary,
             "volumes": volumes,
@@ -128,16 +125,16 @@ class TtkanParser(BaseParser):
         title = title_nodes[0].strip() if title_nodes else ""
 
         # Content paragraphs under <div class="content">
-        paras = tree.xpath('//div[@class="content"]/p')
-        lines = []
-        for p in paras:
-            text = p.text_content().strip()
-            if text and not self._is_ad(text):
-                lines.append(text)
+        paragraphs = [
+            text
+            for p in tree.xpath('//div[@class="content"]/p')
+            if (text := p.text_content().strip()) and not self._is_ad(text)
+        ]
 
-        content = "\n".join(lines)
-        if not content:
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,
