@@ -154,15 +154,15 @@ class YamiboSession(BaseSession):
         Return True if login succeeds, False otherwise.
         """
         try:
-            resp_1 = await self.get(self.LOGIN_URL)
-            resp_1.raise_for_status()
-            text_1 = await resp_1.text()
-            tree = html.fromstring(text_1)
-            csrf_value = tree.xpath('//input[@name="_csrf-frontend"]/@value')
-            csrf_value = csrf_value[0] if csrf_value else ""
-            if not csrf_value:
-                self.logger.warning("yamibo _api_login: CSRF token not found.")
-                return False
+            async with self.get(self.LOGIN_URL) as resp_1:
+                resp_1.raise_for_status()
+                text_1 = await resp_1.text()
+                tree = html.fromstring(text_1)
+                csrf_value = tree.xpath('//input[@name="_csrf-frontend"]/@value')
+                csrf_value = csrf_value[0] if csrf_value else ""
+                if not csrf_value:
+                    self.logger.warning("yamibo _api_login: CSRF token not found.")
+                    return False
         except Exception as exc:
             self.logger.warning("yamibo _api_login failed at step 1: %s", exc)
             return False
@@ -179,10 +179,12 @@ class YamiboSession(BaseSession):
         temp_headers["Origin"] = self.BASE_URL
         temp_headers["Referer"] = self.LOGIN_URL
         try:
-            resp_2 = await self.post(self.LOGIN_URL, data=data_2, headers=temp_headers)
-            resp_2.raise_for_status()
-            text_2 = await resp_2.text()
-            return "登录成功" in text_2
+            async with self.post(
+                self.LOGIN_URL, data=data_2, headers=temp_headers
+            ) as resp_2:
+                resp_2.raise_for_status()
+                text_2 = await resp_2.text()
+                return "登录成功" in text_2
         except Exception as exc:
             self.logger.warning("yamibo _api_login failed at step 2: %s", exc)
         return False

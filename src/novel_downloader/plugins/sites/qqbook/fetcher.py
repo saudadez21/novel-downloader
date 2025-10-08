@@ -160,16 +160,16 @@ class QqbookSession(BaseSession):
         :return: True if the user is logged in, False otherwise.
         """
         try:
-            resp = await self.get(self.USER_HOMEPAGE_API_URL)
-            resp.raise_for_status()
-            payload = await resp.json(encoding="utf-8")
-            if payload.get("code") == 0:
-                return True
-            self.logger.info(
-                "QQ book login invalid (code=%s): %s",
-                payload.get("code"),
-                payload.get("msg"),
-            )
+            async with self.get(self.USER_HOMEPAGE_API_URL) as resp:
+                resp.raise_for_status()
+                payload = await resp.json(encoding="utf-8")
+                if payload.get("code") == 0:
+                    return True
+                self.logger.info(
+                    "QQ book login invalid (code=%s): %s",
+                    payload.get("code"),
+                    payload.get("msg"),
+                )
         except Exception as e:
             self.logger.info("QQ book login check failed: %s", e)
         return False

@@ -142,7 +142,7 @@ class QidianSession(BaseSession):
                 refreshed_token = self._build_payload_token(url)
                 self.update_cookies({self._cookie_key: refreshed_token})
 
-                async with await self.get(url, **kwargs) as resp:
+                async with self.get(url, **kwargs) as resp:
                     resp.raise_for_status()
                     text: str = await resp.text(encoding=encoding)
                     return text
