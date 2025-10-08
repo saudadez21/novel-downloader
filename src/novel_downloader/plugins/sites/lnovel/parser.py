@@ -153,9 +153,10 @@ class LnovelParser(BaseParser):
             if src:
                 paragraphs.append(f'<img src="{src}" />')
 
-        content = "\n".join(paragraphs)
-        if not content.strip():
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,

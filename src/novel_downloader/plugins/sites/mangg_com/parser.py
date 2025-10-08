@@ -102,17 +102,18 @@ class ManggComParser(BaseParser):
 
         title = self._first_str(tree.xpath('//div[@class="bookname"]/h1/text()'))
 
-        lines: list[str] = []
+        paragraphs: list[str] = []
         for ln in tree.xpath(
             '//div[@id="content"]//text()[not(ancestor::script) and not(ancestor::style)]'  # noqa: E501
         ):
             if not ln or not ln.strip() or self._is_ad_line(ln):
                 continue
-            lines.append(ln.strip())
+            paragraphs.append(ln.strip())
 
-        content = "\n".join(lines)
-        if not content.strip():
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,

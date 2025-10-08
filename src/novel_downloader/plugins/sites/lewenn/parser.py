@@ -114,17 +114,18 @@ class LewennParser(BaseParser):
             '//div[@id="content"]//text()[not(ancestor::script) and not(ancestor::style)]'  # noqa: E501
         )
 
-        lines: list[str] = []
+        paragraphs: list[str] = []
         for ln in raw_texts:
             # normalize spaces: \xa0 (nbsp) and \u3000 (ideographic space)
             s = ln.replace("\xa0", "").replace("\u3000", "").strip()
             if not s or self._is_ad_line(s):
                 continue
-            lines.append(s)
+            paragraphs.append(s)
 
-        content = "\n".join(lines)
-        if not content.strip():
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,

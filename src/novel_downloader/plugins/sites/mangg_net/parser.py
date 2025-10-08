@@ -5,6 +5,7 @@ novel_downloader.plugins.sites.mangg_net.parser
 
 """
 
+import re
 from typing import Any
 
 from lxml import html
@@ -26,6 +27,9 @@ class ManggNetParser(BaseParser):
     """
 
     site_name: str = "mangg_net"
+    ADS = {r"^第\(\d+/\d+\)页$"}
+    _NESTED_HTML_RE = re.compile(r"<!DOCTYPE.*?>", re.I | re.S)
+    _HEAD_RE = re.compile(r"<head>.*?</head>", re.I | re.S)
 
     def parse_book_info(
         self,
@@ -115,6 +119,7 @@ class ManggNetParser(BaseParser):
         paragraphs: list[str] = []
 
         for curr_html in html_list:
+            curr_html = self._strip_nested_html(curr_html)
             tree = html.fromstring(curr_html)
             if not title:
                 raw_title = self._first_str(tree.xpath("//h1/text()"))
@@ -124,36 +129,15 @@ class ManggNetParser(BaseParser):
                     title = raw_title.rstrip(" —-").strip()
 
             for article in tree.xpath("//article"):
-                parts: list[str] = []
+                texts = [t.strip() for t in article.itertext() if t.strip()]
+                texts = [t for t in texts if not self._is_ad_line(t)]
+                if texts:
+                    paragraphs.append("\n".join(texts))
 
-                for node in article.iter():
-                    if node.tag in {
-                        "script",
-                        "style",
-                        "title",
-                        "meta",
-                        "head",
-                        "html",
-                        "body",
-                    }:
-                        continue
-                    text = node.text.strip() if node.text else ""
-                    tail = node.tail.strip() if node.tail else ""
-                    if text:
-                        parts.append(text)
-                    if tail:
-                        parts.append(tail)
-
-                # e.g. "第(1/3)页"
-                if parts and parts[0].startswith("第(") and parts[0].endswith(")页"):
-                    parts.pop(0)
-                if parts and parts[-1].startswith("第(") and parts[-1].endswith(")页"):
-                    parts.pop()
-                paragraphs.append("\n".join(parts))
+        if not paragraphs:
+            return None
 
         content = "\n".join(paragraphs)
-        if not content.strip():
-            return None
 
         return {
             "id": chapter_id,
@@ -161,3 +145,11 @@ class ManggNetParser(BaseParser):
             "content": content,
             "extra": {"site": self.site_name},
         }
+
+    @classmethod
+    def _strip_nested_html(cls, s: str) -> str:
+        s = cls._NESTED_HTML_RE.sub("", s)
+        s = cls._HEAD_RE.sub("", s)
+        for tag in ("html", "body"):
+            s = s.replace(f"<{tag}>", "").replace(f"</{tag}>", "")
+        return s
