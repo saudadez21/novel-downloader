@@ -111,16 +111,15 @@ class Jpxs123Parser(BaseParser):
 
         title = raw_title.replace(book_name, "").strip()
 
-        paragraphs = tree.xpath('//div[contains(@class,"read_chapterDetail")]/p')
-        texts = []
-        for p in paragraphs:
+        paragraphs = []
+        for p in tree.xpath('//div[contains(@class,"read_chapterDetail")]/p'):
             txt = p.text_content().strip()
             if txt:
-                texts.append(txt)
+                paragraphs.append(txt)
 
-        content = "\n".join(texts)
-        if not content:
+        if not paragraphs:
             return None
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,

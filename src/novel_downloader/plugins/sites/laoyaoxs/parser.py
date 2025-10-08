@@ -111,34 +111,33 @@ class LaoyaoxsParser(BaseParser):
             tree.xpath('//div[@id="chapter-name"]//h2/text()')
         ) or self._first_str(tree.xpath("//h2/text()"))
 
-        containers = tree.xpath('//div[contains(@class,"main_content") or @id="txt"]')
+        container = next(
+            iter(tree.xpath('//div[contains(@class,"main_content") or @id="txt"]')),
+            None,
+        )
+        if container is None:
+            return None
+
         fragments: list[tuple[int, str]] = []
+        for dd in container.xpath(".//dd[@data-id]"):
+            try:
+                order_idx = int((dd.get("data-id") or "").strip())
+            except ValueError:
+                continue
 
-        if containers:
-            container = containers[0]
-            for dd in container.xpath(".//dd[@data-id]"):
-                data_id_raw = (dd.get("data-id") or "").strip()
-                try:
-                    order_idx = int(data_id_raw)
-                except ValueError:
-                    continue
-
-                dd_text = self._join_strs(dd.xpath(".//p//text()"))
-                if dd_text.strip():
-                    fragments.append((order_idx, dd_text))
+            dd_text = self._join_strs(dd.xpath(".//p//text()"))
+            if dd_text.strip():
+                fragments.append((order_idx, dd_text))
 
         if not fragments:
             return None
 
         fragments.sort(key=lambda x: x[0])
-        content_text = "\n".join(text for _, text in fragments).strip()
-
-        if not content_text.strip():
-            return None
+        content = "\n".join(text for _, text in fragments)
 
         return {
             "id": chapter_id,
             "title": title_text,
-            "content": content_text,
+            "content": content,
             "extra": {"site": self.site_name},
         }
