@@ -106,8 +106,8 @@ SAMPLES: dict[str, list[tuple[str, str, str | None]]] = {
         ("https://www.dxmwx.org/read/55598_47170737.html", "dxmwx", "55598"),
         ("https://tw.dxmwx.org/book/55598.html", "dxmwx", "55598"),
         # wanbengo
-        ("https://www.wanbengo.com/1/", "wanbengo", "1"),
-        ("https://www.wanbengo.com/1/2.html", "wanbengo", "1"),
+        # ("https://www.wanbengo.com/1/", "wanbengo", "1"),
+        # ("https://www.wanbengo.com/1/2.html", "wanbengo", "1"),
         # i25zw
         ("https://www.i25zw.com/book/64371.html", "i25zw", "64371"),
         ("https://www.i25zw.com/64371/", "i25zw", "64371"),

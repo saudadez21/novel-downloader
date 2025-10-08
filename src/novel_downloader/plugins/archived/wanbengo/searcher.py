@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.plugins.sites.wanbengo.searcher
-------------------------------------------------
+novel_downloader.plugins.archived.wanbengo.searcher
+---------------------------------------------------
 
 """
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.plugins.sites.wanbengo.parser
-----------------------------------------------
+novel_downloader.plugins.archived.wanbengo.parser
+-------------------------------------------------
 
 """
 
@@ -10,7 +10,6 @@ from html import unescape
 from typing import Any
 
 from lxml import html
-
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
@@ -29,19 +28,7 @@ class WanbengoParser(BaseParser):
 
     site_name: str = "wanbengo"
 
-    # XPaths for the book info page
-    X_BOOK_NAME = "//div[@class='detailTopMid']//h1/text()"
-    X_AUTHOR = "//div[@class='detailTopMid']//div[@class='writer']//a/text()"
-    X_COVER = "//div[@class='detailTopLeft']//img/@src"
-    X_STATUS = "//div[@class='detailTopLeft']//span[contains(@class,'end')]/text()"
-    X_WORDS = "//div[@class='detailTopMid']//table//tr[td/span[contains(text(),'字数')]]/td[last()]/text()"  # noqa: E501
-    X_SUMMARY = "//div[@class='detailTopMid']//table//tr[td/span[contains(text(),'简介')]]/td[last()]//text()"  # noqa: E501
-    X_TAG = "//div[@class='route']/a[2]//text()"
-    X_UPDATE_TXT = "//div[@class='chapterTitle']//span//text()"
-    X_CHAPTERS = "//div[@class='chapter']//ul//li/a"
-
     # XPaths for the chapter page
-    X_CHAP_TITLE = "//div[contains(@class,'readerTitle')]//h2/text()"
     _CHAP_SPLIT_RE = re.compile(r"(?:</p\s*>|<p\b[^>]*>|<br\s*/?>)", re.I)
     _CHAP_READERCON_RE = re.compile(
         r'<div[^>]*class=(?:"[^"]*readerCon[^"]*"|\'[^\']*readerCon[^\']*\')[^>]*>(.*?)</div>',
@@ -73,23 +60,48 @@ class WanbengoParser(BaseParser):
 
         tree = html.fromstring(html_list[0])
 
-        book_name = self._first_str(tree.xpath(self.X_BOOK_NAME))
-        author = self._first_str(tree.xpath(self.X_AUTHOR))
-        cover_url = self._first_str(tree.xpath(self.X_COVER))
-        serial_status = (
-            self._norm_space(self._first_str(tree.xpath(self.X_STATUS))) or "连载中"
+        book_name = self._first_str(
+            tree.xpath("//div[@class='detailTopMid']//h1/text()")
         )
-        word_count = self._norm_space("".join(tree.xpath(self.X_WORDS)))
-        summary = self._norm_space("".join(tree.xpath(self.X_SUMMARY)))
+        author = self._first_str(
+            tree.xpath("//div[@class='detailTopMid']//div[@class='writer']//a/text()")
+        )
+        cover_url = self._first_str(
+            tree.xpath("//div[@class='detailTopLeft']//img/@src")
+        )
+        serial_status = self._first_str(
+            tree.xpath(
+                "//div[@class='detailTopLeft']//span[contains(@class,'end')]/text()"
+            )
+        )
+        word_count = self._first_str(
+            tree.xpath(
+                "//div[@class='detailTopMid']//table//tr[td/span[contains(text(),'字数')]]/td[last()]/text()"
+            )
+        )
+        summary = self._first_str(
+            tree.xpath(
+                "//div[@class='detailTopMid']//table//tr[td/span[contains(text(),'简介')]]/td[last()]//text()"
+            )
+        )
 
-        book_type = self._norm_space("".join(tree.xpath(self.X_TAG)))
+        book_type = self._first_str(tree.xpath("//div[@class='route']/a[2]//text()"))
         tags = [book_type] if book_type else []
 
-        update_time = self._extract_update_date(tree.xpath(self.X_UPDATE_TXT))
+        update_time = (
+            m.group(1)
+            if (
+                m := re.search(
+                    r"\b(\d{4}-\d{2}-\d{2})\b",
+                    tree.xpath("string(//div[@class='chapterTitle']//span)"),
+                )
+            )
+            else ""
+        )
 
         chapters: list[ChapterInfoDict] = []
-        for a in tree.xpath(self.X_CHAPTERS):
-            title = self._norm_space("".join(a.xpath(".//text()")))
+        for a in tree.xpath("//div[@class='chapter']//ul//li/a"):
+            title = self._first_str(a.xpath(".//text()"))
             href = a.get("href") or ""
             # "/129/103950.html" -> "103950"
             cid = href.rstrip(".html").split("/")[-1]
@@ -124,7 +136,9 @@ class WanbengoParser(BaseParser):
             return None
 
         tree = html.fromstring(html_list[0])
-        title = self._first_str(tree.xpath(self.X_CHAP_TITLE))
+        title = self._first_str(
+            tree.xpath("//div[contains(@class,'readerTitle')]//h2/text()")
+        )
 
         parts = self._CHAP_SPLIT_RE.split(inner.group(1))
         paragraphs: list[str] = []
@@ -150,19 +164,6 @@ class WanbengoParser(BaseParser):
             "content": content,
             "extra": {"site": self.site_name},
         }
-
-    @staticmethod
-    def _extract_update_date(texts: list[str]) -> str:
-        """
-        Find a YYYY-MM-DD anywhere in the provided text nodes.
-
-        If none found, return today's date.
-        """
-        joined = " ".join(t for t in texts if t)
-        m = re.search(r"\b(\d{4}-\d{2}-\d{2})\b", joined)
-        if m:
-            return m.group(1)
-        return ""
 
     def _is_noise_line(self, s: str) -> bool:
         """Heuristic to drop obvious ad/footer/noise lines."""

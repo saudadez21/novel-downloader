@@ -661,16 +661,16 @@ SITE_RULES: dict[str, SiteRuleSet] = {
         ],
         hints=[],
     ),
-    "www.wanbengo.com": SiteRuleSet(
-        site_key="wanbengo",
-        extractors=[
-            BookIdExtractor(
-                pattern=r"^/(\d+)/",
-                build_book_id=lambda m: m.group(1),
-            ),
-        ],
-        hints=[],
-    ),
+    # "www.wanbengo.com": SiteRuleSet(
+    #     site_key="wanbengo",
+    #     extractors=[
+    #         BookIdExtractor(
+    #             pattern=r"^/(\d+)/",
+    #             build_book_id=lambda m: m.group(1),
+    #         ),
+    #     ],
+    #     hints=[],
+    # ),
     "www.xiaoshuoge.info": SiteRuleSet(
         site_key="xiaoshuoge",
         extractors=[

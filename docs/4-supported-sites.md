@@ -81,7 +81,6 @@ novel-cli download --site ttkan shengxu-chendong
 | [天天看小说](https://www.ttkan.co/)                          | ttkan     | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [爱下电子书](https://ixdzs8.com/)                             | ixdzs8   | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [大熊猫文学网](https://www.dxmwx.org/)                        | dxmwx    | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
-| [完本神站](https://www.wanbengo.com/)                        | wanbengo  | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [25中文网](https://www.i25zw.com/)                           | i25zw     | ❌     | ❌     | ❌     | ✅     | 简      |
 | [69阅读](https://www.69yue.top/index.html)                   | n69yue    | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [老幺小说网](https://www.laoyaoxs.org/)                     | laoyaoxs  | ❌     | ❌     | ❌     | ✅     | 简      |
@@ -149,6 +148,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [得奇小说网](https://www.deqixs.com/)                        | deqixs    | ❌     | ❌     | ❌     | ✅     | 简      |
 | [小说屋](http://www.xiaoshuoge.info/)                       | xiaoshuoge | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [小说路上](https://m.xs63b.com/)                              | xs63b    | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [完本神站](https://www.wanbengo.com/)                        | wanbengo  | ❌     | ❌     | ⚠️     | ✅     | 简      |
 
 ---
 
@@ -210,10 +210,6 @@ novel-cli download --site ttkan shengxu-chendong
 * **大熊猫文学网 (dxmwx)**
   * 书籍: `https://www.dxmwx.org/book/55598.html` -> Book ID: `55598`
   * 章节: `https://www.dxmwx.org/read/55598_47170737.html` -> Chapter ID: `47170737`
-
-* **完本神站 (wanbengo)**
-  * 书籍: `https://www.wanbengo.com/1/` -> Book ID: `1`
-  * 章节: `https://www.wanbengo.com/1/2.html` -> Chapter ID: `2`
 
 * **25中文网 (i25zw)**
   * 书籍: `https://www.i25zw.com/book/64371.html` -> Book ID: `64371`
@@ -418,6 +414,14 @@ novel-cli download --site ttkan shengxu-chendong
   * 书籍: `https://m.xs63b.com/xuanhuan/aoshijiuzhongtian/` -> Book ID: `xuanhuan-aoshijiuzhongtian`
   * 章节: `https://m.xs63b.com/xuanhuan/aoshijiuzhongtian/8748062.html` -> Chapter ID: `8748062`
   * 注意: 桌面端页面部分章节缺页, 移动端正常
+
+* **完本神站 (wanbengo)**
+  * 书籍: `https://www.wanbengo.com/1/` -> Book ID: `1`
+  * 章节: `https://www.wanbengo.com/1/2.html` -> Chapter ID: `2`
+  * 归档原因: 页面内容存在严重质量问题, 包括但不限于
+    * 乱码过多: 例如 `?j\i~n￠j^i?a` 或多段连续无意义字符, 导致正文可读性极差
+    * 结构混乱: HTML 标签嵌套不规范, 正文段落交错混乱
+    * 来源异常: 文本中混入大量 HTML 实体, 以及明显来自其他小说网站的段落
 
 ---
 
