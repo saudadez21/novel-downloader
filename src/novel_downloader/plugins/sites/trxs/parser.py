@@ -9,17 +9,18 @@ from typing import Any
 
 from lxml import html
 
+from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
-from novel_downloader.plugins.sites.tongrenquan.parser import TongrenquanParser
 from novel_downloader.schemas import (
     BookInfoDict,
+    ChapterDict,
     ChapterInfoDict,
     VolumeInfoDict,
 )
 
 
 @registrar.register_parser()
-class TrxsParser(TongrenquanParser):
+class TrxsParser(BaseParser):
     """
     Parser for 同人小说网 book pages.
     """
@@ -72,4 +73,44 @@ class TrxsParser(TongrenquanParser):
             "summary": summary,
             "volumes": volumes,
             "extra": {},
+        }
+
+    def parse_chapter(
+        self,
+        html_list: list[str],
+        chapter_id: str,
+        **kwargs: Any,
+    ) -> ChapterDict | None:
+        if not html_list:
+            return None
+
+        tree = html.fromstring(html_list[0])
+
+        raw_title = self._first_str(
+            tree.xpath('//div[contains(@class,"read_chapterName")]//h1/text()')
+        )
+
+        book_name = self._first_str(
+            tree.xpath('//div[contains(@class,"readTop")]//a[last()]/text()')
+        )
+
+        title = raw_title.replace(book_name, "").strip()
+
+        # Extract paragraphs of content
+        paragraphs = [
+            stripped
+            for p in tree.xpath('//div[contains(@class,"read_chapterDetail")]/p')
+            if (stripped := p.text_content().strip())
+        ]
+
+        if not paragraphs:
+            return None
+
+        content = "\n".join(paragraphs)
+
+        return {
+            "id": chapter_id,
+            "title": title,
+            "content": content,
+            "extra": {"site": self.site_name},
         }
