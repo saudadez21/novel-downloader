@@ -126,15 +126,15 @@ class Shu111Parser(BaseParser):
             replaces=[("\xa0", " ")],
         )
 
-        paragraphs: list[str] = []
-        for node in tree.xpath('//div[@id="htmlContent"]//text()'):
-            line = node.replace("\xa0", " ").strip()
-            if line:
-                paragraphs.append(line)
+        paragraphs = [
+            line
+            for node in tree.xpath('//div[@id="htmlContent"]//text()')
+            if (line := node.replace("\xa0", " ").strip())
+        ]
+        if not paragraphs:
+            return None
 
         content = "\n".join(paragraphs)
-        if not content.strip():
-            return None
 
         return {
             "id": chapter_id,

@@ -162,7 +162,7 @@ class PiaotiaParser(BaseParser):
             return None
         node = table[0].getnext()
 
-        lines: list[str] = []
+        paragraphs: list[str] = []
         while node is not None:
             # stop at the next table or any bottom‑link nav div
             if (node.tag == "table" and node.get("border")) or (
@@ -173,13 +173,14 @@ class PiaotiaParser(BaseParser):
             if node.tag == "br":
                 txt = (node.tail or "").replace("\xa0", " ").strip()
                 if txt:
-                    lines.append(txt)
+                    paragraphs.append(txt)
 
             node = node.getnext()
 
-        content = "\n".join(lines).strip()
-        if not content:
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,

@@ -6,7 +6,6 @@ novel_downloader.plugins.sites.guidaye.parser
 """
 
 import re
-from datetime import datetime
 from typing import Any
 
 from lxml import html
@@ -44,9 +43,10 @@ class GuidayeParser(BaseParser):
         author = self._first_str(
             tree.xpath('//div[@id="category-description-author"]/a/text()')
         )
-        cover_url = self.BASE_URL + self._first_str(
+        cover_rel = self._first_str(
             tree.xpath('//div[@id="category-description-image"]//img/@src')
         )
+        cover_url = f"{self.BASE_URL}{cover_rel}" if cover_rel else ""
 
         # Summary paragraphs
         summary = (
@@ -83,7 +83,7 @@ class GuidayeParser(BaseParser):
         # Timestamp of parsing
         share_text = tree.xpath('string(//div[@id="category-description-share"])')
         m = re.search(r"最近更新[：:]\s*([\d-]+)", share_text)
-        update_time = m.group(1) if m else datetime.now().strftime("%Y-%m-%d")
+        update_time = m.group(1) if m else ""
 
         return {
             "book_name": book_name,
@@ -109,15 +109,16 @@ class GuidayeParser(BaseParser):
         title = self._first_str(tree.xpath('//h1[@class="entry-title"]/text()'))
 
         # Extract paragraphs within entry-content
-        full_text = tree.xpath('string(//div[@class="entry-content"])')
-        full_text = full_text.replace("\u00A0", " ")
+        paragraphs = [
+            text
+            for p in tree.xpath('//div[@class="entry-content"]//p')
+            if (text := self._norm_space(p.text_content()))
+        ]
 
-        # 3. Split into lines and clean up
-        lines = [line.strip() for line in full_text.splitlines() if line.strip()]
-        if not lines:
+        if not paragraphs:
             return None
 
-        content = "\n".join(lines)
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,

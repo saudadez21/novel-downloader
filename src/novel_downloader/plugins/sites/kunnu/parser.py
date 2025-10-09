@@ -150,9 +150,10 @@ class KunnuParser(BaseParser):
             if txt and not self._is_ad_line(txt):
                 paragraphs.append(txt)
 
-        content = "\n".join(paragraphs)
-        if not content:
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,

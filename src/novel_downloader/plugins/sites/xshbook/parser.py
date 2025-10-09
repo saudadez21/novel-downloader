@@ -107,17 +107,21 @@ class XshbookParser(BaseParser):
                 tree.xpath("//div[@class='con_top']/text()[last()]")
             )
 
-        paragraphs: list[str] = []
-        for p in tree.xpath("//div[@id='content']//p"):
-            text = self._norm_space(p.text_content() or "")
-            text = self._INLINE_AD_PATTERN.sub("", text).strip()
-            if not text or self._is_ad_line(text):
-                continue
-            paragraphs.append(text)
+        paragraphs = [
+            text
+            for p in tree.xpath("//div[@id='content']//p")
+            if (
+                text := self._INLINE_AD_PATTERN.sub(
+                    "", self._norm_space(p.text_content() or "")
+                ).strip()
+            )
+            and not self._is_ad_line(text)
+        ]
+
+        if not paragraphs:
+            return None
 
         content = "\n".join(paragraphs)
-        if not content.strip():
-            return None
 
         return {
             "id": chapter_id,

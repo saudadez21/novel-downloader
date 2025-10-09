@@ -101,11 +101,16 @@ class TongrenquanParser(BaseParser):
         title = raw_title.replace(book_name, "").strip()
 
         # Extract paragraphs of content
-        paras = tree.xpath('//div[contains(@class,"read_chapterDetail")]/p')
-        texts = [p.text_content().strip() for p in paras if p.text_content().strip()]
-        content = "\n".join(texts)
-        if not content:
+        paragraphs = [
+            stripped
+            for p in tree.xpath('//div[contains(@class,"read_chapterDetail")]/p')
+            if (stripped := p.text_content().strip())
+        ]
+
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,

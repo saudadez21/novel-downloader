@@ -158,9 +158,10 @@ class XiguashuwuParser(BaseParser):
             else:
                 paragraphs.extend(self._parse_chapter_page3plus(html_str))
 
-        content = "\n".join(paragraphs).strip()
-        if not content:
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,

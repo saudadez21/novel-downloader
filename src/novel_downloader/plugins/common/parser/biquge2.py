@@ -1,16 +1,13 @@
 #!/usr/bin/env python3
 """
-novel_downloader.plugins.sites.mangg_com.parser
------------------------------------------------
-
+novel_downloader.plugins.common.parser.biquge2
+----------------------------------------------
 """
 
 from typing import Any
 
 from lxml import html
-
 from novel_downloader.plugins.base.parser import BaseParser
-from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
     BookInfoDict,
     ChapterDict,
@@ -19,17 +16,14 @@ from novel_downloader.schemas import (
 )
 
 
-@registrar.register_parser()
-class ManggComParser(BaseParser):
+class Biquge2Parser(BaseParser):
     """
-    Parser for 追书网 book pages.
+    Base Parser for biquge-related book pages.
     """
 
-    site_name: str = "mangg_com"
-    BASE_URL = "https://www.mangg.com"
-    ADS: set[str] = {
-        "记住追书网网",
-        r"mangg\.com",
+    BASE_URL = "https://www.biquge.com"
+    ADS = {
+        r"biquge\.com",
     }
 
     def parse_book_info(
@@ -50,7 +44,7 @@ class ManggComParser(BaseParser):
         )
         serial_status = self._first_str(
             tree.xpath('//div[@id="info"]/p[2]/text()'),
-            replaces=[(chr(0xA0), ""), ("状态：", ""), (",", "")],
+            replaces=[(chr(0xA0), ""), ("状态：", "")],
         )
         update_time = self._first_str(
             tree.xpath('//div[@id="info"]/p[3]/text()'),
@@ -62,20 +56,27 @@ class ManggComParser(BaseParser):
             cover_src if cover_src.startswith("http") else f"{self.BASE_URL}{cover_src}"
         )
 
-        summary = self._join_strs(
-            tree.xpath('//div[@id="intro"]/text() | //div[@id="intro"]//p/text()'),
-            replaces=[(chr(0xA0), "")],
-        )
+        summary = self._join_strs(tree.xpath('//div[@id="intro"]/p//text()'))
 
         # --- Volumes & Chapters ---
-        chapters: list[ChapterInfoDict] = [
-            {
-                "title": (a.text or "").strip(),
-                "url": (a.get("href") or "").strip(),
-                "chapterId": (a.get("href") or "").rsplit("/", 1)[-1].split(".", 1)[0],
-            }
-            for a in tree.xpath('//div[@id="list"]//dd/a')
-        ]
+        chapters: list[ChapterInfoDict] = []
+        for dt in tree.xpath('//div[@class="listmain"]/dl/dt'):
+            title_text = dt.text_content().strip()
+            if "正文" in title_text:
+                # collect its <dd> siblings
+                sib = dt.getnext()
+                while sib is not None and sib.tag == "dd":
+                    a = sib.xpath(".//a")[0]
+                    chap_title = a.text_content().strip()
+                    href = a.get("href")
+                    url = href if href.startswith("http") else f"{self.BASE_URL}{href}"
+                    chap_id = url.rstrip(".html").split("/")[-1]
+                    chapters.append(
+                        {"title": chap_title, "url": url, "chapterId": chap_id}
+                    )
+                    sib = sib.getnext()
+                break
+
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 
         return {
@@ -100,15 +101,20 @@ class ManggComParser(BaseParser):
 
         tree = html.fromstring(html_list[0])
 
-        title = self._first_str(tree.xpath('//div[@class="bookname"]/h1/text()'))
+        title = self._first_str(tree.xpath('//div[@class="content"]/h1/text()'))
+
+        # collect all visible text inside #content, skipping scripts/styles
+        raw_texts = tree.xpath(
+            '//div[@id="content"]//text()[not(ancestor::script) and not(ancestor::style)]'  # noqa: E501
+        )
 
         paragraphs: list[str] = []
-        for ln in tree.xpath(
-            '//div[@id="content"]//text()[not(ancestor::script) and not(ancestor::style)]'  # noqa: E501
-        ):
-            if not ln or not ln.strip() or self._is_ad_line(ln):
+        for ln in raw_texts:
+            # normalize spaces: \xa0 (nbsp) and \u3000 (ideographic space)
+            s = ln.replace("\xa0", "").replace("\u3000", "").strip()
+            if not s or self._is_ad_line(s):
                 continue
-            paragraphs.append(ln.strip())
+            paragraphs.append(s)
 
         if not paragraphs:
             return None

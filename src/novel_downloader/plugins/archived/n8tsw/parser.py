@@ -94,9 +94,10 @@ class N8tswParser(BaseParser):
             if s and s.strip()
         ]
 
-        content = "\n".join(paragraphs)
-        if not content.strip():
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,

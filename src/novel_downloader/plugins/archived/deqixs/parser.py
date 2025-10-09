@@ -97,7 +97,7 @@ class DeqixsParser(BaseParser):
             return None
 
         title_text = ""
-        contents: list[str] = []
+        paragraphs: list[str] = []
         for curr_html in html_list:
             tree = html.fromstring(curr_html)
             # Extract title once
@@ -113,11 +113,12 @@ class DeqixsParser(BaseParser):
                 # Filter out ads or empty paragraphs
                 if not text or any(ad in text for ad in self.ADS):
                     continue
-                contents.append(text)
+                paragraphs.append(text)
 
-        content = "\n".join(contents)
-        if not content:
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,

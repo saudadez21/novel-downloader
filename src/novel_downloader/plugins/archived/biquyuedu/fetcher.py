@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.plugins.sites.biquyuedu.fetcher
-------------------------------------------------
+novel_downloader.plugins.archived.biquyuedu.fetcher
+---------------------------------------------------
 
 """
 

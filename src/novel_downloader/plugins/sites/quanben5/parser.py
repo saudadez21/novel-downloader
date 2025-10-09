@@ -5,7 +5,6 @@ novel_downloader.plugins.sites.quanben5.parser
 
 """
 
-from datetime import datetime
 from typing import Any
 
 from lxml import html
@@ -48,7 +47,6 @@ class Quanben5Parser(BaseParser):
             tree.xpath('//p[@class="info"][contains(., "类别")]/span/text()')
         )
         tags = [category] if category else []
-        update_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         summary = self._first_str(tree.xpath('//p[@class="description"]/text()'))
 
         chapters: list[ChapterInfoDict] = []
@@ -66,7 +64,7 @@ class Quanben5Parser(BaseParser):
             "book_name": book_name,
             "author": author,
             "cover_url": cover_url,
-            "update_time": update_time,
+            "update_time": "",
             "tags": tags,
             "summary": summary,
             "volumes": volumes,
@@ -88,12 +86,15 @@ class Quanben5Parser(BaseParser):
         title = self._first_str(tree.xpath('//h1[@class="title1"]/text()'))
 
         # Extract all <p> text within the content container
-        paragraphs = tree.xpath('//div[@id="content"]/p/text()')
-        # Clean whitespace and join with double newlines
-        content = "\n".join(p.strip() for p in paragraphs if p.strip())
-
-        if not content:
+        paragraphs = [
+            stripped
+            for p in tree.xpath('//div[@id="content"]/p/text()')
+            if (stripped := p.strip())
+        ]
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,

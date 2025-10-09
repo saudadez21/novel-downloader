@@ -164,11 +164,11 @@ class EsjzoneSession(BaseSession):
         """
         data = {"plxf": "getAuthToken"}
         try:
-            resp = await self.post(url, data=data)
-            resp.raise_for_status()
-            # Example response: <JinJing>token_here</JinJing>
-            text = await resp.text()
-            return self._extract_token(text)
+            async with self.post(url, data=data) as resp:
+                resp.raise_for_status()
+                # Example response: <JinJing>token_here</JinJing>
+                text = await resp.text()
+                return self._extract_token(text)
         except Exception as exc:
             self.logger.warning("esjzone getAuthToken failed for %s: %s", url, exc)
         return ""
@@ -194,13 +194,13 @@ class EsjzoneSession(BaseSession):
         auth_headers = dict(self.headers)
         auth_headers["Authorization"] = token
         try:
-            resp = await self.post(
+            async with self.post(
                 self._API_LOGIN_URL, data=payload, headers=auth_headers
-            )
-            resp.raise_for_status()
-            resp_json = await resp.json(content_type="text/html", encoding="utf-8")
-            resp_code: int = resp_json.get("status", 301)
-            return resp_code == 200
+            ) as resp:
+                resp.raise_for_status()
+                resp_json = await resp.json(content_type="text/html", encoding="utf-8")
+                resp_code: int = resp_json.get("status", 301)
+                return resp_code == 200
         except Exception as exc:
             self.logger.warning("esjzone login failed: %s", exc)
         return False
@@ -225,19 +225,23 @@ class EsjzoneSession(BaseSession):
         headers["Authorization"] = token
 
         try:
-            resp = await self.post(self._API_UNLOCK_URL, data=payload, headers=headers)
-            resp.raise_for_status()
-            result = await resp.json(content_type="text/html", encoding="utf-8")
-            status_code: int = result.get("status", 301)
+            async with self.post(
+                self._API_UNLOCK_URL, data=payload, headers=headers
+            ) as resp:
+                resp.raise_for_status()
+                result = await resp.json(content_type="text/html", encoding="utf-8")
+                status_code: int = result.get("status", 301)
 
-            if status_code != 200:
-                self.logger.warning(
-                    "esjzone unlock failed for %s: %s", chap_url, result.get("msg", "")
-                )
-                return ""
+                if status_code != 200:
+                    self.logger.warning(
+                        "esjzone unlock failed for %s: %s",
+                        chap_url,
+                        result.get("msg", ""),
+                    )
+                    return ""
 
-            reso_html: str = result.get("html", "")
-            return reso_html
+                reso_html: str = result.get("html", "")
+                return reso_html
 
         except Exception as exc:
             self.logger.warning(

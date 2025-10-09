@@ -121,16 +121,16 @@ class YibigeParser(BaseParser):
 
         title = self._first_str(tree.xpath("//div[@class='bookname']/h1/text()"))
 
-        paragraphs: list[str] = []
-        for p in tree.xpath("//div[@id='content']//p"):
-            txt = self._norm_space(p.text_content())
-            if not txt or self._is_ad(txt):
-                continue
-            paragraphs.append(txt)
+        paragraphs = [
+            txt
+            for p in tree.xpath("//div[@id='content']//p")
+            if (txt := self._norm_space(p.text_content())) and not self._is_ad(txt)
+        ]
 
-        content = "\n".join(paragraphs).strip()
-        if not content:
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,

@@ -236,7 +236,7 @@ class EsjzoneParser(BaseParser):
         font_mappings: dict[str, dict[str, str]] = {}
 
         # render everything inside .forum-content recursively
-        contents: list[str] = []
+        paragraphs: list[str] = []
         for root in tree.xpath('//div[contains(@class, "forum-content")]'):
             tokens = self._render_node(
                 root,
@@ -246,11 +246,12 @@ class EsjzoneParser(BaseParser):
             )
             txt = self._tokens_to_str(tokens).strip()
             if txt:
-                contents.append(txt)
+                paragraphs.append(txt)
 
-        content = "\n".join(contents)
-        if not content:
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,

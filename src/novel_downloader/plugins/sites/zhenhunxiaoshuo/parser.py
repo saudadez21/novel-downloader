@@ -5,7 +5,6 @@ novel_downloader.plugins.sites.zhenhunxiaoshuo.parser
 
 """
 
-from datetime import datetime
 from typing import Any
 
 from lxml import html
@@ -41,7 +40,6 @@ class ZhenhunxiaoshuoParser(BaseParser):
         book_name = self._first_str(
             tree.xpath("//h1[contains(@class,'focusbox-title')]/text()")
         )
-        update_time = datetime.now().strftime("%Y-%m-%d")
         summary = self._join_strs(
             tree.xpath(
                 "//div[contains(@class,'focusbox-text')]//p[contains(@class,'text')]//text()"
@@ -64,7 +62,7 @@ class ZhenhunxiaoshuoParser(BaseParser):
             "book_name": book_name,
             "author": "",
             "cover_url": "",
-            "update_time": update_time,
+            "update_time": "",
             "summary": summary,
             "volumes": volumes,
             "extra": {},
@@ -88,13 +86,15 @@ class ZhenhunxiaoshuoParser(BaseParser):
         )
 
         paragraphs = [
-            (p.text or "").strip()
+            stripped
             for p in tree.xpath("//article[contains(@class,'article-content')]//p")
-            if (p.text or "").strip()
+            if (stripped := (p.text or "").strip())
         ]
-        content = "\n".join(paragraphs)
-        if not content:
+
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,

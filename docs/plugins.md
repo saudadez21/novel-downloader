@@ -276,16 +276,17 @@ class AaatxtParser(BaseParser):
         raw_title = self._first_str(tree.xpath("//div[@id='content']//h1/text()"))
         title = raw_title.split("-", 1)[-1].strip()
 
-        lines = []
+        paragraphs = []
         for txt in tree.xpath("//div[@class='chapter']//text()"):
             line = txt.strip()
             if not line or self._is_ad_line(txt):
                 continue
-            lines.append(line)
+            paragraphs.append(line)
 
-        content = "\n".join(lines)
-        if not content:
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         return {"id": chapter_id, "title": title, "content": content, "extra": {"site": self.site_name}}
 ```
@@ -429,7 +430,7 @@ config_3 = "three"
 
 注册器会根据插件模块的路径自动推导出唯一键名 (key), 用来在运行时定位插件。
 
-##### 站点类插件（Fetcher / Parser / Downloader / Exporter / Searcher）
+**站点类插件 (Fetcher / Parser / Downloader / Exporter / Searcher)**
 
 键名来源于模块路径中的:
 
@@ -462,21 +463,7 @@ novel-cli download --site ciweimao 123456
 
 > 站点键名始终自动转换为小写; 若以数字开头, 请加前缀 `n` (如 `123abc` -> `n123abc`)
 
-#### 2. 搜索/加载顺序与覆盖关系
-
-注册表会按 "命名空间" 顺序尝试导入模块 (懒加载):
-
-1. 内置命名空间: `novel_downloader.plugins`
-2.  (可选) 本地命名空间: 默认 `novel_plugins`, 由 `settings.toml` 中 `[plugins]` 控制
-   * `enable_local_plugins = true` 开启本地插件
-   * `local_plugins_path = "./novel_plugins"` 指定目录
-   * `override_builtins = true` 时, 本地命名空间将**排在内置之前**, 可覆盖同名实现
-
-> 站点模块的动态导入路径: `{namespace}.sites.<site_key>.<kind>`
->
-> 处理器模块的动态导入路径: `{namespace}.processors.<name>`
-
-##### 文本处理器 (Processor)
+**文本处理器 (Processor)**
 
 键名来源于模块路径中 `processors.` 之后的部分。
 
@@ -511,6 +498,20 @@ novel_plugins/processors/text/zh_convert.py
 text.zh_convert
 ```
 
+#### 2. 搜索/加载顺序与覆盖关系
+
+注册表会按 "命名空间" 顺序尝试导入模块 (懒加载):
+
+1. 内置命名空间: `novel_downloader.plugins`
+2.  (可选) 本地命名空间: 默认 `novel_plugins`, 由 `settings.toml` 中 `[plugins]` 控制
+   * `enable_local_plugins = true` 开启本地插件
+   * `local_plugins_path = "./novel_plugins"` 指定目录
+   * `override_builtins = true` 时, 本地命名空间将**排在内置之前**, 可覆盖同名实现
+
+> 站点模块的动态导入路径: `{namespace}.sites.<site_key>.<kind>`
+>
+> 处理器模块的动态导入路径: `{namespace}.processors.<name>`
+
 ---
 
 #### 3. 获取与回退策略
@@ -521,4 +522,4 @@ text.zh_convert
 * `get_searcher_class(site)`: 未找到会抛 `ValueError("Unsupported site")`
 * `get_searcher_classes()`: 在未指定站点时, 会尝试加载所有已知站点的 `searcher` 模块并返回可用列表
 
-> 所有注册均在**模块被导入时**生效; 确保插件文件能被 Python 导入 (路径正确、无语法错误)
+> 所有注册均在**模块被导入时**生效; 请确保插件文件能被 Python 导入 (路径正确、无语法错误)

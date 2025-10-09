@@ -106,9 +106,10 @@ class N23ddwParser(BaseParser):
                 if text:
                     paragraphs.append(text)
 
-        content = "\n".join(paragraphs)
-        if not content.strip():
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,

@@ -5,12 +5,12 @@ novel_downloader.plugins.sites.ktshu.parser
 
 """
 
+from novel_downloader.plugins.common.parser.biquge1 import Biquge1Parser
 from novel_downloader.plugins.registry import registrar
-from novel_downloader.plugins.sites.mangg_net.parser import ManggNetParser
 
 
 @registrar.register_parser()
-class KtshuParser(ManggNetParser):
+class KtshuParser(Biquge1Parser):
     """
     Parser for 八一中文网 book pages.
     """

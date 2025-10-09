@@ -106,8 +106,8 @@ SAMPLES: dict[str, list[tuple[str, str, str | None]]] = {
         ("https://www.dxmwx.org/read/55598_47170737.html", "dxmwx", "55598"),
         ("https://tw.dxmwx.org/book/55598.html", "dxmwx", "55598"),
         # wanbengo
-        ("https://www.wanbengo.com/1/", "wanbengo", "1"),
-        ("https://www.wanbengo.com/1/2.html", "wanbengo", "1"),
+        # ("https://www.wanbengo.com/1/", "wanbengo", "1"),
+        # ("https://www.wanbengo.com/1/2.html", "wanbengo", "1"),
         # i25zw
         ("https://www.i25zw.com/book/64371.html", "i25zw", "64371"),
         ("https://www.i25zw.com/64371/", "i25zw", "64371"),
@@ -194,8 +194,8 @@ SAMPLES: dict[str, list[tuple[str, str, str | None]]] = {
         ("https://www.lewenn.net/lw1/", "lewenn", "lw1"),
         ("https://www.lewenn.net/lw1/30038546.html", "lewenn", "lw1"),
         # biquyuedu
-        ("https://biquyuedu.com/novel/GDr1I1.html", "biquyuedu", "GDr1I1"),
-        ("https://biquyuedu.com/novel/GDr1I1/1.html", "biquyuedu", "GDr1I1"),
+        # ("https://biquyuedu.com/novel/GDr1I1.html", "biquyuedu", "GDr1I1"),
+        # ("https://biquyuedu.com/novel/GDr1I1/1.html", "biquyuedu", "GDr1I1"),
         # blqudu
         ("https://www.blqudu.cc/137_137144/", "blqudu", "137_137144"),
         ("https://www.biqudv.cc/137_137144/628955328.html", "blqudu", "137_137144"),
@@ -321,7 +321,7 @@ def resolve_book_id(url: str) -> tuple[str | None, str | None]:
     """
     info = resolve_book_url(url)
     site_key = None if info is None else info["site_key"]
-    book_id = None if info is None else info["book"]["book_id"]
+    book_id = None if info is None else info["book"].book_id
     return site_key, book_id
 
 

@@ -5,12 +5,12 @@ novel_downloader.plugins.sites.blqudu.parser
 
 """
 
+from novel_downloader.plugins.common.parser.biquge2 import Biquge2Parser
 from novel_downloader.plugins.registry import registrar
-from novel_downloader.plugins.sites.lewenn.parser import LewennParser
 
 
 @registrar.register_parser()
-class BlquduParser(LewennParser):
+class BlquduParser(Biquge2Parser):
     """
     Parser for 笔趣读 book pages.
     """

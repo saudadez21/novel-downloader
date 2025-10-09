@@ -5,7 +5,6 @@ novel_downloader.plugins.sites.ixdzs8.fetcher
 
 """
 
-import asyncio
 import re
 from typing import Any
 
@@ -41,11 +40,10 @@ class Ixdzs8Session(BaseSession):
         """
         url = self.book_info_url(book_id=book_id)
         data = {"bid": book_id}
-        info_html, clist_response = await asyncio.gather(
-            self.fetch_verified_html(url, **kwargs),
-            self.post(self.BOOK_CATALOG_URL, data),
-        )
-        catalog_html = await clist_response.text()
+        info_html = await self.fetch_verified_html(url, **kwargs)
+        async with self.post(self.BOOK_CATALOG_URL, data=data) as resp:
+            resp.raise_for_status()
+            catalog_html = await resp.text()
         return [info_html, catalog_html]
 
     async def get_book_chapter(

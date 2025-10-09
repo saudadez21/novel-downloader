@@ -92,8 +92,9 @@ class SfacgSession(BaseSession):
                 "font": "20",
                 "quick": "true",
             }
-            resp = await self.get(self.VIP_CHAPTER_URL, params=params)
-            img_bytes = await resp.read()
+            async with self.get(self.VIP_CHAPTER_URL, params=params) as resp:
+                resp.raise_for_status()
+                img_bytes = await resp.read()
 
             img_base64 = base64.b64encode(img_bytes).decode("utf-8")
             results.append(img_base64)

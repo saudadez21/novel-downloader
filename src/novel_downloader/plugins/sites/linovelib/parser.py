@@ -195,7 +195,7 @@ class LinovelibParser(BaseParser):
             cid_int = 0
 
         title: str = ""
-        contents: list[str] = []
+        paragraphs: list[str] = []
 
         for curr_html in html_list:
             tree = html.fromstring(curr_html)
@@ -264,11 +264,12 @@ class LinovelibParser(BaseParser):
 
             page_content = "\n".join(page_lines)
             if page_content:
-                contents.append(page_content)
+                paragraphs.append(page_content)
 
-        content = "\n".join(contents)
-        if not content.strip():
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,

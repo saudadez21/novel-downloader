@@ -109,29 +109,22 @@ class I25zwParser(BaseParser):
 
         tree = html.fromstring(html_list[0])
 
-        title_text = self._first_str(
-            tree.xpath("//div[@class='zhangjieming']/h1/text()")
-        )
+        title = self._first_str(tree.xpath("//div[@class='zhangjieming']/h1/text()"))
 
-        content_divs = tree.xpath("//div[@id='content']")
-        if not content_divs:
+        paragraphs = [
+            text
+            for p in tree.xpath('//div[@id="content"]//p')
+            if (text := self._norm_space(p.text_content()))
+        ]
+
+        if not paragraphs:
             return None
-        content_div = content_divs[0]
 
-        # Only select direct <p> children to avoid nav links
-        paragraphs = []
-        for p in content_div.xpath("./p"):
-            text = p.text_content().strip()
-            if text:
-                paragraphs.append(text)
-
-        content_text = "\n".join(paragraphs)
-        if not content_text.strip():
-            return None
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,
-            "title": title_text,
-            "content": content_text,
+            "title": title,
+            "content": content,
             "extra": {"site": self.site_name},
         }

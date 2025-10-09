@@ -228,7 +228,7 @@ class BaseSession(abc.ABC):
 
         for attempt in range(self._retry_times + 1):
             try:
-                async with await self.get(url, **kwargs) as resp:
+                async with self.get(url, **kwargs) as resp:
                     resp.raise_for_status()
                     return await self._response_to_str(resp, encoding)
             except aiohttp.ClientError:
@@ -243,41 +243,41 @@ class BaseSession(abc.ABC):
 
         raise RuntimeError("Unreachable code reached in fetch()")
 
-    async def get(
+    def get(
         self,
         url: str,
         params: dict[str, Any] | None = None,
         **kwargs: Any,
-    ) -> ClientResponse:
+    ) -> aiohttp.client._RequestContextManager:
         """
-        Send an HTTP GET request asynchronously.
+        Create an HTTP GET request context manager.
 
         :param url: The target URL.
         :param params: Query parameters to include in the request.
         :param kwargs: Additional args passed to session.get().
-        :return: aiohttp.ClientResponse object.
+        :return: aiohttp.client._RequestContextManager object.
         :raises RuntimeError: If the session is not initialized.
         """
-        return await self._request("GET", url, params=params, **kwargs)
+        return self._request("GET", url, params=params, **kwargs)
 
-    async def post(
+    def post(
         self,
         url: str,
         data: dict[str, Any] | bytes | None = None,
         json: dict[str, Any] | None = None,
         **kwargs: Any,
-    ) -> ClientResponse:
+    ) -> aiohttp.client._RequestContextManager:
         """
-        Send an HTTP POST request asynchronously.
+        Create an HTTP POST request context manager.
 
         :param url: The target URL.
         :param data: Form data to include in the request body.
         :param json: JSON body to include in the request.
         :param kwargs: Additional args passed to session.post().
-        :return: aiohttp.ClientResponse object.
+        :return: aiohttp.client._RequestContextManager object.
         :raises RuntimeError: If the session is not initialized.
         """
-        return await self._request("POST", url, data=data, json=json, **kwargs)
+        return self._request("POST", url, data=data, json=json, **kwargs)
 
     async def load_state(self) -> bool:
         """
@@ -361,14 +361,14 @@ class BaseSession(abc.ABC):
         if self._session:
             self._session.cookie_jar.update_cookies(cookies)
 
-    async def _request(
+    def _request(
         self,
         method: str,
         url: str,
         **kwargs: Any,
-    ) -> ClientResponse:
+    ) -> aiohttp.client._RequestContextManager:
         headers = {**self._headers, **kwargs.pop("headers", {})}
-        return await self.session.request(method, url, headers=headers, **kwargs)
+        return self.session.request(method, url, headers=headers, **kwargs)
 
     async def _check_login_status(self) -> bool:
         """
