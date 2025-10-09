@@ -150,9 +150,10 @@ class N69yueParser(BaseParser):
             else:
                 paragraphs.pop()
 
-        content = "\n".join(paragraphs)
-        if not content:
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,

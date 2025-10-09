@@ -91,7 +91,7 @@ class ShuhaigeParser(BaseParser):
             return None
 
         title = ""
-        contents: list[str] = []
+        paragraphs: list[str] = []
         for curr_html in html_list:
             tree = html.fromstring(curr_html)
             if not title:
@@ -99,20 +99,20 @@ class ShuhaigeParser(BaseParser):
                     tree.xpath('//div[@class="bookname"]/h1/text()')
                 )
 
-            paragraphs = [
+            lines = [
                 text
                 for p in tree.xpath('//div[@id="content"]//p')
                 if (text := "".join(p.itertext()).strip())
                 and not self._is_ad_line(text)
             ]
-            page_text = "\n".join(paragraphs)
+            page_text = "\n".join(lines)
             if page_text:
-                contents.append(page_text)
+                paragraphs.append(page_text)
 
-        if not contents:
+        if not paragraphs:
             return None
 
-        content = "\n".join(contents)
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,

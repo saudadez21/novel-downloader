@@ -276,16 +276,17 @@ class AaatxtParser(BaseParser):
         raw_title = self._first_str(tree.xpath("//div[@id='content']//h1/text()"))
         title = raw_title.split("-", 1)[-1].strip()
 
-        lines = []
+        paragraphs = []
         for txt in tree.xpath("//div[@class='chapter']//text()"):
             line = txt.strip()
             if not line or self._is_ad_line(txt):
                 continue
-            lines.append(line)
+            paragraphs.append(line)
 
-        content = "\n".join(lines)
-        if not content:
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         return {"id": chapter_id, "title": title, "content": content, "extra": {"site": self.site_name}}
 ```

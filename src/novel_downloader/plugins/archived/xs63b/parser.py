@@ -144,9 +144,10 @@ class Xs63bParser(BaseParser):
 
                 paragraphs.append(txt)
 
-        content = "\n".join(paragraphs).strip()
-        if not content:
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,

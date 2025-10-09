@@ -121,12 +121,18 @@ class N23qbParser(BaseParser):
         tree = html.fromstring(html_list[0])
 
         # Content paragraphs
-        paras = tree.xpath('//div[@class="article-content"]/p/text()')
-        content_text = "\n".join(p.strip() for p in paras if p.strip())
-        if not content_text:
+        paragraphs = [
+            text
+            for p in tree.xpath('//div[@class="article-content"]/p/text()')
+            if (text := self._norm_space(p))
+        ]
+
+        if not paragraphs:
             return None
 
-        title_text = self._first_str(tree.xpath('//h1[@class="article-title"]/text()'))
+        content = "\n".join(paragraphs)
+
+        title = self._first_str(tree.xpath('//h1[@class="article-title"]/text()'))
         volume_text = self._first_str(tree.xpath('//h3[@class="text-muted"]/text()'))
 
         next_href = self._first_str(
@@ -136,8 +142,8 @@ class N23qbParser(BaseParser):
 
         return {
             "id": chapter_id,
-            "title": title_text,
-            "content": content_text,
+            "title": title,
+            "content": content,
             "extra": {
                 "site": self.site_name,
                 "volume": volume_text,

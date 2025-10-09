@@ -149,13 +149,13 @@ class ShencouParser(BaseParser):
             return None
         marker = anchors[0]
 
-        lines: list[str] = []
+        paragraphs: list[str] = []
 
         def _append_text(text: str) -> None:
             for ln in text.replace("\xa0", " ").splitlines():
                 ln2 = ln.strip()
                 if ln2:
-                    lines.append(ln2)
+                    paragraphs.append(ln2)
 
         if marker.tail:
             _append_text(marker.tail)
@@ -186,7 +186,7 @@ class ShencouParser(BaseParser):
                 if tag == "div" and "divimage" in cls:
                     srcs = sib.xpath(".//img/@src")
                     if srcs:
-                        lines.append(f'<img src="{srcs[0]}" />')
+                        paragraphs.append(f'<img src="{srcs[0]}" />')
                     # text after the div
                     if sib.tail:
                         _append_text(sib.tail)
@@ -203,9 +203,10 @@ class ShencouParser(BaseParser):
                     _append_text(sib.tail)
                 continue
 
-        content = "\n".join(lines)
-        if not content:
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,

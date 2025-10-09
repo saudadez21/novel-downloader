@@ -173,9 +173,10 @@ class N37yqParser(BaseParser):
                     if src:
                         paragraphs.append(f'<img src="{src}" />')
 
-        content = "\n".join(paragraphs)
-        if not content:
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,

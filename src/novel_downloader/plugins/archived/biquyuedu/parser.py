@@ -119,9 +119,10 @@ class BiquyueduParser(BaseParser):
             if not self._is_ad_line(txt)
         ]
 
-        content = "\n".join(paragraphs)
-        if not content.strip():
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,

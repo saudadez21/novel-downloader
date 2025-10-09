@@ -171,9 +171,10 @@ class N8novelParser(BaseParser):
                 self._append_segment(segments, node.text_content())
                 self._append_segment(segments, node.tail)
 
-        content = "\n".join(segments).strip()
-        if not content.strip():
+        if not segments:
             return None
+
+        content = "\n".join(segments)
 
         return {
             "id": chapter_id,

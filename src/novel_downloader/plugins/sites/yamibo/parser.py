@@ -119,10 +119,16 @@ class YamiboParser(BaseParser):
             return None
         tree = html.fromstring(html_list[0])
 
-        content_lines = tree.xpath("//div[@id='w0-collapse1']//p//text()")
-        content = "\n".join(line.strip() for line in content_lines if line.strip())
-        if not content:
+        paragraphs = [
+            text
+            for p in tree.xpath("//div[@id='w0-collapse1']//p//text()")
+            if (text := self._norm_space(p))
+        ]
+
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         title = self._first_str(
             [tree.xpath("string(//section[contains(@class,'col-md-9')]//h3)")]

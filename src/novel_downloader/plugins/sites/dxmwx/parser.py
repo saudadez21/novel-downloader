@@ -133,9 +133,10 @@ class DxmwxParser(BaseParser):
                 continue
             paragraphs.append(text)
 
-        content = "\n".join(paragraphs)
-        if not content:
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,

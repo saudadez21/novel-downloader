@@ -170,9 +170,10 @@ class Ixdzs8Parser(BaseParser):
             if "本章完" in last:
                 paragraphs.pop()
 
-        content = "\n".join(paragraphs)
-        if not content.strip():
+        if not paragraphs:
             return None
+
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,
