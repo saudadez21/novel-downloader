@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.plugins.sites.sososhu.searcher
------------------------------------------------
+novel_downloader.plugins.common.searcher.sososhu
+------------------------------------------------
 
 """
 
@@ -9,7 +9,6 @@ import logging
 from typing import ClassVar
 
 from lxml import html
-
 from novel_downloader.plugins.base.searcher import BaseSearcher
 from novel_downloader.schemas import SearchResult
 

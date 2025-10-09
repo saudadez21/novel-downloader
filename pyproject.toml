@@ -42,6 +42,7 @@ dev = [
     "mypy",
     "ruff",
     "pytest",
+    "pytest-asyncio",
     "pytest-cov",
     "pytest-mock",
     "types-requests",
