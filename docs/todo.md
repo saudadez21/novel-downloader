@@ -7,8 +7,6 @@
 * [刺猬猫](https://www.ciweimao.com/)
   * 网页端接口已基本解析完成，但 VIP 章节返回的为图片格式
   * 计划在有空时尝试使用 APP 端接口解决
-* [轻小说文库](https://www.wenku8.net/)
-  * 需提供 `cf_clearance` cookie
 
 ### 广告过滤与章节标题归一化
 
@@ -108,14 +106,150 @@
 
 #### 中文
 
-* [次元姬](https://www.ciyuanji.com/)
-* [轻之国度](https://www.lightnovel.fun)
+* [话本小说](https://www.ihuaben.com/)
+
+  * 支持登录
+
+* [101看书](https://101kanshu.com/)
+
+  * 支持登录
+  * 使用加密字体
+
+* [轻之文库](https://www.linovel.net/)
+
+  * 支持登录
+
 * [米国度](https://www.myrics.com/)
-* [息壤中文网](https://www.xrzww.com/)
+
+  * 支持登录
+
+* [西方奇幻小说网](https://www.westnovel.com/)
+
+* [全职小说网](https://www.quanzhifashi.com/)
+
+  * 支持登录
+
+* [万相书城](https://wxsck.com/)
+
+* [笔仙阁](https://www.bixiange.me/)
+
+* [同人社](https://tongrenshe.cc/)
+
+* [半夏小说](https://www.xbanxia.cc/)
+
+* [小说狂人](https://czbooks.net/)
+
+  * 支持登录
+
+* [飞卢小说网](https://b.faloo.com/)
+
+  * VIP 章节需登录访问
+
+* [番茄小说网](https://fanqienovel.com/)
+
+  * VIP 章节需登录访问
+  * 使用加密字体
+
+* [书海小说网](https://www.shuhai.com/)
+
+  * VIP 章节需登录访问
+
+* [若初文学网](https://www.ruochu.com/)
+
+  * VIP 章节需登录访问
+
+* [连城读书](https://lcread.com/)
+
+  * VIP 章节需登录访问
+
+* [长佩文学](https://www.gongzicp.com/)
+
+  * 所有章节需登录
+  * 页面含加密字段 (需解析 `token` / `content`)
+
 * [有毒小说网](https://www.youdubook.com/)
+
+  * 所有章节需登录
+  * 页面含加密字段 (需解析 `token` / `content`)
+
+* [次元城](https://www.ciyuanji.com/)
+
+  * VIP 章节需登录访问
+  * 页面含加密字段 (需解析 `token` / `content`)
+
+* [独阅读](https://www.cddaoyue.cn/)
+
+  * VIP 章节需登录
+  * 页面含加密字段 (需解析 `token` / `content`)
+
+* [寒武纪年原创网](https://www.hanwujinian.com/)
+
+  * VIP 章节需登录
+  * 页面含加密字段 (需解析 `token` / `content`)
+
+* [少年梦](https://www.shaoniandream.com/)
+
+  * VIP 章节需登录
+  * 页面含加密字段 (需解析 `token` / `content`)
+
+* [书耽](https://www.shubl.com/)
+
+  * VIP 章节需登录
+  * 页面含加密字段 (需解析 `token` / `content`)
+
+* [晋江文学城](https://www.jjwxc.net/)
+
+  * VIP 章节需登录
+
+* [息壤中文网](https://www.xrzww.com/)
+
 * [纵横中文网](https://www.zongheng.com/)
-* [69书吧](https://www.69shuba.com/)
-  * 几乎所有请求都需要 Cloudflare 验证
+
+* [海棠小说网](https://m.haitangtxt.net/)
+
+  * 需重新排序
+
+* [爱丽丝书屋](https://www.alicesw.com/)
+
+* [海外书包](https://www.haiwaishubao.com/)
+
+  * 需手动清理 `&esp;`
+
+* [有爱爱](https://www.uaa.com/)
+
+  * 需登录
+
+* [PO18 原创网](https://www.po18.tw/)
+
+  * 需登录
+
+* [大灰狼小说聚合网](https://api.langge.cf/)
+
+  * API 风格与当前框架不兼容，需要单独流程
+
+* [99藏书网](https://www.99csw.com/)
+
+  * 需提供 `cf_clearance` Cookie
+
+* [轻小说文库](https://www.wenku8.net/)
+
+  * 需提供 `cf_clearance` cookie
+
+* [塔读文学](https://www.tadu.com/)
+
+  * 部分章节需通过 APP 阅读
+
+* [七猫中文网](https://www.qimao.com/)
+
+  * 后续章节需 APP 免费阅读
+
+* [得间小说](https://www.idejian.com/)
+
+  * 后续章节需 APP 免费阅读
+
+* [芒果书坊](https://mangguoshufang.com/)
+
+  * 加载较慢，体验不佳
 
 #### 日文
 
