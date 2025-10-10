@@ -5,8 +5,8 @@ novel_downloader.plugins.archived.wanbengo.searcher
 
 """
 
+from novel_downloader.plugins.common.searcher.sososhu import SososhuSearcher
 from novel_downloader.plugins.registry import registrar
-from novel_downloader.plugins.sites.sososhu.searcher import SososhuSearcher
 
 
 @registrar.register_searcher()
