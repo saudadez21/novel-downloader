@@ -193,6 +193,20 @@ SITE_RULES: dict[str, SiteRuleSet] = {
         ],
         hints=[],
     ),
+    "www.ciyuanji.com": SiteRuleSet(
+        site_key="ciyuanji",
+        extractors=[
+            BookIdExtractor(
+                pattern=r"^/b_d_(\d+)\.html$",
+                build_book_id=lambda m: m.group(1),
+            ),
+            BookIdExtractor(
+                pattern=r"^/chapter/(\d+)_\d+\.html$",
+                build_book_id=lambda m: m.group(1),
+            ),
+        ],
+        hints=[],
+    ),
     "www.deqixs.com": SiteRuleSet(
         site_key="deqixs",
         extractors=[

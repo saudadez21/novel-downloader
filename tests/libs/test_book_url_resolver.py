@@ -12,6 +12,9 @@ CASES_SUCCESS = [
     # qqbook
     ("https://book.qq.com/book-detail/41089201", "qqbook", "41089201"),
     ("https://book.qq.com/book-read/41089201/1", "qqbook", "41089201"),
+    # ciyuanji
+    ("https://www.ciyuanji.com/b_d_12030.html", "ciyuanji", "12030"),
+    ("https://www.ciyuanji.com/chapter/12030_3046684.html", "ciyuanji", "12030"),
     # hetushu (+ alias)
     ("https://www.hetushu.com/book/5763/index.html", "hetushu", "5763"),
     ("https://www.hetubook.com/book/5763/4327466.html", "hetushu", "5763"),
