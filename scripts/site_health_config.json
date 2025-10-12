@@ -5,6 +5,8 @@
   "sites": {
     "qidian": ["https://www.qidian.com/"],
     "qqbook": ["https://book.qq.com/"],
+    "ciyuanji": ["https://www.ciyuanji.com/"],
+
     "hetushu": ["https://www.hetushu.com/", "https://www.hetubook.com/"],
     "n23qb": ["https://www.23qb.com/"],
     "yodu": ["https://www.yodu.org/"],

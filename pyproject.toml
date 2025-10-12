@@ -24,6 +24,7 @@ dependencies = [
     "rich",
     "nicegui",
     "requests",
+    "pycryptodome",
     "aiohttp",
     "lxml",
     "platformdirs",

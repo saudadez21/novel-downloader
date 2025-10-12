@@ -72,6 +72,9 @@ request_interval = 2.5
 [sites.sfacg]
 login_required = true
 
+[sites.ciyuanji]
+login_required = true
+
 [sites.yamibo]
 login_required = false
 
