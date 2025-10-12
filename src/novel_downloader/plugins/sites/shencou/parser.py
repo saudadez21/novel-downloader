@@ -150,15 +150,20 @@ class ShencouParser(BaseParser):
         marker = anchors[0]
 
         paragraphs: list[str] = []
+        imgs_by_line: dict[int, list[str]] = {}
+        image_idx = 0
 
-        def _append_text(text: str) -> None:
-            for ln in text.replace("\xa0", " ").splitlines():
-                ln2 = ln.strip()
-                if ln2:
-                    paragraphs.append(ln2)
+        def append_para(txt: str | None) -> None:
+            nonlocal image_idx
+            if not txt:
+                return
+            for ln in txt.replace("\xa0", " ").splitlines():
+                cleaned = ln.strip()
+                if cleaned:
+                    paragraphs.append(cleaned)
+                    image_idx += 1
 
-        if marker.tail:
-            _append_text(marker.tail)
+        append_para(marker.tail)
 
         # 4. Walk through siblings until <!--over-->
         node = marker
@@ -174,8 +179,7 @@ class ShencouParser(BaseParser):
 
             # Process comment tails (e.g. <!--go--> tail)
             if isinstance(sib, etree._Comment):
-                if sib.tail:
-                    _append_text(sib.tail)
+                append_para(sib.tail)
                 continue
 
             if isinstance(sib, html.HtmlElement):
@@ -184,26 +188,31 @@ class ShencouParser(BaseParser):
                 cls = sib.get("class", "") or ""
 
                 if tag == "div" and "divimage" in cls:
-                    srcs = sib.xpath(".//img/@src")
+                    srcs = [
+                        s.strip() for s in sib.xpath(".//img/@src") if s and s.strip()
+                    ]
                     if srcs:
-                        paragraphs.append(f'<img src="{srcs[0]}" />')
-                    # text after the div
-                    if sib.tail:
-                        _append_text(sib.tail)
+                        imgs_by_line.setdefault(image_idx, []).extend(srcs)
+                    append_para(sib.tail)
+                    continue
+
+                # Standalone img
+                if tag == "img":
+                    src = (sib.get("src") or "").strip()
+                    if src:
+                        imgs_by_line.setdefault(image_idx, []).append(src)
+                    append_para(sib.tail)
                     continue
 
                 if tag == "br":
-                    if sib.tail:
-                        _append_text(sib.tail)
+                    append_para(sib.tail)
                     continue
 
-                text = sib.text_content()
-                _append_text(text)
-                if sib.tail:
-                    _append_text(sib.tail)
+                append_para(sib.text_content())
+                append_para(sib.tail)
                 continue
 
-        if not paragraphs:
+        if not (paragraphs or imgs_by_line):
             return None
 
         content = "\n".join(paragraphs)
@@ -212,5 +221,8 @@ class ShencouParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": self.site_name},
+            "extra": {
+                "site": self.site_name,
+                "imgs_by_line": imgs_by_line,
+            },
         }
