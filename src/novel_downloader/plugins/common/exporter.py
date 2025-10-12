@@ -598,11 +598,18 @@ class CommonExporter(BaseExporter):
         for url in imgs_by_line.get(0, []):
             _append_image(url)
 
-        for i, line in enumerate(content.splitlines(), start=1):
+        lines = content.splitlines()
+        for i, line in enumerate(lines, start=1):
             if ln := line.strip():
                 html_parts.append(f"<p>{escape(ln)}</p>")
             for url in imgs_by_line.get(i, []):
                 _append_image(url)
+
+        max_i = len(lines)
+        for k, urls in imgs_by_line.items():
+            if k > max_i:
+                for url in urls:
+                    _append_image(url)
 
         extras_epub = self._render_epub_extras(extras)
         if extras_epub:
