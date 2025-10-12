@@ -130,6 +130,9 @@ class LnovelParser(BaseParser):
         title = self._first_str(tree.xpath("//main//h1/text()"))
 
         paragraphs: list[str] = []
+        imgs_by_line: dict[int, list[str]] = {}
+        image_idx = 0
+
         for idx, elem in enumerate(tree.xpath('//*[@id="chaptersShowContent"]/*')):
             tag = elem.tag.lower()
             if tag == "p":
@@ -138,11 +141,11 @@ class LnovelParser(BaseParser):
                     txt = txt.replace(title, "").replace(vol_name, "").strip()
                 if txt:
                     paragraphs.append(txt)
+                    image_idx += 1
             elif tag == "img":
                 src = (elem.get("src") or "").strip()
                 src = self.BASE_URL + src if src.startswith("/") else src
-                if src:
-                    paragraphs.append(f'<img src="{src}" />')
+                imgs_by_line.setdefault(image_idx, []).append(src)
 
         # image gallery right after content block
         for src in tree.xpath(
@@ -150,10 +153,9 @@ class LnovelParser(BaseParser):
         ):
             src = (src or "").strip()
             src = self.BASE_URL + src if src.startswith("/") else src
-            if src:
-                paragraphs.append(f'<img src="{src}" />')
+            imgs_by_line.setdefault(image_idx, []).append(src)
 
-        if not paragraphs:
+        if not (paragraphs or imgs_by_line):
             return None
 
         content = "\n".join(paragraphs)
@@ -162,5 +164,8 @@ class LnovelParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": self.site_name},
+            "extra": {
+                "site": self.site_name,
+                "imgs_by_line": imgs_by_line,
+            },
         }
