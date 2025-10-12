@@ -264,7 +264,7 @@ class XiguashuwuParser(BaseParser):
 
     def _char_from_img(self, url: str) -> str:
         """
-        Given an <img> src URL, return the mapped character if this image
+        Given an img src URL, return the mapped character if this image
         represents a single glyph.
         """
         if not self._FONT_MAP:
@@ -286,7 +286,7 @@ class XiguashuwuParser(BaseParser):
         """
         Download the glyph image at `url` and run the font OCR on it.
 
-        :param url: Fully-qualified <img src="..."> URL to a single-glyph image.
+        :param url: Fully-qualified `<img src="...">` URL to a single-glyph image.
         :return: The recognized character (top-1) if OCR succeeds, otherwise None.
         """
         try:
@@ -396,7 +396,7 @@ class XiguashuwuParser(BaseParser):
     def _rebuild_paragraphs(self, content_div: html.HtmlElement) -> list[str]:
         """
         Given a content container element, reconstruct each paragraph by
-        interleaving normal text nodes and <img>-based glyphs.
+        interleaving normal text nodes and `<img>`-based glyphs.
 
         Uses `_char_from_img` to map image glyphs to characters.
 
