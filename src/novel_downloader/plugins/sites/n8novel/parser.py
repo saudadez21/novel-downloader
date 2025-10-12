@@ -138,9 +138,20 @@ class N8novelParser(BaseParser):
 
         wrapper = html.fromstring(f"<div>{html_list[1]}</div>")
 
-        segments: list[str] = []
+        paragraphs: list[str] = []
+        imgs_by_line: dict[int, list[str]] = {}
+        image_idx = 0
 
-        self._append_segment(segments, wrapper.text)
+        def append_para(txt: str | None) -> None:
+            nonlocal image_idx
+            if not txt:
+                return
+            cleaned = txt.strip()
+            if cleaned and not self._is_ad(cleaned):
+                paragraphs.append(cleaned)
+                image_idx += 1  # bump on successful append
+
+        append_para(wrapper.text)
 
         for node in wrapper:
             tag = node.tag.lower() if isinstance(node.tag, str) else ""
@@ -150,49 +161,40 @@ class N8novelParser(BaseParser):
                 for img in node.xpath(".//img"):
                     src = img.get("src")
                     full = src if not src.startswith("/") else self.BASE_URL + src
-                    segments.append(f'<img src="{full}" />')
-                self._append_segment(segments, node.tail)
+                    imgs_by_line.setdefault(image_idx, []).append(full)
+                append_para(node.tail)
 
             # Standalone <img>
             elif tag == "img":
                 src = node.get("src")
-                if not src:
-                    continue
-                full = src if not src.startswith("/") else self.BASE_URL + src
-                segments.append(f'<img src="{full}" />')
-                self._append_segment(segments, node.tail)
+                if src:
+                    full = src if not src.startswith("/") else self.BASE_URL + src
+                    imgs_by_line.setdefault(image_idx, []).append(full)
+                append_para(node.tail)
 
             # Line break -> text in .tail is next paragraph
             elif tag == "br":
-                self._append_segment(segments, node.tail)
+                append_para(node.tail)
 
             # Any other element -> get its text content
             else:
-                self._append_segment(segments, node.text_content())
-                self._append_segment(segments, node.tail)
+                append_para(node.text_content())
+                append_para(node.tail)
 
-        if not segments:
+        if not (paragraphs or imgs_by_line):
             return None
 
-        content = "\n".join(segments)
+        content = "\n".join(paragraphs)
 
         return {
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": self.site_name},
+            "extra": {
+                "site": self.site_name,
+                "imgs_by_line": imgs_by_line,
+            },
         }
-
-    @classmethod
-    def _append_segment(cls, segments: list[str], text: str | None) -> None:
-        """
-        Strip, filter out the '8novel' ad, and append non-empty text to segments.
-        """
-        if not text:
-            return
-        cleaned = text.strip()
-        if cleaned and not cls._is_ad(cleaned):
-            segments.append(cleaned)
 
     @classmethod
     def _is_ad(cls, line: str) -> bool:
