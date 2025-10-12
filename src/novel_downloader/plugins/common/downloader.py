@@ -195,7 +195,7 @@ class CommonDownloader(BaseDownloader):
                 )
                 if not chap:
                     raise ValueError("Empty parse result")
-                imgs = self._extract_img_urls(chap["content"])
+                imgs = self._extract_img_urls(chap["extra"])
                 img_dir = self._raw_data_dir / book_id / "images"
                 await self.fetcher.download_images(img_dir, imgs)
                 return chap
@@ -209,6 +209,38 @@ class CommonDownloader(BaseDownloader):
                 else:
                     self.logger.warning("Failed chapter %s: %s", cid, e)
         return None
+
+    def _extract_img_urls(self, extra: dict[str, Any]) -> list[str]:
+        """
+        Extract all image URLs from 'extra' field.
+        """
+        if not isinstance(extra, dict):
+            return []
+
+        imgs_by_line = extra.get("imgs_by_line")
+        if not isinstance(imgs_by_line, dict):
+            return []
+
+        urls: list[str] = []
+        for line_no, urls_in_line in imgs_by_line.items():
+            if not isinstance(urls_in_line, list | tuple):
+                self.logger.debug(
+                    "imgs_by_line[%r] expected list/tuple, got %r",
+                    line_no,
+                    type(urls_in_line),
+                )
+                continue
+            for url in urls_in_line:
+                if isinstance(url, str) and url.startswith("http"):
+                    urls.append(url)
+                else:
+                    self.logger.debug(
+                        "Invalid image URL type or format at line %r: %r",
+                        line_no,
+                        url,
+                    )
+
+        return urls
 
     @staticmethod
     def _normalize_book_id(book_id: str) -> str:

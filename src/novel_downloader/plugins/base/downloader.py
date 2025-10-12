@@ -10,7 +10,6 @@ import abc
 import asyncio
 import json
 import logging
-import re
 import time
 from collections.abc import Awaitable, Callable, Sequence
 from pathlib import Path
@@ -37,11 +36,6 @@ class BaseDownloader(abc.ABC):
     Subclasses are required to implement methods for downloading
     a single book, using the provided fetcher and parser components.
     """
-
-    _IMG_SRC_RE = re.compile(
-        r'<img[^>]*\bsrc\s*=\s*["\'](https?://[^"\']+)["\'][^>]*>',
-        re.IGNORECASE,
-    )
 
     def __init__(
         self,
@@ -215,13 +209,6 @@ class BaseDownloader(abc.ABC):
             (html_dir / f"{book_id}_{filename}_{i}.html").write_text(
                 html, encoding="utf-8"
             )
-
-    @classmethod
-    def _extract_img_urls(cls, content: str) -> list[str]:
-        """
-        Extract all <img> tag src URLs from the given HTML string.
-        """
-        return cls._IMG_SRC_RE.findall(content)
 
     @staticmethod
     def _select_chapter_ids(
