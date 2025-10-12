@@ -196,6 +196,8 @@ class LinovelibParser(BaseParser):
 
         title: str = ""
         paragraphs: list[str] = []
+        imgs_by_line: dict[int, list[str]] = {}
+        image_idx = 0
 
         for curr_html in html_list:
             tree = html.fromstring(curr_html)
@@ -214,9 +216,7 @@ class LinovelibParser(BaseParser):
             use_shuffle = self._has_shuffle(curr_html)
 
             p_texts: list[str] = []
-            img_map: dict[int, list[str]] = {}
             page_lines: list[str] = []
-            last_p_idx: int = -1
 
             for node in tc.xpath("./p | ./img"):
                 tag = node.tag.lower()
@@ -232,18 +232,13 @@ class LinovelibParser(BaseParser):
                     txt = self._norm_space(txt)
 
                     p_texts.append(txt)
-                    last_p_idx += 1
+                    image_idx += 1
 
                 elif tag == "img":
                     src = node.get("data-src") or node.get("src", "")
                     if not src:
                         continue
-                    img_html = f'<img src="{src}" />'
-                    if last_p_idx >= 0:
-                        img_map.setdefault(last_p_idx, []).append(img_html)
-                    else:
-                        # images before the first <p>
-                        page_lines.append(img_html)
+                    imgs_by_line.setdefault(image_idx, []).append(src)
 
             if not p_texts and not page_lines:
                 continue
@@ -256,13 +251,7 @@ class LinovelibParser(BaseParser):
             else:
                 reordered_p = p_texts
 
-            for i, p in enumerate(reordered_p):
-                if p and p.strip():
-                    page_lines.append(p)
-                if i in img_map:
-                    page_lines.extend(img_map[i])
-
-            page_content = "\n".join(page_lines)
+            page_content = "\n".join(p for p in reordered_p if p.strip())
             if page_content:
                 paragraphs.append(page_content)
 
@@ -275,7 +264,10 @@ class LinovelibParser(BaseParser):
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": self.site_name},
+            "extra": {
+                "site": self.site_name,
+                "imgs_by_line": imgs_by_line,
+            },
         }
 
     @staticmethod
