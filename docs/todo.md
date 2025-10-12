@@ -29,6 +29,11 @@
   * 目前导出的排版较为基础，整体观感有待提升
   * 不太擅长设计与排版，需要参考一些优秀的 EPUB 样本 (如字体层次、段落间距、封面与章节页布局等)
 
+### CommonExporter 逻辑优化
+
+* 当前导出逻辑在章节遍历、文件生成、资源整合等部分存在一定重复与分支判断，整体结构略显混乱
+* 可考虑将通用导出流程抽象为模板方法 (Template Method Pattern)，通过定义可选覆盖的 hook 方法 (如 `_render_*` 系列函数) 实现定制化
+
 ### 对比 OpenCC 与 opencc-python
 
 * 对比 [opencc-python](https://github.com/yichen0831/opencc-python) 与 [OpenCC](https://github.com/BYVoid/OpenCC) 的差异
@@ -170,11 +175,6 @@
 * [有毒小说网](https://www.youdubook.com/)
 
   * 所有章节需登录
-  * 页面含加密字段 (需解析 `token` / `content`)
-
-* [次元城](https://www.ciyuanji.com/)
-
-  * VIP 章节需登录访问
   * 页面含加密字段 (需解析 `token` / `content`)
 
 * [独阅读](https://www.cddaoyue.cn/)
