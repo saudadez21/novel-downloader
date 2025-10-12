@@ -6,7 +6,6 @@ novel_downloader.plugins.common.exporter
 Shared exporter implementation for producing standard TXT and EPUB outputs.
 """
 
-import re
 from html import escape
 from pathlib import Path
 from typing import Any, Literal
@@ -40,11 +39,6 @@ class CommonExporter(BaseExporter):
     """
 
     _IMAGE_WRAPPER = '<div class="duokan-image-single illus">{img}</div>'
-    _IMG_TAG_RE = re.compile(r"<img[^>]*>", re.IGNORECASE)
-    _IMG_SRC_RE = re.compile(
-        r'<img[^>]*\bsrc\s*=\s*["\'](https?://[^"\']+)["\'][^>]*>',
-        re.IGNORECASE,
-    )
 
     def export_as_txt(self, book: BookConfig) -> Path | None:
         """
@@ -97,7 +91,7 @@ class CommonExporter(BaseExporter):
             chap_map = self._get_chapters(book_id, cids)
             for ch_info in volume.get("chapters", []):
                 cid = ch_info.get("chapterId")
-                ch_title = ch_info.get("title", "")
+                ch_title = ch_info.get("title")
                 if not cid:
                     continue
 
@@ -141,12 +135,12 @@ class CommonExporter(BaseExporter):
 
         Steps:
           1. Load `book_info` for metadata.
-        2. For each volume:
-          a. Clean the volume title and determine output filename.
-          b. Batch-fetch all chapters in this volume to minimize SQLite overhead.
-          c. Initialize an EPUB builder for the volume, including cover and intro.
-          d. For each chapter: clean title & content, inline remote images.
-          e. Finalize and write the volume EPUB.
+          2. For each volume:
+             a. Clean the volume title and determine output filename.
+             b. Batch-fetch all chapters in this volume to minimize SQLite overhead.
+             c. Initialize an EPUB builder for the volume, including cover and intro.
+             d. For each chapter: build XHTML and place images from extras.imgs_by_line.
+             e. Finalize and write the volume EPUB.
         """
         book_id = self._normalize_book_id(book.book_id)
         start_id = book.start_id
@@ -231,32 +225,15 @@ class CommonExporter(BaseExporter):
                     self._handle_missing_chapter(cid)
                     continue
 
-                raw_title = (
-                    ch_title if isinstance(ch_title, str) else ch.get("title", "")
+                chapter_obj = self._build_epub_chapter(
+                    book=epub,
+                    css=[main_css],
+                    cid=cid,
+                    chap_title=ch_title,
+                    chap=ch,
+                    img_dir=img_dir,
                 )
-                title = (raw_title or "").strip() or str(cid)
-                content = ch.get("content", "")
-
-                content = (
-                    self._inline_remote_images(epub, content, img_dir)
-                    if self._include_picture
-                    else self._remove_all_images(content)
-                )
-
-                chap_html = self._build_epub_chapter(
-                    title=title,
-                    paragraphs=content,
-                    extras=ch.get("extra", {}),
-                )
-                epub.add_chapter(
-                    Chapter(
-                        id=f"c_{cid}",
-                        filename=f"c{cid}.xhtml",
-                        title=title,
-                        content=chap_html,
-                        css=[main_css],
-                    )
-                )
+                epub.add_chapter(chapter_obj)
 
             out_name = self.get_filename(title=vol_title, author=author, ext="epub")
             out_path = self._output_dir / sanitize_filename(out_name)
@@ -373,33 +350,16 @@ class CommonExporter(BaseExporter):
                     self._handle_missing_chapter(cid)
                     continue
 
-                raw_title = (
-                    ch_title if isinstance(ch_title, str) else ch.get("title", "")
-                )
-                title = (raw_title or "").strip() or str(cid)
-                content = ch.get("content", "")
-
-                content = (
-                    self._inline_remote_images(epub, content, img_dir)
-                    if self._include_picture
-                    else self._remove_all_images(content)
+                chapter_obj = self._build_epub_chapter(
+                    book=epub,
+                    css=[main_css],
+                    cid=cid,
+                    chap_title=ch_title,
+                    chap=ch,
+                    img_dir=img_dir,
                 )
 
-                chap_html = self._build_epub_chapter(
-                    title=title,
-                    paragraphs=content,
-                    extras=ch.get("extra", {}),
-                )
-
-                curr_vol.chapters.append(
-                    Chapter(
-                        id=f"c_{cid}",
-                        filename=f"c{cid}.xhtml",
-                        title=title,
-                        content=chap_html,
-                        css=[main_css],
-                    )
-                )
+                curr_vol.chapters.append(chapter_obj)
 
             epub.add_volume(curr_vol)
 
@@ -574,7 +534,7 @@ class CommonExporter(BaseExporter):
         line = f"=== {vol_title.strip()} ==="
         return f"{line}\n" + ("\n".join(meta_bits) + "\n\n" if meta_bits else "\n\n")
 
-    def _build_txt_chapter(self, chap_title: str, chap: ChapterDict) -> str:
+    def _build_txt_chapter(self, chap_title: str | None, chap: ChapterDict) -> str:
         """
         Render one chapter to text
         """
@@ -582,7 +542,6 @@ class CommonExporter(BaseExporter):
         title_line = chap_title or chap.get("title", "").strip()
 
         cleaned = chap.get("content", "").strip()
-        cleaned = self._remove_all_images(cleaned)
         body = "\n".join(s for line in cleaned.splitlines() if (s := line.strip()))
 
         # Extras
@@ -594,96 +553,104 @@ class CommonExporter(BaseExporter):
             else f"{title_line}\n\n{body}\n\n"
         )
 
-    def _inline_remote_images(
-        self,
-        book: EpubBuilder,
-        content: str,
-        image_dir: Path,
-    ) -> str:
-        """
-        Download every remote `<img src="...">` in `content` into `image_dir`,
-        and replace the original url with local path.
-
-        :param content: HTML/text of the chapter containing <img> tags.
-        :param image_dir: Directory to save downloaded images into.
-        """
-        if "<img" not in content.lower():
-            return content
-
-        def _replace(m: re.Match[str]) -> str:
-            url = m.group(1)
-            try:
-                local_path = self._download_image(url, image_dir, on_exist="skip")
-                if not local_path:
-                    return m.group(0)
-                filename = book.add_image(local_path)
-                return f'<img src="../Images/{filename}" />'
-            except Exception as e:
-                self.logger.debug("Inline image failed for %s: %s", url, e)
-                return m.group(0)
-
-        return self._IMG_SRC_RE.sub(_replace, content)
-
-    @classmethod
-    def _remove_all_images(cls, content: str) -> str:
-        """
-        Remove all <img> tags from the given content.
-
-        :param content: HTML/text of the chapter containing <img> tags.
-        """
-        return cls._IMG_TAG_RE.sub("", content)
-
     def _build_epub_chapter(
         self,
-        title: str,
-        paragraphs: str,
-        extras: dict[str, str],
-    ) -> str:
+        *,
+        book: EpubBuilder,
+        css: list[StyleSheet],
+        cid: str,
+        chap_title: str | None,
+        chap: ChapterDict,
+        img_dir: Path,
+    ) -> Chapter:
         """
-        Build a formatted chapter epub HTML including title, body paragraphs,
-        and optional extra sections.
+        Build a Chapter object with XHTML content and optionally place images
+        from `chap.extra['imgs_by_line']` (1-based index; 0 = before first paragraph).
         """
-        parts = []
-        parts.append(f"<h2>{escape(title)}</h2>")
-        parts.append(self._render_html_block(paragraphs))
+        title = chap_title or chap.get("title", "").strip()
+        content = chap.get("content", "")
+
+        extras = chap.get("extra") or {}
+        imgs_by_line = self._normalize_imgs_map(extras.get("imgs_by_line") or {})
+        html_parts: list[str] = [f"<h2>{escape(title)}</h2>"]
+
+        def _append_image(url: str) -> None:
+            """Download `url`, add to EPUB, and append to `html_parts`."""
+            if not self._include_picture:
+                return
+            u = url.strip()
+            if not u:
+                return
+            if u.startswith("//"):
+                u = "https:" + u
+            if not (u.startswith("http://") or u.startswith("https://")):
+                return
+            try:
+                local = self._download_image(u, img_dir, on_exist="skip")
+                if not local:
+                    return
+                fname = book.add_image(local)
+                img = f'<img src="../Images/{fname}" alt="image"/>'
+                html_parts.append(self._IMAGE_WRAPPER.format(img=img))
+            except Exception as e:
+                self.logger.debug("EPUB image add failed for %s: %s", u, e)
+
+        for url in imgs_by_line.get(0, []):
+            _append_image(url)
+
+        for i, line in enumerate(content.splitlines(), start=1):
+            if ln := line.strip():
+                html_parts.append(f"<p>{escape(ln)}</p>")
+            for url in imgs_by_line.get(i, []):
+                _append_image(url)
 
         extras_epub = self._render_epub_extras(extras)
         if extras_epub:
-            parts.append(extras_epub)
+            html_parts.append(extras_epub)
 
-        return "\n".join(parts)
+        content = "\n".join(html_parts)
+
+        return Chapter(
+            id=f"c_{cid}",
+            filename=f"c{cid}.xhtml",
+            title=title,
+            content=content,
+            css=css,
+        )
+
+    @staticmethod
+    def _normalize_imgs_map(raw_map: Any) -> dict[int, list[str]]:
+        """
+        Normalize imgs_by_line into {int: [str, ...]}.
+        """
+        result: dict[int, list[str]] = {}
+        if not isinstance(raw_map, dict):
+            return result
+        for k, v in raw_map.items():
+            try:
+                key = int(k)
+            except Exception:
+                key = 0
+            urls: list[str] = []
+            if isinstance(v, list | tuple):
+                for u in v:
+                    if isinstance(u, str):
+                        s = u.strip()
+                        if s:
+                            urls.append(s)
+            elif isinstance(v, str):
+                s = v.strip()
+                if s:
+                    urls.append(s)
+            if urls:
+                result.setdefault(key, []).extend(urls)
+        return result
 
     @classmethod
     def _render_html_block(cls, text: str) -> str:
-        out: list[str] = []
-        for raw in text.splitlines():
-            line = raw.strip()
-            if not line:
-                continue
-
-            # case 1: already wrapped in a <div>...</div>
-            if line.startswith("<div") and line.endswith("</div>"):
-                out.append(line)
-                continue
-
-            # case 2: single <img> line
-            if cls._IMG_TAG_RE.fullmatch(line):
-                out.append(cls._IMAGE_WRAPPER.format(img=line))
-                continue
-
-            # case 3: inline <img> in text -> escape other text, preserve <img>
-            if "<img " in line.lower():
-                pieces = []
-                last = 0
-                for m in cls._IMG_TAG_RE.finditer(line):
-                    pieces.append(escape(line[last : m.start()]))
-                    pieces.append(m.group(0))
-                    last = m.end()
-                pieces.append(escape(line[last:]))
-                out.append("<p>" + "".join(pieces) + "</p>")
-                continue
-
-            # plain text line
-            out.append(f"<p>{escape(line)}</p>")
-
-        return "\n".join(out)
+        """
+        Wraps each non-empty (stripped) line with <p>.
+        """
+        return "\n".join(
+            f"<p>{escape(s)}</p>" for ln in text.splitlines() if (s := ln.strip())
+        )
