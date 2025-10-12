@@ -219,6 +219,9 @@ class CiyuanjiDownloader(BaseDownloader):
                 )
                 if not chap:
                     raise ValueError("Empty parse result")
+                imgs = self._collect_img_urls(chap["extra"])
+                img_dir = self._raw_data_dir / book_id / "images"
+                await self.fetcher.download_images(img_dir, imgs)
                 return chap
             except Exception as e:
                 if attempt < self._retry_times:
@@ -232,3 +235,14 @@ class CiyuanjiDownloader(BaseDownloader):
                 else:
                     self.logger.warning("Failed chapter %s: %s", cid, e)
         return None
+
+    @staticmethod
+    def _collect_img_urls(extra: dict[str, Any]) -> list[str]:
+        img_list = extra.get("imgList", [])
+        if not isinstance(img_list, list):
+            return []
+        return [
+            url
+            for item in img_list
+            if isinstance(item, dict) and isinstance((url := item.get("imgUrl")), str)
+        ]
