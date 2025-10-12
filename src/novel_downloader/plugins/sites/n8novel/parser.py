@@ -164,7 +164,7 @@ class N8novelParser(BaseParser):
                     imgs_by_line.setdefault(image_idx, []).append(full)
                 append_para(node.tail)
 
-            # Standalone <img>
+            # Standalone img
             elif tag == "img":
                 src = node.get("src")
                 if src:
