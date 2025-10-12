@@ -245,13 +245,13 @@ class EsjzoneParser(BaseParser):
                 font_mappings=font_mappings,
             )
 
-            all_lines.extend(lines)
-
             # Merge image maps, re-indexing by current length prior to this root
             if img_map:
                 base = len(all_lines)
                 for k, urls in img_map.items():
                     imgs_by_line.setdefault(k + base, []).extend(urls)
+
+            all_lines.extend(lines)
 
         if not all_lines:
             return None
