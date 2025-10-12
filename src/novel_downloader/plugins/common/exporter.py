@@ -608,13 +608,13 @@ class CommonExporter(BaseExporter):
         if extras_epub:
             html_parts.append(extras_epub)
 
-        content = "\n".join(html_parts)
+        xhtml = "\n".join(html_parts)
 
         return Chapter(
             id=f"c_{cid}",
             filename=f"c{cid}.xhtml",
             title=title,
-            content=content,
+            content=xhtml,
             css=css,
         )
 
