@@ -28,6 +28,7 @@ from aiohttp import (
 from novel_downloader.infra.http_defaults import (
     DEFAULT_IMAGE_SUFFIX,
     DEFAULT_USER_HEADERS,
+    IMAGE_HEADERS,
 )
 from novel_downloader.infra.paths import DATA_DIR
 from novel_downloader.libs.filesystem import sanitize_filename
@@ -461,7 +462,7 @@ class BaseSession(abc.ABC):
         if save_path.exists() and on_exist == "skip":
             return
 
-        async with await self.get(url) as resp:
+        async with await self.get(url, headers=IMAGE_HEADERS) as resp:
             try:
                 resp.raise_for_status()
             except aiohttp.ClientResponseError as e:

@@ -10,7 +10,7 @@ from html import escape
 from pathlib import Path
 from typing import Any, Literal
 
-from novel_downloader.infra.http_defaults import DEFAULT_HEADERS, DEFAULT_IMAGE_SUFFIX
+from novel_downloader.infra.http_defaults import DEFAULT_IMAGE_SUFFIX, IMAGE_HEADERS
 from novel_downloader.infra.paths import CSS_MAIN_PATH
 from novel_downloader.libs.epub import (
     Chapter,
@@ -422,7 +422,7 @@ class CommonExporter(BaseExporter):
             img_url,
             target_dir,
             filename=filename,
-            headers=DEFAULT_HEADERS,
+            headers=IMAGE_HEADERS,
             on_exist=on_exist,
             default_suffix=DEFAULT_IMAGE_SUFFIX,
         )
