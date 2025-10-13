@@ -19,6 +19,7 @@ import os
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from time import perf_counter
 from typing import Any
 
 import aiohttp
@@ -58,10 +59,18 @@ class SiteResult:
     ok: bool
     message: str
     url: str
+    elapsed: float  # seconds
 
 
 def _utc_now_iso() -> str:
     return datetime.now(UTC).isoformat()
+
+
+def _fmt_duration(seconds: float) -> str:
+    # Human-friendly formatting for the summary line
+    if seconds < 1:
+        return f"{seconds * 1000:.0f} ms"
+    return f"{seconds:.2f} s"
 
 
 def normalize_sites(obj: Mapping[str, Any]) -> dict[str, list[str]]:
@@ -206,17 +215,28 @@ async def check_one_site(
 ) -> SiteResult:
     timeout = aiohttp.ClientTimeout(total=timeout_secs)
     last_msg = "no urls"
+    start = perf_counter()
     for url in urls:
         for attempt in range(retries + 1):
             async with sem:
                 ok, msg = await _fetch_ok(session, url, timeout)
             if ok:
-                return SiteResult(site=site, ok=True, message=msg, url=url)
+                return SiteResult(
+                    site=site,
+                    ok=True,
+                    message=msg,
+                    url=url,
+                    elapsed=perf_counter() - start,
+                )
             last_msg = msg
             if attempt < retries:
                 await asyncio.sleep(0.5)
     return SiteResult(
-        site=site, ok=False, message=last_msg, url=urls[0] if urls else ""
+        site=site,
+        ok=False,
+        message=last_msg,
+        url=urls[0] if urls else "",
+        elapsed=perf_counter() - start,
     )
 
 
@@ -260,7 +280,10 @@ async def async_main() -> int:
     print("\n=== Site Health Summary ===")
     for r in sorted(results, key=lambda x: x.site):
         status = "OK" if r.ok else "FAIL"
-        print(f"[{status}] {r.site:15s} -> {r.message:>8s} ({r.url})")
+        print(
+            f"[{status}] {r.site:15s} -> {r.message:>8s} "
+            f"in {_fmt_duration(r.elapsed)} ({r.url})"
+        )
 
     token = os.getenv("GITHUB_TOKEN")
     repo = os.getenv("GITHUB_REPOSITORY")
