@@ -214,10 +214,11 @@ class CommonExporter(BaseExporter):
             chap_map = self._get_chapters(book_id, cids)
 
             # Append each chapter
+            seen_cids: set[str] = set()
             for ch_info in vol.get("chapters", []):
                 cid = ch_info.get("chapterId")
                 ch_title = ch_info.get("title")
-                if not cid:
+                if not cid or cid in seen_cids:
                     continue
 
                 ch = chap_map.get(cid)
@@ -234,6 +235,7 @@ class CommonExporter(BaseExporter):
                     img_dir=img_dir,
                 )
                 epub.add_chapter(chapter_obj)
+                seen_cids.add(cid)
 
             out_name = self.get_filename(title=vol_title, author=author, ext="epub")
             out_path = self._output_dir / sanitize_filename(out_name)
@@ -311,6 +313,7 @@ class CommonExporter(BaseExporter):
         epub.add_stylesheet(main_css)
 
         # --- Compile columes ---
+        seen_cids: set[str] = set()
         for v_idx, vol in enumerate(vols, start=1):
             vol_title = vol.get("volume_name") or f"卷 {v_idx}"
 
@@ -342,7 +345,7 @@ class CommonExporter(BaseExporter):
             for ch_info in vol.get("chapters", []):
                 cid = ch_info.get("chapterId")
                 ch_title = ch_info.get("title")
-                if not cid:
+                if not cid or cid in seen_cids:
                     continue
 
                 ch = chap_map.get(cid)
@@ -360,6 +363,7 @@ class CommonExporter(BaseExporter):
                 )
 
                 curr_vol.chapters.append(chapter_obj)
+                seen_cids.add(cid)
 
             epub.add_volume(curr_vol)
 
@@ -571,14 +575,13 @@ class CommonExporter(BaseExporter):
         content = chap.get("content", "")
 
         extras = chap.get("extra") or {}
-        imgs_by_line = self._normalize_imgs_map(extras.get("imgs_by_line") or {})
+        imgs_by_line = self._collect_img_map(extras)
         html_parts: list[str] = [f"<h2>{escape(title)}</h2>"]
 
         def _append_image(url: str) -> None:
-            """Download `url`, add to EPUB, and append to `html_parts`."""
             if not self._include_picture:
                 return
-            u = url.strip()
+            u = (url or "").strip()
             if not u:
                 return
             if u.startswith("//"):
@@ -595,9 +598,11 @@ class CommonExporter(BaseExporter):
             except Exception as e:
                 self.logger.debug("EPUB image add failed for %s: %s", u, e)
 
+        # Images before first paragraph
         for url in imgs_by_line.get(0, []):
             _append_image(url)
 
+        # Paragraphs + inline-after images
         lines = content.splitlines()
         for i, line in enumerate(lines, start=1):
             if ln := line.strip():
@@ -611,12 +616,10 @@ class CommonExporter(BaseExporter):
                 for url in urls:
                     _append_image(url)
 
-        extras_epub = self._render_epub_extras(extras)
-        if extras_epub:
+        if extras_epub := self._render_epub_extras(extras):
             html_parts.append(extras_epub)
 
         xhtml = "\n".join(html_parts)
-
         return Chapter(
             id=f"c_{cid}",
             filename=f"c{cid}.xhtml",
@@ -626,11 +629,12 @@ class CommonExporter(BaseExporter):
         )
 
     @staticmethod
-    def _normalize_imgs_map(raw_map: Any) -> dict[int, list[str]]:
+    def _collect_img_map(extras: dict[str, Any]) -> dict[int, list[str]]:
         """
-        Normalize imgs_by_line into {int: [str, ...]}.
+        Collect and normalize `imgs_by_line` into `{int: [str, ...]}`.
         """
         result: dict[int, list[str]] = {}
+        raw_map = extras.get("imgs_by_line") or {}
         if not isinstance(raw_map, dict):
             return result
         for k, v in raw_map.items():

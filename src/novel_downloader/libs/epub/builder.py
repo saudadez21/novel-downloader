@@ -39,7 +39,6 @@ from .documents import (
 from .models import (
     Chapter,
     ChapterEntry,
-    EpubResource,
     ImageResource,
     StyleSheet,
     Volume,
@@ -128,7 +127,11 @@ class EpubBuilder:
         data = image_path.read_bytes()
         img = ImageResource(id=res_id, data=data, media_type=mtype, filename=filename)
         self.images.append(img)
-        self._register(img, folder=IMAGE_FOLDER, in_spine=False)
+        self.opf.add_manifest_item(
+            img.id,
+            f"{IMAGE_FOLDER}/{img.filename}",
+            img.media_type,
+        )
 
         self._img_map[h] = filename
         self._img_idx += 1
@@ -136,7 +139,12 @@ class EpubBuilder:
 
     def add_chapter(self, chap: Chapter) -> None:
         self.chapters.append(chap)
-        self._register(chap, folder=TEXT_FOLDER)
+        self.opf.add_manifest_item(
+            chap.id,
+            f"{TEXT_FOLDER}/{chap.filename}",
+            chap.media_type,
+        )
+        self.opf.add_spine_item(chap.id)
         self.nav.add_chapter(chap.id, chap.title, f"{TEXT_FOLDER}/{chap.filename}")
         self.ncx.add_chapter(chap.id, chap.title, f"{TEXT_FOLDER}/{chap.filename}")
 
@@ -145,19 +153,23 @@ class EpubBuilder:
         # volume-specific cover
         if volume.cover:
             filename = self.add_image(volume.cover)
-            cover_html = f'<img class="width100" src="../{IMAGE_FOLDER}/{filename}"/>'
-            cover_chap = Chapter(
-                id=f"vol_{self._vol_idx}_cover",
-                title=volume.title,
-                content=cover_html,
-                filename=f"vol_{self._vol_idx}_cover.xhtml",
-            )
-            self.chapters.append(cover_chap)
-            self._register(
-                cover_chap,
-                folder=TEXT_FOLDER,
-                properties="duokan-page-fullscreen",
-            )
+            if filename:
+                cover_html = (
+                    f'<img class="width100" src="../{IMAGE_FOLDER}/{filename}"/>'
+                )
+                cover_chap = Chapter(
+                    id=f"vol_{self._vol_idx}_cover",
+                    title=volume.title,
+                    content=cover_html,
+                    filename=f"vol_{self._vol_idx}_cover.xhtml",
+                )
+                self.chapters.append(cover_chap)
+                self.opf.add_manifest_item(
+                    cover_chap.id,
+                    f"{TEXT_FOLDER}/{cover_chap.filename}",
+                    cover_chap.media_type,
+                )
+                self.opf.add_spine_item(cover_chap.id)
 
         # volume intro page
         intro_content = build_volume_intro(volume.title, volume.intro)
@@ -169,13 +181,23 @@ class EpubBuilder:
             filename=f"vol_{self._vol_idx}.xhtml",
         )
         self.chapters.append(vol_intro)
-        self._register(vol_intro, folder=TEXT_FOLDER)
+        self.opf.add_manifest_item(
+            vol_intro.id,
+            f"{TEXT_FOLDER}/{vol_intro.filename}",
+            vol_intro.media_type,
+        )
+        self.opf.add_spine_item(vol_intro.id)
 
         # nested chapters
         entries: list[ChapterEntry] = []
         for chap in volume.chapters:
             self.chapters.append(chap)
-            self._register(chap, folder=TEXT_FOLDER)
+            self.opf.add_manifest_item(
+                chap.id,
+                f"{TEXT_FOLDER}/{chap.filename}",
+                chap.media_type,
+            )
+            self.opf.add_spine_item(chap.id)
             entries.append(
                 ChapterEntry(
                     id=chap.id,
@@ -205,7 +227,11 @@ class EpubBuilder:
         Register an external CSS file in the EPUB.
         """
         self.styles.append(css)
-        self._register(css, folder=CSS_FOLDER, in_spine=False)
+        self.opf.add_manifest_item(
+            css.id,
+            f"{CSS_FOLDER}/{css.filename}",
+            css.media_type,
+        )
 
     def export(self, output_path: str | Path) -> Path:
         """
@@ -215,21 +241,6 @@ class EpubBuilder:
         """
         return self._build_epub(output_path=Path(output_path))
 
-    def _register(
-        self,
-        res: EpubResource,
-        folder: str,
-        in_spine: bool = True,
-        properties: str | None = None,
-    ) -> None:
-        """
-        Add resource to the manifest—and optionally to the spine.
-        """
-        href = f"{folder}/{res.filename}"
-        self.opf.add_manifest_item(res.id, href, res.media_type, properties)
-        if in_spine:
-            self.opf.add_spine_item(res.id, properties)
-
     def _init_styles(self) -> None:
         # volume border & intro CSS
         self.intro_css = StyleSheet(
@@ -238,7 +249,11 @@ class EpubBuilder:
             filename="intro_style.css",
         )
         self.styles.append(self.intro_css)
-        self._register(self.intro_css, folder=CSS_FOLDER, in_spine=False)
+        self.opf.add_manifest_item(
+            "intro_style",
+            f"{CSS_FOLDER}/intro_style.css",
+            "text/css",
+        )
 
         try:
             border_bytes = VOLUME_BORDER_IMAGE_PATH.read_bytes()
@@ -251,7 +266,11 @@ class EpubBuilder:
             filename="volume_border.png",
         )
         self.images.append(border)
-        self._register(border, folder=IMAGE_FOLDER, in_spine=False)
+        self.opf.add_manifest_item(
+            border.id,
+            f"{IMAGE_FOLDER}/{border.filename}",
+            border.media_type,
+        )
 
     def _init_cover(self, cover_path: Path | None) -> None:
         if not cover_path or not cover_path.is_file():
@@ -269,10 +288,10 @@ class EpubBuilder:
             filename=f"cover.{ext}",
         )
         self.images.append(cover_img)
-        self._register(
-            cover_img,
-            folder=IMAGE_FOLDER,
-            in_spine=False,
+        self.opf.add_manifest_item(
+            cover_img.id,
+            f"{IMAGE_FOLDER}/{cover_img.filename}",
+            cover_img.media_type,
             properties="cover-image",
         )
 
@@ -283,11 +302,12 @@ class EpubBuilder:
             filename="cover.xhtml",
         )
         self.chapters.append(cover_chapter)
-        self._register(
-            cover_chapter,
-            folder=TEXT_FOLDER,
-            properties="duokan-page-fullscreen",
+        self.opf.add_manifest_item(
+            cover_chapter.id,
+            f"{TEXT_FOLDER}/{cover_chapter.filename}",
+            cover_chapter.media_type,
         )
+        self.opf.add_spine_item(cover_chapter.id)
         self.nav.add_chapter(
             cover_chapter.id,
             cover_chapter.title,
@@ -317,7 +337,12 @@ class EpubBuilder:
             css=[self.intro_css],
         )
         self.chapters.append(intro)
-        self._register(intro, folder=TEXT_FOLDER)
+        self.opf.add_manifest_item(
+            intro.id,
+            f"{TEXT_FOLDER}/{intro.filename}",
+            intro.media_type,
+        )
+        self.opf.add_spine_item(intro.id)
         self.nav.add_chapter(intro.id, intro.title, f"{TEXT_FOLDER}/{intro.filename}")
         self.ncx.add_chapter(intro.id, intro.title, f"{TEXT_FOLDER}/{intro.filename}")
 
