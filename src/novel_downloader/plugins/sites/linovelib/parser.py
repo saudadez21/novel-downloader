@@ -255,7 +255,7 @@ class LinovelibParser(BaseParser):
             if page_content:
                 paragraphs.append(page_content)
 
-        if not paragraphs:
+        if not (paragraphs or imgs_by_line):
             return None
 
         content = "\n".join(paragraphs)

@@ -253,7 +253,7 @@ class EsjzoneParser(BaseParser):
 
             all_lines.extend(lines)
 
-        if not all_lines:
+        if not (all_lines or imgs_by_line):
             return None
 
         content = "\n".join(all_lines)
