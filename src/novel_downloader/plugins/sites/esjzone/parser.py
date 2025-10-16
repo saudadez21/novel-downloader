@@ -237,7 +237,7 @@ class EsjzoneParser(BaseParser):
 
         # Walk the forum content and produce plain text lines + image map
         all_lines: list[str] = []
-        imgs_by_line: dict[int, list[str]] = {}
+        image_positions: dict[int, list[str]] = {}
         for root in tree.xpath('//div[contains(@class, "forum-content")]'):
             lines, img_map = self._collect_lines_and_images(
                 root,
@@ -249,11 +249,11 @@ class EsjzoneParser(BaseParser):
             if img_map:
                 base = len(all_lines)
                 for k, urls in img_map.items():
-                    imgs_by_line.setdefault(k + base, []).extend(urls)
+                    image_positions.setdefault(k + base, []).extend(urls)
 
             all_lines.extend(lines)
 
-        if not (all_lines or imgs_by_line):
+        if not (all_lines or image_positions):
             return None
 
         content = "\n".join(all_lines)
@@ -263,7 +263,7 @@ class EsjzoneParser(BaseParser):
             "content": content,
             "extra": {
                 "site": self.site_name,
-                "imgs_by_line": imgs_by_line,
+                "image_positions": image_positions,
             },
         }
 
@@ -275,7 +275,7 @@ class EsjzoneParser(BaseParser):
         font_mappings: dict[str, dict[str, str]],
     ) -> tuple[list[str], dict[int, list[str]]]:
         lines: list[str] = []
-        imgs_by_line: dict[int, list[str]] = defaultdict(list)
+        image_positions: dict[int, list[str]] = defaultdict(list)
         buf: list[str] = []
 
         def apply_map(s: str, active_map: dict[str, str] | None) -> str:
@@ -294,7 +294,7 @@ class EsjzoneParser(BaseParser):
                 flush_line()
             # 1-based: images after paragraph N -> key N
             idx = len(lines)
-            imgs_by_line[idx].append(src)
+            image_positions[idx].append(src)
 
         def build_section_map(section: etree._Element) -> dict[str, str] | None:
             style_attr = section.get("style", "")
@@ -369,7 +369,7 @@ class EsjzoneParser(BaseParser):
         flush_line()
 
         # Convert defaultdict to plain dict
-        return lines, dict(imgs_by_line)
+        return lines, dict(image_positions)
 
     def _is_forum_page(self, html_str: list[str]) -> bool:
         if not html_str:

@@ -139,7 +139,7 @@ class CommonExporter(BaseExporter):
              a. Clean the volume title and determine output filename.
              b. Batch-fetch all chapters in this volume to minimize SQLite overhead.
              c. Initialize an EPUB builder for the volume, including cover and intro.
-             d. For each chapter: build XHTML and place images from extras.imgs_by_line.
+             d. For each chap: build XHTML and place image from extras.image_positions
              e. Finalize and write the volume EPUB.
         """
         book_id = self._normalize_book_id(book.book_id)
@@ -569,13 +569,13 @@ class CommonExporter(BaseExporter):
     ) -> Chapter:
         """
         Build a Chapter object with XHTML content and optionally place images
-        from `chap.extra['imgs_by_line']` (1-based index; 0 = before first paragraph).
+        from `chap.extra['image_positions']` (1-based index; 0 = before 1st paragraph).
         """
         title = chap_title or chap.get("title", "").strip()
         content = chap.get("content", "")
 
         extras = chap.get("extra") or {}
-        imgs_by_line = self._collect_img_map(extras)
+        image_positions = self._collect_img_map(extras)
         html_parts: list[str] = [f"<h2>{escape(title)}</h2>"]
 
         def _append_image(url: str) -> None:
@@ -599,7 +599,7 @@ class CommonExporter(BaseExporter):
                 self.logger.debug("EPUB image add failed for %s: %s", u, e)
 
         # Images before first paragraph
-        for url in imgs_by_line.get(0, []):
+        for url in image_positions.get(0, []):
             _append_image(url)
 
         # Paragraphs + inline-after images
@@ -607,11 +607,11 @@ class CommonExporter(BaseExporter):
         for i, line in enumerate(lines, start=1):
             if ln := line.strip():
                 html_parts.append(f"<p>{escape(ln)}</p>")
-            for url in imgs_by_line.get(i, []):
+            for url in image_positions.get(i, []):
                 _append_image(url)
 
         max_i = len(lines)
-        for k, urls in imgs_by_line.items():
+        for k, urls in image_positions.items():
             if k > max_i:
                 for url in urls:
                     _append_image(url)
@@ -631,10 +631,10 @@ class CommonExporter(BaseExporter):
     @staticmethod
     def _collect_img_map(extras: dict[str, Any]) -> dict[int, list[str]]:
         """
-        Collect and normalize `imgs_by_line` into `{int: [str, ...]}`.
+        Collect and normalize `image_positions` into `{int: [str, ...]}`.
         """
         result: dict[int, list[str]] = {}
-        raw_map = extras.get("imgs_by_line") or {}
+        raw_map = extras.get("image_positions") or {}
         if not isinstance(raw_map, dict):
             return result
         for k, v in raw_map.items():

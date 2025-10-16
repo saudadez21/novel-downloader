@@ -175,7 +175,7 @@ class YoduParser(BaseParser):
 
         title: str = ""
         paragraphs: list[str] = []
-        imgs_by_line: dict[int, list[str]] = {}
+        image_positions: dict[int, list[str]] = {}
         image_idx = 0
 
         for curr_html in html_list:
@@ -203,9 +203,9 @@ class YoduParser(BaseParser):
                 elif tag == "img":
                     src = (node.get("src") or "").strip()
                     if src:
-                        imgs_by_line.setdefault(image_idx, []).append(src)
+                        image_positions.setdefault(image_idx, []).append(src)
 
-        if not (paragraphs or imgs_by_line):
+        if not (paragraphs or image_positions):
             return None
 
         content = "\n".join(paragraphs)
@@ -220,7 +220,7 @@ class YoduParser(BaseParser):
             "extra": {
                 "site": self.site_name,
                 "next_cid": next_cid,
-                "imgs_by_line": imgs_by_line,
+                "image_positions": image_positions,
             },
         }
 

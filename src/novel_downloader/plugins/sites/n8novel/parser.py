@@ -139,7 +139,7 @@ class N8novelParser(BaseParser):
         wrapper = html.fromstring(f"<div>{html_list[1]}</div>")
 
         paragraphs: list[str] = []
-        imgs_by_line: dict[int, list[str]] = {}
+        image_positions: dict[int, list[str]] = {}
         image_idx = 0
 
         def append_para(txt: str | None) -> None:
@@ -161,7 +161,7 @@ class N8novelParser(BaseParser):
                 for img in node.xpath(".//img"):
                     src = img.get("src")
                     full = src if not src.startswith("/") else self.BASE_URL + src
-                    imgs_by_line.setdefault(image_idx, []).append(full)
+                    image_positions.setdefault(image_idx, []).append(full)
                 append_para(node.tail)
 
             # Standalone img
@@ -169,7 +169,7 @@ class N8novelParser(BaseParser):
                 src = node.get("src")
                 if src:
                     full = src if not src.startswith("/") else self.BASE_URL + src
-                    imgs_by_line.setdefault(image_idx, []).append(full)
+                    image_positions.setdefault(image_idx, []).append(full)
                 append_para(node.tail)
 
             # Line break -> text in .tail is next paragraph
@@ -181,7 +181,7 @@ class N8novelParser(BaseParser):
                 append_para(node.text_content())
                 append_para(node.tail)
 
-        if not (paragraphs or imgs_by_line):
+        if not (paragraphs or image_positions):
             return None
 
         content = "\n".join(paragraphs)
@@ -192,7 +192,7 @@ class N8novelParser(BaseParser):
             "content": content,
             "extra": {
                 "site": self.site_name,
-                "imgs_by_line": imgs_by_line,
+                "image_positions": image_positions,
             },
         }
 

@@ -132,7 +132,7 @@ class SfacgParser(BaseParser):
 
         tree = html.fromstring(html_list[0])
         content = ""
-        imgs_by_line: dict[int, list[str]] = {}
+        image_positions: dict[int, list[str]] = {}
 
         is_vip = "/ajax/ashx/common.ashx" in html_list[0]
 
@@ -159,10 +159,10 @@ class SfacgParser(BaseParser):
                 logger.warning("sfacg chapter %s :: missing content div", chapter_id)
                 return None
 
-            lines, imgs_by_line = self.parse_normal_chapter(content_divs[0])
+            lines, image_positions = self.parse_normal_chapter(content_divs[0])
             content = "\n".join(lines)
 
-        if not (content or imgs_by_line):
+        if not (content or image_positions):
             return None
 
         title = self._first_str(
@@ -176,7 +176,7 @@ class SfacgParser(BaseParser):
             "extra": {
                 "site": self.site_name,
                 "vip": is_vip,
-                "imgs_by_line": imgs_by_line,
+                "image_positions": image_positions,
             },
         }
 
@@ -184,7 +184,7 @@ class SfacgParser(BaseParser):
         self, content_div: html.HtmlElement
     ) -> tuple[list[str], dict[int, list[str]]]:
         paragraphs: list[str] = []
-        imgs_by_line: dict[int, list[str]] = {}
+        image_positions: dict[int, list[str]] = {}
         image_idx = 0
 
         def append_para(txt: str | None) -> None:
@@ -205,14 +205,14 @@ class SfacgParser(BaseParser):
                 if src:
                     if src.startswith("//"):
                         src = "https:" + src
-                    imgs_by_line.setdefault(image_idx, []).append(src)
+                    image_positions.setdefault(image_idx, []).append(src)
 
             if elem is content_div:  # trailing text (skip the root itself)
                 continue
             if elem.tail and elem.tail.strip():
                 append_para(elem.tail)
 
-        return paragraphs, imgs_by_line
+        return paragraphs, image_positions
 
     def parse_vip_chapter(self, img_base64: str) -> str:
         ocr = get_font_ocr(self._fontocr_cfg)

@@ -217,15 +217,15 @@ class CommonDownloader(BaseDownloader):
         if not isinstance(extra, dict):
             return []
 
-        imgs_by_line = extra.get("imgs_by_line")
-        if not isinstance(imgs_by_line, dict):
+        image_positions = extra.get("image_positions")
+        if not isinstance(image_positions, dict):
             return []
 
         urls: list[str] = []
-        for line_no, urls_in_line in imgs_by_line.items():
+        for line_no, urls_in_line in image_positions.items():
             if not isinstance(urls_in_line, list | tuple):
                 self.logger.debug(
-                    "imgs_by_line[%r] expected list/tuple, got %r",
+                    "image_positions[%r] expected list/tuple, got %r",
                     line_no,
                     type(urls_in_line),
                 )

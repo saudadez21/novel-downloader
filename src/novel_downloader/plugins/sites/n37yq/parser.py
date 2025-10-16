@@ -160,7 +160,7 @@ class N37yqParser(BaseParser):
         )
 
         paragraphs: list[str] = []
-        imgs_by_line: dict[int, list[str]] = {}
+        image_positions: dict[int, list[str]] = {}
         image_idx = 0
 
         for node in tree.xpath("//div[@id='TextContent']/*"):
@@ -176,14 +176,14 @@ class N37yqParser(BaseParser):
                 if img:
                     src = img[0].strip()
                     if src:
-                        imgs_by_line.setdefault(image_idx, []).append(src)
+                        image_positions.setdefault(image_idx, []).append(src)
 
             elif tag == "img":
                 src = (node.get("src") or "").strip()
                 if src:
-                    imgs_by_line.setdefault(image_idx, []).append(src)
+                    image_positions.setdefault(image_idx, []).append(src)
 
-        if not (paragraphs or imgs_by_line):
+        if not (paragraphs or image_positions):
             return None
 
         content = "\n".join(paragraphs)
@@ -194,6 +194,6 @@ class N37yqParser(BaseParser):
             "content": content,
             "extra": {
                 "site": self.site_name,
-                "imgs_by_line": imgs_by_line,
+                "image_positions": image_positions,
             },
         }

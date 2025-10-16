@@ -196,7 +196,7 @@ class LinovelibParser(BaseParser):
 
         title: str = ""
         paragraphs: list[str] = []
-        imgs_by_line: dict[int, list[str]] = {}
+        image_positions: dict[int, list[str]] = {}
         image_idx = 0
 
         for curr_html in html_list:
@@ -238,7 +238,7 @@ class LinovelibParser(BaseParser):
                     src = node.get("data-src") or node.get("src", "")
                     if not src:
                         continue
-                    imgs_by_line.setdefault(image_idx, []).append(src)
+                    image_positions.setdefault(image_idx, []).append(src)
 
             if not p_texts and not page_lines:
                 continue
@@ -255,7 +255,7 @@ class LinovelibParser(BaseParser):
             if page_content:
                 paragraphs.append(page_content)
 
-        if not (paragraphs or imgs_by_line):
+        if not (paragraphs or image_positions):
             return None
 
         content = "\n".join(paragraphs)
@@ -266,7 +266,7 @@ class LinovelibParser(BaseParser):
             "content": content,
             "extra": {
                 "site": self.site_name,
-                "imgs_by_line": imgs_by_line,
+                "image_positions": image_positions,
             },
         }
 

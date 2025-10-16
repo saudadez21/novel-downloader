@@ -150,7 +150,7 @@ class ShencouParser(BaseParser):
         marker = anchors[0]
 
         paragraphs: list[str] = []
-        imgs_by_line: dict[int, list[str]] = {}
+        image_positions: dict[int, list[str]] = {}
         image_idx = 0
 
         def append_para(txt: str | None) -> None:
@@ -192,7 +192,7 @@ class ShencouParser(BaseParser):
                         s.strip() for s in sib.xpath(".//img/@src") if s and s.strip()
                     ]
                     if srcs:
-                        imgs_by_line.setdefault(image_idx, []).extend(srcs)
+                        image_positions.setdefault(image_idx, []).extend(srcs)
                     append_para(sib.tail)
                     continue
 
@@ -200,7 +200,7 @@ class ShencouParser(BaseParser):
                 if tag == "img":
                     src = (sib.get("src") or "").strip()
                     if src:
-                        imgs_by_line.setdefault(image_idx, []).append(src)
+                        image_positions.setdefault(image_idx, []).append(src)
                     append_para(sib.tail)
                     continue
 
@@ -212,7 +212,7 @@ class ShencouParser(BaseParser):
                 append_para(sib.tail)
                 continue
 
-        if not (paragraphs or imgs_by_line):
+        if not (paragraphs or image_positions):
             return None
 
         content = "\n".join(paragraphs)
@@ -223,6 +223,6 @@ class ShencouParser(BaseParser):
             "content": content,
             "extra": {
                 "site": self.site_name,
-                "imgs_by_line": imgs_by_line,
+                "image_positions": image_positions,
             },
         }
