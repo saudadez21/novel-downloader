@@ -5,16 +5,11 @@ novel_downloader.plugins.sites.qidian.searcher
 
 """
 
-import base64
-import hashlib
 import json
 import logging
-import random
-import time
 
 from lxml import html
 
-from novel_downloader.libs.crypto.rc4 import rc4_init, rc4_stream
 from novel_downloader.plugins.base.searcher import BaseSearcher
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import SearchResult
@@ -32,7 +27,9 @@ class QidianSearcher(BaseSearcher):
     async def _fetch_html(self, keyword: str) -> str:
         url = self.SEARCH_URL.format(query=self._quote(keyword))
         try:
-            cookies = self._calc_cookies(url)
+            cookies = {
+                "e1": self._quote(json.dumps(self._E1_VAL)),
+            }
             async with self._http_get(url, cookies=cookies) as resp:
                 resp.raise_for_status()
                 return await self._response_to_str(resp)
@@ -107,34 +104,3 @@ class QidianSearcher(BaseSearcher):
                 )
             )
         return results
-
-    @classmethod
-    def _calc_cookies(cls, new_uri: str) -> dict[str, str]:
-        s_init = rc4_init(cls._d2("dGcwOUl0Myo5aA=="))
-        _fp_val = hashlib.md5(str(random.random()).encode()).hexdigest()
-        loadts = int(time.time() * 1000)
-        duration = max(300, min(1000, int(random.normalvariate(600, 150))))
-        timestamp = loadts + duration
-        comb = f"{new_uri}{loadts}{_fp_val}"
-        ck_val = hashlib.md5(comb.encode("utf-8")).hexdigest()
-        new_payload = {
-            cls._d("bG9hZHRz"): loadts,
-            cls._d("dGltZXN0YW1w"): timestamp,
-            cls._d("ZmluZ2VycHJpbnQ="): _fp_val,
-            cls._d("YWJub3JtYWw="): "0" * 32,
-            cls._d("Y2hlY2tzdW0="): ck_val,
-        }
-        plain_bytes = json.dumps(new_payload, separators=(",", ":")).encode("utf-8")
-        cipher_bytes = rc4_stream(s_init, plain_bytes)
-        return {
-            "e1": cls._quote(json.dumps(cls._E1_VAL)),
-            cls._d("d190c2Zw"): base64.b64encode(cipher_bytes).decode("utf-8"),
-        }
-
-    @staticmethod
-    def _d(b: str) -> str:
-        return base64.b64decode(b).decode()
-
-    @staticmethod
-    def _d2(b: str) -> bytes:
-        return base64.b64decode(b)
