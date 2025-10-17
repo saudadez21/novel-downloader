@@ -12,7 +12,10 @@
 
 * Parser 中已对常见第三方网站广告进行基础过滤
 * 需要继续排查是否存在遗漏
-* 章节名称格式归一化方案待设计 (作者习惯差异较大，如「第 1 章 标题」/「标题」/「第一章标题」等不一致格式)
+* 章节名称格式归一化:
+  * 方案待设计 (作者习惯差异较大，如「第 1 章 标题」/「标题」/「第一章标题」等不一致格式)
+  * 设计正则匹配与中文数字解析方案，提取章号与标题正文
+  * 统一输出格式 (如 `第 12 章 标题`), 并在 `CleanerProcessor` 中提供归一化接口
 
 ### 已有站点维护
 
@@ -22,12 +25,14 @@
 
 ### EPUB 导出优化
 
-* 目前主要瓶颈在于 `ziplib` 的写入以及图片缓存缺失时的下载
-* 在缓存完整的情况下，`snakeviz` 分析结果显示 95% 以上耗时集中在 zip IO
-* 可探索更高效的压缩/写入方式
+* 当前主要性能瓶颈集中在 `zipfile` 的写入阶段, 以及图片缓存缺失时的重复下载
+* 在缓存完整的情况下, `snakeviz` 分析结果显示 95% 以上的耗时集中在 ZIP 文件写入与压缩过程
+* 可进一步探索更高效的压缩与写入方式, 例如:
+  * 使用内存缓冲区批量写入以减少磁盘 IO
+  * 采用多线程或异步写入策略
 * 排版与样式优化:
-  * 目前导出的排版较为基础，整体观感有待提升
-  * 不太擅长设计与排版，需要参考一些优秀的 EPUB 样本 (如字体层次、段落间距、封面与章节页布局等)
+  * 目前导出的排版较为基础，整体观感仍有改进空间
+  * 需参考优秀 EPUB 样本，重点关注字体层次、段落间距、封面与章节页布局等设计细节
 
 ### 对比 OpenCC 与 opencc-python
 
@@ -35,6 +40,75 @@
 * 字典更新与维护情况
 * 转换性能表现
 * 安装方式与兼容性
+
+### 请求层统一与优化
+
+* 对比当前 `requests` + `aiohttp` 的使用情况与维护成本
+* 评估 [`httpx`](https://github.com/encode/httpx) 作为统一请求层的可行性
+* 对比方向:
+  * API 兼容性与迁移成本
+  * 在异步环境下的性能表现 (`uvloop` + HTTP/2)
+  * 错误处理、日志与中间件机制的灵活性
+* 若方案可行，后续再考虑逐步替换底层实现以统一同步与异步接口
+
+### Processor 扩展: 翻译支持
+
+计划扩展 `ProcessorProtocol`，新增翻译类处理器，用于在导出流程中对章节内容进行翻译。
+
+#### 在线翻译服务
+
+* [有道翻译](https://www.youdao.com/)
+* [有道翻译 API](https://fanyi.youdao.com/openapi/)
+* [百度翻译](https://fanyi.baidu.com/mtpe-individual/transText#/)
+* [谷歌翻译](https://translate.google.com/)
+  * 第三方库: [googletrans](https://github.com/ssut/py-googletrans)
+* [Google Cloud Translation](https://cloud.google.com/translate)
+* [DeepL](https://www.deepl.com/en/translator)
+* [DeepL API](https://www.deepl.com/en/pro-api)
+  * Python 库: [deepl](https://github.com/DeepLcom/deepl-python)
+
+#### 大模型 API 翻译
+
+* OpenAI GPT 系列
+* Anthropic Claude
+* DeepSeek
+* Google Gemini
+* 支持自定义 prompt 与目标语言
+
+#### 自建 / 本地翻译模型
+
+基于 `HuggingFace` / `Transformers` / `llama.cpp` / `Ollama` / `vLLM` 等框架。
+
+##### 可选模型
+
+* [MarianMT](https://huggingface.co/docs/transformers/en/model_doc/marian)
+* [M2M-100](https://huggingface.co/docs/transformers/en/model_doc/m2m_100)
+* [NLLB](https://huggingface.co/docs/transformers/en/model_doc/nllb)
+* [Sakura](https://huggingface.co/SakuraLLM)
+* [ALMA](https://github.com/fe1ixxu/ALMA)
+* [aya-expanse-32b](https://huggingface.co/CohereLabs/aya-expanse-32b)
+* [Seed-X-7B](https://github.com/ByteDance-Seed/Seed-X-7B)
+
+#### 配置示例
+
+```toml
+[[plugins.processors]]
+name = "translator.google"
+source = "zh"
+target = "en"
+
+[[plugins.processors]]
+name = "translator.deepl"
+api_key = "YOUR_KEY"
+source = "en"
+target = "fr"
+
+[[plugins.processors]]
+name = "translator.hf"
+model_path = "/models/Sakura-13B"
+system_prompt = "你是一个轻小说翻译模型，可以忠实翻译为简体中文。"
+user_prompt = "请翻译成中文：{text}"
+```
 
 ### 命令行交互
 
@@ -125,6 +199,8 @@
 
 * [西方奇幻小说网](https://www.westnovel.com/)
 
+* [霹雳书屋](https://www.pilibook.net/) ([备用](https://www.mozishuwu.com/))
+
 * [全职小说网](https://www.quanzhifashi.com/)
 
   * 支持登录
@@ -137,9 +213,23 @@
 
 * [半夏小说](https://www.xbanxia.cc/)
 
+* [52书库](https://www.52shuku.net/)
+
+* [努努书坊](https://www.kanunu8.com/)
+
+* [天涯书库](https://www.tianyabooks.com/)
+
 * [小说狂人](https://czbooks.net/)
 
   * 支持登录
+
+* [17K小说网](https://www.17k.com/)
+
+  * 支持登录
+
+* [KadoKado](https://www.kadokado.com.tw/)
+
+  * VIP 章节需登录访问
 
 * [飞卢小说网](https://b.faloo.com/)
 
@@ -204,6 +294,8 @@
 
   * 需重新排序
 
+* [海棠书屋](https://www.fdhxs.com/)
+
 * [爱丽丝书屋](https://www.alicesw.com/)
 
 * [海外书包](https://www.haiwaishubao.com/)
@@ -218,6 +310,10 @@
 
   * 需登录
 
+* [红袖招](https://hongxiuzhao.net/)
+
+  * 使用加密字体
+
 * [大灰狼小说聚合网](https://api.langge.cf/)
 
   * API 风格与当前框架不兼容，需要单独流程
@@ -229,6 +325,15 @@
 * [轻小说文库](https://www.wenku8.net/)
 
   * 需提供 `cf_clearance` cookie
+
+* [真白萌](https://masiro.me/)
+
+  * 需要登录
+  * 需提供 `cf_clearance` Cookie
+
+* [69书吧](https://www.69shuba.com/)
+
+  * 需绕过 Cloudflare
 
 * [塔读文学](https://www.tadu.com/)
 
@@ -253,10 +358,11 @@
 * [Novel Up Plus](https://novelup.plus/)
 * [小説家になろう](https://syosetu.com/)
 * [ハーメルン](https://syosetu.org/)
-* [ラブノベ](https://lovenove.syosetu.com/)
 * [ムーンライトノベルズ](https://mnlt.syosetu.com/top/top/)
 * [ノクターンノベルズ](https://noc.syosetu.com/top/top/)
 * [小説を読もう！](https://yomou.syosetu.com/)
+* [ノベルピア](https://novelpia.jp/)
+* [アルファポリス](https://www.alphapolis.co.jp/)
 
 #### 英文
 
@@ -282,6 +388,7 @@
 * [Novel Full](https://novelfull.com)
 * [Novelhall](https://novelhall.com)
 * [Novel Updates](https://novelupdates.com)
+* [Penana](https://www.penana.com/home.php)
 * [Quotev](https://quotev.com)
 * [Ranobes](https://ranobes.net/)
 * [Re:Library](https://re-library.com)

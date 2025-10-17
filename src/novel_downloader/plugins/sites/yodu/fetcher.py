@@ -5,6 +5,11 @@ novel_downloader.plugins.sites.yodu.fetcher
 
 """
 
+from pathlib import Path
+from typing import Literal
+
+from novel_downloader.infra.http_defaults import IMAGE_HEADERS
+from novel_downloader.libs.filesystem import img_name, write_file
 from novel_downloader.plugins.base.fetcher import GenericSession
 from novel_downloader.plugins.registry import registrar
 
@@ -29,3 +34,27 @@ class YoduSession(GenericSession):
             if idx > 1
             else f"/book/{book_id}/{chapter_id}.html"
         )
+
+    async def _download_one_image(
+        self,
+        url: str,
+        folder: Path,
+        *,
+        on_exist: Literal["overwrite", "skip"],
+    ) -> None:
+        save_path = folder / img_name(url)
+
+        if save_path.exists() and on_exist == "skip":
+            self.logger.debug("Skip existing image: %s", save_path)
+            return
+
+        try:
+            async with await self.get(url, headers=IMAGE_HEADERS, ssl=False) as resp:
+                resp.raise_for_status()
+                data = await resp.read()
+        except Exception as e:
+            self.logger.warning("Failed %s: %s", url, e)
+            return
+
+        write_file(content=data, filepath=save_path, on_exist="overwrite")
+        self.logger.debug("Saved image: %s <- %s", save_path, url)

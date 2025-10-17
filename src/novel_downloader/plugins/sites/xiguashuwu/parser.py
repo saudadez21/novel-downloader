@@ -14,12 +14,13 @@ import urllib.parse
 from typing import Any
 
 import requests
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import unpad
 from lxml import html
 
 from novel_downloader.infra.fontocr import get_font_ocr
 from novel_downloader.infra.http_defaults import DEFAULT_USER_HEADERS
 from novel_downloader.infra.paths import XIGUASHUWU_MAP_PATH
-from novel_downloader.libs.crypto.aes_util import aes_cbc_decrypt
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
@@ -389,9 +390,10 @@ class XiguashuwuParser(BaseParser):
         key = digest[16:].encode("utf-8")
 
         ct = base64.b64decode(a)
-        plaintext = aes_cbc_decrypt(key, iv, ct, block_size=32)
+        data = AES.new(key, AES.MODE_CBC, iv).decrypt(ct)
+        plaintext: str = unpad(data, 32, style="pkcs7").decode("utf-8")
 
-        return plaintext.decode("utf-8")
+        return plaintext
 
     def _rebuild_paragraphs(self, content_div: html.HtmlElement) -> list[str]:
         """

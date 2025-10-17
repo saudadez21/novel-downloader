@@ -38,6 +38,8 @@ def _new_session(
 ) -> requests.Session:
     session = requests.Session()
     session.headers.update(headers or DEFAULT_HEADERS)
+    if retries <= 0:
+        return session
 
     retry = Retry(
         total=retries,

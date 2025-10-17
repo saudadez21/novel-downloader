@@ -365,7 +365,8 @@ class CommonExporter(BaseExporter):
                 curr_vol.chapters.append(chapter_obj)
                 seen_cids.add(cid)
 
-            epub.add_volume(curr_vol)
+            if curr_vol.chapters:
+                epub.add_volume(curr_vol)
 
         # --- Finalize EPUB ---
         out_name = self.get_filename(title=name, author=author, ext="epub")
@@ -428,6 +429,7 @@ class CommonExporter(BaseExporter):
             filename=img_name(img_url, name=filename),
             headers=IMAGE_HEADERS,
             on_exist=on_exist,
+            retries=0,
         )
 
     @staticmethod
