@@ -9,10 +9,8 @@ Exporter implementation for handling Linovelib novels.
 from pathlib import Path
 from typing import Literal
 
-from novel_downloader.infra.http_defaults import (
-    DEFAULT_HEADERS,
-    DEFAULT_IMAGE_SUFFIX,
-)
+from novel_downloader.infra.http_defaults import DEFAULT_HEADERS
+from novel_downloader.libs.filesystem import img_name
 from novel_downloader.plugins.common.exporter import CommonExporter
 from novel_downloader.plugins.registry import registrar
 
@@ -32,7 +30,7 @@ class LinovelibExporter(CommonExporter):
         target_dir: Path,
         filename: str | None = None,
         *,
-        on_exist: Literal["overwrite", "skip", "rename"] = "overwrite",
+        on_exist: Literal["overwrite", "skip"] = "overwrite",
     ) -> Path | None:
         """
         Download image from url to target dir with given name
@@ -42,8 +40,7 @@ class LinovelibExporter(CommonExporter):
         return download(
             img_url,
             target_dir,
-            filename=filename,
+            filename=img_name(img_url, name=filename),
             headers=_IMG_HEADERS,
             on_exist=on_exist,
-            default_suffix=DEFAULT_IMAGE_SUFFIX,
         )

@@ -15,34 +15,11 @@ from typing import Literal
 from .sanitize import sanitize_filename
 
 
-def _unique_path(path: Path, max_tries: int = 100) -> Path:
-    """
-    Return a unique file path by appending _1, _2, ... if needed.
-
-    Falls back to a UUID suffix if all attempts fail.
-    """
-    if not path.exists():
-        return path
-
-    stem = path.stem
-    suffix = path.suffix
-
-    for counter in range(1, max_tries + 1):
-        candidate = path.with_name(f"{stem}_{counter}{suffix}")
-        if not candidate.exists():
-            return candidate
-
-    # fallback: append a random/unique suffix
-    import uuid
-
-    return path.with_name(f"{stem}_{uuid.uuid4().hex}{suffix}")
-
-
 def write_file(
     content: str | bytes,
     filepath: Path,
     *,
-    on_exist: Literal["overwrite", "skip", "rename"] = "overwrite",
+    on_exist: Literal["overwrite", "skip"] = "overwrite",
     encoding: str = "utf-8",
 ) -> Path:
     """
@@ -58,15 +35,10 @@ def write_file(
     filepath = filepath.with_name(sanitize_filename(filepath.name))
     filepath.parent.mkdir(parents=True, exist_ok=True)
 
-    if filepath.exists():
-        match on_exist:
-            case "skip":
-                return filepath
-            case "rename":
-                filepath = _unique_path(filepath)
+    if filepath.exists() and on_exist == "skip":
+        return filepath
 
     write_mode = "wb" if isinstance(content, bytes) else "w"
-
     tmp_path: Path | None = None
     try:
         with tempfile.NamedTemporaryFile(

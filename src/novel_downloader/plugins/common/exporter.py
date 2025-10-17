@@ -10,7 +10,7 @@ from html import escape
 from pathlib import Path
 from typing import Any, Literal
 
-from novel_downloader.infra.http_defaults import DEFAULT_IMAGE_SUFFIX, IMAGE_HEADERS
+from novel_downloader.infra.http_defaults import IMAGE_HEADERS
 from novel_downloader.infra.paths import CSS_MAIN_PATH
 from novel_downloader.libs.epub import (
     Chapter,
@@ -18,7 +18,7 @@ from novel_downloader.libs.epub import (
     StyleSheet,
     Volume,
 )
-from novel_downloader.libs.filesystem import sanitize_filename, write_file
+from novel_downloader.libs.filesystem import img_name, sanitize_filename, write_file
 from novel_downloader.plugins.base.exporter import BaseExporter
 from novel_downloader.schemas import (
     BookConfig,
@@ -413,7 +413,7 @@ class CommonExporter(BaseExporter):
         target_dir: Path,
         filename: str | None = None,
         *,
-        on_exist: Literal["overwrite", "skip", "rename"] = "overwrite",
+        on_exist: Literal["overwrite", "skip"] = "overwrite",
     ) -> Path | None:
         """
         Download image from url to target dir with given name
@@ -425,10 +425,9 @@ class CommonExporter(BaseExporter):
         return download(
             img_url,
             target_dir,
-            filename=filename,
+            filename=img_name(img_url, name=filename),
             headers=IMAGE_HEADERS,
             on_exist=on_exist,
-            default_suffix=DEFAULT_IMAGE_SUFFIX,
         )
 
     @staticmethod
@@ -634,7 +633,8 @@ class CommonExporter(BaseExporter):
         Collect and normalize `image_positions` into `{int: [str, ...]}`.
         """
         result: dict[int, list[str]] = {}
-        raw_map = extras.get("image_positions") or {}
+        raw_map = extras.get("image_positions")
+
         if not isinstance(raw_map, dict):
             return result
         for k, v in raw_map.items():

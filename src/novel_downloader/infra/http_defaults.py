@@ -10,8 +10,6 @@ Utility for normalizing cookie input from user configuration.
 # Default preferences & headers
 # -----------------------------------------------------------------------------
 
-DEFAULT_IMAGE_SUFFIX = ".jpg"
-
 DEFAULT_USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
     "AppleWebKit/537.36 (KHTML, like Gecko) "
