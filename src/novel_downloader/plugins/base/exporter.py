@@ -65,46 +65,6 @@ class BaseExporter:
 
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
-    def export(self, book: BookConfig) -> dict[str, Path]:
-        """
-        Export the book in the formats specified in config.
-
-        :param book: BookConfig with at least 'book_id'.
-        """
-        results: dict[str, Path] = {}
-
-        actions = [
-            (self._make_txt, "txt", self.export_as_txt),
-            (self._make_epub, "epub", self.export_as_epub),
-            (self._make_md, "md", self.export_as_md),
-            (self._make_pdf, "pdf", self.export_as_pdf),
-        ]
-
-        for enabled, fmt_key, export_method in actions:
-            if enabled:
-                try:
-                    self.logger.info(
-                        "Attempting to export book_id '%s' as %s...",
-                        book.book_id,
-                        fmt_key,
-                    )
-                    path = export_method(book)
-
-                    if isinstance(path, Path):
-                        results[fmt_key] = path
-                        self.logger.info("Successfully saved as %s.", fmt_key)
-
-                except NotImplementedError as e:
-                    self.logger.warning(
-                        "Export method for %s not implemented: %s",
-                        fmt_key,
-                        e,
-                    )
-                except Exception:
-                    self.logger.exception("Error while saving as %s", fmt_key)
-
-        return results
-
     def export_as_txt(self, book: BookConfig) -> Path | None:
         """
         Persist the assembled book as a .txt file.
@@ -306,11 +266,15 @@ class BaseExporter:
 
         return "raw"
 
-    def _handle_missing_chapter(self, cid: str) -> None:
+    def _handle_missing_chapter(self, book_id: str, cid: str) -> None:
         """If check_missing is enabled, log a warning."""
         if not self._check_missing:
             return
-        self.logger.warning("Missing chapter content for chapterId=%s", cid)
+        self.logger.warning(
+            "Missing chapter content (bookId=%s, chapterId=%s)",
+            book_id,
+            cid,
+        )
 
     def close(self) -> None:
         """

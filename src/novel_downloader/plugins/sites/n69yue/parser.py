@@ -180,7 +180,8 @@ class N69yueParser(BaseParser):
         obfuscated = "/static/assets/css/style.css" in html_str
         if obfuscated and "/static/assets/css/style.css?ver=20250901" not in html_str:
             logger.warning(
-                "Detected potential obfuscated fonts: script version mismatch. "
+                "n69yue parser: detected potential obfuscated fonts - "
+                "script version mismatch. "
                 "This may cause incorrect character decoding. "
                 "Please report this issue so the handler can be updated."
             )

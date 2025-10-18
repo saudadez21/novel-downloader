@@ -14,15 +14,6 @@ from novel_downloader.schemas import BookConfig
 
 
 class ExporterProtocol(Protocol):
-    def export(self, book: BookConfig) -> dict[str, Path]:
-        """
-        Export the book in the formats specified in config.
-        If a method is not implemented or fails, log the error and continue.
-
-        :param book: BookConfig with at least 'book_id'.
-        """
-        ...
-
     def export_as_txt(self, book: BookConfig) -> Path | None:
         """
         Persist the assembled book as a .txt file.

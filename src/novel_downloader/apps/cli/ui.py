@@ -204,7 +204,7 @@ def setup_logging(
     file: bool = True,
     backup_count: int = 7,
     when: str = "midnight",
-) -> None:
+) -> logging.Logger:
     # Tame noisy third-party loggers
     for name in _MUTE_LOGGERS:
         ml = logging.getLogger(name)
@@ -263,3 +263,4 @@ def setup_logging(
         ch.setFormatter(logging.Formatter("%(message)s"))
         ch.setLevel(console_level)
         logger.addHandler(ch)
+    return logger

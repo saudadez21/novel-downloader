@@ -7,6 +7,7 @@ Lazily load the FontOCR class.
 """
 
 import logging
+import threading
 from typing import TYPE_CHECKING
 
 from novel_downloader.schemas import FontOCRConfig
@@ -17,6 +18,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 _FONT_OCR: "FontOCR | None" = None
+_FONT_OCR_LOCK = threading.Lock()
 
 
 def get_font_ocr(cfg: FontOCRConfig) -> "FontOCR | None":
@@ -25,7 +27,13 @@ def get_font_ocr(cfg: FontOCRConfig) -> "FontOCR | None":
     Returns None if FontOCR or its dependencies are not available.
     """
     global _FONT_OCR
-    if _FONT_OCR is None:
+    if _FONT_OCR is not None:
+        return _FONT_OCR
+
+    with _FONT_OCR_LOCK:
+        if _FONT_OCR is not None:
+            return _FONT_OCR
+
         try:
             from .core import FontOCR
 

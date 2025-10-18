@@ -17,8 +17,7 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 from novel_downloader.infra.http_defaults import DEFAULT_HEADERS
-from novel_downloader.libs.filesystem import sanitize_filename
-from novel_downloader.libs.filesystem.file import _unique_path, write_file
+from novel_downloader.libs.filesystem import sanitize_filename, write_file
 
 
 def _normalize_url(url: str) -> str:
@@ -32,29 +31,6 @@ def _normalize_url(url: str) -> str:
     return url
 
 
-def _build_filepath(
-    url: str,
-    folder: Path,
-    filename: str | None,
-    default_suffix: str,
-    on_exist: Literal["overwrite", "skip", "rename"],
-) -> Path:
-    parsed_url = urlparse(url)
-    url_path = Path(unquote(parsed_url.path))
-
-    raw_name = filename or url_path.name or "unnamed"
-    name = sanitize_filename(raw_name)
-
-    if "." not in name and (url_path.suffix or default_suffix):
-        name += url_path.suffix or default_suffix
-
-    file_path = folder / name
-    if on_exist == "rename":
-        file_path = _unique_path(file_path)
-
-    return file_path
-
-
 def _new_session(
     retries: int,
     backoff: float,
@@ -62,6 +38,8 @@ def _new_session(
 ) -> requests.Session:
     session = requests.Session()
     session.headers.update(headers or DEFAULT_HEADERS)
+    if retries <= 0:
+        return session
 
     retry = Retry(
         total=retries,
@@ -84,11 +62,10 @@ def download(
     retries: int = 3,
     backoff: float = 0.5,
     headers: dict[str, str] | None = None,
-    on_exist: Literal["overwrite", "skip", "rename"] = "overwrite",
-    default_suffix: str = "",
+    on_exist: Literal["overwrite", "skip"] = "overwrite",
 ) -> Path | None:
     """
-    Download a URL to disk, with retries, optional rename/skip, and cleanup on failure.
+    Download a URL to disk, with retries, optional skip, and cleanup on failure.
 
     :param url: the file URL.
     :param target_dir: directory to save into.
@@ -97,8 +74,7 @@ def download(
     :param retries: GET retry count.
     :param backoff: exponential backoff base.
     :param headers: optional headers.
-    :param on_exist: if 'skip', return filepath; if 'rename', auto-rename.
-    :param default_suffix: used if no suffix in URL or filename.
+    :param on_exist: if 'skip', return filepath
     :return: path to the downloaded file.
     """
     url = _normalize_url(url)
@@ -106,13 +82,14 @@ def download(
     folder = Path(target_dir) if target_dir else Path.cwd()
     folder.mkdir(parents=True, exist_ok=True)
 
-    save_path = _build_filepath(
-        url,
-        folder,
-        filename,
-        default_suffix,
-        on_exist,
-    )
+    # Determine final save path
+    if filename:
+        save_path = folder / sanitize_filename(filename)
+    else:
+        parsed_url = urlparse(url)
+        url_path = Path(unquote(parsed_url.path))
+        name = sanitize_filename(url_path.name or "unnamed")
+        save_path = folder / name
 
     # Handle existing file
     if save_path.exists() and on_exist == "skip":

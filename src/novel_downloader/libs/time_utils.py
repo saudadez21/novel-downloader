@@ -48,15 +48,6 @@ def _calc_sleep_duration(
     if max_sleep is not None:
         duration = min(duration, max_sleep)
 
-    logger.debug(
-        "%s: base=%.3f mul=%.3f add=%.3f max=%s -> duration=%.3f",
-        log_prefix,
-        base,
-        multiplicative_jitter,
-        additive_jitter,
-        max_sleep,
-        duration,
-    )
     return duration
 
 

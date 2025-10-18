@@ -9,8 +9,8 @@ import re
 from pathlib import Path
 from typing import Any, Literal
 
-from novel_downloader.infra.http_defaults import DEFAULT_HEADERS, DEFAULT_IMAGE_SUFFIX
-from novel_downloader.libs.filesystem import write_file
+from novel_downloader.infra.http_defaults import DEFAULT_HEADERS
+from novel_downloader.libs.filesystem import img_name, write_file
 from novel_downloader.plugins.base.fetcher import BaseSession
 from novel_downloader.plugins.registry import registrar
 
@@ -181,23 +181,21 @@ class LinovelibSession(BaseSession):
         url: str,
         folder: Path,
         *,
-        on_exist: Literal["overwrite", "skip", "rename"],
+        on_exist: Literal["overwrite", "skip"],
     ) -> None:
-        """Download a single image."""
-        async with self.session.get(url, headers=_IMG_HEADERS) as resp:
-            save_path = self._build_filepath(
-                url=url,
-                folder=folder,
-                default_suffix=DEFAULT_IMAGE_SUFFIX,
-                on_exist=on_exist,
-            )
-            if save_path.exists() and on_exist == "skip":
-                return
+        save_path = folder / img_name(url)
 
-            resp.raise_for_status()
-            write_file(
-                content=await resp.read(),  # bytes
-                filepath=save_path,
-                on_exist=on_exist,
-            )
-            self.logger.debug("Saved image: %s <- %s", save_path, url)
+        if save_path.exists() and on_exist == "skip":
+            self.logger.debug("linovelib image: skip existing %s", save_path)
+            return
+
+        try:
+            async with await self.get(url, headers=_IMG_HEADERS) as resp:
+                resp.raise_for_status()
+                data = await resp.read()
+        except Exception as e:
+            self.logger.warning("linovelib image download failed (%s): %s", url, e)
+            return
+
+        write_file(content=data, filepath=save_path, on_exist="overwrite")
+        self.logger.debug("linovelib image: saved %s <- %s", save_path, url)

@@ -270,7 +270,12 @@ class NodeDecryptor:
                 if spec.fock_asset:
                     fock_path = self.script_dir / spec.fock_asset.basename
                     if not fock_path.exists():
-                        download(spec.fock_asset.url, self.script_dir)
+                        download(
+                            spec.fock_asset.url,
+                            self.script_dir,
+                            filename=spec.fock_asset.basename,
+                            on_exist="skip",
+                        )
 
                 cmd: list[str] | None = ["node", str(dst_script)]
                 logger.debug("%s decryptor prepared with Node.", spec.name.upper())

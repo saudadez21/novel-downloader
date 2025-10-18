@@ -8,7 +8,8 @@ novel_downloader.plugins.sites.esjzone.parser
 import base64
 import logging
 import re
-from typing import Any, Literal
+from collections import defaultdict
+from typing import Any
 from urllib.parse import unquote
 
 from lxml import etree, html
@@ -24,7 +25,6 @@ from novel_downloader.schemas import (
 )
 
 logger = logging.getLogger(__name__)
-Token = tuple[Literal["text", "html"], str]
 
 
 @registrar.register_parser()
@@ -220,9 +220,9 @@ class EsjzoneParser(BaseParser):
             return None
 
         tree = html.fromstring(html_list[0])
-
         title = self._first_str(tree.xpath("//h2/text()"))
 
+        # Collect embedded font bytes (for obfuscated glyph decoding)
         font_bytes_map: dict[str, bytes] = {}
         for link in tree.xpath(
             '//div[contains(@class, "forum-content")]//link[@rel="stylesheet"]'
@@ -235,30 +235,141 @@ class EsjzoneParser(BaseParser):
 
         font_mappings: dict[str, dict[str, str]] = {}
 
-        # render everything inside .forum-content recursively
-        paragraphs: list[str] = []
+        # Walk the forum content and produce plain text lines + image map
+        all_lines: list[str] = []
+        image_positions: dict[int, list[str]] = {}
         for root in tree.xpath('//div[contains(@class, "forum-content")]'):
-            tokens = self._render_node(
+            lines, img_map = self._collect_lines_and_images(
                 root,
                 font_bytes_map=font_bytes_map,
                 font_mappings=font_mappings,
-                active_map=None,
             )
-            txt = self._tokens_to_str(tokens).strip()
-            if txt:
-                paragraphs.append(txt)
 
-        if not paragraphs:
+            # Merge image maps, re-indexing by current length prior to this root
+            if img_map:
+                base = len(all_lines)
+                for k, urls in img_map.items():
+                    image_positions.setdefault(k + base, []).extend(urls)
+
+            all_lines.extend(lines)
+
+        if not (all_lines or image_positions):
             return None
 
-        content = "\n".join(paragraphs)
-
+        content = "\n".join(all_lines)
         return {
             "id": chapter_id,
             "title": title,
             "content": content,
-            "extra": {"site": self.site_name},
+            "extra": {
+                "site": self.site_name,
+                "image_positions": image_positions,
+            },
         }
+
+    def _collect_lines_and_images(
+        self,
+        node: etree._Element,
+        *,
+        font_bytes_map: dict[str, bytes],
+        font_mappings: dict[str, dict[str, str]],
+    ) -> tuple[list[str], dict[int, list[str]]]:
+        lines: list[str] = []
+        image_positions: dict[int, list[str]] = defaultdict(list)
+        buf: list[str] = []
+
+        def apply_map(s: str, active_map: dict[str, str] | None) -> str:
+            if not active_map:
+                return s
+            return "".join(active_map.get(ch, ch) for ch in s)
+
+        def flush_line() -> None:
+            text = "".join(buf).strip()
+            if text:
+                lines.append(text)
+            buf.clear()
+
+        def add_img(src: str) -> None:
+            if buf:
+                flush_line()
+            # 1-based: images after paragraph N -> key N
+            idx = len(lines)
+            image_positions[idx].append(src)
+
+        def build_section_map(section: etree._Element) -> dict[str, str] | None:
+            style_attr = section.get("style", "")
+            fam = self._FONT_FAMILY_RE.search(style_attr)
+            if not fam:
+                return None
+            font_name = fam.group(1)
+            if not self._decode_font:
+                return font_mappings.get(font_name)
+            if font_name not in font_bytes_map:
+                return font_mappings.get(font_name)
+
+            raw_text = section.xpath("string(.)")
+            char_set = set(raw_text) - {" ", "\n", "\u3000"}
+            mapping = self._build_font_mapping(
+                font_bytes_map[font_name],
+                char_set,
+                mapped=font_mappings.get(font_name, {}),
+            )
+            if mapping:
+                font_mappings[font_name] = mapping
+            return mapping or None
+
+        BLOCK_TAGS = {"p"}
+
+        def walk(n: etree._Element, active_map: dict[str, str] | None) -> None:
+            tag = n.tag.lower() if isinstance(n.tag, str) else ""
+
+            # Skip non-content
+            if tag in {"script", "style", "link", "meta"}:
+                return
+
+            if tag == "section":
+                local_map = build_section_map(n) or active_map
+                # text before first child
+                if n.text and n.text.strip():
+                    buf.append(apply_map(n.text, local_map))
+                for child in n:
+                    walk(child, local_map)
+                    if child.tail and child.tail.strip():
+                        buf.append(apply_map(child.tail, local_map))
+                return
+
+            if tag in BLOCK_TAGS:
+                if n.text and n.text.strip():
+                    buf.append(apply_map(n.text, active_map))
+                for child in n:
+                    walk(child, active_map)
+                    if child.tail and child.tail.strip():
+                        buf.append(apply_map(child.tail, active_map))
+                flush_line()
+                return
+
+            if tag == "br":
+                flush_line()
+                return
+
+            if tag == "img":
+                src = n.get("src", "") or ""
+                if src:
+                    add_img(src)
+                return
+
+            if n.text and n.text.strip():
+                buf.append(apply_map(n.text, active_map))
+            for child in n:
+                walk(child, active_map)
+                if child.tail and child.tail.strip():
+                    buf.append(apply_map(child.tail, active_map))
+
+        walk(node, active_map=None)
+        flush_line()
+
+        # Convert defaultdict to plain dict
+        return lines, dict(image_positions)
 
     def _is_forum_page(self, html_str: list[str]) -> bool:
         if not html_str:
@@ -326,7 +437,7 @@ class EsjzoneParser(BaseParser):
             font_bytes = base64.b64decode(font_data_match.group(1))
             return font_name, font_bytes
         except Exception as e:
-            logger.warning("Failed to extract font info: %s", e)
+            logger.warning("esjzone: Failed to extract font info: %s", e)
             return "", b""
 
     def _build_font_mapping(
@@ -374,130 +485,5 @@ class EsjzoneParser(BaseParser):
 
             return mapping
         except Exception as e:
-            logger.warning("Failed to build font mapping: %s", e)
+            logger.warning("esjzone: Failed to build font mapping: %s", e)
             return {}
-
-    @staticmethod
-    def _tokens_to_str(tokens: list[Token]) -> str:
-        """Concatenate tokens in order."""
-        return "".join(seg for _kind, seg in tokens)
-
-    @staticmethod
-    def _apply_map_to_tokens(
-        tokens: list[Token], font_map: dict[str, str] | None
-    ) -> list[Token]:
-        """Apply font map ONLY to text tokens; leave HTML tokens untouched."""
-        if not font_map:
-            return tokens
-        out: list[Token] = []
-        for kind, seg in tokens:
-            if kind == "text":
-                out.append(("text", "".join(font_map.get(ch, ch) for ch in seg)))
-            else:
-                out.append((kind, seg))
-        return out
-
-    def _render_node(
-        self,
-        node: etree._Element,
-        *,
-        font_bytes_map: dict[str, bytes],
-        font_mappings: dict[str, dict[str, str]],
-        active_map: dict[str, str] | None,
-    ) -> list[Token]:
-        """
-        Recursive renderer that returns a list of tokens (('text'|'html'), content).
-        'active_map' is applied to text tokens at this level (and below) unless
-        a <section> establishes/overrides its own mapping.
-        """
-        # Non-element, comments, etc.
-        tag = node.tag.lower() if isinstance(node.tag, str) else ""
-        if tag in {"script", "style", "link", "meta"}:
-            return []
-
-        # <img> -> HTML token
-        if tag == "img":
-            src = node.get("src")
-            return [("html", f'<img src="{src}" />')] if src else []
-
-        # <br> -> emit a line break as text
-        if tag == "br":
-            return [("text", "\n")]
-
-        # <section> may introduce an obfuscated font
-        if tag == "section":
-            style_attr = node.get("style", "")
-            fam = self._FONT_FAMILY_RE.search(style_attr)
-            raw: list[Token] = []
-            # include node.text before first child
-            if node.text and node.text.strip():
-                raw.append(("text", node.text.strip()))
-            for child in node:
-                raw.extend(
-                    self._render_node(
-                        child,
-                        font_bytes_map=font_bytes_map,
-                        font_mappings=font_mappings,
-                        active_map=None,
-                    )
-                )
-                if child.tail and child.tail.strip():
-                    raw.append(("text", child.tail.strip()))
-
-            # If there's a known font here and decoding is enabled, build/apply the map
-            if (
-                self._decode_font
-                and fam
-                and (font_name := fam.group(1)) in font_bytes_map
-            ):
-                char_set = set("".join(seg for kind, seg in raw if kind == "text")) - {
-                    " ",
-                    "\n",
-                    "\u3000",
-                }
-                font_mappings[font_name] = self._build_font_mapping(
-                    font_bytes_map[font_name],
-                    char_set,
-                    mapped=font_mappings.get(font_name, {}),
-                )
-                return self._apply_map_to_tokens(raw, font_mappings[font_name])
-
-            return self._apply_map_to_tokens(raw, active_map)
-
-        # <p> -> collect parts in order
-        if tag == "p":
-            out: list[Token] = []
-
-            if node.text and node.text.strip():
-                out.append(("text", node.text.strip()))
-
-            for child in node:
-                out.extend(
-                    self._render_node(
-                        child,
-                        font_bytes_map=font_bytes_map,
-                        font_mappings=font_mappings,
-                        active_map=active_map,
-                    )
-                )
-                if child.tail and child.tail.strip():
-                    out.append(("text", child.tail.strip()))
-
-            return self._apply_map_to_tokens(out, active_map)
-
-        # <a>, <div>, <span>, etc. -> generic container: recurse
-        out = []
-        if node.text and node.text.strip():
-            out.append(("text", node.text.strip()))
-        for child in node:
-            out.extend(
-                self._render_node(
-                    child,
-                    font_bytes_map=font_bytes_map,
-                    font_mappings=font_mappings,
-                    active_map=active_map,
-                )
-            )
-            if child.tail and child.tail.strip():
-                out.append(("text", child.tail.strip()))
-        return self._apply_map_to_tokens(out, active_map)

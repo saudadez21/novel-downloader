@@ -10,7 +10,6 @@ import abc
 import asyncio
 import json
 import logging
-import re
 import time
 from collections.abc import Awaitable, Callable, Sequence
 from pathlib import Path
@@ -21,7 +20,6 @@ from novel_downloader.schemas import (
     BookConfig,
     BookInfoDict,
     DownloaderConfig,
-    VolumeInfoDict,
 )
 
 ONE_DAY = 86400  # seconds
@@ -37,11 +35,6 @@ class BaseDownloader(abc.ABC):
     Subclasses are required to implement methods for downloading
     a single book, using the provided fetcher and parser components.
     """
-
-    _IMG_SRC_RE = re.compile(
-        r'<img[^>]*\bsrc\s*=\s*["\'](https?://[^"\']+)["\'][^>]*>',
-        re.IGNORECASE,
-    )
 
     def __init__(
         self,
@@ -216,38 +209,6 @@ class BaseDownloader(abc.ABC):
                 html, encoding="utf-8"
             )
 
-    @classmethod
-    def _extract_img_urls(cls, content: str) -> list[str]:
-        """
-        Extract all <img> tag src URLs from the given HTML string.
-        """
-        return cls._IMG_SRC_RE.findall(content)
-
-    @staticmethod
-    def _select_chapter_ids(
-        vols: list[VolumeInfoDict],
-        start_id: str | None,
-        end_id: str | None,
-        ignore: set[str],
-    ) -> list[str]:
-        seen_start = start_id is None
-        out: list[str] = []
-        for vol in vols:
-            for chap in vol["chapters"]:
-                cid = chap.get("chapterId")
-                if not cid:
-                    continue
-                if not seen_start:
-                    if cid == start_id:
-                        seen_start = True
-                    else:
-                        continue
-                if cid not in ignore:
-                    out.append(cid)
-                if end_id is not None and cid == end_id:
-                    return out
-        return out
-
     @property
     def fetcher(self) -> FetcherProtocol:
         return self._fetcher
@@ -255,6 +216,10 @@ class BaseDownloader(abc.ABC):
     @property
     def parser(self) -> ParserProtocol:
         return self._parser
+
+    @property
+    def workers(self) -> int:
+        return self._workers
 
     def _check_login(self) -> bool:
         """

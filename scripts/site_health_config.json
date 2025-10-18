@@ -1,6 +1,6 @@
 {
   "max_concurrent": 20,
-  "timeout": 12,
+  "timeout": 20,
   "retries": 1,
   "sites": {
     "qidian": ["https://www.qidian.com/"],

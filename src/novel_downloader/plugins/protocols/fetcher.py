@@ -106,7 +106,7 @@ class FetcherProtocol(Protocol):
         urls: list[str],
         batch_size: int = 10,
         *,
-        on_exist: Literal["overwrite", "skip", "rename"] = "skip",
+        on_exist: Literal["overwrite", "skip"] = "skip",
     ) -> None:
         """
         Download images to `img_dir` in batches.

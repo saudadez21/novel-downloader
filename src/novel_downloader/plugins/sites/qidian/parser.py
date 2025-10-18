@@ -193,14 +193,14 @@ class QidianParser(BaseParser):
         **kwargs: Any,
     ) -> ChapterDict | None:
         if not html_list:
-            logger.warning("qidian chapter %s :: html_list is empty", chapter_id)
+            logger.warning("qidian parser: html_list is empty (chapter=%s)", chapter_id)
             return None
         try:
             ssr_data = self._find_ssr_page_context(html_list[0])
             chapter_info = self._extract_chapter_info(ssr_data)
         except Exception as e:
             logger.warning(
-                "qidian chapter %s :: failed to locate ssr_pageContext block: %s",
+                "qidian parser: failed to locate ssr_pageContext (chapter=%s): %s",
                 chapter_id,
                 e,
             )
@@ -208,13 +208,13 @@ class QidianParser(BaseParser):
 
         if not chapter_info:
             logger.warning(
-                "qidian chapter %s :: ssr_chapterInfo not found.", chapter_id
+                "qidian parser: ssr_chapterInfo not found (chapter=%s)", chapter_id
             )
             return None
 
         if not self._can_view_chapter(chapter_info):
             logger.warning(
-                "qidian chapter %s :: not purchased or inaccessible.", chapter_id
+                "qidian parser: not purchased or inaccessible (chapter=%s)", chapter_id
             )
             return None
 
@@ -245,7 +245,7 @@ class QidianParser(BaseParser):
         )
         if not chapter_text:
             logger.warning(
-                "qidian chapter %s :: content empty after decryption/font-mapping",
+                "qidian parser: empty content after decryption/font-mapping (chapter=%s)",  # noqa: E501
                 chapter_id,
             )
             return None
@@ -297,8 +297,7 @@ class QidianParser(BaseParser):
         """
         if not self._decode_font:
             logger.warning(
-                "qidian chapter %s :: font decryption skipped "
-                "(set `decode_font=True` to enable)",
+                "qidian parser: font decryption skipped (chapter=%s, decode_font=False)",  # noqa: E501
                 cid,
             )
             return ""
@@ -312,13 +311,13 @@ class QidianParser(BaseParser):
         fixed_woff2_url = chapter_info.get("fixedFontWoff2")
 
         if not css_str:
-            logger.warning("qidian chapter %s :: css missing or empty", cid)
+            logger.warning("qidian parser: missing CSS (chapter=%s)", cid)
             return ""
         if not rf_data:
-            logger.warning("qidian chapter %s :: randomFont.data missing or empty", cid)
+            logger.warning("qidian parser: randomFont.data missing (chapter=%s)", cid)
             return ""
         if not fixed_woff2_url:
-            logger.warning("qidian chapter %s :: fixedFontWoff2 missing or empty", cid)
+            logger.warning("qidian parser: fixedFontWoff2 missing (chapter=%s)", cid)
             return ""
 
         debug_dir = self._debug_dir / "font_debug" / cid
@@ -342,7 +341,9 @@ class QidianParser(BaseParser):
             on_exist="skip",
         )
         if fixed_path is None:
-            logger.warning("qidian chapter %s :: failed to download fixedfont", cid)
+            logger.warning(
+                "qidian parser: failed to download fixed font (chapter=%s)", cid
+            )
             return ""
 
         css_rules = self._parse_css_rules(css_str)

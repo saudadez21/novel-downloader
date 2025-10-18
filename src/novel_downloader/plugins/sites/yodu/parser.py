@@ -175,6 +175,8 @@ class YoduParser(BaseParser):
 
         title: str = ""
         paragraphs: list[str] = []
+        image_positions: dict[int, list[str]] = {}
+        image_idx = 0
 
         for curr_html in html_list:
             tree = html.fromstring(curr_html)
@@ -188,19 +190,22 @@ class YoduParser(BaseParser):
             for node in tree.xpath(
                 '//div[@id="TextContent"]//p | //div[@id="TextContent"]//img'
             ):
-                tag = node.tag.lower()
+                tag = (node.tag or "").lower()
                 if tag == "p":
                     txt = "".join(node.xpath(".//text()")).strip()
+                    if not txt:
+                        continue
                     if decrypt:
                         txt = self._apply_font_mapping(txt)
                     if txt:
                         paragraphs.append(txt)
+                        image_idx += 1
                 elif tag == "img":
                     src = (node.get("src") or "").strip()
                     if src:
-                        paragraphs.append(f'<img src="{src}" />')
+                        image_positions.setdefault(image_idx, []).append(src)
 
-        if not paragraphs:
+        if not (paragraphs or image_positions):
             return None
 
         content = "\n".join(paragraphs)
@@ -215,6 +220,7 @@ class YoduParser(BaseParser):
             "extra": {
                 "site": self.site_name,
                 "next_cid": next_cid,
+                "image_positions": image_positions,
             },
         }
 

@@ -6,12 +6,11 @@ novel_downloader.plugins.common.exporter
 Shared exporter implementation for producing standard TXT and EPUB outputs.
 """
 
-import re
 from html import escape
 from pathlib import Path
 from typing import Any, Literal
 
-from novel_downloader.infra.http_defaults import DEFAULT_HEADERS, DEFAULT_IMAGE_SUFFIX
+from novel_downloader.infra.http_defaults import IMAGE_HEADERS
 from novel_downloader.infra.paths import CSS_MAIN_PATH
 from novel_downloader.libs.epub import (
     Chapter,
@@ -19,7 +18,7 @@ from novel_downloader.libs.epub import (
     StyleSheet,
     Volume,
 )
-from novel_downloader.libs.filesystem import sanitize_filename, write_file
+from novel_downloader.libs.filesystem import img_name, sanitize_filename, write_file
 from novel_downloader.plugins.base.exporter import BaseExporter
 from novel_downloader.schemas import (
     BookConfig,
@@ -40,11 +39,6 @@ class CommonExporter(BaseExporter):
     """
 
     _IMAGE_WRAPPER = '<div class="duokan-image-single illus">{img}</div>'
-    _IMG_TAG_RE = re.compile(r"<img[^>]*>", re.IGNORECASE)
-    _IMG_SRC_RE = re.compile(
-        r'<img[^>]*\bsrc\s*=\s*["\'](https?://[^"\']+)["\'][^>]*>',
-        re.IGNORECASE,
-    )
 
     def export_as_txt(self, book: BookConfig) -> Path | None:
         """
@@ -72,7 +66,9 @@ class CommonExporter(BaseExporter):
         orig_vols = book_info.get("volumes", [])
         vols = self._filter_volumes(orig_vols, start_id, end_id, ignore_set)
         if not vols:
-            self.logger.info("Nothing to do after filtering: %s", book_id)
+            self.logger.info(
+                "Nothing to do after filtering (site=%s, book=%s)", self._site, book_id
+            )
             return None
 
         # --- Prepare header (book metadata) ---
@@ -97,13 +93,13 @@ class CommonExporter(BaseExporter):
             chap_map = self._get_chapters(book_id, cids)
             for ch_info in volume.get("chapters", []):
                 cid = ch_info.get("chapterId")
-                ch_title = ch_info.get("title", "")
+                ch_title = ch_info.get("title")
                 if not cid:
                     continue
 
                 ch = chap_map.get(cid)
                 if not ch:
-                    self._handle_missing_chapter(cid)
+                    self._handle_missing_chapter(book_id, cid)
                     continue
 
                 parts.append(self._build_txt_chapter(ch_title, ch))
@@ -119,10 +115,17 @@ class CommonExporter(BaseExporter):
             result = write_file(
                 content=final_text, filepath=out_path, on_exist="overwrite"
             )
-            self.logger.info("Exported TXT: %s", out_path)
+            self.logger.info(
+                "Exported TXT (site=%s, book=%s): %s", self._site, book_id, out_path
+            )
         except Exception as e:
             self.logger.error(
-                "Failed to write TXT to %s: %s", out_path, e, exc_info=True
+                "Failed to write TXT (site=%s, book=%s) to %s: %s",
+                self._site,
+                book_id,
+                out_path,
+                e,
+                exc_info=True,
             )
             return None
         return result
@@ -141,12 +144,12 @@ class CommonExporter(BaseExporter):
 
         Steps:
           1. Load `book_info` for metadata.
-        2. For each volume:
-          a. Clean the volume title and determine output filename.
-          b. Batch-fetch all chapters in this volume to minimize SQLite overhead.
-          c. Initialize an EPUB builder for the volume, including cover and intro.
-          d. For each chapter: clean title & content, inline remote images.
-          e. Finalize and write the volume EPUB.
+          2. For each volume:
+             a. Clean the volume title and determine output filename.
+             b. Batch-fetch all chapters in this volume to minimize SQLite overhead.
+             c. Initialize an EPUB builder for the volume, including cover and intro.
+             d. For each chap: build XHTML and place image from extras.image_positions
+             e. Finalize and write the volume EPUB.
         """
         book_id = self._normalize_book_id(book.book_id)
         start_id = book.start_id
@@ -160,7 +163,9 @@ class CommonExporter(BaseExporter):
         orig_vols = book_info.get("volumes", [])
         vols = self._filter_volumes(orig_vols, start_id, end_id, ignore_set)
         if not vols:
-            self.logger.info("Nothing to do after filtering: %s", book_id)
+            self.logger.info(
+                "Nothing to do after filtering (site=%s, book=%s)", self._site, book_id
+            )
             return None
 
         # --- Prepare path ---
@@ -220,53 +225,48 @@ class CommonExporter(BaseExporter):
             chap_map = self._get_chapters(book_id, cids)
 
             # Append each chapter
+            seen_cids: set[str] = set()
             for ch_info in vol.get("chapters", []):
                 cid = ch_info.get("chapterId")
                 ch_title = ch_info.get("title")
-                if not cid:
+                if not cid or cid in seen_cids:
                     continue
 
                 ch = chap_map.get(cid)
                 if not ch:
-                    self._handle_missing_chapter(cid)
+                    self._handle_missing_chapter(book_id, cid)
                     continue
 
-                raw_title = (
-                    ch_title if isinstance(ch_title, str) else ch.get("title", "")
+                chapter_obj = self._build_epub_chapter(
+                    book=epub,
+                    css=[main_css],
+                    cid=cid,
+                    chap_title=ch_title,
+                    chap=ch,
+                    img_dir=img_dir,
                 )
-                title = (raw_title or "").strip() or str(cid)
-                content = ch.get("content", "")
-
-                content = (
-                    self._inline_remote_images(epub, content, img_dir)
-                    if self._include_picture
-                    else self._remove_all_images(content)
-                )
-
-                chap_html = self._build_epub_chapter(
-                    title=title,
-                    paragraphs=content,
-                    extras=ch.get("extra", {}),
-                )
-                epub.add_chapter(
-                    Chapter(
-                        id=f"c_{cid}",
-                        filename=f"c{cid}.xhtml",
-                        title=title,
-                        content=chap_html,
-                        css=[main_css],
-                    )
-                )
+                epub.add_chapter(chapter_obj)
+                seen_cids.add(cid)
 
             out_name = self.get_filename(title=vol_title, author=author, ext="epub")
             out_path = self._output_dir / sanitize_filename(out_name)
 
             try:
                 epub.export(out_path)
-                self.logger.info("Exported EPUB: %s", out_path)
+                self.logger.info(
+                    "Exported EPUB (site=%s, book=%s): %s",
+                    self._site,
+                    book_id,
+                    out_path,
+                )
             except Exception as e:
                 self.logger.error(
-                    "Failed to write EPUB to %s: %s", out_path, e, exc_info=True
+                    "Failed to write EPUB (site=%s, book=%s) to %s: %s",
+                    self._site,
+                    book_id,
+                    out_path,
+                    e,
+                    exc_info=True,
                 )
 
         return None
@@ -296,7 +296,9 @@ class CommonExporter(BaseExporter):
         orig_vols = book_info.get("volumes", [])
         vols = self._filter_volumes(orig_vols, start_id, end_id, ignore_set)
         if not vols:
-            self.logger.info("Nothing to do after filtering: %s", book_id)
+            self.logger.info(
+                "Nothing to do after filtering (site=%s, book=%s)", self._site, book_id
+            )
             return None
 
         # --- Prepare path ---
@@ -334,6 +336,7 @@ class CommonExporter(BaseExporter):
         epub.add_stylesheet(main_css)
 
         # --- Compile columes ---
+        seen_cids: set[str] = set()
         for v_idx, vol in enumerate(vols, start=1):
             vol_title = vol.get("volume_name") or f"卷 {v_idx}"
 
@@ -365,43 +368,28 @@ class CommonExporter(BaseExporter):
             for ch_info in vol.get("chapters", []):
                 cid = ch_info.get("chapterId")
                 ch_title = ch_info.get("title")
-                if not cid:
+                if not cid or cid in seen_cids:
                     continue
 
                 ch = chap_map.get(cid)
                 if not ch:
-                    self._handle_missing_chapter(cid)
+                    self._handle_missing_chapter(book_id, cid)
                     continue
 
-                raw_title = (
-                    ch_title if isinstance(ch_title, str) else ch.get("title", "")
-                )
-                title = (raw_title or "").strip() or str(cid)
-                content = ch.get("content", "")
-
-                content = (
-                    self._inline_remote_images(epub, content, img_dir)
-                    if self._include_picture
-                    else self._remove_all_images(content)
+                chapter_obj = self._build_epub_chapter(
+                    book=epub,
+                    css=[main_css],
+                    cid=cid,
+                    chap_title=ch_title,
+                    chap=ch,
+                    img_dir=img_dir,
                 )
 
-                chap_html = self._build_epub_chapter(
-                    title=title,
-                    paragraphs=content,
-                    extras=ch.get("extra", {}),
-                )
+                curr_vol.chapters.append(chapter_obj)
+                seen_cids.add(cid)
 
-                curr_vol.chapters.append(
-                    Chapter(
-                        id=f"c_{cid}",
-                        filename=f"c{cid}.xhtml",
-                        title=title,
-                        content=chap_html,
-                        css=[main_css],
-                    )
-                )
-
-            epub.add_volume(curr_vol)
+            if curr_vol.chapters:
+                epub.add_volume(curr_vol)
 
         # --- Finalize EPUB ---
         out_name = self.get_filename(title=name, author=author, ext="epub")
@@ -409,10 +397,17 @@ class CommonExporter(BaseExporter):
 
         try:
             epub.export(out_path)
-            self.logger.info("Exported EPUB: %s", out_path)
+            self.logger.info(
+                "Exported EPUB (site=%s, book=%s): %s", self._site, book_id, out_path
+            )
         except Exception as e:
             self.logger.error(
-                "Failed to write EPUB to %s: %s", out_path, e, exc_info=True
+                "Failed to write EPUB (site=%s, book=%s) to %s: %s",
+                self._site,
+                book_id,
+                out_path,
+                e,
+                exc_info=True,
             )
             return None
         return out_path
@@ -449,7 +444,7 @@ class CommonExporter(BaseExporter):
         target_dir: Path,
         filename: str | None = None,
         *,
-        on_exist: Literal["overwrite", "skip", "rename"] = "overwrite",
+        on_exist: Literal["overwrite", "skip"] = "overwrite",
     ) -> Path | None:
         """
         Download image from url to target dir with given name
@@ -461,10 +456,10 @@ class CommonExporter(BaseExporter):
         return download(
             img_url,
             target_dir,
-            filename=filename,
-            headers=DEFAULT_HEADERS,
+            filename=img_name(img_url, name=filename),
+            headers=IMAGE_HEADERS,
             on_exist=on_exist,
-            default_suffix=DEFAULT_IMAGE_SUFFIX,
+            retries=0,
         )
 
     @staticmethod
@@ -574,7 +569,7 @@ class CommonExporter(BaseExporter):
         line = f"=== {vol_title.strip()} ==="
         return f"{line}\n" + ("\n".join(meta_bits) + "\n\n" if meta_bits else "\n\n")
 
-    def _build_txt_chapter(self, chap_title: str, chap: ChapterDict) -> str:
+    def _build_txt_chapter(self, chap_title: str | None, chap: ChapterDict) -> str:
         """
         Render one chapter to text
         """
@@ -582,7 +577,6 @@ class CommonExporter(BaseExporter):
         title_line = chap_title or chap.get("title", "").strip()
 
         cleaned = chap.get("content", "").strip()
-        cleaned = self._remove_all_images(cleaned)
         body = "\n".join(s for line in cleaned.splitlines() if (s := line.strip()))
 
         # Extras
@@ -594,96 +588,112 @@ class CommonExporter(BaseExporter):
             else f"{title_line}\n\n{body}\n\n"
         )
 
-    def _inline_remote_images(
-        self,
-        book: EpubBuilder,
-        content: str,
-        image_dir: Path,
-    ) -> str:
-        """
-        Download every remote `<img src="...">` in `content` into `image_dir`,
-        and replace the original url with local path.
-
-        :param content: HTML/text of the chapter containing <img> tags.
-        :param image_dir: Directory to save downloaded images into.
-        """
-        if "<img" not in content.lower():
-            return content
-
-        def _replace(m: re.Match[str]) -> str:
-            url = m.group(1)
-            try:
-                local_path = self._download_image(url, image_dir, on_exist="skip")
-                if not local_path:
-                    return m.group(0)
-                filename = book.add_image(local_path)
-                return f'<img src="../Images/{filename}" />'
-            except Exception as e:
-                self.logger.debug("Inline image failed for %s: %s", url, e)
-                return m.group(0)
-
-        return self._IMG_SRC_RE.sub(_replace, content)
-
-    @classmethod
-    def _remove_all_images(cls, content: str) -> str:
-        """
-        Remove all <img> tags from the given content.
-
-        :param content: HTML/text of the chapter containing <img> tags.
-        """
-        return cls._IMG_TAG_RE.sub("", content)
-
     def _build_epub_chapter(
         self,
-        title: str,
-        paragraphs: str,
-        extras: dict[str, str],
-    ) -> str:
+        *,
+        book: EpubBuilder,
+        css: list[StyleSheet],
+        cid: str,
+        chap_title: str | None,
+        chap: ChapterDict,
+        img_dir: Path,
+    ) -> Chapter:
         """
-        Build a formatted chapter epub HTML including title, body paragraphs,
-        and optional extra sections.
+        Build a Chapter object with XHTML content and optionally place images
+        from `chap.extra['image_positions']` (1-based index; 0 = before 1st paragraph).
         """
-        parts = []
-        parts.append(f"<h2>{escape(title)}</h2>")
-        parts.append(self._render_html_block(paragraphs))
+        title = chap_title or chap.get("title", "").strip()
+        content = chap.get("content", "")
 
-        extras_epub = self._render_epub_extras(extras)
-        if extras_epub:
-            parts.append(extras_epub)
+        extras = chap.get("extra") or {}
+        image_positions = self._collect_img_map(extras)
+        html_parts: list[str] = [f"<h2>{escape(title)}</h2>"]
 
-        return "\n".join(parts)
+        def _append_image(url: str) -> None:
+            if not self._include_picture:
+                return
+            u = (url or "").strip()
+            if not u:
+                return
+            if u.startswith("//"):
+                u = "https:" + u
+            if not (u.startswith("http://") or u.startswith("https://")):
+                return
+            try:
+                local = self._download_image(u, img_dir, on_exist="skip")
+                if not local:
+                    return
+                fname = book.add_image(local)
+                img = f'<img src="../Images/{fname}" alt="image"/>'
+                html_parts.append(self._IMAGE_WRAPPER.format(img=img))
+            except Exception as e:
+                self.logger.debug("EPUB image add failed for %s: %s", u, e)
+
+        # Images before first paragraph
+        for url in image_positions.get(0, []):
+            _append_image(url)
+
+        # Paragraphs + inline-after images
+        lines = content.splitlines()
+        for i, line in enumerate(lines, start=1):
+            if ln := line.strip():
+                html_parts.append(f"<p>{escape(ln)}</p>")
+            for url in image_positions.get(i, []):
+                _append_image(url)
+
+        max_i = len(lines)
+        for k, urls in image_positions.items():
+            if k > max_i:
+                for url in urls:
+                    _append_image(url)
+
+        if extras_epub := self._render_epub_extras(extras):
+            html_parts.append(extras_epub)
+
+        xhtml = "\n".join(html_parts)
+        return Chapter(
+            id=f"c_{cid}",
+            filename=f"c{cid}.xhtml",
+            title=title,
+            content=xhtml,
+            css=css,
+        )
+
+    @staticmethod
+    def _collect_img_map(extras: dict[str, Any]) -> dict[int, list[str]]:
+        """
+        Collect and normalize `image_positions` into `{int: [str, ...]}`.
+        """
+        result: dict[int, list[str]] = {}
+        raw_map = extras.get("image_positions")
+
+        if not isinstance(raw_map, dict):
+            return result
+        for k, v in raw_map.items():
+            try:
+                key = int(k)
+            except Exception:
+                key = 0
+            urls: list[str] = []
+            if isinstance(v, list | tuple):
+                for u in v:
+                    if isinstance(u, str):
+                        s = u.strip()
+                        if s:
+                            urls.append(s)
+            elif isinstance(v, str):
+                s = v.strip()
+                if s:
+                    urls.append(s)
+            if urls:
+                result.setdefault(key, []).extend(urls)
+        return result
 
     @classmethod
     def _render_html_block(cls, text: str) -> str:
-        out: list[str] = []
-        for raw in text.splitlines():
-            line = raw.strip()
-            if not line:
-                continue
-
-            # case 1: already wrapped in a <div>...</div>
-            if line.startswith("<div") and line.endswith("</div>"):
-                out.append(line)
-                continue
-
-            # case 2: single <img> line
-            if cls._IMG_TAG_RE.fullmatch(line):
-                out.append(cls._IMAGE_WRAPPER.format(img=line))
-                continue
-
-            # case 3: inline <img> in text -> escape other text, preserve <img>
-            if "<img " in line.lower():
-                pieces = []
-                last = 0
-                for m in cls._IMG_TAG_RE.finditer(line):
-                    pieces.append(escape(line[last : m.start()]))
-                    pieces.append(m.group(0))
-                    last = m.end()
-                pieces.append(escape(line[last:]))
-                out.append("<p>" + "".join(pieces) + "</p>")
-                continue
-
-            # plain text line
-            out.append(f"<p>{escape(line)}</p>")
-
-        return "\n".join(out)
+        """
+        Wraps each non-empty (stripped) line with <p>.
+        """
+        return "\n".join(
+            f"<p>{escape(s)}</p>" for ln in text.splitlines() if (s := ln.strip())
+        )

@@ -132,6 +132,7 @@ class SfacgParser(BaseParser):
 
         tree = html.fromstring(html_list[0])
         content = ""
+        image_positions: dict[int, list[str]] = {}
 
         is_vip = "/ajax/ashx/common.ashx" in html_list[0]
 
@@ -153,14 +154,15 @@ class SfacgParser(BaseParser):
 
         # case: normal HTML text chapter
         else:
-            content_div = tree.xpath('//div[@class="yuedu Content_Frame"]/div[1]')
-            if not content_div:
+            content_divs = tree.xpath('//div[@class="yuedu Content_Frame"]/div[1]')
+            if not content_divs:
                 logger.warning("sfacg chapter %s :: missing content div", chapter_id)
                 return None
 
-            content = self.parse_normal_chapter(content_div[0])
+            lines, image_positions = self.parse_normal_chapter(content_divs[0])
+            content = "\n".join(lines)
 
-        if not content:
+        if not (content or image_positions):
             return None
 
         title = self._first_str(
@@ -174,28 +176,43 @@ class SfacgParser(BaseParser):
             "extra": {
                 "site": self.site_name,
                 "vip": is_vip,
+                "image_positions": image_positions,
             },
         }
 
-    def parse_normal_chapter(self, content_div: html.HtmlElement) -> str:
-        result = []
+    def parse_normal_chapter(
+        self, content_div: html.HtmlElement
+    ) -> tuple[list[str], dict[int, list[str]]]:
+        paragraphs: list[str] = []
+        image_positions: dict[int, list[str]] = {}
+        image_idx = 0
+
+        def append_para(txt: str | None) -> None:
+            nonlocal image_idx
+            if not txt:
+                return
+            cleaned = txt.strip()
+            if cleaned:
+                paragraphs.append(cleaned)
+                image_idx += 1
+
         for elem in content_div.iter():
             if elem.text and elem.tag not in ("img",):
-                text = elem.text.strip()
-                if text:
-                    result.append(text)
+                append_para(elem.text)
 
             if elem.tag == "img":
                 src = elem.get("src")
                 if src:
-                    result.append(f'<img src="{src}" />')
+                    if src.startswith("//"):
+                        src = "https:" + src
+                    image_positions.setdefault(image_idx, []).append(src)
 
-            if elem is content_div:
+            if elem is content_div:  # trailing text (skip the root itself)
                 continue
             if elem.tail and elem.tail.strip():
-                result.append(elem.tail.strip())
+                append_para(elem.tail)
 
-        return "\n".join(result)
+        return paragraphs, image_positions
 
     def parse_vip_chapter(self, img_base64: str) -> str:
         ocr = get_font_ocr(self._fontocr_cfg)

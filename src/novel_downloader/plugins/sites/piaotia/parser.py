@@ -5,7 +5,6 @@ novel_downloader.plugins.sites.piaotia.parser
 
 """
 
-import re
 from typing import Any
 
 from lxml import html
@@ -27,11 +26,6 @@ class PiaotiaParser(BaseParser):
     """
 
     site_name: str = "piaotia"
-
-    _RE_DEVICE_DIV = re.compile(
-        r'<div\s+id=[\'"“”]?device[\'"“”]?[^>]*>',
-        flags=re.IGNORECASE,
-    )
 
     def parse_book_info(
         self,
@@ -135,47 +129,54 @@ class PiaotiaParser(BaseParser):
         if not html_list:
             return None
 
-        raw = self._RE_DEVICE_DIV.sub("", html_list[0])
-        raw = raw.replace(
-            '<script language="javascript">GetMode();</script>',
-            '<div id="main" class="colors1 sidebar">',
-        ).replace(
-            '<script language="javascript">GetFont();</script>',
-            '<div id="content">',
+        # normalize broken HTML
+        raw = (
+            html_list[0]
+            .replace("<head>", "")
+            .replace("</head>", "")
+            .replace("<body>", "")
+            .replace("</body>", "")
+            .replace(
+                '<script language="javascript">GetMode();</script>',
+                '<div id="main" class="colors1 sidebar">',
+            )
+            .replace(
+                '<script language="javascript">GetFont();</script>',
+                '<div id="content">',
+            )
         )
 
         doc = html.fromstring(raw)
-        container = doc.xpath('//div[@id="content"]')
-        root = container[0] if container else doc
 
-        # Title comes straight from the <h1>
-        title = ""
-        h1 = root.find(".//h1")
-        if h1 is not None:
-            full = h1.text_content().strip()
-            a_txt = h1.xpath("./a/text()")
-            title = full.replace(a_txt[0].strip(), "").strip() if a_txt else full
-
-        # Walk the “script‑tables” -> <br> siblings for the body
-        table = root.xpath('.//table[@align="center" and @border]')
-        if not table:
+        content_nodes = doc.xpath('//div[@id="content"]')
+        if not content_nodes:
             return None
-        node = table[0].getnext()
 
+        title = ""
         paragraphs: list[str] = []
-        while node is not None:
-            # stop at the next table or any bottom‑link nav div
-            if (node.tag == "table" and node.get("border")) or (
-                node.tag == "div" and node.get("class", "").endswith("link")
-            ):
-                break
 
-            if node.tag == "br":
-                txt = (node.tail or "").replace("\xa0", " ").strip()
-                if txt:
-                    paragraphs.append(txt)
+        for node in content_nodes[0].iterchildren():
+            tag = (node.tag or "").lower()
 
-            node = node.getnext()
+            if tag == "h1" and not title:
+                a_elem = node.find(".//a")
+                if a_elem is not None and a_elem.tail:
+                    title = a_elem.tail.strip()
+                else:
+                    title = node.text_content().strip()
+                continue
+
+            if tag == "div" and "toplink" in (node.get("class") or ""):
+                continue
+            if tag == "table":
+                continue
+
+            text = node.text_content().strip()
+            if text:
+                paragraphs.append(text)
+
+            if node.tail and node.tail.strip():
+                paragraphs.append(node.tail.strip())
 
         if not paragraphs:
             return None

@@ -14,7 +14,6 @@ import types
 from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import Any, Literal, Self
-from urllib.parse import unquote, urlparse
 
 import aiohttp
 from aiohttp import (
@@ -25,13 +24,9 @@ from aiohttp import (
     TCPConnector,
 )
 
-from novel_downloader.infra.http_defaults import (
-    DEFAULT_IMAGE_SUFFIX,
-    DEFAULT_USER_HEADERS,
-)
+from novel_downloader.infra.http_defaults import DEFAULT_USER_HEADERS, IMAGE_HEADERS
 from novel_downloader.infra.paths import DATA_DIR
-from novel_downloader.libs.filesystem import sanitize_filename
-from novel_downloader.libs.filesystem.file import _unique_path, write_file
+from novel_downloader.libs.filesystem import img_name, write_file
 from novel_downloader.libs.time_utils import async_jitter_sleep
 from novel_downloader.plugins.utils.rate_limiter import TokenBucketRateLimiter
 from novel_downloader.schemas import FetcherConfig, LoginField
@@ -170,7 +165,7 @@ class BaseSession(abc.ABC):
         urls: list[str],
         batch_size: int = 10,
         *,
-        on_exist: Literal["overwrite", "skip", "rename"] = "skip",
+        on_exist: Literal["overwrite", "skip"] = "skip",
     ) -> None:
         """
         Download images to `img_dir` in batches.
@@ -187,7 +182,8 @@ class BaseSession(abc.ABC):
 
         img_dir.mkdir(parents=True, exist_ok=True)
 
-        for i in range(0, len(urls), max(1, batch_size)):
+        batch_size = max(1, batch_size)
+        for i in range(0, len(urls), batch_size):
             batch = urls[i : i + batch_size]
             tasks = [
                 self._download_one_image(url, img_dir, on_exist=on_exist)
@@ -307,7 +303,11 @@ class BaseSession(abc.ABC):
             self._is_logged_in = await self._check_login_status()
             return self._is_logged_in
         except Exception as e:
-            self.logger.warning("Failed to load state: %s", e)
+            self.logger.warning(
+                "Failed to load state for site=%s: %s",
+                self.site_name,
+                e,
+            )
             return False
 
     async def save_state(self) -> bool:
@@ -346,7 +346,11 @@ class BaseSession(abc.ABC):
             )
             return True
         except Exception as e:
-            self.logger.warning("Failed to save state: %s", e)
+            self.logger.warning(
+                "Failed to save state for site=%s: %s",
+                self.site_name,
+                e,
+            )
             return False
 
     def update_cookies(
@@ -449,57 +453,32 @@ class BaseSession(abc.ABC):
         url: str,
         folder: Path,
         *,
-        on_exist: Literal["overwrite", "skip", "rename"],
+        on_exist: Literal["overwrite", "skip"],
     ) -> None:
-        """Download a single image."""
-        save_path = self._build_filepath(
-            url=url,
-            folder=folder,
-            default_suffix=DEFAULT_IMAGE_SUFFIX,
-            on_exist=on_exist,
-        )
+        """Download a single image and save with a hashed filename."""
+        save_path = folder / img_name(url)
+
         if save_path.exists() and on_exist == "skip":
+            self.logger.debug("Skip existing image: %s", save_path)
             return
 
-        async with await self.get(url) as resp:
-            try:
+        try:
+            async with await self.get(url, headers=IMAGE_HEADERS) as resp:
                 resp.raise_for_status()
-            except aiohttp.ClientResponseError as e:
-                self.logger.warning("Skip %s (HTTP %s): %s", url, e.status, e)
-                return
+                data = await resp.read()
+        except aiohttp.ClientResponseError as e:
+            self.logger.warning("Skip %s (HTTP %s): %s", url, e.status, e)
+            return
+        except Exception as e:
+            self.logger.warning("Failed %s: %s", url, e)
+            return
 
-            write_file(
-                content=await resp.read(),  # bytes
-                filepath=save_path,
-                on_exist=on_exist,
-            )
-            self.logger.debug("Saved image: %s <- %s", save_path, url)
+        write_file(content=data, filepath=save_path, on_exist="overwrite")
+        self.logger.debug("Saved image: %s <- %s", save_path, url)
 
     def _resolve_base_url(self, locale_style: str) -> str:
         key = locale_style.strip().lower()
         return self.BASE_URL_MAP.get(key, self.DEFAULT_BASE_URL)
-
-    @staticmethod
-    def _build_filepath(
-        url: str,
-        folder: Path,
-        default_suffix: str,
-        on_exist: Literal["overwrite", "skip", "rename"],
-    ) -> Path:
-        parsed_url = urlparse(url)
-        url_path = Path(unquote(parsed_url.path))
-
-        raw_name = url_path.name or "unnamed"
-        name = sanitize_filename(raw_name)
-
-        if "." not in name and (url_path.suffix or default_suffix):
-            name += url_path.suffix or default_suffix
-
-        file_path = folder / name
-        if on_exist == "rename":
-            file_path = _unique_path(file_path)
-
-        return file_path
 
     async def __aenter__(self) -> Self:
         if self._session is None or self._session.closed:
