@@ -1,3 +1,14 @@
+## v2.4.1 (2025-10-18)
+
+### Feat
+
+- **sites**: add support for ciyuanji (#110)
+
+### Refactor
+
+- **sites**: unify image handling and generalize common downloader (#111)
+- **sites**: unify biquge parser logic, simplify parsers, and archive legacy sites (#108)
+
 ## v2.4.0 (2025-10-06)
 
 ### Feat
