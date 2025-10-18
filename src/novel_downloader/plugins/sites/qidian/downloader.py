@@ -75,7 +75,11 @@ class QidianDownloader(DualBatchDownloader):
             try:
                 html_list = await self.fetcher.get_book_chapter(book_id, cid)
                 if self._check_restricted(html_list):
-                    self.logger.info("Restricted chapter content detected: %s", cid)
+                    self.logger.info(
+                        "qidian: restricted chapter content (book=%s, chapter=%s)",
+                        book_id,
+                        cid,
+                    )
                     return None
                 encrypted = self._check_encrypted(html_list)
 
@@ -86,7 +90,11 @@ class QidianDownloader(DualBatchDownloader):
                     self.parser.parse_chapter, html_list, cid
                 )
                 if encrypted and not chap:
-                    self.logger.info("Fail for encrypted chapter: %s", cid)
+                    self.logger.info(
+                        "qidian: failed to parse encrypted chapter (book=%s, chapter=%s)",  # noqa: E501
+                        book_id,
+                        cid,
+                    )
                     return None
                 if not chap:
                     raise ValueError("Empty parse result")
@@ -94,7 +102,13 @@ class QidianDownloader(DualBatchDownloader):
 
             except Exception as e:
                 if attempt < self._retry_times:
-                    self.logger.info("Retry chapter %s (%s): %s", cid, attempt + 1, e)
+                    self.logger.info(
+                        "qidian: retrying chapter (book=%s, chapter=%s, attempt=%s): %s",  # noqa: E501
+                        book_id,
+                        cid,
+                        attempt + 1,
+                        e,
+                    )
                     backoff = self._backoff_factor * (2**attempt)
                     await async_jitter_sleep(
                         base=backoff,
@@ -102,5 +116,10 @@ class QidianDownloader(DualBatchDownloader):
                         max_sleep=backoff + 3,
                     )
                 else:
-                    self.logger.warning("Failed chapter %s: %s", cid, e)
+                    self.logger.warning(
+                        "qidian: failed chapter (book=%s, chapter=%s): %s",
+                        book_id,
+                        cid,
+                        e,
+                    )
         return None

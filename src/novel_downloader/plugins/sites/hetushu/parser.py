@@ -77,7 +77,9 @@ class HetushuParser(BaseParser):
 
         for elem in catalog_data:
             if not elem:
-                logger.warning("Empty element encountered in data: %s", elem)
+                logger.warning(
+                    "hetushu book_info: empty element in catalog data: %s", elem
+                )
                 continue
 
             match elem[0]:
@@ -97,7 +99,7 @@ class HetushuParser(BaseParser):
                     )
 
                 case _:
-                    logger.debug("Unknown tag type: %s", elem[0])
+                    logger.debug("hetushu book_info: unknown catalog tag: %s", elem[0])
 
         # Append the last volume if it has any chapters
         if curr_vol["chapters"]:

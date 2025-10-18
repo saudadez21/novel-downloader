@@ -437,7 +437,7 @@ class EsjzoneParser(BaseParser):
             font_bytes = base64.b64decode(font_data_match.group(1))
             return font_name, font_bytes
         except Exception as e:
-            logger.warning("Failed to extract font info: %s", e)
+            logger.warning("esjzone: Failed to extract font info: %s", e)
             return "", b""
 
     def _build_font_mapping(
@@ -485,5 +485,5 @@ class EsjzoneParser(BaseParser):
 
             return mapping
         except Exception as e:
-            logger.warning("Failed to build font mapping: %s", e)
+            logger.warning("esjzone: Failed to build font mapping: %s", e)
             return {}

@@ -48,7 +48,8 @@ class DeqixsSession(BaseSession):
                 html = await self.fetch(full_url, **kwargs)
             except Exception as exc:
                 self.logger.warning(
-                    "deqixs get_book_chapter(%s page %d) failed: %s",
+                    "deqixs get_book_chapter(book=%s, chapter=%s, page=%d) failed: %s",
+                    book_id,
                     chapter_id,
                     idx,
                     exc,

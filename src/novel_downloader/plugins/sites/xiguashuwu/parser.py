@@ -196,7 +196,7 @@ class XiguashuwuParser(BaseParser):
             lines = content_div.xpath(".//text()")
             return [line.strip() for line in lines if line.strip()]
         except Exception as e:
-            logger.warning("Failed to parse chapter page 1: %s", e)
+            logger.warning("xiguashuwu parser: failed to parse chapter page 1: %s", e)
             return []
 
     def _parse_chapter_page2(self, html_str: str) -> list[str]:
@@ -228,7 +228,7 @@ class XiguashuwuParser(BaseParser):
                     reordered.append(paragraphs[idx])
             return reordered
         except Exception as e:
-            logger.warning("Failed to parse chapter page 2: %s", e)
+            logger.warning("xiguashuwu parser: failed to parse chapter page 2: %s", e)
             return []
 
     def _parse_chapter_page3plus(self, html_str: str) -> list[str]:
@@ -247,7 +247,7 @@ class XiguashuwuParser(BaseParser):
             paragraphs = self._rebuild_paragraphs(tree)
             return paragraphs
         except Exception as e:
-            logger.warning("Failed to parse chapter page 3+: %s", e)
+            logger.warning("xiguashuwu parser: failed to parse chapter page 3+: %s", e)
             return []
 
     @classmethod
@@ -305,7 +305,9 @@ class XiguashuwuParser(BaseParser):
             return char if score >= self._CONF_THRESHOLD else None
 
         except Exception as e:
-            logger.warning("Failed to ocr xiguashuwu glyph image %s: %s", url, e)
+            logger.warning(
+                "xiguashuwu parser: failed to OCR glyph image %s: %s", url, e
+            )
         return None
 
     @classmethod

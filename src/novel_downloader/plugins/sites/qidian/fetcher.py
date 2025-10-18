@@ -158,7 +158,9 @@ class QidianSession(BaseSession):
         actual = set(cookies)
         missing = required - actual
         if missing:
-            self.logger.warning("Missing required cookies: %s", ", ".join(missing))
+            self.logger.warning(
+                "Missing required cookies (qidian): %s", ", ".join(missing)
+            )
         return not missing
 
     @staticmethod

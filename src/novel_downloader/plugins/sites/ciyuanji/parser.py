@@ -46,7 +46,7 @@ class CiyuanjiParser(BaseParser):
 
         data = self._find_next_data(html_list[0])
         if not data:
-            logger.warning("ciyuanji book_info :: next_data not found.")
+            logger.warning("ciyuanji book_info: __NEXT_DATA__ not found")
             return None
 
         book_data = self._extract_book_data(data)
@@ -74,42 +74,34 @@ class CiyuanjiParser(BaseParser):
         **kwargs: Any,
     ) -> ChapterDict | None:
         if not html_list:
-            logger.warning("ciyuanji chapter %s :: html_list is empty", chapter_id)
+            logger.warning("ciyuanji chapter %s: html_list is empty", chapter_id)
             return None
 
         if self._check_login(html_list[0]):
-            logger.warning("ciyuanji chapter %s :: VIP login required", chapter_id)
+            logger.warning("ciyuanji chapter %s: VIP login required", chapter_id)
             return None
 
         if self._check_unlock(html_list[0]):
-            logger.warning(
-                "ciyuanji chapter %s :: locked chapter (need to purchase)", chapter_id
-            )
+            logger.warning("ciyuanji chapter %s: locked (need purchase)", chapter_id)
             return None
 
         data = self._find_next_data(html_list[0])
         if not data:
-            logger.warning("ciyuanji chapter %s :: next_data not found.", chapter_id)
+            logger.warning("ciyuanji chapter %s: __NEXT_DATA__ not found", chapter_id)
             return None
 
         chapter_content = self._extract_chapter_content(data)
         if not chapter_content:
-            logger.warning(
-                "ciyuanji chapter %s :: chapterContent not found", chapter_id
-            )
+            logger.warning("ciyuanji chapter %s: chapterContent not found", chapter_id)
             return None
 
         content_enc = chapter_content.get("content", "")
         if not content_enc:
-            logger.warning("ciyuanji chapter %s :: no encrypted content", chapter_id)
+            logger.warning("ciyuanji chapter %s: no encrypted content", chapter_id)
             return None
 
         # Try to decrypt
-        try:
-            content = self._decrypt_chapter(content_enc)
-        except Exception as e:
-            logger.exception("ciyuanji chapter %s :: decrypt failed: %s", chapter_id, e)
-            content = ""
+        content = self._decrypt_chapter(content_enc)
 
         # Build result
         return {

@@ -303,7 +303,11 @@ class BaseSession(abc.ABC):
             self._is_logged_in = await self._check_login_status()
             return self._is_logged_in
         except Exception as e:
-            self.logger.warning("Failed to load state: %s", e)
+            self.logger.warning(
+                "Failed to load state for site=%s: %s",
+                self.site_name,
+                e,
+            )
             return False
 
     async def save_state(self) -> bool:
@@ -342,7 +346,11 @@ class BaseSession(abc.ABC):
             )
             return True
         except Exception as e:
-            self.logger.warning("Failed to save state: %s", e)
+            self.logger.warning(
+                "Failed to save state for site=%s: %s",
+                self.site_name,
+                e,
+            )
             return False
 
     def update_cookies(

@@ -350,13 +350,15 @@ class LinovelibParser(BaseParser):
         matches = re.findall(rf"{re.escape(script_path)}\?([a-zA-Z0-9._-]+)", html_str)
 
         if not matches:
-            logger.warning("No version found for %s", script_path)
+            logger.warning(
+                "linovelib script check: no version found for %s", script_path
+            )
             return True
 
         found_version = matches[0]
         if found_version != expected_version:
             logger.warning(
-                "Detected %s: script version mismatch. "
+                "linovelib script check: Detected %s version mismatch. "
                 "This may cause the content to be incorrect. "
                 "Please report this issue so the handler can be updated.\n"
                 "Script: %s\nFound version: %s\nExpected version: %s",

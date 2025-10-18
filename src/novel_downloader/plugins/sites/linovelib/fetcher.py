@@ -186,7 +186,7 @@ class LinovelibSession(BaseSession):
         save_path = folder / img_name(url)
 
         if save_path.exists() and on_exist == "skip":
-            self.logger.debug("Skip existing image: %s", save_path)
+            self.logger.debug("linovelib image: skip existing %s", save_path)
             return
 
         try:
@@ -194,8 +194,8 @@ class LinovelibSession(BaseSession):
                 resp.raise_for_status()
                 data = await resp.read()
         except Exception as e:
-            self.logger.warning("Failed %s: %s", url, e)
+            self.logger.warning("linovelib image download failed (%s): %s", url, e)
             return
 
         write_file(content=data, filepath=save_path, on_exist="overwrite")
-        self.logger.debug("Saved image: %s <- %s", save_path, url)
+        self.logger.debug("linovelib image: saved %s <- %s", save_path, url)

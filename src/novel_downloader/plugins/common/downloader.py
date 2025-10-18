@@ -67,7 +67,9 @@ class CommonDownloader(BaseDownloader):
         vols = book_info["volumes"]
         plan = self._select_chapter_ids(vols, start_id, end_id, ignore_set)
         if not plan:
-            self.logger.info("Nothing to do after filtering: %s", book_id)
+            self.logger.info(
+                "Nothing to do after filtering (site=%s, book=%s)", self._site, book_id
+            )
             return
 
         progress = Progress(total=len(plan), hook=progress_hook)
@@ -86,7 +88,9 @@ class CommonDownloader(BaseDownloader):
                 storage.upsert_chapters(batch)
             except Exception as e:
                 self.logger.error(
-                    "Storage batch upsert failed (size=%d): %s",
+                    "Storage batch upsert failed (site=%s, book=%s, size=%d): %s",
+                    self._site,
+                    book_id,
                     len(batch),
                     e,
                     exc_info=True,
@@ -176,15 +180,17 @@ class CommonDownloader(BaseDownloader):
         # --- done ---
         if cancelled():
             self.logger.info(
-                "Novel '%s' cancelled: flushed %d/%d chapters.",
-                book_info.get("book_name", "unknown"),
+                "Download cancelled for site=%s book=%s (%d/%d chapters flushed)",
+                self._site,
+                book_id,
                 progress.done,
                 progress.total,
             )
         else:
             self.logger.info(
-                "Novel '%s' download completed.",
-                book_info.get("book_name", "unknown"),
+                "Download completed for site=%s book=%s",
+                self._site,
+                book_id,
             )
 
     async def _process_chapter(
@@ -204,7 +210,12 @@ class CommonDownloader(BaseDownloader):
                 self._save_html_pages(book_id, cid, html_list)
 
                 if self._is_access_limited(html_list):
-                    self.logger.warning("Access limited for chapter %s, skipping.", cid)
+                    self.logger.warning(
+                        "Access limited (site=%s, book=%s, chapter=%s)",
+                        self._site,
+                        book_id,
+                        cid,
+                    )
                     return None
 
                 chap = await asyncio.to_thread(
@@ -212,7 +223,12 @@ class CommonDownloader(BaseDownloader):
                 )
                 if not chap:
                     if self._skip_empty_chapter(html_list):
-                        self.logger.warning("Empty parse result for %s, skipping.", cid)
+                        self.logger.warning(
+                            "Empty parse result (site=%s, book=%s, chapter=%s)",
+                            self._site,
+                            book_id,
+                            cid,
+                        )
                         return None
                     raise ValueError("Empty parse result")
 
@@ -222,13 +238,26 @@ class CommonDownloader(BaseDownloader):
                 return chap
             except Exception as e:
                 if attempt < self._retry_times:
-                    self.logger.info("Retry chapter %s (%s): %s", cid, attempt + 1, e)
+                    self.logger.info(
+                        "Retrying (site=%s, book=%s, chapter=%s, attempt=%d): %s",
+                        self._site,
+                        book_id,
+                        cid,
+                        attempt + 1,
+                        e,
+                    )
                     backoff = self._backoff_factor * (2**attempt)
                     await async_jitter_sleep(
                         base=backoff, mul_spread=1.2, max_sleep=backoff + 3
                     )
                 else:
-                    self.logger.warning("Failed chapter %s: %s", cid, e)
+                    self.logger.warning(
+                        "Failed chapter (site=%s, book=%s, chapter=%s): %s",
+                        self._site,
+                        book_id,
+                        cid,
+                        e,
+                    )
         return None
 
     def _extract_img_urls(self, extra: dict[str, Any]) -> list[str]:
@@ -283,7 +312,9 @@ class CommonDownloader(BaseDownloader):
         for vol in book_info["volumes"]:
             for chap in vol["chapters"]:
                 if cancelled():
-                    self.logger.info("Repair cancelled for book %s", book_id)
+                    self.logger.info(
+                        "Repair cancelled (site=%s, book=%s)", self._site, book_id
+                    )
                     return book_info
 
                 cid = chap.get("chapterId")
@@ -304,7 +335,9 @@ class CommonDownloader(BaseDownloader):
                     data = await self._process_chapter(book_id, prev_cid)
                     if not data:
                         self.logger.warning(
-                            "Failed to fetch chapter %s, skipping repair",
+                            "Failed to fetch chapter (site=%s, book=%s, prev=%s) during repair",  # noqa: E501
+                            self._site,
+                            book_id,
                             prev_cid,
                         )
                         continue
@@ -319,11 +352,18 @@ class CommonDownloader(BaseDownloader):
 
                 next_cid = data.get("extra", {}).get("next_cid")
                 if not next_cid:
-                    self.logger.warning("No next_cid in data for %s", prev_cid)
+                    self.logger.warning(
+                        "No next_cid (site=%s, book=%s, prev=%s)",
+                        self._site,
+                        book_id,
+                        prev_cid,
+                    )
                     continue
 
                 self.logger.info(
-                    "Repaired chapterId: set to %s (from prev %s)",
+                    "Repaired chapterId (site=%s, book=%s): %s <- %s",
+                    self._site,
+                    book_id,
                     next_cid,
                     prev_cid,
                 )
@@ -431,7 +471,9 @@ class DualBatchDownloader(CommonDownloader):
         vols = book_info["volumes"]
         plan = self._select_chapter_ids(vols, start_id, end_id, ignore_set)
         if not plan:
-            self.logger.info("Nothing to do after filtering: %s", book_id)
+            self.logger.info(
+                "Nothing to do after filtering (site=%s, book=%s)", self._site, book_id
+            )
             return
 
         progress = Progress(total=len(plan), hook=progress_hook)
@@ -450,7 +492,9 @@ class DualBatchDownloader(CommonDownloader):
                 storage.upsert_chapters(batch, need_refetch=need_refetch)
             except Exception as e:
                 self.logger.error(
-                    "Storage batch upsert failed (size=%d, need_refetch=%s): %s",
+                    "Storage batch upsert failed (site=%s, book=%s, size=%d, need_refetch=%s): %s",  # noqa: E501
+                    self._site,
+                    book_id,
                     len(batch),
                     need_refetch,
                     e,
@@ -554,13 +598,15 @@ class DualBatchDownloader(CommonDownloader):
         # ---- done ---
         if cancelled():
             self.logger.info(
-                "Novel '%s' cancelled: flushed %d/%d chapters.",
-                book_info.get("book_name", "unknown"),
+                "Download cancelled for site=%s book=%s (%d/%d chapters flushed)",
+                self._site,
+                book_id,
                 progress.done,
                 progress.total,
             )
         else:
             self.logger.info(
-                "Novel '%s' download completed.",
-                book_info.get("book_name", "unknown"),
+                "Download completed for site=%s book=%s",
+                self._site,
+                book_id,
             )

@@ -66,7 +66,9 @@ class CommonExporter(BaseExporter):
         orig_vols = book_info.get("volumes", [])
         vols = self._filter_volumes(orig_vols, start_id, end_id, ignore_set)
         if not vols:
-            self.logger.info("Nothing to do after filtering: %s", book_id)
+            self.logger.info(
+                "Nothing to do after filtering (site=%s, book=%s)", self._site, book_id
+            )
             return None
 
         # --- Prepare header (book metadata) ---
@@ -97,7 +99,7 @@ class CommonExporter(BaseExporter):
 
                 ch = chap_map.get(cid)
                 if not ch:
-                    self._handle_missing_chapter(cid)
+                    self._handle_missing_chapter(book_id, cid)
                     continue
 
                 parts.append(self._build_txt_chapter(ch_title, ch))
@@ -113,10 +115,17 @@ class CommonExporter(BaseExporter):
             result = write_file(
                 content=final_text, filepath=out_path, on_exist="overwrite"
             )
-            self.logger.info("Exported TXT: %s", out_path)
+            self.logger.info(
+                "Exported TXT (site=%s, book=%s): %s", self._site, book_id, out_path
+            )
         except Exception as e:
             self.logger.error(
-                "Failed to write TXT to %s: %s", out_path, e, exc_info=True
+                "Failed to write TXT (site=%s, book=%s) to %s: %s",
+                self._site,
+                book_id,
+                out_path,
+                e,
+                exc_info=True,
             )
             return None
         return result
@@ -154,7 +163,9 @@ class CommonExporter(BaseExporter):
         orig_vols = book_info.get("volumes", [])
         vols = self._filter_volumes(orig_vols, start_id, end_id, ignore_set)
         if not vols:
-            self.logger.info("Nothing to do after filtering: %s", book_id)
+            self.logger.info(
+                "Nothing to do after filtering (site=%s, book=%s)", self._site, book_id
+            )
             return None
 
         # --- Prepare path ---
@@ -223,7 +234,7 @@ class CommonExporter(BaseExporter):
 
                 ch = chap_map.get(cid)
                 if not ch:
-                    self._handle_missing_chapter(cid)
+                    self._handle_missing_chapter(book_id, cid)
                     continue
 
                 chapter_obj = self._build_epub_chapter(
@@ -242,10 +253,20 @@ class CommonExporter(BaseExporter):
 
             try:
                 epub.export(out_path)
-                self.logger.info("Exported EPUB: %s", out_path)
+                self.logger.info(
+                    "Exported EPUB (site=%s, book=%s): %s",
+                    self._site,
+                    book_id,
+                    out_path,
+                )
             except Exception as e:
                 self.logger.error(
-                    "Failed to write EPUB to %s: %s", out_path, e, exc_info=True
+                    "Failed to write EPUB (site=%s, book=%s) to %s: %s",
+                    self._site,
+                    book_id,
+                    out_path,
+                    e,
+                    exc_info=True,
                 )
 
         return None
@@ -275,7 +296,9 @@ class CommonExporter(BaseExporter):
         orig_vols = book_info.get("volumes", [])
         vols = self._filter_volumes(orig_vols, start_id, end_id, ignore_set)
         if not vols:
-            self.logger.info("Nothing to do after filtering: %s", book_id)
+            self.logger.info(
+                "Nothing to do after filtering (site=%s, book=%s)", self._site, book_id
+            )
             return None
 
         # --- Prepare path ---
@@ -350,7 +373,7 @@ class CommonExporter(BaseExporter):
 
                 ch = chap_map.get(cid)
                 if not ch:
-                    self._handle_missing_chapter(cid)
+                    self._handle_missing_chapter(book_id, cid)
                     continue
 
                 chapter_obj = self._build_epub_chapter(
@@ -374,10 +397,17 @@ class CommonExporter(BaseExporter):
 
         try:
             epub.export(out_path)
-            self.logger.info("Exported EPUB: %s", out_path)
+            self.logger.info(
+                "Exported EPUB (site=%s, book=%s): %s", self._site, book_id, out_path
+            )
         except Exception as e:
             self.logger.error(
-                "Failed to write EPUB to %s: %s", out_path, e, exc_info=True
+                "Failed to write EPUB (site=%s, book=%s) to %s: %s",
+                self._site,
+                book_id,
+                out_path,
+                e,
+                exc_info=True,
             )
             return None
         return out_path
