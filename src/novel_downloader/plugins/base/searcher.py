@@ -125,6 +125,14 @@ class BaseSearcher(abc.ABC):
         return value.strip()
 
     @staticmethod
+    def _join_strs(xs: list[str], replaces: list[tuple[str, str]] | None = None) -> str:
+        replaces = replaces or []
+        value = "".join(s.strip() for s in xs if s and s.strip())
+        for old, new in replaces:
+            value = value.replace(old, new)
+        return value.strip()
+
+    @staticmethod
     def _build_url(base: str, params: dict[str, str]) -> str:
         query_string = "&".join(f"{k}={v}" for k, v in params.items())
         return f"{base}?{query_string}"

@@ -151,11 +151,17 @@ async def run_fetch(args: argparse.Namespace) -> None:
     load_config(args.config)
     registrar = registry.registrar
 
-    for site_key in TEST_DATA:
+    selected_sites = args.site or list(TEST_DATA.keys())
+
+    for site_key in selected_sites:
+        if site_key not in TEST_DATA:
+            logger.warning("Unknown site key: %s (skipped)", site_key)
+            continue
+
         need_login = site_key in LOGIN_REQUIRED
         req_interval = REQ_INTERVALS.get(site_key, DEFAULT_REQ_INTERVAL)
-
         fetcher_cfg = FetcherConfig(request_interval=req_interval)
+
         async with registrar.get_fetcher(site_key, fetcher_cfg) as f:
             if need_login and not await f.load_state():
                 logger.warning("%s: login state not loaded.", site_key)
@@ -163,22 +169,49 @@ async def run_fetch(args: argparse.Namespace) -> None:
 
             for entry in TEST_DATA[site_key]:
                 book_id = entry["book_id"]
-                logger.info("Fetching book info: %s:%s", site_key, book_id)
-                info_htmls = await f.get_book_info(book_id)
-                save_html_parts(
-                    info_htmls, HTML_ROOT / site_key / DATE_STR, f"{book_id}_info"
-                )
+                book_dir = HTML_ROOT / site_key / DATE_STR
+                info_prefix = f"{book_id}_info"
+                info_path = book_dir / f"{info_prefix}_1.html"
+
+                if info_path.exists() and not args.overwrite:
+                    logger.info("Skipping existing book info: %s:%s", site_key, book_id)
+                else:
+                    try:
+                        logger.info("Fetching book info: %s:%s", site_key, book_id)
+                        info_htmls = await f.get_book_info(book_id)
+                        save_html_parts(info_htmls, book_dir, info_prefix)
+                    except Exception as e:
+                        logger.exception(
+                            "Failed to fetch book info %s:%s - %s", site_key, book_id, e
+                        )
 
                 for chap_id in entry["chap_ids"]:
-                    logger.info(
-                        "Fetching chapter: %s:%s:%s", site_key, book_id, chap_id
-                    )
-                    chap_htmls = await f.get_book_chapter(book_id, chap_id)
-                    save_html_parts(
-                        chap_htmls,
-                        HTML_ROOT / site_key / DATE_STR,
-                        f"{book_id}_{chap_id}",
-                    )
+                    chap_prefix = f"{book_id}_{chap_id}"
+                    chap_path = book_dir / f"{chap_prefix}_1.html"
+
+                    if chap_path.exists() and not args.overwrite:
+                        logger.info(
+                            "Skipping existing chapter: %s:%s:%s",
+                            site_key,
+                            book_id,
+                            chap_id,
+                        )
+                        continue
+
+                    try:
+                        logger.info(
+                            "Fetching chapter: %s:%s:%s", site_key, book_id, chap_id
+                        )
+                        chap_htmls = await f.get_book_chapter(book_id, chap_id)
+                        save_html_parts(chap_htmls, book_dir, chap_prefix)
+                    except Exception as e:
+                        logger.exception(
+                            "Failed to fetch chapter %s:%s:%s - %s",
+                            site_key,
+                            book_id,
+                            chap_id,
+                            e,
+                        )
 
             if need_login:
                 await f.save_state()
@@ -197,44 +230,61 @@ def run_parse(args: argparse.Namespace) -> None:
     cur = conn.cursor()
 
     registrar = registry.registrar
+    selected_sites = args.site or list(TEST_DATA.keys())
 
-    for site_key in TEST_DATA:
+    for site_key in selected_sites:
+        if site_key not in TEST_DATA:
+            logger.warning("Unknown site key: %s (skipped)", site_key)
+            continue
+
         parser = registrar.get_parser(site_key, _PARSER_CONFIG)
         html_base = HTML_ROOT / site_key / date_str
 
         for entry in TEST_DATA[site_key]:
             book_id = entry["book_id"]
 
-            # book info
-            html_list = load_html_parts(html_base, f"{book_id}_info")
-            if html_list:
-                book_info = parser.parse_book_info(html_list)
-                cur.execute(
-                    "INSERT OR REPLACE INTO books VALUES (?, ?, ?, ?)",
-                    (
-                        site_key,
-                        book_id,
-                        date_str,
-                        json.dumps(book_info, ensure_ascii=False),
-                    ),
+            try:
+                html_list = load_html_parts(html_base, f"{book_id}_info")
+                if html_list:
+                    book_info = parser.parse_book_info(html_list)
+                    cur.execute(
+                        "INSERT OR REPLACE INTO books VALUES (?, ?, ?, ?)",
+                        (
+                            site_key,
+                            book_id,
+                            date_str,
+                            json.dumps(book_info, ensure_ascii=False),
+                        ),
+                    )
+            except Exception as e:
+                logger.exception(
+                    "Failed to parse book info %s:%s - %s", site_key, book_id, e
                 )
 
-            # chapters
             for chap_id in entry["chap_ids"]:
-                html_list = load_html_parts(html_base, f"{book_id}_{chap_id}")
-                if not html_list:
-                    continue
-                chapter = parser.parse_chapter(html_list, chap_id)
-                cur.execute(
-                    "INSERT OR REPLACE INTO chapters VALUES (?, ?, ?, ?, ?)",
-                    (
+                try:
+                    html_list = load_html_parts(html_base, f"{book_id}_{chap_id}")
+                    if not html_list:
+                        continue
+                    chapter = parser.parse_chapter(html_list, chap_id)
+                    cur.execute(
+                        "INSERT OR REPLACE INTO chapters VALUES (?, ?, ?, ?, ?)",
+                        (
+                            site_key,
+                            book_id,
+                            chap_id,
+                            date_str,
+                            json.dumps(chapter, ensure_ascii=False),
+                        ),
+                    )
+                except Exception as e:
+                    logger.exception(
+                        "Failed to parse chapter %s:%s:%s - %s",
                         site_key,
                         book_id,
                         chap_id,
-                        date_str,
-                        json.dumps(chapter, ensure_ascii=False),
-                    ),
-                )
+                        e,
+                    )
 
     conn.commit()
     conn.close()
@@ -1216,6 +1266,17 @@ def main() -> None:
         "--visualize", action="store_true", help="Run visualization mode"
     )
 
+    parser.add_argument(
+        "--site",
+        type=str,
+        nargs="+",
+        help="Specify one or more site keys to process (default: all sites in config)",
+    )
+    parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Overwrite existing HTML files or DB entries",
+    )
     parser.add_argument(
         "--config", type=Path, default=CONFIG_PATH, help="Path to JSON config file"
     )

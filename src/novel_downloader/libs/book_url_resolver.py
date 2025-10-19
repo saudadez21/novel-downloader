@@ -513,6 +513,20 @@ SITE_RULES: dict[str, SiteRuleSet] = {
         ],
         hints=[],
     ),
+    "101kanshu.com": SiteRuleSet(
+        site_key="n101kanshu",
+        extractors=[
+            BookIdExtractor(
+                pattern=r"^/book/(\d+)(?:/index)?\.html?$",
+                build_book_id=lambda m: m.group(1),
+            ),
+            BookIdExtractor(
+                pattern=r"^/txt/(\d+)/",
+                build_book_id=lambda m: m.group(1),
+            ),
+        ],
+        hints=[],
+    ),
     "www.piaotia.com": SiteRuleSet(
         site_key="piaotia",
         extractors=[

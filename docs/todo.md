@@ -184,11 +184,6 @@ user_prompt = "请翻译成中文：{text}"
 
   * 支持登录
 
-* [101看书](https://101kanshu.com/)
-
-  * 支持登录
-  * 使用加密字体
-
 * [轻之文库](https://www.linovel.net/)
 
   * 支持登录

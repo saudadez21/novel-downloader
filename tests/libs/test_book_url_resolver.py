@@ -158,6 +158,10 @@ CASES_SUCCESS = [
     ("https://www.37yq.com/lightnovel/2362.html", "n37yq", "2362"),
     ("https://www.37yq.com/lightnovel/2362/catalog", "n37yq", "2362"),
     ("https://www.37yq.com/lightnovel/2362/92560.html", "n37yq", "2362"),
+    # n101kanshu
+    ("https://101kanshu.com/book/7994.html", "n101kanshu", "7994"),
+    ("https://101kanshu.com/book/7994/index.html", "n101kanshu", "7994"),
+    ("https://101kanshu.com/txt/7994/9137080.html", "n101kanshu", "7994"),
     # linovelib
     ("https://www.linovelib.com/novel/1234.html", "linovelib", "1234"),
     ("https://www.linovelib.com/novel/1234/47800.html", "linovelib", "1234"),

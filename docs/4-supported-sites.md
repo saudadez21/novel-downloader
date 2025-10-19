@@ -118,6 +118,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [大熊猫文学网](https://www.dxmwx.org/)                        | dxmwx    | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [25中文网](https://www.i25zw.com/)                           | i25zw     | ❌     | ❌     | ❌     | ✅     | 简      |
 | [69阅读](https://www.69yue.top/index.html)                   | n69yue    | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [101看书](https://101kanshu.com/)                           | n101kanshu | ❌     | ❌     | ⚠️     | ✅     | 繁      |
 | [老幺小说网](https://www.laoyaoxs.org/)                     | laoyaoxs  | ❌     | ❌     | ❌     | ✅     | 简      |
 | [全本小说网](https://quanben5.com/)                          | quanben5  | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [书林文学](http://shu111.com)                                | shu111    | ❌     | ❌     | ⚠️     | ❌     | 简      |
@@ -300,6 +301,10 @@ novel-cli download --site ttkan shengxu-chendong
 * **69阅读 (n69yue)**
   * 书籍: `https://www.69yue.top/articlecategroy/15yu.html` -> Book ID: `15yu`
   * 章节: `https://www.69yue.top/article/15185363014257741.html` -> Chapter ID: `15185363014257741`
+
+* **101看书 (n101kanshu)**
+  * 书籍: `https://101kanshu.com/book/7994.html` -> Book ID: `7994`
+  * 章节: `https://101kanshu.com/txt/7994/9137080.html` -> Chapter ID: `9137080`
 
 * **老幺小说网 (laoyaoxs)**
   * 书籍: `https://www.laoyaoxs.org/info/7359.html` -> Book ID: `7359`
