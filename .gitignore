@@ -181,6 +181,7 @@ chapter_data/
 debug/
 dev/
 downloads/
+logs/
 novel_cache/
 raw_data/
 *.sqlite

@@ -28,7 +28,7 @@ import aiohttp
 # Configuration
 # ----------------------------
 
-CONFIG_PATH = "scripts/site_health_config.json"
+CONFIG_PATH = "scripts/data/site_health_config.json"
 DEFAULT_MAX_CONCURRENT = 20
 DEFAULT_TIMEOUT_SECS = 12
 DEFAULT_RETRIES = 1

@@ -7,7 +7,7 @@ import pytest
 from novel_downloader.plugins import registry
 
 SITES_DIR = (
-    pathlib.Path(__file__).parents[3] / "src" / "novel_downloader" / "plugins" / "sites"
+    pathlib.Path(__file__).parents[2] / "src" / "novel_downloader" / "plugins" / "sites"
 )
 
 MODULE_DECORATOR_MAP = {
