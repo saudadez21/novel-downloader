@@ -85,6 +85,7 @@ novel-cli download --site ttkan shengxu-chendong
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
 | [次元姬](https://www.ciyuanji.com/)                          | ciyuanji  | ✅     | ✅     | ✅     | ✅     | 简      |
 | [SF轻小说](https://m.sfacg.com)                              | sfacg      | ✅     | ✅     | ✅     | ⚠️     | 简      |
+| [轻之文库](https://www.linovel.net/)                         | linovel    | ✅     | ✅     | ⚠️     | ✅     | 简      |
 | [三七轻小说](https://www.37yq.com/)                          | n37yq      | ✅     | ✅     | ⚠️     | ✅     | 简      |
 | [哔哩轻小说](https://www.linovelib.com/)                     | linovelib  | ✅     | ✅     | ⚠️     | ⚠️     | 简      |
 | [ESJ Zone](https://www.esjzone.cc)                           | esjzone   | ✅     | ✅     | ✅     | ✅     | 简      |
@@ -213,6 +214,12 @@ novel-cli download --site ttkan shengxu-chendong
     * VIP 章节以图片形式返回, 可通过开启 `decode_font` 参数配合 OCR 识别为文本。
     * OCR 识别结果并非完全可靠, 准确率大约在 **80%+**, 可能存在错误或缺字。
     * OCR 运算在 CPU 环境下较为耗时, 解析 VIP 章节速度会明显变慢, 建议在具备 GPU 的环境中运行。
+
+* **轻之文库 (linovel)**
+  * 书籍: `https://www.linovel.net/book/101752.html` -> Book ID: `101752`
+  * 章节: `https://www.linovel.net/book/101752/16996.html` -> Chapter ID: `101752`
+  * 已知问题:
+    * 图片资源可能偶尔无法正常加载或失效
 
 * **三七轻小说 (n37yq)**
   * 书籍: `https://www.37yq.com/lightnovel/2362.html` -> Book ID: `2362`

@@ -365,6 +365,16 @@ SITE_RULES: dict[str, SiteRuleSet] = {
         ],
         hints=[],
     ),
+    "www.linovel.net": SiteRuleSet(
+        site_key="linovel",
+        extractors=[
+            BookIdExtractor(
+                pattern=r"^/book/(\d+)(?:/|\.html|$)",
+                build_book_id=lambda m: m.group(1),
+            ),
+        ],
+        hints=[],
+    ),
     "www.linovelib.com": SiteRuleSet(
         site_key="linovelib",
         extractors=[

@@ -184,10 +184,6 @@ user_prompt = "请翻译成中文：{text}"
 
   * 支持登录
 
-* [轻之文库](https://www.linovel.net/)
-
-  * 支持登录
-
 * [米国度](https://www.myrics.com/)
 
   * 支持登录

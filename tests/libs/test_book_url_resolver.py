@@ -167,6 +167,10 @@ CASES_SUCCESS = [
     ("https://www.linovelib.com/novel/1234/47800.html", "linovelib", "1234"),
     ("https://www.linovelib.com/novel/2727.html", "linovelib", "2727"),
     ("https://www.linovelib.com/novel/2727/vol_292741.html", "linovelib", "2727"),
+    # linovel
+    ("https://www.linovel.net/book/101752.html", "linovel", "101752"),
+    ("https://www.linovel.net/book/101752.html#catalog", "linovel", "101752"),
+    ("https://www.linovel.net/book/101752/16996.html", "linovel", "101752"),
     # n8novel
     ("https://www.8novel.com/novelbooks/3365/", "n8novel", "3365"),
     ("https://article.8novel.com/read/3365/?106235", "n8novel", "3365"),
