@@ -158,6 +158,11 @@ CASES_SUCCESS = [
     ("https://www.37yq.com/lightnovel/2362.html", "n37yq", "2362"),
     ("https://www.37yq.com/lightnovel/2362/catalog", "n37yq", "2362"),
     ("https://www.37yq.com/lightnovel/2362/92560.html", "n37yq", "2362"),
+    # westnovel
+    ("https://www.westnovel.com/ksl/sq/", "westnovel", "ksl-sq"),
+    ("https://www.westnovel.com/ksl/sq/140072.html", "westnovel", "ksl-sq"),
+    # westnovel_sub
+    ("https://www.westnovel.com/q/list/908.html", "westnovel_sub", "q-list-908"),
     # n101kanshu
     ("https://101kanshu.com/book/7994.html", "n101kanshu", "7994"),
     ("https://101kanshu.com/book/7994/index.html", "n101kanshu", "7994"),
@@ -231,6 +236,10 @@ CASES_HINT = [
     (
         "https://www.yamibo.com/novel/view-chapter?id=38772952",
         "章节 URL 不包含书籍 ID, 请复制小说目录页链接",
+    ),
+    (
+        "https://www.westnovel.com/q/showinfo-2-48701-0.html",
+        "章节 URL 不包含书籍 ID, 请复制目录页的链接",
     ),
 ]
 

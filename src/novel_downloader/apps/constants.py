@@ -60,6 +60,8 @@ DOWNLOAD_SUPPORT_SITES = {
     # "wanbengo": "完本神站 (wanbengo)",
     # "xiaoshuoge": "小说屋 (xiaoshuoge)",
     "xiguashuwu": "西瓜书屋 (xiguashuwu)",
+    "westnovel": "西方奇幻小说网 (westnovel)",
+    "westnovel_sub": "西方奇幻小说网 (westnovel_sub)",
     # "xs63b": "小说路上 (xs63b)",
     "xshbook": "小说虎 (xshbook)",
     "yamibo": "百合会 (yamibo)",

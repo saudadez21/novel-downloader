@@ -735,6 +735,40 @@
         ]
       }
     ],
+    "westnovel": [
+      {
+        "book_id": "wuxia-ynyh",
+        "chap_ids": [
+          "198245"
+        ]
+      },
+      {
+        "book_id": "dm-cbem",
+        "chap_ids": [
+          "197433"
+        ]
+      },
+      {
+        "book_id": "ksl-sq",
+        "chap_ids": [
+          "140072"
+        ]
+      }
+    ],
+    "westnovel_sub": [
+      {
+        "book_id": "q-list-908",
+        "chap_ids": [
+          "2-48701-0"
+        ]
+      },
+      {
+        "book_id": "y-list-34423",
+        "chap_ids": [
+          "2-1330670-0"
+        ]
+      }
+    ],
     "xiguashuwu": [
       {
         "book_id": "1",

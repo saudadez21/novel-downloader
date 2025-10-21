@@ -188,8 +188,6 @@ user_prompt = "请翻译成中文：{text}"
 
   * 支持登录
 
-* [西方奇幻小说网](https://www.westnovel.com/)
-
 * [霹雳书屋](https://www.pilibook.net/) ([备用](https://www.mozishuwu.com/))
 
 * [全职小说网](https://www.quanzhifashi.com/)

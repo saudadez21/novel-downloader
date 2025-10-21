@@ -102,6 +102,8 @@ novel-cli download --site ttkan shengxu-chendong
 | [有度中文网](https://www.yodu.org/)                          | yodu      | ✅     | ⚠️     | ⚠️     | ✅     | 简      |
 | [名著阅读](https://b.guidaye.com/)                           | guidaye   | ❌     | ❌     | ❌     | ⚠️     | 简      |
 | [鲲弩小说](https://www.kunnu.com/)                           | kunnu     | ✅     | ❌     | ❌     | ❌     | 简      |
+| [西方奇幻小说网](https://www.westnovel.com/)                 | westnovel | ❌     | ❌     | ❌     | ⚠️     | 简     |
+| [西方奇幻小说网子站点](https://www.westnovel.com/)        | westnovel_sub | ❌     | ❌     | ❌     | ⚠️     | 简     |
 
 #### 类笔趣阁 / 第三方转载站
 
@@ -273,6 +275,14 @@ novel-cli download --site ttkan shengxu-chendong
 * **鲲弩小说 (kunnu)**
   * 书籍: `https://www.kunnu.com/guichui/` -> Book ID: `guichui`
   * 章节: `https://www.kunnu.com/guichui/27427.htm` -> Chapter ID: `27427`
+
+* **西方奇幻小说网 (westnovel)**
+  * 书籍: `https://www.westnovel.com/ksl/sq/` -> Book ID: `ksl-sq`
+  * 章节: `https://www.westnovel.com/ksl/sq/140072.html` -> Chapter ID: `140072`
+
+* **西方奇幻小说网子站点 (westnovel_sub)**
+  * 书籍: `https://www.westnovel.com/q/list/725.html` -> Book ID: `q-list-725`
+  * 章节: `https://www.westnovel.com/q/showinfo-2-40238-0.html` -> Chapter ID: `2-40238-0`
 
 #### 类笔趣阁 / 第三方转载站
 
