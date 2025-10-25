@@ -6,7 +6,9 @@ novel_downloader.plugins.common.searcher.sososhu
 """
 
 import logging
+import re
 from typing import ClassVar
+from urllib.parse import unquote, urlencode, urlparse
 
 from lxml import html
 from novel_downloader.plugins.base.searcher import BaseSearcher
@@ -29,9 +31,7 @@ class SososhuSearcher(BaseSearcher):
             "site": self.SOSOSHU_KEY,
         }
         try:
-            async with self._http_get(self.SEARCH_URL, params=params) as resp:
-                resp.raise_for_status()
-                return await self._response_to_str(resp)
+            return await self._fetch(self.SEARCH_URL, params=params)
         except Exception:
             logger.error(
                 "Failed to fetch HTML for keyword '%s' from '%s'",
@@ -39,6 +39,62 @@ class SososhuSearcher(BaseSearcher):
                 self.SEARCH_URL,
             )
             return ""
+
+    async def _fetch(self, url: str, params: dict[str, str]) -> str:
+        full_url = self._build_url(url, params)
+        parsed = urlparse(full_url)
+        origin = f"{parsed.scheme}://{parsed.netloc}"
+        referer = full_url
+
+        get_headers = {
+            "Origin": origin,
+            "Referer": origin,
+        }
+
+        async with self._http_get(full_url, headers=get_headers) as resp:
+            resp.raise_for_status()
+            resp_text = await self._response_to_str(resp)
+            if "Checking your browser" not in resp_text:
+                return resp_text
+
+            ge_ua_p = None
+            if "ge_ua_p" in resp.cookies:
+                ge_ua_p = unquote(resp.cookies["ge_ua_p"].value)
+            else:
+                logger.debug("ge_ua_p cookie not found; cannot verify browser")
+                return resp_text
+
+        logger.debug("sososhu encountered anti-bot page, trying to verify...")
+
+        nonce_match = re.search(r"var\s+nonce\s*=\s*(\d+)", resp_text)
+        if not nonce_match:
+            logger.debug("Could not find nonce in verification page")
+            return resp_text
+        nonce = int(nonce_match.group(1))
+        logger.debug("Found nonce=%s, ge_ua_p=%s", nonce, ge_ua_p)
+
+        sum_val = self.calc_sum(ge_ua_p, nonce)
+        payload = urlencode({"sum": str(sum_val), "nonce": str(nonce)})
+        post_headers = {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-GE-UA-Step": "prev",
+            "Cookie": f"ge_ua_p={ge_ua_p}",
+            "Origin": origin,
+            "Referer": referer,
+        }
+
+        async with self._http_post(
+            full_url, data=payload, headers=post_headers
+        ) as verify_resp:
+            verify_resp.raise_for_status()
+            _verify_text = await self._response_to_str(verify_resp)
+
+        async with self._http_get(url, params=params) as final_resp:
+            final_resp.raise_for_status()
+            final_text = await self._response_to_str(final_resp)
+
+        logger.debug("Verification completed, content fetched.")
+        return final_text
 
     def _parse_html(
         self, html_str: str, limit: int | None = None
@@ -89,3 +145,11 @@ class SososhuSearcher(BaseSearcher):
     @staticmethod
     def _url_to_id(url: str) -> str:
         return url
+
+    @staticmethod
+    def calc_sum(cookie_value: str, nonce: int) -> int:
+        total = 0
+        for i, ch in enumerate(cookie_value):
+            if ch.isalnum():  # JS /^[a-zA-Z0-9]$/
+                total += ord(ch) * (nonce + i)
+        return total

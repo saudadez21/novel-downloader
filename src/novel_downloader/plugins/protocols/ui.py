@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.usecases.protocols
------------------------------------
+novel_downloader.plugins.protocols.ui
+-------------------------------------
 """
 
 from pathlib import Path
@@ -44,12 +44,6 @@ class DownloadUI(Protocol):
     async def on_complete(self, book: BookConfig) -> None:
         ...
 
-    async def on_book_error(self, book: BookConfig, error: Exception) -> None:
-        ...
-
-    async def on_site_error(self, site: str, error: Exception) -> None:
-        ...
-
 
 class ExportUI(Protocol):
     def on_start(self, book: BookConfig, fmt: str | None = None) -> None:
@@ -62,23 +56,6 @@ class ExportUI(Protocol):
         ...
 
     def on_unsupported(self, book: BookConfig, fmt: str) -> None:
-        ...
-
-
-class ConfigUI(Protocol):
-    def on_missing(self, path: Path) -> None:
-        ...
-
-    def on_created(self, path: Path) -> None:
-        ...
-
-    def on_invalid(self, error: Exception) -> None:
-        ...
-
-    def on_abort(self) -> None:
-        ...
-
-    def confirm_create(self) -> bool:
         ...
 
 
@@ -95,9 +72,4 @@ class ProcessUI(Protocol):
         ...
 
     def on_missing(self, book: BookConfig, what: str, path: Path) -> None:
-        ...
-
-    def on_book_error(
-        self, book: BookConfig, stage: str | None, error: Exception
-    ) -> None:
         ...

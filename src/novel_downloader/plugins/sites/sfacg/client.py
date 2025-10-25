@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
 """
-novel_downloader.plugins.sites.sfacg.downloader
------------------------------------------------
-
+novel_downloader.plugins.sites.sfacg.client
+-------------------------------------------
 """
 
-
-from novel_downloader.plugins.common.downloader import CommonDownloader
+from novel_downloader.plugins.common.client import CommonClient
 from novel_downloader.plugins.registry import registrar
 
 
-@registrar.register_downloader()
-class SfacgDownloader(CommonDownloader):
+@registrar.register_client()
+class SfacgClient(CommonClient):
     """
-    Specialized Async downloader for sfacg novel sites.
+    Specialized client for SF 轻小说 novel sites.
     """
 
     @property

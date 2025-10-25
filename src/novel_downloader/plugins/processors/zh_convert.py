@@ -15,19 +15,6 @@ from typing import Any
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import BookInfoDict, ChapterDict
 
-_ALLOWED_DIRECTIONS = {
-    "hk2s",
-    "s2hk",
-    "s2t",
-    "s2tw",
-    "s2twp",
-    "t2hk",
-    "t2s",
-    "t2tw",
-    "tw2s",
-    "tw2sp",
-}
-
 
 @registrar.register_processor()
 class ZhConvertProcessor:
@@ -99,11 +86,6 @@ class ZhConvertProcessor:
         """
         Build the pycorrector converter based on direction.
         """
-        if direction not in _ALLOWED_DIRECTIONS:
-            raise ValueError(
-                f"direction must be one of {_ALLOWED_DIRECTIONS}, got: {direction}"
-            )
-
         try:
             from opencc import OpenCC
         except Exception as e:

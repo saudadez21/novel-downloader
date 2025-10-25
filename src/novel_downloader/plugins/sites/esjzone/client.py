@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
 """
-novel_downloader.plugins.sites.esjzone.downloader
--------------------------------------------------
-
+novel_downloader.plugins.sites.esjzone.client
+---------------------------------------------
 """
 
-
-from novel_downloader.plugins.common.downloader import CommonDownloader
+from novel_downloader.plugins.common.client import CommonClient
 from novel_downloader.plugins.registry import registrar
 
 
-@registrar.register_downloader()
-class EsjzoneDownloader(CommonDownloader):
+@registrar.register_client()
+class EsjzoneClient(CommonClient):
     """
-    Specialized Async downloader for ESJ Zone novel sites.
+    Specialized client for ESJ Zone novel sites.
     """
 
     ENCRYPTED_MARKERS = [

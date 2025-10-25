@@ -1,39 +1,23 @@
 #!/usr/bin/env python3
 """
-novel_downloader.plugins.sites.qidian.downloader
-------------------------------------------------
-
-Downloader implementation for Qidian novels,
-with handling for restricted and encrypted chapters
+novel_downloader.plugins.sites.qidian.client
+--------------------------------------------
 """
 
 import asyncio
+from typing import Any
 
 from novel_downloader.libs.time_utils import async_jitter_sleep
-from novel_downloader.plugins.common.downloader import DualBatchDownloader
-from novel_downloader.plugins.protocols import FetcherProtocol, ParserProtocol
+from novel_downloader.plugins.common.client import CommonClient
 from novel_downloader.plugins.registry import registrar
-from novel_downloader.schemas import ChapterDict, DownloaderConfig
+from novel_downloader.schemas import ChapterDict
 
 
-@registrar.register_downloader()
-class QidianDownloader(DualBatchDownloader):
+@registrar.register_client()
+class QidianClient(CommonClient):
     """
-    Specialized downloader for Qidian (起点) novels.
-
-    Processes each chapter in a single worker that
-    handles fetch -> parse -> enqueue storage.
+    Specialized client for 起点 novel sites.
     """
-
-    def __init__(
-        self,
-        fetcher: FetcherProtocol,
-        parser: ParserProtocol,
-        config: DownloaderConfig,
-        site: str,
-    ):
-        super().__init__(fetcher, parser, config, site)
-        self._request_interval = max(1.0, config.request_interval)
 
     @property
     def workers(self) -> int:
@@ -123,3 +107,36 @@ class QidianDownloader(DualBatchDownloader):
                         e,
                     )
         return None
+
+    def _render_txt_extras(self, extras: dict[str, Any]) -> str:
+        """
+        render "作者说" for TXT:
+          * Clean content
+          * Strip leading/trailing blanks
+          * Drop multiple blank lines (keep only non-empty lines)
+        """
+        note = (extras.get("author_say") or "").strip()
+        if not note:
+            return ""
+
+        # collapse blank lines
+        body = "\n".join(s for line in note.splitlines() if (s := line.strip()))
+        return f"作者说\n\n{body}"
+
+    def _render_epub_extras(self, extras: dict[str, Any]) -> str:
+        """
+        render "作者说" for EPUB:
+          * Clean content
+          * Keep as HTML-safe via _render_html_block
+          * Wrap with `<hr/>` + `<h3>作者说</h3>`
+        """
+        note = (extras.get("author_say") or "").strip()
+        if not note:
+            return ""
+
+        parts = [
+            "<hr />",
+            "<h3>作者说</h3>",
+            self._render_html_block(note),
+        ]
+        return "\n".join(parts)

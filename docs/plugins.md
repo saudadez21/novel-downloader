@@ -1,6 +1,6 @@
 ## 插件系统 (Plugins)
 
-支持通过插件扩展 (或覆盖) 新的**站点**、**文本处理器 (processors)**、**导出器 (exporters)**。
+支持通过插件扩展 (或覆盖) 新的**站点**、**文本处理器 (processors)**、**客户端 (clients)**。
 
 插件可放在本地目录中启用, 也可选择是否覆盖内置实现。
 
@@ -27,8 +27,7 @@ local_plugins_path = "./novel_plugins"
    │     ├─ fetcher.py       # 必需: 实现会话类 (如 CiweimaoSession)
    │     ├─ parser.py        # 必需: 实现解析类 (如 CiweimaoParser)
    │     ├─ searcher.py      # 可选: 用于站内搜索
-   │     ├─ downloader.py    # 可选: 不提供则使用通用 CommonDownloader
-   │     └─ exporter.py      # 可选: 不提供则使用通用 CommonExporter
+   │     └─ client.py        # 可选: 不提供则使用通用 CommonClient
    └─ processors
       └─ processor_a.py      # 自定义文本处理器, 名称在 settings.toml 的 processors.name 中引用
 ```
@@ -43,7 +42,7 @@ local_plugins_path = "./novel_plugins"
 
 一个站点通常包含两个必要组件: **Fetcher** (抓取页面) 与 **Parser** (解析页面)
 
-可选组件: **Searcher** (站内搜索) 、**Downloader/Exporter** (覆盖默认下载/导出流程)
+可选组件: **Searcher** (站内搜索) 、**Client** (覆盖默认下载/导出流程)
 
 #### 1. Fetcher (抓取)
 
@@ -400,18 +399,7 @@ config_3 = "three"
 ```
 
 > 现有内置处理器文档: 见 `docs/3-settings-schema.md#processors-配置`
-> 包括 `cleaner` (正则/替换) 、`zh_convert` (OpenCC 简繁转换) 、`corrector` (pycorrector 纠错, 效果因模型而异) 。
-
----
-
-### 覆盖默认下载/导出 (可选)
-
-`downloader.py` 与 `exporter.py` 如未提供, 将使用内置通用实现:
-
-* `CommonDownloader`: 基于会话+解析器的标准抓取流程
-* `CommonExporter`: TXT/EPUB 等标准导出流程
-
-仅在需要自定义特殊逻辑时再提供覆盖文件。
+> 包括 `cleaner` (正则/替换) 、`zh_convert` (OpenCC 简繁转换) 、`corrector` (pycorrector 纠错, 效果因模型而异)。
 
 ---
 
@@ -422,15 +410,14 @@ config_3 = "three"
 * 站点会话：`@registrar.register_fetcher()`
 * 站点解析器：`@registrar.register_parser()`
 * 站点搜索器：`@registrar.register_searcher()`
-* 站点下载器：`@registrar.register_downloader()`
-* 站点导出器：`@registrar.register_exporter()`
+* 站点客户端：`@registrar.get_client()`
 * 文本处理器：`@registrar.register_processor()`
 
 #### 1. 关键名如何确定
 
 注册器会根据插件模块的路径自动推导出唯一键名 (key), 用来在运行时定位插件。
 
-**站点类插件 (Fetcher / Parser / Downloader / Exporter / Searcher)**
+**站点类插件 (Fetcher / Parser / Client / Searcher)**
 
 键名来源于模块路径中的:
 
@@ -516,8 +503,8 @@ text.zh_convert
 
 #### 3. 获取与回退策略
 
+* `get_client(site)`: 未找到站点专属实现时, 自动回退到 **通用实现** (`CommonClient`)
 * `get_fetcher(site)` / `get_parser(site)`: 未找到会抛 `ValueError("Unsupported site")`
-* `get_downloader(site)` / `get_exporter(site)`: 未找到站点专属实现时, 自动回退到 **通用实现** (`CommonDownloader`/`CommonExporter`)
 * `get_processor(name)`: 未找到会抛 `ValueError("Unsupported processor")`
 * `get_searcher_class(site)`: 未找到会抛 `ValueError("Unsupported site")`
 * `get_searcher_classes()`: 在未指定站点时, 会尝试加载所有已知站点的 `searcher` 模块并返回可用列表

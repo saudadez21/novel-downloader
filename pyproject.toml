@@ -116,6 +116,11 @@ asyncio_default_fixture_loop_scope = "function"
 pythonpath = ["src"]
 testpaths = ["tests"]
 
+[tool.coverage.run]
+omit = [
+  "src/novel_downloader/apps/*",
+]
+
 [tool.commitizen]
 name = "cz_conventional_commits"
 version = "2.4.1"

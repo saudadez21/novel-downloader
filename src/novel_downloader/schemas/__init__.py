@@ -8,6 +8,7 @@ Data contracts and type definitions.
 
 __all__ = [
     "BookConfig",
+    "ClientConfig",
     "DownloaderConfig",
     "ParserConfig",
     "FetcherConfig",
@@ -34,6 +35,7 @@ from .book import (
 )
 from .config import (
     BookConfig,
+    ClientConfig,
     DownloaderConfig,
     ExporterConfig,
     FetcherConfig,

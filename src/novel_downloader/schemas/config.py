@@ -13,7 +13,7 @@ from typing import Any
 
 @dataclass
 class FetcherConfig:
-    request_interval: float = 2.0
+    request_interval: float = 0.5
     retry_times: int = 3
     backoff_factor: float = 2.0
     timeout: float = 30.0
@@ -31,7 +31,7 @@ class FetcherConfig:
 
 @dataclass
 class DownloaderConfig:
-    request_interval: float = 2.0
+    request_interval: float = 0.5
     retry_times: int = 3
     backoff_factor: float = 2.0
     raw_data_dir: str = "./raw_data"
@@ -66,19 +66,26 @@ class ParserConfig:
 
 @dataclass
 class ExporterConfig:
+    append_timestamp: bool = True
+    filename_template: str = "{title}_{author}"
+    include_picture: bool = True
+    split_mode: str = "book"
+
+
+@dataclass
+class ClientConfig:
+    request_interval: float = 0.5
+    retry_times: int = 3
+    backoff_factor: float = 2.0
     cache_dir: str = "./novel_cache"
     raw_data_dir: str = "./raw_data"
     output_dir: str = "./downloads"
-    check_missing: bool = True
-    make_txt: bool = True
-    make_epub: bool = False
-    make_md: bool = False
-    make_pdf: bool = False
-    append_timestamp: bool = True
-    filename_template: str = "{title}_{author}"
-    include_cover: bool = True
-    include_picture: bool = True
-    split_mode: str = "book"
+    workers: int = 4
+    skip_existing: bool = True
+    save_html: bool = False
+    storage_batch_size: int = 1
+    fetcher_cfg: FetcherConfig = field(default_factory=FetcherConfig)
+    parser_cfg: ParserConfig = field(default_factory=ParserConfig)
 
 
 @dataclass

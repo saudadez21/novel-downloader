@@ -16,30 +16,23 @@ if TYPE_CHECKING:
 
     from novel_downloader.plugins.base.searcher import BaseSearcher
     from novel_downloader.plugins.protocols import (
-        DownloaderProtocol,
-        ExporterProtocol,
+        ClientProtocol,
         FetcherProtocol,
         ParserProtocol,
         ProcessorProtocol,
     )
     from novel_downloader.schemas import (
-        DownloaderConfig,
-        ExporterConfig,
+        ClientConfig,
         FetcherConfig,
         ParserConfig,
     )
 
-    DownloaderBuilder = Callable[
-        [FetcherProtocol, ParserProtocol, DownloaderConfig, str],
-        DownloaderProtocol,
-    ]
-    ExporterBuilder = Callable[[ExporterConfig, str], ExporterProtocol]
+    ClientBuilder = Callable[[str, ClientConfig | None], ClientProtocol]
     FetcherBuilder = Callable[[FetcherConfig], FetcherProtocol]
     ParserBuilder = Callable[[ParserConfig], ParserProtocol]
     ProcessorBuilder = Callable[[dict[str, Any]], ProcessorProtocol]
 
-    D = TypeVar("D", bound=DownloaderProtocol)
-    E = TypeVar("E", bound=ExporterProtocol)
+    C = TypeVar("C", bound=ClientProtocol)
     F = TypeVar("F", bound=FetcherProtocol)
     P = TypeVar("P", bound=ParserProtocol)
     R = TypeVar("R", bound=ProcessorProtocol)  # Processor
@@ -50,8 +43,7 @@ _PLUGINS_PKG = "novel_downloader.plugins"
 
 class PluginRegistry:
     def __init__(self) -> None:
-        self._downloaders: dict[str, DownloaderBuilder] = {}
-        self._exporters: dict[str, ExporterBuilder] = {}
+        self._client: dict[str, ClientBuilder] = {}
         self._fetchers: dict[str, FetcherBuilder] = {}
         self._parsers: dict[str, ParserBuilder] = {}
         self._processors: dict[str, ProcessorBuilder] = {}
@@ -78,22 +70,12 @@ class PluginRegistry:
 
         return deco
 
-    def register_downloader(
+    def register_client(
         self, site_key: str | None = None
-    ) -> Callable[[type[D]], type[D]]:
-        def deco(cls: type[D]) -> type[D]:
+    ) -> Callable[[type[C]], type[C]]:
+        def deco(cls: type[C]) -> type[C]:
             key = (site_key or cls.__module__.split(".")[-2]).lower()
-            self._downloaders[key] = cls
-            return cls
-
-        return deco
-
-    def register_exporter(
-        self, site_key: str | None = None
-    ) -> Callable[[type[E]], type[E]]:
-        def deco(cls: type[E]) -> type[E]:
-            key = (site_key or cls.__module__.split(".")[-2]).lower()
-            self._exporters[key] = cls
+            self._client[key] = cls
             return cls
 
         return deco
@@ -138,37 +120,22 @@ class PluginRegistry:
             raise ValueError(f"Unsupported site: {site!r}")
         return cls(config)
 
-    def get_downloader(
+    def get_client(
         self,
-        fetcher: FetcherProtocol,
-        parser: ParserProtocol,
         site: str,
-        config: DownloaderConfig,
-    ) -> DownloaderProtocol:
+        config: ClientConfig | None = None,
+    ) -> ClientProtocol:
         key = self._normalize_key(site)
-        cls = self._downloaders.get(key)
+        cls = self._client.get(key)
         if cls is None:
-            self._try_import_site(key, "downloader")
-            cls = self._downloaders.get(key)
-
-        if cls is None:
-            from novel_downloader.plugins.common.downloader import CommonDownloader
-
-            return CommonDownloader(fetcher, parser, config, key)
-        return cls(fetcher, parser, config, key)
-
-    def get_exporter(self, site: str, config: ExporterConfig) -> ExporterProtocol:
-        key = self._normalize_key(site)
-        cls = self._exporters.get(key)
-        if cls is None:
-            self._try_import_site(key, "exporter")
-            cls = self._exporters.get(key)
+            self._try_import_site(key, "client")
+            cls = self._client.get(key)
 
         if cls is None:
-            from novel_downloader.plugins.common.exporter import CommonExporter
+            from novel_downloader.plugins.common.client import CommonClient
 
-            return CommonExporter(config, key)
-        return cls(config, key)
+            return CommonClient(key, config)
+        return cls(key, config)
 
     def get_processor(self, name: str, config: dict[str, Any]) -> ProcessorProtocol:
         key = name.strip().lower()

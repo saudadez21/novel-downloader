@@ -190,12 +190,6 @@ user_prompt = "请翻译成中文：{text}"
 
 * [霹雳书屋](https://www.pilibook.net/) ([备用](https://www.mozishuwu.com/))
 
-* [全职小说网](https://www.quanzhifashi.com/)
-
-  * 支持登录
-
-* [万相书城](https://wxsck.com/)
-
 * [笔仙阁](https://www.bixiange.me/)
 
 * [同人社](https://tongrenshe.cc/)
@@ -275,6 +269,11 @@ user_prompt = "请翻译成中文：{text}"
 
   * VIP 章节需登录
 
+* [轻之国度](https://www.lightnovel.fun/)
+
+  * 需登录
+  * [备用](https://www.lightnovel.us/)
+
 * [息壤中文网](https://www.xrzww.com/)
 
 * [纵横中文网](https://www.zongheng.com/)
@@ -302,6 +301,73 @@ user_prompt = "请翻译成中文：{text}"
 * [红袖招](https://hongxiuzhao.net/)
 
   * 使用加密字体
+
+* 海棠文化線上文學城
+
+  * [站点 1](https://ebook.longmabook.com/)
+  * [站点 2](https://www.longmabookcn.com/)
+  * [站点 3](https://ebook.lmbooks.com/)
+  * [站点 4](https://www.lmebooks.com/)
+  * [站点 5](https://www.haitbook.com/)
+  * [站点 6](https://www.htwhbook.com/)
+  * [站点 7](https://www.myhtebook.com/)
+  * [站点 8](https://www.lovehtbooks.com/)
+  * [站点 9](https://www.myhtebooks.com/)
+  * [站点 10](https://www.myhtlmebook.com/)
+  * [站点 11](https://jp.myhtebook.com/)
+  * [站点 12](https://jp.myhtlmebook.com/)
+  * [站点 13](https://ebook.urhtbooks.com/)
+  * [站点 14](https://www.urhtbooks.com/)
+  * [站点 15](https://www.newhtbook.com/)
+  * [站点 16](https://www.lvhtebook.com/)
+  * [站点 17](https://jp.lvhtebook.com/)
+  * [站点 18](https://www.htlvbooks.com/)
+
+* [完本神站](https://www.wanben.info/)
+
+* [全职小说网](https://www.quanzhifashi.com/)
+
+  * 支持登录
+
+* [万相书城](https://wxsck.com/)
+
+* 笔趣阁
+
+  * [站点 1](https://www.bqu9.cc/)
+  * [站点 2](https://www.nibiqu.cc/)
+  * [站点 3](https://www.boqugew.com/)
+  * [站点 4](https://www.biquge.tw/)
+  * [站点 5](https://www.biquge345.com/)
+  * [站点 6](https://www.beqege.cc/)
+  * [站点 7](https://m.chenkuan.com/)
+
+* [笔趣趣](https://www.biququ.com/)
+
+* [燃火小说](https://www.ranwen.la/)
+
+* [绿色小说网](https://www.lvsewx.cc/)
+
+* [42中文网](https://www.42zw.la/)
+
+* [文海小说](https://www.zgzl.net/)
+
+* [小说之家](https://xszj.org/)
+
+* [万相书城](https://www.wxscs.com/index.html)
+
+* [三五中文](https://m.mjyhb.com/)
+
+* [帝书阁](https://www.23dishuge.com/)
+
+* [大众文学](https://m.shauthor.com/)
+
+* [小說之家](https://m.xszj.org/)
+
+* 69书吧
+
+  * [站点 1](https://www.69hsw.com/)
+  * [站点 2](https://www.69hao.com/)
+  * [站点 3](https://www.69hsz.net/)
 
 * [大灰狼小说聚合网](https://api.langge.cf/)
 

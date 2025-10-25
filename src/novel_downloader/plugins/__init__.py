@@ -9,15 +9,13 @@ common utilities, and the plugin registry.
 
 __all__ = [
     "registrar",
-    "DownloaderProtocol",
-    "ExporterProtocol",
+    "ClientProtocol",
     "FetcherProtocol",
     "ParserProtocol",
 ]
 
 from .protocols import (
-    DownloaderProtocol,
-    ExporterProtocol,
+    ClientProtocol,
     FetcherProtocol,
     ParserProtocol,
 )

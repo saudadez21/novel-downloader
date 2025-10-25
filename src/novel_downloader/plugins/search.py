@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.usecases.search
---------------------------------
+novel_downloader.plugins.search
+-------------------------------
 
 """
 
@@ -11,6 +11,7 @@ import asyncio
 from collections.abc import AsyncGenerator, Sequence
 
 import aiohttp
+
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import SearchResult
 
@@ -47,7 +48,7 @@ async def search(
         site_lists = await asyncio.gather(*coros, return_exceptions=True)
 
     for item in site_lists:
-        if isinstance(item, Exception | BaseException):
+        if isinstance(item, BaseException):
             continue
         results.extend(item)
 

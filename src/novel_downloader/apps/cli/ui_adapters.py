@@ -33,22 +33,6 @@ class CLIDownloadUI:
             self._progress = None
         ui.success(t("Book {book_id} downloaded.").format(book_id=book.book_id))
 
-    async def on_book_error(self, book: BookConfig, error: Exception) -> None:
-        if self._progress:
-            self._progress.stop()
-            self._progress = None
-        ui.error(
-            t("Failed to download {book_id}: {err}").format(
-                book_id=book.book_id, err=error
-            )
-        )
-
-    async def on_site_error(self, site: str, error: Exception) -> None:
-        if self._progress:
-            self._progress.stop()
-            self._progress = None
-        ui.error(t("Site error ({site}): {err}").format(site=site, err=error))
-
 
 class CLIExportUI:
     def __init__(self) -> None:
@@ -138,25 +122,6 @@ class CLILoginUI:
         ui.success(t("Login successful."))
 
 
-class CLIConfigUI:
-    def on_missing(self, path: Path) -> None:
-        ui.warn(t("No config found at {path}.").format(path=str(path.resolve())))
-
-    def on_created(self, path: Path) -> None:
-        ui.success(
-            t("Created default config at {path}.").format(path=str(path.resolve()))
-        )
-
-    def on_invalid(self, error: Exception) -> None:
-        ui.error(t("Failed to load configuration: {err}").format(err=str(error)))
-
-    def on_abort(self) -> None:
-        ui.error(t("Cannot continue without a config file."))
-
-    def confirm_create(self) -> bool:
-        return ui.confirm(t("Would you like to create a default config?"), default=True)
-
-
 class CLIProcessUI:
     def __init__(self) -> None:
         self._progress: ui.ProgressUI | None = None
@@ -196,19 +161,5 @@ class CLIProcessUI:
                 what=what,
                 book_id=book.book_id,
                 path=str(path),
-            )
-        )
-
-    def on_book_error(
-        self, book: BookConfig, stage: str | None, error: Exception
-    ) -> None:
-        if self._progress:
-            self._progress.stop()
-            self._progress = None
-
-        stage_label = stage or "Unknown"
-        ui.error(
-            t("Error processing {book_id} at stage '{stage}': {err}").format(
-                book_id=book.book_id, stage=stage_label, err=str(error)
             )
         )

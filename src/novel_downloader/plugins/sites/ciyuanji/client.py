@@ -1,20 +1,34 @@
 #!/usr/bin/env python3
 """
-novel_downloader.plugins.sites.ciyuanji.exporter
-------------------------------------------------
+novel_downloader.plugins.sites.ciyuanji.client
+----------------------------------------------
 """
 
 from typing import Any
 
-from novel_downloader.plugins.common.exporter import CommonExporter
+from novel_downloader.plugins.common.client import CommonClient
 from novel_downloader.plugins.registry import registrar
 
 
-@registrar.register_exporter()
-class CiyuanjiExporter(CommonExporter):
+@registrar.register_client()
+class CiyuanjiClient(CommonClient):
     """
-    Exporter for Ciyuanji (次元姬) novels.
+    Specialized client for 次元姬 novel sites.
     """
+
+    @property
+    def workers(self) -> int:
+        return 1
+
+    def _extract_img_urls(self, extra: dict[str, Any]) -> list[str]:
+        img_list = extra.get("imgList", [])
+        if not isinstance(img_list, list):
+            return []
+        return [
+            url
+            for item in img_list
+            if isinstance(item, dict) and isinstance((url := item.get("imgUrl")), str)
+        ]
 
     @staticmethod
     def _collect_img_map(extras: dict[str, Any]) -> dict[int, list[str]]:

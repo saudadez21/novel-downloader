@@ -14,7 +14,6 @@
     - [`book_ids` 字段说明](#book_ids-字段说明)
     - [示例: 起点 (`qidian`)](#示例-起点-qidian)
   - [output 配置](#output-配置)
-    - [输出格式 `[output.formats]`](#输出格式-outputformats)
     - [命名规则 `[output.naming]`](#命名规则-outputnaming)
     - [EPUB 选项 `[output.epub]`](#epub-选项-outputepub)
     - [示例配置](#示例配置-1)
@@ -44,7 +43,7 @@
 | `raw_data_dir`       | string  | `"./raw_data"`    | 书籍数据存放目录                             |
 | `output_dir`         | string  | `"./downloads"`   | 最终导出文件目录                             |
 | `cache_dir`          | string  | `"./novel_cache"` | 本地缓存目录 (字体 / 图片等)                  |
-| `workers`            | int     | 2                 | 下载任务协程数量                             |
+| `workers`            | int     | 4                 | 下载任务协程数量                             |
 | `skip_existing`      | bool    | true              | 下载时跳过本地已存在的章节文件                 |
 | `storage_batch_size` | int     | 1                 | `sqlite` 每批提交的章节数 (提高写入性能)       |
 
@@ -88,11 +87,11 @@ backoff_factor = 2.0
 timeout = 30.0
 max_connections = 10
 max_rps = 1.0
-request_interval = 1.0
+request_interval = 0.5
 raw_data_dir = "./raw_data"
 output_dir = "./downloads"
 cache_dir = "./novel_cache"
-workers = 2
+workers = 4
 skip_existing = true
 storage_batch_size = 4
 
@@ -198,14 +197,9 @@ book_id = "1012584111"
 
 控制导出格式, 文件命名与 EPUB 细节
 
-#### 输出格式 `[output.formats]`
-
-| 参数名          | 类型  | 默认值     | 说明                                       |
-| -------------- | ----- | --------- | ------------------------------------------ |
-| `make_txt`     | bool  | true      | 是否生成完整 TXT 文件                       |
-| `make_epub`    | bool  | false     | 是否生成 EPUB 文件                          |
-| `make_md`      | bool  | false     | 是否生成 Markdown 文件 (未实现)             |
-| `make_pdf`     | bool  | false     | 是否生成 PDF 文件 (未实现)                  |
+| 参数名          | 类型        | 默认值     | 说明                                       |
+| -------------- | ----------- | --------- | ------------------------------------------ |
+| `formats`      | `list[str]` | `[]`      | 输出格式                                    |
 
 #### 命名规则 `[output.naming]`
 
@@ -218,24 +212,22 @@ book_id = "1012584111"
 
 | 参数名                         | 类型    | 默认值                         | 说明                                       |
 | ----------------------------- | ------- | ----------------------------- | ------------------------------------------ |
-| `include_cover`               | bool    | true                          | 是否包含封面                               |
 | `include_picture`             | bool    | true                          | 是否下载并嵌入章节中的图片 (可能增加文件体积) |
 
 #### 示例配置
 
 ```toml
-[output.formats]
-make_txt = true
-make_epub = true
-make_md = false
-make_pdf = false
+[output]
+formats = [
+    "txt",
+    "epub",
+]
 
 [output.naming]
 append_timestamp = false
 filename_template = "{title}_{author}"
 
 [output.epub]
-include_cover = true
 include_picture = true
 ```
 

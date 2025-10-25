@@ -13,6 +13,7 @@ from typing import Any, TypeVar
 
 from novel_downloader.schemas import (
     BookConfig,
+    ClientConfig,
     DownloaderConfig,
     ExporterConfig,
     FetcherConfig,
@@ -69,6 +70,28 @@ class ConfigAdapter:
             locale_style=self._pick("locale_style", "simplified", s, g),
         )
 
+    def get_client_config(self, site: str) -> ClientConfig:
+        """
+        Build a :class:`novel_downloader.models.ClientConfig` using both
+        general and site-specific settings.
+        """
+        s, g = self._site_cfg(site), self._gen_cfg()
+        debug = g.get("debug") or {}
+        return ClientConfig(
+            request_interval=self._pick("request_interval", 0.5, s, g),
+            retry_times=self._pick("retry_times", 3, s, g),
+            backoff_factor=self._pick("backoff_factor", 2.0, s, g),
+            raw_data_dir=g.get("raw_data_dir", "./raw_data"),
+            cache_dir=g.get("cache_dir", "./novel_cache"),
+            output_dir=g.get("output_dir", "./downloads"),
+            workers=self._pick("workers", 4, s, g),
+            skip_existing=self._pick("skip_existing", True, s, g),
+            save_html=bool(debug.get("save_html", False)),
+            storage_batch_size=g.get("storage_batch_size", 1),
+            fetcher_cfg=self.get_fetcher_config(site),
+            parser_cfg=self.get_parser_config(site),
+        )
+
     def get_downloader_config(self, site: str) -> DownloaderConfig:
         """
         Build a :class:`novel_downloader.models.DownloaderConfig` using both
@@ -118,24 +141,14 @@ class ConfigAdapter:
 
         :return: Fully populated configuration for text/ebook export.
         """
-        s, g = self._site_cfg(site), self._gen_cfg()
+        s = self._site_cfg(site)
         out = self._config.get("output") or {}
-        fmt = out.get("formats") or {}
         naming = out.get("naming") or {}
         epub_opts = out.get("epub") or {}
 
         return ExporterConfig(
-            cache_dir=g.get("cache_dir", "./novel_cache"),
-            raw_data_dir=g.get("raw_data_dir", "./raw_data"),
-            output_dir=g.get("output_dir", "./downloads"),
-            check_missing=self._pick("check_missing", False, s, g),
-            make_txt=fmt.get("make_txt", True),
-            make_epub=fmt.get("make_epub", True),
-            make_md=fmt.get("make_md", False),
-            make_pdf=fmt.get("make_pdf", False),
             append_timestamp=naming.get("append_timestamp", True),
             filename_template=naming.get("filename_template", "{title}_{author}"),
-            include_cover=epub_opts.get("include_cover", True),
             include_picture=epub_opts.get("include_picture", True),
             split_mode=s.get("split_mode", "book"),
         )
@@ -157,6 +170,30 @@ class ConfigAdapter:
                     out[key] = s
         return out
 
+    def get_login_required(self, site: str) -> bool:
+        """
+        Return whether the given site requires login before downloading.
+        """
+        s, g = self._site_cfg(site), self._gen_cfg()
+        return bool(s.get("login_required", g.get("login_required", False)))
+
+    def get_export_fmt(self, site: str) -> list[str]:
+        """
+        Return the list of export formats for a given site.
+        """
+        s = self._site_cfg(site)
+        out: dict[str, Any] = self._config.get("output") or {}
+
+        fmt = (s.get("formats") if "formats" in s else None) or out.get("formats") or {}
+
+        if isinstance(fmt, list):
+            return fmt
+
+        if isinstance(fmt, dict):
+            return self._convert_fmt_dict(fmt)
+
+        return []
+
     def get_plugins_config(self) -> dict[str, Any]:
         """
         Return the plugin-related configuration section.
@@ -167,6 +204,17 @@ class ConfigAdapter:
             "local_plugins_path": plugins_cfg.get("local_plugins_path") or "",
             "override_builtins": plugins_cfg.get("override_builtins", False),
         }
+
+    def get_processor_configs(self, site: str) -> list[ProcessorConfig]:
+        s = self._site_cfg(site)
+        plugins = self._config.get("plugins") or {}
+
+        site_rows = s.get("processors") or []
+        site_procs = self._to_processor_cfgs(site_rows)
+        plugin_rows = plugins.get("processors") or []
+        global_procs = self._to_processor_cfgs(plugin_rows)
+
+        return site_procs if site_procs else global_procs
 
     def get_pipeline_config(self, site: str) -> PipelineConfig:
         """
@@ -369,4 +417,24 @@ class ConfigAdapter:
             opts = {k: v for k, v in row.items() if k not in ("name", "overwrite")}
             result.append(ProcessorConfig(name=name, overwrite=overwrite, options=opts))
 
+        return result
+
+    @staticmethod
+    def _convert_fmt_dict(fmt_dict: dict[str, bool]) -> list[str]:
+        """
+        Convert legacy `make_xxx = true` format to ['xxx', ...] list.
+        """
+        import warnings
+
+        warnings.warn(
+            "The legacy output.formats configuration (make_xxx = true) "
+            "will be removed. Please migrate to formats = ['txt', 'epub'] format.",
+            category=UserWarning,
+            stacklevel=2,
+        )
+
+        result = []
+        for key, value in fmt_dict.items():
+            if value and key.startswith("make_"):
+                result.append(key.removeprefix("make_"))
         return result

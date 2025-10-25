@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.usecases.process
----------------------------------
-
-Run an ordered sequence of processors over a book's chapters, persisting
-each stage to its own sqlite file and recording provenance in pipeline.json.
+novel_downloader.plugins.utils.stage_runner
+-------------------------------------------
 """
 
 from __future__ import annotations
@@ -23,68 +20,13 @@ from novel_downloader.schemas import (
     BookInfoDict,
     ChapterDict,
     ChapterInfoDict,
-    PipelineConfig,
     PipelineMeta,
     ProcessorConfig,
     VolumeInfoDict,
 )
 
-from .protocols import ProcessUI
 
-
-def process_books(
-    site: str,
-    books: list[BookConfig],
-    pipeline_cfg: PipelineConfig,
-    ui: ProcessUI,
-) -> None:
-    for book in books:
-        process_book(site, book, pipeline_cfg, ui)
-
-
-def process_book(
-    site: str,
-    book: BookConfig,
-    pipeline_cfg: PipelineConfig,
-    ui: ProcessUI,
-) -> None:
-    """
-    Run all processors for a single book;
-    create stage sqlite outputs and update pipeline.json.
-    """
-    base_dir = Path(pipeline_cfg.raw_data_dir) / site / book.book_id
-    raw_sqlite = base_dir / "chapter.raw.sqlite"
-    book_info_path = base_dir / "book_info.raw.json"
-
-    # Pre-flight checks
-    if not raw_sqlite.is_file():
-        ui.on_missing(book, "raw", raw_sqlite)
-        return
-    if not book_info_path.is_file():
-        ui.on_missing(book, "book_info", book_info_path)
-        return
-
-    stage_name: str = "Unknown"
-    try:
-        runner = _StageRunner(base_dir=base_dir, book=book)
-        for pconf in pipeline_cfg.processors:
-            stage_name = pconf.name
-            ui.on_stage_start(book, stage_name)
-
-            def _progress(
-                done: int, total: int, *, _b: BookConfig = book, _s: str = stage_name
-            ) -> None:
-                ui.on_stage_progress(_b, _s, done, total)
-
-            runner.run(pconf, on_progress=_progress)
-
-            ui.on_stage_complete(book, stage_name)
-
-    except Exception as e:
-        ui.on_book_error(book, stage=stage_name, error=e)
-
-
-class _StageRunner:
+class StageRunner:
     """
     Encapsulates per-stage I/O, incremental logic, batching, and provenance.
     """
