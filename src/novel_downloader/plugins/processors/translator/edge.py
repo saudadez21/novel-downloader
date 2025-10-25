@@ -29,7 +29,7 @@ class EdgeTranslaterProcessor:
 
     def __init__(self, config: dict[str, Any]) -> None:
         self._source: str = config.get("source") or "auto"
-        self._target: str = config.get("target") or "zh-CN"
+        self._target: str = config.get("target") or "zh-Hans"
         self._sleep: float = float(config.get("sleep", 1.0))
         self._endpoint: str = (
             "https://api-edge.cognitive.microsofttranslator.com/translate"
