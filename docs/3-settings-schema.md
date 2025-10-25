@@ -25,6 +25,7 @@
       - [`cleaner`](#cleaner)
       - [`zh_convert`](#zh_convert)
       - [`translator.google`](#translatorgoogle)
+      - [`translator.edge`](#translatoredge)
       - [`corrector`](#corrector)
 
 ### general 配置
@@ -380,6 +381,14 @@ content_replace = "content-replace.json"
 | `source`        | str    | `auto`  |
 | `target`        | str    | `zh-CN` |
 | `sleep`         | float  | 2.0     |
+
+##### `translator.edge`
+
+| 参数名           | 类型   | 默认值   |
+| --------------- | ------ | ------- |
+| `source`        | str    | `auto`  |
+| `target`        | str    | `zh-CN` |
+| `sleep`         | float  | 1.0     |
 
 ##### `corrector`
 
