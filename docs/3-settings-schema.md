@@ -24,6 +24,7 @@
     - [内置处理器概览 (简要)](#内置处理器概览-简要)
       - [`cleaner`](#cleaner)
       - [`zh_convert`](#zh_convert)
+      - [`translator.google`](#translatorgoogle)
       - [`corrector`](#corrector)
 
 ### general 配置
@@ -371,6 +372,14 @@ content_replace = "content-replace.json"
 > [OpenCC 官方文档](https://github.com/yichen0831/opencc-python?tab=readme-ov-file#conversions-%E8%BD%89%E6%8F%9B)
 >
 > 依赖: `opencc-python-reimplemented`。
+
+##### `translator.google`
+
+| 参数名           | 类型   | 默认值   |
+| --------------- | ------ | ------- |
+| `source`        | str    | `auto`  |
+| `target`        | str    | `zh-CN` |
+| `sleep`         | float  | 2.0     |
 
 ##### `corrector`
 
