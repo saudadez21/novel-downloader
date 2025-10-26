@@ -133,6 +133,18 @@ SITE_RULES: dict[str, list[SiteRuleSet]] = {
             hints=[],
         )
     ],
+    "www.alphapolis.co.jp": [
+        SiteRuleSet(
+            site_key="alphapolis",
+            extractors=[
+                BookIdExtractor(
+                    pattern=r"^/novel/(\d+)/(\d+)",
+                    build_book_id=lambda m: f"{m.group(1)}-{m.group(2)}",
+                ),
+            ],
+            hints=[],
+        )
+    ],
     "www.b520.cc": [
         SiteRuleSet(
             site_key="b520",

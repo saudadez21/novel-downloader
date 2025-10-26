@@ -221,6 +221,9 @@ CASES_SUCCESS = [
     # akatsuki_novels
     ("https://www.akatsuki-novels.com/stories/index/novel_id~103", "akatsuki_novels", "103"),  # noqa: E501
     ("https://www.akatsuki-novels.com/stories/view/163722/novel_id~103", "akatsuki_novels", "103"),  # noqa: E501
+    # alphapolis
+    ("https://www.alphapolis.co.jp/novel/547686423/112003230", "alphapolis", "547686423-112003230"),  # noqa: E501
+    ("https://www.alphapolis.co.jp/novel/547686423/112003230/episode/10322710", "alphapolis", "547686423-112003230"),  # noqa: E501
 ]
 
 CASES_HINT = [

@@ -411,7 +411,6 @@ user_prompt = "请翻译成中文：{text}"
 * [カクヨム](https://kakuyomu.jp/)
 * [Novel Up Plus](https://novelup.plus/)
 * [ノベルピア](https://novelpia.jp/)
-* [アルファポリス](https://www.alphapolis.co.jp/)
 
 #### 英文
 
