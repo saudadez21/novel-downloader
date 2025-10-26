@@ -408,7 +408,6 @@ user_prompt = "请翻译成中文：{text}"
 
 #### 日文
 
-* [暁](https://www.akatsuki-novels.com/)
 * [カクヨム](https://kakuyomu.jp/)
 * [Novel Up Plus](https://novelup.plus/)
 * [ノベルピア](https://novelpia.jp/)

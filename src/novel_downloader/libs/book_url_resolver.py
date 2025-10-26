@@ -121,6 +121,18 @@ SITE_RULES: dict[str, list[SiteRuleSet]] = {
             hints=[],
         )
     ],
+    "www.akatsuki-novels.com": [
+        SiteRuleSet(
+            site_key="akatsuki_novels",
+            extractors=[
+                BookIdExtractor(
+                    pattern=r"novel_id~(\d+)",
+                    build_book_id=lambda m: m.group(1),
+                ),
+            ],
+            hints=[],
+        )
+    ],
     "www.b520.cc": [
         SiteRuleSet(
             site_key="b520",

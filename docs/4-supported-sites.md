@@ -165,6 +165,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [ムーンライトノベルズ](https://mnlt.syosetu.com/top/top/)     | syosetu18  | ✅     | ✅     | ⚠️     | ⚠️     |
 | [ノクターンノベルズ](https://noc.syosetu.com/top/top/)        | syosetu18  | ✅     | ✅     | ⚠️     | ⚠️     |
 | [小説を読もう！](https://yomou.syosetu.com/)                 | syosetu_org | ✅     | ❌     | ⚠️     | ⚠️     |
+| [暁](https://www.akatsuki-novels.com/)                  | akatsuki_novels | ❌     | ❌     | ⚠️     | ⚠️     |
 
 #### 限制级
 
@@ -462,6 +463,10 @@ novel-cli download --site ttkan shengxu-chendong
 * **ハーメルン (syosetu_org)**
   * 书籍: `https://syosetu.org/novel/292891/` -> Book ID: `292891`
   * 章节: `https://syosetu.org/novel/292891/1.html` -> Chapter ID: `1`
+
+* **暁 (akatsuki_novels)**
+  * 书籍: `https://www.akatsuki-novels.com/stories/index/novel_id~103` -> Book ID: `103`
+  * 章节: `https://www.akatsuki-novels.com/stories/view/163722/novel_id~103` -> Chapter ID: `163722`
 
 #### 限制级
 

@@ -218,6 +218,9 @@ CASES_SUCCESS = [
     # syosetu_org
     ("https://syosetu.org/novel/292891/", "syosetu_org", "292891"),
     ("https://syosetu.org/novel/292891/1.html", "syosetu_org", "292891"),
+    # akatsuki_novels
+    ("https://www.akatsuki-novels.com/stories/index/novel_id~103", "akatsuki_novels", "103"),  # noqa: E501
+    ("https://www.akatsuki-novels.com/stories/view/163722/novel_id~103", "akatsuki_novels", "103"),  # noqa: E501
 ]
 
 CASES_HINT = [
