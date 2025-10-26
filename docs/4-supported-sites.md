@@ -12,6 +12,7 @@
     - [综合书库 / 文库与名著](#综合书库--文库与名著)
     - [类笔趣阁 / 第三方转载站](#类笔趣阁--第三方转载站)
     - [同人](#同人)
+    - [日语](#日语)
     - [限制级](#限制级)
     - [已归档站点](#已归档站点)
   - [站点详解与 Book ID 规则](#站点详解与-book-id-规则)
@@ -20,6 +21,7 @@
     - [综合书库 / 文库与名著](#综合书库--文库与名著-1)
     - [类笔趣阁 / 第三方转载站](#类笔趣阁--第三方转载站-1)
     - [同人](#同人-1)
+    - [日语](#日语-1)
     - [限制级](#限制级-1)
     - [已归档站点](#已归档站点-1)
   - [配置文件](#配置文件)
@@ -153,6 +155,16 @@ novel-cli download --site ttkan shengxu-chendong
 | [同人圈](https://www.tongrenquan.org/)                      | tongrenquan | ❌     | ❌     | ❌     | ✅     | 简      |
 | [同人小说网](https://www.trxs.cc/)                           | trxs        | ❌     | ❌     | ❌     | ✅     | 简      |
 | [全本同人小说](https://www.qbtr.cc/)                         | qbtr        | ❌     | ❌     | ❌     | ✅     | 简      |
+
+#### 日语
+
+| 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 |
+| ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- |
+| [小説家になろう](https://syosetu.com/)                       | syosetu    | ✅     | ✅     | ⚠️     | ⚠️     |
+| [小説を読もう！](https://yomou.syosetu.com/)                 | syosetu    | ✅     | ✅     | ⚠️     | ⚠️     |
+| [ムーンライトノベルズ](https://mnlt.syosetu.com/top/top/)     | syosetu18  | ✅     | ✅     | ⚠️     | ⚠️     |
+| [ノクターンノベルズ](https://noc.syosetu.com/top/top/)        | syosetu18  | ✅     | ✅     | ⚠️     | ⚠️     |
+| [小説を読もう！](https://yomou.syosetu.com/)                 | syosetu_org | ✅     | ❌     | ⚠️     | ⚠️     |
 
 #### 限制级
 
@@ -428,6 +440,28 @@ novel-cli download --site ttkan shengxu-chendong
   * 书籍: `https://www.qbtr.cc/tongren/8978.html` -> Book ID: `tongren-8978`
   * 章节: `https://www.qbtr.cc/tongren/8978/1.html` -> Chapter ID: `1`
   * 注意: 该站点直接提供 txt 下载。
+
+#### 日语
+
+* **小説家になろう (syosetu)**
+  * 书籍: `https://ncode.syosetu.com/n9584gd/` -> Book ID: `n9584gd`
+  * 章节: `https://ncode.syosetu.com/n9584gd/1/` -> Chapter ID: `1`
+
+* **小説を読もう！ (syosetu)**
+  * 书籍: `https://ncode.syosetu.com/n4826lc/` -> Book ID: `n4826lc`
+  * 章节: `https://ncode.syosetu.com/n4826lc/1/` -> Chapter ID: `1`
+
+* **ムーンライトノベルズ (syosetu18)**
+  * 书籍: `https://novel18.syosetu.com/n2976io/` -> Book ID: `n2976io`
+  * 章节: `https://novel18.syosetu.com/n2976io/1/` -> Chapter ID: `1`
+
+* **ノクターンノベルズ (syosetu18)**
+  * 书籍: `https://novel18.syosetu.com/n8543hb/` -> Book ID: `n8543hb`
+  * 章节: `https://novel18.syosetu.com/n8543hb/1/` -> Chapter ID: `1`
+
+* **ハーメルン (syosetu_org)**
+  * 书籍: `https://syosetu.org/novel/292891/` -> Book ID: `292891`
+  * 章节: `https://syosetu.org/novel/292891/1.html` -> Chapter ID: `1`
 
 #### 限制级
 

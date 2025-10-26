@@ -745,6 +745,54 @@ SITE_RULES: dict[str, list[SiteRuleSet]] = {
             hints=[],
         )
     ],
+    "ncode.syosetu.com": [
+        SiteRuleSet(
+            site_key="syosetu",
+            extractors=[
+                BookIdExtractor(
+                    pattern=r"^/([nN]\w+)/?$",
+                    build_book_id=lambda m: m.group(1),
+                ),
+                BookIdExtractor(
+                    pattern=r"^/([nN]\w+)/\d+/?$",
+                    build_book_id=lambda m: m.group(1),
+                ),
+            ],
+            hints=[],
+        )
+    ],
+    "novel18.syosetu.com": [
+        SiteRuleSet(
+            site_key="syosetu18",
+            extractors=[
+                BookIdExtractor(
+                    pattern=r"^/([nN]\w+)/?$",
+                    build_book_id=lambda m: m.group(1),
+                ),
+                BookIdExtractor(
+                    pattern=r"^/([nN]\w+)/\d+/?$",
+                    build_book_id=lambda m: m.group(1),
+                ),
+            ],
+            hints=[],
+        )
+    ],
+    "syosetu.org": [
+        SiteRuleSet(
+            site_key="syosetu_org",
+            extractors=[
+                BookIdExtractor(
+                    pattern=r"^/novel/(\d+)/?$",
+                    build_book_id=lambda m: m.group(1),
+                ),
+                BookIdExtractor(
+                    pattern=r"^/novel/(\d+)/\d+\.html$",
+                    build_book_id=lambda m: m.group(1),
+                ),
+            ],
+            hints=[],
+        )
+    ],
     "www.tongrenquan.org": [
         SiteRuleSet(
             site_key="tongrenquan",

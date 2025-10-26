@@ -205,6 +205,19 @@ CASES_SUCCESS = [
     # deqixs
     ("https://www.deqixs.com/xiaoshuo/2026/", "deqixs", "2026"),
     ("https://www.deqixs.com/xiaoshuo/2026/1969933.html", "deqixs", "2026"),
+    # syosetu
+    ("https://ncode.syosetu.com/n9584gd/", "syosetu", "n9584gd"),
+    ("https://ncode.syosetu.com/n9584gd/1/", "syosetu", "n9584gd"),
+    ("https://ncode.syosetu.com/n4826lc/", "syosetu", "n4826lc"),
+    ("https://ncode.syosetu.com/n4826lc/1/", "syosetu", "n4826lc"),
+    # syosetu18
+    ("https://novel18.syosetu.com/n2976io/", "syosetu18", "n2976io"),
+    ("https://novel18.syosetu.com/n2976io/1/", "syosetu18", "n2976io"),
+    ("https://novel18.syosetu.com/n8543hb/", "syosetu18", "n8543hb"),
+    ("https://novel18.syosetu.com/n8543hb/1/", "syosetu18", "n8543hb"),
+    # syosetu_org
+    ("https://syosetu.org/novel/292891/", "syosetu_org", "292891"),
+    ("https://syosetu.org/novel/292891/1.html", "syosetu_org", "292891"),
 ]
 
 CASES_HINT = [

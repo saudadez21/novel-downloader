@@ -691,6 +691,51 @@
         ]
       }
     ],
+    "syosetu": [
+      {
+        "book_id": "n9584gd",
+        "chap_ids": [
+          "1",
+          "564"
+        ]
+      },
+      {
+        "book_id": "n4826lc",
+        "chap_ids": [
+          "1"
+        ]
+      }
+    ],
+    "syosetu18": [
+      {
+        "book_id": "n2976io",
+        "chap_ids": [
+          "1",
+          "134"
+        ]
+      },
+      {
+        "book_id": "n8543hb",
+        "chap_ids": [
+          "1"
+        ]
+      }
+    ],
+    "syosetu_org": [
+      {
+        "book_id": "292891",
+        "chap_ids": [
+          "1",
+          "963"
+        ]
+      },
+      {
+        "book_id": "388909",
+        "chap_ids": [
+          "1"
+        ]
+      }
+    ],
     "tongrenquan": [
       {
         "book_id": "9420",

@@ -118,7 +118,7 @@ user_prompt = "请翻译成中文：{text}"
 
 ### 导出模板支持
 
-* 增加可定制的导出模板（基于 `Jinja2`）
+* 增加可定制的导出模板 (基于 `Jinja2`)
 
 示例模板:
 
@@ -411,11 +411,6 @@ user_prompt = "请翻译成中文：{text}"
 * [暁](https://www.akatsuki-novels.com/)
 * [カクヨム](https://kakuyomu.jp/)
 * [Novel Up Plus](https://novelup.plus/)
-* [小説家になろう](https://syosetu.com/)
-* [ハーメルン](https://syosetu.org/)
-* [ムーンライトノベルズ](https://mnlt.syosetu.com/top/top/)
-* [ノクターンノベルズ](https://noc.syosetu.com/top/top/)
-* [小説を読もう！](https://yomou.syosetu.com/)
 * [ノベルピア](https://novelpia.jp/)
 * [アルファポリス](https://www.alphapolis.co.jp/)
 
