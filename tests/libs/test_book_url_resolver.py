@@ -224,6 +224,9 @@ CASES_SUCCESS = [
     # alphapolis
     ("https://www.alphapolis.co.jp/novel/547686423/112003230", "alphapolis", "547686423-112003230"),  # noqa: E501
     ("https://www.alphapolis.co.jp/novel/547686423/112003230/episode/10322710", "alphapolis", "547686423-112003230"),  # noqa: E501
+    # novelpia
+    ("https://novelpia.jp/novel/2393?sid=main5", "novelpia", "2393"),
+    ("https://novelpia.jp/novel/2749", "novelpia", "2749"),
 ]
 
 CASES_HINT = [
@@ -258,6 +261,10 @@ CASES_HINT = [
     ),
     (
         "https://www.westnovel.com/q/showinfo-2-48701-0.html",
+        "章节 URL 不包含书籍 ID, 请复制目录页的链接",
+    ),
+    (
+        "https://novelpia.jp/viewer/51118",
         "章节 URL 不包含书籍 ID, 请复制目录页的链接",
     ),
 ]

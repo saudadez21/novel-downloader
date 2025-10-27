@@ -167,6 +167,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [小説を読もう！](https://yomou.syosetu.com/)                 | syosetu_org | ✅     | ❌     | ⚠️     | ⚠️     |
 | [暁](https://www.akatsuki-novels.com/)                  | akatsuki_novels | ❌     | ❌     | ⚠️     | ⚠️     |
 | [アルファポリス](https://www.alphapolis.co.jp/)              | alphapolis  | ✅     | ❌     | ⚠️     | ⚠️     |
+| [ノベルピア](https://novelpia.jp/)                          | novelpia    | ❌     | ✅     | ⚠️     | ⚠️     |
 
 #### 限制级
 
@@ -472,6 +473,10 @@ novel-cli download --site ttkan shengxu-chendong
 * **アルファポリス (alphapolis)**
   * 书籍: `https://www.alphapolis.co.jp/novel/547686423/112003230` -> Book ID: `547686423-112003230`
   * 章节: `https://www.alphapolis.co.jp/novel/547686423/112003230/episode/10322710` -> Chapter ID: `10322710`
+
+* **ノベルピア (novelpia)**
+  * 书籍: `https://novelpia.jp/novel/2393?sid=main5` -> Book ID: `2393`
+  * 章节: `https://novelpia.jp/viewer/51118` -> Chapter ID: `51118`
 
 #### 限制级
 

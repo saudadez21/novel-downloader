@@ -47,6 +47,7 @@ DOWNLOAD_SUPPORT_SITES = {
     "n69yue": "69阅读 (n69yue)",
     "n71ge": "新吾爱文学 (n71ge)",
     "n101kanshu": "101看书 (n101kanshu)",
+    "novelpia": "ノベルピア (novelpia)",
     "piaotia": "飘天文学网 (piaotia)",
     "qbtr": "全本同人小说 (qbtr)",
     "qidian": "起点中文网 (qidian)",

@@ -409,8 +409,8 @@ user_prompt = "请翻译成中文：{text}"
 #### 日文
 
 * [カクヨム](https://kakuyomu.jp/)
+  * VIP 章节需登录访问
 * [Novel Up Plus](https://novelup.plus/)
-* [ノベルピア](https://novelpia.jp/)
 
 #### 英文
 

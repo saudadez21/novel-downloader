@@ -913,6 +913,8 @@ class CommonClient(BaseClient):
             book_info = self._load_book_info(book_id)
             if book_info and time.time() - book_info.get("last_checked", 0.0) < ONE_DAY:
                 return book_info
+        except FileNotFoundError as exc:
+            self.logger.debug("No cached book_info found for %s: %s", book_id, exc)
         except Exception as exc:
             self.logger.info("Failed to load cached book_info for %s: %s", book_id, exc)
 
