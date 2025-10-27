@@ -22,6 +22,7 @@ async def search(
     limit: int | None = None,
     per_site_limit: int = 5,
     timeout: float = 5.0,
+    nsfw: bool = False,
 ) -> list[SearchResult]:
     """
     Perform a search for the given keyword across one or more registered sites,
@@ -32,6 +33,7 @@ async def search(
     :param limit: Maximum total number of results to return; if None, return all.
     :param per_site_limit: Maximum number of search results per site.
     :param timeout: Per-request time budget (seconds)
+    :param nsfw: Whether to include NSFW searchers.
     :return: A flat list of `SearchResult` objects.
     """
     classes = registrar.get_searcher_classes(sites, load_all_if_none=True)
@@ -43,7 +45,12 @@ async def search(
     results: list[SearchResult] = []
 
     async with aiohttp.ClientSession(timeout=timeout_cfg) as session:
-        instances = [cls(session) for cls in classes]
+        if sites is None:
+            instances = [
+                inst for cls in classes if ((inst := cls(session)).nsfw == nsfw)
+            ]
+        else:
+            instances = [cls(session) for cls in classes]
         coros = [inst.search(keyword, limit=per_site_limit) for inst in instances]
         site_lists = await asyncio.gather(*coros, return_exceptions=True)
 
@@ -61,6 +68,7 @@ async def search_stream(
     sites: Sequence[str] | None = None,
     per_site_limit: int = 5,
     timeout: float = 5.0,
+    nsfw: bool = False,
 ) -> AsyncGenerator[list[SearchResult], None]:
     """
     Stream search results from registered sites as soon as each site finishes.
@@ -69,6 +77,7 @@ async def search_stream(
     :param sites: Optional list of site keys; if None, use all registered sites.
     :param per_site_limit: Maximum number of results per site.
     :param timeout: Timeout per-site (seconds).
+    :param nsfw: Whether to include NSFW searchers.
     :yield: Lists of `SearchResult` objects from each completed site.
     """
     classes = registrar.get_searcher_classes(sites, load_all_if_none=True)
@@ -79,7 +88,12 @@ async def search_stream(
 
     timeout_cfg = aiohttp.ClientTimeout(total=timeout)
     async with aiohttp.ClientSession(timeout=timeout_cfg) as session:
-        instances = [cls(session) for cls in classes]
+        if sites is None:
+            instances = [
+                inst for cls in classes if ((inst := cls(session)).nsfw == nsfw)
+            ]
+        else:
+            instances = [cls(session) for cls in classes]
         tasks = [
             asyncio.create_task(
                 inst.search(keyword, limit=per_site_limit),

@@ -616,6 +616,7 @@ class GenericSession(BaseSession):
         self, book_id: str, chapter_id: str, **kwargs: Any
     ) -> list[str]:
         book_id = self._transform_book_id(book_id)
+        chapter_id = self._transform_book_id(chapter_id)
 
         if self.USE_PAGINATED_CHAPTER:
             return await self._paginate(

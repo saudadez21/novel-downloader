@@ -234,6 +234,9 @@ CASES_SUCCESS = [
     ("https://www.mozishuwu.com/1/627/info.html", "pilibook", "1-627"),
     ("https://www.mozishuwu.com/1/627/menu/1.html", "pilibook", "1-627"),
     ("https://www.mozishuwu.com/1/627/read/247250.html", "pilibook", "1-627"),
+    # alicesw
+    ("https://www.alicesw.com/novel/46857.html", "alicesw", "46857"),
+    ("https://www.alicesw.com/other/chapters/id/46857.html", "alicesw", "46857"),
 ]
 
 CASES_HINT = [
@@ -272,6 +275,10 @@ CASES_HINT = [
     ),
     (
         "https://novelpia.jp/viewer/51118",
+        "章节 URL 不包含书籍 ID, 请复制目录页的链接",
+    ),
+    (
+        "https://www.alicesw.com/book/48247/563ed665333ad.html",
         "章节 URL 不包含书籍 ID, 请复制目录页的链接",
     ),
 ]

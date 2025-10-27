@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 """
-novel_downloader.plugins.sites.xiguashuwu.searcher
---------------------------------------------------
-
+novel_downloader.plugins.sites.alicesw.searcher
+-----------------------------------------------
 """
 
 import logging
 
 from lxml import html
-
 from novel_downloader.plugins.base.searcher import BaseSearcher
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import SearchResult
@@ -17,23 +15,20 @@ logger = logging.getLogger(__name__)
 
 
 @registrar.register_searcher()
-class XiguashuwuSearcher(BaseSearcher):
-    site_name = "xiguashuwu"
+class AliceswSearcher(BaseSearcher):
+    site_name = "alicesw"
     priority = 500
-    BASE_URL = "https://www.xiguashuwu.com"
-    SEARCH_URL = "https://www.xiguashuwu.com/search/{query}"
+    BASE_URL = "http://www.alicesw.com/"
+    SEARCH_URL = "https://www.alicesw.com/search.html"
 
     @property
     def nsfw(self) -> bool:
         return True
 
     async def _fetch_html(self, keyword: str) -> str:
-        url = self.SEARCH_URL.format(query=self._quote(keyword))
-        headers = {
-            "Referer": "https://www.xiguashuwu.com/search/",
-        }
+        params = {"q": keyword, "f": "_all"}
         try:
-            async with self._http_get(url, headers=headers) as resp:
+            async with self._http_get(self.SEARCH_URL, params=params) as resp:
                 resp.raise_for_status()
                 return await self._response_to_str(resp)
         except Exception:
@@ -48,49 +43,40 @@ class XiguashuwuSearcher(BaseSearcher):
         self, html_str: str, limit: int | None = None
     ) -> list[SearchResult]:
         doc = html.fromstring(html_str)
-        rows = doc.xpath('//div[@class="SHsectionThree-middle"]/p')
+        rows = doc.xpath("//div[contains(@class, 'list-group-item')]")
         results: list[SearchResult] = []
 
         for idx, row in enumerate(rows):
-            href = self._first_str(
-                row.xpath(".//a[starts-with(@href,'/book/')][1]/@href")
-            ) or self._first_str(row.xpath(".//a[1]/@href"))
+            href = self._first_str(row.xpath(".//h5/a/@href"))
             if not href:
                 continue
 
             if limit is not None and idx >= limit:
                 break
 
-            # '/book/184974/iszip/0/' -> "184974"
-            book_id = href.split("/book/")[-1].split("/")[0]
+            book_id = href.rsplit("/", 1)[-1].split(".", 1)[0]
             book_url = self._abs_url(href)
-
-            title = (
-                self._first_str(
-                    row.xpath(".//a[starts-with(@href,'/book/')][1]//text()")
-                )
-                or self._first_str(row.xpath(".//a[1]//text()"))
-                or "-"
+            title = self._join_strs(row.xpath(".//h5/a//text()"))
+            author = self._first_str(
+                row.xpath(".//p[contains(@class,'text-muted')]/a/text()")
             )
-
-            author = (
-                self._first_str(
-                    row.xpath(".//a[starts-with(@href,'/writer/')][1]//text()")
+            update_date = self._first_str(
+                row.xpath(
+                    ".//p[contains(@class,'timedesc')]/text()[contains(., '更新时间')]"
                 )
-                or self._first_str(row.xpath(".//a[2]//text()"))
-                or "-"
             )
+            update_date = update_date.split("更新时间：", 1)[-1]
 
             results.append(
                 SearchResult(
                     site=self.site_name,
                     book_id=book_id,
                     book_url=book_url,
-                    cover_url="-",
+                    cover_url="",
                     title=title,
                     author=author,
                     latest_chapter="-",
-                    update_date="-",
+                    update_date=update_date,
                     word_count="-",
                     priority=self.priority + idx,
                 )

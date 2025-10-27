@@ -12,6 +12,7 @@ novel_downloader.apps.constants
 DOWNLOAD_SUPPORT_SITES = {
     "aaatxt": "3A电子书 (aaatxt)",
     "akatsuki_novels": "暁 (akatsuki_novels)",
+    "alicesw": "爱丽丝书屋 (alicesw)",
     "alphapolis": "アルファポリス (alphapolis)",
     "b520": "笔趣阁 (b520)",
     "biquge5": "笔趣阁 (biquge5)",
@@ -79,6 +80,7 @@ DOWNLOAD_SUPPORT_SITES = {
 
 SEARCH_SUPPORT_SITES = {
     "aaatxt": "3A电子书",
+    "alicesw": "爱丽丝书屋 (alicesw)",
     "b520": "笔趣阁 (b520)",
     "biquge5": "笔趣阁 (biquge5)",
     "biquguo": "笔趣阁小说网",

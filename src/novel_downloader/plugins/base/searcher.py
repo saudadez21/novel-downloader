@@ -32,6 +32,10 @@ class BaseSearcher(abc.ABC):
             return []
         return self._parse_html(html, limit)
 
+    @property
+    def nsfw(self) -> bool:
+        return False
+
     @abc.abstractmethod
     async def _fetch_html(self, keyword: str) -> str:
         """

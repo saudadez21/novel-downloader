@@ -13,8 +13,7 @@ SITES_DIR = (
 MODULE_DECORATOR_MAP = {
     "fetcher": ("register_fetcher", "_fetchers"),
     "parser": ("register_parser", "_parsers"),
-    "downloader": ("register_downloader", "_downloaders"),
-    "exporter": ("register_exporter", "_exporters"),
+    "client": ("register_client", "_client"),
     "searcher": ("register_searcher", "_searchers"),
 }
 

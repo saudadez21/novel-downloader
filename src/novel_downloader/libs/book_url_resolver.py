@@ -133,6 +133,27 @@ SITE_RULES: dict[str, list[SiteRuleSet]] = {
             hints=[],
         )
     ],
+    "www.alicesw.com": [
+        SiteRuleSet(
+            site_key="alicesw",
+            extractors=[
+                BookIdExtractor(
+                    pattern=r"^/novel/(\d+)\.html$",
+                    build_book_id=lambda m: m.group(1),
+                ),
+                BookIdExtractor(
+                    pattern=r"^/other/chapters/id/(\d+)\.html$",
+                    build_book_id=lambda m: m.group(1),
+                ),
+            ],
+            hints=[
+                HintRule(
+                    pattern=r"^/book/\d+/[A-Za-z0-9]+\.html$",
+                    hint="章节 URL 不包含书籍 ID, 请复制目录页的链接",
+                ),
+            ],
+        )
+    ],
     "www.alphapolis.co.jp": [
         SiteRuleSet(
             site_key="alphapolis",

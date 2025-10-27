@@ -282,8 +282,6 @@ user_prompt = "请翻译成中文：{text}"
 
 * [海棠书屋](https://www.fdhxs.com/)
 
-* [爱丽丝书屋](https://www.alicesw.com/)
-
 * [海外书包](https://www.haiwaishubao.com/)
 
   * 需手动清理 `&esp;`
