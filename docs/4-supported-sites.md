@@ -114,6 +114,7 @@ novel-cli download --site ttkan shengxu-chendong
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 | 支持语言 |
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
 | [和图书](https://www.hetushu.com/index.php)                  | hetushu   | ✅     | ❌     | ❌     | ✅     | 简 / 繁 |
+| [霹雳书屋](https://www.pilibook.net/) ([备用](https://www.mozishuwu.com/)) | pilibook | ✅     | ❌     | ❌     | ⚠️     | 简      |
 | [铅笔小说](https://www.23qb.com)                             | n23qb     | ✅     | ❌     | ⚠️     | ✅     | 简      |
 | [飘天文学网](https://www.piaotia.com/)                        | piaotia  | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [新吾爱文学](https://www.71ge.com/)                           | n71ge    | ❌     | ❌     | ⚠️     | ✅     | 简      |
@@ -304,6 +305,10 @@ novel-cli download --site ttkan shengxu-chendong
 * **铅笔小说 (n23qb)**
   * 书籍: `https://www.23qb.com/book/12282/` -> Book ID: `12282`
   * 章节: `https://www.23qb.com/book/12282/7908999.html` -> Chapter ID: `7908999`
+
+* **霹雳书屋 (pilibook)**
+  * 书籍: `https://www.pilibook.net/5/16098/info.html` -> Book ID: `5-16098`
+  * 章节: `https://www.pilibook.net/5/16098/read/4249983.html` -> Chapter ID: `4249983`
 
 * **飘天文学网 (piaotia)**
   * 书籍: `https://www.piaotia.com/bookinfo/1/1705.html` -> Book ID: `1-1705`

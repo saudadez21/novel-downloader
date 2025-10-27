@@ -740,7 +740,6 @@ class CommonClient(BaseClient):
                 vol_title = vol.get("volume_name") or f"卷 {v_idx}"
 
                 vol_cover = self._resolve_img_path(img_dir, vol.get("volume_cover"))
-                vol_cover = vol_cover or cover_path
 
                 curr_vol = Volume(
                     id=f"vol_{v_idx}",

@@ -188,8 +188,6 @@ user_prompt = "请翻译成中文：{text}"
 
   * 支持登录
 
-* [霹雳书屋](https://www.pilibook.net/) ([备用](https://www.mozishuwu.com/))
-
 * [笔仙阁](https://www.bixiange.me/)
 
 * [同人社](https://tongrenshe.cc/)

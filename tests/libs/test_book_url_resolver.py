@@ -227,6 +227,13 @@ CASES_SUCCESS = [
     # novelpia
     ("https://novelpia.jp/novel/2393?sid=main5", "novelpia", "2393"),
     ("https://novelpia.jp/novel/2749", "novelpia", "2749"),
+    # pilibook
+    ("https://www.pilibook.net/1/627/info.html", "pilibook", "1-627"),
+    ("https://www.pilibook.net/1/627/menu/1.html", "pilibook", "1-627"),
+    ("https://www.pilibook.net/1/627/read/247250.html", "pilibook", "1-627"),
+    ("https://www.mozishuwu.com/1/627/info.html", "pilibook", "1-627"),
+    ("https://www.mozishuwu.com/1/627/menu/1.html", "pilibook", "1-627"),
+    ("https://www.mozishuwu.com/1/627/read/247250.html", "pilibook", "1-627"),
 ]
 
 CASES_HINT = [

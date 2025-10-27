@@ -49,6 +49,7 @@ DOWNLOAD_SUPPORT_SITES = {
     "n101kanshu": "101看书 (n101kanshu)",
     "novelpia": "ノベルピア (novelpia)",
     "piaotia": "飘天文学网 (piaotia)",
+    "pilibook": "霹雳书屋 (pilibook)",
     "qbtr": "全本同人小说 (qbtr)",
     "qidian": "起点中文网 (qidian)",
     "qqbook": "QQ阅读 (qqbook)",

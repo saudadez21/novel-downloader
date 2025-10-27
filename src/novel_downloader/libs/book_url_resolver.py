@@ -500,6 +500,18 @@ SITE_RULES: dict[str, list[SiteRuleSet]] = {
             hints=[],
         )
     ],
+    "www.mozishuwu.com": [
+        SiteRuleSet(
+            site_key="pilibook",
+            extractors=[
+                BookIdExtractor(
+                    pattern=r"^/(\d+)/(\d+)/(?:info|menu|read)",
+                    build_book_id=lambda m: f"{m.group(1)}-{m.group(2)}",
+                ),
+            ],
+            hints=[],
+        )
+    ],
     "8novel.com": [
         SiteRuleSet(
             site_key="n8novel",
@@ -658,6 +670,18 @@ SITE_RULES: dict[str, list[SiteRuleSet]] = {
                 ),
                 BookIdExtractor(
                     pattern=r"^/html/(\d+)/(\d+)/",
+                    build_book_id=lambda m: f"{m.group(1)}-{m.group(2)}",
+                ),
+            ],
+            hints=[],
+        )
+    ],
+    "www.pilibook.net": [
+        SiteRuleSet(
+            site_key="pilibook",
+            extractors=[
+                BookIdExtractor(
+                    pattern=r"^/(\d+)/(\d+)/(?:info|menu|read)",
                     build_book_id=lambda m: f"{m.group(1)}-{m.group(2)}",
                 ),
             ],
