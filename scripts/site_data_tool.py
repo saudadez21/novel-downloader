@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import getpass
 import html as py_html
 import json
 import logging
@@ -17,6 +18,7 @@ from typing import Any
 
 from nicegui import ui
 from nicegui.events import KeyEventArguments
+from novel_downloader.infra.cookies import parse_cookies
 from novel_downloader.plugins import registry
 from novel_downloader.schemas import FetcherConfig, ParserConfig
 
@@ -60,10 +62,10 @@ CREATE TABLE IF NOT EXISTS chapters (
 # ---------------------------------------------------------------------
 # Logging
 # ---------------------------------------------------------------------
-def setup_logging() -> None:
+def setup_logging() -> logging.Logger:
     logger = logging.getLogger("site_tool")
     if logger.handlers:
-        return
+        return logger
 
     LOG_DIR.mkdir(exist_ok=True)
     log_path = LOG_DIR / "site_data_tool.log"
@@ -89,9 +91,10 @@ def setup_logging() -> None:
     logger.setLevel(logging.INFO)
     logger.addHandler(handler)
     logger.addHandler(console)
+    return logger
 
 
-logger = logging.getLogger()
+logger = setup_logging()
 
 
 # ---------------------------------------------------------------------
@@ -163,9 +166,49 @@ async def run_fetch(args: argparse.Namespace) -> None:
         fetcher_cfg = FetcherConfig(request_interval=req_interval)
 
         async with registrar.get_fetcher(site_key, fetcher_cfg) as f:
-            if need_login and not await f.load_state():
-                logger.warning("%s: login state not loaded.", site_key)
-                continue
+            logged_in = await f.load_state() if need_login else True
+
+            if need_login and not logged_in:
+                logger.info("%s: login required.", site_key)
+
+                login_kwargs: dict[str, Any] = {}
+                for field in f.login_fields:
+                    prompt_text = f"{field.label or field.name}"
+                    if field.placeholder:
+                        prompt_text += f" ({field.placeholder})"
+                    if field.default:
+                        prompt_text += f" [default: {field.default}]"
+                    prompt_text += ": "
+
+                    if field.type == "password":
+                        value = getpass.getpass(prompt_text)
+                    else:
+                        value = input(prompt_text)
+
+                    value = value.strip() or field.default
+
+                    if field.type == "cookie":
+                        try:
+                            value = parse_cookies(value)
+                        except Exception as e:
+                            logger.warning(
+                                "%s: failed to parse cookies (%s)", site_key, e
+                            )
+                            value = {}
+
+                    login_kwargs[field.name] = value
+
+                try:
+                    ok = await f.login(**login_kwargs)
+                except Exception as e:
+                    logger.error("%s: login raised exception: %s", site_key, e)
+                    ok = False
+
+                if not ok:
+                    logger.warning("%s: login failed, skipping site.", site_key)
+                    continue
+                else:
+                    logger.info("%s: login successful.", site_key)
 
             for entry in TEST_DATA[site_key]:
                 book_id = entry["book_id"]
@@ -1304,8 +1347,6 @@ def main() -> None:
     CONFIG_PATH, SITE_DATA_PATH, HTML_ROOT = args.config, args.db, args.html_root
     if args.date:
         DATE_STR = args.date
-
-    setup_logging()
 
     if args.fetch:
         asyncio.run(run_fetch(args))

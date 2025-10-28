@@ -237,6 +237,12 @@ CASES_SUCCESS = [
     # alicesw
     ("https://www.alicesw.com/novel/46857.html", "alicesw", "46857"),
     ("https://www.alicesw.com/other/chapters/id/46857.html", "alicesw", "46857"),
+    # haiwaishubao
+    ("https://www.haiwaishubao.com/book/102659/", "haiwaishubao", "102659"),
+    ("https://www.haiwaishubao.com/index/102659/", "haiwaishubao", "102659"),
+    ("https://www.haiwaishubao.com/index/102659/2/", "haiwaishubao", "102659"),
+    ("https://www.haiwaishubao.com/book/102659/5335635.html", "haiwaishubao", "102659"),
+    ("https://www.haiwaishubao.com/book/102659/5335635_2.html", "haiwaishubao", "102659"),  # noqa: E501
 ]
 
 CASES_HINT = [

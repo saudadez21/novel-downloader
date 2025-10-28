@@ -14,7 +14,6 @@ from typing import Any, TypeVar
 from novel_downloader.schemas import (
     BookConfig,
     ClientConfig,
-    DownloaderConfig,
     ExporterConfig,
     FetcherConfig,
     FontOCRConfig,
@@ -70,6 +69,26 @@ class ConfigAdapter:
             locale_style=self._pick("locale_style", "simplified", s, g),
         )
 
+    def get_parser_config(self, site: str) -> ParserConfig:
+        """
+        Build a :class:`novel_downloader.models.ParserConfig` from general,
+        OCR-related, and site-specific settings.
+
+        :return: Fully populated configuration for the parser stage.
+        """
+        s, g = self._site_cfg(site), self._gen_cfg()
+        g_font = g.get("font_ocr") or {}
+        s_font = s.get("font_ocr") or {}
+        font_ocr: dict[str, Any] = {**g_font, **s_font}
+        return ParserConfig(
+            cache_dir=g.get("cache_dir", "./novel_cache"),
+            use_truncation=bool(s.get("use_truncation", True)),
+            decode_font=bool(font_ocr.get("decode_font", False)),
+            save_font_debug=bool(font_ocr.get("save_font_debug", False)),
+            batch_size=int(font_ocr.get("batch_size", 32)),
+            fontocr_cfg=self._dict_to_fontocr_cfg(font_ocr),
+        )
+
     def get_client_config(self, site: str) -> ClientConfig:
         """
         Build a :class:`novel_downloader.models.ClientConfig` using both
@@ -90,48 +109,6 @@ class ConfigAdapter:
             storage_batch_size=g.get("storage_batch_size", 1),
             fetcher_cfg=self.get_fetcher_config(site),
             parser_cfg=self.get_parser_config(site),
-        )
-
-    def get_downloader_config(self, site: str) -> DownloaderConfig:
-        """
-        Build a :class:`novel_downloader.models.DownloaderConfig` using both
-        general and site-specific settings.
-
-        :return: Fully populated configuration for the chapter/page downloader.
-        """
-        s, g = self._site_cfg(site), self._gen_cfg()
-        debug = g.get("debug") or {}
-        return DownloaderConfig(
-            request_interval=self._pick("request_interval", 0.5, s, g),
-            retry_times=self._pick("retry_times", 3, s, g),
-            backoff_factor=self._pick("backoff_factor", 2.0, s, g),
-            workers=self._pick("workers", 2, s, g),
-            skip_existing=self._pick("skip_existing", True, s, g),
-            login_required=bool(s.get("login_required", False)),
-            save_html=bool(debug.get("save_html", False)),
-            raw_data_dir=g.get("raw_data_dir", "./raw_data"),
-            cache_dir=g.get("cache_dir", "./novel_cache"),
-            storage_batch_size=g.get("storage_batch_size", 1),
-        )
-
-    def get_parser_config(self, site: str) -> ParserConfig:
-        """
-        Build a :class:`novel_downloader.models.ParserConfig` from general,
-        OCR-related, and site-specific settings.
-
-        :return: Fully populated configuration for the parser stage.
-        """
-        s, g = self._site_cfg(site), self._gen_cfg()
-        g_font = g.get("font_ocr") or {}
-        s_font = s.get("font_ocr") or {}
-        font_ocr: dict[str, Any] = {**g_font, **s_font}
-        return ParserConfig(
-            cache_dir=g.get("cache_dir", "./novel_cache"),
-            use_truncation=bool(s.get("use_truncation", True)),
-            decode_font=bool(font_ocr.get("decode_font", False)),
-            save_font_debug=bool(font_ocr.get("save_font_debug", False)),
-            batch_size=int(font_ocr.get("batch_size", 32)),
-            fontocr_cfg=self._dict_to_fontocr_cfg(font_ocr),
         )
 
     def get_exporter_config(self, site: str) -> ExporterConfig:

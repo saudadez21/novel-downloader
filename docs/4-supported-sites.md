@@ -177,6 +177,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [3A电子书](http://www.aaatxt.com/)                           | aaatxt     | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [西瓜书屋](https://www.xiguashuwu.com/)                      | xiguashuwu | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [爱丽丝书屋](https://www.alicesw.com/)                       | alicesw    | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [海外书包](https://www.haiwaishubao.com/)                  | haiwaishubao | ❌     | ❌     | ⚠️     | ✅     | 简      |
 
 #### 已归档站点
 
@@ -498,6 +499,10 @@ novel-cli download --site ttkan shengxu-chendong
 * **爱丽丝书屋 (alicesw)**
   * 书籍: `https://www.alicesw.com/novel/46857.html` -> Book ID: `46857`
   * 章节: `https://www.alicesw.com/book/48247/563ed665333ad.html` -> Chapter ID: `48247-563ed665333ad`
+
+* **海外书包 (haiwaishubao)**
+  * 书籍: `https://www.haiwaishubao.com/book/102659/` -> Book ID: `102659`
+  * 章节: `https://www.haiwaishubao.com/book/102659/5335635.html` -> Chapter ID: `5335635`
 
 #### 已归档站点
 

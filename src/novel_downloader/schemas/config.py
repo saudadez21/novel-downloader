@@ -30,20 +30,6 @@ class FetcherConfig:
 
 
 @dataclass
-class DownloaderConfig:
-    request_interval: float = 0.5
-    retry_times: int = 3
-    backoff_factor: float = 2.0
-    raw_data_dir: str = "./raw_data"
-    cache_dir: str = "./novel_cache"
-    workers: int = 4
-    skip_existing: bool = True
-    login_required: bool = False
-    save_html: bool = False
-    storage_batch_size: int = 1
-
-
-@dataclass
 class FontOCRConfig:
     model_name: str | None = None
     model_dir: str | None = None

@@ -340,6 +340,18 @@ SITE_RULES: dict[str, list[SiteRuleSet]] = {
             hints=[],
         )
     ],
+    "www.haiwaishubao.com": [
+        SiteRuleSet(
+            site_key="haiwaishubao",
+            extractors=[
+                BookIdExtractor(
+                    pattern=r"^/(?:book|index)/(\d+)/",
+                    build_book_id=lambda m: m.group(1),
+                ),
+            ],
+            hints=[],
+        )
+    ],
     "hetushu.com": [
         SiteRuleSet(
             site_key="hetushu",
