@@ -290,10 +290,6 @@ user_prompt = "请翻译成中文：{text}"
 
   * 需登录
 
-* [红袖招](https://hongxiuzhao.net/)
-
-  * 使用加密字体
-
 * 海棠文化線上文學城
 
   * [站点 1](https://ebook.longmabook.com/)

@@ -178,6 +178,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [西瓜书屋](https://www.xiguashuwu.com/)                      | xiguashuwu | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [爱丽丝书屋](https://www.alicesw.com/)                       | alicesw    | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [海外书包](https://www.haiwaishubao.com/)                  | haiwaishubao | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [红袖招](https://hongxiuzhao.net/)                          | hongxiuzhao | ❌     | ❌     | ⚠️     | ⚠️     | 简      |
 
 #### 已归档站点
 
@@ -503,6 +504,10 @@ novel-cli download --site ttkan shengxu-chendong
 * **海外书包 (haiwaishubao)**
   * 书籍: `https://www.haiwaishubao.com/book/102659/` -> Book ID: `102659`
   * 章节: `https://www.haiwaishubao.com/book/102659/5335635.html` -> Chapter ID: `5335635`
+
+* **红袖招 (hongxiuzhao)**
+  * 书籍: `https://hongxiuzhao.net/ZG6rmWO.html` -> Book ID: `ZG6rmWO`
+  * 章节: `https://hongxiuzhao.net/aBKBVz6a.html` -> Chapter ID: `aBKBVz6a`
 
 #### 已归档站点
 

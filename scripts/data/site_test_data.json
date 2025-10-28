@@ -294,6 +294,21 @@
         ]
       }
     ],
+    "hongxiuzhao": [
+      {
+        "book_id": "VPGlv8",
+        "chap_ids": [
+          "AwyNoK",
+          "8O93rn"
+        ]
+      },
+      {
+        "book_id": "M7gLdP",
+        "chap_ids": [
+          "PXmZW8"
+        ]
+      }
+    ],
     "i25zw": [
       {
         "book_id": "64371",
@@ -993,7 +1008,8 @@
     "sfacg",
     "esjzone",
     "qqbook",
-    "qidian"
+    "qidian",
+    "hongxiuzhao"
   ],
   "REQ_INTERVALS": {
     "default": 0.5,

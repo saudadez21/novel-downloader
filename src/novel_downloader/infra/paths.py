@@ -50,6 +50,7 @@ CSS_INTRO_PATH = RES.joinpath("css_styles", "intro.css")
 VOLUME_BORDER_IMAGE_PATH = RES.joinpath("images", "volume_border_tinify.png")
 
 # JSON
+HONGXIUZHAO_MAP_PATH = RES.joinpath("json", "hongxiuzhao.json")
 LINOVELIB_MAP_PATH = RES.joinpath("json", "linovelib.json")
 N69YUE_MAP_PATH = RES.joinpath("json", "n69yue.json")
 XIGUASHUWU_MAP_PATH = RES.joinpath("json", "xiguashuwu.json")

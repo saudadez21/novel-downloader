@@ -34,8 +34,6 @@ class BaseParser(abc.ABC):
 
         :param config: ParserConfig object controlling parsing behavior.
         """
-        self._book_id: str | None = None
-
         self._fontocr_cfg = config.fontocr_cfg
         self._save_font_debug = config.save_font_debug
         self._decode_font: bool = config.decode_font

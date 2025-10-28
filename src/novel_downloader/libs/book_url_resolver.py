@@ -364,6 +364,18 @@ SITE_RULES: dict[str, list[SiteRuleSet]] = {
             hints=[],
         )
     ],
+    "hongxiuzhao.net": [
+        SiteRuleSet(
+            site_key="hongxiuzhao",
+            extractors=[
+                BookIdExtractor(
+                    pattern=r"^/([A-Za-z0-9]+)\.html",
+                    build_book_id=lambda m: m.group(1),
+                ),
+            ],
+            hints=[],
+        ),
+    ],
     "www.i25zw.com": [
         SiteRuleSet(
             site_key="i25zw",

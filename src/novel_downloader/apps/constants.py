@@ -27,6 +27,7 @@ DOWNLOAD_SUPPORT_SITES = {
     "fsshu": "笔趣阁 (fsshu)",
     "guidaye": "名著阅读 (guidaye)",
     "hetushu": "和图书 (hetushu)",
+    "hongxiuzhao": "红袖招 (hongxiuzhao)",
     "i25zw": "25中文网 (i25zw)",
     "ixdzs8": "爱下电子书 (ixdzs8)",
     "jpxs123": "精品小说网 (jpxs123)",

@@ -243,6 +243,8 @@ CASES_SUCCESS = [
     ("https://www.haiwaishubao.com/index/102659/2/", "haiwaishubao", "102659"),
     ("https://www.haiwaishubao.com/book/102659/5335635.html", "haiwaishubao", "102659"),
     ("https://www.haiwaishubao.com/book/102659/5335635_2.html", "haiwaishubao", "102659"),  # noqa: E501
+    # hongxiuzhao
+    ("https://hongxiuzhao.net/VPGlv8.html", "hongxiuzhao", "VPGlv8"),
 ]
 
 CASES_HINT = [
