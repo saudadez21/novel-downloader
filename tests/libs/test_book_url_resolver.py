@@ -245,6 +245,8 @@ CASES_SUCCESS = [
     ("https://www.haiwaishubao.com/book/102659/5335635_2.html", "haiwaishubao", "102659"),  # noqa: E501
     # hongxiuzhao
     ("https://hongxiuzhao.net/VPGlv8.html", "hongxiuzhao", "VPGlv8"),
+    # uaa
+    ("https://www.uaa.com/novel/intro?id=869062931097194496", "uaa", "869062931097194496"),  # noqa: E501
 ]
 
 CASES_HINT = [
@@ -287,6 +289,10 @@ CASES_HINT = [
     ),
     (
         "https://www.alicesw.com/book/48247/563ed665333ad.html",
+        "章节 URL 不包含书籍 ID, 请复制目录页的链接",
+    ),
+    (
+        "https://www.uaa.com/novel/chapter?id=869062931193663489",
         "章节 URL 不包含书籍 ID, 请复制目录页的链接",
     ),
 ]

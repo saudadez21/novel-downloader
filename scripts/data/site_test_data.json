@@ -888,6 +888,21 @@
         ]
       }
     ],
+    "uaa": [
+      {
+        "book_id": "896633419390390272",
+        "chap_ids": [
+          "896633419402973184",
+          "1178553737019527168"
+        ]
+      },
+      {
+        "book_id": "11302896",
+        "chap_ids": [
+          "132898"
+        ]
+      }
+    ],
     "westnovel": [
       {
         "book_id": "wuxia-ynyh",
@@ -1009,7 +1024,8 @@
     "esjzone",
     "qqbook",
     "qidian",
-    "hongxiuzhao"
+    "hongxiuzhao",
+    "uaa"
   ],
   "REQ_INTERVALS": {
     "default": 0.5,

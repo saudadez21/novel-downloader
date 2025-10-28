@@ -282,10 +282,6 @@ user_prompt = "请翻译成中文：{text}"
 
 * [海棠书屋](https://www.fdhxs.com/)
 
-* [有爱爱](https://www.uaa.com/)
-
-  * 需登录
-
 * [PO18 原创网](https://www.po18.tw/)
 
   * 需登录

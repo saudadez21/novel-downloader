@@ -179,6 +179,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [爱丽丝书屋](https://www.alicesw.com/)                       | alicesw    | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [海外书包](https://www.haiwaishubao.com/)                  | haiwaishubao | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [红袖招](https://hongxiuzhao.net/)                          | hongxiuzhao | ❌     | ❌     | ⚠️     | ⚠️     | 简      |
+| [有爱爱](https://www.uaa.com/)                              | uaa         | ✅     | ❌     | ✅     | ⚠️     | 简      |
 
 #### 已归档站点
 
@@ -508,6 +509,10 @@ novel-cli download --site ttkan shengxu-chendong
 * **红袖招 (hongxiuzhao)**
   * 书籍: `https://hongxiuzhao.net/ZG6rmWO.html` -> Book ID: `ZG6rmWO`
   * 章节: `https://hongxiuzhao.net/aBKBVz6a.html` -> Chapter ID: `aBKBVz6a`
+
+* **有爱爱 (uaa)**
+  * 书籍: `https://www.uaa.com/novel/intro?id=11304099` -> Book ID: `11304099`
+  * 章节: `https://www.uaa.com/novel/chapter?id=234639` -> Chapter ID: `234639`
 
 #### 已归档站点
 

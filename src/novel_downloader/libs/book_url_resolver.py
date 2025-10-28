@@ -951,6 +951,25 @@ SITE_RULES: dict[str, list[SiteRuleSet]] = {
             hints=[],
         )
     ],
+    "www.uaa.com": [
+        SiteRuleSet(
+            site_key="uaa",
+            extractors=[
+                BookIdExtractor(
+                    pattern=r"^/novel/intro$",
+                    build_book_id=lambda m: "",
+                    pattern_query=r"id=(\d+)",
+                    build_book_id_query=lambda m: m.group(1),
+                ),
+            ],
+            hints=[
+                HintRule(
+                    pattern=r"^/novel/chapter$",
+                    hint="章节 URL 不包含书籍 ID, 请复制目录页的链接",
+                ),
+            ],
+        )
+    ],
     # "www.wanbengo.com": [SiteRuleSet(
     #     site_key="wanbengo",
     #     extractors=[

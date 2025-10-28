@@ -66,6 +66,7 @@ DOWNLOAD_SUPPORT_SITES = {
     "tongrenquan": "同人圈 (tongrenquan)",
     "trxs": "同人小说网 (trxs)",
     "ttkan": "天天看小说 (ttkan)",
+    "uaa": "有爱爱 (uaa)",
     # "wanbengo": "完本神站 (wanbengo)",
     # "xiaoshuoge": "小说屋 (xiaoshuoge)",
     "xiguashuwu": "西瓜书屋 (xiguashuwu)",
@@ -81,7 +82,7 @@ DOWNLOAD_SUPPORT_SITES = {
 
 SEARCH_SUPPORT_SITES = {
     "aaatxt": "3A电子书",
-    "alicesw": "爱丽丝书屋 (alicesw)",
+    "alicesw": "爱丽丝书屋",
     "b520": "笔趣阁 (b520)",
     "biquge5": "笔趣阁 (biquge5)",
     "biquguo": "笔趣阁小说网",
