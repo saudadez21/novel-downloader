@@ -188,21 +188,15 @@ user_prompt = "请翻译成中文：{text}"
 
   * 支持登录
 
-* [笔仙阁](https://www.bixiange.me/)
+* [笔仙阁](https://m.bixiange.me/)
 
 * [同人社](https://tongrenshe.cc/)
-
-* [半夏小说](https://www.xbanxia.cc/)
 
 * [52书库](https://www.52shuku.net/)
 
 * [努努书坊](https://www.kanunu8.com/)
 
 * [天涯书库](https://www.tianyabooks.com/)
-
-* [小说狂人](https://czbooks.net/)
-
-  * 支持登录
 
 * [17K小说网](https://www.17k.com/)
 
@@ -285,6 +279,8 @@ user_prompt = "请翻译成中文：{text}"
 * [PO18 原创网](https://www.po18.tw/)
 
   * 需登录
+
+* [半夏小说](https://www.xbanxia.cc/)
 
 * 海棠文化線上文學城
 

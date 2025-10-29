@@ -175,6 +175,7 @@ novel-cli download --site ttkan shengxu-chendong
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 | 支持语言 |
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
 | [3A电子书](http://www.aaatxt.com/)                           | aaatxt     | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [小说狂人](https://czbooks.net/)                             | czbooks    | ❌     | ❌     | ⚠️     | ✅     | 繁      |
 | [西瓜书屋](https://www.xiguashuwu.com/)                      | xiguashuwu | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [爱丽丝书屋](https://www.alicesw.com/)                       | alicesw    | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [海外书包](https://www.haiwaishubao.com/)                  | haiwaishubao | ❌     | ❌     | ⚠️     | ✅     | 简      |
@@ -493,6 +494,10 @@ novel-cli download --site ttkan shengxu-chendong
   * 书籍: `http://www.aaatxt.com/shu/24514.html` -> Book ID: `24514`
   * 章节: `http://www.aaatxt.com/yuedu/24514_1.html` -> Chapter ID: `24514_1`
   * 注意: 该站点直接提供 txt 下载。
+
+* **小说狂人 (czbooks)**
+  * 书籍: `https://czbooks.net/n/dr4p0k7` -> Book ID: `dr4p0k7`
+  * 章节: `https://czbooks.net/n/dr4p0k7/drgkg7hgh?chapterNumber=0` -> Chapter ID: `drgkg7hgh`
 
 * **西瓜书屋 (xiguashuwu)**
   * 书籍: `https://www.xiguashuwu.com/book/1234/iszip/1/` -> Book ID: `1234`

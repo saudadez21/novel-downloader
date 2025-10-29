@@ -247,6 +247,9 @@ CASES_SUCCESS = [
     ("https://hongxiuzhao.net/VPGlv8.html", "hongxiuzhao", "VPGlv8"),
     # uaa
     ("https://www.uaa.com/novel/intro?id=869062931097194496", "uaa", "869062931097194496"),  # noqa: E501
+    # czbooks
+    ("https://czbooks.net/n/dr4p0k7", "czbooks", "dr4p0k7"),
+    ("https://czbooks.net/n/dr4p0k7/drgkg7hgh?chapterNumber=0", "czbooks", "dr4p0k7"),
 ]
 
 CASES_HINT = [

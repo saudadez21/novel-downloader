@@ -155,6 +155,27 @@
         ]
       }
     ],
+    "czbooks": [
+      {
+        "book_id": "dr4p0k7",
+        "chap_ids": [
+          "drgkg7hgh",
+          "dr25nf71e"
+        ]
+      },
+      {
+        "book_id": "s61k0j",
+        "chap_ids": [
+          "s660dn33"
+        ]
+      },
+      {
+        "book_id": "s6d3l2",
+        "chap_ids": [
+          "s665ckp1"
+        ]
+      }
+    ],
     "dxmwx": [
       {
         "book_id": "55598",
