@@ -261,6 +261,9 @@ CASES_SUCCESS = [
     ("https://wxsck.com/book/20297/6660334.html", "wxsck", "20297"),
     ("https://www.wxscs.com/book/20297/", "wxsck", "20297"),
     ("https://www.wxscs.com/book/20297/6660334.html", "wxsck", "20297"),
+    # biquge345
+    ("https://www.biquge345.com/book/321301/", "biquge345", "321301"),
+    ("https://www.biquge345.com/chapter/321301/37740966.html", "biquge345", "321301"),
 ]
 
 CASES_HINT = [

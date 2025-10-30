@@ -16,6 +16,7 @@ DOWNLOAD_SUPPORT_SITES = {
     "alphapolis": "アルファポリス (alphapolis)",
     "b520": "笔趣阁 (b520)",
     "biquge5": "笔趣阁 (biquge5)",
+    "biquge345": "笔趣阁 (biquge345)",
     "biquguo": "笔趣阁小说网 (biquguo)",
     # "biquyuedu": "精彩小说 (biquyuedu)",
     "blqudu": "笔趣读 (blqudu)",

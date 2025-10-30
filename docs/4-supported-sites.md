@@ -130,6 +130,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [书林文学](http://shu111.com)                                | shu111    | ❌     | ❌     | ⚠️     | ❌     | 简      |
 | [万相书城](https://wxsck.com/) ([备用](https://www.wxscs.com/index.html)) | wxsck    | ❌     | ❌     | ⚠️     | ❌     | 简      |
 | [笔趣阁](http://www.b520.cc)                                 | b520      | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [笔趣阁](https://www.biquge345.com/)                         | biquge345 | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [书海阁小说网](https://www.shuhaige.net/)                     | shuhaige | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [小说虎](https://www.xshbook.com/)                           | xshbook   | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [顶点小说网](https://www.23ddw.net/)                         | n23ddw    | ❌     | ❌     | ❌     | ✅     | 简      |
@@ -374,6 +375,10 @@ novel-cli download --site ttkan shengxu-chendong
 * **笔趣阁 (b520)**
   * 书籍: `http://www.b520.cc/8_8187/` -> Book ID: `8_8187`
   * 章节: `http://www.b520.cc/8_8187/3899831.html` -> Chapter ID: `3899831`
+
+* **笔趣阁 (biquge345)**
+  * 书籍: `https://www.biquge345.com/book/321301/` -> Book ID: `321301`
+  * 章节: `https://www.biquge345.com/chapter/321301/37740966.html` -> Chapter ID: `37740966`
 
 * **书海阁小说网 (shuhaige)**
   * 书籍: `https://www.shuhaige.net/199178/` -> Book ID: `199178`

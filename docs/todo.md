@@ -305,17 +305,12 @@ user_prompt = "请翻译成中文：{text}"
 
 * [全职小说网](https://www.quanzhifashi.com/)
 
-* [万相书城](https://wxsck.com/)
-
-* [万相书城](https://www.wxscs.com/index.html)
-
 * 笔趣阁
 
   * [站点 1](https://www.bqu9.cc/)
   * [站点 2](https://www.nibiqu.cc/)
   * [站点 3](https://www.boqugew.com/)
   * [站点 4](https://www.biquge.tw/)
-  * [站点 5](https://www.biquge345.com/)
   * [站点 6](https://www.beqege.cc/)
   * [站点 7](https://m.chenkuan.com/)
 
