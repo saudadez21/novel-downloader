@@ -200,7 +200,7 @@ user_prompt = "请翻译成中文：{text}"
 
 * [17K小说网](https://www.17k.com/)
 
-  * 支持登录
+  * VIP 章节需登录访问
 
 * [KadoKado](https://www.kadokado.com.tw/)
 

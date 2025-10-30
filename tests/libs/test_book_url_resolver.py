@@ -250,6 +250,12 @@ CASES_SUCCESS = [
     # czbooks
     ("https://czbooks.net/n/dr4p0k7", "czbooks", "dr4p0k7"),
     ("https://czbooks.net/n/dr4p0k7/drgkg7hgh?chapterNumber=0", "czbooks", "dr4p0k7"),
+    # bixiange
+    ("https://m.bixiange.me/wxxz/20876/", "bixiange", "wxxz-20876"),
+    ("https://m.bixiange.me/wxxz/20876/index/1.html", "bixiange", "wxxz-20876"),
+    # tongrenshe
+    ("https://tongrenshe.cc/tongren/8899.html", "tongrenshe", "8899"),
+    ("https://tongrenshe.cc/tongren/8899/1.html", "tongrenshe", "8899"),
 ]
 
 CASES_HINT = [

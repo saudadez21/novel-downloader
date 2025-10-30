@@ -82,6 +82,8 @@ HOST_ALIASES: dict[str, str] = {
     "sg.yibige.org": "yibige.org",
     "tw.yibige.org": "yibige.org",
     "hk.yibige.org": "yibige.org",
+    # xszj simplified/traditional
+    "m.xszj.org": "xszj.org",
 }
 
 
@@ -216,6 +218,18 @@ SITE_RULES: dict[str, list[SiteRuleSet]] = {
     #     ],
     #     hints=[],
     # )],
+    "m.bixiange.me": [
+        SiteRuleSet(
+            site_key="bixiange",
+            extractors=[
+                BookIdExtractor(
+                    pattern=r"^/([^/]+)/(\d+)/",
+                    build_book_id=lambda m: f"{m.group(1)}-{m.group(2)}",
+                ),
+            ],
+            hints=[],
+        )
+    ],
     "blqudu.cc": [
         SiteRuleSet(
             site_key="blqudu",
@@ -925,6 +939,18 @@ SITE_RULES: dict[str, list[SiteRuleSet]] = {
                 ),
                 BookIdExtractor(
                     pattern=r"^/tongren/(\d+)/\d+\.html$",
+                    build_book_id=lambda m: m.group(1),
+                ),
+            ],
+            hints=[],
+        )
+    ],
+    "tongrenshe.cc": [
+        SiteRuleSet(
+            site_key="tongrenshe",
+            extractors=[
+                BookIdExtractor(
+                    pattern=r"^/tongren/(\d+)",
                     build_book_id=lambda m: m.group(1),
                 ),
             ],

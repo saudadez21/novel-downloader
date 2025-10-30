@@ -106,17 +106,28 @@ class SearchCmd(Command):
             download_ui = CLIDownloadUI()
             client = registrar.get_client(site, adapter.get_client_config(site))
 
-            async with client:
-                if adapter.get_login_required(site):
-                    succ = await client.login(
-                        ui=login_ui,
-                        login_cfg=adapter.get_login_config(site),
-                    )
-                    if not succ:
-                        return
+            try:
+                async with client:
+                    if adapter.get_login_required(site):
+                        succ = await client.login(
+                            ui=login_ui,
+                            login_cfg=adapter.get_login_config(site),
+                        )
+                        if not succ:
+                            return
 
-                for book in books:
-                    await client.download(book, ui=download_ui)
+                    for book in books:
+                        await client.download(book, ui=download_ui)
+            except ValueError as e:
+                ui.warn(
+                    t("'{site}' is currently not supported: {err}").format(
+                        site=site, err=e
+                    )
+                )
+                return
+            except Exception as e:
+                ui.error(t("Site error ({site}): {err}").format(site=site, err=e))
+                return
 
             if not download_ui.completed_books:
                 return

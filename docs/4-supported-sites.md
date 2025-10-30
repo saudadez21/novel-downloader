@@ -154,6 +154,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [百合会](https://www.yamibo.com/site/novel)                  | yamibo     | ✅     | ❌     | ✅     | ⚠️     | 简      |
 | [镇魂小说网](https://www.zhenhunxiaoshuo.com/)           | zhenhunxiaoshuo | ❌     | ❌     | ❌     | ⚠️     | 简      |
 | [同人圈](https://www.tongrenquan.org/)                      | tongrenquan | ❌     | ❌     | ❌     | ✅     | 简      |
+| [同人社](https://tongrenshe.cc/)                            | tongrenshe  | ❌     | ❌     | ❌     | ✅     | 简      |
 | [同人小说网](https://www.trxs.cc/)                           | trxs        | ❌     | ❌     | ❌     | ✅     | 简      |
 | [全本同人小说](https://www.qbtr.cc/)                         | qbtr        | ❌     | ❌     | ❌     | ✅     | 简      |
 
@@ -448,6 +449,11 @@ novel-cli download --site ttkan shengxu-chendong
 * **同人小说网 (trxs)**
   * 书籍: `https://www.trxs.cc/tongren/6201.html` -> Book ID: `6201`
   * 章节: `https://www.trxs.cc/tongren/6201/1.html` -> Chapter ID: `1`
+
+* **同人社 (tongrenshe)**
+  * 书籍: `https://tongrenshe.cc/tongren/8899.html` -> Book ID: `8899`
+  * 章节: `https://tongrenshe.cc/tongren/8899/1.html` -> Chapter ID: `1`
+  * 注意: 该站点直接提供 txt 下载。
 
 * **全本同人小说 (qbtr)**
   * 书籍: `https://www.qbtr.cc/tongren/8978.html` -> Book ID: `tongren-8978`

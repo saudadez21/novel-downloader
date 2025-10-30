@@ -8,14 +8,13 @@ import logging
 
 from lxml import html
 from novel_downloader.plugins.base.searcher import BaseSearcher
+from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import SearchResult
-
-# from novel_downloader.plugins.registry import registrar
 
 logger = logging.getLogger(__name__)
 
 
-# @registrar.register_searcher()
+@registrar.register_searcher()
 class UaaSearcher(BaseSearcher):
     site_name = "uaa"
     priority = 500
