@@ -128,6 +128,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [老幺小说网](https://www.laoyaoxs.org/)                     | laoyaoxs  | ❌     | ❌     | ❌     | ✅     | 简      |
 | [全本小说网](https://quanben5.com/)                          | quanben5  | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [书林文学](http://shu111.com)                                | shu111    | ❌     | ❌     | ⚠️     | ❌     | 简      |
+| [万相书城](https://wxsck.com/) ([备用](https://www.wxscs.com/index.html)) | wxsck    | ❌     | ❌     | ⚠️     | ❌     | 简      |
 | [笔趣阁](http://www.b520.cc)                                 | b520      | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [书海阁小说网](https://www.shuhaige.net/)                     | shuhaige | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [小说虎](https://www.xshbook.com/)                           | xshbook   | ❌     | ❌     | ⚠️     | ✅     | 简      |
@@ -365,6 +366,10 @@ novel-cli download --site ttkan shengxu-chendong
 * **天天看小說 (ttkan)**
   * 书籍: `https://www.ttkan.co/novel/chapters/shengxu-chendong` -> Book ID: `shengxu-chendong`
   * 章节: `https://www.wa01.com/novel/pagea/shengxu-chendong_1.html` -> Chapter ID: `1`
+
+* **万相书城 (wxsck)**
+  * 书籍: `https://wxsck.com/book/20297/` -> Book ID: `20297`
+  * 章节: `https://wxsck.com/book/20297/6660334.html` -> Chapter ID: `6660334`
 
 * **笔趣阁 (b520)**
   * 书籍: `http://www.b520.cc/8_8187/` -> Book ID: `8_8187`

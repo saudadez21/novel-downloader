@@ -190,8 +190,6 @@ user_prompt = "请翻译成中文：{text}"
 
 * [笔仙阁](https://m.bixiange.me/)
 
-* [同人社](https://tongrenshe.cc/)
-
 * [52书库](https://www.52shuku.net/)
 
 * [努努书坊](https://www.kanunu8.com/)
@@ -307,9 +305,9 @@ user_prompt = "请翻译成中文：{text}"
 
 * [全职小说网](https://www.quanzhifashi.com/)
 
-  * 支持登录
-
 * [万相书城](https://wxsck.com/)
+
+* [万相书城](https://www.wxscs.com/index.html)
 
 * 笔趣阁
 
@@ -332,8 +330,6 @@ user_prompt = "请翻译成中文：{text}"
 * [文海小说](https://www.zgzl.net/)
 
 * [小说之家](https://xszj.org/)
-
-* [万相书城](https://www.wxscs.com/index.html)
 
 * [三五中文](https://m.mjyhb.com/)
 

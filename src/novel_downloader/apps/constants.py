@@ -74,6 +74,7 @@ DOWNLOAD_SUPPORT_SITES = {
     "xiguashuwu": "西瓜书屋 (xiguashuwu)",
     "westnovel": "西方奇幻小说网 (westnovel)",
     "westnovel_sub": "西方奇幻小说网 (westnovel_sub)",
+    "wxsck": "万相书城 (wxsck)",
     # "xs63b": "小说路上 (xs63b)",
     "xshbook": "小说虎 (xshbook)",
     "yamibo": "百合会 (yamibo)",

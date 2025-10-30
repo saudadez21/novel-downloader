@@ -96,7 +96,7 @@ class GoogleTranslaterProcessor:
                     r.text,
                 )
         except Exception as e:
-            logger.warning("Translation request failed: %s", e, exc_info=True)
+            logger.warning("Translation request failed: %s", e)
 
         # Respectful delay between requests
         time.sleep(self._sleep)

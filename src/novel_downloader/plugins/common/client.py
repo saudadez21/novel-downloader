@@ -180,7 +180,6 @@ class CommonClient(BaseClient):
                     len(batch),
                     need_refetch,
                     e,
-                    exc_info=True,
                 )
             else:
                 await bump(len(batch))
@@ -418,7 +417,7 @@ class CommonClient(BaseClient):
 
             except Exception as e:
                 results[fmt] = []
-                self.logger.exception(f"Error exporting {fmt}: {e}")
+                self.logger.warning(f"Error exporting {fmt}: {e}")
                 if ui:
                     ui.on_error(book, fmt, e)
 
@@ -516,7 +515,6 @@ class CommonClient(BaseClient):
                 book_id,
                 out_path,
                 e,
-                exc_info=True,
             )
             return []
 
@@ -669,7 +667,6 @@ class CommonClient(BaseClient):
                         book_id,
                         out_path,
                         e,
-                        exc_info=True,
                     )
         return outputs
 
@@ -803,7 +800,6 @@ class CommonClient(BaseClient):
                 book_id,
                 out_path,
                 e,
-                exc_info=True,
             )
             return []
         return [out_path]

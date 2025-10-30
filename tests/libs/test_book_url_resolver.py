@@ -256,6 +256,11 @@ CASES_SUCCESS = [
     # tongrenshe
     ("https://tongrenshe.cc/tongren/8899.html", "tongrenshe", "8899"),
     ("https://tongrenshe.cc/tongren/8899/1.html", "tongrenshe", "8899"),
+    # wxsck
+    ("https://wxsck.com/book/20297/", "wxsck", "20297"),
+    ("https://wxsck.com/book/20297/6660334.html", "wxsck", "20297"),
+    ("https://www.wxscs.com/book/20297/", "wxsck", "20297"),
+    ("https://www.wxscs.com/book/20297/6660334.html", "wxsck", "20297"),
 ]
 
 CASES_HINT = [

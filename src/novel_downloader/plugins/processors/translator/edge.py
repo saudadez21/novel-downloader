@@ -160,7 +160,7 @@ class EdgeTranslaterProcessor:
                 )
                 return text
         except Exception as e:
-            logger.error("Edge translation failed: %s", e, exc_info=True)
+            logger.error("Edge translation failed: %s", e)
             return text
         finally:
             time.sleep(self._sleep)

@@ -84,6 +84,8 @@ HOST_ALIASES: dict[str, str] = {
     "hk.yibige.org": "yibige.org",
     # xszj simplified/traditional
     "m.xszj.org": "xszj.org",
+    # wxsck
+    "www.wxscs.com": "wxsck.com",
 }
 
 
@@ -1048,6 +1050,18 @@ SITE_RULES: dict[str, list[SiteRuleSet]] = {
             ],
             hints=[],
         ),
+    ],
+    "wxsck.com": [
+        SiteRuleSet(
+            site_key="wxsck",
+            extractors=[
+                BookIdExtractor(
+                    pattern=r"^/book/(\d+)/",
+                    build_book_id=lambda m: m.group(1),
+                ),
+            ],
+            hints=[],
+        )
     ],
     "www.xiaoshuoge.info": [
         SiteRuleSet(
