@@ -625,6 +625,18 @@ SITE_RULES: dict[str, list[SiteRuleSet]] = {
             hints=[],
         )
     ],
+    "www.17k.com": [
+        SiteRuleSet(
+            site_key="n17k",
+            extractors=[
+                BookIdExtractor(
+                    pattern=r"^/(?:book|list|chapter)/(\d+)",
+                    build_book_id=lambda m: m.group(1),
+                ),
+            ],
+            hints=[],
+        ),
+    ],
     "www.23ddw.net": [
         SiteRuleSet(
             site_key="n23ddw",

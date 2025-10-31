@@ -520,6 +520,23 @@ class BaseSession(abc.ABC):
         key = locale_style.strip().lower()
         return self.BASE_URL_MAP.get(key, self.DEFAULT_BASE_URL)
 
+    def _debug_cookies(self) -> None:
+        """
+        Print all cookies currently stored in the aiohttp ClientSession cookie jar.
+        """
+        if not self._session:
+            print("[Cookie Debug] Session not initialized.")
+            return
+
+        print("\n=== [Cookie Jar Dump] ===")
+        jar = self._session.cookie_jar
+        for cookie in jar:
+            print(
+                f"{cookie.key} = {cookie.value} "
+                "(domain={cookie['domain']}, path={cookie['path']})"
+            )
+        print("=========================\n")
+
     async def __aenter__(self) -> Self:
         if self._session is None or self._session.closed:
             await self.init()

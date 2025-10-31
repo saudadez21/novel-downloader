@@ -78,6 +78,7 @@ novel-cli download --site ttkan shengxu-chendong
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
 | [起点中文网](https://www.qidian.com)                         | qidian    | ✅     | ❌     | ✅     | ✅     | 简      |
 | [QQ阅读](https://book.qq.com/)                               | qqbook    | ❌     | ❌     | ✅     | ⚠️     | 简      |
+| [17K小说网](https://www.17k.com/)                            | n17k      | ✅     | ❌     | ⚠️     | ⚠️     | 简      |
 
 #### 轻小说 / 二次元向平台
 
@@ -221,6 +222,10 @@ novel-cli download --site ttkan shengxu-chendong
   * 其它:
     * VIP 章节解析需要额外安装 [Node.js](https://nodejs.org/en/download)
     * VIP 章节可能使用字体加密, 可按需开启解密字体 (`decode_font` 参数)
+
+* **17K小说网 (n17k)**
+  * 书籍: `https://www.17k.com/book/3631088.html` -> Book ID: `3631088`
+  * 章节: `https://www.17k.com/chapter/3631088/49406153.html` -> Chapter ID: `49406153`
 
 #### 轻小说 / 二次元向平台
 

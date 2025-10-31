@@ -264,6 +264,10 @@ CASES_SUCCESS = [
     # biquge345
     ("https://www.biquge345.com/book/321301/", "biquge345", "321301"),
     ("https://www.biquge345.com/chapter/321301/37740966.html", "biquge345", "321301"),
+    # n17k
+    ("https://www.17k.com/book/3348757.html", "n17k", "3348757"),
+    ("https://www.17k.com/list/3348757.html", "n17k", "3348757"),
+    ("https://www.17k.com/chapter/3348757/44541132.html", "n17k", "3348757"),
 ]
 
 CASES_HINT = [

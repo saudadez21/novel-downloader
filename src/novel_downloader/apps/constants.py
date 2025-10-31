@@ -44,6 +44,7 @@ DOWNLOAD_SUPPORT_SITES = {
     "mangg_net": "追书网.net (mangg_net)",
     "n8novel": "无限轻小说 (n8novel)",
     # "n8tsw": "笔趣阁 (n8tsw)",
+    "n17k": "17K小说网 (n17k)",
     "n23ddw": "顶点小说网 (n23ddw)",
     "n23qb": "铅笔小说 (n23qb)",
     "n37yq": "三七轻小说 (n37yq)",
