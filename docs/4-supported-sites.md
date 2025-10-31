@@ -79,6 +79,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [起点中文网](https://www.qidian.com)                         | qidian    | ✅     | ❌     | ✅     | ✅     | 简      |
 | [QQ阅读](https://book.qq.com/)                               | qqbook    | ❌     | ❌     | ✅     | ⚠️     | 简      |
 | [17K小说网](https://www.17k.com/)                            | n17k      | ✅     | ❌     | ⚠️     | ⚠️     | 简      |
+| [番茄小说网](https://fanqienovel.com/)                      | fanqienovel | ✅     | ❌     | ⚠️     | ⚠️     | 简      |
 
 #### 轻小说 / 二次元向平台
 
@@ -227,6 +228,10 @@ novel-cli download --site ttkan shengxu-chendong
 * **17K小说网 (n17k)**
   * 书籍: `https://www.17k.com/book/3631088.html` -> Book ID: `3631088`
   * 章节: `https://www.17k.com/chapter/3631088/49406153.html` -> Chapter ID: `49406153`
+
+* **番茄小说网 (fanqienovel)**
+  * 书籍: `https://fanqienovel.com/page/7276384138653862966` -> Book ID: `7276384138653862966`
+  * 章节: `https://fanqienovel.com/reader/7276663560427471412` -> Chapter ID: `7276663560427471412`
 
 #### 轻小说 / 二次元向平台
 

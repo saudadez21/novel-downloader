@@ -26,6 +26,7 @@ DOWNLOAD_SUPPORT_SITES = {
     "czbooks": "小说狂人 (czbooks)",
     "dxmwx": "大熊猫文学网 (dxmwx)",
     "esjzone": "ESJ Zone (esjzone)",
+    "fanqienovel": "番茄小说网 (fanqienovel)",
     "fsshu": "笔趣阁 (fsshu)",
     "guidaye": "名著阅读 (guidaye)",
     "hetushu": "和图书 (hetushu)",

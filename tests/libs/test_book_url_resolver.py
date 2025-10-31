@@ -270,6 +270,8 @@ CASES_SUCCESS = [
     ("https://www.17k.com/chapter/3348757/44541132.html", "n17k", "3348757"),
     # kadokado
     ("https://www.kadokado.com.tw/book/1", "kadokado", "1"),
+    # fanqienovel
+    ("https://fanqienovel.com/page/7276384138653862966", "fanqienovel", "7276384138653862966"),  # noqa: E501
 ]
 
 CASES_HINT = [
@@ -320,6 +322,10 @@ CASES_HINT = [
     ),
     (
         "https://www.kadokado.com.tw/chapter/1?titleId=1&ownerId=1",
+        "章节 URL 不包含书籍 ID, 请复制目录页的链接",
+    ),
+    (
+        "https://fanqienovel.com/reader/7276663560427471412?enter_from=page",
         "章节 URL 不包含书籍 ID, 请复制目录页的链接",
     ),
 ]

@@ -356,6 +356,23 @@ SITE_RULES: dict[str, list[SiteRuleSet]] = {
             hints=[],
         )
     ],
+    "fanqienovel.com": [
+        SiteRuleSet(
+            site_key="fanqienovel",
+            extractors=[
+                BookIdExtractor(
+                    pattern=r"^/page/(\d+)",
+                    build_book_id=lambda m: m.group(1),
+                ),
+            ],
+            hints=[
+                HintRule(
+                    pattern=r"^/reader/\d+",
+                    hint="章节 URL 不包含书籍 ID, 请复制目录页的链接",
+                ),
+            ],
+        )
+    ],
     "www.fsshu.com": [
         SiteRuleSet(
             site_key="fsshu",

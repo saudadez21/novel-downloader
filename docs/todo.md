@@ -200,11 +200,6 @@ user_prompt = "请翻译成中文：{text}"
 
   * VIP 章节需登录访问
 
-* [番茄小说网](https://fanqienovel.com/)
-
-  * VIP 章节需登录访问
-  * 使用加密字体
-
 * [书海小说网](https://www.shuhai.com/)
 
   * VIP 章节需登录访问
