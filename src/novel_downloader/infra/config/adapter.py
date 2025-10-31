@@ -263,14 +263,6 @@ class ConfigAdapter:
         debug_cfg = self._gen_cfg().get("debug", {})
         return debug_cfg.get("log_level") or "INFO"
 
-    @property
-    def site(self) -> str:
-        return self._site
-
-    @site.setter
-    def site(self, value: str) -> None:
-        self._site = value
-
     def _gen_cfg(self) -> dict[str, Any]:
         """
         A read-only view of the global ``general`` settings.

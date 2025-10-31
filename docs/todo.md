@@ -196,10 +196,6 @@ user_prompt = "请翻译成中文：{text}"
 
 * [天涯书库](https://www.tianyabooks.com/)
 
-* [KadoKado](https://www.kadokado.com.tw/)
-
-  * VIP 章节需登录访问
-
 * [飞卢小说网](https://b.faloo.com/)
 
   * VIP 章节需登录访问

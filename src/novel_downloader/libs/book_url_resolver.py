@@ -464,6 +464,23 @@ SITE_RULES: dict[str, list[SiteRuleSet]] = {
             hints=[],
         )
     ],
+    "www.kadokado.com.tw": [
+        SiteRuleSet(
+            site_key="kadokado",
+            extractors=[
+                BookIdExtractor(
+                    pattern=r"^/book/(\d+)",
+                    build_book_id=lambda m: m.group(1),
+                ),
+            ],
+            hints=[
+                HintRule(
+                    pattern=r"^/chapter/\d+",
+                    hint="章节 URL 不包含书籍 ID, 请复制目录页的链接",
+                ),
+            ],
+        )
+    ],
     "www.ktshu.cc": [
         SiteRuleSet(
             site_key="ktshu",
