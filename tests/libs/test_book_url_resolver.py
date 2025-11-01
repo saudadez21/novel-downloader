@@ -272,6 +272,10 @@ CASES_SUCCESS = [
     ("https://www.kadokado.com.tw/book/1", "kadokado", "1"),
     # fanqienovel
     ("https://fanqienovel.com/page/7276384138653862966", "fanqienovel", "7276384138653862966"),  # noqa: E501
+    # ruochu
+    ("https://www.ruochu.com/book/158713", "ruochu", "158713"),
+    ("https://www.ruochu.com/chapter/158713", "ruochu", "158713"),
+    ("https://www.ruochu.com/book/158713/13869103", "ruochu", "158713"),
 ]
 
 CASES_HINT = [

@@ -204,10 +204,6 @@ user_prompt = "请翻译成中文：{text}"
 
   * VIP 章节需登录访问
 
-* [若初文学网](https://www.ruochu.com/)
-
-  * VIP 章节需登录访问
-
 * [连城读书](https://lcread.com/)
 
   * VIP 章节需登录访问

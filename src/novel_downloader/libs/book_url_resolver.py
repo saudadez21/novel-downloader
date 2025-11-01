@@ -875,6 +875,22 @@ SITE_RULES: dict[str, list[SiteRuleSet]] = {
             hints=[],
         )
     ],
+    "www.ruochu.com": [
+        SiteRuleSet(
+            site_key="ruochu",
+            extractors=[
+                BookIdExtractor(
+                    pattern=r"^/book/(\d+)(?:/|$)",
+                    build_book_id=lambda m: m.group(1),
+                ),
+                BookIdExtractor(
+                    pattern=r"^/chapter/(\d+)(?:/|$)",
+                    build_book_id=lambda m: m.group(1),
+                ),
+            ],
+            hints=[],
+        )
+    ],
     "m.sfacg.com": [
         SiteRuleSet(
             site_key="sfacg",
