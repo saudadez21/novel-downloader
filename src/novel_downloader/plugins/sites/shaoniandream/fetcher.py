@@ -65,10 +65,18 @@ class ShaoniandreamSession(BaseSession):
 
         detail_url = self.BOOK_DETAIL_URL.format(book_id=book_id)
         params = {"randomm": self._get_rand()}
+        headers = {
+            "Origin": "https://www.shaoniandream.com",
+            "Referer": f"https://www.shaoniandream.com/book_detail/{book_id}",
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "X-Requested-With": "XMLHttpRequest",
+        }
         data = {
             "chapter_access_key": await self._get_book_detail_key(book_id),
         }
-        async with self.post(detail_url, data=data, params=params) as resp:
+        async with self.post(
+            detail_url, data=data, headers=headers, params=params
+        ) as resp:
             resp.raise_for_status()
             detail_html = await resp.text(encoding="utf-8")
 
@@ -81,12 +89,18 @@ class ShaoniandreamSession(BaseSession):
         **kwargs: Any,
     ) -> list[str]:
         url = self.CHAPTER_URL.format(chapter_id=chapter_id)
-        params = {"randoom": self._get_rand()}
+        params = {"randomm": self._get_rand()}
+        headers = {
+            "Origin": "https://www.shaoniandream.com",
+            "Referer": f"https://www.shaoniandream.com/readchapter/{chapter_id}",
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "X-Requested-With": "XMLHttpRequest",
+        }
         data = {
             "chapter_access_key": await self._get_chapter_key(chapter_id),
             "isMarket": "1",
         }
-        async with self.post(url, data=data, params=params) as resp:
+        async with self.post(url, data=data, headers=headers, params=params) as resp:
             resp.raise_for_status()
             return [await resp.text(encoding="utf-8")]
 
@@ -109,9 +123,14 @@ class ShaoniandreamSession(BaseSession):
 
     async def _get_book_detail_key(self, book_id: str) -> str:
         params = {"randoom": self._get_rand()}
+        headers = {
+            "Origin": "https://www.shaoniandream.com",
+            "Referer": f"https://www.shaoniandream.com/book_detail/{book_id}",
+            "X-Requested-With": "XMLHttpRequest",
+        }
         url = self.BOOK_DETAIL_SIGN_UTL.format(book_id=book_id)
 
-        async with self.post(url, params=params) as resp:
+        async with self.post(url, params=params, headers=headers) as resp:
             resp.raise_for_status()
             resp_json: dict[str, Any] = await resp.json(encoding="utf-8")
 
@@ -126,9 +145,14 @@ class ShaoniandreamSession(BaseSession):
 
     async def _get_chapter_key(self, chapter_id: str) -> str:
         params = {"randoom": self._get_rand()}
+        headers = {
+            "Origin": "https://www.shaoniandream.com",
+            "Referer": f"https://www.shaoniandream.com/readchapter/{chapter_id}",
+            "X-Requested-With": "XMLHttpRequest",
+        }
         url = self.CHAPTER_SIGN_URL.format(chapter_id=chapter_id)
 
-        async with self.post(url, params=params) as resp:
+        async with self.post(url, params=params, headers=headers) as resp:
             resp.raise_for_status()
             resp_json: dict[str, Any] = await resp.json(encoding="utf-8")
 
