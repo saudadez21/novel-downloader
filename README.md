@@ -152,6 +152,7 @@ if __name__ == "__main__":
 
 * 正则清理 (自定义去广告/去水印)
 * 繁简转换 (基于 [opencc-python](https://github.com/yichen0831/opencc-python))
+* 自动翻译 (支持 `translator.google`, `translator.edge`, `translator.youdao`)
 * 文本纠错 (基于 [pycorrector](https://github.com/shibing624/pycorrector))
 
 处理按顺序执行, 并生成中间产物用于后续导出。
