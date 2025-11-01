@@ -98,6 +98,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [轻小说百科](https://lnovel.org/)                             | lnovel    | ✅     | ✅     | ⚠️     | ⚠️     | 简 / 繁 |
 | [无限轻小说](https://www.8novel.com/)                         | n8novel   | ✅     | ✅     | ⚠️     | ✅     | 繁      |
 | [KadoKado](https://www.kadokado.com.tw/)                     | kadokado  | ✅     | ✅     | ✅     | ✅     | 繁      |
+| [少年梦](https://www.shaoniandream.com/)                  | shaoniandream | ✅     | ✅     | ⚠️     | ⚠️     | 简      |
 
 #### 综合书库 / 文库与名著
 
@@ -299,6 +300,10 @@ novel-cli download --site ttkan shengxu-chendong
 * **KadoKado (kadokado)**
   * 书籍: `https://www.kadokado.com.tw/book/1` -> Book ID: `1`
   * 章节: `https://www.kadokado.com.tw/chapter/3796?titleId=1&ownerId=1` -> Chapter ID: `3796`
+
+* **少年梦 (shaoniandream)**
+  * 书籍: `https://www.shaoniandream.com/book_detail/754` -> Book ID: `754`
+  * 章节: `https://www.shaoniandream.com/readchapter/97973` -> Chapter ID: `97973`
 
 #### 综合书库 / 文库与名著
 

@@ -63,6 +63,7 @@ DOWNLOAD_SUPPORT_SITES = {
     "quanben5": "全本小说网 (quanben5)",
     "ruochu": "若初文学网 (ruochu)",
     "sfacg": "SF轻小说 (sfacg)",
+    "shaoniandream": "少年梦 (shaoniandream)",
     "shencou": "神凑轻小说 (shencou)",
     "shu111": "书林文学 (shu111)",
     "syosetu": "小説家になろう (syosetu)",

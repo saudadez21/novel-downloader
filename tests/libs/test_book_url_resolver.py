@@ -276,6 +276,8 @@ CASES_SUCCESS = [
     ("https://www.ruochu.com/book/158713", "ruochu", "158713"),
     ("https://www.ruochu.com/chapter/158713", "ruochu", "158713"),
     ("https://www.ruochu.com/book/158713/13869103", "ruochu", "158713"),
+    # shaoniandream
+    ("https://www.shaoniandream.com/book_detail/754", "shaoniandream", "754"),
 ]
 
 CASES_HINT = [
@@ -330,6 +332,10 @@ CASES_HINT = [
     ),
     (
         "https://fanqienovel.com/reader/7276663560427471412?enter_from=page",
+        "章节 URL 不包含书籍 ID, 请复制目录页的链接",
+    ),
+    (
+        "https://www.shaoniandream.com/readchapter/97973",
         "章节 URL 不包含书籍 ID, 请复制目录页的链接",
     ),
 ]

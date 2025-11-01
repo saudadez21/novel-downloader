@@ -23,6 +23,9 @@
   * 可能因 `cookie expired` 导致失效
   * 需要考虑增加过期检测与重新获取机制 (暂未复现)
 
+* **shaoniandream**
+  * 有时遇到 `"网络错误，请稍后重试！"`
+
 ### EPUB 导出优化
 
 * 当前主要性能瓶颈集中在 `zipfile` 的写入阶段, 以及图片缓存缺失时的重复下载
@@ -224,11 +227,6 @@ user_prompt = "请翻译成中文：{text}"
   * 页面含加密字段 (需解析 `token` / `content`)
 
 * [寒武纪年原创网](https://www.hanwujinian.com/)
-
-  * VIP 章节需登录
-  * 页面含加密字段 (需解析 `token` / `content`)
-
-* [少年梦](https://www.shaoniandream.com/)
 
   * VIP 章节需登录
   * 页面含加密字段 (需解析 `token` / `content`)

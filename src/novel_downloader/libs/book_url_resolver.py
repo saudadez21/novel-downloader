@@ -912,6 +912,23 @@ SITE_RULES: dict[str, list[SiteRuleSet]] = {
             ],
         )
     ],
+    "www.shaoniandream.com": [
+        SiteRuleSet(
+            site_key="shaoniandream",
+            extractors=[
+                BookIdExtractor(
+                    pattern=r"^/book_detail/(\d+)$",
+                    build_book_id=lambda m: m.group(1),
+                ),
+            ],
+            hints=[
+                HintRule(
+                    pattern=r"^/readchapter/\d+$",
+                    hint="章节 URL 不包含书籍 ID, 请复制目录页的链接",
+                ),
+            ],
+        )
+    ],
     "www.shencou.com": [
         SiteRuleSet(
             site_key="shencou",
