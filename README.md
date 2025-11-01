@@ -111,6 +111,39 @@ novel-web
 * 更多示例见: [WEB 使用示例](docs/6-web-usage-examples.md)
 * 运行中可使用 `CTRL+C` 停止服务
 
+### 4. 编程接口 (Programmatic API)
+
+示例:
+
+```python
+import asyncio
+from novel_downloader.plugins import registrar
+from novel_downloader.schemas import BookConfig, ClientConfig
+
+async def main() -> None:
+    # 指定站点标识
+    site = "n23qb"
+
+    # 指定书籍 ID
+    book = BookConfig(book_id="12282")
+
+    # 创建客户端配置
+    cfg = ClientConfig(request_interval=0.5)
+
+    # 获取站点客户端实例
+    client = registrar.get_client(site, cfg)
+
+    # 在异步上下文中执行下载
+    async with client:
+        await client.download(book)
+
+    # 下载完成后执行导出操作
+    client.export(book, formats=["txt", "epub"])
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
 ---
 
 ## 文本处理 (`processors`)
@@ -119,6 +152,7 @@ novel-web
 
 * 正则清理 (自定义去广告/去水印)
 * 繁简转换 (基于 [opencc-python](https://github.com/yichen0831/opencc-python))
+* 自动翻译 (支持 `translator.google`, `translator.edge`, `translator.youdao`)
 * 文本纠错 (基于 [pycorrector](https://github.com/shibing624/pycorrector))
 
 处理按顺序执行, 并生成中间产物用于后续导出。
@@ -181,7 +215,7 @@ pip install .
 * [WEB 使用示例](docs/6-web-usage-examples.md)
 * [复制 Cookies](docs/copy-cookies.md)
 * [文件保存](docs/file-saving.md)
-* [模块与接口文档](docs/api/README.md)
+* [模块与接口文档](docs/api.md)
 * [TODO](docs/todo.md)
 
 ---

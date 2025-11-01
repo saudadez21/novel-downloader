@@ -4,19 +4,28 @@ novel_downloader.apps.web.models
 --------------------------------
 """
 
+from __future__ import annotations
+
 import asyncio
 import time
 from collections import deque
 from dataclasses import dataclass, field
+from enum import Enum
 from pathlib import Path
-from typing import Literal
+from statistics import fmean
 from uuid import uuid4
 
 from novel_downloader.schemas import LoginField
 
-Status = Literal[
-    "queued", "running", "processing", "exporting", "completed", "cancelled", "failed"
-]
+
+class Status(str, Enum):
+    QUEUED = "queued"
+    RUNNING = "running"
+    PROCESSING = "processing"
+    EXPORTING = "exporting"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+    FAILED = "failed"
 
 
 @dataclass
@@ -47,45 +56,37 @@ class DownloadTask:
 
     # runtime state
     task_id: str = field(default_factory=lambda: uuid4().hex)
-    status: Status = "queued"
+    status: Status = Status.QUEUED
     chapters_total: int = 0
     chapters_done: int = 0
     error: str | None = None
     exported_paths: dict[str, Path] = field(default_factory=dict)
 
-    _cancel_event: asyncio.Event = field(default_factory=asyncio.Event, repr=False)
+    asyncio_task: asyncio.Task[None] | None = field(default=None, repr=False)
 
-    _recent_times: deque[float] = field(
-        default_factory=lambda: deque(maxlen=20), repr=False
-    )
-    _last_timestamp: float = field(default_factory=time.monotonic, repr=False)
+    _recent: deque[float] = field(default_factory=lambda: deque(maxlen=20), repr=False)
+    _last_ts: float = field(default_factory=time.monotonic, repr=False)
 
     def progress(self) -> float:
-        if self.chapters_total <= 0:
-            return 0.0
-        return round(self.chapters_done / self.chapters_total, 2)
+        return (
+            0.0
+            if self.chapters_total <= 0
+            else round(self.chapters_done / self.chapters_total, 2)
+        )
 
     def record_chapter_time(self) -> None:
         """Record elapsed time for one finished chapter."""
         now = time.monotonic()
-        elapsed = now - self._last_timestamp
-        self._last_timestamp = now
-        if elapsed > 0:
-            self._recent_times.append(elapsed)
+        dt = now - self._last_ts
+        self._last_ts = now
+        if 0 < dt < 120:
+            self._recent.append(dt)
 
     def eta(self) -> float | None:
         """Return ETA in seconds if estimable, else None."""
         if self.chapters_total <= 0 or self.chapters_done >= self.chapters_total:
             return None
-        if not self._recent_times:
+        if not self._recent:
             return None
-        avg = sum(self._recent_times) / len(self._recent_times)
         remaining = self.chapters_total - self.chapters_done
-        return avg * remaining
-
-    def cancel(self) -> None:
-        self._cancel_event.set()
-        self.status = "cancelled"
-
-    def is_cancelled(self) -> bool:
-        return self._cancel_event.is_set()
+        return fmean(self._recent) * remaining

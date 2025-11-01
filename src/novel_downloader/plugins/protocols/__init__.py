@@ -8,15 +8,23 @@ parser, and searcher interfaces.
 """
 
 __all__ = [
-    "DownloaderProtocol",
-    "ExporterProtocol",
+    "ClientProtocol",
     "FetcherProtocol",
     "ParserProtocol",
     "ProcessorProtocol",
+    "DownloadUI",
+    "ExportUI",
+    "LoginUI",
+    "ProcessUI",
 ]
 
-from .downloader import DownloaderProtocol
-from .exporter import ExporterProtocol
+from .client import ClientProtocol
 from .fetcher import FetcherProtocol
 from .parser import ParserProtocol
 from .processor import ProcessorProtocol
+from .ui import (
+    DownloadUI,
+    ExportUI,
+    LoginUI,
+    ProcessUI,
+)

@@ -118,7 +118,7 @@ user_prompt = "请翻译成中文：{text}"
 
 ### 导出模板支持
 
-* 增加可定制的导出模板（基于 `Jinja2`）
+* 增加可定制的导出模板 (基于 `Jinja2`)
 
 示例模板:
 
@@ -184,34 +184,11 @@ user_prompt = "请翻译成中文：{text}"
 
   * 支持登录
 
-* [101看书](https://101kanshu.com/)
-
-  * 支持登录
-  * 使用加密字体
-
-* [轻之文库](https://www.linovel.net/)
-
-  * 支持登录
-
 * [米国度](https://www.myrics.com/)
 
   * 支持登录
 
-* [西方奇幻小说网](https://www.westnovel.com/)
-
-* [霹雳书屋](https://www.pilibook.net/) ([备用](https://www.mozishuwu.com/))
-
-* [全职小说网](https://www.quanzhifashi.com/)
-
-  * 支持登录
-
-* [万相书城](https://wxsck.com/)
-
-* [笔仙阁](https://www.bixiange.me/)
-
-* [同人社](https://tongrenshe.cc/)
-
-* [半夏小说](https://www.xbanxia.cc/)
+* [笔仙阁](https://m.bixiange.me/)
 
 * [52书库](https://www.52shuku.net/)
 
@@ -219,32 +196,11 @@ user_prompt = "请翻译成中文：{text}"
 
 * [天涯书库](https://www.tianyabooks.com/)
 
-* [小说狂人](https://czbooks.net/)
-
-  * 支持登录
-
-* [17K小说网](https://www.17k.com/)
-
-  * 支持登录
-
-* [KadoKado](https://www.kadokado.com.tw/)
-
-  * VIP 章节需登录访问
-
 * [飞卢小说网](https://b.faloo.com/)
 
   * VIP 章节需登录访问
 
-* [番茄小说网](https://fanqienovel.com/)
-
-  * VIP 章节需登录访问
-  * 使用加密字体
-
 * [书海小说网](https://www.shuhai.com/)
-
-  * VIP 章节需登录访问
-
-* [若初文学网](https://www.ruochu.com/)
 
   * VIP 章节需登录访问
 
@@ -272,11 +228,6 @@ user_prompt = "请翻译成中文：{text}"
   * VIP 章节需登录
   * 页面含加密字段 (需解析 `token` / `content`)
 
-* [少年梦](https://www.shaoniandream.com/)
-
-  * VIP 章节需登录
-  * 页面含加密字段 (需解析 `token` / `content`)
-
 * [书耽](https://www.shubl.com/)
 
   * VIP 章节需登录
@@ -285,6 +236,11 @@ user_prompt = "请翻译成中文：{text}"
 * [晋江文学城](https://www.jjwxc.net/)
 
   * VIP 章节需登录
+
+* [轻之国度](https://www.lightnovel.fun/)
+
+  * 需登录
+  * [备用](https://www.lightnovel.us/)
 
 * [息壤中文网](https://www.xrzww.com/)
 
@@ -296,23 +252,71 @@ user_prompt = "请翻译成中文：{text}"
 
 * [海棠书屋](https://www.fdhxs.com/)
 
-* [爱丽丝书屋](https://www.alicesw.com/)
-
-* [海外书包](https://www.haiwaishubao.com/)
-
-  * 需手动清理 `&esp;`
-
-* [有爱爱](https://www.uaa.com/)
-
-  * 需登录
-
 * [PO18 原创网](https://www.po18.tw/)
 
   * 需登录
 
-* [红袖招](https://hongxiuzhao.net/)
+* [半夏小说](https://www.xbanxia.cc/)
 
-  * 使用加密字体
+* 海棠文化線上文學城
+
+  * [站点 1](https://ebook.longmabook.com/)
+  * [站点 2](https://www.longmabookcn.com/)
+  * [站点 3](https://ebook.lmbooks.com/)
+  * [站点 4](https://www.lmebooks.com/)
+  * [站点 5](https://www.haitbook.com/)
+  * [站点 6](https://www.htwhbook.com/)
+  * [站点 7](https://www.myhtebook.com/)
+  * [站点 8](https://www.lovehtbooks.com/)
+  * [站点 9](https://www.myhtebooks.com/)
+  * [站点 10](https://www.myhtlmebook.com/)
+  * [站点 11](https://jp.myhtebook.com/)
+  * [站点 12](https://jp.myhtlmebook.com/)
+  * [站点 13](https://ebook.urhtbooks.com/)
+  * [站点 14](https://www.urhtbooks.com/)
+  * [站点 15](https://www.newhtbook.com/)
+  * [站点 16](https://www.lvhtebook.com/)
+  * [站点 17](https://jp.lvhtebook.com/)
+  * [站点 18](https://www.htlvbooks.com/)
+
+* [完本神站](https://www.wanben.info/)
+
+* [全职小说网](https://www.quanzhifashi.com/)
+
+* 笔趣阁
+
+  * [站点 1](https://www.bqu9.cc/)
+  * [站点 2](https://www.nibiqu.cc/)
+  * [站点 3](https://www.boqugew.com/)
+  * [站点 4](https://www.biquge.tw/)
+  * [站点 6](https://www.beqege.cc/)
+  * [站点 7](https://m.chenkuan.com/)
+
+* [笔趣趣](https://www.biququ.com/)
+
+* [燃火小说](https://www.ranwen.la/)
+
+* [绿色小说网](https://www.lvsewx.cc/)
+
+* [42中文网](https://www.42zw.la/)
+
+* [文海小说](https://www.zgzl.net/)
+
+* [小说之家](https://xszj.org/)
+
+* [三五中文](https://m.mjyhb.com/)
+
+* [帝书阁](https://www.23dishuge.com/)
+
+* [大众文学](https://m.shauthor.com/)
+
+* [小說之家](https://m.xszj.org/)
+
+* 69书吧
+
+  * [站点 1](https://www.69hsw.com/)
+  * [站点 2](https://www.69hao.com/)
+  * [站点 3](https://www.69hsz.net/)
 
 * [大灰狼小说聚合网](https://api.langge.cf/)
 
@@ -353,16 +357,9 @@ user_prompt = "请翻译成中文：{text}"
 
 #### 日文
 
-* [暁](https://www.akatsuki-novels.com/)
 * [カクヨム](https://kakuyomu.jp/)
+  * VIP 章节需登录访问
 * [Novel Up Plus](https://novelup.plus/)
-* [小説家になろう](https://syosetu.com/)
-* [ハーメルン](https://syosetu.org/)
-* [ムーンライトノベルズ](https://mnlt.syosetu.com/top/top/)
-* [ノクターンノベルズ](https://noc.syosetu.com/top/top/)
-* [小説を読もう！](https://yomou.syosetu.com/)
-* [ノベルピア](https://novelpia.jp/)
-* [アルファポリス](https://www.alphapolis.co.jp/)
 
 #### 英文
 

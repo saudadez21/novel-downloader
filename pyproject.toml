@@ -112,8 +112,14 @@ strict = true
 [tool.pytest.ini_options]
 minversion = "7.1"
 addopts = "--strict-markers"
+asyncio_default_fixture_loop_scope = "function"
 pythonpath = ["src"]
 testpaths = ["tests"]
+
+[tool.coverage.run]
+omit = [
+  "src/novel_downloader/apps/*",
+]
 
 [tool.commitizen]
 name = "cz_conventional_commits"

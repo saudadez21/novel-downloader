@@ -3,16 +3,14 @@ import asyncio
 import logging
 import os
 from collections import defaultdict
-from collections.abc import Awaitable, Callable
+from pathlib import Path
 
 from novel_downloader.libs.book_url_resolver import resolve_book_url
 from novel_downloader.plugins import registrar
 from novel_downloader.schemas import (
     BookConfig,
-    DownloaderConfig,
+    ClientConfig,
     ExporterConfig,
-    FetcherConfig,
-    ParserConfig,
 )
 
 logger = logging.getLogger(__name__)
@@ -22,19 +20,71 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
 )
 
-
 # --- Editable defaults (overridable by ENV) ---
+WORKERS = int(os.environ.get("WORKERS", 8))
 SITE_KEY = ""
-BOOK_IDS = """
-
-"""
-BOOK_URLS = """
-
-"""
+BOOK_IDS = ""
+BOOK_URLS = ""
 FORMATS = """
 txt
 epub
 """
+
+# ---------------------------------------------------------------------------
+
+
+class SimpleDownloadUI:
+    def __init__(self, site: str, interval: int = 20) -> None:
+        self.site = site
+        self.interval = interval
+
+    async def on_start(self, book: BookConfig) -> None:
+        logger.info(f"Downloading {self.site} book {book.book_id}...")
+
+    async def on_progress(self, done: int, total: int) -> None:
+        if done % self.interval == 0 or done == total:
+            logger.info("Progress (%s): %d/%d chapters", self.site, done, total)
+
+    async def on_complete(self, book: BookConfig) -> None:
+        logger.info(f"Book {book.book_id} ({self.site}) downloaded.")
+
+
+class SimpleExportUI:
+    def __init__(self, site: str) -> None:
+        self.site = site
+
+    def on_start(self, book: BookConfig, fmt: str | None = None) -> None:
+        msg = f"Starting export of {book.book_id} ({self.site})"
+        if fmt:
+            msg += f" -> {fmt}"
+        logger.info(msg)
+
+    def on_success(self, book: BookConfig, fmt: str, path: Path) -> None:
+        logger.info(
+            "Export success: %s (%s) -> %s saved to %s",
+            book.book_id,
+            self.site,
+            fmt,
+            path,
+        )
+
+    def on_error(self, book: BookConfig, fmt: str | None, error: Exception) -> None:
+        fmt = fmt or "default"
+        logger.error(
+            "Export error: %s (%s) %s: %s",
+            book.book_id,
+            self.site,
+            fmt,
+            error,
+        )
+
+    def on_unsupported(self, book: BookConfig, fmt: str) -> None:
+        logger.warning(
+            "Unsupported export format %s for %s (%s)",
+            fmt,
+            book.book_id,
+            self.site,
+        )
 
 
 def get_list(name: str, fallback: str) -> list[str]:
@@ -50,49 +100,24 @@ BOOK_URLS_LIST = get_list("BOOK_URLS", BOOK_URLS)
 FORMATS_LIST = get_list("FORMATS", FORMATS)
 
 
-def make_progress_hook(
-    site: str,
-    book_id: str,
-    interval: int = 20,
-) -> Callable[[int, int], Awaitable[None]]:
-    async def progress_hook(done: int, total: int) -> None:
-        if done % interval == 0 or done == total:
-            logger.info("Progress %s [%s]: %d/%d chapters", book_id, site, done, total)
-
-    return progress_hook
-
-
 async def download_books(
     site: str,
     books: list[BookConfig],
-    downloader_cfg: DownloaderConfig,
-    fetcher_cfg: FetcherConfig,
-    parser_cfg: ParserConfig,
+    client_cfg: ClientConfig,
 ) -> None:
     try:
-        parser = registrar.get_parser(site, parser_cfg)
-        fetcher = registrar.get_fetcher(site, fetcher_cfg)
+        client = registrar.get_client(site=site, config=client_cfg)
+        ui = SimpleDownloadUI(site=site)
     except ValueError as e:
         logger.warning("Init failed for %s: %s", site, e)
         return
 
-    async with fetcher:
-        downloader = registrar.get_downloader(
-            fetcher=fetcher,
-            parser=parser,
-            site=site,
-            config=downloader_cfg,
-        )
-
+    async with client:
         for book in books:
-            logger.info("Downloading %s [%s]", book.book_id, site)
-            hook = make_progress_hook(site, book.book_id)
-
             try:
-                await downloader.download(book, progress_hook=hook)
-                logger.info("Downloaded %s [%s]", book.book_id, site)
+                await client.download(book, ui=ui)
             except Exception as e:
-                logger.warning("Failed to download %s [%s]: %s", book.book_id, site, e)
+                logger.warning("Failed to download %s (%s): %s", book.book_id, site, e)
 
 
 def export_books(
@@ -101,21 +126,23 @@ def export_books(
     exporter_cfg: ExporterConfig,
     formats: list[str],
 ) -> None:
-    with registrar.get_exporter(site, exporter_cfg) as exporter:
-        for book in books:
-            for fmt in formats:
-                export_fn = getattr(exporter, f"export_as_{fmt.lower()}", None)
-                if not callable(export_fn):
-                    logger.warning("Format %s not supported for %s", fmt, site)
-                    continue
+    try:
+        client = registrar.get_client(site=site)
+        ui = SimpleExportUI(site=site)
+    except ValueError as e:
+        logger.warning("Init failed for %s: %s", site, e)
+        return
 
-                try:
-                    export_fn(book)
-                    logger.info("Exported %s [%s] as %s", book.book_id, site, fmt)
-                except Exception as e:
-                    logger.warning(
-                        "Failed to export %s [%s] as %s: %s", book.book_id, site, fmt, e
-                    )
+    for book in books:
+        try:
+            client.export(
+                book,
+                exporter_cfg,
+                formats=formats,
+                ui=ui,
+            )
+        except Exception as e:
+            logger.warning("Failed to export %s (%s): %s", book.book_id, site, e)
 
 
 def main() -> None:
@@ -139,17 +166,34 @@ def main() -> None:
         logger.info("No books to process.")
         return
 
-    downloader_cfg = DownloaderConfig()
-    fetcher_cfg = FetcherConfig()
-    parser_cfg = ParserConfig()
+    client_cfg = ClientConfig()
     exporter_cfg = ExporterConfig()
 
-    async def run_all():
-        for site, books in grouped.items():
-            await download_books(site, books, downloader_cfg, fetcher_cfg, parser_cfg)
-            export_books(site, books, exporter_cfg, FORMATS_LIST)
+    async def process_site(site: str, books: list[BookConfig], sem: asyncio.Semaphore):
+        async with sem:
+            logger.info("Starting downloads for site: %s (%d books)", site, len(books))
+            await download_books(site, books, client_cfg)
+            logger.info("Finished downloads for site: %s", site)
 
-    asyncio.run(run_all())
+    async def run_all_downloads():
+        sem = asyncio.Semaphore(WORKERS)
+        tasks = [
+            asyncio.create_task(process_site(site, books, sem))
+            for site, books in grouped.items()
+        ]
+        await asyncio.gather(*tasks)
+
+    try:
+        asyncio.run(run_all_downloads())
+    except KeyboardInterrupt:
+        logger.warning("Interrupted by user, shutting down downloads...")
+        return
+
+    # --- Export phase ---
+    logger.info("Starting export phase for all sites...")
+    for site, books in grouped.items():
+        export_books(site, books, exporter_cfg, FORMATS_LIST)
+    logger.info("All exports completed.")
 
 
 if __name__ == "__main__":

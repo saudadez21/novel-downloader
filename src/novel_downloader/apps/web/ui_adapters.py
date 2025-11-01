@@ -19,6 +19,8 @@ from novel_downloader.apps.web.services.cred_broker import (
 from novel_downloader.infra.cookies import parse_cookies
 from novel_downloader.schemas import BookConfig, LoginField
 
+from .models import Status
+
 
 class WebLoginUI:
     def __init__(self, task: DownloadTask) -> None:
@@ -44,7 +46,7 @@ class WebLoginUI:
             cleanup_request(req.req_id)
             return prefill
 
-        if self.task.is_cancelled():
+        if self.task.status == Status.CANCELLED:
             await complete_request(req.req_id, None)
             cleanup_request(req.req_id)
             return prefill
@@ -68,11 +70,11 @@ class WebLoginUI:
         return merged
 
     def on_login_failed(self) -> None:
-        self.task.status = "failed"
+        self.task.status = Status.FAILED
         self.task.error = "登录失败"
 
     def on_login_success(self) -> None:
-        self.task.status = "running"
+        self.task.status = Status.RUNNING
 
 
 class WebDownloadUI:
@@ -80,7 +82,7 @@ class WebDownloadUI:
         self.task = task
 
     async def on_start(self, book: BookConfig) -> None:
-        self.task.status = "running"
+        self.task.status = Status.RUNNING
 
     async def on_progress(self, done: int, total: int) -> None:
         self.task.chapters_total = total
@@ -88,15 +90,7 @@ class WebDownloadUI:
         self.task.record_chapter_time()
 
     async def on_complete(self, book: BookConfig) -> None:
-        self.task.status = "exporting"
-
-    async def on_book_error(self, book: BookConfig, error: Exception) -> None:
-        self.task.status = "failed"
-        self.task.error = str(error)
-
-    async def on_site_error(self, site: str, error: Exception) -> None:
-        self.task.status = "failed"
-        self.task.error = str(error)
+        self.task.status = Status.EXPORTING
 
 
 class WebExportUI:
@@ -105,13 +99,13 @@ class WebExportUI:
         self.task.exported_paths = {}
 
     def on_start(self, book: BookConfig, fmt: str | None = None) -> None:
-        self.task.status = "exporting"
+        self.task.status = Status.EXPORTING
 
     def on_success(self, book: BookConfig, fmt: str, path: Path) -> None:
         self.task.exported_paths[fmt] = path
 
     def on_error(self, book: BookConfig, fmt: str | None, error: Exception) -> None:
-        self.task.status = "failed"
+        self.task.status = Status.FAILED
         self.task.error = str(error)
 
     def on_unsupported(self, book: BookConfig, fmt: str) -> None:
@@ -123,9 +117,8 @@ class WebProcessUI:
         self.task = task
 
     def on_stage_start(self, book: BookConfig, stage: str) -> None:
-        self.task.status = "processing"
+        self.task.status = Status.PROCESSING
         self.task.chapters_done = 0
-        self.task._recent_times.clear()
 
     def on_stage_progress(
         self, book: BookConfig, stage: str, done: int, total: int
@@ -139,14 +132,5 @@ class WebProcessUI:
         pass
 
     def on_missing(self, book: BookConfig, what: str, path: Path) -> None:
-        self.task.status = "failed"
+        self.task.status = Status.FAILED
         self.task.error = f"Missing required data ({what}): {path}"
-
-    def on_book_error(
-        self, book: BookConfig, stage: str | None, error: Exception
-    ) -> None:
-        self.task.status = "failed"
-        if stage:
-            self.task.error = f"Stage '{stage}' error: {error}"
-        else:
-            self.task.error = str(error)

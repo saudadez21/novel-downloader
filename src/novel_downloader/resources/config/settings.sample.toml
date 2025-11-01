@@ -9,9 +9,8 @@ request_interval = 0.5             # 同一本书各章节请求间隔 (秒)
 raw_data_dir = "./raw_data"        # 书籍原始 JSON/DB/图片 数据存放目录
 output_dir = "./downloads"         # 最终输出文件存放目录
 cache_dir = "./novel_cache"        # 本地缓存目录
-workers = 2                        # 工作协程数
+workers = 4                        # 工作协程数
 skip_existing = true               # 是否跳过已存在章节
-check_missing = false              # 是否检查并报告缺失章节
 storage_batch_size = 1             # SQLite 批量提交的章节数量
 locale_style = "simplified"        # simplified / traditional
 
@@ -101,14 +100,15 @@ local_plugins_path = "./novel_plugins"
 # content_replace = "path/to/content-replace.json"
 
 # 输出文件格式及相关选项
-[output.formats]
-make_txt = true                    # 是否生成完整 TXT 文件
-make_epub = true                   # 是否生成 EPUB
+[output]
+formats = [
+    "txt",
+    "epub",
+]
 
 [output.naming]
 append_timestamp = true            # 在文件名中追加时间戳
 filename_template = "{title}_{author}"  # 文件命名规则
 
 [output.epub]
-include_cover = true               # 是否在 EPUB 中包含封面
 include_picture = true             # 是否下载章节图片 (体积较大)

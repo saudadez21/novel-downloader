@@ -23,6 +23,10 @@ class XiguashuwuSearcher(BaseSearcher):
     BASE_URL = "https://www.xiguashuwu.com"
     SEARCH_URL = "https://www.xiguashuwu.com/search/{query}"
 
+    @property
+    def nsfw(self) -> bool:
+        return True
+
     async def _fetch_html(self, keyword: str) -> str:
         url = self.SEARCH_URL.format(query=self._quote(keyword))
         headers = {

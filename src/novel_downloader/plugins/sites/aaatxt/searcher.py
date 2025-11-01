@@ -22,6 +22,10 @@ class AaatxtSearcher(BaseSearcher):
     priority = 500
     SEARCH_URL = "http://www.aaatxt.com/search.php"
 
+    @property
+    def nsfw(self) -> bool:
+        return True
+
     async def _fetch_html(self, keyword: str) -> str:
         # gbk / gb2312
         params = {

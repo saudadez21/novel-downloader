@@ -158,11 +158,24 @@ CASES_SUCCESS = [
     ("https://www.37yq.com/lightnovel/2362.html", "n37yq", "2362"),
     ("https://www.37yq.com/lightnovel/2362/catalog", "n37yq", "2362"),
     ("https://www.37yq.com/lightnovel/2362/92560.html", "n37yq", "2362"),
+    # westnovel
+    ("https://www.westnovel.com/ksl/sq/", "westnovel", "ksl-sq"),
+    ("https://www.westnovel.com/ksl/sq/140072.html", "westnovel", "ksl-sq"),
+    # westnovel_sub
+    ("https://www.westnovel.com/q/list/908.html", "westnovel_sub", "q-list-908"),
+    # n101kanshu
+    ("https://101kanshu.com/book/7994.html", "n101kanshu", "7994"),
+    ("https://101kanshu.com/book/7994/index.html", "n101kanshu", "7994"),
+    ("https://101kanshu.com/txt/7994/9137080.html", "n101kanshu", "7994"),
     # linovelib
     ("https://www.linovelib.com/novel/1234.html", "linovelib", "1234"),
     ("https://www.linovelib.com/novel/1234/47800.html", "linovelib", "1234"),
     ("https://www.linovelib.com/novel/2727.html", "linovelib", "2727"),
     ("https://www.linovelib.com/novel/2727/vol_292741.html", "linovelib", "2727"),
+    # linovel
+    ("https://www.linovel.net/book/101752.html", "linovel", "101752"),
+    ("https://www.linovel.net/book/101752.html#catalog", "linovel", "101752"),
+    ("https://www.linovel.net/book/101752/16996.html", "linovel", "101752"),
     # n8novel
     ("https://www.8novel.com/novelbooks/3365/", "n8novel", "3365"),
     ("https://article.8novel.com/read/3365/?106235", "n8novel", "3365"),
@@ -192,6 +205,79 @@ CASES_SUCCESS = [
     # deqixs
     ("https://www.deqixs.com/xiaoshuo/2026/", "deqixs", "2026"),
     ("https://www.deqixs.com/xiaoshuo/2026/1969933.html", "deqixs", "2026"),
+    # syosetu
+    ("https://ncode.syosetu.com/n9584gd/", "syosetu", "n9584gd"),
+    ("https://ncode.syosetu.com/n9584gd/1/", "syosetu", "n9584gd"),
+    ("https://ncode.syosetu.com/n4826lc/", "syosetu", "n4826lc"),
+    ("https://ncode.syosetu.com/n4826lc/1/", "syosetu", "n4826lc"),
+    # syosetu18
+    ("https://novel18.syosetu.com/n2976io/", "syosetu18", "n2976io"),
+    ("https://novel18.syosetu.com/n2976io/1/", "syosetu18", "n2976io"),
+    ("https://novel18.syosetu.com/n8543hb/", "syosetu18", "n8543hb"),
+    ("https://novel18.syosetu.com/n8543hb/1/", "syosetu18", "n8543hb"),
+    # syosetu_org
+    ("https://syosetu.org/novel/292891/", "syosetu_org", "292891"),
+    ("https://syosetu.org/novel/292891/1.html", "syosetu_org", "292891"),
+    # akatsuki_novels
+    ("https://www.akatsuki-novels.com/stories/index/novel_id~103", "akatsuki_novels", "103"),  # noqa: E501
+    ("https://www.akatsuki-novels.com/stories/view/163722/novel_id~103", "akatsuki_novels", "103"),  # noqa: E501
+    # alphapolis
+    ("https://www.alphapolis.co.jp/novel/547686423/112003230", "alphapolis", "547686423-112003230"),  # noqa: E501
+    ("https://www.alphapolis.co.jp/novel/547686423/112003230/episode/10322710", "alphapolis", "547686423-112003230"),  # noqa: E501
+    # novelpia
+    ("https://novelpia.jp/novel/2393?sid=main5", "novelpia", "2393"),
+    ("https://novelpia.jp/novel/2749", "novelpia", "2749"),
+    # pilibook
+    ("https://www.pilibook.net/1/627/info.html", "pilibook", "1-627"),
+    ("https://www.pilibook.net/1/627/menu/1.html", "pilibook", "1-627"),
+    ("https://www.pilibook.net/1/627/read/247250.html", "pilibook", "1-627"),
+    ("https://www.mozishuwu.com/1/627/info.html", "pilibook", "1-627"),
+    ("https://www.mozishuwu.com/1/627/menu/1.html", "pilibook", "1-627"),
+    ("https://www.mozishuwu.com/1/627/read/247250.html", "pilibook", "1-627"),
+    # alicesw
+    ("https://www.alicesw.com/novel/46857.html", "alicesw", "46857"),
+    ("https://www.alicesw.com/other/chapters/id/46857.html", "alicesw", "46857"),
+    # haiwaishubao
+    ("https://www.haiwaishubao.com/book/102659/", "haiwaishubao", "102659"),
+    ("https://www.haiwaishubao.com/index/102659/", "haiwaishubao", "102659"),
+    ("https://www.haiwaishubao.com/index/102659/2/", "haiwaishubao", "102659"),
+    ("https://www.haiwaishubao.com/book/102659/5335635.html", "haiwaishubao", "102659"),
+    ("https://www.haiwaishubao.com/book/102659/5335635_2.html", "haiwaishubao", "102659"),  # noqa: E501
+    # hongxiuzhao
+    ("https://hongxiuzhao.net/VPGlv8.html", "hongxiuzhao", "VPGlv8"),
+    # uaa
+    ("https://www.uaa.com/novel/intro?id=869062931097194496", "uaa", "869062931097194496"),  # noqa: E501
+    # czbooks
+    ("https://czbooks.net/n/dr4p0k7", "czbooks", "dr4p0k7"),
+    ("https://czbooks.net/n/dr4p0k7/drgkg7hgh?chapterNumber=0", "czbooks", "dr4p0k7"),
+    # bixiange
+    ("https://m.bixiange.me/wxxz/20876/", "bixiange", "wxxz-20876"),
+    ("https://m.bixiange.me/wxxz/20876/index/1.html", "bixiange", "wxxz-20876"),
+    # tongrenshe
+    ("https://tongrenshe.cc/tongren/8899.html", "tongrenshe", "8899"),
+    ("https://tongrenshe.cc/tongren/8899/1.html", "tongrenshe", "8899"),
+    # wxsck
+    ("https://wxsck.com/book/20297/", "wxsck", "20297"),
+    ("https://wxsck.com/book/20297/6660334.html", "wxsck", "20297"),
+    ("https://www.wxscs.com/book/20297/", "wxsck", "20297"),
+    ("https://www.wxscs.com/book/20297/6660334.html", "wxsck", "20297"),
+    # biquge345
+    ("https://www.biquge345.com/book/321301/", "biquge345", "321301"),
+    ("https://www.biquge345.com/chapter/321301/37740966.html", "biquge345", "321301"),
+    # n17k
+    ("https://www.17k.com/book/3348757.html", "n17k", "3348757"),
+    ("https://www.17k.com/list/3348757.html", "n17k", "3348757"),
+    ("https://www.17k.com/chapter/3348757/44541132.html", "n17k", "3348757"),
+    # kadokado
+    ("https://www.kadokado.com.tw/book/1", "kadokado", "1"),
+    # fanqienovel
+    ("https://fanqienovel.com/page/7276384138653862966", "fanqienovel", "7276384138653862966"),  # noqa: E501
+    # ruochu
+    ("https://www.ruochu.com/book/158713", "ruochu", "158713"),
+    ("https://www.ruochu.com/chapter/158713", "ruochu", "158713"),
+    ("https://www.ruochu.com/book/158713/13869103", "ruochu", "158713"),
+    # shaoniandream
+    ("https://www.shaoniandream.com/book_detail/754", "shaoniandream", "754"),
 ]
 
 CASES_HINT = [
@@ -223,6 +309,34 @@ CASES_HINT = [
     (
         "https://www.yamibo.com/novel/view-chapter?id=38772952",
         "章节 URL 不包含书籍 ID, 请复制小说目录页链接",
+    ),
+    (
+        "https://www.westnovel.com/q/showinfo-2-48701-0.html",
+        "章节 URL 不包含书籍 ID, 请复制目录页的链接",
+    ),
+    (
+        "https://novelpia.jp/viewer/51118",
+        "章节 URL 不包含书籍 ID, 请复制目录页的链接",
+    ),
+    (
+        "https://www.alicesw.com/book/48247/563ed665333ad.html",
+        "章节 URL 不包含书籍 ID, 请复制目录页的链接",
+    ),
+    (
+        "https://www.uaa.com/novel/chapter?id=869062931193663489",
+        "章节 URL 不包含书籍 ID, 请复制目录页的链接",
+    ),
+    (
+        "https://www.kadokado.com.tw/chapter/1?titleId=1&ownerId=1",
+        "章节 URL 不包含书籍 ID, 请复制目录页的链接",
+    ),
+    (
+        "https://fanqienovel.com/reader/7276663560427471412?enter_from=page",
+        "章节 URL 不包含书籍 ID, 请复制目录页的链接",
+    ),
+    (
+        "https://www.shaoniandream.com/readchapter/97973",
+        "章节 URL 不包含书籍 ID, 请复制目录页的链接",
     ),
 ]
 

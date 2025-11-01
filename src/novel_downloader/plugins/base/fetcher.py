@@ -159,6 +159,46 @@ class BaseSession(abc.ABC):
         """
         ...
 
+    async def download_image(
+        self,
+        url: str,
+        folder: Path,
+        *,
+        name: str | None = None,
+        on_exist: Literal["overwrite", "skip"] = "skip",
+    ) -> Path | None:
+        """
+        Download a single image and return its saved path.
+
+        :param url: Image URL.
+        :param folder: Destination folder.
+        :param name: Optional explicit filename (without suffix).
+        :param on_exist: What to do when file exists.
+        :return: Path of saved image, or None if failed/skipped.
+        """
+        folder.mkdir(parents=True, exist_ok=True)
+
+        save_path = folder / img_name(url, name=name)
+
+        if save_path.exists() and on_exist == "skip":
+            self.logger.debug("Skip existing image: %s", save_path)
+            return save_path
+
+        try:
+            async with await self.get(url, headers=IMAGE_HEADERS) as resp:
+                resp.raise_for_status()
+                data = await resp.read()
+        except aiohttp.ClientResponseError as e:
+            self.logger.warning("Skip %s (HTTP %s): %s", url, e.status, e)
+            return None
+        except Exception as e:
+            self.logger.warning("Failed %s: %s", url, e)
+            return None
+
+        write_file(content=data, filepath=save_path, on_exist="overwrite")
+        self.logger.debug("Saved image: %s <- %s", save_path, url)
+        return save_path
+
     async def download_images(
         self,
         img_dir: Path,
@@ -480,6 +520,23 @@ class BaseSession(abc.ABC):
         key = locale_style.strip().lower()
         return self.BASE_URL_MAP.get(key, self.DEFAULT_BASE_URL)
 
+    def _debug_cookies(self) -> None:
+        """
+        Print all cookies currently stored in the aiohttp ClientSession cookie jar.
+        """
+        if not self._session:
+            print("[Cookie Debug] Session not initialized.")
+            return
+
+        print("\n=== [Cookie Jar Dump] ===")
+        jar = self._session.cookie_jar
+        for cookie in jar:
+            print(
+                f"{cookie.key} = {cookie.value} "
+                "(domain={cookie['domain']}, path={cookie['path']})"
+            )
+        print("=========================\n")
+
     async def __aenter__(self) -> Self:
         if self._session is None or self._session.closed:
             await self.init()
@@ -576,6 +633,7 @@ class GenericSession(BaseSession):
         self, book_id: str, chapter_id: str, **kwargs: Any
     ) -> list[str]:
         book_id = self._transform_book_id(book_id)
+        chapter_id = self._transform_book_id(chapter_id)
 
         if self.USE_PAGINATED_CHAPTER:
             return await self._paginate(

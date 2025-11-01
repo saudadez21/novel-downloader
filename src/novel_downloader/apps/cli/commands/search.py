@@ -11,10 +11,18 @@ from pathlib import Path
 
 from novel_downloader.apps.cli import ui
 from novel_downloader.apps.constants import SEARCH_SUPPORT_SITES
+from novel_downloader.apps.utils import load_or_init_config
 from novel_downloader.infra.config import ConfigAdapter
 from novel_downloader.infra.i18n import t
+from novel_downloader.plugins import registrar
 from novel_downloader.schemas import BookConfig, SearchResult
 
+from ..ui_adapters import (
+    CLIDownloadUI,
+    CLIExportUI,
+    CLILoginUI,
+    CLIProcessUI,
+)
 from .base import Command
 
 
@@ -60,16 +68,6 @@ class SearchCmd(Command):
 
     @classmethod
     def run(cls, args: Namespace) -> None:
-        from novel_downloader.usecases.config import load_or_init_config
-
-        from ..ui_adapters import (
-            CLIConfigUI,
-            CLIDownloadUI,
-            CLIExportUI,
-            CLILoginUI,
-            CLIProcessUI,
-        )
-
         sites: Sequence[str] | None = args.site or None
         keyword: str = args.keyword
         overall_limit = None if args.limit is None else max(1, args.limit)
@@ -77,12 +75,12 @@ class SearchCmd(Command):
         timeout = max(0.1, float(args.timeout))
         config_path: Path | None = Path(args.config) if args.config else None
 
-        config_data = load_or_init_config(config_path, CLIConfigUI())
+        config_data = load_or_init_config(config_path)
         if config_data is None:
             return
 
         async def _run() -> None:
-            from novel_downloader.usecases.search import search
+            from novel_downloader.plugins.search import search
 
             with ui.status(t("Searching for '{keyword}'...").format(keyword=keyword)):
                 results = await search(
@@ -104,39 +102,51 @@ class SearchCmd(Command):
             log_level = adapter.get_log_level()
             ui.setup_logging(console_level=log_level)
 
-            from novel_downloader.usecases.download import download_books
-
             login_ui = CLILoginUI()
             download_ui = CLIDownloadUI()
-            await download_books(
-                chosen["site"],
-                books,
-                adapter.get_downloader_config(site),
-                adapter.get_fetcher_config(site),
-                adapter.get_parser_config(site),
-                login_ui=login_ui,
-                download_ui=download_ui,
-                login_config=adapter.get_login_config(site),
-            )
+            client = registrar.get_client(site, adapter.get_client_config(site))
+
+            try:
+                async with client:
+                    if adapter.get_login_required(site):
+                        succ = await client.login(
+                            ui=login_ui,
+                            login_cfg=adapter.get_login_config(site),
+                        )
+                        if not succ:
+                            return
+
+                    for book in books:
+                        await client.download(book, ui=download_ui)
+            except ValueError as e:
+                ui.warn(
+                    t("'{site}' is currently not supported: {err}").format(
+                        site=site, err=e
+                    )
+                )
+                return
+            except Exception as e:
+                ui.error(t("Site error ({site}): {err}").format(site=site, err=e))
+                return
+
             if not download_ui.completed_books:
                 return
 
-            # export
-            from novel_downloader.usecases.export import export_books
-            from novel_downloader.usecases.process import process_books
+            process_ui = CLIProcessUI()
+            export_ui = CLIExportUI()
 
-            process_books(
-                site,
-                list(download_ui.completed_books),
-                adapter.get_pipeline_config(site),
-                ui=CLIProcessUI(),
-            )
-            export_books(
-                site=chosen["site"],
-                books=list(download_ui.completed_books),
-                exporter_cfg=adapter.get_exporter_config(site),
-                export_ui=CLIExportUI(),
-            )
+            for book in download_ui.completed_books:
+                client.process(
+                    book,
+                    processors=adapter.get_processor_configs(site),
+                    ui=process_ui,
+                )
+                client.export(
+                    book,
+                    cfg=adapter.get_exporter_config(site),
+                    formats=args.format or adapter.get_export_fmt(site),
+                    ui=export_ui,
+                )
 
         import asyncio
 

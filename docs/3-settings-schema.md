@@ -14,7 +14,6 @@
     - [`book_ids` 字段说明](#book_ids-字段说明)
     - [示例: 起点 (`qidian`)](#示例-起点-qidian)
   - [output 配置](#output-配置)
-    - [输出格式 `[output.formats]`](#输出格式-outputformats)
     - [命名规则 `[output.naming]`](#命名规则-outputnaming)
     - [EPUB 选项 `[output.epub]`](#epub-选项-outputepub)
     - [示例配置](#示例配置-1)
@@ -25,6 +24,9 @@
     - [内置处理器概览 (简要)](#内置处理器概览-简要)
       - [`cleaner`](#cleaner)
       - [`zh_convert`](#zh_convert)
+      - [`translator.google`](#translatorgoogle)
+      - [`translator.edge`](#translatoredge)
+      - [`translator.youdao`](#translatoryoudao)
       - [`corrector`](#corrector)
 
 ### general 配置
@@ -44,7 +46,7 @@
 | `raw_data_dir`       | string  | `"./raw_data"`    | 书籍数据存放目录                             |
 | `output_dir`         | string  | `"./downloads"`   | 最终导出文件目录                             |
 | `cache_dir`          | string  | `"./novel_cache"` | 本地缓存目录 (字体 / 图片等)                  |
-| `workers`            | int     | 2                 | 下载任务协程数量                             |
+| `workers`            | int     | 4                 | 下载任务协程数量                             |
 | `skip_existing`      | bool    | true              | 下载时跳过本地已存在的章节文件                 |
 | `storage_batch_size` | int     | 1                 | `sqlite` 每批提交的章节数 (提高写入性能)       |
 
@@ -88,11 +90,11 @@ backoff_factor = 2.0
 timeout = 30.0
 max_connections = 10
 max_rps = 1.0
-request_interval = 1.0
+request_interval = 0.5
 raw_data_dir = "./raw_data"
 output_dir = "./downloads"
 cache_dir = "./novel_cache"
-workers = 2
+workers = 4
 skip_existing = true
 storage_batch_size = 4
 
@@ -198,14 +200,9 @@ book_id = "1012584111"
 
 控制导出格式, 文件命名与 EPUB 细节
 
-#### 输出格式 `[output.formats]`
-
-| 参数名          | 类型  | 默认值     | 说明                                       |
-| -------------- | ----- | --------- | ------------------------------------------ |
-| `make_txt`     | bool  | true      | 是否生成完整 TXT 文件                       |
-| `make_epub`    | bool  | false     | 是否生成 EPUB 文件                          |
-| `make_md`      | bool  | false     | 是否生成 Markdown 文件 (未实现)             |
-| `make_pdf`     | bool  | false     | 是否生成 PDF 文件 (未实现)                  |
+| 参数名          | 类型        | 默认值     | 说明                                       |
+| -------------- | ----------- | --------- | ------------------------------------------ |
+| `formats`      | `list[str]` | `[]`      | 输出格式                                    |
 
 #### 命名规则 `[output.naming]`
 
@@ -218,24 +215,22 @@ book_id = "1012584111"
 
 | 参数名                         | 类型    | 默认值                         | 说明                                       |
 | ----------------------------- | ------- | ----------------------------- | ------------------------------------------ |
-| `include_cover`               | bool    | true                          | 是否包含封面                               |
 | `include_picture`             | bool    | true                          | 是否下载并嵌入章节中的图片 (可能增加文件体积) |
 
 #### 示例配置
 
 ```toml
-[output.formats]
-make_txt = true
-make_epub = true
-make_md = false
-make_pdf = false
+[output]
+formats = [
+    "txt",
+    "epub",
+]
 
 [output.naming]
 append_timestamp = false
 filename_template = "{title}_{author}"
 
 [output.epub]
-include_cover = true
 include_picture = true
 ```
 
@@ -341,7 +336,7 @@ content_replace = "content-replace.json"
 ```json
 {
   "请记住本书首发网址": "",
-  "（本章完）": "",
+  "(本章完)": "",
   "li子": "例子",
   "pinbi词": "屏蔽词"
 }
@@ -380,6 +375,518 @@ content_replace = "content-replace.json"
 >
 > 依赖: `opencc-python-reimplemented`。
 
+##### `translator.google`
+
+| 参数名           | 类型   | 默认值   |
+| --------------- | ------ | ------- |
+| `source`        | str    | `auto`  |
+| `target`        | str    | `zh-CN` |
+| `sleep`         | float  | 2.0     |
+
+<details>
+<summary>支持语言列表 (点击展开)</summary>
+
+| 语言名称              | 代码         |
+| ----------------- | ---------- |
+| 阿布哈兹语             | `ab`       |
+| 亚齐语               | `ace`      |
+| 阿乔利语              | `ach`      |
+| 阿法尔语              | `aa`       |
+| 南非荷兰语             | `af`       |
+| 阿尔巴尼亚语            | `sq`       |
+| 阿卢尔语              | `alz`      |
+| 阿姆哈拉语             | `am`       |
+| 阿拉伯语              | `ar`       |
+| 亚美尼亚语             | `hy`       |
+| 阿萨姆语              | `as`       |
+| 阿瓦尔语              | `av`       |
+| 阿瓦德语              | `awa`      |
+| 艾马拉语              | `ay`       |
+| 阿塞拜疆语             | `az`       |
+| 巴厘语               | `ban`      |
+| 俾路支语              | `bal`      |
+| 班巴拉语              | `bm`       |
+| 巴乌莱语              | `bci`      |
+| 巴什基尔语             | `ba`       |
+| 巴斯克语              | `eu`       |
+| 巴塔克卡罗语            | `btx`      |
+| 巴塔克西马隆贡语          | `bts`      |
+| 巴塔克托巴语            | `bbc`      |
+| 白俄罗斯语             | `be`       |
+| 本巴语               | `bem`      |
+| 孟加拉语              | `bn`       |
+| 雅加达方言(Betawi)     | `bew`      |
+| 博杰普尔语             | `bho`      |
+| 比科尔语              | `bik`      |
+| 波斯尼亚语             | `bs`       |
+| 布列塔尼语             | `br`       |
+| 保加利亚语             | `bg`       |
+| 布里亚特语             | `bua`      |
+| 粤语                | `yue`      |
+| 加泰罗尼亚语            | `ca`       |
+| 宿务语               | `ceb`      |
+| 查莫罗语              | `ch`       |
+| 车臣语               | `ce`       |
+| 齐切瓦语              | `ny`       |
+| 中文(简体)            | `zh-CN`    |
+| 中文(繁体)            | `zh-TW`    |
+| 楚克语               | `chk`      |
+| 楚瓦什语              | `cv`       |
+| 科西嘉语              | `co`       |
+| 克里米亚鞑靼语           | `crh`      |
+| 克罗地亚语             | `hr`       |
+| 捷克语               | `cs`       |
+| 丹麦语               | `da`       |
+| 达里语               | `fa-AF`    |
+| 迪维希语              | `dv`       |
+| 丁卡语               | `din`      |
+| 多格拉语              | `doi`      |
+| 冬贝语               | `dov`      |
+| 荷兰语               | `nl`       |
+| 朱拉语(Dyula)        | `dyu`      |
+| 宗卡语               | `dz`       |
+| 英语                | `en`       |
+| 世界语               | `eo`       |
+| 爱沙尼亚语             | `et`       |
+| 埃维语               | `ee`       |
+| 法罗语               | `fo`       |
+| 斐济语               | `fj`       |
+| 菲律宾语              | `tl`       |
+| 芬兰语               | `fi`       |
+| 丰语(Fon)           | `fon`      |
+| 法语                | `fr`       |
+| 弗里斯兰语             | `fy`       |
+| 弗留利语              | `fur`      |
+| 富拉语               | `ff`       |
+| 加语(Ga)            | `gaa`      |
+| 加利西亚语             | `gl`       |
+| 格鲁吉亚语             | `ka`       |
+| 德语                | `de`       |
+| 希腊语               | `el`       |
+| 瓜拉尼语              | `gn`       |
+| 古吉拉特语             | `gu`       |
+| 海地克里奥尔语           | `ht`       |
+| 哈卡钦语              | `cnh`      |
+| 豪萨语               | `ha`       |
+| 夏威夷语              | `haw`      |
+| 希伯来语              | `iw`       |
+| 希利盖农语             | `hil`      |
+| 印地语               | `hi`       |
+| 苗族语               | `hmn`      |
+| 匈牙利语              | `hu`       |
+| 洪斯里克语             | `hrx`      |
+| 伊班语               | `iba`      |
+| 冰岛语               | `is`       |
+| 伊博语               | `ig`       |
+| 伊洛卡诺语             | `ilo`      |
+| 印度尼西亚语            | `id`       |
+| 爱尔兰语              | `ga`       |
+| 意大利语              | `it`       |
+| 牙买加土语             | `jam`      |
+| 日语                | `ja`       |
+| 爪哇语               | `jw`       |
+| 景颇语               | `kac`      |
+| 格陵兰语              | `kl`       |
+| 卡纳达语              | `kn`       |
+| 卡努里语              | `kr`       |
+| 卡潘潘庞语             | `pam`      |
+| 哈萨克语              | `kk`       |
+| 卡西语               | `kha`      |
+| 高棉语               | `km`       |
+| 基加语               | `cgg`      |
+| 基孔戈语              | `kg`       |
+| 卢旺达语              | `rw`       |
+| 基图巴语              | `ktu`      |
+| 科克博罗克语            | `trp`      |
+| 科米语               | `kv`       |
+| 孔卡尼语              | `gom`      |
+| 韩语                | `ko`       |
+| 克里奥尔语(塞拉利昂)       | `kri`      |
+| 库尔德语(库尔曼吉)        | `ku`       |
+| 库尔德语(索拉尼)         | `ckb`      |
+| 吉尔吉斯语             | `ky`       |
+| 老挝语               | `lo`       |
+| 拉脱维亚方言(Latgalian) | `ltg`      |
+| 拉丁语               | `la`       |
+| 拉脱维亚语             | `lv`       |
+| 利古里亚语             | `lij`      |
+| 林堡语               | `li`       |
+| 林加拉语              | `ln`       |
+| 立陶宛语              | `lt`       |
+| 伦巴第语              | `lmo`      |
+| 卢干达语              | `lg`       |
+| 卢奥语               | `luo`      |
+| 卢森堡语              | `lb`       |
+| 马其顿语              | `mk`       |
+| 马都拉语              | `mad`      |
+| 迈蒂利语              | `mai`      |
+| 望加锡语              | `mak`      |
+| 马尔加什语             | `mg`       |
+| 马来语               | `ms`       |
+| 马来语(爪夷文)          | `ms-Arab`  |
+| 马拉雅拉姆语            | `ml`       |
+| 马耳他语              | `mt`       |
+| 马姆语               | `mam`      |
+| 曼岛语               | `gv`       |
+| 毛利语               | `mi`       |
+| 马拉地语              | `mr`       |
+| 马绍尔语              | `mh`       |
+| 马尔瓦里语             | `mwr`      |
+| 毛里求斯克里奥尔语         | `mfe`      |
+| 马里语(东部)           | `chm`      |
+| 曼尼普尔语(梅泰文)        | `mni-Mtei` |
+| 米南加保语             | `min`      |
+| 米佐语               | `lus`      |
+| 蒙古语               | `mn`       |
+| 缅甸语               | `my`       |
+| 纳瓦特尔语(东瓦斯特卡)      | `nhe`      |
+| 恩道语               | `ndc-ZW`   |
+| 南恩德贝莱语            | `nr`       |
+| 尼瓦尔语              | `new`      |
+| 尼泊尔语              | `ne`       |
+| 恩科语               | `bm-Nkoo`  |
+| 挪威语               | `no`       |
+| 努埃尔语              | `nus`      |
+| 奥克语               | `oc`       |
+| 奥里亚语              | `or`       |
+| 奥罗莫语              | `om`       |
+| 奥塞梯语              | `os`       |
+| 邦阿西楠语             | `pag`      |
+| 帕皮阿门托语            | `pap`      |
+| 普什图语              | `ps`       |
+| 波斯语               | `fa`       |
+| 波兰语               | `pl`       |
+| 葡萄牙语(巴西)          | `pt`       |
+| 葡萄牙语(葡萄牙)         | `pt-PT`    |
+| 旁遮普语(果鲁穆奇文)       | `pa`       |
+| 旁遮普语(沙姆奇文)        | `pa-Arab`  |
+| 克丘亚语              | `qu`       |
+| 凯克其语              | `kek`      |
+| 罗姆语               | `rom`      |
+| 罗马尼亚语             | `ro`       |
+| 伦迪语               | `rn`       |
+| 俄语                | `ru`       |
+| 萨米语(北部)           | `se`       |
+| 萨摩亚语              | `sm`       |
+| 桑戈语               | `sg`       |
+| 梵语                | `sa`       |
+| 桑塔利语              | `sat-Latn` |
+| 苏格兰盖尔语            | `gd`       |
+| 北索托语              | `nso`      |
+| 塞尔维亚语             | `sr`       |
+| 塞索托语              | `st`       |
+| 塞舌尔克里奥尔语          | `crs`      |
+| 掸语                | `shn`      |
+| 修纳语               | `sn`       |
+| 西西里语              | `scn`      |
+| 西里西亚语             | `szl`      |
+| 信德语               | `sd`       |
+| 僧伽罗语              | `si`       |
+| 斯洛伐克语             | `sk`       |
+| 斯洛文尼亚语            | `sl`       |
+| 索马里语              | `so`       |
+| 西班牙语              | `es`       |
+| 巽他语               | `su`       |
+| 苏苏语               | `sus`      |
+| 斯瓦希里语             | `sw`       |
+| 斯瓦蒂语              | `ss`       |
+| 瑞典语               | `sv`       |
+| 塔希提语              | `ty`       |
+| 塔吉克语              | `tg`       |
+| 柏柏尔语(拉丁)          | `ber-Latn` |
+| 柏柏尔语(提非纳文)        | `ber`      |
+| 泰米尔语              | `ta`       |
+| 鞑靼语               | `tt`       |
+| 泰卢固语              | `te`       |
+| 德顿语               | `tet`      |
+| 泰语                | `th`       |
+| 藏语                | `bo`       |
+| 提格利尼亚语            | `ti`       |
+| 提夫语               | `tiv`      |
+| 巴布亚皮钦语            | `tpi`      |
+| 汤加语               | `to`       |
+| 聪加语               | `ts`       |
+| 茨瓦纳语              | `tn`       |
+| 图鲁语               | `tcy`      |
+| 通布卡语              | `tum`      |
+| 土耳其语              | `tr`       |
+| 土库曼语              | `tk`       |
+| 图瓦语               | `tyv`      |
+| 特威语               | `ak`       |
+| 乌德穆尔特语            | `udm`      |
+| 乌克兰语              | `uk`       |
+| 乌尔都语              | `ur`       |
+| 维吾尔语              | `ug`       |
+| 乌兹别克语             | `uz`       |
+| 文达语               | `ve`       |
+| 威尼斯语              | `vec`      |
+| 越南语               | `vi`       |
+| 瓦莱语(Waray)        | `war`      |
+| 威尔士语              | `cy`       |
+| 沃洛夫语              | `wo`       |
+| 科萨语               | `xh`       |
+| 雅库特语              | `sah`      |
+| 意第绪语              | `yi`       |
+| 约鲁巴语              | `yo`       |
+| 尤卡坦玛雅语            | `yua`      |
+| 萨波特克语             | `zap`      |
+| 祖鲁语               | `zu`       |
+
+</details>
+
+##### `translator.edge`
+
+| 参数名           | 类型   | 默认值   |
+| --------------- | ------ | ------- |
+| `source`        | str    | `auto`  |
+| `target`        | str    | `zh-Hans` |
+| `sleep`         | float  | 1.0     |
+
+<details>
+<summary>支持语言列表 (点击展开)</summary>
+
+| 语言名称        | 代码         |
+| ----------- | ---------- |
+| 南非荷兰语       | `af`       |
+| 阿尔巴尼亚语      | `sq`       |
+| 阿姆哈拉语       | `am`       |
+| 阿拉伯语        | `ar`       |
+| 亚美尼亚语       | `hy`       |
+| 阿萨姆语        | `as`       |
+| 阿塞拜疆语(拉丁)   | `az`       |
+| 孟加拉语        | `bn`       |
+| 巴什基尔语       | `ba`       |
+| 巴斯克语        | `eu`       |
+| 波斯尼亚语(拉丁)   | `bs`       |
+| 保加利亚语       | `bg`       |
+| 粤语(繁体)      | `yue`      |
+| 加泰罗尼亚语      | `ca`       |
+| 中文(文言文)     | `lzh`      |
+| 中文(简体)      | `zh-Hans`  |
+| 中文(繁体)      | `zh-Hant`  |
+| 克罗地亚语       | `hr`       |
+| 捷克语         | `cs`       |
+| 丹麦语         | `da`       |
+| 达里语         | `prs`      |
+| 迪维希语        | `dv`       |
+| 荷兰语         | `nl`       |
+| 英语          | `en`       |
+| 爱沙尼亚语       | `et`       |
+| 法罗语         | `fo`       |
+| 斐济语         | `fj`       |
+| 菲律宾语        | `fil`      |
+| 芬兰语         | `fi`       |
+| 法语          | `fr`       |
+| 法语(加拿大)     | `fr-ca`    |
+| 加利西亚语       | `gl`       |
+| 格鲁吉亚语       | `ka`       |
+| 德语          | `de`       |
+| 希腊语         | `el`       |
+| 古吉拉特语       | `gu`       |
+| 海地克里奥尔语     | `ht`       |
+| 希伯来语        | `he`       |
+| 印地语         | `hi`       |
+| 苗族语(拉丁)     | `mww`      |
+| 匈牙利语        | `hu`       |
+| 冰岛语         | `is`       |
+| 印度尼西亚语      | `id`       |
+| 伊努因纳克顿语     | `ikt`      |
+| 因纽特语        | `iu`       |
+| 因纽特语(拉丁)    | `iu-Latn`  |
+| 爱尔兰语        | `ga`       |
+| 意大利语        | `it`       |
+| 日语          | `ja`       |
+| 卡纳达语        | `kn`       |
+| 哈萨克语        | `kk`       |
+| 高棉语         | `km`       |
+| 克林贡语        | `tlh-Latn` |
+| 克林贡语(plqaD) | `tlh-Piqd` |
+| 韩语          | `ko`       |
+| 库尔德语(中部)    | `ku`       |
+| 库尔德语(北部)    | `kmr`      |
+| 吉尔吉斯语(西里尔)  | `ky`       |
+| 老挝语         | `lo`       |
+| 拉脱维亚语       | `lv`       |
+| 立陶宛语        | `lt`       |
+| 马其顿语        | `mk`       |
+| 马尔加什语       | `mg`       |
+| 马来语(拉丁)     | `ms`       |
+| 马拉雅拉姆语      | `ml`       |
+| 马耳他语        | `mt`       |
+| 毛利语         | `mi`       |
+| 马拉地语        | `mr`       |
+| 蒙古语(西里尔)    | `mn-Cyrl`  |
+| 蒙古语(传统)     | `mn-Mong`  |
+| 缅甸语         | `my`       |
+| 尼泊尔语        | `ne`       |
+| 挪威语         | `nb`       |
+| 奥里亚语        | `or`       |
+| 普什图语        | `ps`       |
+| 波斯语         | `fa`       |
+| 波兰语         | `pl`       |
+| 葡萄牙语(巴西)    | `pt`       |
+| 葡萄牙语(葡萄牙)   | `pt-pt`    |
+| 旁遮普语        | `pa`       |
+| 克雷塔罗奥托米语    | `otq`      |
+| 罗马尼亚语       | `ro`       |
+| 俄语          | `ru`       |
+| 萨摩亚语(拉丁)    | `sm`       |
+| 塞尔维亚语(西里尔)  | `sr-Cyrl`  |
+| 塞尔维亚语(拉丁)   | `sr-Latn`  |
+| 斯洛伐克语       | `sk`       |
+| 斯洛文尼亚语      | `sl`       |
+| 索马里语(阿拉伯)   | `so`       |
+| 西班牙语        | `es`       |
+| 斯瓦希里语(拉丁)   | `sw`       |
+| 瑞典语         | `sv`       |
+| 塔希提语        | `ty`       |
+| 泰米尔语        | `ta`       |
+| 鞑靼语(拉丁)     | `tt`       |
+| 泰卢固语        | `te`       |
+| 泰语          | `th`       |
+| 藏语          | `bo`       |
+| 提格利尼亚语      | `ti`       |
+| 汤加语         | `to`       |
+| 土耳其语        | `tr`       |
+| 土库曼语(拉丁)    | `tk`       |
+| 乌克兰语        | `uk`       |
+| 上索布语        | `hsb`      |
+| 乌尔都语        | `ur`       |
+| 维吾尔语(阿拉伯)   | `ug`       |
+| 乌兹别克语(拉丁)   | `uz`       |
+| 越南语         | `vi`       |
+| 威尔士语        | `cy`       |
+| 尤卡坦玛雅语      | `yua`      |
+| 祖鲁语         | `zu`       |
+
+</details>
+
+##### `translator.youdao`
+
+| 参数名           | 类型   | 默认值   |
+| --------------- | ------ | ------- |
+| `source`        | str    | `auto`  |
+| `target`        | str    | `zh-CHS` |
+| `sleep`         | float  | 1.0     |
+
+<details>
+<summary>支持语言列表 (点击展开)</summary>
+
+| 语言名称       | 代码        |
+| ------------- | ----------- |
+| 自动识别       | `auto`     |
+| 阿尔巴尼亚语    | `sq`       |
+| 爱尔兰语       | `ga`      |
+| 爱沙尼亚语      | `et`      |
+| 阿拉伯语       | `ar`      |
+| 阿姆哈拉语      | `am`      |
+| 阿塞拜疆语      | `az`      |
+| 白俄罗斯语      | `be`      |
+| 保加利亚语      | `bg`      |
+| 巴斯克语       | `eu`      |
+| 冰岛语        | `is`      |
+| 波兰语        | `pl`      |
+| 波斯尼亚语(拉丁语) | `bs-Latn` |
+| 波斯语        | `fa`      |
+| 丹麦语        | `da`      |
+| 德语         | `de`      |
+| 俄语         | `ru`      |
+| 法语         | `fr`      |
+| 菲律宾语       | `tl`      |
+| 芬兰语        | `fi`      |
+| 弗里斯兰语      | `fy`      |
+| 高棉语        | `km`      |
+| 格鲁吉亚语      | `ka`      |
+| 古吉拉特语      | `gu`      |
+| 海地语        | `ht`      |
+| 韩语         | `ko`      |
+| 豪萨语        | `ha`      |
+| 哈萨克语       | `kk`      |
+| 荷兰语        | `nl`      |
+| 加利西亚语      | `gl`      |
+| 加泰罗尼亚语     | `ca`      |
+| 捷克语        | `cs`      |
+| 吉尔吉斯斯坦语    | `ky`      |
+| 卡纳达语       | `kn`      |
+| 克林贡语       | `tlh`     |
+| 克罗地亚语      | `hr`      |
+| 克洛塔罗乙巳语    | `otq`     |
+| 科西嘉语       | `co`      |
+| 库尔德语       | `ku`      |
+| 拉丁语        | `la`      |
+| 老挝语        | `lo`      |
+| 拉脱维亚语      | `lv`      |
+| 立陶宛语       | `lt`      |
+| 罗马尼亚语      | `ro`      |
+| 卢森堡语       | `lb`      |
+| 马尔加什语      | `mg`      |
+| 马耳他语       | `mt`      |
+| 马拉地语       | `mr`      |
+| 马来语        | `ms`      |
+| 马拉雅拉姆语     | `ml`      |
+| 毛利语        | `mi`      |
+| 马其顿语       | `mk`      |
+| 蒙古语        | `mn`      |
+| 孟加拉语       | `bn`      |
+| 缅甸语        | `my`      |
+| 苗族昂山土语     | `mww`     |
+| 苗族语        | `hmn`     |
+| 南非科萨语      | `xh`      |
+| 南非祖鲁语      | `zu`      |
+| 尼泊尔语       | `ne`      |
+| 挪威语        | `no`      |
+| 旁遮普语       | `pa`      |
+| 普什图语       | `ps`      |
+| 葡萄牙语       | `pt`      |
+| 齐切瓦语       | `ny`      |
+| 日语         | `ja`      |
+| 瑞典语        | `sv`      |
+| 塞尔维亚语(拉丁语) | `sr-Latn` |
+| 塞尔维亚语(西里尔) | `sr-Cyrl` |
+| 塞索托语       | `st`      |
+| 萨摩亚语       | `sm`      |
+| 僧伽罗语       | `si`      |
+| 世界语        | `eo`      |
+| 斯洛伐克语      | `sk`      |
+| 斯洛文尼亚语     | `sl`      |
+| 斯瓦希里语      | `sw`      |
+| 苏格兰盖尔语     | `gd`      |
+| 索马里语       | `so`      |
+| 宿务语        | `ceb`     |
+| 泰卢固语       | `te`      |
+| 泰米尔语       | `ta`      |
+| 泰语         | `th`      |
+| 塔吉克语       | `tg`      |
+| 土耳其语       | `tr`      |
+| 威尔士语       | `cy`      |
+| 文言文        | `zh-lzh`  |
+| 乌尔都语       | `ur`      |
+| 乌克兰语       | `uk`      |
+| 乌兹别克语      | `uz`      |
+| 夏威夷语       | `haw`     |
+| 西班牙语       | `es`      |
+| 希伯来语       | `he`      |
+| 希腊语        | `el`      |
+| 信德语        | `sd`      |
+| 匈牙利语       | `hu`      |
+| 修纳语        | `sn`      |
+| 亚美尼亚语      | `hy`      |
+| 伊博语        | `ig`      |
+| 意大利语       | `it`      |
+| 意第绪语       | `yi`      |
+| 印地语        | `hi`      |
+| 印度尼西亚语     | `id`      |
+| 英语         | `en`      |
+| 印尼巽他语      | `su`      |
+| 印尼爪哇语      | `jw`      |
+| 尤卡坦玛雅语     | `yua`     |
+| 约鲁巴语       | `yo`      |
+| 越南语        | `vi`      |
+| 中文         | `zh-CHS`  |
+| 中文(繁体)     | `zh-CHT`  |
+
+</details>
+
 ##### `corrector`
 
 中文文本纠错, 基于 [**pycorrector**](https://github.com/shibing624/pycorrector)。
@@ -406,7 +913,7 @@ content_replace = "content-replace.json"
 
 | 引擎 Key          | 说明                        | 文档链接                                                                                                                                       | 额外参数                                                                                                                                   |
 | --------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| **kenlm**       | 基于统计语言模型的中文纠错             | [kenlm 模型（统计模型）](https://github.com/shibing624/pycorrector?tab=readme-ov-file#kenlm%E6%A8%A1%E5%9E%8B%E7%BB%9F%E8%AE%A1%E6%A8%A1%E5%9E%8B) | `language_model_path`, `custom_confusion_path_or_dict`, `proper_name_path`, `common_char_path`, `same_pinyin_path`, `same_stroke_path` |
+| **kenlm**       | 基于统计语言模型的中文纠错             | [kenlm 模型(统计模型)](https://github.com/shibing624/pycorrector?tab=readme-ov-file#kenlm%E6%A8%A1%E5%9E%8B%E7%BB%9F%E8%AE%A1%E6%A8%A1%E5%9E%8B) | `language_model_path`, `custom_confusion_path_or_dict`, `proper_name_path`, `common_char_path`, `same_pinyin_path`, `same_stroke_path` |
 | **macbert**     | 基于 Transformer 的拼写纠错模型    | [MacBERT 模型](https://github.com/shibing624/pycorrector?tab=readme-ov-file#macbert4csc%E6%A8%A1%E5%9E%8B)                                   | `model_name_or_path`                                                                                                                   |
 | **t5**          | T5 架构的中文纠错模型              | [T5 模型](https://github.com/shibing624/pycorrector?tab=readme-ov-file#t5%E6%A8%A1%E5%9E%8B)                                                 | `model_name_or_path`                                                                                                                   |
 | **ernie_csc**   | 基于 ERNIE 的中文纠错模型          | [ErnieCSC 模型](https://github.com/shibing624/pycorrector?tab=readme-ov-file#erniecsc%E6%A8%A1%E5%9E%8B)                                     | `model_name_or_path`                                                                                                                   |

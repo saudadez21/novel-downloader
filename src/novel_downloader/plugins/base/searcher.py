@@ -32,6 +32,10 @@ class BaseSearcher(abc.ABC):
             return []
         return self._parse_html(html, limit)
 
+    @property
+    def nsfw(self) -> bool:
+        return False
+
     @abc.abstractmethod
     async def _fetch_html(self, keyword: str) -> str:
         """
@@ -121,6 +125,14 @@ class BaseSearcher(abc.ABC):
         value: str = xs[0].strip() if xs else ""
         for replace in replaces:
             old, new = replace
+            value = value.replace(old, new)
+        return value.strip()
+
+    @staticmethod
+    def _join_strs(xs: list[str], replaces: list[tuple[str, str]] | None = None) -> str:
+        replaces = replaces or []
+        value = "".join(s.strip() for s in xs if s and s.strip())
+        for old, new in replaces:
             value = value.replace(old, new)
         return value.strip()
 
