@@ -16,8 +16,8 @@ from typing import Any, TypedDict
 
 from lxml import html
 
-from novel_downloader.infra.fontocr import get_font_ocr
 from novel_downloader.infra.jsbridge import get_decryptor
+from novel_downloader.libs.fontocr import get_font_ocr
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (

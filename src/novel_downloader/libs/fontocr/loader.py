@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.infra.fontocr.loader
--------------------------------------
+novel_downloader.libs.fontocr.loader
+------------------------------------
 
 Lazily load the FontOCR class.
 """

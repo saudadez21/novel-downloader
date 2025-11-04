@@ -18,9 +18,9 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
 from lxml import html
 
-from novel_downloader.infra.fontocr import get_font_ocr
 from novel_downloader.infra.http_defaults import DEFAULT_USER_HEADERS
 from novel_downloader.infra.paths import XIGUASHUWU_MAP_PATH
+from novel_downloader.libs.fontocr import get_font_ocr
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (

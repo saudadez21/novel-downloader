@@ -9,13 +9,12 @@ from argparse import ArgumentParser, Namespace
 from collections.abc import Sequence
 from pathlib import Path
 
-from novel_downloader.apps.cli import ui
-from novel_downloader.apps.constants import SEARCH_SUPPORT_SITES
+from novel_downloader.apps.cli import prompts, ui
 from novel_downloader.apps.utils import load_or_init_config
 from novel_downloader.infra.config import ConfigAdapter
 from novel_downloader.infra.i18n import t
 from novel_downloader.plugins import registrar
-from novel_downloader.schemas import BookConfig, SearchResult
+from novel_downloader.schemas import BookConfig
 
 from ..ui_adapters import (
     CLIDownloadUI,
@@ -91,7 +90,7 @@ class SearchCmd(Command):
                     timeout=timeout,
                 )
 
-            chosen = cls._prompt_user_select(results)
+            chosen = prompts.select_search_result(results)
             if chosen is None:
                 return
 
@@ -151,81 +150,3 @@ class SearchCmd(Command):
         import asyncio
 
         asyncio.run(_run())
-
-    @staticmethod
-    def _prompt_user_select(
-        results: Sequence[SearchResult],
-        per_page: int = 10,
-    ) -> SearchResult | None:
-        """
-        Show results in pages and let user select by global index.
-        """
-        if not results:
-            ui.warn(t("No results found."))
-            return None
-
-        total = len(results)
-        total_pages = max(1, (total + per_page - 1) // per_page)
-        page = 1
-
-        columns = [
-            t("#"),
-            t("Title"),
-            t("Author"),
-            t("Latest"),
-            t("Updated"),
-            t("Site Name"),
-            t("Book ID"),
-        ]
-        all_rows = [
-            [
-                str(i),
-                r["title"],
-                r["author"],
-                r["latest_chapter"],
-                r["update_date"],
-                SEARCH_SUPPORT_SITES.get(r["site"], r["site"]),
-                r["book_id"],
-            ]
-            for i, r in enumerate(results, 1)
-        ]
-
-        while True:
-            start = (page - 1) * per_page + 1
-            end = min(page * per_page, total)
-
-            page_rows = all_rows[start - 1 : end]
-
-            ui.render_table(
-                t("Search Results · Page {page}/{total_pages}").format(
-                    page=page, total_pages=total_pages
-                ),
-                columns,
-                page_rows,
-            )
-
-            numeric_choices = [str(i) for i in range(start, end + 1)]
-            nav_choices = []
-            if page < total_pages:
-                nav_choices.append("n")
-            if page > 1:
-                nav_choices.append("p")
-
-            choice = ui.prompt_choice(
-                t(
-                    "Enter a number, 'n' for next, 'p' for previous (press Enter to cancel)"  # noqa: E501
-                ),
-                numeric_choices + nav_choices,
-            )
-
-            if choice == "":
-                return None  # cancel
-            if choice == "n" and page < total_pages:
-                page += 1
-                continue
-            if choice == "p" and page > 1:
-                page -= 1
-                continue
-            if choice in numeric_choices:
-                idx = int(choice)
-                return results[idx - 1]

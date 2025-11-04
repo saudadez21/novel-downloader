@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.infra.fontocr.core
------------------------------------
+novel_downloader.libs.fontocr.core
+----------------------------------
 
 This class provides utility methods for optical character recognition (OCR),
 primarily used for decrypting custom font encryption.
