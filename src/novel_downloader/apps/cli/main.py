@@ -14,12 +14,19 @@ from novel_downloader.infra.i18n import t
 
 def cli_main() -> None:
     parser = argparse.ArgumentParser(description=t("Novel Downloader CLI tool."))
-    subparsers = parser.add_subparsers(dest="command", required=True)
+    subparsers = parser.add_subparsers(dest="command")
 
     for cmd in commands:
         cmd.register(subparsers)
 
     args = parser.parse_args()
+
+    if args.command is None:
+        from novel_downloader.apps.cli.interactive import start_interactive
+
+        start_interactive()
+        return
+
     if hasattr(args, "func"):
         try:
             args.func(args)

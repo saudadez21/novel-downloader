@@ -12,7 +12,7 @@ from novel_downloader.infra.config import copy_default_config, load_config
 from novel_downloader.infra.i18n import t
 
 
-def load_or_init_config(config_path: Path | None) -> dict[str, Any] | None:
+def load_or_init_config(config_path: Path | None = None) -> dict[str, Any] | None:
     try:
         return load_config(config_path)
     except FileNotFoundError:

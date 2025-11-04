@@ -44,6 +44,9 @@ class ConfigAdapter:
         """
         self._config: dict[str, Any] = dict(config)
 
+    def get_config(self) -> dict[str, Any]:
+        return self._config
+
     def get_fetcher_config(self, site: str) -> FetcherConfig:
         """
         Build a :class:`novel_downloader.models.FetcherConfig` by resolving fields

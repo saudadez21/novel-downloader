@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.infra.fontocr
-------------------------------
+novel_downloader.libs.fontocr
+-----------------------------
 
 Font-based OCR utilities for parsing and restoring obfuscated text.
 """
