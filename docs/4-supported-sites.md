@@ -13,7 +13,7 @@
     - [类笔趣阁 / 第三方转载站](#类笔趣阁--第三方转载站)
     - [同人](#同人)
     - [日语](#日语)
-    - [限制级](#限制级)
+    - [NSFW](#nsfw)
     - [已归档站点](#已归档站点)
   - [站点详解与 Book ID 规则](#站点详解与-book-id-规则)
     - [主流原创 / 正版文学平台](#主流原创--正版文学平台-1)
@@ -22,7 +22,7 @@
     - [类笔趣阁 / 第三方转载站](#类笔趣阁--第三方转载站-1)
     - [同人](#同人-1)
     - [日语](#日语-1)
-    - [限制级](#限制级-1)
+    - [NSFW](#nsfw-1)
     - [已归档站点](#已归档站点-1)
   - [配置文件](#配置文件)
   - [Cookie 与登录](#cookie-与登录)
@@ -178,11 +178,10 @@ novel-cli download --site ttkan shengxu-chendong
 | [アルファポリス](https://www.alphapolis.co.jp/)              | alphapolis  | ✅     | ❌     | ⚠️     | ⚠️     |
 | [ノベルピア](https://novelpia.jp/)                          | novelpia    | ❌     | ✅     | ⚠️     | ⚠️     |
 
-#### 限制级
+#### NSFW
 
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 | 支持语言 |
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
-| [3A电子书](http://www.aaatxt.com/)                           | aaatxt     | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [小说狂人](https://czbooks.net/)                             | czbooks    | ❌     | ❌     | ⚠️     | ✅     | 繁      |
 | [西瓜书屋](https://www.xiguashuwu.com/)                      | xiguashuwu | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [爱丽丝书屋](https://www.alicesw.com/)                       | alicesw    | ❌     | ❌     | ⚠️     | ✅     | 简      |
@@ -194,6 +193,7 @@ novel-cli download --site ttkan shengxu-chendong
 
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 | 支持语言 |
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
+| [3A电子书](http://www.aaatxt.com/)                           | aaatxt     | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [笔趣阁](https://www.8tsw.com/)                              | n8tsw     | ❌     | ❌     | ⚠️     | ⚠️     | 简      |
 | [精彩小说](https://biquyuedu.com/)                           | biquyuedu | ❌     | ❌     | ⚠️     | ❌     | 简      |
 | [得奇小说网](https://www.deqixs.com/)                        | deqixs    | ❌     | ❌     | ❌     | ✅     | 简      |
@@ -529,12 +529,7 @@ novel-cli download --site ttkan shengxu-chendong
   * 书籍: `https://novelpia.jp/novel/2393?sid=main5` -> Book ID: `2393`
   * 章节: `https://novelpia.jp/viewer/51118` -> Chapter ID: `51118`
 
-#### 限制级
-
-* **3A电子书 (aaatxt)**
-  * 书籍: `http://www.aaatxt.com/shu/24514.html` -> Book ID: `24514`
-  * 章节: `http://www.aaatxt.com/yuedu/24514_1.html` -> Chapter ID: `24514_1`
-  * 注意: 该站点直接提供 txt 下载。
+#### NSFW
 
 * **小说狂人 (czbooks)**
   * 书籍: `https://czbooks.net/n/dr4p0k7` -> Book ID: `dr4p0k7`
@@ -561,6 +556,11 @@ novel-cli download --site ttkan shengxu-chendong
   * 章节: `https://www.uaa.com/novel/chapter?id=234639` -> Chapter ID: `234639`
 
 #### 已归档站点
+
+* **3A电子书 (aaatxt)**
+  * 书籍: `http://www.aaatxt.com/shu/24514.html` -> Book ID: `24514`
+  * 章节: `http://www.aaatxt.com/yuedu/24514_1.html` -> Chapter ID: `24514_1`
+  * 注意: 该站点直接提供 txt 下载。
 
 * **笔趣阁 (n8tsw)**
   * 书籍: `https://www.8tsw.com/0_1/` -> Book ID: `0_1`

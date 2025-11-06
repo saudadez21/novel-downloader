@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.plugins.sites.aaatxt.fetcher
----------------------------------------------
+novel_downloader.plugins.archived.aaatxt.fetcher
+------------------------------------------------
 
 """
 
