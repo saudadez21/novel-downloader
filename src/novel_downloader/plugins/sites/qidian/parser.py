@@ -15,7 +15,6 @@ from pathlib import Path
 from typing import Any, TypedDict
 
 from lxml import html
-
 from novel_downloader.infra.cookies import get_cookie_value
 from novel_downloader.infra.jsbridge import get_decryptor
 from novel_downloader.infra.paths import DATA_DIR

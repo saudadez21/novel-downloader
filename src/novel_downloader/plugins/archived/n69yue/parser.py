@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.plugins.sites.n69yue.parser
---------------------------------------------
+novel_downloader.plugins.archived.n69yue.parser
+-----------------------------------------------
 
 """
 
@@ -10,7 +10,6 @@ import logging
 from typing import Any
 
 from lxml import html
-
 from novel_downloader.infra.paths import N69YUE_MAP_PATH
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar

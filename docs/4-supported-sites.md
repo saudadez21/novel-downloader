@@ -128,7 +128,6 @@ novel-cli download --site ttkan shengxu-chendong
 | [爱下电子书](https://ixdzs8.com/)                             | ixdzs8   | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [大熊猫文学网](https://www.dxmwx.org/)                        | dxmwx    | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [25中文网](https://www.i25zw.com/)                           | i25zw     | ❌     | ❌     | ❌     | ✅     | 简      |
-| [69阅读](https://www.69yue.top/index.html)                   | n69yue    | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [101看书](https://101kanshu.com/)                           | n101kanshu | ❌     | ❌     | ⚠️     | ✅     | 繁      |
 | [老幺小说网](https://www.laoyaoxs.org/)                     | laoyaoxs  | ❌     | ❌     | ❌     | ✅     | 简      |
 | [全本小说网](https://quanben5.com/)                          | quanben5  | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
@@ -200,6 +199,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [小说屋](http://www.xiaoshuoge.info/)                       | xiaoshuoge | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [小说路上](https://m.xs63b.com/)                              | xs63b    | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [完本神站](https://www.wanbengo.com/)                        | wanbengo  | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [69阅读](https://www.69yue.top/index.html)                   | n69yue    | ❌     | ❌     | ⚠️     | ✅     | 简      |
 
 ---
 
@@ -367,10 +367,6 @@ novel-cli download --site ttkan shengxu-chendong
 * **25中文网 (i25zw)**
   * 书籍: `https://www.i25zw.com/book/64371.html` -> Book ID: `64371`
   * 章节: `https://www.i25zw.com/64371/153149757.html` -> Chapter ID: `153149757`
-
-* **69阅读 (n69yue)**
-  * 书籍: `https://www.69yue.top/articlecategroy/15yu.html` -> Book ID: `15yu`
-  * 章节: `https://www.69yue.top/article/15185363014257741.html` -> Chapter ID: `15185363014257741`
 
 * **101看书 (n101kanshu)**
   * 书籍: `https://101kanshu.com/book/7994.html` -> Book ID: `7994`
@@ -592,6 +588,10 @@ novel-cli download --site ttkan shengxu-chendong
     * 乱码过多: 例如 `?j\i~n￠j^i?a` 或多段连续无意义字符, 导致正文可读性极差
     * 结构混乱: HTML 标签嵌套不规范, 正文段落交错混乱
     * 来源异常: 文本中混入大量 HTML 实体, 以及明显来自其他小说网站的段落
+
+* **69阅读 (n69yue)**
+  * 书籍: `https://www.69yue.top/articlecategroy/15yu.html` -> Book ID: `15yu`
+  * 章节: `https://www.69yue.top/article/15185363014257741.html` -> Chapter ID: `15185363014257741`
 
 ---
 

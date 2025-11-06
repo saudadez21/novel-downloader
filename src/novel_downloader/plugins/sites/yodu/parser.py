@@ -10,7 +10,6 @@ import re
 from typing import Any
 
 from lxml import html
-
 from novel_downloader.infra.paths import YODU_MAP_PATH
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
