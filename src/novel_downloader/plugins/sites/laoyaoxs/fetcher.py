@@ -5,12 +5,12 @@ novel_downloader.plugins.sites.laoyaoxs.fetcher
 
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class LaoyaoxsSession(GenericSession):
+class LaoyaoxsFetcher(GenericFetcher):
     """
     A session class for interacting with the 老幺小说网 (www.laoyaoxs.org) novel.
     """

@@ -5,12 +5,12 @@ novel_downloader.plugins.sites.guidaye.fetcher
 
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class GuidayeSession(GenericSession):
+class GuidayeFetcher(GenericFetcher):
     """
     A session class for interacting with the 名著阅读 (b.guidaye.com) novel.
     """

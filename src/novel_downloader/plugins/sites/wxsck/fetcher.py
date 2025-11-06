@@ -4,12 +4,12 @@ novel_downloader.plugins.sites.wxsck.fetcher
 --------------------------------------------
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class WxsckSession(GenericSession):
+class WxsckFetcher(GenericFetcher):
     """
     A session class for interacting with the 万相书城 (wxsck.com) novel.
     """

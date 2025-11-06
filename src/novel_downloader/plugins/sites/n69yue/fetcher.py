@@ -5,12 +5,12 @@ novel_downloader.plugins.sites.n69yue.fetcher
 
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class N69yueSession(GenericSession):
+class N69yueFetcher(GenericFetcher):
     """
     A session class for interacting with the 69阅读 (www.69yue.top) novel.
     """

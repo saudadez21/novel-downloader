@@ -10,10 +10,10 @@ import base64
 import re
 from typing import Any
 
-from novel_downloader.plugins.base.fetcher import BaseSession
+from novel_downloader.plugins.base.fetcher import BaseFetcher
 
 
-class Xs63bSession(BaseSession):
+class Xs63bFetcher(BaseFetcher):
     """
     A session class for interacting with the 小说路上 (m.xs63b.com) novel.
     """

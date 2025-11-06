@@ -37,6 +37,7 @@
 
 | 参数名                | 类型    | 默认值             | 说明                                       |
 | -------------------- | ------- | ----------------- | ------------------------------------------ |
+| `backend`            | `str`   | `"aiohttp"`       | 全局 HTTP 请求后端, 可选 `"aiohttp"`, `"httpx"`, `"curl_cffi"` |
 | `retry_times`        | int     | 3                 | 请求失败重试次数                             |
 | `backoff_factor`     | float   | 2.0               | 重试的退避因子 (每次重试等待时间将按倍数增加, 如 `2s`, `4s`, `8s`) |
 | `timeout`            | float   | 30.0              | 单次请求超时 (秒)                            |
@@ -48,13 +49,51 @@
 | `cache_dir`          | string  | `"./novel_cache"` | 本地缓存目录 (字体 / 图片等)                  |
 | `workers`            | int     | 4                 | 下载任务协程数量                             |
 | `skip_existing`      | bool    | true              | 下载时跳过本地已存在的章节文件                 |
+| `http2`              | `bool`  | `true`            | 仅对 `httpx` 生效, 启用 HTTP/2 支持           |
+| `impersonate`        | `str \| None` | `None`      | 仅对 `curl_cffi` 生效, 启用浏览器指纹仿真模式  |
 | `storage_batch_size` | int     | 1                 | `sqlite` 每批提交的章节数 (提高写入性能)       |
 
-> **站点压力与 503**
+**站点压力与 503**
+
+部分站点对高频访问敏感 (例如 >= 5 RPS), 可能返回 `503 Service Temporarily Unavailable`。
+
+建议适当**降低** `max_rps` 或**增大** `request_interval`; 工具支持断点续爬, 已完成的数据不会重复抓取。
+
+**HTTP 请求后端**
+
+程序支持可插拔式 HTTP 后端, 可在 `[general]` 中通过 `backend` 参数进行切换:
+
+| 后端名称     | 说明                                                | 依赖安装                    |
+| ----------- | --------------------------------------------------- | -------------------------- |
+| `aiohttp`   | 默认后端, 基于 `aiohttp` 的异步 HTTP 客户端           | -                          |
+| `httpx`     | 现代异步 HTTP 客户端, 支持 HTTP/1.1 与 HTTP/2         | `pip install httpx[http2]` |
+| `curl_cffi` | 基于 `libcurl` 的实现, 支持浏览器仿真 (`impersonate`) | `pip install curl_cffi`    |
+
+> **扩展参数**
 >
-> 部分站点对高频访问敏感 (例如 >= 5 RPS), 可能返回 `503 Service Temporarily Unavailable`。
+> * `http2`: 仅对 `httpx` 生效, 启用 HTTP/2 支持 (默认 `true`)
+> * `impersonate`: 仅对 `curl_cffi` 生效, 启用浏览器指纹仿真, 可设为 `"chrome136"`, `"chrome"` 等
 >
-> 建议适当**降低** `max_rps` 或**增大** `request_interval`; 工具支持断点续爬, 已完成的数据不会重复抓取。
+> 更多信息请参考各项目文档:
+>
+> * [`httpx`](https://github.com/encode/httpx)
+> * [`curl_cffi`](https://github.com/lexiforest/curl_cffi)
+
+**兼容性与 Cloudflare 行为说明**
+
+由于各 HTTP 客户端在协议实现与 TLS 指纹上的差异, 部分站点在使用默认的 `aiohttp` 后端时, 可能会触发 **Cloudflare 反爬虫或访问验证机制**, 从而导致连接被拦截或返回 `403`/`5xx` 状态码。
+
+若遇到此类情况, 建议切换至以下后端之一:
+
+* **`httpx` (启用 `http2 = true`)**: 通过 HTTP/2 可获得更接近现代浏览器的网络特征, 对部分启用 Cloudflare 的站点有更好的兼容性
+* **`curl_cffi` (启用 `impersonate`)**: 通过模拟浏览器 TLS 指纹和请求头, 可显著提升被 Cloudflare 或其他 WAF 拦截的站点的访问成功率
+
+需要注意的是, 不同站点的后端表现可能存在差异。例如:
+
+* 某些站点仅在 `aiohttp` 或 `httpx` 的 HTTP/1.1 模式下可正常访问, 而在启用 `http2 = true` 时反而会触发 Cloudflare 或导致连接失败
+* 另一些站点则恰好相反, 只有在启用 HTTP/2 或使用 `curl_cffi` 的浏览器仿真模式下才能成功建立连接
+
+因此, 在遇到访问异常 (如 403、TLS 握手失败、Cloudflare 验证循环等) 时, 建议根据具体站点情况灵活调整后端和相关参数。
 
 #### 调试子节 `[general.debug]`
 

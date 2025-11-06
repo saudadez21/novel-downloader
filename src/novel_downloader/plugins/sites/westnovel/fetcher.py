@@ -4,12 +4,12 @@ novel_downloader.plugins.sites.westnovel.fetcher
 ------------------------------------------------
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class WestnovelSession(GenericSession):
+class WestnovelFetcher(GenericFetcher):
     """
     A session class for interacting with the 西方奇幻小说网 (www.westnovel.com) novel.
     """

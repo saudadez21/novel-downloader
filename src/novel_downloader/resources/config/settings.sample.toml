@@ -12,6 +12,7 @@ cache_dir = "./novel_cache"        # 本地缓存目录
 workers = 4                        # 工作协程数
 skip_existing = true               # 是否跳过已存在章节
 storage_batch_size = 1             # SQLite 批量提交的章节数量
+backend = "aiohttp"                # aiohttp / httpx / curl_cffi
 locale_style = "simplified"        # simplified / traditional
 
 [general.debug]

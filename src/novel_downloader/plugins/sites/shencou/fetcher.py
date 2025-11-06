@@ -7,12 +7,12 @@ novel_downloader.plugins.sites.shencou.fetcher
 
 from typing import Any
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class ShencouSession(GenericSession):
+class ShencouFetcher(GenericFetcher):
     """
     A session class for interacting with the 神凑轻小说 (www.shencou.com) novel.
     """

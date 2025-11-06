@@ -5,12 +5,12 @@ novel_downloader.plugins.sites.lnovel.fetcher
 
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class LnovelSession(GenericSession):
+class LnovelFetcher(GenericFetcher):
     """
     A session class for interacting with the 轻小说百科 (lnovel.org) novel.
     """

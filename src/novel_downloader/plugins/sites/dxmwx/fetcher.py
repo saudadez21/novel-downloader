@@ -5,12 +5,12 @@ novel_downloader.plugins.sites.dxmwx.fetcher
 
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class DxmwxSession(GenericSession):
+class DxmwxFetcher(GenericFetcher):
     """
     A session class for interacting with the 大熊猫文学网 (www.dxmwx.org) novel.
     """

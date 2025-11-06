@@ -9,12 +9,12 @@ import json
 import time
 from typing import Any
 
-from novel_downloader.plugins.base.fetcher import BaseSession
+from novel_downloader.plugins.base.fetcher import BaseFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class NovelpiaSession(BaseSession):
+class NovelpiaFetcher(BaseFetcher):
     """
     A session class for interacting with the ノベルピア (novelpia.jp) novel.
     """
@@ -36,26 +36,37 @@ class NovelpiaSession(BaseSession):
             "mem_nick": "HATI",
             "_": str(int(time.time() * 1000)),
         }
-        async with self.get(self.BOOK_INFO_URL, params=payload) as resp:
-            resp.raise_for_status()
-            info = await resp.json(content_type=None)
+        resp = await self.session.get(self.BOOK_INFO_URL, params=payload, **kwargs)
+        if not resp.ok:
+            raise ConnectionError(
+                f"Book info request failed: {self.BOOK_INFO_URL}, status={resp.status}"
+            )
+
+        try:
+            info = resp.json()
+        except Exception as exc:
+            raise RuntimeError(
+                f"Book info JSON parse failed for {book_id}: {exc}"
+            ) from exc
+
         results: list[str] = [json.dumps(info)]
+
         chap_count: int = info.get("novel", {}).get("count_book", 0)
         page_size = 20
         total_pages = (chap_count + page_size - 1) // page_size
 
         async def fetch_page(idx: int) -> str:
-            payload = {
-                "novel_no": book_id,
-                "page": str(idx),
-            }
-            async with self.post(self.BOOK_CATALOG_URL, data=payload) as resp:
-                resp.raise_for_status()
-                return await resp.text()  # type: ignore[no-any-return]
+            payload = {"novel_no": book_id, "page": str(idx)}
+            resp = await self.session.post(
+                self.BOOK_CATALOG_URL, data=payload, **kwargs
+            )
+            if not resp.ok:
+                raise ConnectionError(
+                    f"Book catalog page {idx} failed, status={resp.status}"
+                )
+            return resp.text
 
-        tasks = [fetch_page(idx) for idx in range(total_pages)]
-        pages = await asyncio.gather(*tasks, return_exceptions=False)
-
+        pages = await asyncio.gather(*[fetch_page(idx) for idx in range(total_pages)])
         results.extend(pages)
         return results
 
@@ -67,6 +78,11 @@ class NovelpiaSession(BaseSession):
     ) -> list[str]:
         url = self.CHAPTER_URL.format(chapter_id=chapter_id)
         data = {"size": "14"}
-        async with self.post(url, data=data) as resp:
-            resp.raise_for_status()
-            return [await resp.text()]
+
+        resp = await self.session.post(url, data=data, **kwargs)
+        if not resp.ok:
+            raise ConnectionError(
+                f"Book chapter request failed: {url}, status={resp.status}"
+            )
+
+        return [resp.text]

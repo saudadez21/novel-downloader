@@ -4,12 +4,12 @@ novel_downloader.plugins.sites.alphapolis.fetcher
 -------------------------------------------------
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class AlphapolisSession(GenericSession):
+class AlphapolisFetcher(GenericFetcher):
     """
     A session class for interacting with the アルファポリス (www.alphapolis.co.jp) novel
     """

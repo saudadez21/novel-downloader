@@ -5,12 +5,12 @@ novel_downloader.plugins.sites.bxwx9.fetcher
 
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class Bxwx9Session(GenericSession):
+class Bxwx9Fetcher(GenericFetcher):
     """
     A session class for interacting with the 笔下文学网 (www.bxwx9.org) novel.
     """

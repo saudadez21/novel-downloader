@@ -5,10 +5,10 @@ novel_downloader.plugins.archived.n8tsw.fetcher
 
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 
 
-class N8tswSession(GenericSession):
+class N8tswFetcher(GenericFetcher):
     """
     A session class for interacting with the 笔趣阁 (www.8tsw.com) novel.
     """

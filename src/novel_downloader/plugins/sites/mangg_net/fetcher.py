@@ -5,12 +5,12 @@ novel_downloader.plugins.sites.mangg_net.fetcher
 
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class ManggNetSession(GenericSession):
+class ManggNetFetcher(GenericFetcher):
     """
     A session class for interacting with the 追书网 (www.mangg.net) novel.
     """

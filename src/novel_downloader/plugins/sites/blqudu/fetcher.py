@@ -5,12 +5,12 @@ novel_downloader.plugins.sites.blqudu.fetcher
 
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class BlquduSession(GenericSession):
+class BlquduFetcher(GenericFetcher):
     """
     A session class for interacting with the 笔趣读 (www.blqudu.cc) novel.
     """

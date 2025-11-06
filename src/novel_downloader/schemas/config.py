@@ -21,11 +21,15 @@ class FetcherConfig:
     max_rps: float = 1000.0
     user_agent: str | None = None
     headers: dict[str, str] | None = None
+    impersonate: str | None = None
     verify_ssl: bool = True
+    http2: bool = True
     proxy: str | None = None
     proxy_user: str | None = None
     proxy_pass: str | None = None
     trust_env: bool = False
+    cache_dir: str = "./novel_cache"
+    backend: str = "aiohttp"
     locale_style: str = "simplified"
 
 

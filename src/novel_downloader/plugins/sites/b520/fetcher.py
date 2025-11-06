@@ -7,12 +7,12 @@ novel_downloader.plugins.sites.b520.fetcher
 
 from typing import Any
 
-from novel_downloader.plugins.base.fetcher import BaseSession
+from novel_downloader.plugins.base.fetcher import BaseFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class B520Session(BaseSession):
+class B520Fetcher(BaseFetcher):
     """
     A session class for interacting with the 笔趣阁 (www.b520.cc) novel.
     """
@@ -28,6 +28,7 @@ class B520Session(BaseSession):
         **kwargs: Any,
     ) -> list[str]:
         headers = {
+            **self.headers,
             "Referer": "http://www.b520.cc/",
         }
         url = self.book_info_url(book_id=book_id)
@@ -40,6 +41,7 @@ class B520Session(BaseSession):
         **kwargs: Any,
     ) -> list[str]:
         headers = {
+            **self.headers,
             "Referer": "http://www.b520.cc/",
         }
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)

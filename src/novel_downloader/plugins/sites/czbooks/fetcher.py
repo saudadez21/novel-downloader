@@ -4,12 +4,12 @@ novel_downloader.plugins.sites.czbooks.fetcher
 ----------------------------------------------
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class CzbooksSession(GenericSession):
+class CzbooksFetcher(GenericFetcher):
     """
     A session class for interacting with the 小说狂人 (czbooks.net) novel.
     """

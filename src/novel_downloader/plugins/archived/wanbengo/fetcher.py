@@ -5,12 +5,12 @@ novel_downloader.plugins.archived.wanbengo.fetcher
 
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class WanbengoSession(GenericSession):
+class WanbengoFetcher(GenericFetcher):
     """
     A session class for interacting with the 完本神站 (www.wanbengo.com) novel.
     """

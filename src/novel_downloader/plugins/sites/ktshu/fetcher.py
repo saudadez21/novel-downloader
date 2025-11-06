@@ -5,12 +5,12 @@ novel_downloader.plugins.sites.ktshu.fetcher
 
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class KtshuSession(GenericSession):
+class KtshuFetcher(GenericFetcher):
     """
     A session class for interacting with the 八一中文网 (www.ktshu.cc) novel.
     """

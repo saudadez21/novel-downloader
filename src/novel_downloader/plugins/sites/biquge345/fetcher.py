@@ -4,12 +4,12 @@ novel_downloader.plugins.sites.biquge345.fetcher
 ------------------------------------------------
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class Biquge345Session(GenericSession):
+class Biquge345Fetcher(GenericFetcher):
     """
     A session class for interacting with the 笔趣阁 (www.biquge345.com) novel.
     """

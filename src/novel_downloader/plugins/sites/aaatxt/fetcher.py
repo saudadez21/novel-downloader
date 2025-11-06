@@ -7,12 +7,12 @@ novel_downloader.plugins.sites.aaatxt.fetcher
 
 from typing import Any
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class AaatxtSession(GenericSession):
+class AaatxtFetcher(GenericFetcher):
     """
     A session class for interacting with the 3A电子书 (www.aaatxt.com) novel.
     """

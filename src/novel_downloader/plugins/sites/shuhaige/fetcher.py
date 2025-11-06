@@ -5,12 +5,12 @@ novel_downloader.plugins.sites.shuhaige.fetcher
 
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class ShuhaigeSession(GenericSession):
+class ShuhaigeFetcher(GenericFetcher):
     """
     A session class for interacting with the
     书海阁小说网 (www.shuhaige.net) novel.

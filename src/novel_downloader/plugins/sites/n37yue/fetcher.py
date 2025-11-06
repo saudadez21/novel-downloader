@@ -5,12 +5,12 @@ novel_downloader.plugins.sites.n37yue.fetcher
 
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class N37yueSession(GenericSession):
+class N37yueFetcher(GenericFetcher):
     """
     A session class for interacting with the 37阅读网 (www.37yue.com) novel.
     """

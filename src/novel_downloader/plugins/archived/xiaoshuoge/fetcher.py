@@ -8,10 +8,10 @@ novel_downloader.plugins.archived.xiaoshuoge.fetcher
 import asyncio
 from typing import Any
 
-from novel_downloader.plugins.base.fetcher import BaseSession
+from novel_downloader.plugins.base.fetcher import BaseFetcher
 
 
-class XiaoshuogeSession(BaseSession):
+class XiaoshuogeFetcher(BaseFetcher):
     """
     A session class for interacting with the 小说屋 (www.xiaoshuoge.info) novel.
     """

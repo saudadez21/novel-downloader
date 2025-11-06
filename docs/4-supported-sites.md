@@ -173,7 +173,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [小説を読もう！](https://yomou.syosetu.com/)                 | syosetu    | ✅     | ✅     | ⚠️     | ⚠️     |
 | [ムーンライトノベルズ](https://mnlt.syosetu.com/top/top/)     | syosetu18  | ✅     | ✅     | ⚠️     | ⚠️     |
 | [ノクターンノベルズ](https://noc.syosetu.com/top/top/)        | syosetu18  | ✅     | ✅     | ⚠️     | ⚠️     |
-| [小説を読もう！](https://yomou.syosetu.com/)                 | syosetu_org | ✅     | ❌     | ⚠️     | ⚠️     |
+| [ハーメルン](https://syosetu.org/)                          | syosetu_org | ✅     | ❌     | ⚠️     | ⚠️     |
 | [暁](https://www.akatsuki-novels.com/)                  | akatsuki_novels | ❌     | ❌     | ⚠️     | ⚠️     |
 | [アルファポリス](https://www.alphapolis.co.jp/)              | alphapolis  | ✅     | ❌     | ⚠️     | ⚠️     |
 | [ノベルピア](https://novelpia.jp/)                          | novelpia    | ❌     | ✅     | ⚠️     | ⚠️     |

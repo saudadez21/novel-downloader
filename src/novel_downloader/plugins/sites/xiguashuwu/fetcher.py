@@ -7,12 +7,12 @@ novel_downloader.plugins.sites.xiguashuwu.fetcher
 
 from typing import Literal
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class XiguashuwuSession(GenericSession):
+class XiguashuwuFetcher(GenericFetcher):
     """
     A session class for interacting with the 西瓜书屋 (www.xiguashuwu.com) novel.
     """

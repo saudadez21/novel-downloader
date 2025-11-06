@@ -5,12 +5,12 @@ novel_downloader.plugins.sites.shu111.fetcher
 
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class Shu111Session(GenericSession):
+class Shu111Fetcher(GenericFetcher):
     """
     A session class for interacting with the 书林文学 (shu111.com) novel.
     """

@@ -5,12 +5,12 @@ novel_downloader.plugins.sites.trxs.fetcher
 
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class TrxsSession(GenericSession):
+class TrxsFetcher(GenericFetcher):
     """
     A session class for interacting with the 同人小说网 (www.trxs.cc) novel.
     """

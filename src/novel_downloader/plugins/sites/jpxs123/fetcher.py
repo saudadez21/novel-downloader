@@ -9,12 +9,12 @@ from typing import Any
 
 from lxml import html
 
-from novel_downloader.plugins.base.fetcher import BaseSession
+from novel_downloader.plugins.base.fetcher import BaseFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class Jpxs123Session(BaseSession):
+class Jpxs123Fetcher(BaseFetcher):
     """
     A session class for interacting with the 精品小说网 (www.jpxs123.com) novel.
     """

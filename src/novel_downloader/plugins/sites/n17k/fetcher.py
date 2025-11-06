@@ -9,15 +9,14 @@ import random
 import re
 from typing import Any
 
-import aiohttp
 from novel_downloader.libs.time_utils import async_jitter_sleep
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import FetcherConfig
 
 
 @registrar.register_fetcher()
-class N17kSession(GenericSession):
+class N17kFetcher(GenericFetcher):
     """
     A session class for interacting with the 17K小说网 (www.17k.com) novel.
     """
@@ -56,7 +55,7 @@ class N17kSession(GenericSession):
     async def fetch(
         self,
         url: str,
-        encoding: str | None = None,
+        encoding: str = "utf-8",
         **kwargs: Any,
     ) -> str:
         """
@@ -65,16 +64,17 @@ class N17kSession(GenericSession):
         :param url: The target URL to fetch.
         :param kwargs: Additional keyword arguments to pass to `session.get`.
         :return: The response body as text.
-        :raises: aiohttp.ClientError on final failure.
         """
         if self._rate_limiter:
             await self._rate_limiter.wait()
 
         for attempt in range(self._retry_times + 1):
             try:
-                async with self.get(url, **kwargs) as resp:
-                    resp.raise_for_status()
-                    text = await self._response_to_str(resp, encoding)
+                resp = await self.session.get(url, encoding=encoding, **kwargs)
+                if not resp.ok:
+                    raise ConnectionError(f"HTTP {resp.status} for {url}")
+
+                text = resp.text
 
                 match = self._RE_ARG_1.search(text)
                 if match:
@@ -82,15 +82,18 @@ class N17kSession(GenericSession):
                     reordered = self._reorder(arg1_val)
                     arg2_val = self._xor_hex(reordered)
 
-                    self.update_cookies({self._d("YWN3X3NjX192Mg=="): arg2_val})
+                    self.session.update_cookies({self._d("YWN3X3NjX192Mg=="): arg2_val})
 
-                    async with self.get(url, **kwargs) as resp2:
-                        resp2.raise_for_status()
-                        return await self._response_to_str(resp2, encoding)
+                    resp2 = await self.session.get(url, encoding=encoding, **kwargs)
+                    if not resp2.ok:
+                        raise ConnectionError(
+                            f"HTTP {resp2.status} for {url} after cookie update"
+                        )
+                    return resp2.text
 
                 return text
 
-            except aiohttp.ClientError:
+            except Exception as exc:
                 if attempt < self._retry_times:
                     await async_jitter_sleep(
                         self._backoff_factor,
@@ -98,7 +101,7 @@ class N17kSession(GenericSession):
                         max_sleep=self._backoff_factor + 2,
                     )
                     continue
-                raise
+                raise ConnectionError(f"Fetch failed for {url}: {exc}") from exc
 
         raise RuntimeError("Unreachable code reached in fetch()")
 

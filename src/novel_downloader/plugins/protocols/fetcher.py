@@ -103,7 +103,7 @@ class FetcherProtocol(Protocol):
     async def download_image(
         self,
         url: str,
-        folder: Path,
+        img_dir: Path,
         *,
         name: str | None = None,
         on_exist: Literal["overwrite", "skip"] = "skip",
@@ -112,7 +112,7 @@ class FetcherProtocol(Protocol):
         Download a single image and return its saved path.
 
         :param url: Image URL.
-        :param folder: Destination folder.
+        :param img_dir: Destination folder.
         :param name: Optional explicit filename (without suffix).
         :param on_exist: What to do when file exists.
         :return: Path of saved image, or None if failed/skipped.

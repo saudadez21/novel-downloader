@@ -6,11 +6,9 @@
 [![Downloads](https://img.shields.io/pypi/dm/novel-downloader.svg)](https://pypistats.org/packages/novel-downloader)
 [![Hits-of-Code](https://hitsofcode.com/github/saudadez21/novel-downloader?branch=main&label=Hits-of-Code)](https://hitsofcode.com/github/saudadez21/novel-downloader/view?branch=main&label=Hits-of-Code)
 
-异步小说下载工具 / 库。支持断点续传、广告过滤与 TXT/EPUB 导出, 提供 CLI 与 Web 图形界面。
+异步小说下载工具 / 库。支持断点续爬、广告过滤与 TXT/EPUB 导出, 提供 CLI 与 Web 图形界面。
 
 > 运行要求: **Python 3.11+** (开发环境: Python 3.12)
-
-> 基于 [aiohttp](https://github.com/aio-libs/aiohttp)
 
 ## 功能特性
 
@@ -24,7 +22,7 @@
 * **可选字体混淆还原**: `decode_font`
 * **双形态使用**: 命令行 (CLI) 与 Web 图形界面 (GUI)
 * **文本处理流水线 (processors)**: 正则清理 / 繁简转换 / 文本纠错等
-* **插件系统**: 可扩展站点、处理器、导出器等能力
+* **插件系统**: 可扩展站点、处理器、导出等能力
 
 ---
 

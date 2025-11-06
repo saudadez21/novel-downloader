@@ -5,12 +5,12 @@ novel_downloader.plugins.archived.biquyuedu.fetcher
 
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class BiquyueduSession(GenericSession):
+class BiquyueduFetcher(GenericFetcher):
     """
     A session class for interacting with the 精彩小说 (biquyuedu.com) novel.
     """
