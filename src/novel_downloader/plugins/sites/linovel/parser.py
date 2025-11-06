@@ -106,8 +106,11 @@ class LinovelParser(BaseParser):
 
             chapters: list[ChapterInfoDict] = []
             for a in sec.xpath('.//div[contains(@class,"chapter-list")]//a'):
-                ch_title = self._first_str([a.text_content()])
                 ch_url = a.get("href", "").strip()
+                if not ch_url or ch_url.startswith("javascript:"):
+                    continue
+
+                ch_title = self._first_str([a.text_content()])
                 ch_id = ch_url.rsplit("/", 1)[-1].split(".", 1)[0]
 
                 chapters.append(
