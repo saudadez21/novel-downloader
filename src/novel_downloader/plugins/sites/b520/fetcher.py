@@ -5,10 +5,16 @@ novel_downloader.plugins.sites.b520.fetcher
 
 """
 
-from typing import Any
+from pathlib import Path
+from typing import Any, Literal
 
+from novel_downloader.infra.http_defaults import IMAGE_HEADERS
+from novel_downloader.libs.filesystem import img_name, write_file
 from novel_downloader.plugins.base.fetcher import BaseFetcher
 from novel_downloader.plugins.registry import registrar
+
+_IMG_HEADERS = IMAGE_HEADERS.copy()
+_IMG_HEADERS["Referer"] = "http://www.b520.cc/"
 
 
 @registrar.register_fetcher()
@@ -46,6 +52,42 @@ class B520Fetcher(BaseFetcher):
         }
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
         return [await self.fetch(url, headers=headers, encoding="gbk", **kwargs)]
+
+    async def _download_one_image(
+        self,
+        url: str,
+        folder: Path,
+        *,
+        name: str | None = None,
+        on_exist: Literal["overwrite", "skip"],
+    ) -> Path | None:
+        save_path = folder / img_name(url, name=name)
+
+        if save_path.exists() and on_exist == "skip":
+            self.logger.debug("b520 image: skip existing %s", save_path)
+            return save_path
+
+        try:
+            resp = await self.session.get(url, headers=_IMG_HEADERS)
+        except Exception as e:
+            self.logger.warning(
+                "Image request failed (site=b520) %s: %s",
+                url,
+                e,
+            )
+            return None
+
+        if not resp.ok:
+            self.logger.warning(
+                "Image request failed (site=b520) %s: HTTP %s",
+                url,
+                resp.status,
+            )
+            return None
+
+        write_file(content=resp.content, filepath=save_path, on_exist="overwrite")
+        self.logger.debug("b520 image: saved %s <- %s", save_path, url)
+        return save_path
 
     @classmethod
     def book_info_url(cls, book_id: str) -> str:
