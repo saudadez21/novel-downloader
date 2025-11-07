@@ -93,6 +93,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [轻之文库](https://www.linovel.net/)                         | linovel    | ✅     | ✅     | ⚠️     | ✅     | 简      |
 | [三七轻小说](https://www.37yq.com/)                          | n37yq      | ✅     | ✅     | ⚠️     | ✅     | 简      |
 | [哔哩轻小说](https://www.linovelib.com/)                     | linovelib  | ✅     | ✅     | ⚠️     | ⚠️     | 简      |
+| [轻小说文库](https://www.wenku8.net/)                        | wenku8     | ✅     | ✅     | ✅     | ⚠️     | 简      |
 | [ESJ Zone](https://www.esjzone.cc)                           | esjzone   | ✅     | ✅     | ✅     | ✅     | 简      |
 | [神凑轻小说](https://www.shencou.com/)                        | shencou   | ✅     | ✅     | ⚠️     | ⚠️     | 简      |
 | [轻小说百科](https://lnovel.org/)                             | lnovel    | ✅     | ✅     | ⚠️     | ⚠️     | 简 / 繁 |
@@ -273,6 +274,16 @@ novel-cli download --site ttkan shengxu-chendong
   * 书籍: `https://www.linovelib.com/novel/1234.html` -> Book ID: `1234`
   * 章节: `https://www.linovelib.com/novel/1234/47800.html` -> Chapter ID: `47800`
   * 风控: 请求过于频繁可能触发限制, 导致封禁或限流 (推荐请求间隔大于 2 秒)
+
+* **轻小说文库 (wenku8)**
+  * 示例 URL:
+    * 目录页面: `https://www.wenku8.net/novel/2/2835/index.htm` -> Book ID: `2-2835`
+    * 章节页面: `https://www.wenku8.net/novel/2/2835/113354.htm` -> Chapter ID: `113354`
+  * 目录访问:
+    * 先打开详细页面 (如 `https://www.wenku8.net/book/2835.htm`), 再点击 "小说目录" 查看
+  * 备用:
+    * `https://www.wenku8.cc`
+    * `https://www.wenku8.com`
 
 * **无限轻小说 (n8novel)**
   * 书籍: `https://www.8novel.com/novelbooks/3365/` -> Book ID: `3365`

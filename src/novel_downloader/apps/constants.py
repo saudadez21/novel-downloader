@@ -77,6 +77,7 @@ DOWNLOAD_SUPPORT_SITES = {
     "ttkan": "天天看小说 (ttkan)",
     "uaa": "有爱爱 (uaa)",
     # "wanbengo": "完本神站 (wanbengo)",
+    "wenku8": "轻小说文库 (wenku8)",
     # "xiaoshuoge": "小说屋 (xiaoshuoge)",
     "xiguashuwu": "西瓜书屋 (xiguashuwu)",
     "westnovel": "西方奇幻小说网 (westnovel)",

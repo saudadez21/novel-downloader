@@ -281,6 +281,9 @@ CASES_SUCCESS = [
     # dushu
     ("https://www.dushu.com/showbook/138947/", "dushu", "138947"),
     ("https://www.dushu.com/showbook/138947/1984736.html", "dushu", "138947"),
+    # wenku8
+    ("https://www.wenku8.net/novel/2/2835/index.htm", "wenku8", "2-2835"),
+    ("https://www.wenku8.net/novel/2/2835/113354.htm", "wenku8", "2-2835"),
 ]
 
 CASES_HINT = [
@@ -340,6 +343,10 @@ CASES_HINT = [
     (
         "https://www.shaoniandream.com/readchapter/97973",
         "章节 URL 不包含书籍 ID, 请复制目录页的链接",
+    ),
+    (
+        "https://www.wenku8.net/book/2835.htm",
+        "请在 '详细页面' 内点击 '小说目录'",
     ),
 ]
 

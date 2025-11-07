@@ -102,6 +102,10 @@ user_prompt = "请翻译成中文：{text}"
 ### 命令行交互
 
 * 整理并精简命令行参数
+* 新增章节下载功能
+  * CLI 支持通过 `--chapter-id` 参数指定章节 ID, 仅下载该章节并导出为单独 txt 文件
+  * 当传入章节 URL 时, 自动解析出 `book_id` 与 `chapter_id`, 并询问是否下载整本或仅该章节
+  * 增加相关交互提示与输出信息, 优化体验
 
 ### 导出模板支持
 
@@ -314,10 +318,6 @@ user_prompt = "请翻译成中文：{text}"
 * [99藏书网](https://www.99csw.com/)
 
   * 需提供 `cf_clearance` Cookie
-
-* [轻小说文库](https://www.wenku8.net/)
-
-  * 需提供 `cf_clearance` cookie
 
 * [真白萌](https://masiro.me/)
 

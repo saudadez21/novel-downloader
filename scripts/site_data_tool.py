@@ -35,6 +35,8 @@ LOGIN_REQUIRED: set[str] = set()
 TEST_DATA: dict[str, list[dict[str, Any]]] = {}
 REQ_INTERVALS: dict[str, float] = {}
 DEFAULT_REQ_INTERVAL: float = 0.5
+BACKEND_MAP: dict[str, str] = {}
+DEFAULT_BACKEND: str = "aiohttp"
 _PARSER_CONFIG = ParserConfig()
 
 DATE_STR = datetime.now().strftime("%Y-%m-%d")
@@ -102,14 +104,21 @@ logger = setup_logging()
 # ---------------------------------------------------------------------
 def load_config(cfg_path: Path) -> None:
     global LOGIN_REQUIRED, TEST_DATA, REQ_INTERVALS, DEFAULT_REQ_INTERVAL, NAV_HELPER
+    global BACKEND_MAP, DEFAULT_BACKEND
     with open(cfg_path, encoding="utf-8") as f:
         data = json.load(f)
 
     TEST_DATA = data["TEST_DATA"]
     LOGIN_REQUIRED = set(data["LOGIN_REQUIRED"])
+
     req_cfg = data.get("REQ_INTERVALS", {})
     DEFAULT_REQ_INTERVAL = req_cfg.pop("default", 0.5)
     REQ_INTERVALS = req_cfg
+
+    backend_cfg = data.get("BACKEND_MAP", {})
+    DEFAULT_BACKEND = backend_cfg.pop("default", "aiohttp")
+    BACKEND_MAP = backend_cfg
+
     NAV_HELPER = NavHelper(TEST_DATA)
 
 
@@ -163,7 +172,20 @@ async def run_fetch(args: argparse.Namespace) -> None:
 
         need_login = site_key in LOGIN_REQUIRED
         req_interval = REQ_INTERVALS.get(site_key, DEFAULT_REQ_INTERVAL)
-        fetcher_cfg = FetcherConfig(request_interval=req_interval)
+        backend = BACKEND_MAP.get(site_key, DEFAULT_BACKEND)
+
+        fetcher_cfg = FetcherConfig(
+            request_interval=req_interval,
+            backend=backend,
+        )
+
+        logger.info(
+            "Initialized fetcher for site=%s | backend=%s | login_required=%s | interval=%.2fs",  # noqa: E501
+            site_key,
+            backend,
+            need_login,
+            req_interval,
+        )
 
         async with registrar.get_fetcher(site_key, fetcher_cfg) as f:
             logged_in = await f.load_state() if need_login else True

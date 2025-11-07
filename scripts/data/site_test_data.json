@@ -1036,6 +1036,22 @@
         ]
       }
     ],
+    "wenku8": [
+      {
+        "book_id": "1-1715",
+        "chap_ids": [
+          "65647",
+          "66909",
+          "156478"
+        ]
+      },
+      {
+        "book_id": "2-2652",
+        "chap_ids": [
+          "102177"
+        ]
+      }
+    ],
     "westnovel": [
       {
         "book_id": "wuxia-ynyh",
@@ -1178,5 +1194,9 @@
   "REQ_INTERVALS": {
     "default": 0.5,
     "linovelib": 2.0
+  },
+  "BACKEND_MAP": {
+    "default": "aiohttp",
+    "wenku8": "curl_cffi"
   }
 }

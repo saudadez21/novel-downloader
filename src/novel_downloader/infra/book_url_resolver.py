@@ -1119,6 +1119,23 @@ SITE_RULES: dict[str, list[SiteRuleSet]] = {
             ],
         )
     ],
+    "www.wenku8.net": [
+        SiteRuleSet(
+            site_key="wenku8",
+            extractors=[
+                BookIdExtractor(
+                    pattern=r"^/novel/(\d+)/(\d+)/",
+                    build_book_id=lambda m: f"{m.group(1)}-{m.group(2)}",
+                ),
+            ],
+            hints=[
+                HintRule(
+                    pattern=r"^/book/\d+\.htm$",
+                    hint="请在 '详细页面' 内点击 '小说目录'",
+                ),
+            ],
+        )
+    ],
     "www.wanbengo.com": [
         SiteRuleSet(
             site_key="wanbengo",
