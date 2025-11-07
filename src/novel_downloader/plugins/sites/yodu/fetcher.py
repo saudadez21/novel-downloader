@@ -50,7 +50,7 @@ class YoduFetcher(GenericFetcher):
             return save_path
 
         try:
-            resp = await self.session.get(url, headers=IMAGE_HEADERS, ssl=False)
+            resp = await self.session.get(url, headers=IMAGE_HEADERS, verify=False)
         except Exception as e:
             self.logger.warning(
                 "Image request failed (site=yodu) %s: %s",

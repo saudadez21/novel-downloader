@@ -6,12 +6,16 @@ novel_downloader.plugins.base.session_httpx
 
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Unpack
 
 import httpx
 
 from novel_downloader.plugins.base.response import BaseResponse
-from novel_downloader.plugins.base.session_base import BaseSession
+from novel_downloader.plugins.base.session_base import (
+    BaseSession,
+    GetRequestKwargs,
+    PostRequestKwargs,
+)
 
 
 class HttpxSession(BaseSession):
@@ -57,10 +61,14 @@ class HttpxSession(BaseSession):
     async def get(
         self,
         url: str,
+        *,
+        allow_redirects: bool | None = None,
+        verify: bool | None = None,
         encoding: str = "utf-8",
-        **kwargs: Any,
+        **kwargs: Unpack[GetRequestKwargs],
     ) -> BaseResponse:
-        kwargs.pop("ssl", None)
+        if allow_redirects is not None:
+            kwargs.setdefault("follow_redirects", allow_redirects)  # type: ignore[typeddict-item]
 
         r = await self.session.get(url, **kwargs)
         return BaseResponse(
@@ -73,10 +81,14 @@ class HttpxSession(BaseSession):
     async def post(
         self,
         url: str,
+        *,
+        allow_redirects: bool | None = None,
+        verify: bool | None = None,
         encoding: str = "utf-8",
-        **kwargs: Any,
+        **kwargs: Unpack[PostRequestKwargs],
     ) -> BaseResponse:
-        kwargs.pop("ssl", None)
+        if allow_redirects is not None:
+            kwargs.setdefault("follow_redirects", allow_redirects)  # type: ignore[typeddict-item]
 
         r = await self.session.post(url, **kwargs)
         return BaseResponse(

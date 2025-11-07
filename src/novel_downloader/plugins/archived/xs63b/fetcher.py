@@ -45,8 +45,8 @@ class Xs63bFetcher(BaseFetcher):
         catalog_url = self.book_catalog_url(book_id=book_id)
 
         info_html, catalog_html = await asyncio.gather(
-            self.fetch(info_url, ssl=False, **kwargs),
-            self.fetch(catalog_url, ssl=False, **kwargs),
+            self.fetch(info_url, verify=False, **kwargs),
+            self.fetch(catalog_url, verify=False, **kwargs),
         )
         return [info_html, catalog_html]
 

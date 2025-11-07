@@ -4,14 +4,32 @@ novel_downloader.plugins.base.session_base
 ------------------------------------------
 """
 
+from __future__ import annotations
+
 import types
 from abc import ABC, abstractmethod
+from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import Any, Self
+from typing import Any, Self, TypedDict, Unpack
 
 from novel_downloader.infra.http_defaults import DEFAULT_USER_HEADERS
 from novel_downloader.plugins.base.response import BaseResponse
 from novel_downloader.schemas import FetcherConfig
+
+
+class BaseRequestKwargs(TypedDict, total=False):
+    headers: Mapping[str, str] | Sequence[tuple[str, str]]
+    cookies: dict[str, str] | list[tuple[str, str]]
+
+
+class GetRequestKwargs(BaseRequestKwargs, total=False):
+    params: dict[str, Any] | list[tuple[str, Any]] | None
+
+
+class PostRequestKwargs(BaseRequestKwargs, total=False):
+    params: dict[str, Any] | list[tuple[str, Any]] | None
+    data: Any
+    json: Any
 
 
 class BaseSession(ABC):
@@ -68,8 +86,11 @@ class BaseSession(ABC):
     async def get(
         self,
         url: str,
+        *,
+        allow_redirects: bool | None = None,
+        verify: bool | None = None,
         encoding: str = "utf-8",
-        **kwargs: Any,
+        **kwargs: Unpack[GetRequestKwargs],
     ) -> BaseResponse:
         """
         Create an HTTP GET request context manager.
@@ -84,8 +105,11 @@ class BaseSession(ABC):
     async def post(
         self,
         url: str,
+        *,
+        allow_redirects: bool | None = None,
+        verify: bool | None = None,
         encoding: str = "utf-8",
-        **kwargs: Any,
+        **kwargs: Unpack[PostRequestKwargs],
     ) -> BaseResponse:
         """
         Create an HTTP POST request context manager.

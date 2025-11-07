@@ -6,12 +6,16 @@ novel_downloader.plugins.base.session_aiohttp
 
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Unpack
 
 import aiohttp
 
 from novel_downloader.plugins.base.response import BaseResponse
-from novel_downloader.plugins.base.session_base import BaseSession
+from novel_downloader.plugins.base.session_base import (
+    BaseSession,
+    GetRequestKwargs,
+    PostRequestKwargs,
+)
 
 
 class AiohttpSession(BaseSession):
@@ -55,9 +59,17 @@ class AiohttpSession(BaseSession):
     async def get(
         self,
         url: str,
+        *,
+        allow_redirects: bool | None = None,
+        verify: bool | None = None,
         encoding: str = "utf-8",
-        **kwargs: Any,
+        **kwargs: Unpack[GetRequestKwargs],
     ) -> BaseResponse:
+        if verify is not None:
+            kwargs.setdefault("ssl", verify)  # type: ignore[typeddict-item]
+        if allow_redirects is not None:
+            kwargs.setdefault("allow_redirects", allow_redirects)  # type: ignore[typeddict-item]
+
         async with self.session.get(url, **kwargs) as r:
             content = await r.read()
             return BaseResponse(
@@ -70,9 +82,17 @@ class AiohttpSession(BaseSession):
     async def post(
         self,
         url: str,
+        *,
+        allow_redirects: bool | None = None,
+        verify: bool | None = None,
         encoding: str = "utf-8",
-        **kwargs: Any,
+        **kwargs: Unpack[PostRequestKwargs],
     ) -> BaseResponse:
+        if verify is not None:
+            kwargs.setdefault("ssl", verify)  # type: ignore[typeddict-item]
+        if allow_redirects is not None:
+            kwargs.setdefault("allow_redirects", allow_redirects)  # type: ignore[typeddict-item]
+
         async with self.session.post(url, **kwargs) as r:
             content = await r.read()
             return BaseResponse(

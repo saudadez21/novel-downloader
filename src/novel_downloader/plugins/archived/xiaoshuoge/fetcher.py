@@ -40,8 +40,8 @@ class XiaoshuogeFetcher(BaseFetcher):
         catalog_url = self.book_catalog_url(book_id=book_id)
 
         info_html, catalog_html = await asyncio.gather(
-            self.fetch(info_url, ssl=False, **kwargs),
-            self.fetch(catalog_url, ssl=False, **kwargs),
+            self.fetch(info_url, verify=False, **kwargs),
+            self.fetch(catalog_url, verify=False, **kwargs),
         )
         return [info_html, catalog_html]
 
@@ -53,7 +53,7 @@ class XiaoshuogeFetcher(BaseFetcher):
     ) -> list[str]:
         book_id = book_id.replace("-", "/")
         url = self.chapter_url(book_id=book_id, chapter_id=chapter_id)
-        return [await self.fetch(url, ssl=False, **kwargs)]
+        return [await self.fetch(url, verify=False, **kwargs)]
 
     @classmethod
     def book_info_url(cls, book_id: str) -> str:

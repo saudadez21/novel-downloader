@@ -8,12 +8,16 @@ novel_downloader.plugins.base.session_curl_cffi
 
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Unpack
 
 from curl_cffi.requests import AsyncSession
 
 from novel_downloader.plugins.base.response import BaseResponse
-from novel_downloader.plugins.base.session_base import BaseSession
+from novel_downloader.plugins.base.session_base import (
+    BaseSession,
+    GetRequestKwargs,
+    PostRequestKwargs,
+)
 
 
 class CurlCffiSession(BaseSession):
@@ -46,12 +50,16 @@ class CurlCffiSession(BaseSession):
     async def get(
         self,
         url: str,
+        *,
+        allow_redirects: bool | None = None,
+        verify: bool | None = None,
         encoding: str = "utf-8",
-        **kwargs: Any,
+        **kwargs: Unpack[GetRequestKwargs],
     ) -> BaseResponse:
-        if "ssl" in kwargs:
-            ssl_val = kwargs.pop("ssl")
-            kwargs.setdefault("verify", ssl_val is not False)
+        if verify is not None:
+            kwargs.setdefault("verify", verify)  # type: ignore[typeddict-item]
+        if allow_redirects is not None:
+            kwargs.setdefault("allow_redirects", allow_redirects)  # type: ignore[typeddict-item]
 
         r = await self.session.get(url, **kwargs)
         return BaseResponse(
@@ -64,12 +72,16 @@ class CurlCffiSession(BaseSession):
     async def post(
         self,
         url: str,
+        *,
+        allow_redirects: bool | None = None,
+        verify: bool | None = None,
         encoding: str = "utf-8",
-        **kwargs: Any,
+        **kwargs: Unpack[PostRequestKwargs],
     ) -> BaseResponse:
-        if "ssl" in kwargs:
-            ssl_val = kwargs.pop("ssl")
-            kwargs.setdefault("verify", ssl_val is not False)
+        if verify is not None:
+            kwargs.setdefault("verify", verify)  # type: ignore[typeddict-item]
+        if allow_redirects is not None:
+            kwargs.setdefault("allow_redirects", allow_redirects)  # type: ignore[typeddict-item]
 
         r = await self.session.post(url, **kwargs)
         return BaseResponse(

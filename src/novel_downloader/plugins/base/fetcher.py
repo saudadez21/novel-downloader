@@ -331,6 +331,14 @@ class BaseFetcher(abc.ABC):
             )
             return None
 
+        if not resp.content:
+            self.logger.warning(
+                "Empty response for image (site=%s): %s",
+                self.site_name,
+                url,
+            )
+            return None
+
         if not resp.ok:
             self.logger.warning(
                 "Image request failed (site=%s) %s: HTTP %s",
