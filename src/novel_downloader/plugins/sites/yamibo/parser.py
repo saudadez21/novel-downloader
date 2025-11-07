@@ -8,7 +8,6 @@ novel_downloader.plugins.sites.yamibo.parser
 from typing import Any
 
 from lxml import html
-
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
@@ -95,6 +94,10 @@ class YamiboParser(BaseParser):
                 url = chap.get("href", "")
                 chapter_id = url.split("id=")[-1] if "id=" in url else ""
                 chapters.append({"title": title, "url": url, "chapterId": chapter_id})
+
+            if not chapters:
+                return None
+
             volumes = [{"volume_name": "单卷", "chapters": chapters}]
 
         return {

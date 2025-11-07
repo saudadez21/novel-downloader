@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 """
-novel_downloader.plugins.sites.aaatxt.parser
---------------------------------------------
+novel_downloader.plugins.archived.aaatxt.parser
+-----------------------------------------------
 
 """
 
 from typing import Any
 
 from lxml import html
-
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (

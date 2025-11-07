@@ -30,6 +30,8 @@ def test_site_plugin_structure(site_path):
         module_path = f"novel_downloader.plugins.sites.{site_key}.{mod_name}"
         module = importlib.import_module(module_path)
 
+        expected_key = f"{site_key.replace('_', '')}{mod_name}".lower()
+
         # Find all classes defined in this module
         classes = {
             name: cls
@@ -40,12 +42,14 @@ def test_site_plugin_structure(site_path):
         # Check naming convention
         matched_class = None
         for name, cls in classes.items():
-            # support mangg_com -> ManggComSession, etc.
-            if name.lower().startswith(site_key.replace("_", "")):
+            if name.lower() == expected_key:
                 matched_class = cls
                 break
 
-        assert matched_class, f"{module_path}: missing expected class"
+        assert matched_class is not None, (
+            f"{module_path}: expected class matching '{expected_key}' "
+            f"not found (found: {', '.join(classes.keys()) or 'none'})"
+        )
 
         # Check registry field
         registry_obj = registry.registrar

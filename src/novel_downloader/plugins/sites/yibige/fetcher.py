@@ -5,12 +5,12 @@ novel_downloader.plugins.sites.yibige.fetcher
 
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class YibigeSession(GenericSession):
+class YibigeFetcher(GenericFetcher):
     """
     A session class for interacting with the 一笔阁 (www.yibige.org) novel.
     """

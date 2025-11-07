@@ -7,12 +7,12 @@ novel_downloader.plugins.sites.n71ge.fetcher
 
 from typing import Literal
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class N71geSession(GenericSession):
+class N71geFetcher(GenericFetcher):
     """
     A session class for interacting with the 新吾爱文学 (www.71ge.com) novel.
     """

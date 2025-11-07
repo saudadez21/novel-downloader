@@ -10,12 +10,12 @@ from typing import Literal
 
 from novel_downloader.infra.http_defaults import IMAGE_HEADERS
 from novel_downloader.libs.filesystem import img_name, write_file
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class YoduSession(GenericSession):
+class YoduFetcher(GenericFetcher):
     """
     A session class for interacting with the 有度中文网 (www.yodu.org) novel.
     """
@@ -40,21 +40,33 @@ class YoduSession(GenericSession):
         url: str,
         folder: Path,
         *,
+        name: str | None = None,
         on_exist: Literal["overwrite", "skip"],
-    ) -> None:
-        save_path = folder / img_name(url)
+    ) -> Path | None:
+        save_path = folder / img_name(url, name=name)
 
         if save_path.exists() and on_exist == "skip":
             self.logger.debug("Skip existing image: %s", save_path)
-            return
+            return save_path
 
         try:
-            async with await self.get(url, headers=IMAGE_HEADERS, ssl=False) as resp:
-                resp.raise_for_status()
-                data = await resp.read()
+            resp = await self.session.get(url, headers=IMAGE_HEADERS, verify=False)
         except Exception as e:
-            self.logger.warning("Failed %s: %s", url, e)
-            return
+            self.logger.warning(
+                "Image request failed (site=yodu) %s: %s",
+                url,
+                e,
+            )
+            return None
 
-        write_file(content=data, filepath=save_path, on_exist="overwrite")
+        if not resp.ok:
+            self.logger.warning(
+                "Image request failed (site=yodu) %s: HTTP %s",
+                url,
+                resp.status,
+            )
+            return None
+
+        write_file(content=resp.content, filepath=save_path, on_exist="overwrite")
         self.logger.debug("Saved image: %s <- %s", save_path, url)
+        return save_path

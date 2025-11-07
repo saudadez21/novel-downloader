@@ -148,14 +148,14 @@ def _task_card(tsk: DownloadTask, *, active: bool) -> None:
             _progress_block(tsk)
 
 
-@ui.page("/progress")  # type: ignore[misc]
+@ui.page("/progress")
 def page_progress() -> None:
     navbar("progress")
     setup_dialog()
 
     with ui.column().classes("w-full max-w-screen-lg min-w-[320px] mx-auto gap-4"):
 
-        @ui.refreshable  # type: ignore[misc]
+        @ui.refreshable
         def section() -> None:
             s = manager.snapshot()
 

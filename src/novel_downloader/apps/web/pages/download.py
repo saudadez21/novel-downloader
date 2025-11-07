@@ -17,7 +17,7 @@ from ..services import manager, setup_dialog
 _DEFAULT_SITE = "qidian"
 
 
-@ui.page("/download")  # type: ignore[misc]
+@ui.page("/download")
 def page_download() -> None:
     navbar("download")
     setup_dialog()

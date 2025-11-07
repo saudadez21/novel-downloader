@@ -4,12 +4,12 @@ novel_downloader.plugins.sites.n101kanshu.fetcher
 -------------------------------------------------
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class N101kanshuSession(GenericSession):
+class N101kanshuFetcher(GenericFetcher):
     """
     A session class for interacting with the 101看书 (101kanshu.com) novel.
     """

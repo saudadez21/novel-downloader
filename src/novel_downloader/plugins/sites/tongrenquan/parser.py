@@ -8,7 +8,6 @@ novel_downloader.plugins.sites.tongrenquan.parser
 from typing import Any
 
 from lxml import html
-
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
@@ -65,6 +64,9 @@ class TongrenquanParser(BaseParser):
             }
             for a in tree.xpath('//div[contains(@class,"book_list")]//ul//li/a')
         ]
+
+        if not chapters:
+            return None
 
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 

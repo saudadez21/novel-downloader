@@ -5,12 +5,12 @@ novel_downloader.plugins.sites.n23ddw.fetcher
 
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class N23ddwSession(GenericSession):
+class N23ddwFetcher(GenericFetcher):
     """
     A session class for interacting with the 顶点小说网 (www.23ddw.net) novel.
     """

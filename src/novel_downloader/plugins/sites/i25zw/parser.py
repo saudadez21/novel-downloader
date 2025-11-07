@@ -8,7 +8,6 @@ novel_downloader.plugins.sites.i25zw.parser
 from typing import Any
 
 from lxml import html
-
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
@@ -83,6 +82,10 @@ class I25zwParser(BaseParser):
                     "chapterId": chapter_id,
                 }
             )
+
+        if not chapters:
+            return None
+
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 
         return {

@@ -5,12 +5,12 @@ novel_downloader.plugins.sites.i25zw.fetcher
 
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class I25zwSession(GenericSession):
+class I25zwFetcher(GenericFetcher):
     """
     A session class for interacting with the 25中文网 (www.i25zw.com) novel.
     """

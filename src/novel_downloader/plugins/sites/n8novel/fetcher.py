@@ -8,12 +8,12 @@ novel_downloader.plugins.sites.n8novel.fetcher
 import re
 from typing import Any
 
-from novel_downloader.plugins.base.fetcher import BaseSession
+from novel_downloader.plugins.base.fetcher import BaseFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class N8novelSession(BaseSession):
+class N8novelFetcher(BaseFetcher):
     """
     A session class for interacting with the 无限轻小说 (www.8novel.com) novel.
     """

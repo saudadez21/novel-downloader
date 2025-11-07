@@ -8,7 +8,6 @@ novel_downloader.plugins.sites.kunnu.parser
 from typing import Any
 
 from lxml import html
-
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
@@ -116,6 +115,9 @@ class KunnuParser(BaseParser):
 
         # Flush the last collected volume
         flush_volume()
+
+        if not volumes:
+            return None
 
         return {
             "book_name": book_name,

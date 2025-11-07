@@ -13,7 +13,6 @@ from typing import Any
 from Crypto.Cipher import DES
 from Crypto.Util.Padding import unpad
 from lxml import html
-
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
@@ -53,6 +52,9 @@ class CiyuanjiParser(BaseParser):
         raw_chapters = self._extract_chapter_list(data)
         volumes = self._build_volumes(raw_chapters)
         tags = [t["tagName"] for t in book_data.get("tagList", []) if "tagName" in t]
+
+        if not volumes:
+            return None
 
         return {
             "book_name": book_data.get("bookName", ""),

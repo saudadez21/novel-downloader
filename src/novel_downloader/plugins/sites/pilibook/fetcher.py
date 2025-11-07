@@ -4,12 +4,12 @@ novel_downloader.plugins.sites.pilibook.fetcher
 -----------------------------------------------
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class PilibookSession(GenericSession):
+class PilibookFetcher(GenericFetcher):
     """
     A session class for interacting with the 霹雳书屋 (www.pilibook.net) novel.
     """

@@ -5,12 +5,12 @@ novel_downloader.plugins.sites.n37yq.fetcher
 
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class N37yqSession(GenericSession):
+class N37yqFetcher(GenericFetcher):
     """
     A session class for interacting with the 三七轻小说 (www.37yq.com) novel.
     """

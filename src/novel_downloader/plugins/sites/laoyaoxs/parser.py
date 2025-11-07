@@ -8,7 +8,6 @@ novel_downloader.plugins.sites.laoyaoxs.parser
 from typing import Any
 
 from lxml import html
-
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
@@ -83,6 +82,10 @@ class LaoyaoxsParser(BaseParser):
                 '//div[contains(@class,"read")]//dl[@id="newlist"]//dd//a[1]'
             )
         ]
+
+        if not chapters:
+            return None
+
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 
         return {

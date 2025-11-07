@@ -5,12 +5,12 @@ novel_downloader.plugins.sites.piaotia.fetcher
 
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class PiaotiaSession(GenericSession):
+class PiaotiaFetcher(GenericFetcher):
     """
     A session class for interacting with the 飘天文学网 (www.piaotia.com) novel.
     """

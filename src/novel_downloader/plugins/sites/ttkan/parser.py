@@ -8,7 +8,6 @@ novel_downloader.plugins.sites.ttkan.parser
 from typing import Any
 
 from lxml import html
-
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
@@ -91,6 +90,9 @@ class TtkanParser(BaseParser):
                     "url": url,
                 }
             )
+
+        if not chapters:
+            return None
 
         volumes: list[VolumeInfoDict] = [
             {

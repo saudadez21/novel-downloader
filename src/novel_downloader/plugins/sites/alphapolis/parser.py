@@ -140,6 +140,9 @@ class AlphapolisParser(BaseParser):
 
         flush_volume()
 
+        if not volumes:
+            return None
+
         return {
             "book_name": book_name,
             "author": author,

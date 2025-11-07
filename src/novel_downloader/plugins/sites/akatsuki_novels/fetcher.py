@@ -4,12 +4,12 @@ novel_downloader.plugins.sites.akatsuki_novels.fetcher
 ------------------------------------------------------
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class AkatsukiNovelsSession(GenericSession):
+class AkatsukiNovelsFetcher(GenericFetcher):
     """
     A session class for interacting with the 暁 (www.akatsuki-novels.com) novel.
     """

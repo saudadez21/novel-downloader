@@ -64,8 +64,8 @@ try:
         if not data_b:
             return b""
         _validate_inputs(key_b, iv_b, data_b)
-        pt = _PyAES.new(key_b, _PyAES.MODE_CBC, iv_b).decrypt(data_b)
-        return _py_unpad(pt, block_size, style="pkcs7") if unpad else pt  # type: ignore[no-any-return]
+        pt: bytes = _PyAES.new(key_b, _PyAES.MODE_CBC, iv_b).decrypt(data_b)
+        return _py_unpad(pt, block_size, style="pkcs7") if unpad else pt
 
 except ImportError:
     print(

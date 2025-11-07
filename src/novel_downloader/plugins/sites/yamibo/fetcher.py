@@ -9,14 +9,13 @@ from collections.abc import Mapping
 from typing import Any
 
 from lxml import html
-
-from novel_downloader.plugins.base.fetcher import BaseSession
+from novel_downloader.plugins.base.fetcher import BaseFetcher
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import LoginField
 
 
 @registrar.register_fetcher()
-class YamiboSession(BaseSession):
+class YamiboFetcher(BaseFetcher):
     """
     A session class for interacting with the 百合会 (www.yamibo.com) novel.
     """
@@ -42,7 +41,7 @@ class YamiboSession(BaseSession):
         Restore cookies persisted by the session-based workflow.
         """
         if cookies:
-            self.update_cookies(cookies)
+            self.session.update_cookies(cookies)
 
         if await self._check_login_status():
             self._is_logged_in = True
@@ -91,8 +90,7 @@ class YamiboSession(BaseSession):
 
         :return: The HTML markup of the bookcase page.
         """
-        url = self.bookcase_url()
-        return [await self.fetch(url, **kwargs)]
+        return [await self.fetch(self.BOOKCASE_URL, **kwargs)]
 
     @property
     def login_fields(self) -> list[LoginField]:
@@ -114,15 +112,6 @@ class YamiboSession(BaseSession):
                 description="The password used for login",
             ),
         ]
-
-    @classmethod
-    def bookcase_url(cls) -> str:
-        """
-        Construct the URL for the user's bookcase page.
-
-        :return: Fully qualified URL of the bookcase.
-        """
-        return cls.BOOKCASE_URL
 
     @classmethod
     def book_info_url(cls, book_id: str) -> str:
@@ -154,17 +143,29 @@ class YamiboSession(BaseSession):
         Return True if login succeeds, False otherwise.
         """
         try:
-            async with self.get(self.LOGIN_URL) as resp_1:
-                resp_1.raise_for_status()
-                text_1 = await resp_1.text()
-                tree = html.fromstring(text_1)
-                csrf_value = tree.xpath('//input[@name="_csrf-frontend"]/@value')
-                csrf_value = csrf_value[0] if csrf_value else ""
-                if not csrf_value:
-                    self.logger.warning("yamibo _api_login: CSRF token not found.")
-                    return False
+            resp_1 = await self.session.get(self.LOGIN_URL)
         except Exception as exc:
-            self.logger.warning("yamibo _api_login failed at step 1: %s", exc)
+            self.logger.warning("yamibo _api_login failed at step 1 (request): %s", exc)
+            return False
+
+        if not resp_1.ok:
+            self.logger.warning(
+                "yamibo _api_login HTTP error at step 1: %s, status=%s",
+                self.LOGIN_URL,
+                resp_1.status,
+            )
+            return False
+
+        try:
+            tree = html.fromstring(resp_1.text)
+            csrf_value_list = tree.xpath('//input[@name="_csrf-frontend"]/@value')
+            csrf_value = csrf_value_list[0] if csrf_value_list else ""
+        except Exception as exc:
+            self.logger.warning("yamibo _api_login parse error at step 1: %s", exc)
+            return False
+
+        if not csrf_value:
+            self.logger.warning("yamibo _api_login: CSRF token not found.")
             return False
 
         data_2 = {
@@ -175,19 +176,30 @@ class YamiboSession(BaseSession):
             "LoginForm[rememberMe]": 1,
             "login-button": "",
         }
-        temp_headers = dict(self.headers)
-        temp_headers["Origin"] = self.BASE_URL
-        temp_headers["Referer"] = self.LOGIN_URL
+        headers = {
+            **self.headers,
+            "Origin": self.BASE_URL,
+            "Referer": self.LOGIN_URL,
+        }
+
         try:
-            async with self.post(
-                self.LOGIN_URL, data=data_2, headers=temp_headers
-            ) as resp_2:
-                resp_2.raise_for_status()
-                text_2 = await resp_2.text()
-                return "登录成功" in text_2
+            resp_2 = await self.session.post(
+                self.LOGIN_URL, data=data_2, headers=headers
+            )
         except Exception as exc:
-            self.logger.warning("yamibo _api_login failed at step 2: %s", exc)
-        return False
+            self.logger.warning("yamibo _api_login failed at step 2 (request): %s", exc)
+            return False
+
+        if not resp_2.ok:
+            self.logger.warning(
+                "yamibo _api_login HTTP error at step 2: %s, status=%s",
+                self.LOGIN_URL,
+                resp_2.status,
+            )
+            return False
+
+        text_2 = resp_2.text
+        return "登录成功" in text_2
 
     async def _check_login_status(self) -> bool:
         """

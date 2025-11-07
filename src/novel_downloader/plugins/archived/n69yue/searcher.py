@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.plugins.sites.n69yue.searcher
-----------------------------------------------
+novel_downloader.plugins.archived.n69yue.searcher
+-------------------------------------------------
 """
 
 import json

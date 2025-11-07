@@ -7,10 +7,10 @@ novel_downloader.plugins.archived.deqixs.fetcher
 
 from typing import Any
 
-from novel_downloader.plugins.base.fetcher import BaseSession
+from novel_downloader.plugins.base.fetcher import BaseFetcher
 
 
-class DeqixsSession(BaseSession):
+class DeqixsFetcher(BaseFetcher):
     """
     A session class for interacting with the 得奇小说网 (www.deqixs.com) novel.
     """

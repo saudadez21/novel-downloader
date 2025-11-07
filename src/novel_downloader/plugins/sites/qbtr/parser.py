@@ -9,7 +9,6 @@ import re
 from typing import Any
 
 from lxml import html
-
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
@@ -68,6 +67,9 @@ class QbtrParser(BaseParser):
             m = re.search(r"^/[^/]+/\d+/(\d+)\.html$", url)
             cid = m.group(1) if m else ""
             chapters.append({"title": title, "url": url, "chapterId": cid})
+
+        if not chapters:
+            return None
 
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 

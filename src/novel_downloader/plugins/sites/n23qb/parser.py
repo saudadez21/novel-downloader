@@ -8,7 +8,6 @@ novel_downloader.plugins.sites.n23qb.parser
 from typing import Any
 
 from lxml import html
-
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
@@ -97,6 +96,9 @@ class N23qbParser(BaseParser):
 
         if current_volume:
             volumes.append(current_volume)
+
+        if not volumes:
+            return None
 
         return {
             "book_name": book_name,

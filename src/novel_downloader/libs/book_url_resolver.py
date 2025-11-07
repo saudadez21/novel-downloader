@@ -218,20 +218,22 @@ SITE_RULES: dict[str, list[SiteRuleSet]] = {
             hints=[],
         )
     ],
-    # "biquyuedu.com": [SiteRuleSet(
-    #     site_key="biquyuedu",
-    #     extractors=[
-    #         BookIdExtractor(
-    #             pattern=r"^/novel/([^/]+)/\d+\.html$",
-    #             build_book_id=lambda m: m.group(1),
-    #         ),
-    #         BookIdExtractor(
-    #             pattern=r"^/novel/([^.]+)\.html",
-    #             build_book_id=lambda m: m.group(1),
-    #         ),
-    #     ],
-    #     hints=[],
-    # )],
+    "biquyuedu.com": [
+        SiteRuleSet(
+            site_key="biquyuedu",
+            extractors=[
+                BookIdExtractor(
+                    pattern=r"^/novel/([^/]+)/\d+\.html$",
+                    build_book_id=lambda m: m.group(1),
+                ),
+                BookIdExtractor(
+                    pattern=r"^/novel/([^.]+)\.html",
+                    build_book_id=lambda m: m.group(1),
+                ),
+            ],
+            hints=[],
+        )
+    ],
     "m.bixiange.me": [
         SiteRuleSet(
             site_key="bixiange",
@@ -1101,16 +1103,18 @@ SITE_RULES: dict[str, list[SiteRuleSet]] = {
             ],
         )
     ],
-    # "www.wanbengo.com": [SiteRuleSet(
-    #     site_key="wanbengo",
-    #     extractors=[
-    #         BookIdExtractor(
-    #             pattern=r"^/(\d+)/",
-    #             build_book_id=lambda m: m.group(1),
-    #         ),
-    #     ],
-    #     hints=[],
-    # )],
+    "www.wanbengo.com": [
+        SiteRuleSet(
+            site_key="wanbengo",
+            extractors=[
+                BookIdExtractor(
+                    pattern=r"^/(\d+)/",
+                    build_book_id=lambda m: m.group(1),
+                ),
+            ],
+            hints=[],
+        )
+    ],
     "www.westnovel.com": [
         SiteRuleSet(
             site_key="westnovel_sub",

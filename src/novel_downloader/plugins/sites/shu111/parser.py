@@ -8,7 +8,6 @@ novel_downloader.plugins.sites.shu111.parser
 from typing import Any
 
 from lxml import html
-
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
@@ -94,6 +93,9 @@ class Shu111Parser(BaseParser):
             }
             for a in tree.xpath('//*[@id="list-chapterAll"]//dd/a')
         ]
+
+        if not chapters:
+            return None
 
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 

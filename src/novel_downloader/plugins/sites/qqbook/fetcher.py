@@ -8,13 +8,12 @@ novel_downloader.plugins.sites.qqbook.fetcher
 import asyncio
 from typing import Any
 
-from novel_downloader.plugins.base.fetcher import BaseSession
+from novel_downloader.plugins.base.fetcher import BaseFetcher
 from novel_downloader.plugins.registry import registrar
-from novel_downloader.schemas import LoginField
 
 
 @registrar.register_fetcher()
-class QqbookSession(BaseSession):
+class QqbookFetcher(BaseFetcher):
     """
     A session class for interacting with the QQ 阅读 (book.qq.com) novel.
     """
@@ -28,24 +27,6 @@ class QqbookSession(BaseSession):
     CHAPTER_URL = "https://book.qq.com/book-read/{book_id}/{chapter_id}/"
 
     USER_HOMEPAGE_API_URL = "https://book.qq.com/api/user/homepage"
-
-    async def login(
-        self,
-        username: str = "",
-        password: str = "",
-        cookies: dict[str, str] | None = None,
-        attempt: int = 1,
-        **kwargs: Any,
-    ) -> bool:
-        """
-        Restore cookies persisted by the session-based workflow.
-        """
-        if not cookies:
-            return False
-        self.update_cookies(cookies)
-
-        self._is_logged_in = await self._check_login_status()
-        return self._is_logged_in
 
     async def get_book_info(
         self,
@@ -87,21 +68,7 @@ class QqbookSession(BaseSession):
 
         :return: The HTML markup of the bookcase page.
         """
-        url = self.bookcase_url()
-        return [await self.fetch(url, **kwargs)]
-
-    @property
-    def login_fields(self) -> list[LoginField]:
-        return [
-            LoginField(
-                name="cookies",
-                label="Cookie",
-                type="cookie",
-                required=True,
-                placeholder="Paste your login cookies here",
-                description="Copy the cookies from your browser's developer tools while logged in.",  # noqa: E501
-            ),
-        ]
+        return [await self.fetch(self.BOOKCASE_URL, **kwargs)]
 
     @classmethod
     def homepage_url(cls) -> str:
@@ -111,15 +78,6 @@ class QqbookSession(BaseSession):
         :return: Fully qualified URL of the home page.
         """
         return cls.HOMEPAGE_URL
-
-    @classmethod
-    def bookcase_url(cls) -> str:
-        """
-        Construct the URL for the user's bookcase page.
-
-        :return: Fully qualified URL of the bookcase.
-        """
-        return cls.BOOKCASE_URL
 
     @classmethod
     def book_info_url(cls, book_id: str) -> str:
@@ -160,16 +118,27 @@ class QqbookSession(BaseSession):
         :return: True if the user is logged in, False otherwise.
         """
         try:
-            async with self.get(self.USER_HOMEPAGE_API_URL) as resp:
-                resp.raise_for_status()
-                payload = await resp.json(encoding="utf-8")
-                if payload.get("code") == 0:
-                    return True
-                self.logger.info(
-                    "QQ book login invalid (code=%s): %s",
-                    payload.get("code"),
-                    payload.get("msg"),
-                )
+            resp = await self.session.get(self.USER_HOMEPAGE_API_URL)
         except Exception as e:
-            self.logger.info("QQ book login check failed: %s", e)
+            self.logger.info("QQ book login check request failed: %s", e)
+            return False
+
+        if not resp.ok:
+            self.logger.info("QQ book login check HTTP failed: status=%s", resp.status)
+            return False
+
+        try:
+            payload = resp.json()
+        except Exception as e:
+            self.logger.info("QQ book login check JSON parse failed: %s", e)
+            return False
+
+        if payload.get("code") == 0:
+            return True
+
+        self.logger.info(
+            "QQ book login invalid (code=%s): %s",
+            payload.get("code"),
+            payload.get("msg"),
+        )
         return False

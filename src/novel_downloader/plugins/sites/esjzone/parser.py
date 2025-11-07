@@ -13,7 +13,6 @@ from typing import Any
 from urllib.parse import unquote
 
 from lxml import etree, html
-
 from novel_downloader.libs.fontocr import get_font_ocr
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
@@ -191,6 +190,9 @@ class EsjzoneParser(BaseParser):
         if chap_roots:
             walk(chap_roots[0])
         flush_volume()
+
+        if not volumes:
+            return None
 
         return {
             "book_name": book_name,

@@ -8,33 +8,24 @@ Abstract base class providing common HTTP session handling for fetchers.
 
 import abc
 import asyncio
-import json
 import logging
 import types
-from collections.abc import Callable, Mapping
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any, Literal, Self
 
-import aiohttp
-from aiohttp import (
-    BasicAuth,
-    ClientResponse,
-    ClientSession,
-    ClientTimeout,
-    TCPConnector,
-)
-
-from novel_downloader.infra.http_defaults import DEFAULT_USER_HEADERS, IMAGE_HEADERS
-from novel_downloader.infra.paths import DATA_DIR
+from novel_downloader.infra.http_defaults import IMAGE_HEADERS
 from novel_downloader.libs.filesystem import img_name, write_file
 from novel_downloader.libs.time_utils import async_jitter_sleep
 from novel_downloader.plugins.utils.rate_limiter import TokenBucketRateLimiter
 from novel_downloader.schemas import FetcherConfig, LoginField
 
+from .session_base import BaseSession
 
-class BaseSession(abc.ABC):
+
+class BaseFetcher(abc.ABC):
     """
-    BaseSession wraps basic HTTP operations using aiohttp.ClientSession.
+    BaseFetcher wraps basic HTTP operations.
     """
 
     site_name: str
@@ -58,30 +49,20 @@ class BaseSession(abc.ABC):
         self._request_interval = config.request_interval
         self._retry_times = config.retry_times
         self._timeout = config.timeout
-        self._max_connections = config.max_connections
-        self._verify_ssl = config.verify_ssl
-        self._proxy = config.proxy
-        self._trust_env = config.trust_env
-        self._init_cookies = cookies or {}
         self._is_logged_in = False
 
-        self._state_file = DATA_DIR / self.site_name / "session_state.cookies"
+        self._cache_dir = Path(config.cache_dir) / self.site_name
 
-        self._headers = (
-            config.headers.copy()
-            if config.headers is not None
-            else DEFAULT_USER_HEADERS.copy()
+        self.session: BaseSession = self._create_session(
+            backend=config.backend,
+            cfg=config,
+            cookies=cookies,
+            **kwargs,
         )
-        if config.user_agent:
-            self._headers["User-Agent"] = config.user_agent
 
-        self._session: ClientSession | None = None
         self._rate_limiter: TokenBucketRateLimiter | None = (
             TokenBucketRateLimiter(config.max_rps) if config.max_rps > 0 else None
         )
-        self._proxy_auth: BasicAuth | None = None
-        if config.proxy_user and config.proxy_pass:
-            self._proxy_auth = BasicAuth(config.proxy_user, config.proxy_pass)
 
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
@@ -89,30 +70,14 @@ class BaseSession(abc.ABC):
         self,
         **kwargs: Any,
     ) -> None:
-        """
-        Set up the aiohttp.ClientSession with timeout, connector, headers.
-        """
-        timeout = ClientTimeout(total=self._timeout)
-        connector = TCPConnector(
-            ssl=self._verify_ssl,
-            limit_per_host=self._max_connections,
-        )
-        self._session = ClientSession(
-            timeout=timeout,
-            connector=connector,
-            cookies=self._init_cookies,
-            proxy=self._proxy,
-            proxy_auth=self._proxy_auth,
-            trust_env=self._trust_env,
-        )
+        """"""
+        await self.session.init()
 
     async def close(self) -> None:
         """
         Shutdown and clean up any resources.
         """
-        if self._session and not self._session.closed:
-            await self._session.close()
-        self._session = None
+        await self.session.close()
 
     async def login(
         self,
@@ -127,7 +92,12 @@ class BaseSession(abc.ABC):
 
         :returns: True if login succeeded.
         """
-        return False
+        if not cookies:
+            return False
+        self.session.update_cookies(cookies)
+
+        self._is_logged_in = await self._check_login_status()
+        return self._is_logged_in
 
     @abc.abstractmethod
     async def get_book_info(
@@ -162,7 +132,7 @@ class BaseSession(abc.ABC):
     async def download_image(
         self,
         url: str,
-        folder: Path,
+        img_dir: Path,
         *,
         name: str | None = None,
         on_exist: Literal["overwrite", "skip"] = "skip",
@@ -171,33 +141,15 @@ class BaseSession(abc.ABC):
         Download a single image and return its saved path.
 
         :param url: Image URL.
-        :param folder: Destination folder.
+        :param img_dir: Destination folder.
         :param name: Optional explicit filename (without suffix).
         :param on_exist: What to do when file exists.
         :return: Path of saved image, or None if failed/skipped.
         """
-        folder.mkdir(parents=True, exist_ok=True)
-
-        save_path = folder / img_name(url, name=name)
-
-        if save_path.exists() and on_exist == "skip":
-            self.logger.debug("Skip existing image: %s", save_path)
-            return save_path
-
-        try:
-            async with await self.get(url, headers=IMAGE_HEADERS) as resp:
-                resp.raise_for_status()
-                data = await resp.read()
-        except aiohttp.ClientResponseError as e:
-            self.logger.warning("Skip %s (HTTP %s): %s", url, e.status, e)
-            return None
-        except Exception as e:
-            self.logger.warning("Failed %s: %s", url, e)
-            return None
-
-        write_file(content=data, filepath=save_path, on_exist="overwrite")
-        self.logger.debug("Saved image: %s <- %s", save_path, url)
-        return save_path
+        img_dir.mkdir(parents=True, exist_ok=True)
+        return await self._download_one_image(
+            url, img_dir, name=name, on_exist=on_exist
+        )
 
     async def download_images(
         self,
@@ -234,6 +186,22 @@ class BaseSession(abc.ABC):
                 if isinstance(r, Exception):
                     self.logger.warning("Image download error: %s", r)
 
+    async def load_state(self) -> bool:
+        """
+        Load session cookies from a file to restore previous login state.
+
+        :return: True if the session state was loaded, False otherwise.
+        """
+        return self.session.load_cookies(self._cache_dir)
+
+    async def save_state(self) -> bool:
+        """
+        Save the current session cookies to a file for future reuse.
+
+        :return: True if the session state was saved, False otherwise.
+        """
+        return self.session.save_cookies(self._cache_dir)
+
     @property
     def is_logged_in(self) -> bool:
         """
@@ -243,12 +211,21 @@ class BaseSession(abc.ABC):
 
     @property
     def login_fields(self) -> list[LoginField]:
-        return []
+        return [
+            LoginField(
+                name="cookies",
+                label="Cookie",
+                type="cookie",
+                required=True,
+                placeholder="Paste your login cookies here",
+                description="Copy the cookies from your browser's developer tools while logged in.",  # noqa: E501
+            ),
+        ]
 
     async def fetch(
         self,
         url: str,
-        encoding: str | None = None,
+        encoding: str = "utf-8",
         **kwargs: Any,
     ) -> str:
         """
@@ -257,17 +234,13 @@ class BaseSession(abc.ABC):
         :param url: The target URL to fetch.
         :param kwargs: Additional keyword arguments to pass to `session.get`.
         :return: The response body as text.
-        :raises: aiohttp.ClientError on final failure.
         """
         if self._rate_limiter:
             await self._rate_limiter.wait()
 
         for attempt in range(self._retry_times + 1):
-            try:
-                async with self.get(url, **kwargs) as resp:
-                    resp.raise_for_status()
-                    return await self._response_to_str(resp, encoding)
-            except aiohttp.ClientError:
+            resp = await self.session.get(url, encoding=encoding, **kwargs)
+            if not resp.ok:
                 if attempt < self._retry_times:
                     await async_jitter_sleep(
                         self._backoff_factor,
@@ -275,144 +248,37 @@ class BaseSession(abc.ABC):
                         max_sleep=self._backoff_factor + 2,
                     )
                     continue
-                raise
+                raise ConnectionError(
+                    f"Request to {url} failed with status {resp.status}"
+                )
+            return resp.text
 
         raise RuntimeError("Unreachable code reached in fetch()")
 
-    def get(
-        self,
-        url: str,
-        params: dict[str, Any] | None = None,
+    @staticmethod
+    def _create_session(
+        backend: str,
+        cfg: FetcherConfig,
+        cookies: dict[str, str] | None = None,
         **kwargs: Any,
-    ) -> aiohttp.client._RequestContextManager:
-        """
-        Create an HTTP GET request context manager.
+    ) -> BaseSession:
+        match backend:
+            case "aiohttp":
+                from novel_downloader.plugins.base.session_aiohttp import AiohttpSession
 
-        :param url: The target URL.
-        :param params: Query parameters to include in the request.
-        :param kwargs: Additional args passed to session.get().
-        :return: aiohttp.client._RequestContextManager object.
-        :raises RuntimeError: If the session is not initialized.
-        """
-        return self._request("GET", url, params=params, **kwargs)
+                return AiohttpSession(cfg, cookies, **kwargs)
+            case "httpx":
+                from novel_downloader.plugins.base.session_httpx import HttpxSession
 
-    def post(
-        self,
-        url: str,
-        data: dict[str, Any] | bytes | None = None,
-        json: dict[str, Any] | None = None,
-        **kwargs: Any,
-    ) -> aiohttp.client._RequestContextManager:
-        """
-        Create an HTTP POST request context manager.
-
-        :param url: The target URL.
-        :param data: Form data to include in the request body.
-        :param json: JSON body to include in the request.
-        :param kwargs: Additional args passed to session.post().
-        :return: aiohttp.client._RequestContextManager object.
-        :raises RuntimeError: If the session is not initialized.
-        """
-        return self._request("POST", url, data=data, json=json, **kwargs)
-
-    async def load_state(self) -> bool:
-        """
-        Load session cookies from a file to restore previous login state.
-
-        :return: True if the session state was loaded, False otherwise.
-        """
-        # if not self._state_file.exists() or self._session is None:
-        #     return False
-        # try:
-        #     self._session.cookie_jar.load(self._state_file)
-        #     self._is_logged_in = await self._check_login_status()
-        #     return self._is_logged_in
-        # except Exception as e:
-        #     self.logger.warning("Failed to load state: %s", e)
-        # return False
-        if not self._state_file.exists() or self._session is None:
-            return False
-        try:
-            storage = json.loads(self._state_file.read_text(encoding="utf-8"))
-            raw_cookies = storage.get("cookies", [])
-            cookie_dict = self._filter_cookies(raw_cookies)
-
-            if cookie_dict:
-                self._session.cookie_jar.update_cookies(cookie_dict)
-
-            self._is_logged_in = await self._check_login_status()
-            return self._is_logged_in
-        except Exception as e:
-            self.logger.warning(
-                "Failed to load state for site=%s: %s",
-                self.site_name,
-                e,
-            )
-            return False
-
-    async def save_state(self) -> bool:
-        """
-        Save the current session cookies to a file for future reuse.
-
-        :return: True if the session state was saved, False otherwise.
-        """
-        # if self._session is None:
-        #     return False
-        # try:
-        #     self._session.cookie_jar.save(self._state_file)
-        #     return True
-        # except Exception as e:
-        #     self.logger.warning("Failed to save state: %s", e)
-        # return False
-        if self._session is None:
-            return False
-        try:
-            cookies = []
-            for cookie in self._session.cookie_jar:
-                cookies.append(
-                    {
-                        "name": cookie.key,
-                        "value": cookie.value,
-                    }
+                return HttpxSession(cfg, cookies, **kwargs)
+            case "curl_cffi":
+                from novel_downloader.plugins.base.session_curl_cffi import (
+                    CurlCffiSession,
                 )
-            storage_state = {
-                "cookies": cookies,
-                "origins": [],
-            }
-            self._state_file.parent.mkdir(parents=True, exist_ok=True)
-            self._state_file.write_text(
-                json.dumps(storage_state, indent=2, ensure_ascii=False),
-                encoding="utf-8",
-            )
-            return True
-        except Exception as e:
-            self.logger.warning(
-                "Failed to save state for site=%s: %s",
-                self.site_name,
-                e,
-            )
-            return False
 
-    def update_cookies(
-        self,
-        cookies: dict[str, str],
-    ) -> None:
-        """
-        Update or add multiple cookies in the session.
-
-        :param cookies: A dictionary of cookie key-value pairs.
-        """
-        if self._session:
-            self._session.cookie_jar.update_cookies(cookies)
-
-    def _request(
-        self,
-        method: str,
-        url: str,
-        **kwargs: Any,
-    ) -> aiohttp.client._RequestContextManager:
-        headers = {**self._headers, **kwargs.pop("headers", {})}
-        return self.session.request(method, url, headers=headers, **kwargs)
+                return CurlCffiSession(cfg, cookies, **kwargs)
+            case _:
+                raise ValueError(f"Unsupported backend: {backend!r}")
 
     async def _check_login_status(self) -> bool:
         """
@@ -420,18 +286,7 @@ class BaseSession(abc.ABC):
 
         :return: True if the user is logged in, False otherwise.
         """
-        return False
-
-    @property
-    def session(self) -> ClientSession:
-        """
-        Return the active aiohttp.ClientSession.
-
-        :raises RuntimeError: If the session is uninitialized.
-        """
-        if self._session is None:
-            raise RuntimeError("Session is not initialized or has been shut down.")
-        return self._session
+        return True
 
     async def _sleep(self) -> None:
         if self._request_interval > 0:
@@ -448,98 +303,61 @@ class BaseSession(abc.ABC):
 
         :return: A dict mapping header names to their values.
         """
-        return self._headers.copy()
-
-    @staticmethod
-    def _filter_cookies(
-        raw_cookies: list[Mapping[str, Any]],
-    ) -> dict[str, str]:
-        """
-        Hook:
-        take the raw list of cookie-dicts loaded from storage_state
-        and return a simple name -> value mapping.
-        """
-        return {c["name"]: c["value"] for c in raw_cookies}
-
-    @staticmethod
-    async def _response_to_str(
-        resp: ClientResponse,
-        encoding: str | None = None,
-    ) -> str:
-        """
-        Read the full body of resp as text. Try the provided encoding,
-        response charset, and common fallbacks. On failure, fall back
-        to utf-8 with errors ignored.
-        """
-        data: bytes = await resp.read()
-        encodings: list[str | None] = [
-            encoding,
-            resp.charset,
-            "gb2312",
-            "gb18030",
-            "gbk",
-            "utf-8",
-        ]
-
-        for enc in (e for e in encodings if e is not None):
-            try:
-                return data.decode(enc)
-            except UnicodeDecodeError:
-                continue
-        return data.decode(encoding or "utf-8", errors="ignore")
+        return self.session.headers
 
     async def _download_one_image(
         self,
         url: str,
         folder: Path,
         *,
+        name: str | None = None,
         on_exist: Literal["overwrite", "skip"],
-    ) -> None:
+    ) -> Path | None:
         """Download a single image and save with a hashed filename."""
-        save_path = folder / img_name(url)
+        save_path = folder / img_name(url, name=name)
 
         if save_path.exists() and on_exist == "skip":
             self.logger.debug("Skip existing image: %s", save_path)
-            return
+            return save_path
 
         try:
-            async with await self.get(url, headers=IMAGE_HEADERS) as resp:
-                resp.raise_for_status()
-                data = await resp.read()
-        except aiohttp.ClientResponseError as e:
-            self.logger.warning("Skip %s (HTTP %s): %s", url, e.status, e)
-            return
+            resp = await self.session.get(url, headers=IMAGE_HEADERS)
         except Exception as e:
-            self.logger.warning("Failed %s: %s", url, e)
-            return
+            self.logger.warning(
+                "Image request failed (site=%s) %s: %s",
+                self.site_name,
+                url,
+                e,
+            )
+            return None
 
-        write_file(content=data, filepath=save_path, on_exist="overwrite")
+        if not resp.content:
+            self.logger.warning(
+                "Empty response for image (site=%s): %s",
+                self.site_name,
+                url,
+            )
+            return None
+
+        if not resp.ok:
+            self.logger.warning(
+                "Image request failed (site=%s) %s: HTTP %s",
+                self.site_name,
+                url,
+                resp.status,
+            )
+            return None
+
+        write_file(content=resp.content, filepath=save_path, on_exist="overwrite")
         self.logger.debug("Saved image: %s <- %s", save_path, url)
+        return save_path
 
     def _resolve_base_url(self, locale_style: str) -> str:
         key = locale_style.strip().lower()
         return self.BASE_URL_MAP.get(key, self.DEFAULT_BASE_URL)
 
-    def _debug_cookies(self) -> None:
-        """
-        Print all cookies currently stored in the aiohttp ClientSession cookie jar.
-        """
-        if not self._session:
-            print("[Cookie Debug] Session not initialized.")
-            return
-
-        print("\n=== [Cookie Jar Dump] ===")
-        jar = self._session.cookie_jar
-        for cookie in jar:
-            print(
-                f"{cookie.key} = {cookie.value} "
-                "(domain={cookie['domain']}, path={cookie['path']})"
-            )
-        print("=========================\n")
-
     async def __aenter__(self) -> Self:
-        if self._session is None or self._session.closed:
-            await self.init()
+        await self.init()
         return self
 
     async def __aexit__(
@@ -551,7 +369,7 @@ class BaseSession(abc.ABC):
         await self.close()
 
 
-class GenericSession(BaseSession):
+class GenericFetcher(BaseFetcher):
     """
     Generic mid-layer for novel sites.
 
@@ -573,6 +391,7 @@ class GenericSession(BaseSession):
     """
 
     BOOK_ID_REPLACEMENTS: list[tuple[str, str]] = []
+    CHAP_ID_REPLACEMENTS: list[tuple[str, str]] = []
 
     # Simple template-style URLs (single page)
     BOOK_INFO_URL: str | None = None
@@ -633,7 +452,7 @@ class GenericSession(BaseSession):
         self, book_id: str, chapter_id: str, **kwargs: Any
     ) -> list[str]:
         book_id = self._transform_book_id(book_id)
-        chapter_id = self._transform_book_id(chapter_id)
+        chapter_id = self._transform_chap_id(chapter_id)
 
         if self.USE_PAGINATED_CHAPTER:
             return await self._paginate(
@@ -688,6 +507,11 @@ class GenericSession(BaseSession):
         for old, new in self.BOOK_ID_REPLACEMENTS:
             book_id = book_id.replace(old, new)
         return book_id
+
+    def _transform_chap_id(self, chap_id: str) -> str:
+        for old, new in self.CHAP_ID_REPLACEMENTS:
+            chap_id = chap_id.replace(old, new)
+        return chap_id
 
     async def _paginate(
         self,

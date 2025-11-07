@@ -15,7 +15,6 @@ from pathlib import Path
 from typing import Any, TypedDict
 
 from lxml import html
-
 from novel_downloader.infra.jsbridge import get_decryptor
 from novel_downloader.libs.fontocr import get_font_ocr
 from novel_downloader.plugins.base.parser import BaseParser
@@ -69,9 +68,8 @@ class QqbookParser(BaseParser):
         """
         super().__init__(config)
 
-        self._rand_path = self._base_cache_dir / "qqbook" / "randomFont.ttf"
-        self._fixed_font_dir = self._base_cache_dir / "qqbook" / "fixed_fonts"
-        self._fixed_map_dir = self._base_cache_dir / "qqbook" / "fixed_font_map"
+        self._fixed_font_dir = self._cache_dir / "fixed_fonts"
+        self._fixed_map_dir = self._cache_dir / "fixed_font_map"
         self._debug_dir = Path.cwd() / "debug" / "qqbook"
 
     def parse_book_info(
@@ -162,6 +160,9 @@ class QqbookParser(BaseParser):
                 "accessible": accessible,
             }
             chapters.append(chap)
+
+        if not chapters:
+            return None
 
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 
@@ -328,17 +329,6 @@ class QqbookParser(BaseParser):
         if self._save_font_debug:
             debug_dir.mkdir(parents=True, exist_ok=True)
 
-        try:
-            self._rand_path.parent.mkdir(parents=True, exist_ok=True)
-            self._rand_path.write_bytes(bytes(rf_data))
-        except Exception as e:
-            logger.error(
-                "QQbook chapter %s :: failed to write randomFont.ttf",
-                cid,
-                exc_info=e,
-            )
-            return ""
-
         fixed_path = download(
             url=fixed_woff2_url,
             target_dir=self._fixed_font_dir,
@@ -367,7 +357,7 @@ class QqbookParser(BaseParser):
 
         mapping_result = self._generate_font_map(
             fixed_font_path=fixed_path,
-            random_font_path=self._rand_path,
+            random_font_bytes=bytes(rf_data),
             char_set=char_set,
             refl_set=refl_set,
             batch_size=self._batch_size,
@@ -408,7 +398,7 @@ class QqbookParser(BaseParser):
     def _generate_font_map(
         self,
         fixed_font_path: Path,
-        random_font_path: Path,
+        random_font_bytes: bytes,
         char_set: set[str],
         refl_set: set[str],
         batch_size: int = 32,
@@ -420,7 +410,7 @@ class QqbookParser(BaseParser):
         and an random obfuscated font. Results are cached in JSON.
 
         :param fixed_font_path: fixed font file.
-        :param random_font_path: random font file.
+        :param random_font_bytes: raw bytes of the random font file.
         :param char_set: Characters to match directly.
         :param refl_set: Characters to match in flipped form.
         :param cache_dir: Directory to save/load cached results.
@@ -455,9 +445,9 @@ class QqbookParser(BaseParser):
 
         # prepare font renderers and cmap sets
         fixed_chars = font_ocr.extract_font_charset(fixed_font_path)
-        random_chars = font_ocr.extract_font_charset(random_font_path)
+        random_chars = font_ocr.extract_font_charset_bytes(random_font_bytes)
         fixed_font = font_ocr.load_render_font(fixed_font_path)
-        random_font = font_ocr.load_render_font(random_font_path)
+        random_font = font_ocr.load_render_font_bytes(random_font_bytes)
 
         # process normal and reflected sets together
         rendered = []

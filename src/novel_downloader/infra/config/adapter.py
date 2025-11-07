@@ -64,11 +64,15 @@ class ConfigAdapter:
             max_rps=self._pick("max_rps", 1000.0, s, g),
             user_agent=self._pick("user_agent", None, s, g),
             headers=self._pick("headers", None, s, g),
+            impersonate=self._pick("impersonate", None, s, g),
             verify_ssl=self._pick("verify_ssl", True, s, g),
+            http2=self._pick("http2", True, s, g),
             proxy=self._pick("proxy", None, s, g),
             proxy_user=self._pick("proxy_user", None, s, g),
             proxy_pass=self._pick("proxy_pass", None, s, g),
             trust_env=self._pick("trust_env", False, s, g),
+            cache_dir=g.get("cache_dir", "./novel_cache"),
+            backend=self._pick("backend", "aiohttp", s, g),
             locale_style=self._pick("locale_style", "simplified", s, g),
         )
 

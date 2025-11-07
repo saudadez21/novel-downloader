@@ -8,7 +8,6 @@ novel_downloader.plugins.sites.dxmwx.parser
 from typing import Any
 
 from lxml import html
-
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
@@ -96,6 +95,10 @@ class DxmwxParser(BaseParser):
             # "/read/57215_50197663.html" -> "50197663"
             chap_id = href.split("read/", 1)[-1].split(".html", 1)[0].split("_")[-1]
             chapters.append({"title": title, "url": href, "chapterId": chap_id})
+
+        if not chapters:
+            return None
+
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 
         return {

@@ -5,12 +5,12 @@ novel_downloader.plugins.sites.ttkan.fetcher
 
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class TtkanSession(GenericSession):
+class TtkanFetcher(GenericFetcher):
     """
     A session class for interacting with the 天天看小说 (www.ttkan.co) novel.
     """

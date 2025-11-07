@@ -39,7 +39,7 @@ class BaseParser(abc.ABC):
         self._decode_font: bool = config.decode_font
         self._batch_size = config.batch_size
         self._use_truncation = config.use_truncation
-        self._base_cache_dir = Path(config.cache_dir)
+        self._cache_dir = Path(config.cache_dir) / self.site_name
 
         self._ad_pattern = self._compile_ads_pattern()
 

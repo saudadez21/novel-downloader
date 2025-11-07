@@ -268,7 +268,7 @@ def _build_settings_dropdown(
     return _get_sites, _get_psl, _get_timeout
 
 
-@ui.page("/")  # type: ignore[misc]
+@ui.page("/")
 def page_search() -> None:
     navbar("search")
     setup_dialog()
@@ -337,7 +337,7 @@ def page_search() -> None:
         list_area = ui.column().classes("w-full gap-3")
         pager_area = ui.row().classes("items-center justify-center w-full q-mt-md")
 
-    @ui.refreshable  # type: ignore[misc]
+    @ui.refreshable
     def render_status() -> None:
         status_area.clear()
         with status_area:
@@ -356,7 +356,7 @@ def page_search() -> None:
         with ui.card().props("flat bordered").classes("w-full h-[120px] animate-pulse"):
             pass
 
-    @ui.refreshable  # type: ignore[misc]
+    @ui.refreshable
     def render_results() -> None:
         list_area.clear()
         pager_area.clear()

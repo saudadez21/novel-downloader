@@ -13,6 +13,7 @@ from typing import Any
 
 import numpy as np
 from fontTools.ttLib import TTFont
+from numpy.typing import NDArray
 from paddleocr import TextRecognition
 from PIL import Image, ImageDraw, ImageFont
 from PIL.Image import Transpose
@@ -57,7 +58,7 @@ class FontOCR:
 
     def predict(
         self,
-        images: list[np.ndarray],
+        images: list[NDArray[np.uint8]],
         batch_size: int = 1,
     ) -> list[tuple[str, float]]:
         """
@@ -107,7 +108,7 @@ class FontOCR:
         render_font: ImageFont.FreeTypeFont,
         is_reflect: bool = False,
         size: int = 64,
-    ) -> np.ndarray:
+    ) -> NDArray[np.uint8]:
         """
         Render a single character into an RGB square image.
 
@@ -160,7 +161,7 @@ class FontOCR:
         return img
 
     @staticmethod
-    def load_image_array_bytes(data: bytes) -> np.ndarray:
+    def load_image_array_bytes(data: bytes) -> NDArray[np.uint8]:
         """
         Decode image bytes into an RGB NumPy array.
 
@@ -177,7 +178,7 @@ class FontOCR:
             return np.asarray(im)
 
     @staticmethod
-    def gif_to_array(path: Path) -> np.ndarray:
+    def gif_to_array(path: Path) -> NDArray[np.uint8]:
         """
         Convert a GIF image into a numpy array with white background.
 
@@ -191,7 +192,7 @@ class FontOCR:
             return np.array(background.convert("RGB"))
 
     @staticmethod
-    def gif_to_array_bytes(data: bytes) -> np.ndarray:
+    def gif_to_array_bytes(data: bytes) -> NDArray[np.uint8]:
         """
         Convert a GIF (in bytes) into a numpy array with white background.
 
@@ -205,7 +206,7 @@ class FontOCR:
             return np.array(background.convert("RGB"))
 
     @staticmethod
-    def filter_orange_watermark(img: np.ndarray) -> np.ndarray:
+    def filter_orange_watermark(img: NDArray[np.uint8]) -> NDArray[np.uint8]:
         """
         Remove orange-like watermark colors by replacing them with white.
 
@@ -229,12 +230,12 @@ class FontOCR:
 
     @staticmethod
     def split_by_height(
-        img: np.ndarray,
+        img: NDArray[np.uint8],
         height: int = 38,
         top_offset: int = 10,
         bottom_offset: int = 10,
         per_chunk_top_ignore: int = 10,
-    ) -> list[np.ndarray]:
+    ) -> list[NDArray[np.uint8]]:
         """
         Split an image vertically into chunks of fixed height,
         with optional global offsets and per-chunk top ignore.
@@ -260,11 +261,11 @@ class FontOCR:
 
     @staticmethod
     def crop_chars_region(
-        img: np.ndarray,
+        img: NDArray[np.uint8],
         num_chars: int,
         left_margin: int = 14,
         char_width: int = 28,
-    ) -> np.ndarray:
+    ) -> NDArray[np.uint8]:
         """
         Crop the image to keep only the region that covers the specified
         number of characters starting after the left margin.
@@ -280,7 +281,7 @@ class FontOCR:
         return img[:, :end_col, :]
 
     @staticmethod
-    def is_empty_image(img: np.ndarray) -> bool:
+    def is_empty_image(img: NDArray[np.uint8]) -> bool:
         """
         Check if the image is completely white (255, 255, 255).
 

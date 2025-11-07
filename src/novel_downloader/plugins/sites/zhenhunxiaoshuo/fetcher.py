@@ -5,12 +5,12 @@ novel_downloader.plugins.sites.zhenhunxiaoshuo.fetcher
 
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class ZhenhunxiaoshuoSession(GenericSession):
+class ZhenhunxiaoshuoFetcher(GenericFetcher):
     """
     A session class for interacting with the 镇魂小说网
     (www.zhenhunxiaoshuo.com) novel.

@@ -11,7 +11,7 @@ from typing import Any, Literal
 
 from novel_downloader.infra.http_defaults import DEFAULT_HEADERS
 from novel_downloader.libs.filesystem import img_name, write_file
-from novel_downloader.plugins.base.fetcher import BaseSession
+from novel_downloader.plugins.base.fetcher import BaseFetcher
 from novel_downloader.plugins.registry import registrar
 
 _IMG_HEADERS = DEFAULT_HEADERS.copy()
@@ -19,7 +19,7 @@ _IMG_HEADERS["Referer"] = "https://www.linovelib.com/"
 
 
 @registrar.register_fetcher()
-class LinovelibSession(BaseSession):
+class LinovelibFetcher(BaseFetcher):
     """
     A session class for interacting with 哔哩轻小说 (www.linovelib.com) novel.
     """
@@ -181,21 +181,33 @@ class LinovelibSession(BaseSession):
         url: str,
         folder: Path,
         *,
+        name: str | None = None,
         on_exist: Literal["overwrite", "skip"],
-    ) -> None:
-        save_path = folder / img_name(url)
+    ) -> Path | None:
+        save_path = folder / img_name(url, name=name)
 
         if save_path.exists() and on_exist == "skip":
             self.logger.debug("linovelib image: skip existing %s", save_path)
-            return
+            return save_path
 
         try:
-            async with await self.get(url, headers=_IMG_HEADERS) as resp:
-                resp.raise_for_status()
-                data = await resp.read()
+            resp = await self.session.get(url, headers=_IMG_HEADERS)
         except Exception as e:
-            self.logger.warning("linovelib image download failed (%s): %s", url, e)
-            return
+            self.logger.warning(
+                "Image request failed (site=linovelib) %s: %s",
+                url,
+                e,
+            )
+            return None
 
-        write_file(content=data, filepath=save_path, on_exist="overwrite")
+        if not resp.ok:
+            self.logger.warning(
+                "Image request failed (site=linovelib) %s: HTTP %s",
+                url,
+                resp.status,
+            )
+            return None
+
+        write_file(content=resp.content, filepath=save_path, on_exist="overwrite")
         self.logger.debug("linovelib image: saved %s <- %s", save_path, url)
+        return save_path

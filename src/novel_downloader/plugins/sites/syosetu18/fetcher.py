@@ -6,13 +6,13 @@ novel_downloader.plugins.sites.syosetu18.fetcher
 
 from typing import Any
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import FetcherConfig
 
 
 @registrar.register_fetcher()
-class Syosetu18Session(GenericSession):
+class Syosetu18Fetcher(GenericFetcher):
     """
     A session class for interacting with the 小説家になろう (syosetu.com) novel.
     """

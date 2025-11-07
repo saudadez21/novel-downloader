@@ -24,7 +24,7 @@ local_plugins_path = "./novel_plugins"
 └─ novel_plugins
    ├─ sites
    │  └─ ciweimao            # 示例: 站点键 (site_key), 即 --site 的值
-   │     ├─ fetcher.py       # 必需: 实现会话类 (如 CiweimaoSession)
+   │     ├─ fetcher.py       # 必需: 实现会话类 (如 CiweimaoFetcher)
    │     ├─ parser.py        # 必需: 实现解析类 (如 CiweimaoParser)
    │     ├─ searcher.py      # 可选: 用于站内搜索
    │     └─ client.py        # 可选: 不提供则使用通用 CommonClient
@@ -47,7 +47,7 @@ local_plugins_path = "./novel_plugins"
 #### 1. Fetcher (抓取)
 
 * 职责: 登录、抓取 **书籍信息页** 与 **章节页** (可能为多页)
-* 建议继承: `BaseSession` 或更高层的 `GenericSession`
+* 建议继承: `BaseFetcher` 或更高层的 `GenericFetcher`
 * 注册: 使用装饰器 `@registrar.register_fetcher()`
 
 ##### Fetcher 协议 (精简)
@@ -87,15 +87,15 @@ class LoginField:
     description: str = ""
 ```
 
-##### 继承 `BaseSession` (自定义 URL 的简单站点)
+##### 继承 `BaseFetcher` (自定义 URL 的简单站点)
 
 ```python
 from typing import Any
-from novel_downloader.plugins.base.fetcher import BaseSession
+from novel_downloader.plugins.base.fetcher import BaseFetcher
 from novel_downloader.plugins.registry import registrar
 
 @registrar.register_fetcher()
-class B520Session(BaseSession):
+class B520Fetcher(BaseFetcher):
     site_name: str = "b520"
 
     BOOK_INFO_URL = "http://www.b520.cc/{book_id}/"
@@ -110,16 +110,16 @@ class B520Session(BaseSession):
         return [await self.fetch(url, headers={"Referer": "http://www.b520.cc/"}, encoding="gbk")]
 ```
 
-##### 继承 `GenericSession` (模板 URL / 分页内置支持)
+##### 继承 `GenericFetcher` (模板 URL / 分页内置支持)
 
 **单页信息 + 单页章节**
 
 ```python
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 @registrar.register_fetcher()
-class BiquyueduSession(GenericSession):
+class BiquyueduFetcher(GenericFetcher):
     site_name: str = "biquyuedu"
     BOOK_INFO_URL = "https://biquyuedu.com/novel/{book_id}.html"
     CHAPTER_URL   = "https://biquyuedu.com/novel/{book_id}/{chapter_id}.html"
@@ -128,11 +128,11 @@ class BiquyueduSession(GenericSession):
 **信息/章节为多页**
 
 ```python
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 @registrar.register_fetcher()
-class Biquge5Session(GenericSession):
+class Biquge5Fetcher(GenericFetcher):
     site_name: str = "biquge5"
     BASE_URL = "https://www.biquge5.com"
 
@@ -151,11 +151,11 @@ class Biquge5Session(GenericSession):
 **信息页和目录页分离**
 
 ```python
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 @registrar.register_fetcher()
-class I25zwSession(GenericSession):
+class I25zwFetcher(GenericFetcher):
     site_name: str = "i25zw"
 
     HAS_SEPARATE_CATALOG = True
@@ -164,7 +164,7 @@ class I25zwSession(GenericSession):
     CHAPTER_URL      = "https://www.i25zw.com/{book_id}/{chapter_id}.html"
 ```
 
-> `GenericSession` 还提供分页钩子 `should_continue_pagination(...)`、相对路径拼接等通用逻辑, 便于快速适配。
+> `GenericFetcher` 还提供分页钩子 `should_continue_pagination(...)`、相对路径拼接等通用逻辑, 便于快速适配。
 
 ---
 

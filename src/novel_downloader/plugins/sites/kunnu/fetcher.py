@@ -5,12 +5,12 @@ novel_downloader.plugins.sites.kunnu.fetcher
 
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class KunnuSession(GenericSession):
+class KunnuFetcher(GenericFetcher):
     """
     A session class for interacting with the 鲲弩小说 (www.kunnu.com) novel.
     """

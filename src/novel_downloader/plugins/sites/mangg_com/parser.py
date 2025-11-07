@@ -8,7 +8,6 @@ novel_downloader.plugins.sites.mangg_com.parser
 from typing import Any
 
 from lxml import html
-
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
@@ -76,6 +75,10 @@ class ManggComParser(BaseParser):
             }
             for a in tree.xpath('//div[@id="list"]//dd/a')
         ]
+
+        if not chapters:
+            return None
+
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 
         return {

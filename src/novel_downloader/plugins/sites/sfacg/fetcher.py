@@ -8,13 +8,12 @@ novel_downloader.plugins.sites.sfacg.fetcher
 import base64
 from typing import Any
 
-from novel_downloader.plugins.base.fetcher import BaseSession
+from novel_downloader.plugins.base.fetcher import BaseFetcher
 from novel_downloader.plugins.registry import registrar
-from novel_downloader.schemas import LoginField
 
 
 @registrar.register_fetcher()
-class SfacgSession(BaseSession):
+class SfacgFetcher(BaseFetcher):
     """
     A session class for interacting with the SF轻小说 (m.sfacg.com) novel.
     """
@@ -27,28 +26,6 @@ class SfacgSession(BaseSession):
     BOOK_CATALOG_URL = "https://m.sfacg.com/i/{book_id}/"
     CHAPTER_URL = "https://m.sfacg.com/c/{chapter_id}/"
     VIP_CHAPTER_URL = "https://m.sfacg.com/ajax/ashx/common.ashx"
-
-    async def login(
-        self,
-        username: str = "",
-        password: str = "",
-        cookies: dict[str, str] | None = None,
-        attempt: int = 1,
-        **kwargs: Any,
-    ) -> bool:
-        """
-        Restore cookies persisted by the session-based workflow.
-        """
-        if cookies:
-            self.update_cookies(cookies)
-
-        if await self._check_login_status():
-            self._is_logged_in = True
-            self.logger.debug("Logged in via cookies: sfacg")
-            return True
-
-        self._is_logged_in = False
-        return False
 
     async def get_book_info(
         self,
@@ -92,11 +69,13 @@ class SfacgSession(BaseSession):
                 "font": "20",
                 "quick": "true",
             }
-            async with self.get(self.VIP_CHAPTER_URL, params=params) as resp:
-                resp.raise_for_status()
-                img_bytes = await resp.read()
+            resp = await self.session.get(self.VIP_CHAPTER_URL, params=params)
+            if not resp.ok:
+                raise ConnectionError(
+                    f"VIP chapter image request failed: {self.VIP_CHAPTER_URL}, status={resp.status}"  # noqa: E501
+                )
 
-            img_base64 = base64.b64encode(img_bytes).decode("utf-8")
+            img_base64 = base64.b64encode(resp.content).decode("utf-8")
             results.append(img_base64)
 
         return results
@@ -110,30 +89,7 @@ class SfacgSession(BaseSession):
 
         :return: The HTML markup of the bookcase page.
         """
-        url = self.bookcase_url()
-        return [await self.fetch(url, **kwargs)]
-
-    @property
-    def login_fields(self) -> list[LoginField]:
-        return [
-            LoginField(
-                name="cookies",
-                label="Cookie",
-                type="cookie",
-                required=True,
-                placeholder="Paste your login cookies here",
-                description="Copy the cookies from your browser's developer tools while logged in.",  # noqa: E501
-            ),
-        ]
-
-    @classmethod
-    def bookcase_url(cls) -> str:
-        """
-        Construct the URL for the user's bookcase page.
-
-        :return: Fully qualified URL of the bookcase.
-        """
-        return cls.BOOKCASE_URL
+        return [await self.fetch(self.BOOKCASE_URL, **kwargs)]
 
     @classmethod
     def book_info_url(cls, book_id: str) -> str:

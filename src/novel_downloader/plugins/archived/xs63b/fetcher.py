@@ -10,10 +10,10 @@ import base64
 import re
 from typing import Any
 
-from novel_downloader.plugins.base.fetcher import BaseSession
+from novel_downloader.plugins.base.fetcher import BaseFetcher
 
 
-class Xs63bSession(BaseSession):
+class Xs63bFetcher(BaseFetcher):
     """
     A session class for interacting with the 小说路上 (m.xs63b.com) novel.
     """
@@ -45,8 +45,8 @@ class Xs63bSession(BaseSession):
         catalog_url = self.book_catalog_url(book_id=book_id)
 
         info_html, catalog_html = await asyncio.gather(
-            self.fetch(info_url, ssl=False, **kwargs),
-            self.fetch(catalog_url, ssl=False, **kwargs),
+            self.fetch(info_url, verify=False, **kwargs),
+            self.fetch(catalog_url, verify=False, **kwargs),
         )
         return [info_html, catalog_html]
 

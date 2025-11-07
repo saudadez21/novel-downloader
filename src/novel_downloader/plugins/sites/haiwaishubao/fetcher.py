@@ -4,12 +4,12 @@ novel_downloader.plugins.sites.haiwaishubao.fetcher
 ---------------------------------------------------
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class HaiwaishubaoSession(GenericSession):
+class HaiwaishubaoFetcher(GenericFetcher):
     """
     A session class for interacting with the 海外书包 (www.haiwaishubao.com) novel
     """

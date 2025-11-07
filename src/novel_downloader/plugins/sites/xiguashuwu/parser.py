@@ -17,7 +17,6 @@ import requests
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
 from lxml import html
-
 from novel_downloader.infra.http_defaults import DEFAULT_USER_HEADERS
 from novel_downloader.infra.paths import XIGUASHUWU_MAP_PATH
 from novel_downloader.libs.fontocr import get_font_ocr
@@ -114,6 +113,9 @@ class XiguashuwuParser(BaseParser):
                         chapterId=chapter_id,
                     )
                 )
+
+        if not chapters:
+            return None
 
         volumes: list[VolumeInfoDict] = [
             VolumeInfoDict(volume_name="正文", chapters=chapters)

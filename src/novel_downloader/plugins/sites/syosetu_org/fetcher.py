@@ -4,12 +4,12 @@ novel_downloader.plugins.sites.syosetu_org.fetcher
 --------------------------------------------------
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class SyosetuOrgSession(GenericSession):
+class SyosetuOrgFetcher(GenericFetcher):
     """
     A session class for interacting with the ハーメルン (syosetu.org) novel.
     """

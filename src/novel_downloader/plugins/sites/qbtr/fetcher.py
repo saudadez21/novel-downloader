@@ -8,13 +8,12 @@ novel_downloader.plugins.sites.qbtr.fetcher
 from typing import Any
 
 from lxml import html
-
-from novel_downloader.plugins.base.fetcher import BaseSession
+from novel_downloader.plugins.base.fetcher import BaseFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class QbtrSession(BaseSession):
+class QbtrFetcher(BaseFetcher):
     """
     A session class for interacting with the 全本同人小说 (www.qbtr.cc) novel.
     """

@@ -8,7 +8,6 @@ novel_downloader.plugins.sites.quanben5.parser
 from typing import Any
 
 from lxml import html
-
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
@@ -57,6 +56,9 @@ class Quanben5Parser(BaseParser):
             # '/n/toutian/83840.html' -> '83840'
             chapter_id = href.rstrip(".html").split("/")[-1]
             chapters.append({"title": title, "url": href, "chapterId": chapter_id})
+
+        if not chapters:
+            return None
 
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 

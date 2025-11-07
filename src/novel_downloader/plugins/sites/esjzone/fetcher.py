@@ -9,13 +9,13 @@ import re
 from collections.abc import Mapping
 from typing import Any
 
-from novel_downloader.plugins.base.fetcher import BaseSession
+from novel_downloader.plugins.base.fetcher import BaseFetcher
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import LoginField
 
 
 @registrar.register_fetcher()
-class EsjzoneSession(BaseSession):
+class EsjzoneFetcher(BaseFetcher):
     """
     A session class for interacting with the ESJ Zone (www.esjzone.cc) novel.
     """
@@ -44,7 +44,7 @@ class EsjzoneSession(BaseSession):
         Restore cookies persisted by the session-based workflow.
         """
         if cookies:
-            self.update_cookies(cookies)
+            self.session.update_cookies(cookies)
 
         if await self._check_login_status():
             self._is_logged_in = True
@@ -96,8 +96,7 @@ class EsjzoneSession(BaseSession):
 
         :return: The HTML markup of the bookcase page.
         """
-        url = self.bookcase_url()
-        return [await self.fetch(url, **kwargs)]
+        return [await self.fetch(self.BOOKCASE_URL, **kwargs)]
 
     @property
     def login_fields(self) -> list[LoginField]:
@@ -119,15 +118,6 @@ class EsjzoneSession(BaseSession):
                 description="The password used for login",
             ),
         ]
-
-    @classmethod
-    def bookcase_url(cls) -> str:
-        """
-        Construct the URL for the user's bookcase page.
-
-        :return: Fully qualified URL of the bookcase.
-        """
-        return cls.BOOKCASE_URL
 
     @classmethod
     def book_info_url(cls, book_id: str) -> str:
@@ -163,15 +153,23 @@ class EsjzoneSession(BaseSession):
             mechanism in JavaScript.
         """
         data = {"plxf": "getAuthToken"}
+
+        resp = await self.session.post(url, data=data)
+        if not resp.ok:
+            self.logger.warning(
+                "esjzone getAuthToken HTTP failed for %s, status=%s", url, resp.status
+            )
+            return ""
+
         try:
-            async with self.post(url, data=data) as resp:
-                resp.raise_for_status()
-                # Example response: <JinJing>token_here</JinJing>
-                text = await resp.text()
-                return self._extract_token(text)
+            # Example response: <JinJing>token_here</JinJing>
+            text = resp.text
+            return self._extract_token(text)
         except Exception as exc:
-            self.logger.warning("esjzone getAuthToken failed for %s: %s", url, exc)
-        return ""
+            self.logger.warning(
+                "esjzone getAuthToken parse failed for %s: %s", url, exc
+            )
+            return ""
 
     async def _api_login(self, username: str, password: str) -> bool:
         """
@@ -191,19 +189,27 @@ class EsjzoneSession(BaseSession):
             "pwd": password,
             "remember_me": "on",
         }
-        auth_headers = dict(self.headers)
-        auth_headers["Authorization"] = token
+        headers = {**self.headers, "Authorization": token}
+
+        resp = await self.session.post(
+            self._API_LOGIN_URL, data=payload, headers=headers
+        )
+        if not resp.ok:
+            self.logger.warning("esjzone login HTTP failed, status=%s", resp.status)
+            return False
+
         try:
-            async with self.post(
-                self._API_LOGIN_URL, data=payload, headers=auth_headers
-            ) as resp:
-                resp.raise_for_status()
-                resp_json = await resp.json(content_type="text/html", encoding="utf-8")
-                resp_code: int = resp_json.get("status", 301)
-                return resp_code == 200
+            result = resp.json()
         except Exception as exc:
-            self.logger.warning("esjzone login failed: %s", exc)
-        return False
+            self.logger.warning("esjzone login JSON parse failed: %s", exc)
+            return False
+
+        status_code: int = result.get("status", 301)
+        if status_code != 200:
+            self.logger.warning("esjzone login failed: %s", result.get("msg", ""))
+            return False
+
+        return True
 
     async def _api_unlock_chapter(self, chap_url: str, password: str) -> str:
         """
@@ -221,34 +227,32 @@ class EsjzoneSession(BaseSession):
             return ""
 
         payload = {"pw": password}
-        headers = dict(self.headers)
-        headers["Authorization"] = token
+        headers = {**self.headers, "Authorization": token}
+
+        resp = await self.session.post(
+            self._API_UNLOCK_URL, data=payload, headers=headers
+        )
+        if not resp.ok:
+            self.logger.warning(
+                "esjzone unlock HTTP failed for %s, status=%s", chap_url, resp.status
+            )
+            return ""
 
         try:
-            async with self.post(
-                self._API_UNLOCK_URL, data=payload, headers=headers
-            ) as resp:
-                resp.raise_for_status()
-                result = await resp.json(content_type="text/html", encoding="utf-8")
-                status_code: int = result.get("status", 301)
-
-                if status_code != 200:
-                    self.logger.warning(
-                        "esjzone unlock failed for %s: %s",
-                        chap_url,
-                        result.get("msg", ""),
-                    )
-                    return ""
-
-                reso_html: str = result.get("html", "")
-                return reso_html
-
+            result = resp.json()
         except Exception as exc:
             self.logger.warning(
-                "esjzone unlock request failed for %s: %s", chap_url, exc
+                "esjzone unlock JSON parse failed for %s: %s", chap_url, exc
             )
+            return ""
 
-        return ""
+        if result.get("status") != 200:
+            self.logger.warning(
+                "esjzone unlock failed for %s: %s", chap_url, result.get("msg", "")
+            )
+            return ""
+
+        return result.get("html") or ""
 
     async def _check_login_status(self) -> bool:
         """

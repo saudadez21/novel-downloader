@@ -7,13 +7,12 @@ novel_downloader.plugins.sites.kadokado.fetcher
 import asyncio
 from typing import Any
 
-from novel_downloader.plugins.base.fetcher import BaseSession
+from novel_downloader.plugins.base.fetcher import BaseFetcher
 from novel_downloader.plugins.registry import registrar
-from novel_downloader.schemas import LoginField
 
 
 @registrar.register_fetcher()
-class KadokadoSession(BaseSession):
+class KadokadoFetcher(BaseFetcher):
     """
     A session class for interacting with the KadoKado (www.kadokado.com.tw) novel.
     """
@@ -25,24 +24,6 @@ class KadokadoSession(BaseSession):
     CHAPTER_INFO_URL = "https://api.kadokado.com.tw/v3/chapter/{chapter_id}/info"
     CHAPTER_CONT_URL = "https://api.kadokado.com.tw/v3/chapter/{chapter_id}/content"
     USER_API_URL = "https://api.kadokado.com.tw/v2/members/me"
-
-    async def login(
-        self,
-        username: str = "",
-        password: str = "",
-        cookies: dict[str, str] | None = None,
-        attempt: int = 1,
-        **kwargs: Any,
-    ) -> bool:
-        """
-        Restore cookies persisted by the session-based workflow.
-        """
-        if not cookies:
-            return False
-        self.update_cookies(cookies)
-
-        self._is_logged_in = await self._check_login_status()
-        return self._is_logged_in
 
     async def get_book_info(
         self,
@@ -73,28 +54,29 @@ class KadokadoSession(BaseSession):
         )
         return [info_resp, content_resp]
 
-    @property
-    def login_fields(self) -> list[LoginField]:
-        return [
-            LoginField(
-                name="cookies",
-                label="Cookie",
-                type="cookie",
-                required=True,
-                placeholder="Paste your login cookies here",
-                description="Copy the cookies from your browser's developer tools while logged in.",  # noqa: E501
-            ),
-        ]
-
     async def _check_login_status(self) -> bool:
+        """
+        Check whether the user is currently logged in by
+        querying the KadoKado user info API.
+        """
         try:
-            async with self.get(self.USER_API_URL) as resp:
-                resp.raise_for_status()
-                data = await resp.json()
-                if isinstance(data, dict) and data.get("memberId"):
-                    return True
-                self.logger.debug("KadoKado login check response: %s", data)
-                return False
+            resp = await self.session.get(self.USER_API_URL)
         except Exception as e:
-            self.logger.info("KadoKado login check failed: %s", e)
+            self.logger.info("KadoKado login check request failed: %s", e)
+            return False
+
+        if not resp.ok:
+            self.logger.info("KadoKado login check HTTP failed: status=%s", resp.status)
+            return False
+
+        try:
+            data = resp.json()
+        except Exception as e:
+            self.logger.info("KadoKado login check JSON parse failed: %s", e)
+            return False
+
+        if isinstance(data, dict) and data.get("memberId"):
+            return True
+
+        self.logger.debug("KadoKado login check response: %s", data)
         return False

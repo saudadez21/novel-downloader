@@ -8,12 +8,12 @@ novel_downloader.plugins.sites.ixdzs8.fetcher
 import re
 from typing import Any
 
-from novel_downloader.plugins.base.fetcher import BaseSession
+from novel_downloader.plugins.base.fetcher import BaseFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class Ixdzs8Session(BaseSession):
+class Ixdzs8Fetcher(BaseFetcher):
     """
     A session class for interacting with the 爱下电子书 (ixdzs8.com) novel.
     """
@@ -41,9 +41,13 @@ class Ixdzs8Session(BaseSession):
         url = self.book_info_url(book_id=book_id)
         data = {"bid": book_id}
         info_html = await self.fetch_verified_html(url, **kwargs)
-        async with self.post(self.BOOK_CATALOG_URL, data=data) as resp:
-            resp.raise_for_status()
-            catalog_html = await resp.text()
+        resp = await self.session.post(self.BOOK_CATALOG_URL, data=data, **kwargs)
+        if not resp.ok:
+            raise ConnectionError(
+                f"Book catalog request failed: {self.BOOK_CATALOG_URL}, status={resp.status}"  # noqa: E501
+            )
+
+        catalog_html = resp.text
         return [info_html, catalog_html]
 
     async def get_book_chapter(

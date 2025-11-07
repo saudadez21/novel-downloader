@@ -12,7 +12,6 @@ import re
 from typing import Any
 
 from lxml import html
-
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
@@ -104,6 +103,9 @@ class HetushuParser(BaseParser):
         # Append the last volume if it has any chapters
         if curr_vol["chapters"]:
             volumes.append(curr_vol)
+
+        if not volumes:
+            return None
 
         return {
             "book_name": book_name,

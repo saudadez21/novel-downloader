@@ -13,7 +13,7 @@
     - [类笔趣阁 / 第三方转载站](#类笔趣阁--第三方转载站)
     - [同人](#同人)
     - [日语](#日语)
-    - [限制级](#限制级)
+    - [NSFW](#nsfw)
     - [已归档站点](#已归档站点)
   - [站点详解与 Book ID 规则](#站点详解与-book-id-规则)
     - [主流原创 / 正版文学平台](#主流原创--正版文学平台-1)
@@ -22,7 +22,7 @@
     - [类笔趣阁 / 第三方转载站](#类笔趣阁--第三方转载站-1)
     - [同人](#同人-1)
     - [日语](#日语-1)
-    - [限制级](#限制级-1)
+    - [NSFW](#nsfw-1)
     - [已归档站点](#已归档站点-1)
   - [配置文件](#配置文件)
   - [Cookie 与登录](#cookie-与登录)
@@ -128,7 +128,6 @@ novel-cli download --site ttkan shengxu-chendong
 | [爱下电子书](https://ixdzs8.com/)                             | ixdzs8   | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [大熊猫文学网](https://www.dxmwx.org/)                        | dxmwx    | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [25中文网](https://www.i25zw.com/)                           | i25zw     | ❌     | ❌     | ❌     | ✅     | 简      |
-| [69阅读](https://www.69yue.top/index.html)                   | n69yue    | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [101看书](https://101kanshu.com/)                           | n101kanshu | ❌     | ❌     | ⚠️     | ✅     | 繁      |
 | [老幺小说网](https://www.laoyaoxs.org/)                     | laoyaoxs  | ❌     | ❌     | ❌     | ✅     | 简      |
 | [全本小说网](https://quanben5.com/)                          | quanben5  | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
@@ -173,16 +172,15 @@ novel-cli download --site ttkan shengxu-chendong
 | [小説を読もう！](https://yomou.syosetu.com/)                 | syosetu    | ✅     | ✅     | ⚠️     | ⚠️     |
 | [ムーンライトノベルズ](https://mnlt.syosetu.com/top/top/)     | syosetu18  | ✅     | ✅     | ⚠️     | ⚠️     |
 | [ノクターンノベルズ](https://noc.syosetu.com/top/top/)        | syosetu18  | ✅     | ✅     | ⚠️     | ⚠️     |
-| [小説を読もう！](https://yomou.syosetu.com/)                 | syosetu_org | ✅     | ❌     | ⚠️     | ⚠️     |
+| [ハーメルン](https://syosetu.org/)                          | syosetu_org | ✅     | ❌     | ⚠️     | ⚠️     |
 | [暁](https://www.akatsuki-novels.com/)                  | akatsuki_novels | ❌     | ❌     | ⚠️     | ⚠️     |
 | [アルファポリス](https://www.alphapolis.co.jp/)              | alphapolis  | ✅     | ❌     | ⚠️     | ⚠️     |
 | [ノベルピア](https://novelpia.jp/)                          | novelpia    | ❌     | ✅     | ⚠️     | ⚠️     |
 
-#### 限制级
+#### NSFW
 
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 | 支持语言 |
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
-| [3A电子书](http://www.aaatxt.com/)                           | aaatxt     | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [小说狂人](https://czbooks.net/)                             | czbooks    | ❌     | ❌     | ⚠️     | ✅     | 繁      |
 | [西瓜书屋](https://www.xiguashuwu.com/)                      | xiguashuwu | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [爱丽丝书屋](https://www.alicesw.com/)                       | alicesw    | ❌     | ❌     | ⚠️     | ✅     | 简      |
@@ -194,12 +192,14 @@ novel-cli download --site ttkan shengxu-chendong
 
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 | 支持语言 |
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
+| [3A电子书](http://www.aaatxt.com/)                           | aaatxt     | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [笔趣阁](https://www.8tsw.com/)                              | n8tsw     | ❌     | ❌     | ⚠️     | ⚠️     | 简      |
 | [精彩小说](https://biquyuedu.com/)                           | biquyuedu | ❌     | ❌     | ⚠️     | ❌     | 简      |
 | [得奇小说网](https://www.deqixs.com/)                        | deqixs    | ❌     | ❌     | ❌     | ✅     | 简      |
 | [小说屋](http://www.xiaoshuoge.info/)                       | xiaoshuoge | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [小说路上](https://m.xs63b.com/)                              | xs63b    | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [完本神站](https://www.wanbengo.com/)                        | wanbengo  | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [69阅读](https://www.69yue.top/index.html)                   | n69yue    | ❌     | ❌     | ⚠️     | ✅     | 简      |
 
 ---
 
@@ -368,10 +368,6 @@ novel-cli download --site ttkan shengxu-chendong
   * 书籍: `https://www.i25zw.com/book/64371.html` -> Book ID: `64371`
   * 章节: `https://www.i25zw.com/64371/153149757.html` -> Chapter ID: `153149757`
 
-* **69阅读 (n69yue)**
-  * 书籍: `https://www.69yue.top/articlecategroy/15yu.html` -> Book ID: `15yu`
-  * 章节: `https://www.69yue.top/article/15185363014257741.html` -> Chapter ID: `15185363014257741`
-
 * **101看书 (n101kanshu)**
   * 书籍: `https://101kanshu.com/book/7994.html` -> Book ID: `7994`
   * 章节: `https://101kanshu.com/txt/7994/9137080.html` -> Chapter ID: `9137080`
@@ -529,12 +525,7 @@ novel-cli download --site ttkan shengxu-chendong
   * 书籍: `https://novelpia.jp/novel/2393?sid=main5` -> Book ID: `2393`
   * 章节: `https://novelpia.jp/viewer/51118` -> Chapter ID: `51118`
 
-#### 限制级
-
-* **3A电子书 (aaatxt)**
-  * 书籍: `http://www.aaatxt.com/shu/24514.html` -> Book ID: `24514`
-  * 章节: `http://www.aaatxt.com/yuedu/24514_1.html` -> Chapter ID: `24514_1`
-  * 注意: 该站点直接提供 txt 下载。
+#### NSFW
 
 * **小说狂人 (czbooks)**
   * 书籍: `https://czbooks.net/n/dr4p0k7` -> Book ID: `dr4p0k7`
@@ -561,6 +552,11 @@ novel-cli download --site ttkan shengxu-chendong
   * 章节: `https://www.uaa.com/novel/chapter?id=234639` -> Chapter ID: `234639`
 
 #### 已归档站点
+
+* **3A电子书 (aaatxt)**
+  * 书籍: `http://www.aaatxt.com/shu/24514.html` -> Book ID: `24514`
+  * 章节: `http://www.aaatxt.com/yuedu/24514_1.html` -> Chapter ID: `24514_1`
+  * 注意: 该站点直接提供 txt 下载。
 
 * **笔趣阁 (n8tsw)**
   * 书籍: `https://www.8tsw.com/0_1/` -> Book ID: `0_1`
@@ -592,6 +588,10 @@ novel-cli download --site ttkan shengxu-chendong
     * 乱码过多: 例如 `?j\i~n￠j^i?a` 或多段连续无意义字符, 导致正文可读性极差
     * 结构混乱: HTML 标签嵌套不规范, 正文段落交错混乱
     * 来源异常: 文本中混入大量 HTML 实体, 以及明显来自其他小说网站的段落
+
+* **69阅读 (n69yue)**
+  * 书籍: `https://www.69yue.top/articlecategroy/15yu.html` -> Book ID: `15yu`
+  * 章节: `https://www.69yue.top/article/15185363014257741.html` -> Chapter ID: `15185363014257741`
 
 ---
 
@@ -640,23 +640,6 @@ novel-cli download --site linovelib
 2. 打开开发者工具 (F12) 复制完整的 Cookie 字符串 (详见 [复制 Cookies](./copy-cookies.md))
 
 当前基于会话的 Cookie 不支持自动续期, 每次运行如果过期需手动更新。后续版本将考虑优化此流程。
-
-也可使用内置脚本在浏览器中完成登录并保存会话:
-
-```bash
-# 通用登录脚本
-python ./scripts/login_scripts/login.py qidian
-
-# 专用于 ESJ Zone 的登录
-python ./scripts/login_scripts/esjzone_login.py -u username -p password
-```
-
-脚本依赖 Playwright, 请先安装并初始化浏览器内核:
-
-```bash
-pip install playwright
-playwright install
-```
 
 #### 在配置中保存账号信息
 

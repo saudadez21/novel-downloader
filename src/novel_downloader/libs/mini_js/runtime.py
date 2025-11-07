@@ -191,7 +191,7 @@ class MiniJS:
 
             case _:
                 return (
-                    MiniJS._eval_expr_in_env_static(cast(ExpressionNode, node), env),
+                    MiniJS._eval_expr_in_env_static(node, env),
                     True,
                 )
 

@@ -8,7 +8,6 @@ novel_downloader.plugins.sites.b520.parser
 from typing import Any
 
 from lxml import html
-
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
@@ -66,6 +65,9 @@ class B520Parser(BaseParser):
                 '//div[@id="list"]/dl/dt[contains(., "正文")]/following-sibling::dd/a'
             )
         ]
+
+        if not chapters:
+            return None
 
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 

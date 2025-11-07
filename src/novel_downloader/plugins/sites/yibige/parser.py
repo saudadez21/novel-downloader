@@ -8,7 +8,6 @@ novel_downloader.plugins.sites.yibige.parser
 from typing import Any
 
 from lxml import html
-
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
@@ -93,6 +92,9 @@ class YibigeParser(BaseParser):
             # /6238/2496.html -> 2496
             chap_id = href.split("/")[-1].split(".")[0]
             chapters.append({"title": title, "url": href, "chapterId": chap_id})
+
+        if not chapters:
+            return None
 
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 

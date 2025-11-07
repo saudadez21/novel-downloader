@@ -13,17 +13,15 @@ import time
 from collections.abc import Mapping
 from typing import Any, ClassVar
 
-import aiohttp
-
 from novel_downloader.libs.crypto.rc4 import rc4_init, rc4_stream
 from novel_downloader.libs.time_utils import async_jitter_sleep
-from novel_downloader.plugins.base.fetcher import BaseSession
+from novel_downloader.plugins.base.fetcher import BaseFetcher
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import FetcherConfig, LoginField
 
 
 @registrar.register_fetcher()
-class QidianSession(BaseSession):
+class QidianFetcher(BaseFetcher):
     """
     A session class for interacting with the 起点中文网 (www.qidian.com) novel.
     """
@@ -69,7 +67,7 @@ class QidianSession(BaseSession):
         """
         if not cookies or not self._check_cookies(cookies):
             return False
-        self.update_cookies(cookies)
+        self.session.update_cookies(cookies)
 
         is_logged_in = await self._check_login_status()
         if is_logged_in:
@@ -107,8 +105,7 @@ class QidianSession(BaseSession):
 
         :return: The HTML markup of the bookcase page.
         """
-        url = self.bookcase_url()
-        return [await self.fetch(url, **kwargs)]
+        return [await self.fetch(self.BOOKCASE_URL, **kwargs)]
 
     @property
     def login_fields(self) -> list[LoginField]:
@@ -126,11 +123,11 @@ class QidianSession(BaseSession):
     async def fetch(
         self,
         url: str,
-        encoding: str | None = None,
+        encoding: str = "utf-8",
         **kwargs: Any,
     ) -> str:
         """
-        Same as :py:meth:`BaseSession.fetch`, but transparently refreshes
+        Same as :py:meth:`BaseFetcher.fetch`, but transparently refreshes
         a cookie-based token used for request validation.
         The method:
           1. Reads the existing cookie (if any);
@@ -141,15 +138,10 @@ class QidianSession(BaseSession):
             await self._rate_limiter.wait()
 
         for attempt in range(self._retry_times + 1):
-            try:
-                refreshed_token = self._build_payload_token(url)
-                self.update_cookies({self._cookie_key: refreshed_token})
-
-                async with self.get(url, **kwargs) as resp:
-                    resp.raise_for_status()
-                    text: str = await resp.text(encoding=encoding)
-                    return text
-            except aiohttp.ClientError:
+            refreshed_token = self._build_payload_token(url)
+            self.session.update_cookies({self._cookie_key: refreshed_token})
+            resp = await self.session.get(url, encoding=encoding, **kwargs)
+            if not resp.ok:
                 if attempt < self._retry_times:
                     await async_jitter_sleep(
                         self._backoff_factor,
@@ -157,27 +149,12 @@ class QidianSession(BaseSession):
                         max_sleep=self._backoff_factor + 2,
                     )
                     continue
-                raise
+                raise ConnectionError(
+                    f"Request to {url} failed with status {resp.status}"
+                )
+            return resp.text
 
         raise RuntimeError("Unreachable code reached in fetch()")
-
-    @classmethod
-    def homepage_url(cls) -> str:
-        """
-        Construct the URL for the site home page.
-
-        :return: Fully qualified URL of the home page.
-        """
-        return cls.HOMEPAGE_URL
-
-    @classmethod
-    def bookcase_url(cls) -> str:
-        """
-        Construct the URL for the user's bookcase page.
-
-        :return: Fully qualified URL of the bookcase.
-        """
-        return cls.BOOKCASE_URL
 
     @classmethod
     def book_info_url(cls, book_id: str) -> str:
@@ -204,7 +181,7 @@ class QidianSession(BaseSession):
         """
         Decrypt the payload from cookie and update `_fp_val` and `_ab_val`.
         """
-        enc_token = self._get_cookie_value(self._cookie_key)
+        enc_token = self.session.get_cookie(self._cookie_key)
         if enc_token and not reflush:
             cipher_bytes = base64.b64decode(enc_token)
             plain_bytes = rc4_stream(self._s_init, cipher_bytes)
@@ -279,12 +256,6 @@ class QidianSession(BaseSession):
                 "Missing required cookies (qidian): %s", ", ".join(missing)
             )
         return not missing
-
-    def _get_cookie_value(self, key: str) -> str | None:
-        for cookie in self.session.cookie_jar:
-            if cookie.key == key:
-                return str(cookie.value)
-        return None
 
     @staticmethod
     def _filter_cookies(

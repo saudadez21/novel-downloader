@@ -4,12 +4,12 @@ novel_downloader.plugins.sites.alicesw.fetcher
 ----------------------------------------------
 """
 
-from novel_downloader.plugins.base.fetcher import GenericSession
+from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 
 
 @registrar.register_fetcher()
-class AliceswSession(GenericSession):
+class AliceswFetcher(GenericFetcher):
     """
     A session class for interacting with the 爱丽丝书屋 (www.alicesw.com) novel.
     """
@@ -17,6 +17,7 @@ class AliceswSession(GenericSession):
     site_name: str = "alicesw"
 
     BOOK_ID_REPLACEMENTS = [("-", "/")]
+    CHAP_ID_REPLACEMENTS = [("-", "/")]
 
     HAS_SEPARATE_CATALOG: bool = True
     BOOK_INFO_URL = "https://www.alicesw.com/novel/{book_id}.html"

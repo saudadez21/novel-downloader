@@ -8,7 +8,6 @@ novel_downloader.plugins.sites.shencou.parser
 from typing import Any
 
 from lxml import etree, html
-
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
@@ -111,6 +110,9 @@ class ShencouParser(BaseParser):
         # append last volume if not empty
         if curr_vol["chapters"]:
             volumes.append(curr_vol)
+
+        if not volumes:
+            return None
 
         return {
             "book_name": book_name,

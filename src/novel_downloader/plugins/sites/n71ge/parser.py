@@ -8,7 +8,6 @@ novel_downloader.plugins.sites.n71ge.parser
 from typing import Any
 
 from lxml import html
-
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
@@ -89,6 +88,10 @@ class N71geParser(BaseParser):
             }
             for a in tree.xpath("//div[contains(@class,'ml_list')]//ul/li/a")
         ]
+
+        if not chapters:
+            return None
+
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 
         return {
