@@ -6,9 +6,8 @@ novel_downloader.infra.cookies
 Utility for normalizing cookie input from user configuration.
 """
 
-__all__ = ["parse_cookies", "get_cookie_value"]
+__all__ = ["parse_cookies", "CookieStore"]
 
-import functools
 import json
 from collections.abc import Mapping
 from pathlib import Path
@@ -42,49 +41,63 @@ def parse_cookies(cookies: str | Mapping[str, str]) -> dict[str, str]:
     raise TypeError("Unsupported cookie format: must be str or dict-like")
 
 
-def get_cookie_value(cookies_dir: Path, key: str) -> str:
+class CookieStore:
     """
-    Read cookies from the given directory and return the value of the first cookie
-    that matches the provided key.
+    A simple cookie storage and loader utility that reads cookies from multiple
+    supported client formats and caches them in memory.
 
-    This function looks for the following files in `cookies_dir`:
+    Supported cookie files (by default):
       * aiohttp.cookies
       * curl_cffi.cookies
       * httpx.cookies
     """
-    filenames = [
-        "aiohttp.cookies",
-        "curl_cffi.cookies",
-        "httpx.cookies",
-    ]
 
-    for filename in filenames:
-        state_file = cookies_dir / filename
-        if not state_file.exists():
-            continue
+    DEFAULT_FILENAMES = ["aiohttp.cookies", "curl_cffi.cookies", "httpx.cookies"]
 
-        try:
-            mtime = state_file.stat().st_mtime
-        except OSError:
-            continue
+    def __init__(self, cookies_dir: Path, filenames: list[str] | None = None) -> None:
+        """
+        Initialize a new CookieStore.
 
-        data = load_state_file(state_file, mtime)
-        value: str | None = next(
-            (
-                c.get("value")
-                for c in data
-                if c.get("name") == key and isinstance(c.get("value"), str)
-            ),
-            None,
-        )
-        if value:
-            return value
-    return ""
+        :param cookies_dir: Directory containing cookie state files.
+        :param filenames: Optional list of cookie filenames to read.
+        """
+        self.cookies_dir = cookies_dir
+        self.filenames = filenames or self.DEFAULT_FILENAMES
+        self.cache: dict[str, str] = {}
+        self.mtimes: dict[str, float] = {}
 
+    def get(self, key: str) -> str:
+        """
+        Retrieve a cookie value by name.
 
-@functools.cache
-def load_state_file(state_file: Path, mtime: float = 0.0) -> list[dict[str, str]]:
-    try:
-        return json.loads(state_file.read_text(encoding="utf-8")) or []
-    except (OSError, json.JSONDecodeError):
-        return []
+        :param key: The name of the cookie to retrieve.
+        :return: The cookie value if found, otherwise an empty string.
+        """
+        self.load_all()
+        return self.cache.get(key, "")
+
+    def load_all(self) -> None:
+        """
+        Load or refresh cookies from all known cookie files.
+
+        For each configured cookie file, this method:
+          * Checks whether the file exists.
+          * Compares its modification time (`mtime`) to the last cached value.
+          * If changed, reads and parses the JSON content.
+          * Extracts `name` and `value` pairs into the in-memory cache.
+        """
+        for filename in self.filenames:
+            state_file = self.cookies_dir / filename
+            if not state_file.exists():
+                continue
+            try:
+                mtime = state_file.stat().st_mtime
+                if self.mtimes.get(filename) == mtime:
+                    continue
+                self.mtimes[filename] = mtime
+                data = json.loads(state_file.read_text(encoding="utf-8")) or []
+                for c in data:
+                    if "name" in c and "value" in c:
+                        self.cache[c["name"]] = c["value"]
+            except (OSError, json.JSONDecodeError):
+                continue
