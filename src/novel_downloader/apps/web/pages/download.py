@@ -8,8 +8,8 @@ novel_downloader.apps.web.pages.download
 from nicegui import ui
 
 from novel_downloader.apps.constants import DOWNLOAD_SUPPORT_SITES
+from novel_downloader.infra.book_url_resolver import resolve_book_url
 from novel_downloader.infra.i18n import t
-from novel_downloader.libs.book_url_resolver import resolve_book_url
 
 from ..components import navbar
 from ..services import manager, setup_dialog

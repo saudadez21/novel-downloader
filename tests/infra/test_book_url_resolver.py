@@ -1,7 +1,7 @@
 import logging
 
 import pytest
-from novel_downloader.libs.book_url_resolver import resolve_book_url
+from novel_downloader.infra.book_url_resolver import resolve_book_url
 
 # fmt: off
 CASES_SUCCESS = [

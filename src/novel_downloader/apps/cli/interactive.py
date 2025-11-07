@@ -16,9 +16,9 @@ from pathlib import Path
 
 from novel_downloader.apps.cli import prompts, ui
 from novel_downloader.apps.utils import load_or_init_config
+from novel_downloader.infra.book_url_resolver import resolve_book_url
 from novel_downloader.infra.config import ConfigAdapter
 from novel_downloader.infra.i18n import t
-from novel_downloader.libs.book_url_resolver import resolve_book_url
 from novel_downloader.plugins import registrar
 from novel_downloader.plugins.search import search
 from novel_downloader.schemas import BookConfig

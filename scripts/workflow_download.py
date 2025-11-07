@@ -5,7 +5,7 @@ import os
 from collections import defaultdict
 from pathlib import Path
 
-from novel_downloader.libs.book_url_resolver import resolve_book_url
+from novel_downloader.infra.book_url_resolver import resolve_book_url
 from novel_downloader.plugins import registrar
 from novel_downloader.schemas import (
     BookConfig,

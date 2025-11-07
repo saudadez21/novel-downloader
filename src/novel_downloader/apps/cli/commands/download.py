@@ -71,7 +71,7 @@ class DownloadCmd(Command):
         if site:  # SITE MODE
             books = cls._parse_book_args(args.book_ids, args.start, args.end)
         else:  # URL MODE
-            from novel_downloader.libs.book_url_resolver import resolve_book_url
+            from novel_downloader.infra.book_url_resolver import resolve_book_url
 
             ui.info(t("No --site provided; detecting site from URL..."))
             if len(args.book_ids) != 1:

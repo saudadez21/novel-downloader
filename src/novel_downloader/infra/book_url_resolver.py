@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.libs.book_url_resolver
----------------------------------------
+novel_downloader.infra.book_url_resolver
+----------------------------------------
 
 Utility for resolving a novel site URL into a standardized configuration.
 """
