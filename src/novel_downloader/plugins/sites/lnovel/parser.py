@@ -99,6 +99,9 @@ class LnovelParser(BaseParser):
                 )
             volumes.append({"volume_name": volume_name, "chapters": chapters})
 
+        if not volumes:
+            return None
+
         return {
             "book_name": book_name,
             "author": author,

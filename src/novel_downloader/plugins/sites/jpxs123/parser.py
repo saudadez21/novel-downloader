@@ -68,6 +68,9 @@ class Jpxs123Parser(BaseParser):
             cid = url.split("/")[-1].split(".")[0]
             chapters.append({"title": title, "url": url, "chapterId": cid})
 
+        if not chapters:
+            return None
+
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 
         # Parse the download page (second HTML)

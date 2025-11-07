@@ -91,6 +91,9 @@ class TtkanParser(BaseParser):
                 }
             )
 
+        if not chapters:
+            return None
+
         volumes: list[VolumeInfoDict] = [
             {
                 "volume_name": "正文",

@@ -82,6 +82,10 @@ class LaoyaoxsParser(BaseParser):
                 '//div[contains(@class,"read")]//dl[@id="newlist"]//dd//a[1]'
             )
         ]
+
+        if not chapters:
+            return None
+
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 
         return {

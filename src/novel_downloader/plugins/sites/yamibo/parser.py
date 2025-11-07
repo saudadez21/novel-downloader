@@ -94,6 +94,10 @@ class YamiboParser(BaseParser):
                 url = chap.get("href", "")
                 chapter_id = url.split("id=")[-1] if "id=" in url else ""
                 chapters.append({"title": title, "url": url, "chapterId": chapter_id})
+
+            if not chapters:
+                return None
+
             volumes = [{"volume_name": "单卷", "chapters": chapters}]
 
         return {

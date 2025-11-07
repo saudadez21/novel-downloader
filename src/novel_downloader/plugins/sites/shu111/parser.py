@@ -94,6 +94,9 @@ class Shu111Parser(BaseParser):
             for a in tree.xpath('//*[@id="list-chapterAll"]//dd/a')
         ]
 
+        if not chapters:
+            return None
+
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 
         return {

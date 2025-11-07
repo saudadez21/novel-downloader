@@ -129,6 +129,9 @@ class N37yqParser(BaseParser):
         # Flush the last collected volume
         flush_volume()
 
+        if not volumes:
+            return None
+
         return {
             "book_name": book_name,
             "author": author,

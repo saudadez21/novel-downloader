@@ -104,6 +104,9 @@ class HetushuParser(BaseParser):
         if curr_vol["chapters"]:
             volumes.append(curr_vol)
 
+        if not volumes:
+            return None
+
         return {
             "book_name": book_name,
             "author": author,

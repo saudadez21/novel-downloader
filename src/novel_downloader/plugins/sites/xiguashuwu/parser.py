@@ -114,6 +114,9 @@ class XiguashuwuParser(BaseParser):
                     )
                 )
 
+        if not chapters:
+            return None
+
         volumes: list[VolumeInfoDict] = [
             VolumeInfoDict(volume_name="正文", chapters=chapters)
         ]

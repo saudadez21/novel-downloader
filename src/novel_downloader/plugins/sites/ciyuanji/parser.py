@@ -53,6 +53,9 @@ class CiyuanjiParser(BaseParser):
         volumes = self._build_volumes(raw_chapters)
         tags = [t["tagName"] for t in book_data.get("tagList", []) if "tagName" in t]
 
+        if not volumes:
+            return None
+
         return {
             "book_name": book_data.get("bookName", ""),
             "author": book_data.get("authorName", ""),

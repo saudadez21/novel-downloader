@@ -57,6 +57,9 @@ class Quanben5Parser(BaseParser):
             chapter_id = href.rstrip(".html").split("/")[-1]
             chapters.append({"title": title, "url": href, "chapterId": chapter_id})
 
+        if not chapters:
+            return None
+
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 
         return {

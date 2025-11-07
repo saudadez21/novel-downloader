@@ -97,6 +97,9 @@ class N23qbParser(BaseParser):
         if current_volume:
             volumes.append(current_volume)
 
+        if not volumes:
+            return None
+
         return {
             "book_name": book_name,
             "author": author,

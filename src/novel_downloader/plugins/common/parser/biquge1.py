@@ -87,6 +87,9 @@ class Biquge1Parser(BaseParser):
             ]
             chapters.extend(more)
 
+        if not chapters:
+            return None
+
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 
         return {

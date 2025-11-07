@@ -68,6 +68,9 @@ class QbtrParser(BaseParser):
             cid = m.group(1) if m else ""
             chapters.append({"title": title, "url": url, "chapterId": cid})
 
+        if not chapters:
+            return None
+
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 
         # Parse the download page (second HTML)

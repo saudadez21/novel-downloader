@@ -82,6 +82,10 @@ class I25zwParser(BaseParser):
                     "chapterId": chapter_id,
                 }
             )
+
+        if not chapters:
+            return None
+
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 
         return {

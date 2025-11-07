@@ -88,6 +88,9 @@ class PiaotiaParser(BaseParser):
             chapter_id = url.split(".")[0]
             chapters.append({"title": title, "url": url, "chapterId": chapter_id})
 
+        if not chapters:
+            return None
+
         # Single volume
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 

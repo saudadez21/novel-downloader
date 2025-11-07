@@ -61,6 +61,9 @@ class TongrensheParser(BaseParser):
             for a in tree.xpath('//div[contains(@class,"book_list")]//ul//li/a')
         ]
 
+        if not chapters:
+            return None
+
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 
         return {

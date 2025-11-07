@@ -108,6 +108,9 @@ class Ixdzs8Parser(BaseParser):
                 }
             )
 
+        if not chapters:
+            return None
+
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 
         return {

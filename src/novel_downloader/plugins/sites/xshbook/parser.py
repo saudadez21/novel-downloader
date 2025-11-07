@@ -77,6 +77,9 @@ class XshbookParser(BaseParser):
             chapter_id = href.rsplit("/", 1)[-1].split(".", 1)[0]
             chapters.append({"title": title, "url": href, "chapterId": chapter_id})
 
+        if not chapters:
+            return None
+
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 
         return {

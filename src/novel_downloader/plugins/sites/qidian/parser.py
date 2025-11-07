@@ -171,6 +171,9 @@ class QidianParser(BaseParser):
                 chapters.append({"title": title, "url": url, "chapterId": cid})
             volumes.append({"volume_name": vol_name, "chapters": chapters})
 
+        if not volumes:
+            return None
+
         return {
             "book_name": book_name,
             "author": author,

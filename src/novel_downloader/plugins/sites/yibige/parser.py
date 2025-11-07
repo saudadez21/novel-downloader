@@ -93,6 +93,9 @@ class YibigeParser(BaseParser):
             chap_id = href.split("/")[-1].split(".")[0]
             chapters.append({"title": title, "url": href, "chapterId": chap_id})
 
+        if not chapters:
+            return None
+
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 
         return {

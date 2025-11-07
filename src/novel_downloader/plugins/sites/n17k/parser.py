@@ -105,6 +105,9 @@ class N17kParser(BaseParser):
                 )
                 vol_idx += 1
 
+        if not volumes:
+            return None
+
         return {
             "book_name": book_name,
             "author": author,
