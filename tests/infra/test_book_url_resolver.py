@@ -278,6 +278,9 @@ CASES_SUCCESS = [
     ("https://www.ruochu.com/book/158713/13869103", "ruochu", "158713"),
     # shaoniandream
     ("https://www.shaoniandream.com/book_detail/754", "shaoniandream", "754"),
+    # dushu
+    ("https://www.dushu.com/showbook/138947/", "dushu", "138947"),
+    ("https://www.dushu.com/showbook/138947/1984736.html", "dushu", "138947"),
 ]
 
 CASES_HINT = [

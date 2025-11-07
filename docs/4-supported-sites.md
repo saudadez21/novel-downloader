@@ -108,6 +108,7 @@ novel-cli download --site ttkan shengxu-chendong
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
 | [有度中文网](https://www.yodu.org/)                          | yodu      | ✅     | ⚠️     | ⚠️     | ✅     | 简      |
 | [名著阅读](https://b.guidaye.com/)                           | guidaye   | ❌     | ❌     | ❌     | ⚠️     | 简      |
+| [读书](https://www.dushu.com/)                              | dushu     | ✅     | ❌     | ⚠️     | ⚠️     | 简      |
 | [鲲弩小说](https://www.kunnu.com/)                           | kunnu     | ✅     | ❌     | ❌     | ❌     | 简      |
 | [西方奇幻小说网](https://www.westnovel.com/)                 | westnovel | ❌     | ❌     | ❌     | ⚠️     | 简     |
 | [西方奇幻小说网子站点](https://www.westnovel.com/)        | westnovel_sub | ❌     | ❌     | ❌     | ⚠️     | 简     |
@@ -320,6 +321,10 @@ novel-cli download --site ttkan shengxu-chendong
 * **名著阅读 (guidaye)**
   * 书籍: `https://b.guidaye.com/kongbu/654/` -> Book ID: `kongbu-654`
   * 章节: `https://b.guidaye.com/kongbu/654/170737.html` -> Chapter ID: `170737`
+
+* **读书 (dushu)**
+  * 书籍: `https://www.dushu.com/showbook/138752/` -> Book ID: `138752`
+  * 章节: `https://www.dushu.com/showbook/138752/1982168.html` -> Chapter ID: `1982168`
 
 * **鲲弩小说 (kunnu)**
   * 书籍: `https://www.kunnu.com/guichui/` -> Book ID: `guichui`

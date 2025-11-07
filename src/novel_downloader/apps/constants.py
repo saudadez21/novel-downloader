@@ -24,6 +24,7 @@ DOWNLOAD_SUPPORT_SITES = {
     "ciluke": "思路客 (ciluke)",
     "ciyuanji": "次元姬小说网 (ciyuanji)",
     "czbooks": "小说狂人 (czbooks)",
+    "dushu": "读书 (dushu)",
     "dxmwx": "大熊猫文学网 (dxmwx)",
     "esjzone": "ESJ Zone (esjzone)",
     "fanqienovel": "番茄小说网 (fanqienovel)",

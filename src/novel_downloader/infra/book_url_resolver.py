@@ -310,6 +310,22 @@ SITE_RULES: dict[str, list[SiteRuleSet]] = {
             hints=[],
         )
     ],
+    "www.dushu.com": [
+        SiteRuleSet(
+            site_key="dushu",
+            extractors=[
+                BookIdExtractor(
+                    pattern=r"^/showbook/(\d+)/",
+                    build_book_id=lambda m: m.group(1),
+                ),
+                BookIdExtractor(
+                    pattern=r"^/showbook/(\d+)/\d+\.html",
+                    build_book_id=lambda m: m.group(1),
+                ),
+            ],
+            hints=[],
+        )
+    ],
     "www.deqixs.com": [
         SiteRuleSet(
             site_key="deqixs",
