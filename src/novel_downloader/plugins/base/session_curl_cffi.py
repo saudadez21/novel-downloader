@@ -23,6 +23,8 @@ from novel_downloader.plugins.base.session_base import (
 class CurlCffiSession(BaseSession):
     """Session backend using curl_cffi for browser-like HTTP requests."""
 
+    _session: AsyncSession[Any] | None
+
     async def init(
         self,
         **kwargs: Any,
@@ -138,7 +140,7 @@ class CurlCffiSession(BaseSession):
         if self._session is None:
             return None
 
-        value = self._session.cookies.get(key)
+        value: str | None = self._session.cookies.get(key)
         if isinstance(value, bytes):
             try:
                 return value.decode("utf-8", errors="ignore")
@@ -147,7 +149,7 @@ class CurlCffiSession(BaseSession):
         return value
 
     @property
-    def session(self) -> AsyncSession:
+    def session(self) -> AsyncSession[Any]:
         """
         Return the active AsyncSession.
 

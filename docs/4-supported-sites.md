@@ -641,23 +641,6 @@ novel-cli download --site linovelib
 
 当前基于会话的 Cookie 不支持自动续期, 每次运行如果过期需手动更新。后续版本将考虑优化此流程。
 
-也可使用内置脚本在浏览器中完成登录并保存会话:
-
-```bash
-# 通用登录脚本
-python ./scripts/login_scripts/login.py qidian
-
-# 专用于 ESJ Zone 的登录
-python ./scripts/login_scripts/esjzone_login.py -u username -p password
-```
-
-脚本依赖 Playwright, 请先安装并初始化浏览器内核:
-
-```bash
-pip install playwright
-playwright install
-```
-
 #### 在配置中保存账号信息
 
 对于 ESJ Zone 和 百合会 等需要登录才能获取内容的站点, 可在 `settings.toml` 中开启登录并填写账号信息 (或在运行时按提示输入):

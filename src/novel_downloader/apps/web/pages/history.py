@@ -109,7 +109,7 @@ def _render_file_card(item: FileItem) -> None:
                 ).props("outline size=sm")
 
 
-@ui.page("/history")  # type: ignore[misc]
+@ui.page("/history")
 def page_history() -> None:
     navbar("history")
     setup_dialog()

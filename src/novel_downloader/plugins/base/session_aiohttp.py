@@ -21,6 +21,8 @@ from novel_downloader.plugins.base.session_base import (
 class AiohttpSession(BaseSession):
     """Session backend implemented with aiohttp for asynchronous HTTP requests."""
 
+    _session: aiohttp.ClientSession | None
+
     async def init(
         self,
         **kwargs: Any,
@@ -159,7 +161,8 @@ class AiohttpSession(BaseSession):
         jar = self._session.cookie_jar
         for cookie in jar:
             if cookie.key == key:
-                return cookie.value
+                value: str = cookie.value
+                return value
         return None
 
     @property

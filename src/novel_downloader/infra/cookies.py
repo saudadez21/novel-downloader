@@ -12,7 +12,6 @@ import functools
 import json
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Any
 
 
 def parse_cookies(cookies: str | Mapping[str, str]) -> dict[str, str]:
@@ -43,8 +42,24 @@ def parse_cookies(cookies: str | Mapping[str, str]) -> dict[str, str]:
     raise TypeError("Unsupported cookie format: must be str or dict-like")
 
 
-def get_cookie_value(state_files: list[Path], key: str) -> str:
-    for state_file in state_files:
+def get_cookie_value(cookies_dir: Path, key: str) -> str:
+    """
+    Read cookies from the given directory and return the value of the first cookie
+    that matches the provided key.
+
+    This function looks for the following files in `cookies_dir`:
+      * aiohttp.cookies
+      * curl_cffi.cookies
+      * httpx.cookies
+    """
+    filenames = [
+        "aiohttp.cookies",
+        "curl_cffi.cookies",
+        "httpx.cookies",
+    ]
+
+    for filename in filenames:
+        state_file = cookies_dir / filename
         if not state_file.exists():
             continue
 
@@ -54,23 +69,22 @@ def get_cookie_value(state_files: list[Path], key: str) -> str:
             continue
 
         data = load_state_file(state_file, mtime)
-        cookies = data.get("cookies", [])
-        value = next(
+        value: str | None = next(
             (
                 c.get("value")
-                for c in cookies
+                for c in data
                 if c.get("name") == key and isinstance(c.get("value"), str)
             ),
             None,
         )
-        if isinstance(value, str):
+        if value:
             return value
     return ""
 
 
 @functools.cache
-def load_state_file(state_file: Path, mtime: float = 0.0) -> dict[str, Any]:
+def load_state_file(state_file: Path, mtime: float = 0.0) -> list[dict[str, str]]:
     try:
-        return json.loads(state_file.read_text(encoding="utf-8")) or {}
+        return json.loads(state_file.read_text(encoding="utf-8")) or []
     except (OSError, json.JSONDecodeError):
-        return {}
+        return []

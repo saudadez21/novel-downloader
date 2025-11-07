@@ -2,7 +2,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/novel-downloader.svg)](https://pypi.org/project/novel-downloader/)
 [![Python](https://img.shields.io/pypi/pyversions/novel-downloader.svg)](https://www.python.org/downloads/)
-[![Build and Publish](https://github.com/saudadez21/novel-downloader/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/saudadez21/novel-downloader/actions/workflows/release.yml)
+[![CI](https://github.com/saudadez21/novel-downloader/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/saudadez21/novel-downloader/actions/workflows/ci.yml)
 [![Downloads](https://img.shields.io/pypi/dm/novel-downloader.svg)](https://pypistats.org/packages/novel-downloader)
 [![Hits-of-Code](https://hitsofcode.com/github/saudadez21/novel-downloader?branch=main&label=Hits-of-Code)](https://hitsofcode.com/github/saudadez21/novel-downloader/view?branch=main&label=Hits-of-Code)
 

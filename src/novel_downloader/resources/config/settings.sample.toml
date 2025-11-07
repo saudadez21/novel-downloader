@@ -14,6 +14,8 @@ skip_existing = true               # 是否跳过已存在章节
 storage_batch_size = 1             # SQLite 批量提交的章节数量
 backend = "aiohttp"                # aiohttp / httpx / curl_cffi
 locale_style = "simplified"        # simplified / traditional
+# http2 = false
+# impersonate = "chrome"
 
 [general.debug]
 save_html = false                  # 是否将抓取到的原始 HTML 保留到磁盘
@@ -42,7 +44,6 @@ book_ids = [
   "0000000000"
 ]
 login_required = true              # 是否需要登录才能访问
-use_truncation = true              # 是否基于章节长度截断以避免重复内容
 
 [sites.qqbook]  # QQ 阅读
 book_ids = [
@@ -103,8 +104,8 @@ local_plugins_path = "./novel_plugins"
 # 输出文件格式及相关选项
 [output]
 formats = [
-    "txt",
-    "epub",
+  "txt",
+  "epub",
 ]
 
 [output.naming]
@@ -112,4 +113,4 @@ append_timestamp = true            # 在文件名中追加时间戳
 filename_template = "{title}_{author}"  # 文件命名规则
 
 [output.epub]
-include_picture = true             # 是否下载章节图片 (体积较大)
+include_picture = true             # 是否附带书籍图片

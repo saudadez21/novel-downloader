@@ -245,14 +245,14 @@ novel-cli config COMMAND [ARGS]...
 **Subcommands**
 
 * `init [--force]`: 在当前目录初始化默认配置文件 (`./settings.toml`); `--force` 覆盖已存在文件
-* `set-lang LANG`: 切换 CLI 语言 (`zh` / `en`)
+* `set-lang LANG`: 切换 CLI 语言 (`zh_CN` / `en_US`)
 * `set-config PATH`: 注册自定义 TOML 为**全局配置**
 
 **Examples**
 
 ```bash
 # 切换界面语言为英文
-novel-cli config set-lang en
+novel-cli config set-lang en_US
 
 # 注册新的 settings.toml
 novel-cli config set-config ./settings.toml

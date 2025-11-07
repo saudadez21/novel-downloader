@@ -58,7 +58,7 @@ class BaseSession(ABC):
         self._proxy_pass = config.proxy_pass
         self._trust_env = config.trust_env
         self._cookies = cookies or {}
-        self._session = None
+        self._session: Any = None
 
         self._headers = (
             config.headers.copy()

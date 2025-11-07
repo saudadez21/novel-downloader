@@ -66,9 +66,8 @@ class QidianParser(BaseParser):
         """
         super().__init__(config)
 
-        self._rand_path = self._base_cache_dir / "qidian" / "randomFont.ttf"
-        self._fixed_font_dir = self._base_cache_dir / "qidian" / "fixed_fonts"
-        self._fixed_map_dir = self._base_cache_dir / "qidian" / "fixed_font_map"
+        self._fixed_font_dir = self._cache_dir / "fixed_fonts"
+        self._fixed_map_dir = self._cache_dir / "fixed_font_map"
         self._debug_dir = Path.cwd() / "debug" / "qidian"
 
         self._state_files = [
@@ -227,7 +226,7 @@ class QidianParser(BaseParser):
         raw_html = chapter_info.get("content", "")
         cid = str(chapter_info.get("chapterId") or chapter_id)
         fkp = chapter_info.get("fkp", "")
-        fuid = self._fuid or get_cookie_value(self._state_files, "ywguid")
+        fuid = self._fuid or get_cookie_value(self._cache_dir, "ywguid")
         author_say = chapter_info.get("authorSay", "").strip()
         update_time = chapter_info.get("updateTime", "")
         update_timestamp = chapter_info.get("updateTimestamp", 0)
@@ -326,17 +325,6 @@ class QidianParser(BaseParser):
         if self._save_font_debug:
             debug_dir.mkdir(parents=True, exist_ok=True)
 
-        try:
-            self._rand_path.parent.mkdir(parents=True, exist_ok=True)
-            self._rand_path.write_bytes(bytes(rf_data))
-        except Exception as e:
-            logger.error(
-                "qidian chapter %s :: failed to write randomFont.ttf",
-                cid,
-                exc_info=e,
-            )
-            return ""
-
         fixed_path = download(
             url=fixed_woff2_url,
             target_dir=self._fixed_font_dir,
@@ -367,7 +355,7 @@ class QidianParser(BaseParser):
 
         mapping_result = self._generate_font_map(
             fixed_font_path=fixed_path,
-            random_font_path=self._rand_path,
+            random_font_bytes=bytes(rf_data),
             char_set=char_set,
             refl_set=refl_set,
             batch_size=self._batch_size,
@@ -462,7 +450,7 @@ class QidianParser(BaseParser):
     def _generate_font_map(
         self,
         fixed_font_path: Path,
-        random_font_path: Path,
+        random_font_bytes: bytes,
         char_set: set[str],
         refl_set: set[str],
         batch_size: int = 32,
@@ -474,7 +462,7 @@ class QidianParser(BaseParser):
         and an random obfuscated font. Results are cached in JSON.
 
         :param fixed_font_path: fixed font file.
-        :param random_font_path: random font file.
+        :param random_font_bytes: raw bytes of the random font file.
         :param char_set: Characters to match directly.
         :param refl_set: Characters to match in flipped form.
         :param batch_size: How many chars to OCR per batch.
@@ -508,9 +496,9 @@ class QidianParser(BaseParser):
 
         # prepare font renderers and cmap sets
         fixed_chars = font_ocr.extract_font_charset(fixed_font_path)
-        random_chars = font_ocr.extract_font_charset(random_font_path)
+        random_chars = font_ocr.extract_font_charset_bytes(random_font_bytes)
         fixed_font = font_ocr.load_render_font(fixed_font_path)
-        random_font = font_ocr.load_render_font(random_font_path)
+        random_font = font_ocr.load_render_font_bytes(random_font_bytes)
 
         # process normal and reflected sets together
         rendered = []
