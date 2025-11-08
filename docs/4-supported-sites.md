@@ -263,7 +263,7 @@ novel-cli download --site ttkan shengxu-chendong
 
 * **轻之文库 (linovel)**
   * 书籍: `https://www.linovel.net/book/101752.html` -> Book ID: `101752`
-  * 章节: `https://www.linovel.net/book/101752/16996.html` -> Chapter ID: `101752`
+  * 章节: `https://www.linovel.net/book/101752/16996.html` -> Chapter ID: `16996`
   * 已知问题:
     * 图片资源可能偶尔无法正常加载或失效
 
@@ -277,9 +277,8 @@ novel-cli download --site ttkan shengxu-chendong
   * 风控: 请求过于频繁可能触发限制, 导致封禁或限流 (推荐请求间隔大于 2 秒)
 
 * **轻小说文库 (wenku8)**
-  * 示例 URL:
-    * 目录页面: `https://www.wenku8.net/novel/2/2835/index.htm` -> Book ID: `2-2835`
-    * 章节页面: `https://www.wenku8.net/novel/2/2835/113354.htm` -> Chapter ID: `113354`
+  * 书籍: `https://www.wenku8.net/novel/2/2835/index.htm` -> Book ID: `2-2835`
+  * 章节: `https://www.wenku8.net/novel/2/2835/113354.htm` -> Chapter ID: `113354`
   * 目录访问:
     * 先打开详细页面 (如 `https://www.wenku8.net/book/2835.htm`), 再点击 "小说目录" 查看
   * 备用:

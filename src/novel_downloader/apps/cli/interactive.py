@@ -110,10 +110,17 @@ async def _interactive_download(adapter: ConfigAdapter) -> None:
             return
         info = resolve_book_url(url)
         if not info:
-            ui.error(t("Unable to parse book URL."))
+            ui.error(t("Failed to recognize or parse the provided URL."))
             return
-        site = info["site_key"]
-        book = info["book"]
+
+        book_id = info.get("book_id")
+        site = info.get("site_key")
+
+        if not book_id:
+            ui.error(t("The provided URL does not contain a valid book ID."))
+            return
+
+        book = BookConfig(book_id=book_id)
     else:
         site = ui.prompt(t("Enter site key"))
         book_id = ui.prompt(t("Enter book ID"))
@@ -121,6 +128,10 @@ async def _interactive_download(adapter: ConfigAdapter) -> None:
             ui.warn(t("Incomplete information."))
             return
         book = BookConfig(book_id=book_id)
+
+    if not site or not book:
+        ui.error(t("Failed to initialize download parameters."))
+        return
 
     await _do_download(adapter, site, book)
 

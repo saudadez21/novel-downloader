@@ -103,8 +103,10 @@ def page_download() -> None:
                 return None, None
             if not info:
                 return None, None
-            site_key = str(info["site_key"])
-            bid = str(info["book"].book_id)
+            site_key = info["site_key"]
+            bid = info.get("book_id")
+            if not book_id:
+                return None, None
             return site_key, bid
 
         def _reset_preview() -> None:
