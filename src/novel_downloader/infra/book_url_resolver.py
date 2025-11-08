@@ -701,6 +701,15 @@ def resolve_book_url(url: str) -> BookURLInfo | None:
                 return _make_info("ttkan", m.group(1), None)
             return None
 
+        case "twkan.com":
+            # chapter: /txt/78813/47726772
+            if m := re.search(r"^/txt/(\d+)/(\d+)$", path):
+                return _make_info("twkan", m.group(1), m.group(2))
+            # book: /book/78813.html or /book/78813/index.html
+            if m := re.search(r"^/book/(\d+)(?:/index\.html|\.html)?$", path):
+                return _make_info("twkan", m.group(1), None)
+            return None
+
         case "www.uaa.com":
             # chapter: /novel/chapter?id=234639
             if (

@@ -83,6 +83,11 @@ login_required = false
 backend = "curl_cffi"
 impersonate = "chrome136"
 
+[sites.twkan]
+login_required = false
+backend = "curl_cffi"
+impersonate = "chrome136"
+
 [sites.ciyuanji]
 login_required = true
 

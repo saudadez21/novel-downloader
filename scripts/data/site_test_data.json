@@ -1037,6 +1037,22 @@
         ]
       }
     ],
+    "twkan": [
+      {
+        "book_id": "67465",
+        "chap_ids": [
+          "41819770",
+          "51739414"
+        ]
+      },
+      {
+        "book_id": "81181",
+        "chap_ids": [
+          "48521668",
+          "51741622"
+        ]
+      }
+    ],
     "uaa": [
       {
         "book_id": "896633419390390272",
@@ -1214,6 +1230,7 @@
   "BACKEND_MAP": {
     "default": "aiohttp",
     "n69shuba": "curl_cffi",
+    "twkan": "curl_cffi",
     "wenku8": "curl_cffi"
   }
 }

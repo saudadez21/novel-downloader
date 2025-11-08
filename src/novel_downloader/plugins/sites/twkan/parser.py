@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.plugins.sites.n69shuba.parser
-----------------------------------------------
+novel_downloader.plugins.sites.twkan.parser
+-------------------------------------------
 """
 
 from typing import Any
@@ -18,12 +18,16 @@ from novel_downloader.schemas import (
 
 
 @registrar.register_parser()
-class N69shubaParser(BaseParser):
+class TwkanParser(BaseParser):
     """
-    Parser for 69书吧 book pages.
+    Parser for 台灣小說網 book pages.
     """
 
-    site_name: str = "n69shuba"
+    site_name: str = "twkan"
+    ADS = {
+        r"twkan\.com",
+        "台灣小說網",
+    }
 
     def parse_book_info(
         self,
@@ -65,7 +69,7 @@ class N69shubaParser(BaseParser):
 
         # --- Chapter volumes & listings ---
         chapters: list[ChapterInfoDict] = []
-        for a in catalog_tree.xpath('//div[@id="catalog"]//ul/li/a'):
+        for a in catalog_tree.xpath("//ul/li/a"):
             url = a.get("href", "").strip()
             if not url:
                 continue
@@ -81,9 +85,6 @@ class N69shubaParser(BaseParser):
 
         if not chapters:
             return None
-
-        # catalog is newest-first, so reverse
-        chapters.reverse()
 
         volumes: list[VolumeInfoDict] = [{"volume_name": "正文", "chapters": chapters}]
 
@@ -110,62 +111,48 @@ class N69shubaParser(BaseParser):
 
         tree = html.fromstring(html_list[0])
 
-        title = ""
+        title = self._first_str(
+            tree.xpath('//div[contains(@class,"txtnav")]//h1/text()')
+        )
         paragraphs: list[str] = []
 
         # Iterate through direct children of content div
-        for elem in tree.xpath('//div[contains(@class,"txtnav")]/*'):
-            tag = (elem.tag or "").lower()
-            cls = (elem.get("class") or "").lower()
-            eid = elem.get("id", "").lower()
+        for content_div in tree.xpath('//div[@id="txtcontent0"]'):
+            first_text = (content_div.text or "").strip()
+            if first_text and not self._is_ad_line(first_text):
+                paragraphs.append(first_text)
 
-            # --- title ---
-            if tag == "h1" and not title:
-                title = elem.text_content().strip()
-                if tail := (elem.tail or "").strip():
-                    paragraphs.append(tail)
-                continue
+            for elem in content_div:
+                tag = (elem.tag or "").lower()
+                cls = (elem.get("class") or "").lower()
 
-            # --- skip metadata/ads ---
-            if "txtinfo" in cls:
-                if tail := (elem.tail or "").strip():
-                    paragraphs.append(tail)
-                continue
-            if "bottom-ad" in cls:
-                if tail := (elem.tail or "").strip():
-                    paragraphs.append(tail)
-                continue
-            if "txtright" in eid:
-                if tail := (elem.tail or "").strip():
-                    paragraphs.append(tail)
-                continue
+                # --- skip ad and layout divs ---
+                if any(k in cls for k in ("txtad", "txtcenter")):
+                    tail = (elem.tail or "").strip()
+                    if tail and not self._is_ad_line(tail):
+                        paragraphs.append(tail)
+                    continue
 
-            # --- handle line breaks ---
-            if tag == "br":
-                if tail := (elem.tail or "").strip():
-                    paragraphs.append(tail)
-                continue
+                # --- handle line breaks ---
+                if tag == "br":
+                    tail = (elem.tail or "").strip()
+                    if tail and not self._is_ad_line(tail):
+                        paragraphs.append(tail)
+                    continue
 
-            # --- normal text elements ---
-            if text := elem.text_content().strip():
-                paragraphs.append(text)
-            if tail := (elem.tail or "").strip():
-                paragraphs.append(tail)
+                # --- normal text elements ---
+                text = elem.text_content().strip()
+                if text and not self._is_ad_line(text):
+                    paragraphs.append(text)
+
+                tail = (elem.tail or "").strip()
+                if tail and not self._is_ad_line(tail):
+                    paragraphs.append(tail)
 
         if not paragraphs:
             return None
         if paragraphs[0].strip() == title.strip():
             paragraphs.pop(0)
-
-        if not paragraphs:
-            return None
-        last = paragraphs[-1].rstrip()
-        if last.endswith("(本章完)"):
-            last = last[: -len("(本章完)")].rstrip()
-            if last:
-                paragraphs[-1] = last
-            else:
-                paragraphs.pop()
 
         if not paragraphs:
             return None

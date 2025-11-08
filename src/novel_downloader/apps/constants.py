@@ -76,6 +76,7 @@ DOWNLOAD_SUPPORT_SITES = {
     "tongrenshe": "同人社 (tongrenshe)",
     "trxs": "同人小说网 (trxs)",
     "ttkan": "天天看小说 (ttkan)",
+    "twkan": "台灣小說網 (twkan)",
     "uaa": "有爱爱 (uaa)",
     # "wanbengo": "完本神站 (wanbengo)",
     "wenku8": "轻小说文库 (wenku8)",
