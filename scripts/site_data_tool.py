@@ -177,6 +177,7 @@ async def run_fetch(args: argparse.Namespace) -> None:
         fetcher_cfg = FetcherConfig(
             request_interval=req_interval,
             backend=backend,
+            impersonate="chrome136",
         )
 
         logger.info(

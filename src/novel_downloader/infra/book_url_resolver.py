@@ -741,6 +741,18 @@ SITE_RULES: dict[str, list[SiteRuleSet]] = {
             hints=[],
         )
     ],
+    "www.69shuba.com": [
+        SiteRuleSet(
+            site_key="n69shuba",
+            extractors=[
+                BookIdExtractor(
+                    pattern=r"^/(?:book|txt)/(\d+)",
+                    build_book_id=lambda m: m.group(1),
+                ),
+            ],
+            hints=[],
+        )
+    ],
     "www.69yue.top": [
         SiteRuleSet(
             site_key="n69yue",

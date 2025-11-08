@@ -640,6 +640,22 @@
         ]
       }
     ],
+    "n69shuba": [
+      {
+        "book_id": "43484",
+        "chap_ids": [
+          "28931795",
+          "40873934"
+        ]
+      },
+      {
+        "book_id": "88724",
+        "chap_ids": [
+          "39943182",
+          "40865390"
+        ]
+      }
+    ],
     "n69yue": [
       {
         "book_id": "15yu",
@@ -1197,6 +1213,7 @@
   },
   "BACKEND_MAP": {
     "default": "aiohttp",
+    "n69shuba": "curl_cffi",
     "wenku8": "curl_cffi"
   }
 }

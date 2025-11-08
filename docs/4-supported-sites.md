@@ -130,6 +130,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [爱下电子书](https://ixdzs8.com/)                             | ixdzs8   | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [大熊猫文学网](https://www.dxmwx.org/)                        | dxmwx    | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [25中文网](https://www.i25zw.com/)                           | i25zw     | ❌     | ❌     | ❌     | ✅     | 简      |
+| [69书吧](https://www.69shuba.com/)                           | n69shuba  | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [101看书](https://101kanshu.com/)                           | n101kanshu | ❌     | ❌     | ⚠️     | ✅     | 繁      |
 | [老幺小说网](https://www.laoyaoxs.org/)                     | laoyaoxs  | ❌     | ❌     | ❌     | ✅     | 简      |
 | [全本小说网](https://quanben5.com/)                          | quanben5  | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
@@ -284,6 +285,9 @@ novel-cli download --site ttkan shengxu-chendong
   * 备用:
     * `https://www.wenku8.cc`
     * `https://www.wenku8.com`
+  * 注意:
+    * 该站点使用 `Cloudflare` 防护机制, 当出现 403 响应时, 可尝试将后端切换为 `curl_cffi` 并配置 `impersonate = "chrome136"`
+    * 切换后通常可正常访问, 但当 `request_interval < 3.0` 时, 仍可能再次触发 403
 
 * **无限轻小说 (n8novel)**
   * 书籍: `https://www.8novel.com/novelbooks/3365/` -> Book ID: `3365`
@@ -383,6 +387,13 @@ novel-cli download --site ttkan shengxu-chendong
 * **25中文网 (i25zw)**
   * 书籍: `https://www.i25zw.com/book/64371.html` -> Book ID: `64371`
   * 章节: `https://www.i25zw.com/64371/153149757.html` -> Chapter ID: `153149757`
+
+* **69书吧 (n69shuba)**
+  * 书籍: `https://www.69shuba.com/book/88724.htm` -> Book ID: `88724`
+  * 章节: `https://www.69shuba.com/txt/88724/39943182` -> Chapter ID: `39943182`
+  * 注意:
+    * 该站点使用 `Cloudflare` 防护机制, 当出现 403 响应时, 可尝试将后端切换为 `curl_cffi` 并配置 `impersonate = "chrome136"`
+    * 切换后通常可正常访问, 但当 `request_interval < 3.0` 时, 仍可能再次触发 403
 
 * **101看书 (n101kanshu)**
   * 书籍: `https://101kanshu.com/book/7994.html` -> Book ID: `7994`

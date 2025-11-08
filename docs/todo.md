@@ -324,10 +324,6 @@ user_prompt = "请翻译成中文：{text}"
   * 需要登录
   * 需提供 `cf_clearance` Cookie
 
-* [69书吧](https://www.69shuba.com/)
-
-  * 需绕过 Cloudflare
-
 * [塔读文学](https://www.tadu.com/)
 
   * 部分章节需通过 APP 阅读

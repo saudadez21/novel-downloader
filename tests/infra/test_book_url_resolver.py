@@ -284,6 +284,10 @@ CASES_SUCCESS = [
     # wenku8
     ("https://www.wenku8.net/novel/2/2835/index.htm", "wenku8", "2-2835"),
     ("https://www.wenku8.net/novel/2/2835/113354.htm", "wenku8", "2-2835"),
+    # n69shuba
+    ("https://www.69shuba.com/book/90442.htm", "n69shuba", "90442"),
+    ("https://www.69shuba.com/book/90442/", "n69shuba", "90442"),
+    ("https://www.69shuba.com/txt/90442/40755363", "n69shuba", "90442"),
 ]
 
 CASES_HINT = [
