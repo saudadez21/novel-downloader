@@ -281,16 +281,21 @@ user_prompt = "请翻译成中文：{text}"
 
 * [完本神站](https://www.wanben.info/)
 
+  * 站点的章节内容经常混杂 HTML 文本
+
 * [全职小说网](https://www.quanzhifashi.com/)
+
+  * 部分章节不全或无法访问
+  * 部分书籍出现 `索引文件不存在！` 提示
 
 * 笔趣阁
 
   * [站点 1](https://www.bqu9.cc/)
   * [站点 2](https://www.nibiqu.cc/)
-  * [站点 3](https://www.boqugew.com/)
+  * [站点 3](https://m.chenkuan.com/)
+    * 加载较慢，体验不佳
   * [站点 4](https://www.biquge.tw/)
-  * [站点 6](https://www.beqege.cc/)
-  * [站点 7](https://m.chenkuan.com/)
+  * [站点 5](https://www.beqege.cc/)
 
 * [笔趣趣](https://www.biququ.com/)
 
@@ -300,7 +305,12 @@ user_prompt = "请翻译成中文：{text}"
 
 * [42中文网](https://www.42zw.la/)
 
+  * 部分章节不全或无法访问
+  * 部分书籍出现 `索引文件不存在！` 提示
+
 * [文海小说](https://www.zgzl.net/)
+
+  * 加载较慢，体验不佳
 
 * [小说之家](https://xszj.org/)
 

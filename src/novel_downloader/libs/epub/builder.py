@@ -47,6 +47,7 @@ from .utils import (
     build_book_intro,
     build_container_xml,
     build_volume_intro,
+    hash_bytes,
     hash_file,
 )
 
@@ -126,6 +127,47 @@ class EpubBuilder:
         filename = f"{res_id}.{ext}"
         data = image_path.read_bytes()
         img = ImageResource(id=res_id, data=data, media_type=mtype, filename=filename)
+        self.images.append(img)
+        self.opf.add_manifest_item(
+            img.id,
+            f"{IMAGE_FOLDER}/{img.filename}",
+            img.media_type,
+        )
+
+        self._img_map[h] = filename
+        self._img_idx += 1
+        return filename
+
+    def add_image_bytes(
+        self, data: bytes, mime_type: str, *, hint_ext: str | None = None
+    ) -> str:
+        """
+        Add an image resource from bytes (deduped by hash) and register it.
+        """
+        if not data:
+            return ""
+
+        h = hash_bytes(data)
+        if h in self._img_map:
+            return self._img_map[h]
+
+        ext = None
+        for k, v in IMAGE_MEDIA_TYPES.items():
+            if v == mime_type:
+                ext = k
+                break
+        if not ext:
+            ext = (hint_ext or "bin").lstrip(".")
+
+        res_id = f"img_{self._img_idx}"
+        filename = f"{res_id}.{ext}"
+
+        img = ImageResource(
+            id=res_id,
+            data=data,
+            media_type=mime_type,
+            filename=filename,
+        )
         self.images.append(img)
         self.opf.add_manifest_item(
             img.id,

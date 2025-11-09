@@ -177,7 +177,7 @@ class YoduParser(BaseParser):
 
         title: str = ""
         paragraphs: list[str] = []
-        image_positions: dict[int, list[str]] = {}
+        image_positions: dict[int, list[dict[str, Any]]] = {}
         image_idx = 0
 
         for curr_html in html_list:
@@ -204,8 +204,16 @@ class YoduParser(BaseParser):
                         image_idx += 1
                 elif tag == "img":
                     src = (node.get("src") or "").strip()
-                    if src:
-                        image_positions.setdefault(image_idx, []).append(src)
+                    if not src:
+                        continue
+                    if src.startswith("//"):
+                        src = "https:" + src
+                    image_positions.setdefault(image_idx, []).append(
+                        {
+                            "type": "url",
+                            "data": src,
+                        }
+                    )
 
         if not (paragraphs or image_positions):
             return None

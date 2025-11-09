@@ -110,7 +110,7 @@ class KadokadoParser(BaseParser):
         title = info.get("chapterDisplayName") or ""
 
         paragraphs: list[str] = []
-        image_positions: dict[int, list[str]] = {}
+        image_positions: dict[int, list[dict[str, Any]]] = {}
         image_idx = 0
 
         for elem in tree.iter():
@@ -123,11 +123,25 @@ class KadokadoParser(BaseParser):
             elif tag == "img":
                 src = elem.get("src")
                 if src:
-                    image_positions.setdefault(image_idx, []).append(src)
+                    if src.startswith("//"):
+                        src = "https:" + src
+                    image_positions.setdefault(image_idx, []).append(
+                        {
+                            "type": "url",
+                            "data": src,
+                        }
+                    )
 
         # After content
-        image_urls = content_resp.get("imageUrls") or []
-        image_positions.setdefault(image_idx, []).extend(image_urls)
+        extra_imgs = content_resp.get("imageUrls") or []
+        for url in extra_imgs:
+            if isinstance(url, str) and url.strip():
+                image_positions.setdefault(image_idx, []).append(
+                    {
+                        "type": "url",
+                        "data": url.strip(),
+                    }
+                )
 
         if not (paragraphs or image_positions):
             return None

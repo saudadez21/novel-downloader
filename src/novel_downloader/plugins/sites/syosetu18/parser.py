@@ -134,21 +134,28 @@ class Syosetu18Parser(BaseParser):
 
         # Extract paragraphs of content
         paragraphs: list[str] = []
-        image_positions: dict[int, list[str]] = {}
+        image_positions: dict[int, list[dict[str, Any]]] = {}
         image_idx = 0
 
         for div in tree.xpath(
             '//div[@class="p-novel__body"]/div[contains(@class,"p-novel__text")]'
         ):
             for p in div.xpath("./p"):
-                imgs = [
-                    src if src.startswith("http") else "https:" + src
-                    for src in p.xpath(".//img/@src")
-                ]
+                # --- collect images ---
+                for src in p.xpath(".//img/@src"):
+                    src = src.strip()
+                    if not src:
+                        continue
+                    if not src.startswith("http"):
+                        src = "https:" + src
+                    image_positions.setdefault(image_idx, []).append(
+                        {
+                            "type": "url",
+                            "data": src,
+                        }
+                    )
 
-                if imgs:
-                    image_positions.setdefault(image_idx, []).extend(imgs)
-
+                # --- collect text ---
                 if text := p.text_content().strip():
                     paragraphs.append(text)
                     image_idx += 1

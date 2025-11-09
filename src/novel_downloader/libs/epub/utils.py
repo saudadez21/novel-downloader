@@ -35,6 +35,18 @@ def hash_file(file_path: Path, chunk_size: int = 8192) -> str:
     return h.hexdigest()
 
 
+def hash_bytes(data: bytes) -> str:
+    """
+    Compute the SHA256 hash of a bytes object.
+
+    :param data: Bytes to hash.
+    :return: The SHA256 hash string (lowercase hex) of the data.
+    """
+    h = hashlib.sha256()
+    h.update(data)
+    return h.hexdigest()
+
+
 def build_container_xml(
     root_path: str = ROOT_PATH,
 ) -> str:

@@ -148,7 +148,7 @@ class Wenku8Parser(BaseParser):
         title = self._first_str(tree.xpath('//div[@id="title"]/text()'))
 
         paragraphs: list[str] = []
-        image_positions: dict[int, list[str]] = {}
+        image_positions: dict[int, list[dict[str, Any]]] = {}
         image_idx = 0
 
         # Iterate through direct children of content div
@@ -166,8 +166,21 @@ class Wenku8Parser(BaseParser):
             elif tag == "div" and "divimage" in (elem.get("class") or ""):
                 # Collect all image links
                 urls = elem.xpath(".//a/@href") or elem.xpath(".//img/@src")
-                if urls:
-                    image_positions.setdefault(image_idx, []).extend(urls)
+                for src in urls:
+                    src = src.strip()
+                    if not src:
+                        continue
+                    # normalize URL
+                    if src.startswith("//"):
+                        src = "https:" + src
+                    # elif src.startswith("/"):
+                    #     src = self.BASE_URL + src
+                    image_positions.setdefault(image_idx, []).append(
+                        {
+                            "type": "url",
+                            "data": src,
+                        }
+                    )
                 if tail := (elem.tail or "").strip():
                     paragraphs.append(tail)
                     image_idx += 1

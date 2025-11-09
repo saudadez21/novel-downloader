@@ -134,25 +134,32 @@ class SfacgParser(BaseParser):
 
         tree = html.fromstring(html_list[0])
         content = ""
-        image_positions: dict[int, list[str]] = {}
+        image_positions: dict[int, list[dict[str, Any]]] = {}
 
         is_vip = "/ajax/ashx/common.ashx" in html_list[0]
 
         # case: VIP chapter -> needs OCR from base64 image
         if is_vip:
-            if not self._decode_font:
-                logger.warning(
-                    "sfacg chapter %s :: vip decryption skipped "
-                    "(set `decode_font=True` to enable)",
-                    chapter_id,
-                )
-                return None
-
             if len(html_list) < 2:
                 logger.warning("sfacg chapter %s :: missing VIP img data", chapter_id)
                 return None
 
-            content = self.parse_vip_chapter(html_list[1])
+            if not self._decode_font:
+                logger.warning(
+                    "sfacg chapter %s :: VIP chapter not decoded "
+                    "(enable decode_font to OCR)",
+                    chapter_id,
+                )
+                image_positions[0] = [
+                    {
+                        "type": "base64",
+                        "data": html_list[1].strip(),
+                        "mime": "image/gif",
+                    }
+                ]
+
+            else:
+                content = self.parse_vip_chapter(html_list[1])
 
         # case: normal HTML text chapter
         else:
@@ -184,9 +191,9 @@ class SfacgParser(BaseParser):
 
     def parse_normal_chapter(
         self, content_div: html.HtmlElement
-    ) -> tuple[list[str], dict[int, list[str]]]:
+    ) -> tuple[list[str], dict[int, list[dict[str, Any]]]]:
         paragraphs: list[str] = []
-        image_positions: dict[int, list[str]] = {}
+        image_positions: dict[int, list[dict[str, Any]]] = {}
         image_idx = 0
 
         def append_para(txt: str | None) -> None:
@@ -207,7 +214,12 @@ class SfacgParser(BaseParser):
                 if src:
                     if src.startswith("//"):
                         src = "https:" + src
-                    image_positions.setdefault(image_idx, []).append(src)
+                    image_positions.setdefault(image_idx, []).append(
+                        {
+                            "type": "url",
+                            "data": src,
+                        }
+                    )
 
             if elem is content_div:  # trailing text (skip the root itself)
                 continue

@@ -198,7 +198,7 @@ class LinovelibParser(BaseParser):
 
         title: str = ""
         paragraphs: list[str] = []
-        image_positions: dict[int, list[str]] = {}
+        image_positions: dict[int, list[dict[str, Any]]] = {}
         image_idx = 0
 
         for curr_html in html_list:
@@ -240,7 +240,15 @@ class LinovelibParser(BaseParser):
                     src = node.get("data-src") or node.get("src", "")
                     if not src:
                         continue
-                    image_positions.setdefault(image_idx, []).append(src)
+                    src = src.strip()
+                    if src.startswith("//"):
+                        src = "https:" + src
+                    image_positions.setdefault(image_idx, []).append(
+                        {
+                            "type": "url",
+                            "data": src,
+                        }
+                    )
 
             if not p_texts and not page_lines:
                 continue
