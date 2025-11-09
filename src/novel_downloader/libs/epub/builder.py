@@ -47,6 +47,7 @@ from .utils import (
     build_book_intro,
     build_container_xml,
     build_volume_intro,
+    detect_image_format,
     hash_bytes,
     hash_file,
 )
@@ -118,14 +119,18 @@ class EpubBuilder:
         if h in self._img_map:
             return self._img_map[h]
 
-        ext = image_path.suffix.lower().lstrip(".")
+        data = image_path.read_bytes()
+        # Try detecting from magic bytes
+        fmt = detect_image_format(data)
+        ext = fmt.lower() if fmt else image_path.suffix.lower().lstrip(".")
+
         mtype = IMAGE_MEDIA_TYPES.get(ext)
         if not mtype:
             return ""
 
         res_id = f"img_{self._img_idx}"
         filename = f"{res_id}.{ext}"
-        data = image_path.read_bytes()
+
         img = ImageResource(id=res_id, data=data, media_type=mtype, filename=filename)
         self.images.append(img)
         self.opf.add_manifest_item(
@@ -138,9 +143,7 @@ class EpubBuilder:
         self._img_idx += 1
         return filename
 
-    def add_image_bytes(
-        self, data: bytes, mime_type: str, *, hint_ext: str | None = None
-    ) -> str:
+    def add_image_bytes(self, data: bytes, mime_type: str) -> str:
         """
         Add an image resource from bytes (deduped by hash) and register it.
         """
@@ -151,13 +154,18 @@ class EpubBuilder:
         if h in self._img_map:
             return self._img_map[h]
 
-        ext = None
-        for k, v in IMAGE_MEDIA_TYPES.items():
-            if v == mime_type:
-                ext = k
-                break
-        if not ext:
-            ext = (hint_ext or "bin").lstrip(".")
+        ext = detect_image_format(data)
+        mtype = IMAGE_MEDIA_TYPES.get(ext) if ext else None
+
+        # Fallback to provided mime_type
+        if not mtype and mime_type:
+            for k, v in IMAGE_MEDIA_TYPES.items():
+                if v == mime_type:
+                    ext, mtype = k, v
+                    break
+
+        if not (ext and mtype):
+            return ""
 
         res_id = f"img_{self._img_idx}"
         filename = f"{res_id}.{ext}"
@@ -165,7 +173,7 @@ class EpubBuilder:
         img = ImageResource(
             id=res_id,
             data=data,
-            media_type=mime_type,
+            media_type=mtype,
             filename=filename,
         )
         self.images.append(img)
