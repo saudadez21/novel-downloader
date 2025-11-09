@@ -255,6 +255,7 @@ CASES_HINT = [
 CASES_INVALID = [
     # URLs with no rule should return None
     "https://www.unknownsite.com/book/123.html",
+    "https://example.org/unrelated/page",
     "not a url",
     "",
 ]
