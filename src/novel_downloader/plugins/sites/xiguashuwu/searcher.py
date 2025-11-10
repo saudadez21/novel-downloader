@@ -29,10 +29,11 @@ class XiguashuwuSearcher(BaseSearcher):
     async def _fetch_html(self, keyword: str) -> str:
         url = self.SEARCH_URL.format(query=self._quote(keyword))
         headers = {
+            **self.session.headers,
             "Referer": "https://www.xiguashuwu.com/search/",
         }
         try:
-            async with self._http_get(url, headers=headers) as resp:
+            async with self.session.get(url, headers=headers) as resp:
                 resp.raise_for_status()
                 return await self._response_to_str(resp)
         except Exception:

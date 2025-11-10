@@ -12,6 +12,7 @@ from collections.abc import AsyncGenerator, Sequence
 
 import aiohttp
 
+from novel_downloader.infra.http_defaults import DEFAULT_USER_HEADERS
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import SearchResult
 
@@ -44,7 +45,10 @@ async def search(
     timeout_cfg = aiohttp.ClientTimeout(total=timeout)
     results: list[SearchResult] = []
 
-    async with aiohttp.ClientSession(timeout=timeout_cfg) as session:
+    async with aiohttp.ClientSession(
+        timeout=timeout_cfg,
+        headers=DEFAULT_USER_HEADERS,
+    ) as session:
         if sites is None:
             instances = [
                 inst for cls in classes if ((inst := cls(session)).nsfw == nsfw)
@@ -87,7 +91,10 @@ async def search_stream(
         return
 
     timeout_cfg = aiohttp.ClientTimeout(total=timeout)
-    async with aiohttp.ClientSession(timeout=timeout_cfg) as session:
+    async with aiohttp.ClientSession(
+        timeout=timeout_cfg,
+        headers=DEFAULT_USER_HEADERS,
+    ) as session:
         if sites is None:
             instances = [
                 inst for cls in classes if ((inst := cls(session)).nsfw == nsfw)

@@ -161,10 +161,15 @@ def extract_biquyuedu(path: str, query: str) -> BookURLInfo | None:
 
 @register_extractor(["m.bixiange.me"])
 def extract_bixiange(path: str, query: str) -> BookURLInfo | None:
-    if m := re.search("^/([^/]+)/(\\d+)/index/(\\d+)\\.html$", path):
-        return _make_info("bixiange", f"{m.group(1)}-{m.group(2)}", m.group(3))
-    if m := re.search("^/([^/]+)/(\\d+)/?$", path):
-        return _make_info("bixiange", f"{m.group(1)}-{m.group(2)}", None)
+    if m := re.match(r"^/([^/]+)/(\d+)/index/(\d+)\.html$", path):
+        cat, bid, chap = m.groups()
+        return _make_info("bixiange", f"{cat}-{bid}", chap)
+    if m := re.match(r"^/([^/]+)/(\d+)/(\d+)\.html$", path):
+        cat, bid, chap = m.groups()
+        return _make_info("bixiange", f"{cat}-{bid}", chap)
+    if m := re.match(r"^/([^/]+)/(\d+)", path):
+        cat, bid = m.groups()
+        return _make_info("bixiange", f"{cat}-{bid}", None)
     return None
 
 

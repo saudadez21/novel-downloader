@@ -28,12 +28,13 @@ class TrxsSearcher(BaseSearcher):
         classid = "0"
         body = f"keyboard={keyboard}&show={show}&classid={classid}"
         headers = {
+            **self.session.headers,
             "Origin": "https://www.trxs.cc",
             "Referer": "https://www.trxs.cc/",
             "Content-Type": "application/x-www-form-urlencoded",
         }
         try:
-            async with self._http_post(
+            async with self.session.post(
                 self.SEARCH_URL, data=body, headers=headers
             ) as resp:
                 resp.raise_for_status()

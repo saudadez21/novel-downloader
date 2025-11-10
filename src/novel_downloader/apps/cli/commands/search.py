@@ -77,6 +77,8 @@ class SearchCmd(Command):
         config_data = load_or_init_config(config_path)
         if config_data is None:
             return
+        adapter = ConfigAdapter(config=config_data)
+        ui.setup_logging(console_level=adapter.get_log_level())
 
         async def _run() -> None:
             from novel_downloader.plugins.search import search
@@ -95,11 +97,7 @@ class SearchCmd(Command):
                 return
 
             site = chosen["site"]
-            adapter = ConfigAdapter(config=config_data)
             books: list[BookConfig] = [BookConfig(book_id=chosen["book_id"])]
-
-            log_level = adapter.get_log_level()
-            ui.setup_logging(console_level=log_level)
 
             login_ui = CLILoginUI()
             download_ui = CLIDownloadUI()

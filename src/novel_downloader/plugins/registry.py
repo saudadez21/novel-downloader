@@ -7,7 +7,6 @@ novel_downloader.plugins.registry
 from __future__ import annotations
 
 import contextlib
-import pkgutil
 from importlib import import_module
 from typing import TYPE_CHECKING, Any, TypeVar
 
@@ -235,19 +234,19 @@ class PluginRegistry:
         Scan all known plugin and import every `{namespace}.sites.<site>.<kind>`
         without failing if a site has no module for that kind.
         """
+        import importlib.resources as res
+
         for base in self._sources:
             try:
                 pkg = import_module(f"{base}.sites")
             except ModuleNotFoundError:
                 continue
 
-            # iterate over site packages under *.sites
-            for _, name, ispkg in pkgutil.iter_modules(
-                pkg.__path__, pkg.__name__ + "."
-            ):
-                if not ispkg:
+            for name in res.contents(pkg):
+                if name.startswith("_"):
                     continue
-                modname = f"{name}.{kind}"
+
+                modname = f"{pkg.__name__}.{name}.{kind}"
                 try:
                     import_module(modname)
                 except ModuleNotFoundError as e:

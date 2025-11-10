@@ -29,7 +29,7 @@ class CzbooksSearcher(BaseSearcher):
         url = self.SEARCH_URL.format(query=self._quote(keyword))
         params = {"q": keyword}
         try:
-            async with self._http_get(url, params=params) as resp:
+            async with self.session.get(url, params=params) as resp:
                 resp.raise_for_status()
                 return await self._response_to_str(resp)
         except Exception:

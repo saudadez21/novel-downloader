@@ -25,10 +25,11 @@ class HetushuSearcher(BaseSearcher):
     async def _fetch_html(self, keyword: str) -> str:
         params = {"keyword": keyword}
         headers = {
+            **self.session.headers,
             "Referer": "https://www.hetushu.com/",
         }
         try:
-            async with self._http_get(
+            async with self.session.get(
                 self.SEARCH_URL, params=params, headers=headers
             ) as resp:
                 resp.raise_for_status()

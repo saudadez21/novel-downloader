@@ -188,8 +188,6 @@ user_prompt = "请翻译成中文：{text}"
 
   * 支持登录
 
-* [笔仙阁](https://m.bixiange.me/)
-
 * [52书库](https://www.52shuku.net/)
 
 * [努努书坊](https://www.kanunu8.com/)

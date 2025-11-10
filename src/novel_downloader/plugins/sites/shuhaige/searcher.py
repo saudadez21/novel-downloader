@@ -35,12 +35,13 @@ class ShuhaigeSearcher(BaseSearcher):
             f"Hm_lpvt_c3da01855456ad902664af23cc3254cb={ts}"
         )
         headers = {
+            **self.session.headers,
             "Origin": "https://www.shuhaige.net",
             "Referer": "https://www.shuhaige.net/",
             "Cookie": cookie_str,
         }
         try:
-            async with self._http_post(
+            async with self.session.post(
                 self.SEARCH_URL, data=data, headers=headers
             ) as resp:
                 resp.raise_for_status()

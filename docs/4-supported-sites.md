@@ -137,6 +137,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [全本小说网](https://quanben5.com/)                          | quanben5  | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [书林文学](http://shu111.com)                                | shu111    | ❌     | ❌     | ⚠️     | ❌     | 简      |
 | [万相书城](https://wxsck.com/) ([备用](https://www.wxscs.com/index.html)) | wxsck    | ❌     | ❌     | ⚠️     | ❌     | 简      |
+| [笔仙阁](https://m.bixiange.me/)                             | bixiange  | ❌     | ❌     | ❌     | ✅     | 简      |
 | [笔趣阁](http://www.b520.cc)                                 | b520      | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [笔趣阁](https://www.biquge345.com/)                         | biquge345 | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [书海阁小说网](https://www.shuhaige.net/)                     | shuhaige | ❌     | ❌     | ⚠️     | ✅     | 简      |
@@ -426,6 +427,11 @@ novel-cli download --site ttkan shengxu-chendong
 * **万相书城 (wxsck)**
   * 书籍: `https://wxsck.com/book/20297/` -> Book ID: `20297`
   * 章节: `https://wxsck.com/book/20297/6660334.html` -> Chapter ID: `6660334`
+
+* **笔仙阁 (bixiange)**
+  * 书籍: `https://m.bixiange.me/wxxz/20921/` -> Book ID: `wxxz-20921`
+  * 章节: `https://m.bixiange.me/wxxz/20921/index/1.html` -> Chapter ID: `1`
+  * 注意: 该站点直接提供 txt 下载。
 
 * **笔趣阁 (b520)**
   * 书籍: `http://www.b520.cc/8_8187/` -> Book ID: `8_8187`

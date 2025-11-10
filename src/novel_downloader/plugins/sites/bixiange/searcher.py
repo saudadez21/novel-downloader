@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.plugins.sites.tongrenshe.searcher
---------------------------------------------------
+novel_downloader.plugins.sites.bixiange.searcher
+------------------------------------------------
 """
 
 import logging
@@ -15,26 +15,24 @@ logger = logging.getLogger(__name__)
 
 
 @registrar.register_searcher()
-class TongrensheSearcher(BaseSearcher):
-    site_name = "tongrenshe"
+class BixiangeSearcher(BaseSearcher):
+    site_name = "bixiange"
     priority = 30
-    SEARCH_URL = "https://tongrenshe.cc/e/search/index.php"
-    BASE_URL = "https://tongrenshe.cc"
+    BASE_URL = "https://m.bixiange.me"
+    SEARCH_URL = "https://m.bixiange.me/e/search/indexpage.php"
 
     async def _fetch_html(self, keyword: str) -> str:
-        keyboard = self._quote(keyword, encoding="gbk", errors="replace")
-        show = "title"
-        classid = "0"
-        body = f"keyboard={keyboard}&show={show}&classid={classid}"
+        kw = self._quote(keyword, encoding="gbk", errors="replace")
+        data = f"keyboard={kw}&show=title&classid=0"
         headers = {
             **self.session.headers,
-            "Origin": "https://tongrenshe.cc",
-            "Referer": "https://tongrenshe.cc/",
+            "Referer": "https://m.bixiange.me/",
+            "Origin": "https://m.bixiange.me",
             "Content-Type": "application/x-www-form-urlencoded",
         }
         try:
             async with self.session.post(
-                self.SEARCH_URL, data=body, headers=headers
+                self.SEARCH_URL, headers=headers, data=data
             ) as resp:
                 resp.raise_for_status()
                 return await self._response_to_str(resp)
@@ -50,42 +48,34 @@ class TongrensheSearcher(BaseSearcher):
         self, html_str: str, limit: int | None = None
     ) -> list[SearchResult]:
         doc = html.fromstring(html_str)
-        rows = doc.xpath('//div[@class="books m-cols"]/div[@class="bk"]')
+        rows = doc.xpath('//div[contains(@class, "list")]//li')
         results: list[SearchResult] = []
 
         for idx, row in enumerate(rows):
-            href = self._first_str(row.xpath(".//h3/a[1]/@href"))
-            if not href:
-                continue
-
             if limit is not None and idx >= limit:
                 break
 
-            # '/tongren/9302.html' -> "9302"
-            book_id = href.split("/")[-1].split(".")[0]
+            href = self._first_str(row.xpath('.//div[@class="cover"]/a/@href'))
+            if not href:
+                continue
+
             book_url = self._abs_url(href)
+            # "/khjj/11945.html" -> "khjj-11945"
+            # "/trxs/19408" -> "trxs-19408"
+            href_path = href.strip("/").split(".", 1)[0].split("/")
+            book_id = "-".join(href_path)
 
-            cover_rel = self._first_str(
-                row.xpath("./div[@class='pic']/a[1]/img[1]/@src")
-            )
-            cover_url = self._abs_url(cover_rel) if cover_rel else ""
+            cover_url = self._first_str(row.xpath('.//div[@class="cover"]//img/@src'))
+            if cover_url:
+                cover_url = self._abs_url(cover_url)
 
-            title = self._first_str(
-                row.xpath("./div[@class='bk_right']/h3/a[1]//text()")
-            )
-
-            author = (
-                self._first_str(
-                    row.xpath("./div[@class='bk_right']/div[@class='booknews']/text()"),
-                    replaces=[("作者：", "")],
-                )
-                or "-"
-            )
+            title = self._first_str(row.xpath('.//div[@class="title"]//a/text()'))
 
             update_date = self._first_str(
                 row.xpath(
-                    "./div[@class='bk_right']/div[@class='booknews']/label[@class='date']/text()"
-                )
+                    './/div[@class="tips"]/span[contains(text(), "时间")]/text()'
+                ),  # noqa: E501
+                replaces=[("时间：", "")],
             )
 
             results.append(
@@ -95,7 +85,7 @@ class TongrensheSearcher(BaseSearcher):
                     book_url=book_url,
                     cover_url=cover_url,
                     title=title,
-                    author=author,
+                    author="-",
                     latest_chapter="-",
                     update_date=update_date,
                     word_count="-",
