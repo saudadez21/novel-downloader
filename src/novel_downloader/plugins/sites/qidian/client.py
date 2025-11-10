@@ -140,3 +140,6 @@ class QidianClient(CommonClient):
             *(f"<p>{escape(s)}</p>" for ln in note.splitlines() if (s := ln.strip())),
         ]
         return "\n".join(parts)
+
+    def _render_html_extras(self, extras: dict[str, Any]) -> str:
+        return self._render_epub_extras(extras)

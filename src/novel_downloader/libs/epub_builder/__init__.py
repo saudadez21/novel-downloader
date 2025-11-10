@@ -20,14 +20,14 @@ builder.export("output/my_novel.epub")
 
 __all__ = [
     "EpubBuilder",
-    "Chapter",
-    "Volume",
-    "StyleSheet",
+    "EpubChapter",
+    "EpubVolume",
+    "EpubStyleSheet",
 ]
 
 from .core import EpubBuilder
 from .models import (
-    Chapter,
-    StyleSheet,
-    Volume,
+    EpubChapter,
+    EpubStyleSheet,
+    EpubVolume,
 )

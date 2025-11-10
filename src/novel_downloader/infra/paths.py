@@ -42,8 +42,10 @@ RES = files("novel_downloader.resources")
 DEFAULT_CONFIG_FILE = RES.joinpath("config", "settings.sample.toml")
 
 # CSS Styles
-CSS_MAIN_PATH = RES.joinpath("css_styles", "main.css")
-CSS_INTRO_PATH = RES.joinpath("css_styles", "intro.css")
+EPUB_CSS_MAIN_PATH = RES.joinpath("css_styles", "epub_main.css")
+EPUB_CSS_INTRO_PATH = RES.joinpath("css_styles", "epub_intro.css")
+HTML_CSS_INDEX_PATH = RES.joinpath("css_styles", "html_index.css")
+HTML_CSS_CHAPTER_PATH = RES.joinpath("css_styles", "html_chapter.css")
 
 # Images
 # VOLUME_BORDER_IMAGE_PATH = RES.joinpath("images", "volume_border.png")
@@ -61,3 +63,4 @@ YODU_MAP_PATH = RES.joinpath("json", "yodu.json")
 EXPR_TO_JSON_SCRIPT_PATH = RES.joinpath("js_scripts", "expr_to_json.js")
 QD_DECRYPT_SCRIPT_PATH = RES.joinpath("js_scripts", "qidian_decrypt_node.js")
 QQ_DECRYPT_SCRIPT_PATH = RES.joinpath("js_scripts", "qq_decrypt_node.js")
+HTML_JS_MAIN_PATH = RES.joinpath("js_scripts", "html_main.js")

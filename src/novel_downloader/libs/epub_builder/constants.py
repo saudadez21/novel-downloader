@@ -7,9 +7,9 @@ EPUB-specific constants used by the builder.
 """
 
 ROOT_PATH = "OEBPS"
-IMAGE_FOLDER = "Images"
-TEXT_FOLDER = "Text"
-CSS_FOLDER = "Styles"
+IMAGE_DIR = "Images"
+TEXT_DIR = "Text"
+CSS_DIR = "Styles"
 
 XHTML_NS = "http://www.w3.org/1999/xhtml"
 EPUB_NS = "http://www.idpf.org/2007/ops"
@@ -39,13 +39,13 @@ CONTAINER_TEMPLATE = """\
 
 COVER_IMAGE_TEMPLATE = (
     f'<div style="text-align: center; margin: 0; padding: 0;">'
-    f'<img src="../{IMAGE_FOLDER}/cover.{{ext}}" alt="cover" '
+    f'<img src="../{IMAGE_DIR}/cover.{{ext}}" alt="cover" '
     f'style="max-width: 100%; height: auto;" />'
     f"</div>"
 )
 
 CSS_TMPLATE = (
-    f'<link href="../{CSS_FOLDER}/{{filename}}" '
+    f'<link href="../{CSS_DIR}/{{filename}}" '
     f'rel="stylesheet" type="{{media_type}}"/>'
 )
 

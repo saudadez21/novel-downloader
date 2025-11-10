@@ -9,7 +9,7 @@ Defines the core EPUB data models and resource classes used by the builder:
   * Hierarchical NavPoint for NCX navigation
   * Base resource class (EpubResource) and specializations:
     * StyleSheet
-    * ImageResource
+    * Image
     * Chapter (with XHTML serialization)
   * Volume container for grouping chapters with optional intro and cover
 """
@@ -78,21 +78,21 @@ class EpubResource:
 
 
 @dataclass
-class StyleSheet(EpubResource):
+class EpubStyleSheet(EpubResource):
     content: str
     media_type: str = field(init=False, default="text/css")
 
 
 @dataclass
-class ImageResource(EpubResource):
+class EpubImage(EpubResource):
     data: bytes
 
 
 @dataclass
-class Chapter(EpubResource):
+class EpubChapter(EpubResource):
     title: str
     content: str
-    css: list[StyleSheet] = field(default_factory=list)
+    css: list[EpubStyleSheet] = field(default_factory=list)
     media_type: str = field(init=False, default="application/xhtml+xml")
 
     def to_xhtml(self, lang: str = "zh-Hans") -> str:
@@ -112,9 +112,9 @@ class Chapter(EpubResource):
 
 
 @dataclass
-class Volume:
+class EpubVolume:
     id: str
     title: str
     intro: str = ""
     cover: Path | None = None
-    chapters: list[Chapter] = field(default_factory=list)
+    chapters: list[EpubChapter] = field(default_factory=list)
