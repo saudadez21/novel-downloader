@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.libs.epub.constants
-------------------------------------
+novel_downloader.libs.epub_builder.constants
+--------------------------------------------
 
 EPUB-specific constants used by the builder.
 """

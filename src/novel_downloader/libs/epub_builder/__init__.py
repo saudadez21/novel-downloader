@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.libs.epub
---------------------------
+novel_downloader.libs.epub_builder
+----------------------------------
 
 Top-level package for EPUB export utilities.
 
@@ -25,7 +25,7 @@ __all__ = [
     "StyleSheet",
 ]
 
-from .builder import EpubBuilder
+from .core import EpubBuilder
 from .models import (
     Chapter,
     StyleSheet,

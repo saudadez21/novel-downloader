@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.libs.epub.builder
-----------------------------------
+novel_downloader.libs.epub_builder.core
+---------------------------------------
 
 Orchestrates the end-to-end EPUB build process by:
   * Managing metadata (title, author, description, language, etc.)
@@ -22,6 +22,8 @@ from novel_downloader.infra.paths import (
     CSS_INTRO_PATH,
     VOLUME_BORDER_IMAGE_PATH,
 )
+from novel_downloader.libs.crypto.hash_utils import hash_bytes, hash_file
+from novel_downloader.libs.media.image import detect_image_format
 
 from .constants import (
     COVER_IMAGE_TEMPLATE,
@@ -47,9 +49,6 @@ from .utils import (
     build_book_intro,
     build_container_xml,
     build_volume_intro,
-    detect_image_format,
-    hash_bytes,
-    hash_file,
 )
 
 

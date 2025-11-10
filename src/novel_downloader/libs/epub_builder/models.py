@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.libs.epub.models
----------------------------------
+novel_downloader.libs.epub_builder.models
+-----------------------------------------
 
 Defines the core EPUB data models and resource classes used by the builder:
   * Typed entries for table of contents (ChapterEntry, VolumeEntry)

@@ -12,7 +12,7 @@ from typing import Any, Final, final
 
 from novel_downloader.infra.paths import CSS_MAIN_PATH
 from novel_downloader.infra.persistence.chapter_storage import ChapterStorage
-from novel_downloader.libs.epub import (
+from novel_downloader.libs.epub_builder import (
     Chapter,
     EpubBuilder,
     StyleSheet,
@@ -495,7 +495,6 @@ class CommonClient(BaseClient):
         img_dir: Path | None = None
         if cfg.include_picture:
             img_dir = raw_base / "images"
-            img_dir.mkdir(parents=True, exist_ok=True)
 
         stage = stage or self._resolve_stage_selection(book_id)
         book_info = self._load_book_info(book_id, stage=stage)
@@ -619,7 +618,6 @@ class CommonClient(BaseClient):
         img_dir: Path | None = None
         if cfg.include_picture:
             img_dir = raw_base / "images"
-            img_dir.mkdir(parents=True, exist_ok=True)
 
         stage = stage or self._resolve_stage_selection(book_id)
         book_info = self._load_book_info(book_id, stage=stage)

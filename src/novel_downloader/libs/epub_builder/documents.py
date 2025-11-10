@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.libs.epub.documents
-------------------------------------
+novel_downloader.libs.epub_builder.documents
+--------------------------------------------
 
 Defines the classes that render EPUB navigation and packaging documents:
   * NavDocument: builds the XHTML nav.xhtml (EPUB 3)
