@@ -54,6 +54,7 @@ DOWNLOAD_SUPPORT_SITES = {
     "n23qb": "铅笔小说 (n23qb)",
     "n37yq": "三七轻小说 (n37yq)",
     "n37yue": "37阅读网 (n37yue)",
+    "n69hao": "69书吧 (n69hao)",
     "n69shuba": "69书吧 (n69shuba)",
     # "n69yue": "69阅读 (n69yue)",
     "n71ge": "新吾爱文学 (n71ge)",

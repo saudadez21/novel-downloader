@@ -490,6 +490,15 @@ def extract_n37yue(path: str, query: str) -> BookURLInfo | None:
     return None
 
 
+@register_extractor(["www.69hao.com", "www.69hsw.com"])
+def extract_n69hao(path: str, query: str) -> BookURLInfo | None:
+    if m := re.search(r"^/(\d+)/(\d+)\.html$", path):
+        return _make_info("n69hao", m.group(1), m.group(2))
+    if m := re.search(r"^/(\d+)/?$", path):
+        return _make_info("n69hao", m.group(1), None)
+    return None
+
+
 @register_extractor(["www.69shuba.com"])
 def extract_n69shuba(path: str, query: str) -> BookURLInfo | None:
     if m := re.search("^/txt/(\\d+)/(\\d+)", path):

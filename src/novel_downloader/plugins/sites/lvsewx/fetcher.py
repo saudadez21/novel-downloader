@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-novel_downloader.plugins.sites.lvscwx.fetcher
+novel_downloader.plugins.sites.lvsewx.fetcher
 ---------------------------------------------
 """
 

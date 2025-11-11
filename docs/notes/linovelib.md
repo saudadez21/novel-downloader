@@ -247,6 +247,8 @@ if __name__ == "__main__":
     image.show()
 ```
 
+![font_sample](../images/linovelib_read_font_sample.png)
+
 观察可见:
 
 部分字符渲染为空白, 如示例中所示。

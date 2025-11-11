@@ -412,12 +412,6 @@ user_prompt = "请翻译成中文：{text}"
 
 * [小說之家](https://m.xszj.org/)
 
-* 69书吧
-
-  * [站点 1](https://www.69hsw.com/)
-  * [站点 2](https://www.69hao.com/)
-  * [站点 3](https://www.69hsz.net/)
-
 * [大灰狼小说聚合网](https://api.langge.cf/)
 
   * API 风格与当前框架不兼容，需要单独流程

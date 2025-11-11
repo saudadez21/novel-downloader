@@ -144,6 +144,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [书海阁小说网](https://www.shuhaige.net/)                     | shuhaige | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [小说虎](https://www.xshbook.com/)                           | xshbook   | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [顶点小说网](https://www.23ddw.net/)                         | n23ddw    | ❌     | ❌     | ❌     | ✅     | 简      |
+| [69书吧](https://www.69hao.com/) ([备用](https://www.69hsw.com/)) | n69hao    | ❌     | ❌     | ❌     | ⚠️     | 简      |
 | [一笔阁](https://www.yibige.org/)                            | yibige    | ❌     | ❌     | ⚠️     | ⚠️     | 简 / 繁 |
 | [乐文小说网](https://www.lewenn.net/)                        | lewenn    | ❌     | ❌     | ⚠️     | ❌     | 简      |
 | [笔趣读](https://www.blqudu.cc/)                             | blqudu    | ❌     | ❌     | ⚠️     | ❌     | 简      |
@@ -472,6 +473,10 @@ novel-cli download --site ttkan shengxu-chendong
 * **顶点小说网 (n23ddw)**
   * 书籍: `https://www.23ddw.net/du/80/80892/` -> Book ID: `80-80892`
   * 章节: `https://www.23ddw.net/du/80/80892/13055110.html` -> Chapter ID: `13055110`
+
+* **69书吧 (n69hao)**
+  * 书籍: `https://www.69hao.com/48/` -> Book ID: `48`
+  * 章节: `https://www.69hao.com/48/38642.html` -> Chapter ID: `38642`
 
 * **追书网.com (mangg_com)**
   * 书籍: `https://www.mangg.com/id57715/` -> Book ID: `id57715`
