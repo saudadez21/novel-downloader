@@ -158,6 +158,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [37阅读网](https://www.37yue.com/)                           | n37yue   | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [笔下文学网](https://www.bxwx9.org/)                          | bxwx9    | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [绿色小说网](https://www.lvsewx.cc/)                          | lvsewx   | ❌     | ❌     | ❌     | ❌     | 简      |
+| [大众文学](https://m.shauthor.com/)                          | shauthor  | ❌     | ❌     | ⚠️     | ⚠️     | 简      |
 
 #### 同人
 
@@ -518,6 +519,10 @@ novel-cli download --site ttkan shengxu-chendong
   * 书籍: `https://www.lvsewx.cc/ebook/20645.html` -> Book ID: `20645`
   * 章节: `https://www.lvscwx.cc/books/20/20645/7237914.html` -> Chapter ID: `7237914`
   * 注意: 大部分书籍的最后几章都不完整
+
+* **大众文学 (shauthor)**
+  * 书籍: `https://m.shauthor.com/info_s5o/` -> Book ID: `s5o`
+  * 章节: `https://m.shauthor.com/read_s5o/jjhl0.html` -> Chapter ID: `jjhl0`
 
 #### 同人
 

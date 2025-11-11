@@ -69,6 +69,7 @@ DOWNLOAD_SUPPORT_SITES = {
     "ruochu": "若初文学网 (ruochu)",
     "sfacg": "SF轻小说 (sfacg)",
     "shaoniandream": "少年梦 (shaoniandream)",
+    "shauthor": "大众文学 (shauthor)",
     "shencou": "神凑轻小说 (shencou)",
     "shu111": "书林文学 (shu111)",
     "syosetu": "小説家になろう (syosetu)",

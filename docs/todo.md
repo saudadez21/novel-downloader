@@ -404,13 +404,15 @@ user_prompt = "请翻译成中文：{text}"
 
 * [小说之家](https://xszj.org/)
 
-* [三五中文](https://m.mjyhb.com/)
+  * [繁体](https://m.xszj.org/)
+  * 目录分页过多
 
 * [帝书阁](https://www.23dishuge.com/)
 
-* [大众文学](https://m.shauthor.com/)
+  * 目录分页过多
+  * 结构和 `小说之家` 几乎一样
 
-* [小說之家](https://m.xszj.org/)
+* [三五中文](https://m.mjyhb.com/)
 
 * [大灰狼小说聚合网](https://api.langge.cf/)
 

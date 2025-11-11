@@ -642,6 +642,15 @@ def extract_shaoniandream(path: str, query: str) -> BookURLInfo | None:
     return None
 
 
+@register_extractor(["m.shauthor.com"])
+def extract_shauthor(path: str, query: str) -> BookURLInfo | None:
+    if m := re.search(r"^/read_([a-z0-9]+)/([a-z0-9]+)(?:_\d+)?\.html$", path, re.I):
+        return _make_info("shauthor", m.group(1), m.group(2))
+    if m := re.search(r"^/info_([a-z0-9]+)/?$", path, re.I):
+        return _make_info("shauthor", m.group(1), None)
+    return None
+
+
 @register_extractor(["www.shencou.com"])
 def extract_shencou(path: str, query: str) -> BookURLInfo | None:
     if path.startswith("/books/read_"):
