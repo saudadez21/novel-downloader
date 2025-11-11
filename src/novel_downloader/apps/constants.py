@@ -44,6 +44,7 @@ DOWNLOAD_SUPPORT_SITES = {
     "linovel": "轻之文库 (linovel)",
     "linovelib": "哔哩轻小说 (linovelib)",
     "lnovel": "轻小说百科 (lnovel)",
+    "lvsewx": "绿色小说网 (lvsewx)",
     "mangg_com": "追书网.com (mangg_com)",
     "mangg_net": "追书网.net (mangg_net)",
     "n8novel": "无限轻小说 (n8novel)",

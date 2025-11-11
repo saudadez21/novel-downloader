@@ -383,12 +383,15 @@ user_prompt = "请翻译成中文：{text}"
     * 加载较慢，体验不佳
   * [站点 4](https://www.biquge.tw/)
   * [站点 5](https://www.beqege.cc/)
+    * `curl_cffi`
 
 * [笔趣趣](https://www.biququ.com/)
 
+  * `curl_cffi`
+
 * [燃火小说](https://www.ranwen.la/)
 
-* [绿色小说网](https://www.lvsewx.cc/)
+  * `curl_cffi`
 
 * [42中文网](https://www.42zw.la/)
 

@@ -409,6 +409,15 @@ def extract_lnovel(path: str, query: str) -> BookURLInfo | None:
     return None
 
 
+@register_extractor(["www.lvscwx.cc", "www.lvsewx.cc"])
+def extract_lvsewx(path: str, query: str) -> BookURLInfo | None:
+    if m := re.search(r"^/ebook/(\d+)\.html$", path):
+        return _make_info("lvsewx", m.group(1), None)
+    if m := re.search(r"^/books/\d+/(\d+)/(\d+)\.html$", path):
+        return _make_info("lvsewx", m.group(1), m.group(2))
+    return None
+
+
 @register_extractor(["www.mangg.com"])
 def extract_mangg_com(path: str, query: str) -> BookURLInfo | None:
     if m := re.search("^/(id\\d+)/(\\d+)\\.html$", path):

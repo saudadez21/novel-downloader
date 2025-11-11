@@ -156,6 +156,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [八一中文网](https://www.ktshu.cc/)                           | ktshu    | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [37阅读网](https://www.37yue.com/)                           | n37yue   | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [笔下文学网](https://www.bxwx9.org/)                          | bxwx9    | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [绿色小说网](https://www.lvsewx.cc/)                          | lvsewx   | ❌     | ❌     | ❌     | ❌     | 简      |
 
 #### 同人
 
@@ -507,6 +508,11 @@ novel-cli download --site ttkan shengxu-chendong
 * **笔下文学网 (bxwx9)**
   * 书籍: `https://www.bxwx9.org/b/48/48453/` -> Book ID: `48-48453`
   * 章节: `https://www.bxwx9.org/b/48/48453/175908.html` -> Chapter ID: `175908`
+
+* **绿色小说网 (lvsewx)**
+  * 书籍: `https://www.lvsewx.cc/ebook/20645.html` -> Book ID: `20645`
+  * 章节: `https://www.lvscwx.cc/books/20/20645/7237914.html` -> Chapter ID: `7237914`
+  * 注意: 大部分书籍的最后几章都不完整
 
 #### 同人
 
