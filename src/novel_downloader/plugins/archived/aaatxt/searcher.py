@@ -33,11 +33,12 @@ class AaatxtSearcher(BaseSearcher):
         }
         full_url = self._build_url(self.SEARCH_URL, params)  # need build manually
         headers = {
+            **self.session.headers,
             "Host": "www.aaatxt.com",
             "Referer": "http://www.aaatxt.com/",
         }
         try:
-            async with self._http_get(full_url, headers=headers) as resp:
+            async with self.session.get(full_url, headers=headers) as resp:
                 resp.raise_for_status()
                 return await self._response_to_str(resp, "gb2312")
         except Exception:

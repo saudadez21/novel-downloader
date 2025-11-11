@@ -7,12 +7,11 @@ Abstract base class providing common utilities for site-specific searchers.
 """
 
 import abc
-from typing import Any, ClassVar
+from typing import ClassVar
 from urllib.parse import quote_plus, urljoin
 
 import aiohttp
 
-from novel_downloader.infra.http_defaults import DEFAULT_USER_HEADERS
 from novel_downloader.schemas import SearchResult
 
 
@@ -22,7 +21,7 @@ class BaseSearcher(abc.ABC):
     BASE_URL: ClassVar[str] = ""
 
     def __init__(self, session: aiohttp.ClientSession) -> None:
-        self._session = session
+        self.session = session
 
     async def search(
         self, keyword: str, limit: int | None = None
@@ -58,34 +57,6 @@ class BaseSearcher(abc.ABC):
         :return: List of SearchResult dicts.
         """
         pass
-
-    def _http_get(
-        self,
-        url: str,
-        *,
-        params: dict[str, str] | None = None,
-        headers: dict[str, str] | None = None,
-        **kwargs: Any,
-    ) -> aiohttp.client._RequestContextManager:
-        """
-        Helper for GET requests with default headers.
-        """
-        hdrs = {**DEFAULT_USER_HEADERS, **(headers or {})}
-        return self._session.get(url, params=params, headers=hdrs, **kwargs)
-
-    def _http_post(
-        self,
-        url: str,
-        *,
-        data: dict[str, str] | str | None = None,
-        headers: dict[str, str] | None = None,
-        **kwargs: Any,
-    ) -> aiohttp.client._RequestContextManager:
-        """
-        Helper for POST requests with default headers.
-        """
-        hdrs = {**DEFAULT_USER_HEADERS, **(headers or {})}
-        return self._session.post(url, data=data, headers=hdrs, **kwargs)
 
     @staticmethod
     def _quote(q: str, encoding: str | None = None, errors: str | None = None) -> str:

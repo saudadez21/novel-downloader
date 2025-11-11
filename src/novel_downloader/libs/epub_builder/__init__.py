@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.libs.epub
---------------------------
+novel_downloader.libs.epub_builder
+----------------------------------
 
 Top-level package for EPUB export utilities.
 
@@ -20,14 +20,14 @@ builder.export("output/my_novel.epub")
 
 __all__ = [
     "EpubBuilder",
-    "Chapter",
-    "Volume",
-    "StyleSheet",
+    "EpubChapter",
+    "EpubVolume",
+    "EpubStyleSheet",
 ]
 
-from .builder import EpubBuilder
+from .core import EpubBuilder
 from .models import (
-    Chapter,
-    StyleSheet,
-    Volume,
+    EpubChapter,
+    EpubStyleSheet,
+    EpubVolume,
 )

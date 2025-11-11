@@ -44,12 +44,13 @@ class Quanben5Searcher(BaseSearcher):
         full_url = self._build_url(self.SEARCH_URL, params)
 
         headers = {
+            **self.session.headers,
             "Host": "quanben5.com",
             "Referer": "https://quanben5.com/search.html",
         }
 
         try:
-            async with self._http_get(full_url, headers=headers) as resp:
+            async with self.session.get(full_url, headers=headers) as resp:
                 resp.raise_for_status()
                 return await self._response_to_str(resp)
         except Exception:

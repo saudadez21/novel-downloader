@@ -25,7 +25,7 @@ class N23qbSearcher(BaseSearcher):
     async def _fetch_html(self, keyword: str) -> str:
         params = {"searchkey": keyword}
         try:
-            async with self._http_get(self.SEARCH_URL, params=params) as resp:
+            async with self.session.get(self.SEARCH_URL, params=params) as resp:
                 resp.raise_for_status()
                 return await self._response_to_str(resp)
         except Exception:

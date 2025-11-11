@@ -25,13 +25,14 @@ class N71geSearcher(BaseSearcher):
 
     async def _fetch_html(self, keyword: str) -> str:
         headers = {
+            **self.session.headers,
             "Dnt": "1",
             "Origin": "https://www.71ge.com",
             "Referer": "https://www.71ge.com/search.php",
             "Content-Type": "application/x-www-form-urlencoded",
         }
         with contextlib.suppress(Exception):
-            async with self._http_get(self.SEARCH_URL, headers=headers) as resp:
+            async with self.session.get(self.SEARCH_URL, headers=headers) as resp:
                 await resp.read()
         searchkey = self._quote(keyword, encoding="gbk", errors="replace")
         login = "login"
@@ -40,7 +41,7 @@ class N71geSearcher(BaseSearcher):
         )
         body = f"s={searchkey}&action={login}&submit={submit}"
         try:
-            async with self._http_post(
+            async with self.session.post(
                 self.SEARCH_URL, data=body, headers=headers
             ) as resp:
                 resp.raise_for_status()

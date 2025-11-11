@@ -28,11 +28,12 @@ class N69yueSearcher(BaseSearcher):
     async def _fetch_html(self, keyword: str) -> str:
         data = {"q": keyword}
         headers = {
+            **self.session.headers,
             "Origin": "https://www.69yue.top",
             "Referer": self._build_url(self.SEARCH_PAGE_URL, data),
         }
         try:
-            async with self._http_post(
+            async with self.session.post(
                 self.SEARCH_URL, data=data, headers=headers
             ) as resp:
                 resp.raise_for_status()

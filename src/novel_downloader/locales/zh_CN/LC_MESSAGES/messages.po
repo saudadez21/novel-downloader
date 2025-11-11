@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: novel-downloader 2.5.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-01 21:15-0400\n"
+"POT-Creation-Date: 2025-11-08 14:38-0500\n"
 "PO-Revision-Date: 2025-09-22 22:43-0400\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -32,7 +32,7 @@ msgstr "已在 {path} 创建默认配置文件"
 
 #: src\novel_downloader\apps\utils.py:32
 msgid "Cannot continue without a config file."
-msgstr "没有配置文件，无法继续执行"
+msgstr "没有配置文件, 无法继续执行"
 
 #: src\novel_downloader\apps\utils.py:36
 #, python-brace-format
@@ -49,7 +49,7 @@ msgstr "再见！"
 
 #: src\novel_downloader\apps\cli\interactive.py:65
 msgid "Invalid choice. Please try again."
-msgstr "无效的选择，请重试"
+msgstr "无效的选择, 请重试"
 
 #: src\novel_downloader\apps\cli\interactive.py:70
 msgid "Enter a keyword to search"
@@ -85,7 +85,7 @@ msgstr "下载模式"
 
 #: src\novel_downloader\apps\cli\interactive.py:99
 msgid "Enter 'u' for URL or 'i' for Site + Book ID (Enter to cancel)"
-msgstr "输入 'u' 以使用 URL，或输入 'i' 以使用站点与书籍 ID (回车取消)"
+msgstr "输入 'u' 以使用 URL, 或输入 'i' 以使用站点与书籍 ID (回车取消)"
 
 #: src\novel_downloader\apps\cli\interactive.py:107
 msgid "Enter the book URL"
@@ -96,61 +96,70 @@ msgid "No URL provided."
 msgstr "未提供 URL"
 
 #: src\novel_downloader\apps\cli\interactive.py:113
-msgid "Unable to parse book URL."
-msgstr "无法解析书籍 URL"
+msgid "Failed to recognize or parse the provided URL."
+msgstr "无法识别或解析提供的 URL"
 
-#: src\novel_downloader\apps\cli\interactive.py:118
+#: src\novel_downloader\apps\cli\interactive.py:120
+#: src\novel_downloader\apps\cli\commands\download.py:100
+msgid "The provided URL does not contain a valid book ID."
+msgstr "提供的 URL 不包含有效的书籍 ID"
+
+#: src\novel_downloader\apps\cli\interactive.py:125
 msgid "Enter site key"
 msgstr "请输入站点键值"
 
-#: src\novel_downloader\apps\cli\interactive.py:119
+#: src\novel_downloader\apps\cli\interactive.py:126
 msgid "Enter book ID"
 msgstr "请输入书籍 ID"
 
-#: src\novel_downloader\apps\cli\interactive.py:121
+#: src\novel_downloader\apps\cli\interactive.py:128
 msgid "Incomplete information."
 msgstr "信息不完整"
 
-#: src\novel_downloader\apps\cli\interactive.py:142
+#: src\novel_downloader\apps\cli\interactive.py:133
+msgid "Failed to initialize download parameters."
+msgstr "下载参数初始化失败"
+
+#: src\novel_downloader\apps\cli\interactive.py:153
 msgid "Login failed."
 msgstr "登录失败"
 
-#: src\novel_downloader\apps\cli\interactive.py:148
-#: src\novel_downloader\apps\cli\commands\download.py:165
+#: src\novel_downloader\apps\cli\interactive.py:160
+#: src\novel_downloader\apps\cli\commands\download.py:173
 #: src\novel_downloader\apps\cli\commands\search.py:122
 #, python-brace-format
 msgid "'{site}' is currently not supported: {err}"
 msgstr "暂不支持站点 '{site}': {err}"
 
-#: src\novel_downloader\apps\cli\interactive.py:152
+#: src\novel_downloader\apps\cli\interactive.py:165
 #, python-brace-format
 msgid "Error while downloading from {site}: {err}"
 msgstr "从站点 {site} 下载时出错: {err}"
 
-#: src\novel_downloader\apps\cli\interactive.py:163
+#: src\novel_downloader\apps\cli\interactive.py:176
 msgid "Do you want to export this book now?"
 msgstr "是否立即导出此书？"
 
-#: src\novel_downloader\apps\cli\interactive.py:177
+#: src\novel_downloader\apps\cli\interactive.py:190
 #: src\novel_downloader\apps\cli\commands\export.py:82
 msgid "No site selected."
 msgstr "未选择任何站点"
 
-#: src\novel_downloader\apps\cli\interactive.py:183
+#: src\novel_downloader\apps\cli\interactive.py:196
 #: src\novel_downloader\apps\cli\commands\export.py:95
 msgid "No books selected."
 msgstr "未选择任何书籍"
 
-#: src\novel_downloader\apps\cli\interactive.py:192
+#: src\novel_downloader\apps\cli\interactive.py:205
 #, python-brace-format
 msgid "Exporting book '{book_id}' in formats: {fmt}"
 msgstr "正在导出书籍 '{book_id}', 格式: {fmt}"
 
-#: src\novel_downloader\apps\cli\interactive.py:204
+#: src\novel_downloader\apps\cli\interactive.py:217
 msgid "Export completed successfully."
 msgstr "导出完成"
 
-#: src\novel_downloader\apps\cli\interactive.py:206
+#: src\novel_downloader\apps\cli\interactive.py:219
 #, python-brace-format
 msgid "Export failed: {err}"
 msgstr "导出失败: {err}"
@@ -221,7 +230,7 @@ msgstr "站点键"
 #: src\novel_downloader\apps\cli\prompts.py:86
 #: src\novel_downloader\apps\cli\prompts.py:245
 msgid "Enter a number, 'n' for next, 'p' for previous (press Enter to cancel)"
-msgstr "输入序号选择，'n' 下一页，'p' 上一页（回车取消）"
+msgstr "输入序号选择, 'n' 下一页, 'p' 上一页 (回车取消)"
 
 #: src\novel_downloader\apps\cli\prompts.py:109
 #, python-brace-format
@@ -266,7 +275,7 @@ msgstr "作者"
 msgid ""
 "Enter numbers (e.g. 1,3,5), 'a' for all, 'n' next, 'p' previous (Enter to "
 "cancel)"
-msgstr "输入序号 (如 1,3,5)，'a' 全选，'n' 下一页，'p' 上一页（回车取消）"
+msgstr "输入序号 (如 1,3,5), 'a' 全选, 'n' 下一页, 'p' 上一页 (回车取消)"
 
 #: src\novel_downloader\apps\cli\prompts.py:177
 msgid "Invalid input."
@@ -353,7 +362,7 @@ msgstr "请输入值"
 
 #: src\novel_downloader\apps\cli\ui_adapters.py:106
 msgid "This field is required. Please provide a value."
-msgstr "该字段为必填项，请输入值"
+msgstr "该字段为必填项, 请输入值"
 
 #: src\novel_downloader\apps\cli\ui_adapters.py:117
 msgid ""
@@ -518,7 +527,7 @@ msgstr "要下载的书籍 ID 或 URL"
 
 #: src\novel_downloader\apps\cli\commands\download.py:38
 msgid "Source site key (auto-detected if omitted and URL is provided)"
-msgstr "来源站点标识（若省略且提供了 URL，将自动检测）"
+msgstr "来源站点标识 (若省略且提供了 URL, 将自动检测)"
 
 #: src\novel_downloader\apps\cli\commands\download.py:41
 #: src\novel_downloader\apps\cli\commands\export.py:44
@@ -529,63 +538,63 @@ msgstr "配置文件路径"
 #: src\novel_downloader\apps\cli\commands\download.py:46
 #: src\novel_downloader\apps\cli\commands\export.py:49
 msgid "Start chapter ID (applies only to the first book)"
-msgstr "起始章节 ID（仅对第一本书生效）"
+msgstr "起始章节 ID (仅对第一本书生效)"
 
 #: src\novel_downloader\apps\cli\commands\download.py:51
 #: src\novel_downloader\apps\cli\commands\export.py:54
 msgid "End chapter ID (applies only to the first book)"
-msgstr "结束章节 ID（仅对第一本书生效）"
+msgstr "结束章节 ID (仅对第一本书生效)"
 
 #: src\novel_downloader\apps\cli\commands\download.py:56
 msgid "Skip export step (download only)"
-msgstr "跳过导出步骤（仅下载）"
+msgstr "跳过导出步骤 (仅下载)"
 
 #: src\novel_downloader\apps\cli\commands\download.py:61
 #: src\novel_downloader\apps\cli\commands\export.py:37
 msgid "Output format(s) (default: config)"
-msgstr "输出格式（默认: 配置文件）"
+msgstr "输出格式 (默认: 配置文件)"
 
 #: src\novel_downloader\apps\cli\commands\download.py:76
 msgid "No --site provided; detecting site from URL..."
-msgstr "未提供 --site；正在从 URL 检测站点..."
+msgstr "未提供 --site; 正在从 URL 检测站点..."
 
-#: src\novel_downloader\apps\cli\commands\download.py:80
+#: src\novel_downloader\apps\cli\commands\download.py:81
 #, python-brace-format
 msgid "Expected exactly one URL argument when --site is omitted (got {n})."
-msgstr "省略 --site 时应只提供一个 URL 参数（收到 {n} 个）"
+msgstr "省略 --site 时应只提供一个 URL 参数 (收到 {n} 个)"
 
-#: src\novel_downloader\apps\cli\commands\download.py:89
+#: src\novel_downloader\apps\cli\commands\download.py:90
 #, python-brace-format
 msgid "Could not resolve site and book from URL: {url}"
 msgstr "无法从 URL 解析站点和书籍: {url}"
 
-#: src\novel_downloader\apps\cli\commands\download.py:103
+#: src\novel_downloader\apps\cli\commands\download.py:111
 #, python-brace-format
 msgid "Resolved URL to site '{site}' with book ID '{book_id}'."
-msgstr "已解析 URL: 站点 '{site}'，书籍 ID '{book_id}'"
+msgstr "已解析 URL: 站点 '{site}', 书籍 ID '{book_id}'"
 
-#: src\novel_downloader\apps\cli\commands\download.py:112
+#: src\novel_downloader\apps\cli\commands\download.py:120
 #: src\novel_downloader\apps\cli\commands\export.py:86
 #, python-brace-format
 msgid "Using site: {site}"
 msgstr "使用站点: {site}"
 
-#: src\novel_downloader\apps\cli\commands\download.py:120
+#: src\novel_downloader\apps\cli\commands\download.py:128
 #, python-brace-format
 msgid "Failed to read book IDs from configuration: {err}"
 msgstr "从配置读取书籍 ID 失败: {err}"
 
-#: src\novel_downloader\apps\cli\commands\download.py:127
+#: src\novel_downloader\apps\cli\commands\download.py:135
 msgid "No book IDs provided. Exiting."
-msgstr "未提供书籍 ID，已退出"
+msgstr "未提供书籍 ID, 已退出"
 
-#: src\novel_downloader\apps\cli\commands\download.py:171
+#: src\novel_downloader\apps\cli\commands\download.py:179
 #: src\novel_downloader\apps\cli\commands\search.py:128
 #, python-brace-format
 msgid "Site error ({site}): {err}"
 msgstr "站点错误 ({site}): {err}"
 
-#: src\novel_downloader\apps\cli\commands\download.py:196
+#: src\novel_downloader\apps\cli\commands\download.py:204
 msgid "Export skipped (--no-export)"
 msgstr "已跳过导出 (--no-export)"
 
@@ -595,11 +604,11 @@ msgstr "导出已下载的小说"
 
 #: src\novel_downloader\apps\cli\commands\export.py:32
 msgid "Book ID(s) to export (optional; choose interactively if omitted)"
-msgstr "要导出的书籍 ID（可选；若省略则交互式选择）"
+msgstr "要导出的书籍 ID (可选; 若省略则交互式选择)"
 
 #: src\novel_downloader\apps\cli\commands\export.py:41
 msgid "Source site key (optional; choose interactively if omitted)"
-msgstr "来源站点键（可选；若省略则交互式选择）"
+msgstr "来源站点键 (可选; 若省略则交互式选择)"
 
 #: src\novel_downloader\apps\cli\commands\export.py:59
 msgid "Export stage (e.g. raw, cleaner). Defaults to last stage."
@@ -611,7 +620,7 @@ msgstr "在一个或多个站点搜索书籍"
 
 #: src\novel_downloader\apps\cli\commands\search.py:39
 msgid "Restrict search to specific site key(s). Default: all sites."
-msgstr "限制搜索范围为指定站点（默认: 全部站点）"
+msgstr "限制搜索范围为指定站点 (默认: 全部站点)"
 
 #: src\novel_downloader\apps\cli\commands\search.py:41
 msgid "Search keyword"
@@ -623,11 +632,11 @@ msgstr "最大总结果数"
 
 #: src\novel_downloader\apps\cli\commands\search.py:58
 msgid "Maximum number of results per site (default: 10)"
-msgstr "每个站点的最大结果数（默认: 10）"
+msgstr "每个站点的最大结果数 (默认: 10)"
 
 #: src\novel_downloader\apps\cli\commands\search.py:65
 msgid "Request timeout in seconds (default: 5.0)"
-msgstr "请求超时时间（秒，默认: 5.0）"
+msgstr "请求超时时间 (秒, 默认: 5.0)"
 
 #: src\novel_downloader\apps\web\components\navigation.py:38
 #: src\novel_downloader\apps\web\pages\search.py:293
@@ -671,7 +680,7 @@ msgstr "解析结果"
 msgid ""
 "Paste the full novel detail page link, the system will automatically parse "
 "the site and book ID"
-msgstr "粘贴完整的小说详情页链接，系统会自动解析站点和书籍ID"
+msgstr "粘贴完整的小说详情页链接, 系统会自动解析站点和书籍ID"
 
 #: src\novel_downloader\apps\web\pages\download.py:65
 #: src\novel_downloader\apps\web\pages\progress.py:139
@@ -682,7 +691,7 @@ msgstr "站点"
 #: src\novel_downloader\apps\web\pages\download.py:78
 msgid ""
 "If you already know the site and book ID, you can enter them directly here"
-msgstr "若已知站点与书籍ID，可在此直接输入"
+msgstr "若已知站点与书籍ID, 可在此直接输入"
 
 #: src\novel_downloader\apps\web\pages\download.py:84
 #: src\novel_downloader\apps\web\pages\search.py:215
@@ -693,36 +702,36 @@ msgstr "清空"
 msgid "Add to download queue"
 msgstr "添加到下载队列"
 
-#: src\novel_downloader\apps\web\pages\download.py:132
+#: src\novel_downloader\apps\web\pages\download.py:134
 #, python-brace-format
 msgid "Site: {site}"
 msgstr "站点: {site}"
 
-#: src\novel_downloader\apps\web\pages\download.py:133
+#: src\novel_downloader\apps\web\pages\download.py:135
 #, python-brace-format
 msgid "Book ID: {bid}"
 msgstr "书籍 ID: {bid}"
 
-#: src\novel_downloader\apps\web\pages\download.py:138
+#: src\novel_downloader\apps\web\pages\download.py:140
 msgid "Parsing failed: The link may not be supported or is invalid"
 msgstr "解析失败: 该链接可能不受支持或格式不正确"
 
-#: src\novel_downloader\apps\web\pages\download.py:147
+#: src\novel_downloader\apps\web\pages\download.py:149
 msgid "Please enter a novel URL"
 msgstr "请输入小说链接"
 
-#: src\novel_downloader\apps\web\pages\download.py:152
+#: src\novel_downloader\apps\web\pages\download.py:154
 msgid "Unable to parse the URL, please check the link or site support"
-msgstr "无法解析该 URL，请检查链接或站点支持情况"
+msgstr "无法解析该 URL, 请检查链接或站点支持情况"
 
-#: src\novel_downloader\apps\web\pages\download.py:158
-#: src\novel_downloader\apps\web\pages\download.py:169
+#: src\novel_downloader\apps\web\pages\download.py:160
+#: src\novel_downloader\apps\web\pages\download.py:171
 #: src\novel_downloader\apps\web\pages\search.py:177
 #, python-brace-format
 msgid "Task added: {title}"
 msgstr "已添加任务: {title}"
 
-#: src\novel_downloader\apps\web\pages\download.py:164
+#: src\novel_downloader\apps\web\pages\download.py:166
 msgid "Please enter a Book ID"
 msgstr "请输入书籍ID"
 
@@ -832,7 +841,7 @@ msgstr "取消"
 
 #: src\novel_downloader\apps\web\pages\progress.py:133
 msgid "Task has ended and cannot be cancelled"
-msgstr "任务已结束，无法取消"
+msgstr "任务已结束, 无法取消"
 
 #: src\novel_downloader\apps\web\pages\progress.py:143
 msgid "Error"
@@ -853,11 +862,11 @@ msgstr "已完成 / 已取消 / 失败"
 
 #: src\novel_downloader\apps\web\pages\search.py:73
 msgid "Timeout must be > 0 seconds, reset to 10.0"
-msgstr "超时需 > 0 秒，已重置为 10.0"
+msgstr "超时需 > 0 秒, 已重置为 10.0"
 
 #: src\novel_downloader\apps\web\pages\search.py:88
 msgid "Per-site limit must be a positive integer, reset to 30"
-msgstr "单站条数上限需为正整数，已重置为 30"
+msgstr "单站条数上限需为正整数, 已重置为 30"
 
 #: src\novel_downloader\apps\web\pages\search.py:165
 #, python-brace-format
@@ -906,7 +915,7 @@ msgstr "排序"
 
 #: src\novel_downloader\apps\web\pages\search.py:346
 msgid "Searching (results will appear progressively)..."
-msgstr "正在搜索（结果将陆续显示）..."
+msgstr "正在搜索 (结果将陆续显示)..."
 
 #: src\novel_downloader\apps\web\pages\search.py:352
 #, python-brace-format
@@ -916,7 +925,7 @@ msgstr "当前已获取 {total} 条结果"
 #: src\novel_downloader\apps\web\pages\search.py:376
 #, python-brace-format
 msgid "Total {total} results (page {page}/{pages})"
-msgstr "共 {total} 条结果（第 {page}/{pages} 页）"
+msgstr "共 {total} 条结果 (第 {page}/{pages} 页)"
 
 #: src\novel_downloader\apps\web\pages\search.py:457
 msgid "Please enter a keyword"
@@ -969,6 +978,9 @@ msgstr "在此粘贴您的登录 Cookies"
 #: scripts\i18n_strings.py:26
 msgid "Copy the cookies from your browser's developer tools while logged in."
 msgstr "请在已登录状态下从浏览器开发者工具复制 Cookies"
+
+#~ msgid "Unable to parse book URL."
+#~ msgstr "无法解析书籍 URL"
 
 #, python-brace-format
 #~ msgid "Failed to download {book_id}: {err}"

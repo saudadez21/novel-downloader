@@ -8,8 +8,8 @@ novel_downloader.apps.web.pages.download
 from nicegui import ui
 
 from novel_downloader.apps.constants import DOWNLOAD_SUPPORT_SITES
+from novel_downloader.infra.book_url_resolver import resolve_book_url
 from novel_downloader.infra.i18n import t
-from novel_downloader.libs.book_url_resolver import resolve_book_url
 
 from ..components import navbar
 from ..services import manager, setup_dialog
@@ -103,8 +103,10 @@ def page_download() -> None:
                 return None, None
             if not info:
                 return None, None
-            site_key = str(info["site_key"])
-            bid = str(info["book"].book_id)
+            site_key = info["site_key"]
+            bid = info.get("book_id")
+            if not book_id:
+                return None, None
             return site_key, bid
 
         def _reset_preview() -> None:

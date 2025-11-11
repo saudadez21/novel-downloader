@@ -165,7 +165,7 @@ class LinovelParser(BaseParser):
         )
 
         paragraphs: list[str] = []
-        image_positions: dict[int, list[str]] = {}
+        image_positions: dict[int, list[dict[str, Any]]] = {}
         image_idx = 0
 
         for p in tree.xpath(
@@ -182,7 +182,13 @@ class LinovelParser(BaseParser):
                 if not urls:
                     continue
 
-                image_positions.setdefault(image_idx, []).extend(urls)
+                img_objs: list[dict[str, Any]] = []
+                for url in urls:
+                    if url.startswith("//"):
+                        url = "https:" + url
+                    img_objs.append({"type": "url", "data": url})
+
+                image_positions.setdefault(image_idx, []).extend(img_objs)
             else:
                 txt = p.text_content().replace("\xa0", " ").strip()
                 if txt:

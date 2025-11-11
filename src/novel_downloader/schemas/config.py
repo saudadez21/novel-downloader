@@ -96,4 +96,4 @@ class BookConfig:
     book_id: str
     start_id: str | None = None
     end_id: str | None = None
-    ignore_ids: tuple[str, ...] = field(default_factory=tuple)
+    ignore_ids: frozenset[str] = field(default_factory=frozenset)

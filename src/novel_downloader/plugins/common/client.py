@@ -5,27 +5,25 @@ novel_downloader.plugins.common.client
 """
 
 import asyncio
-import json
-import time
-from collections.abc import Sequence
+import base64
 from html import escape
 from pathlib import Path
-from typing import Any, Final, Protocol, cast, final
+from typing import Any, Final, final
 
-from novel_downloader.infra.paths import CSS_MAIN_PATH
+from novel_downloader.infra.paths import EPUB_CSS_MAIN_PATH
 from novel_downloader.infra.persistence.chapter_storage import ChapterStorage
-from novel_downloader.libs.epub import (
-    Chapter,
+from novel_downloader.libs.epub_builder import (
     EpubBuilder,
-    StyleSheet,
-    Volume,
+    EpubChapter,
+    EpubStyleSheet,
+    EpubVolume,
 )
-from novel_downloader.libs.filesystem import img_name, sanitize_filename, write_file
+from novel_downloader.libs.filesystem import sanitize_filename, write_file
+from novel_downloader.libs.html_builder import HtmlBuilder, HtmlChapter, HtmlVolume
 from novel_downloader.libs.time_utils import async_jitter_sleep
 from novel_downloader.plugins.base.client import BaseClient
 from novel_downloader.plugins.protocols import (
     DownloadUI,
-    ExportUI,
     LoginUI,
     ProcessUI,
 )
@@ -34,28 +32,10 @@ from novel_downloader.schemas import (
     BookConfig,
     BookInfoDict,
     ChapterDict,
-    ChapterInfoDict,
     ExporterConfig,
     ProcessorConfig,
     VolumeInfoDict,
 )
-
-
-class SafeDict(dict[str, Any]):
-    def __missing__(self, key: str) -> str:
-        return f"{{{key}}}"
-
-
-class _ExportFunc(Protocol):
-    def __call__(
-        self,
-        book: BookConfig,
-        cfg: ExporterConfig | None = None,
-        *,
-        stage: str | None,
-        **kwargs: Any,
-    ) -> list[Path]:
-        ...
 
 
 @final
@@ -69,7 +49,6 @@ class StopToken:
 
 
 STOP: Final[StopToken] = StopToken()
-ONE_DAY = 86400  # seconds
 
 
 class CommonClient(BaseClient):
@@ -118,16 +97,16 @@ class CommonClient(BaseClient):
         :param book: BookConfig with at least 'book_id'.
         :param ui: Optional DownloadUI to report progress or messages.
         """
-        if ui:
-            await ui.on_start(book)
-
-        book_id = self._normalize_book_id(book.book_id)
+        book_id = book.book_id
         start_id = book.start_id
         end_id = book.end_id
-        ignore_set = set(book.ignore_ids or [])
+        ignore_set = book.ignore_ids
 
         raw_base = self._raw_data_dir / book_id
         raw_base.mkdir(parents=True, exist_ok=True)
+
+        if ui:
+            await ui.on_start(book)
 
         # ---- metadata ---
         book_info = await self._get_book_info(book_id=book_id)
@@ -272,9 +251,7 @@ class CommonClient(BaseClient):
         :param book: BookConfig to process.
         :param ui: Optional ProcessUI to report progress.
         """
-        book_id = self._normalize_book_id(book.book_id)
-        raw_base = self._raw_data_dir / book_id
-        raw_base.mkdir(parents=True, exist_ok=True)
+        raw_base = self._raw_data_dir / book.book_id
 
         raw_sqlite = raw_base / "chapter.raw.sqlite"
         book_info_path = raw_base / "book_info.raw.json"
@@ -312,13 +289,15 @@ class CommonClient(BaseClient):
                 if ui:
                     ui.on_stage_complete(book, stage_name)
 
-            self.logger.info("All stages completed successfully for book %s", book_id)
+            self.logger.info(
+                "All stages completed successfully for book %s", book.book_id
+            )
 
         except Exception as e:
             self.logger.warning(
                 "Processing failed at stage '%s' for book %s: %s",
                 stage_name,
-                book_id,
+                book.book_id,
                 e,
             )
 
@@ -337,10 +316,10 @@ class CommonClient(BaseClient):
         :param force_update: If True, re-download even if images are already cached.
         :param concurrent: Maximum number of concurrent download tasks.
         """
-        book_id = self._normalize_book_id(book.book_id)
+        book_id = book.book_id
         start_id = book.start_id
         end_id = book.end_id
-        ignore_set = set(book.ignore_ids or [])
+        ignore_set = book.ignore_ids
 
         raw_base = self._raw_data_dir / book_id
         raw_base.mkdir(parents=True, exist_ok=True)
@@ -364,64 +343,13 @@ class CommonClient(BaseClient):
                 if chap is None:
                     continue
 
-                imgs = self._extract_img_urls(chap["extra"])
+                imgs = self._extract_img_urls(chap)
                 await self.fetcher.download_images(
                     img_dir,
                     imgs,
                     batch_size=concurrent,
                     on_exist="overwrite" if force_update else "skip",
                 )
-
-    def export(
-        self,
-        book: BookConfig,
-        cfg: ExporterConfig | None = None,
-        *,
-        formats: list[str] | None = None,
-        stage: str | None = None,
-        ui: ExportUI | None = None,
-        **kwargs: Any,
-    ) -> dict[str, list[Path]]:
-        """
-        Persist the assembled book to disk.
-
-        :param book: The book configuration to export.
-        :param cfg: Optional ExporterConfig defining export parameters.
-        :param formats: Optional list of format strings (e.g., ['epub', 'txt']).
-        :param ui: Optional ExportUI for reporting export progress.
-        :return: A mapping from format name to the resulting file path.
-        """
-        formats = formats or ["epub"]
-        results: dict[str, list[Path]] = {}
-
-        for fmt in formats:
-            method_name = f"export_as_{fmt.lower()}"
-            export_func: _ExportFunc | None = getattr(self, method_name, None)
-
-            if not callable(export_func):
-                if ui:
-                    ui.on_unsupported(book, fmt)
-                results[fmt] = []
-                continue
-
-            if ui:
-                ui.on_start(book, fmt)
-
-            try:
-                paths = export_func(book, cfg, stage=stage, **kwargs)
-                results[fmt] = paths
-
-                if paths and ui:
-                    for path in paths:
-                        ui.on_success(book, fmt, path)
-
-            except Exception as e:
-                results[fmt] = []
-                self.logger.warning(f"Error exporting {fmt}: {e}")
-                if ui:
-                    ui.on_error(book, fmt, e)
-
-        return results
 
     def export_as_txt(
         self,
@@ -435,14 +363,15 @@ class CommonClient(BaseClient):
         Export a novel as a single text file by merging all chapter data.
         """
         cfg = cfg or ExporterConfig()
-        book_id = self._normalize_book_id(book.book_id)
+        book_id = book.book_id
         start_id = book.start_id
         end_id = book.end_id
-        ignore_set = set(book.ignore_ids or [])
+        ignore_set = book.ignore_ids
 
         # --- Load book data ---
         raw_base = self._raw_data_dir / book_id
-        raw_base.mkdir(parents=True, exist_ok=True)
+        if not raw_base.is_dir():
+            return []
 
         stage = stage or self._resolve_stage_selection(book_id)
         book_info = self._load_book_info(book_id, stage=stage)
@@ -546,6 +475,120 @@ class CommonClient(BaseClient):
             )
         raise ValueError(f"Unsupported split_mode: {mode!r}")
 
+    def export_as_html(
+        self,
+        book: BookConfig,
+        cfg: ExporterConfig | None = None,
+        *,
+        stage: str | None = None,
+        **kwargs: Any,
+    ) -> list[Path]:
+        """
+        Export a novel as HTML files.
+        """
+        cfg = cfg or ExporterConfig()
+        book_id = book.book_id
+        start_id = book.start_id
+        end_id = book.end_id
+        ignore_set = book.ignore_ids
+
+        # --- Load book data ---
+        raw_base = self._raw_data_dir / book_id
+        if not raw_base.is_dir():
+            return []
+
+        img_dir = raw_base / "images"
+
+        stage = stage or self._resolve_stage_selection(book_id)
+        book_info = self._load_book_info(book_id, stage=stage)
+
+        # --- Filter volumes & chapters ---
+        orig_vols = book_info.get("volumes", [])
+        vols = self._filter_volumes(orig_vols, start_id, end_id, ignore_set)
+        if not vols:
+            self.logger.info(
+                "Nothing to do after filtering (site=%s, book=%s)", self._site, book_id
+            )
+            return []
+
+        # --- Prepare header (book metadata) ---
+        name = book_info["book_name"]
+        author = book_info.get("author") or ""
+        cover_path = self._resolve_img_path(
+            img_dir, book_info.get("cover_url"), name="cover"
+        )
+        cover = cover_path.read_bytes() if cover_path else None
+
+        # --- Initialize EPUB ---
+        builder = HtmlBuilder(
+            title=name,
+            author=author,
+            description=book_info.get("summary", ""),
+            cover=cover,
+            subject=book_info.get("tags", []),
+            serial_status=book_info.get("serial_status", ""),
+            word_count=book_info.get("word_count", ""),
+        )
+
+        # --- Compile columes ---
+        with ChapterStorage(raw_base, filename=f"chapter.{stage}.sqlite") as storage:
+            for v_idx, vol in enumerate(vols, start=1):
+                vol_title = vol.get("volume_name") or f"卷 {v_idx}"
+
+                curr_vol = HtmlVolume(
+                    title=vol_title,
+                    intro=vol.get("volume_intro", ""),
+                )
+
+                # Collect chapter ids then batch fetch
+                cids = [
+                    c["chapterId"]
+                    for c in vol.get("chapters", [])
+                    if c.get("chapterId")
+                ]
+                if not cids:
+                    continue
+                chap_map = storage.get_chapters(cids)
+
+                # Append each chapter
+                for ch_info in vol.get("chapters", []):
+                    cid = ch_info.get("chapterId")
+                    ch_title = ch_info.get("title")
+                    if not cid:
+                        continue
+
+                    ch = chap_map.get(cid)
+                    if not ch:
+                        continue
+
+                    chapter_obj = self._build_html_chapter(
+                        builder=builder,
+                        cid=cid,
+                        chap_title=ch_title,
+                        chap=ch,
+                        img_dir=img_dir,
+                    )
+
+                    curr_vol.chapters.append(chapter_obj)
+
+                if curr_vol.chapters:
+                    builder.add_volume(curr_vol)
+
+        try:
+            out_path = builder.export(self._output_dir)
+            self.logger.info(
+                "Exported HTML (site=%s, book=%s): %s", self._site, book_id, out_path
+            )
+        except Exception as e:
+            self.logger.error(
+                "Failed to write HTML (site=%s, book=%s): %s",
+                self._site,
+                book_id,
+                e,
+            )
+            return []
+        return [out_path]
+
     def _export_epub_by_volume(
         self,
         book: BookConfig,
@@ -557,18 +600,19 @@ class CommonClient(BaseClient):
         """
         Export each volume of a novel as a separate EPUB file.
         """
-        book_id = self._normalize_book_id(book.book_id)
+        book_id = book.book_id
         start_id = book.start_id
         end_id = book.end_id
-        ignore_set = set(book.ignore_ids or [])
+        ignore_set = book.ignore_ids
 
         # --- Load book data ---
         raw_base = self._raw_data_dir / book_id
-        raw_base.mkdir(parents=True, exist_ok=True)
+        if not raw_base.is_dir():
+            return []
+
         img_dir: Path | None = None
         if cfg.include_picture:
             img_dir = raw_base / "images"
-            img_dir.mkdir(parents=True, exist_ok=True)
 
         stage = stage or self._resolve_stage_selection(book_id)
         book_info = self._load_book_info(book_id, stage=stage)
@@ -590,8 +634,10 @@ class CommonClient(BaseClient):
         # --- Generate intro + cover ---
         cover_path = self._resolve_img_path(img_dir, book_info.get("cover_url"))
 
-        css_text = CSS_MAIN_PATH.read_text(encoding="utf-8")
-        main_css = StyleSheet(id="main_style", content=css_text, filename="main.css")
+        css_text = EPUB_CSS_MAIN_PATH.read_text(encoding="utf-8")
+        main_css = EpubStyleSheet(
+            id="main_style", content=css_text, filename="main.css"
+        )
 
         # --- Compile columes ---
         outputs: list[Path] = []
@@ -681,18 +727,19 @@ class CommonClient(BaseClient):
         """
         Export a single novel (identified by `book_id`) to an EPUB file.
         """
-        book_id = self._normalize_book_id(book.book_id)
+        book_id = book.book_id
         start_id = book.start_id
         end_id = book.end_id
-        ignore_set = set(book.ignore_ids or [])
+        ignore_set = book.ignore_ids
 
         # --- Load book data ---
         raw_base = self._raw_data_dir / book_id
-        raw_base.mkdir(parents=True, exist_ok=True)
+        if not raw_base.is_dir():
+            return []
+
         img_dir: Path | None = None
         if cfg.include_picture:
             img_dir = raw_base / "images"
-            img_dir.mkdir(parents=True, exist_ok=True)
 
         stage = stage or self._resolve_stage_selection(book_id)
         book_info = self._load_book_info(book_id, stage=stage)
@@ -726,8 +773,10 @@ class CommonClient(BaseClient):
             word_count=book_info.get("word_count", ""),
             uid=f"{self._site}_{book_id}",
         )
-        css_text = CSS_MAIN_PATH.read_text(encoding="utf-8")
-        main_css = StyleSheet(id="main_style", content=css_text, filename="main.css")
+        css_text = EPUB_CSS_MAIN_PATH.read_text(encoding="utf-8")
+        main_css = EpubStyleSheet(
+            id="main_style", content=css_text, filename="main.css"
+        )
         epub.add_stylesheet(main_css)
 
         # --- Compile columes ---
@@ -738,7 +787,7 @@ class CommonClient(BaseClient):
 
                 vol_cover = self._resolve_img_path(img_dir, vol.get("volume_cover"))
 
-                curr_vol = Volume(
+                curr_vol = EpubVolume(
                     id=f"vol_{v_idx}",
                     title=vol_title,
                     intro=vol.get("volume_intro", ""),
@@ -868,7 +917,7 @@ class CommonClient(BaseClient):
                         return None
                     raise ValueError("Empty parse result")
 
-                imgs = self._extract_img_urls(chap["extra"])
+                imgs = self._extract_img_urls(chap)
                 img_dir = self._raw_data_dir / book_id / "images"
                 await self.fetcher.download_images(img_dir, imgs)
                 return chap
@@ -895,169 +944,6 @@ class CommonClient(BaseClient):
                         e,
                     )
         return None
-
-    async def _get_book_info(self, book_id: str) -> BookInfoDict:
-        """
-        Attempt to fetch and parse the book_info for a given book_id.
-
-        :param book_id: identifier of the book
-        :return: parsed BookInfoDict
-        """
-        book_info: BookInfoDict | None = None
-        try:
-            book_info = self._load_book_info(book_id)
-            if book_info and time.time() - book_info.get("last_checked", 0.0) < ONE_DAY:
-                return book_info
-        except FileNotFoundError as exc:
-            self.logger.debug("No cached book_info found for %s: %s", book_id, exc)
-        except Exception as exc:
-            self.logger.info("Failed to load cached book_info for %s: %s", book_id, exc)
-
-        try:
-            info_html = await self.fetcher.get_book_info(book_id)
-            self._save_html_pages(book_id, "info", info_html)
-
-            book_info = self.parser.parse_book_info(info_html)
-            if book_info:
-                book_info["last_checked"] = time.time()
-                self._save_book_info(book_id, book_info)
-                return book_info
-
-        except Exception as exc:
-            self.logger.warning(
-                "Failed to fetch/parse book_info for %s: %s", book_id, exc
-            )
-
-        if book_info is None:
-            raise LookupError(f"Unable to load book_info for {book_id}")
-
-        return book_info
-
-    def _save_book_info(
-        self, book_id: str, book_info: BookInfoDict, stage: str = "raw"
-    ) -> None:
-        """
-        Serialize and save the book_info dict as json.
-
-        :param book_id: identifier of the book
-        :param book_info: dict containing metadata about the book
-        """
-        target_dir = self._raw_data_dir / book_id
-        target_dir.mkdir(parents=True, exist_ok=True)
-        (target_dir / f"book_info.{stage}.json").write_text(
-            json.dumps(book_info, ensure_ascii=False, indent=2),
-            encoding="utf-8",
-        )
-
-    def _load_book_info(self, book_id: str, stage: str = "raw") -> BookInfoDict:
-        """
-        Load and return the book_info payload for the given book.
-
-        :param book_id: Book identifier.
-        :raises FileNotFoundError: if the metadata file does not exist.
-        :raises ValueError: if the JSON is invalid or has an unexpected structure.
-        :return: Parsed BookInfoDict.
-        """
-        info_path = self._raw_data_dir / book_id / f"book_info.{stage}.json"
-        if not info_path.is_file():
-            raise FileNotFoundError(f"Missing metadata file: {info_path}")
-
-        try:
-            data = json.loads(info_path.read_text(encoding="utf-8"))
-        except json.JSONDecodeError as e:
-            raise ValueError(f"Corrupt JSON in {info_path}: {e}") from e
-
-        if not isinstance(data, dict):
-            raise ValueError(
-                f"Invalid JSON structure in {info_path}: expected an object at the top"
-            )
-
-        return cast(BookInfoDict, data)
-
-    def _save_html_pages(
-        self,
-        book_id: str,
-        filename: str,
-        html_list: Sequence[str],
-        *,
-        folder: str = "html",
-    ) -> None:
-        """
-        If save_html is enabled, write each HTML snippet to a file.
-
-        Filenames will be {book_id}_{filename}_{index}.html in html_dir.
-
-        :param book_id: The book identifier
-        :param filename: used as filename prefix
-        :param html_list: list of HTML strings to save
-        """
-        if not self._save_html:
-            return
-        html_dir = self._debug_dir / folder
-        html_dir.mkdir(parents=True, exist_ok=True)
-        for i, html in enumerate(html_list):
-            (html_dir / f"{book_id}_{filename}_{i}.html").write_text(
-                html, encoding="utf-8"
-            )
-
-    def _get_filename(
-        self,
-        filename_template: str,
-        *,
-        title: str,
-        author: str | None = None,
-        append_timestamp: bool = True,
-        ext: str = "txt",
-        **extra_fields: str,
-    ) -> str:
-        """
-        Generate a filename based on the configured template and metadata fields.
-
-        :param title: Book title (required).
-        :param author: Author name (optional).
-        :param ext: File extension (e.g., "txt", "epub").
-        :param extra_fields: Any additional fields used in the filename template.
-        :return: Formatted filename with extension.
-        """
-        context = SafeDict(title=title, author=author or "", **extra_fields)
-        name = filename_template.format_map(context)
-        if append_timestamp:
-            from datetime import datetime
-
-            name += f"_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-        return f"{name}.{ext}"
-
-    def _extract_img_urls(self, extra: dict[str, Any]) -> list[str]:
-        """
-        Extract all image URLs from 'extra' field.
-        """
-        if not isinstance(extra, dict):
-            return []
-
-        image_positions = extra.get("image_positions")
-        if not isinstance(image_positions, dict):
-            return []
-
-        urls: list[str] = []
-        for line_no, urls_in_line in image_positions.items():
-            if not isinstance(urls_in_line, list | tuple):
-                self.logger.debug(
-                    "image_positions[%r] expected list/tuple, got %r",
-                    line_no,
-                    type(urls_in_line),
-                )
-                continue
-            for url in urls_in_line:
-                if isinstance(url, str) and url.startswith("http"):
-                    urls.append(url)
-                else:
-                    self.logger.debug(
-                        "Invalid image URL type or format at line %r: %r",
-                        line_no,
-                        url,
-                    )
-
-        return urls
 
     async def _repair_chapter_ids(
         self,
@@ -1123,123 +1009,6 @@ class CommonClient(BaseClient):
         self._save_book_info(book_id, book_info)
         return book_info
 
-    @staticmethod
-    def _select_chapter_ids(
-        vols: list[VolumeInfoDict],
-        start_id: str | None,
-        end_id: str | None,
-        ignore: set[str],
-    ) -> list[str]:
-        seen_start = start_id is None
-        out: list[str] = []
-        for vol in vols:
-            for chap in vol["chapters"]:
-                cid = chap.get("chapterId")
-                if not cid:
-                    continue
-                if not seen_start:
-                    if cid == start_id:
-                        seen_start = True
-                    else:
-                        continue
-                if cid not in ignore and chap.get("accessible", True):
-                    out.append(cid)
-                if end_id is not None and cid == end_id:
-                    return out
-        return out
-
-    @staticmethod
-    def _filter_volumes(
-        vols: list[VolumeInfoDict],
-        start_id: str | None,
-        end_id: str | None,
-        ignore: set[str],
-    ) -> list[VolumeInfoDict]:
-        """
-        Rebuild volumes to include only chapters within
-        the [start_id, end_id] range (inclusive),
-        while excluding any chapter IDs in `ignore`.
-
-        :param vols: List of volume dicts.
-        :param start_id: Range start chapter ID (inclusive) or None to start.
-        :param end_id: Range end chapter ID (inclusive) or None to go till the end.
-        :param ignore: Set of chapter IDs to exclude (regardless of range).
-        :return: New list of volumes with chapters filtered accordingly.
-        """
-        if start_id is None and end_id is None and not ignore:
-            return vols
-
-        started = start_id is None
-        finished = False
-        result: list[VolumeInfoDict] = []
-
-        for vol in vols:
-            if finished:
-                break
-
-            kept: list[ChapterInfoDict] = []
-
-            for ch in vol.get("chapters", []):
-                cid = ch.get("chapterId")
-                if not cid:
-                    continue
-
-                # wait until hit the start_id
-                if not started:
-                    if cid == start_id:
-                        started = True
-                    else:
-                        continue
-
-                if cid not in ignore:
-                    kept.append(ch)
-
-                # check for end_id after keeping
-                if end_id is not None and cid == end_id:
-                    finished = True
-                    break
-
-            if kept:
-                result.append(
-                    {
-                        **vol,
-                        "chapters": kept,
-                    }
-                )
-
-        return result
-
-    @staticmethod
-    def _resolve_img_path(
-        img_dir: Path | None,
-        url: str | None,
-        *,
-        name: str | None = None,
-    ) -> Path | None:
-        """
-        Resolve the local path of an image if it exists.
-
-        :param img_dir: The directory where images are stored.
-        :param url: The source URL of the image.
-        :param name: Optional explicit base name.
-        :return: Path to the existing image, or None if not found or invalid.
-        """
-        if not img_dir or not url:
-            return None
-
-        path = img_dir / img_name(url, name=name)
-        return path if path.is_file() else None
-
-    @staticmethod
-    def _normalize_book_id(book_id: str) -> str:
-        """
-        Normalize a book identifier.
-
-        Subclasses may override this method to transform the book ID
-        into their preferred format.
-        """
-        return book_id.replace("/", "-")
-
     def _is_access_limited(self, html_list: list[str]) -> bool:
         """
         Return True if page content indicates access restriction
@@ -1258,53 +1027,6 @@ class CommonClient(BaseClient):
     def _need_refetch(self, chap: ChapterDict) -> bool:
         """Override this hook to decide if a chapter needs refetch."""
         return False
-
-    def _resolve_stage_selection(self, book_id: str) -> str:
-        """
-        Return the chosen stage name for export (e.g., 'raw', 'cleaner', 'corrector').
-        Strategy:
-          * If pipeline.json exists, walk pipeline in reverse and pick the last stage
-            whose recorded sqlite file exists.
-          * Fallback: any executed record with an existing sqlite file.
-          * Else: 'raw'.
-        """
-        base_dir = self._raw_data_dir / book_id
-        pipeline_path = base_dir / "pipeline.json"
-        if not pipeline_path.is_file():
-            return "raw"
-
-        try:
-            meta = json.loads(pipeline_path.read_text(encoding="utf-8"))
-        except Exception:
-            return "raw"
-
-        pipeline: list[str] = meta.get("pipeline", [])
-        if not pipeline:
-            return "raw"
-
-        for stg in reversed(pipeline):
-            db_file = base_dir / f"chapter.{stg}.sqlite"
-            info_file = base_dir / f"book_info.{stg}.json"
-            if db_file.is_file() and info_file.is_file():
-                return stg
-
-        return "raw"
-
-    def _render_txt_extras(self, extras: dict[str, Any]) -> str:
-        """
-        Format the extras dict into a string.
-
-        Subclasses may override this method to render extra info.
-        """
-        return ""
-
-    def _render_epub_extras(self, extras: dict[str, Any]) -> str:
-        """
-        Format the extras dict into a string.
-
-        Subclasses may override this method to render extra info.
-        """
-        return ""
 
     def _build_txt_header(self, book_info: BookInfoDict, name: str, author: str) -> str:
         """
@@ -1371,16 +1093,24 @@ class CommonClient(BaseClient):
             else f"{title_line}\n\n{body}\n\n"
         )
 
+    def _render_txt_extras(self, extras: dict[str, Any]) -> str:
+        """
+        Format the extras dict into a string.
+
+        Subclasses may override this method to render extra info.
+        """
+        return ""
+
     def _build_epub_chapter(
         self,
         *,
         book: EpubBuilder,
-        css: list[StyleSheet],
+        css: list[EpubStyleSheet],
         cid: str,
         chap_title: str | None,
         chap: ChapterDict,
         img_dir: Path | None = None,
-    ) -> Chapter:
+    ) -> EpubChapter:
         """
         Build a Chapter object with XHTML content and optionally place images
         from `chap.extra['image_positions']` (1-based index; 0 = before 1st paragraph).
@@ -1389,52 +1119,72 @@ class CommonClient(BaseClient):
         content = chap.get("content", "")
 
         extras = chap.get("extra") or {}
-        image_positions = self._collect_img_map(extras)
+        image_positions = self._collect_img_map(chap)
         html_parts: list[str] = [f"<h2>{escape(title)}</h2>"]
 
-        def _append_image(url: str) -> None:
+        def _append_image(item: dict[str, Any]) -> None:
             if not img_dir:
                 return
-            u = (url or "").strip()
-            if not u:
+
+            typ = item.get("type")
+            data = (item.get("data") or "").strip()
+            if not data:
                 return
-            if u.startswith("//"):
-                u = "https:" + u
-            if not (u.startswith("http://") or u.startswith("https://")):
-                return
+
             try:
-                local = self._resolve_img_path(img_dir, u)
-                if not local:
+                if typ == "url":
+                    # ---- Handle normal URL ----
+                    if data.startswith("//"):
+                        data = "https:" + data
+                    if not (data.startswith("http://") or data.startswith("https://")):
+                        return
+
+                    local = self._resolve_img_path(img_dir, data)
+                    if not local:
+                        return
+
+                    fname = book.add_image(local)
+
+                elif typ == "base64":
+                    # ---- Handle base64-encoded image ----
+                    mime = item.get("mime", "image/png")
+                    raw = base64.b64decode(data)
+                    fname = book.add_image_bytes(raw, mime_type=mime)
+
+                else:
+                    # Unknown type
                     return
-                fname = book.add_image(local)
-                img = f'<img src="../Images/{fname}" alt="image"/>'
-                html_parts.append(self._IMAGE_WRAPPER.format(img=img))
+
+                # ---- Append <img> HTML ----
+                img_tag = f'<img src="../Images/{fname}" alt="image"/>'
+                html_parts.append(self._IMAGE_WRAPPER.format(img=img_tag))
+
             except Exception as e:
-                self.logger.debug("EPUB image add failed for %s: %s", u, e)
+                self.logger.debug("EPUB image add failed: %s", e)
 
         # Images before first paragraph
-        for url in image_positions.get(0, []):
-            _append_image(url)
+        for item in image_positions.get(0, []):
+            _append_image(item)
 
         # Paragraphs + inline-after images
         lines = content.splitlines()
         for i, line in enumerate(lines, start=1):
             if ln := line.strip():
                 html_parts.append(f"<p>{escape(ln)}</p>")
-            for url in image_positions.get(i, []):
-                _append_image(url)
+            for item in image_positions.get(i, []):
+                _append_image(item)
 
         max_i = len(lines)
-        for k, urls in image_positions.items():
+        for k, items in image_positions.items():
             if k > max_i:
-                for url in urls:
-                    _append_image(url)
+                for item in items:
+                    _append_image(item)
 
         if extras_epub := self._render_epub_extras(extras):
             html_parts.append(extras_epub)
 
         xhtml = "\n".join(html_parts)
-        return Chapter(
+        return EpubChapter(
             id=f"c_{cid}",
             filename=f"c{cid}.xhtml",
             title=title,
@@ -1442,41 +1192,108 @@ class CommonClient(BaseClient):
             css=css,
         )
 
-    @staticmethod
-    def _collect_img_map(extras: dict[str, Any]) -> dict[int, list[str]]:
+    def _render_epub_extras(self, extras: dict[str, Any]) -> str:
         """
-        Collect and normalize `image_positions` into `{int: [str, ...]}`.
-        """
-        result: dict[int, list[str]] = {}
-        raw_map = extras.get("image_positions")
+        Format the extras dict into a string.
 
-        if not isinstance(raw_map, dict):
-            return result
-        for k, v in raw_map.items():
+        Subclasses may override this method to render extra info.
+        """
+        return ""
+
+    def _build_html_chapter(
+        self,
+        *,
+        builder: HtmlBuilder,
+        cid: str,
+        chap_title: str | None,
+        chap: ChapterDict,
+        img_dir: Path | None = None,
+    ) -> HtmlChapter:
+        """
+        Build a Chapter object with HTML content and optionally place images
+        from `chap.extra['image_positions']` (1-based index; 0 = before 1st paragraph).
+        """
+        title = chap_title or chap.get("title", "").strip()
+        content = chap.get("content", "")
+
+        extras = chap.get("extra") or {}
+        image_positions = self._collect_img_map(chap)
+        html_parts: list[str] = []
+
+        def _append_image(item: dict[str, Any]) -> None:
+            if not img_dir:
+                return
+
+            typ = item.get("type")
+            data = (item.get("data") or "").strip()
+            if not data:
+                return
+
             try:
-                key = int(k)
-            except Exception:
-                key = 0
-            urls: list[str] = []
-            if isinstance(v, list | tuple):
-                for u in v:
-                    if isinstance(u, str):
-                        s = u.strip()
-                        if s:
-                            urls.append(s)
-            elif isinstance(v, str):
-                s = v.strip()
-                if s:
-                    urls.append(s)
-            if urls:
-                result.setdefault(key, []).extend(urls)
-        return result
+                if typ == "url":
+                    # ---- Handle normal URL ----
+                    if data.startswith("//"):
+                        data = "https:" + data
+                    if not (data.startswith("http://") or data.startswith("https://")):
+                        return
 
-    @classmethod
-    def _render_html_block(cls, text: str) -> str:
-        """
-        Wraps each non-empty (stripped) line with <p>.
-        """
-        return "\n".join(
-            f"<p>{escape(s)}</p>" for ln in text.splitlines() if (s := ln.strip())
+                    local = self._resolve_img_path(img_dir, data)
+                    if not local:
+                        return
+
+                    fname = builder.add_image(local)
+
+                elif typ == "base64":
+                    # ---- Handle base64-encoded image ----
+                    mime = item.get("mime", "image/png")
+                    raw = base64.b64decode(data)
+                    fname = builder.add_image_bytes(raw, mime_type=mime)
+
+                else:
+                    # Unknown type
+                    return
+
+                # ---- Append <img> HTML ----
+                img_tag = (
+                    f'<img src="../media/{fname}" alt="image" class="chapter-image"/>'
+                )
+                html_parts.append(self._IMAGE_WRAPPER.format(img=img_tag))
+
+            except Exception as e:
+                self.logger.debug("EPUB image add failed: %s", e)
+
+        # Images before first paragraph
+        for item in image_positions.get(0, []):
+            _append_image(item)
+
+        # Paragraphs + inline-after images
+        lines = content.splitlines()
+        for i, line in enumerate(lines, start=1):
+            if ln := line.strip():
+                html_parts.append(f"<p>{escape(ln)}</p>")
+            for item in image_positions.get(i, []):
+                _append_image(item)
+
+        max_i = len(lines)
+        for k, items in image_positions.items():
+            if k > max_i:
+                for item in items:
+                    _append_image(item)
+
+        if extras_part := self._render_html_extras(extras):
+            html_parts.append(extras_part)
+
+        html_str = "\n".join(html_parts)
+        return HtmlChapter(
+            filename=f"c{cid}.html",
+            title=title,
+            content=html_str,
         )
+
+    def _render_html_extras(self, extras: dict[str, Any]) -> str:
+        """
+        Format the extras dict into a string.
+
+        Subclasses may override this method to render extra info.
+        """
+        return ""

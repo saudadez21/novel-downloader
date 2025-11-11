@@ -318,7 +318,7 @@ class B520Searcher(BaseSearcher):
 
     async def _fetch_html(self, keyword: str) -> str:
         try:
-            async with self._http_get(self.SEARCH_URL, params={"searchkey": keyword},
+            async with self.session.get(self.SEARCH_URL, params={"searchkey": keyword},
                                       headers={"Referer": "http://www.b520.cc/"}) as resp:
                 resp.raise_for_status()
                 return await self._response_to_str(resp)

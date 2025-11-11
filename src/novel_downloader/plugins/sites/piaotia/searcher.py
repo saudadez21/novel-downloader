@@ -34,12 +34,13 @@ class PiaotiaSearcher(BaseSearcher):
         submit = self._quote(" 搜 索 ", encoding="gbk", errors="replace")
         body = f"searchtype={searchtype}&searchkey={searchkey}&Submit={submit}"
         headers = {
+            **self.session.headers,
             "Origin": "https://www.piaotia.com",
             "Referer": "https://www.piaotia.com",
             "Content-Type": "application/x-www-form-urlencoded",
         }
         try:
-            async with self._http_post(
+            async with self.session.post(
                 self.SEARCH_URL, data=body, headers=headers
             ) as resp:
                 resp.raise_for_status()

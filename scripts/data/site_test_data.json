@@ -123,6 +123,22 @@
         ]
       }
     ],
+    "bixiange": [
+      {
+        "book_id": "khjj-20819",
+        "chap_ids": [
+          "1",
+          "288"
+        ]
+      },
+      {
+        "book_id": "wxxz-20921",
+        "chap_ids": [
+          "1",
+          "2117"
+        ]
+      }
+    ],
     "blqudu": [
       {
         "book_id": "137_137144",
@@ -189,6 +205,21 @@
         "book_id": "s6d3l2",
         "chap_ids": [
           "s665ckp1"
+        ]
+      }
+    ],
+    "dushu": [
+      {
+        "book_id": "101155",
+        "chap_ids": [
+          "1037361",
+          "1040458"
+        ]
+      },
+      {
+        "book_id": "138947",
+        "chap_ids": [
+          "1984737"
         ]
       }
     ],
@@ -527,6 +558,29 @@
         ]
       }
     ],
+    "lvsewx": [
+      {
+        "book_id": "2527",
+        "chap_ids": [
+          "21204730",
+          "44184579"
+        ]
+      },
+      {
+        "book_id": "20645",
+        "chap_ids": [
+          "7237914",
+          "558875637"
+        ]
+      },
+      {
+        "book_id": "56447362",
+        "chap_ids": [
+          "509977888",
+          "680168970"
+        ]
+      }
+    ],
     "mangg_com": [
       {
         "book_id": "id57715",
@@ -556,6 +610,22 @@
         "chap_ids": [
           "1103859",
           "1260952"
+        ]
+      }
+    ],
+    "mjyhb": [
+      {
+        "book_id": "3119",
+        "chap_ids": [
+          "62d0d",
+          "6b9fi"
+        ]
+      },
+      {
+        "book_id": "olo",
+        "chap_ids": [
+          "2snr9",
+          "3969r"
         ]
       }
     ],
@@ -622,6 +692,38 @@
         "chap_ids": [
           "128096",
           "128407"
+        ]
+      }
+    ],
+    "n69hao": [
+      {
+        "book_id": "48",
+        "chap_ids": [
+          "38642",
+          "31773780"
+        ]
+      },
+      {
+        "book_id": "51",
+        "chap_ids": [
+          "43557",
+          "44702301"
+        ]
+      }
+    ],
+    "n69shuba": [
+      {
+        "book_id": "43484",
+        "chap_ids": [
+          "28931795",
+          "40873934"
+        ]
+      },
+      {
+        "book_id": "88724",
+        "chap_ids": [
+          "39943182",
+          "40865390"
         ]
       }
     ],
@@ -849,6 +951,22 @@
         ]
       }
     ],
+    "shauthor": [
+      {
+        "book_id": "d9d",
+        "chap_ids": [
+          "kf1i6",
+          "kf1is"
+        ]
+      },
+      {
+        "book_id": "s5o",
+        "chap_ids": [
+          "jjhl0",
+          "jjhfq"
+        ]
+      }
+    ],
     "shencou": [
       {
         "book_id": "0-695",
@@ -947,6 +1065,32 @@
         ]
       }
     ],
+    "tianyabooks": [
+      {
+        "book_id": "bl_novels-candy",
+        "chap_ids": [
+          "143693"
+        ]
+      },
+      {
+        "book_id": "book-Chernyshevsky_01",
+        "chap_ids": [
+          "5880"
+        ]
+      },
+      {
+        "book_id": "fantasy-SongOfFireAndIce6",
+        "chap_ids": [
+          "11201"
+        ]
+      },
+      {
+        "book_id": "world-Tazaki",
+        "chap_ids": [
+          "100078"
+        ]
+      }
+    ],
     "tongrenquan": [
       {
         "book_id": "9420",
@@ -1006,6 +1150,22 @@
         ]
       }
     ],
+    "twkan": [
+      {
+        "book_id": "67465",
+        "chap_ids": [
+          "41819770",
+          "51739414"
+        ]
+      },
+      {
+        "book_id": "81181",
+        "chap_ids": [
+          "48521668",
+          "51741622"
+        ]
+      }
+    ],
     "uaa": [
       {
         "book_id": "896633419390390272",
@@ -1018,6 +1178,22 @@
         "book_id": "11302896",
         "chap_ids": [
           "132898"
+        ]
+      }
+    ],
+    "wenku8": [
+      {
+        "book_id": "1-1715",
+        "chap_ids": [
+          "65647",
+          "66909",
+          "156478"
+        ]
+      },
+      {
+        "book_id": "2-2652",
+        "chap_ids": [
+          "102177"
         ]
       }
     ],
@@ -1163,5 +1339,11 @@
   "REQ_INTERVALS": {
     "default": 0.5,
     "linovelib": 2.0
+  },
+  "BACKEND_MAP": {
+    "default": "aiohttp",
+    "n69shuba": "curl_cffi",
+    "twkan": "curl_cffi",
+    "wenku8": "curl_cffi"
   }
 }

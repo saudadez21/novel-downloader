@@ -32,11 +32,12 @@ class HaiwaishubaoSearcher(BaseSearcher):
             "submit": "",
         }
         headers = {
+            **self.session.headers,
             "Host": "www.haiwaishubao.com",
             "Referer": "https://www.haiwaishubao.com",
         }
         try:
-            async with self._http_post(
+            async with self.session.post(
                 self.SEARCH_URL, data=payload, headers=headers
             ) as resp:
                 resp.raise_for_status()

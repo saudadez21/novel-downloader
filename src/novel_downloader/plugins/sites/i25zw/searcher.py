@@ -28,7 +28,7 @@ class I25zwSearcher(BaseSearcher):
             "Submit": "",
         }
         try:
-            async with self._http_post(self.SEARCH_URL, data=payload) as resp:
+            async with self.session.post(self.SEARCH_URL, data=payload) as resp:
                 resp.raise_for_status()
                 return await self._response_to_str(resp)
         except Exception:

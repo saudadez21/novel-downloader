@@ -337,10 +337,10 @@ class ConfigAdapter:
         start_id = str(data["start_id"]) if "start_id" in data else None
         end_id = str(data["end_id"]) if "end_id" in data else None
 
-        ignore_ids: tuple[str, ...] = ()
+        ignore_ids: frozenset[str] = frozenset()
         if "ignore_ids" in data:
             with contextlib.suppress(Exception):
-                ignore_ids = tuple(str(x) for x in data["ignore_ids"])
+                ignore_ids = frozenset(str(x) for x in data["ignore_ids"])
 
         return BookConfig(
             book_id=book_id,

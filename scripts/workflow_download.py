@@ -5,7 +5,7 @@ import os
 from collections import defaultdict
 from pathlib import Path
 
-from novel_downloader.libs.book_url_resolver import resolve_book_url
+from novel_downloader.infra.book_url_resolver import resolve_book_url
 from novel_downloader.plugins import registrar
 from novel_downloader.schemas import (
     BookConfig,
@@ -13,7 +13,7 @@ from novel_downloader.schemas import (
     ExporterConfig,
 )
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -151,10 +151,25 @@ def main() -> None:
     # Add from BOOK_URLS
     for url in BOOK_URLS_LIST:
         info = resolve_book_url(url)
+
         if not info:
-            logger.warning("Unresolved URL: %s", url)
+            logger.warning("Unresolved URL, no matching rule: %s", url)
             continue
-        grouped[info["site_key"]].append(info["book"])
+
+        book_id = info.get("book_id")
+        site_key = info.get("site_key")
+        chap_id = info.get("chapter_id")
+
+        if not book_id:
+            logger.warning(
+                "Resolved but missing book_id: url=%s site=%s chapter_id=%s",
+                url,
+                site_key or "unknown",
+                chap_id or "none",
+            )
+            continue
+
+        grouped[site_key].append(BookConfig(book_id=book_id))
 
     # Add from SITE_KEYS + BOOK_IDS pairing
     if SITE_KEYS and BOOK_IDS_LIST:

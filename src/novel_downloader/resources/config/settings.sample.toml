@@ -73,6 +73,21 @@ request_interval = 2.5
 [sites.sfacg]
 login_required = true
 
+[sites.n69shuba]
+login_required = false
+backend = "curl_cffi"
+impersonate = "chrome136"
+
+[sites.wenku8]
+login_required = false
+backend = "curl_cffi"
+impersonate = "chrome136"
+
+[sites.twkan]
+login_required = false
+backend = "curl_cffi"
+impersonate = "chrome136"
+
 [sites.ciyuanji]
 login_required = true
 

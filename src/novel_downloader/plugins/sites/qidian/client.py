@@ -5,6 +5,7 @@ novel_downloader.plugins.sites.qidian.client
 """
 
 import asyncio
+from html import escape
 from typing import Any
 
 from novel_downloader.libs.time_utils import async_jitter_sleep
@@ -125,10 +126,9 @@ class QidianClient(CommonClient):
 
     def _render_epub_extras(self, extras: dict[str, Any]) -> str:
         """
-        render "作者说" for EPUB:
-          * Clean content
-          * Keep as HTML-safe via _render_html_block
-          * Wrap with `<hr/>` + `<h3>作者说</h3>`
+        Render "作者说" section for EPUB.
+
+        Clean text, wrap as HTML-safe, and format with heading.
         """
         note = (extras.get("author_say") or "").strip()
         if not note:
@@ -137,6 +137,9 @@ class QidianClient(CommonClient):
         parts = [
             "<hr />",
             "<h3>作者说</h3>",
-            self._render_html_block(note),
+            *(f"<p>{escape(s)}</p>" for ln in note.splitlines() if (s := ln.strip())),
         ]
         return "\n".join(parts)
+
+    def _render_html_extras(self, extras: dict[str, Any]) -> str:
+        return self._render_epub_extras(extras)

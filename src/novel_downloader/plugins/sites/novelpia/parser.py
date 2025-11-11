@@ -123,13 +123,23 @@ class NovelpiaParser(BaseParser):
         doc = html.fromstring(html_doc)
 
         paragraphs: list[str] = []
-        image_positions: dict[int, list[str]] = {}
+        image_positions: dict[int, list[dict[str, Any]]] = {}
         image_idx = 0
+
         for p_elem in doc.xpath(".//p"):
-            imgs = p_elem.xpath(".//img/@src")
-            if imgs:
-                full_imgs = ["https:" + i if i.startswith("//") else i for i in imgs]
-                image_positions.setdefault(image_idx, []).extend(full_imgs)
+            # ---- collect images ----
+            for src in p_elem.xpath(".//img/@src"):
+                src = src.strip()
+                if not src:
+                    continue
+                if src.startswith("//"):
+                    src = "https:" + src
+                image_positions.setdefault(image_idx, []).append(
+                    {
+                        "type": "url",
+                        "data": src,
+                    }
+                )
 
             for ruby in p_elem.xpath(".//ruby"):
                 base = "".join(ruby.xpath(".//text()[not(parent::rt)]")).strip()

@@ -1,0 +1,109 @@
+:root {
+  --max-content-width: 70%;
+  --bg-color: #fafafa;
+  --text-color: #222;
+  --accent-color: #0078d4;
+  --border-radius: 8px;
+  --shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: "Noto Serif SC", "Songti SC", serif;
+  line-height: 1.7;
+  color: var(--text-color);
+  background: var(--bg-color);
+  margin: 0;
+}
+
+header, main.toc {
+  width: 100%;
+  max-width: 1024px;
+  min-width: 320px;
+  margin: 2em auto;
+  padding: 0 1.5em;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 2em;
+}
+
+.cover {
+  max-width: 280px;
+  margin: 1em auto;
+  display: block;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+}
+
+.volume h3 {
+  margin-top: 1.5em;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 0.3em;
+}
+
+.volume ul { list-style: none; padding-left: 1em; }
+.volume li { margin: 0.4em 0; }
+
+.volume li a {
+  text-decoration: none;
+  color: var(--accent-color);
+  transition: color 0.2s ease;
+}
+
+.volume li a:hover {
+  color: #005a9e;
+  text-decoration: underline;
+}
+
+/* Floating Controls */
+#floating-controls {
+  position: fixed;
+  right: 1em;
+  bottom: 1em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6em;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  padding: 0.6em;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+  transition: opacity 0.3s ease;
+}
+
+#floating-controls.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#floating-controls button {
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 1em;
+  width: 2.2em;
+  height: 2.2em;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+#floating-controls button:hover {
+  background: #005a9e;
+  transform: scale(1.1);
+}
+
+/* Progress Bar */
+#progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #0078d4, #00b8ff);
+  width: 0;
+  z-index: 10000;
+}

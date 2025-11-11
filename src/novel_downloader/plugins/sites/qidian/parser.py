@@ -15,9 +15,8 @@ from pathlib import Path
 from typing import Any, TypedDict
 
 from lxml import html
-from novel_downloader.infra.cookies import get_cookie_value
+from novel_downloader.infra.cookies import CookieStore
 from novel_downloader.infra.jsbridge import get_decryptor
-from novel_downloader.infra.paths import DATA_DIR
 from novel_downloader.libs.fontocr import get_font_ocr
 from novel_downloader.libs.textutils import truncate_half_lines
 from novel_downloader.plugins.base.parser import BaseParser
@@ -70,10 +69,8 @@ class QidianParser(BaseParser):
         self._fixed_map_dir = self._cache_dir / "fixed_font_map"
         self._debug_dir = Path.cwd() / "debug" / "qidian"
 
-        self._state_files = [
-            DATA_DIR / "qidian" / "session_state.cookies",
-        ]
         self._fuid = fuid
+        self._cookie_store = CookieStore(self._cache_dir)
 
     def parse_book_info(
         self,
@@ -226,7 +223,7 @@ class QidianParser(BaseParser):
         raw_html = chapter_info.get("content", "")
         cid = str(chapter_info.get("chapterId") or chapter_id)
         fkp = chapter_info.get("fkp", "")
-        fuid = self._fuid or get_cookie_value(self._cache_dir, "ywguid")
+        fuid = self._fuid or self._cookie_store.get("ywguid")
         author_say = chapter_info.get("authorSay", "").strip()
         update_time = chapter_info.get("updateTime", "")
         update_timestamp = chapter_info.get("updateTimestamp", 0)

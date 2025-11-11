@@ -71,9 +71,10 @@ class DownloadCmd(Command):
         if site:  # SITE MODE
             books = cls._parse_book_args(args.book_ids, args.start, args.end)
         else:  # URL MODE
-            from novel_downloader.libs.book_url_resolver import resolve_book_url
+            from novel_downloader.infra.book_url_resolver import resolve_book_url
 
             ui.info(t("No --site provided; detecting site from URL..."))
+
             if len(args.book_ids) != 1:
                 ui.error(
                     t(
@@ -93,15 +94,22 @@ class DownloadCmd(Command):
                 return
 
             site = resolved["site_key"]
-            first = BookConfig(
-                book_id=resolved["book"].book_id,
-                start_id=args.start,
-                end_id=args.end,
-            )
-            books = [first]
+            book_id = resolved.get("book_id")
+
+            if not book_id:
+                ui.error(t("The provided URL does not contain a valid book ID."))
+                return
+
+            books = [
+                BookConfig(
+                    book_id=book_id,
+                    start_id=args.start,
+                    end_id=args.end,
+                )
+            ]
             ui.info(
                 t("Resolved URL to site '{site}' with book ID '{book_id}'.").format(
-                    site=site, book_id=first.book_id
+                    site=site, book_id=book_id
                 )
             )
 

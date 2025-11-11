@@ -47,11 +47,12 @@ class SososhuSearcher(BaseSearcher):
         referer = full_url
 
         get_headers = {
+            **self.session.headers,
             "Origin": origin,
             "Referer": origin,
         }
 
-        async with self._http_get(full_url, headers=get_headers) as resp:
+        async with self.session.get(full_url, headers=get_headers) as resp:
             resp.raise_for_status()
             resp_text = await self._response_to_str(resp)
             if "Checking your browser" not in resp_text:
@@ -76,6 +77,7 @@ class SososhuSearcher(BaseSearcher):
         sum_val = self.calc_sum(ge_ua_p, nonce)
         payload = urlencode({"sum": str(sum_val), "nonce": str(nonce)})
         post_headers = {
+            **self.session.headers,
             "Content-Type": "application/x-www-form-urlencoded",
             "X-GE-UA-Step": "prev",
             "Cookie": f"ge_ua_p={ge_ua_p}",
@@ -83,13 +85,13 @@ class SososhuSearcher(BaseSearcher):
             "Referer": referer,
         }
 
-        async with self._http_post(
+        async with self.session.post(
             full_url, data=payload, headers=post_headers
         ) as verify_resp:
             verify_resp.raise_for_status()
             _verify_text = await self._response_to_str(verify_resp)
 
-        async with self._http_get(url, params=params) as final_resp:
+        async with self.session.get(url, params=params) as final_resp:
             final_resp.raise_for_status()
             final_text = await self._response_to_str(final_resp)
 

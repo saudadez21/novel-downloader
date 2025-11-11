@@ -1,82 +1,570 @@
 {
-  "max_concurrent": 20,
+  "max_concurrent": 12,
   "timeout": 20,
   "retries": 1,
+  "speed_levels": {
+    "slow": 2.0,
+    "very_slow": 5.0
+  },
   "sites": {
-    "qidian": ["https://www.qidian.com/"],
-    "qqbook": ["https://book.qq.com/"],
-    "ciyuanji": ["https://www.ciyuanji.com/"],
-    "n17k": ["https://www.17k.com/"],
-    "fanqienovel": ["https://fanqienovel.com/"],
-    "shaoniandream": ["https://www.shaoniandream.com/"],
-
-    "hetushu": ["https://www.hetushu.com/", "https://www.hetubook.com/"],
-    "n23qb": ["https://www.23qb.com/"],
-    "yodu": ["https://www.yodu.org/"],
-    "piaotia": ["https://www.piaotia.com/"],
-    "n71ge": ["https://www.71ge.com/"],
-    "jpxs123": ["https://www.jpxs123.com/"],
-    "ttkan": ["https://www.ttkan.co/", "https://cn.ttkan.co/", "https://tw.ttkan.co/"],
-    "ixdzs8": ["https://ixdzs8.com/"],
-    "dxmwx": ["https://www.dxmwx.org/", "https://tw.dxmwx.org/"],
-    "i25zw": ["https://www.i25zw.com/"],
-    "laoyaoxs": ["https://www.laoyaoxs.org/"],
-    "quanben5": ["https://quanben5.com/", "https://big5.quanben5.com/"],
-    "kunnu": ["https://www.kunnu.com/"],
-    "shu111": ["http://shu111.com/"],
-    "guidaye": ["https://b.guidaye.com/"],
-    "pilibook": ["https://www.pilibook.net/"],
-    "ruochu": ["https://www.ruochu.com/"],
-
-    "b520": ["http://www.b520.cc/"],
-    "biquge345": ["https://www.biquge345.com/"],
-    "shuhaige": ["https://www.shuhaige.net/"],
-    "xshbook": ["https://www.xshbook.com/"],
-    "n23ddw": ["https://www.23ddw.net/"],
-    "yibige": ["https://www.yibige.org/", "https://tw.yibige.org/", "https://hk.yibige.org/"],
-    "lewenn": ["https://www.lewenn.net/"],
-    "blqudu": ["https://www.blqudu.cc/", "https://www.biqudv.cc/"],
-    "mangg_com": ["https://www.mangg.com/"],
-    "mangg_net": ["https://www.mangg.net/"],
-    "fsshu": ["https://www.fsshu.com/"],
-    "biquge5": ["https://www.biquge5.com/"],
-    "biquguo": ["https://www.biquguo.com/"],
-    "ciluke": ["https://www.ciluke.com/"],
-    "ktshu": ["https://www.ktshu.cc/"],
-    "n37yue": ["https://www.37yue.com/"],
-    "bxwx9": ["https://www.bxwx9.org/"],
-    "n101kanshu": ["https://101kanshu.com/"],
-    "westnovel": ["https://www.westnovel.com/"],
-    "wxsck": ["https://wxsck.com/", "https://www.wxscs.com/index.html"],
-
-    "tongrenquan": ["https://www.tongrenquan.org/"],
-    "tongrenshe": ["https://tongrenshe.cc/"],
-    "trxs": ["https://www.trxs.cc/"],
-    "qbtr": ["https://www.qbtr.cc/"],
-
-    "kadokado": ["https://www.kadokado.com.tw/"],
-    "sfacg": ["https://m.sfacg.com/"],
-    "n37yq": ["https://www.37yq.com/"],
-    "linovelib": ["https://www.linovelib.com/"],
-    "linovel": ["https://www.linovel.net/"],
-    "esjzone": ["https://www.esjzone.cc/"],
-    "shencou": ["https://www.shencou.com/"],
-    "lnovel": ["https://lnovel.org/", "https://lnovel.tw/"],
-    "n8novel": ["https://www.8novel.com/"],
-    "syosetu": ["https://syosetu.com/", "https://yomou.syosetu.com/"],
-    "syosetu18": ["https://mnlt.syosetu.com/top/top/", "https://noc.syosetu.com/top/top/"],
-    "syosetu_org": ["https://syosetu.org/"],
-    "akatsuki_novels": ["https://www.akatsuki-novels.com/"],
-    "alphapolis": ["https://www.alphapolis.co.jp/"],
-    "novelpia": ["https://novelpia.jp/"],
-
-    "zhenhunxiaoshuo": ["https://www.zhenhunxiaoshuo.com/"],
-    "yamibo": ["https://www.yamibo.com/site/novel", "https://www.yamibo.com/"],
-    "alicesw": ["https://www.alicesw.com/"],
-    "haiwaishubao": ["https://www.haiwaishubao.com/"],
-    "hongxiuzhao": ["https://hongxiuzhao.net/"],
-    "uaa": ["https://www.uaa.com/"],
-    "czbooks": ["https://czbooks.net/"],
-    "xiguashuwu": ["https://www.xiguashuwu.com/"]
+    "akatsuki_novels": {
+      "urls": [
+        "https://www.akatsuki-novels.com/",
+        "https://www.akatsuki-novels.com/stories/index/novel_id~103",
+        "https://www.akatsuki-novels.com/stories/view/163722/novel_id~103"
+      ]
+    },
+    "alicesw": {
+      "urls": [
+        "https://www.alicesw.com/",
+        "https://www.alicesw.com/novel/46857.html",
+        "https://www.alicesw.com/book/48247/563ed665333ad.html"
+      ]
+    },
+    "alphapolis": {
+      "urls": [
+        "https://www.alphapolis.co.jp/",
+        "https://www.alphapolis.co.jp/novel/547686423/112003230",
+        "https://www.alphapolis.co.jp/novel/547686423/112003230/episode/10322710"
+      ]
+    },
+    "b520": {
+      "urls": [
+        "http://www.b520.cc",
+        "http://www.b520.cc/8_8187/",
+        "http://www.b520.cc/8_8187/3899831.html"
+      ]
+    },
+    "biquge345": {
+      "urls": [
+        "https://www.biquge345.com/",
+        "https://www.biquge345.com/book/321301/",
+        "https://www.biquge345.com/chapter/321301/37740966.html"
+      ]
+    },
+    "biquge5": {
+      "urls": [
+        "https://www.biquge5.com/",
+        "https://www.biquge5.com/9_9194/",
+        "https://www.biquge5.com/9_9194/737908.html"
+      ]
+    },
+    "biquguo": {
+      "urls": [
+        "https://www.biquguo.com/",
+        "https://www.biquguo.com/0/352/",
+        "https://www.biquguo.com/0/352/377618.html"
+      ]
+    },
+    "bixiange": {
+      "urls": [
+        "https://m.bixiange.me/",
+        "https://m.bixiange.me/wxxz/20921/",
+        "https://m.bixiange.me/wxxz/20921/index/1.html"
+      ]
+    },
+    "blqudu": {
+      "urls": [
+        "https://www.blqudu.cc/",
+        "https://www.blqudu.cc/137_137144/",
+        "https://www.biqudv.cc/137_137144/628955328.html"
+      ]
+    },
+    "bxwx9": {
+      "urls": [
+        "https://www.bxwx9.org/",
+        "https://www.bxwx9.org/b/48/48453/",
+        "https://www.bxwx9.org/b/48/48453/175908.html"
+      ]
+    },
+    "ciluke": {
+      "urls": [
+        "https://www.ciluke.com/",
+        "https://www.ciluke.com/19/19747/",
+        "https://www.ciluke.com/19/19747/316194.html"
+      ]
+    },
+    "ciyuanji": {
+      "urls": [
+        "https://www.ciyuanji.com/",
+        "https://www.ciyuanji.com/b_d_12030.html",
+        "https://www.ciyuanji.com/chapter/12030_3046684.html"
+      ]
+    },
+    "czbooks": {
+      "urls": [
+        "https://czbooks.net/",
+        "https://czbooks.net/n/dr4p0k7",
+        "https://czbooks.net/n/dr4p0k7/drgkg7hgh?chapterNumber=0"
+      ]
+    },
+    "dushu": {
+      "urls": [
+        "https://www.dushu.com/",
+        "https://www.dushu.com/showbook/138752/",
+        "https://www.dushu.com/showbook/138752/1982168.html"
+      ]
+    },
+    "dxmwx": {
+      "urls": [
+        "https://www.dxmwx.org/",
+        "https://www.dxmwx.org/book/55598.html",
+        "https://www.dxmwx.org/read/55598_47170737.html"
+      ]
+    },
+    "esjzone": {
+      "urls": [
+        "https://www.esjzone.cc",
+        "https://www.esjzone.cc/detail/1660702902.html",
+        "https://www.esjzone.cc/forum/1660702902/294593.html"
+      ]
+    },
+    "fanqienovel": {
+      "urls": [
+        "https://fanqienovel.com/",
+        "https://fanqienovel.com/page/7276384138653862966",
+        "https://fanqienovel.com/reader/7276663560427471412"
+      ]
+    },
+    "fsshu": {
+      "urls": [
+        "https://www.fsshu.com/",
+        "https://www.fsshu.com/biquge/0_139/",
+        "https://www.fsshu.com/biquge/0_139/c40381.html"
+      ]
+    },
+    "guidaye": {
+      "urls": [
+        "https://b.guidaye.com/",
+        "https://b.guidaye.com/kongbu/654/",
+        "https://b.guidaye.com/kongbu/654/170737.html"
+      ]
+    },
+    "haiwaishubao": {
+      "urls": [
+        "https://www.haiwaishubao.com/",
+        "https://www.haiwaishubao.com/book/102659/",
+        "https://www.haiwaishubao.com/book/102659/5335635.html"
+      ]
+    },
+    "hetushu": {
+      "urls": [
+        "https://www.hetushu.com/index.php",
+        "https://www.hetushu.com/book/5763/index.html",
+        "https://www.hetushu.com/book/5763/4327466.html"
+      ]
+    },
+    "hongxiuzhao": {
+      "urls": [
+        "https://hongxiuzhao.net/",
+        "https://hongxiuzhao.net/ZG6rmWO.html",
+        "https://hongxiuzhao.net/aBKBVz6a.html"
+      ]
+    },
+    "i25zw": {
+      "urls": [
+        "https://www.i25zw.com/",
+        "https://www.i25zw.com/book/64371.html",
+        "https://www.i25zw.com/64371/153149757.html"
+      ]
+    },
+    "ixdzs8": {
+      "urls": [
+        "https://ixdzs8.com/",
+        "https://ixdzs8.com/read/38804/",
+        "https://ixdzs8.com/read/38804/p1.html"
+      ]
+    },
+    "jpxs123": {
+      "urls": [
+        "https://www.jpxs123.com/",
+        "https://www.jpxs123.com/xh/zhetian.html",
+        "https://www.jpxs123.com/xh/zhetian/1.html"
+      ]
+    },
+    "kadokado": {
+      "urls": [
+        "https://www.kadokado.com.tw/",
+        "https://www.kadokado.com.tw/book/1",
+        "https://www.kadokado.com.tw/chapter/3796?titleId=1&ownerId=1"
+      ]
+    },
+    "ktshu": {
+      "urls": [
+        "https://www.ktshu.cc/",
+        "https://www.ktshu.cc/book/47244/",
+        "https://www.ktshu.cc/book/47244/418953.html"
+      ]
+    },
+    "kunnu": {
+      "urls": [
+        "https://www.kunnu.com/",
+        "https://www.kunnu.com/guichui/",
+        "https://www.kunnu.com/guichui/27427.htm"
+      ]
+    },
+    "laoyaoxs": {
+      "urls": [
+        "https://www.laoyaoxs.org/",
+        "https://www.laoyaoxs.org/info/7359.html",
+        "https://www.laoyaoxs.org/list/7359/21385.html"
+      ]
+    },
+    "lewenn": {
+      "urls": [
+        "https://www.lewenn.net/",
+        "https://www.lewenn.net/lw1/",
+        "https://www.lewenn.net/lw1/30038546.html"
+      ]
+    },
+    "linovelib": {
+      "urls": [
+        "https://www.linovelib.com/",
+        "https://www.linovelib.com/novel/1234.html",
+        "https://www.linovelib.com/novel/1234/47800.html"
+      ]
+    },
+    "lnovel": {
+      "urls": [
+        "https://lnovel.org/",
+        "https://lnovel.org/books-3638",
+        "https://lnovel.org/chapters-138730"
+      ]
+    },
+    "lvsewx": {
+      "urls": [
+        "https://www.lvsewx.cc/",
+        "https://www.lvsewx.cc/ebook/20645.html",
+        "https://www.lvscwx.cc/books/20/20645/7237914.html"
+      ]
+    },
+    "mangg_com": {
+      "urls": [
+        "https://www.mangg.com/id57715/",
+        "https://www.mangg.com/id57715/632689.html"
+      ]
+    },
+    "mangg_net": {
+      "urls": [
+        "https://www.mangg.net/id26581/",
+        "https://www.mangg.net/id26581/1159408.html"
+      ]
+    },
+    "mjyhb": {
+      "urls": [
+        "https://m.mjyhb.com/",
+        "https://m.mjyhb.com/info_3119/",
+        "https://m.mjyhb.com/read_3119/62d0d.html"
+      ]
+    },
+    "n101kanshu": {
+      "urls": [
+        "https://101kanshu.com/",
+        "https://101kanshu.com/book/7994.html",
+        "https://101kanshu.com/txt/7994/9137080.html"
+      ]
+    },
+    "n17k": {
+      "urls": [
+        "https://www.17k.com/",
+        "https://www.17k.com/book/3631088.html",
+        "https://www.17k.com/chapter/3631088/49406153.html"
+      ]
+    },
+    "n23ddw": {
+      "urls": [
+        "https://www.23ddw.net/",
+        "https://www.23ddw.net/du/80/80892/",
+        "https://www.23ddw.net/du/80/80892/13055110.html"
+      ]
+    },
+    "n23qb": {
+      "urls": [
+        "https://www.23qb.com",
+        "https://www.23qb.com/book/12282/",
+        "https://www.23qb.com/book/12282/7908999.html"
+      ]
+    },
+    "n37yq": {
+      "urls": [
+        "https://www.37yq.com/",
+        "https://www.37yq.com/lightnovel/2362.html",
+        "https://www.37yq.com/lightnovel/2362/92560.html"
+      ]
+    },
+    "n37yue": {
+      "urls": [
+        "https://www.37yue.com/",
+        "https://www.37yue.com/0/180/",
+        "https://www.37yue.com/0/180/164267.html"
+      ]
+    },
+    "n69hao": {
+      "urls": [
+        "https://www.69hao.com/48/",
+        "https://www.69hao.com/48/38642.html"
+      ]
+    },
+    "n69shuba": {
+      "urls": [
+        "https://www.69shuba.com/",
+        "https://www.69shuba.com/book/88724.htm",
+        "https://www.69shuba.com/txt/88724/39943182"
+      ],
+      "impersonate": "chrome136",
+      "http2": true
+    },
+    "n71ge": {
+      "urls": [
+        "https://www.71ge.com/",
+        "https://www.71ge.com/65_65536/",
+        "https://www.71ge.com/65_65536/1.html"
+      ]
+    },
+    "n8novel": {
+      "urls": [
+        "https://www.8novel.com/",
+        "https://www.8novel.com/novelbooks/3365/",
+        "https://article.8novel.com/read/3365/?106235"
+      ]
+    },
+    "novelpia": {
+      "urls": [
+        "https://novelpia.jp/",
+        "https://novelpia.jp/novel/2393?sid=main5",
+        "https://novelpia.jp/viewer/51118"
+      ]
+    },
+    "piaotia": {
+      "urls": [
+        "https://www.piaotia.com/",
+        "https://www.piaotia.com/bookinfo/1/1705.html",
+        "https://www.piaotia.com/html/1/1705/762992.html"
+      ]
+    },
+    "pilibook": {
+      "urls": [
+        "https://www.pilibook.net/5/16098/info.html",
+        "https://www.pilibook.net/5/16098/read/4249983.html"
+      ]
+    },
+    "qbtr": {
+      "urls": [
+        "https://www.qbtr.cc/",
+        "https://www.qbtr.cc/tongren/8978.html",
+        "https://www.qbtr.cc/tongren/8978/1.html"
+      ]
+    },
+    "qidian": {
+      "urls": [
+        "https://www.qidian.com",
+        "https://www.qidian.com/book/1010868264/",
+        "https://www.qidian.com/chapter/1010868264/405976997/"
+      ]
+    },
+    "qqbook": {
+      "urls": [
+        "https://book.qq.com/",
+        "https://book.qq.com/book-detail/41089201",
+        "https://book.qq.com/book-read/41089201/1"
+      ]
+    },
+    "quanben5": {
+      "urls": [
+        "https://quanben5.com/",
+        "https://quanben5.com/n/doushentianxia/",
+        "https://quanben5.com/n/doushentianxia/13685.html"
+      ]
+    },
+    "ruochu": {
+      "urls": [
+        "https://www.ruochu.com/",
+        "https://www.ruochu.com/book/158713",
+        "https://www.ruochu.com/book/158713/13869103"
+      ]
+    },
+    "sfacg": {
+      "urls": [
+        "https://m.sfacg.com",
+        "https://m.sfacg.com/b/456123/",
+        "https://m.sfacg.com/c/5417665/"
+      ]
+    },
+    "shaoniandream": {
+      "urls": [
+        "https://www.shaoniandream.com/",
+        "https://www.shaoniandream.com/book_detail/754",
+        "https://www.shaoniandream.com/readchapter/97973"
+      ]
+    },
+    "shauthor": {
+      "urls": [
+        "https://m.shauthor.com/",
+        "https://m.shauthor.com/info_s5o/",
+        "https://m.shauthor.com/read_s5o/jjhl0.html"
+      ]
+    },
+    "shencou": {
+      "urls": [
+        "https://www.shencou.com/",
+        "https://www.shencou.com/read/3/3540/index.html",
+        "https://www.shencou.com/read/3/3540/156328.html"
+      ]
+    },
+    "shu111": {
+      "urls": [
+        "http://shu111.com",
+        "http://www.shu111.com/book/282944.html",
+        "http://www.shu111.com/book/282944/96171674.html"
+      ]
+    },
+    "shuhaige": {
+      "urls": [
+        "https://www.shuhaige.net/",
+        "https://www.shuhaige.net/199178/",
+        "https://www.shuhaige.net/199178/86580492.html"
+      ]
+    },
+    "syosetu": {
+      "urls": [
+        "https://yomou.syosetu.com/",
+        "https://ncode.syosetu.com/n4826lc/",
+        "https://ncode.syosetu.com/n4826lc/1/"
+      ]
+    },
+    "syosetu18": {
+      "urls": [
+        "https://noc.syosetu.com/top/top/",
+        "https://novel18.syosetu.com/n8543hb/",
+        "https://novel18.syosetu.com/n8543hb/1/"
+      ]
+    },
+    "syosetu_org": {
+      "urls": [
+        "https://syosetu.org/",
+        "https://syosetu.org/novel/292891/",
+        "https://syosetu.org/novel/292891/1.html"
+      ]
+    },
+    "tianyabooks": {
+      "urls": [
+        "https://www.tianyabooks.com/",
+        "https://www.tianyabooks.com/net/changshengjie/",
+        "https://www.tianyabooks.com/net/changshengjie/59453.html"
+      ]
+    },
+    "tongrenquan": {
+      "urls": [
+        "https://www.tongrenquan.org/",
+        "https://www.tongrenquan.org/tongren/7548.html",
+        "https://www.tongrenquan.org/tongren/7548/1.html"
+      ]
+    },
+    "tongrenshe": {
+      "urls": [
+        "https://tongrenshe.cc/",
+        "https://tongrenshe.cc/tongren/8899.html",
+        "https://tongrenshe.cc/tongren/8899/1.html"
+      ]
+    },
+    "trxs": {
+      "urls": [
+        "https://www.trxs.cc/",
+        "https://www.trxs.cc/tongren/6201.html",
+        "https://www.trxs.cc/tongren/6201/1.html"
+      ]
+    },
+    "ttkan": {
+      "urls": [
+        "https://www.ttkan.co/",
+        "https://www.ttkan.co/novel/chapters/shengxu-chendong",
+        "https://www.wa01.com/novel/pagea/shengxu-chendong_1.html"
+      ]
+    },
+    "twkan": {
+      "urls": [
+        "https://twkan.com/",
+        "https://twkan.com/book/78813.html",
+        "https://twkan.com/txt/78813/47726772"
+      ]
+    },
+    "uaa": {
+      "urls": [
+        "https://www.uaa.com/",
+        "https://www.uaa.com/novel/intro?id=11304099",
+        "https://www.uaa.com/novel/chapter?id=234639"
+      ]
+    },
+    "wenku8": {
+      "urls": [
+        "https://www.wenku8.net/",
+        "https://www.wenku8.net/novel/2/2835/index.htm",
+        "https://www.wenku8.net/novel/2/2835/113354.htm"
+      ],
+      "impersonate": "chrome136",
+      "http2": true
+    },
+    "westnovel": {
+      "urls": [
+        "https://www.westnovel.com/",
+        "https://www.westnovel.com/ksl/sq/",
+        "https://www.westnovel.com/ksl/sq/140072.html"
+      ]
+    },
+    "westnovel_sub": {
+      "urls": [
+        "https://www.westnovel.com/",
+        "https://www.westnovel.com/q/list/725.html",
+        "https://www.westnovel.com/q/showinfo-2-40238-0.html"
+      ]
+    },
+    "wxsck": {
+      "urls": [
+        "https://wxsck.com/book/20297/",
+        "https://wxsck.com/book/20297/6660334.html"
+      ]
+    },
+    "xiguashuwu": {
+      "urls": [
+        "https://www.xiguashuwu.com/",
+        "https://www.xiguashuwu.com/book/1234/iszip/1/",
+        "https://www.xiguashuwu.com/book/1234/482.html"
+      ]
+    },
+    "xshbook": {
+      "urls": [
+        "https://www.xshbook.com/",
+        "https://www.xshbook.com/95139/95139418/",
+        "https://www.xshbook.com/95139/95139418/407988281.html"
+      ]
+    },
+    "yamibo": {
+      "urls": [
+        "https://www.yamibo.com/site/novel",
+        "https://www.yamibo.com/novel/262117",
+        "https://www.yamibo.com/novel/view-chapter?id=38772952"
+      ]
+    },
+    "yibige": {
+      "urls": [
+        "https://www.yibige.org/",
+        "https://www.yibige.org/6238/",
+        "https://www.yibige.org/6238/1.html"
+      ]
+    },
+    "yodu": {
+      "urls": [
+        "https://www.yodu.org/",
+        "https://www.yodu.org/book/18862/",
+        "https://www.yodu.org/book/18862/4662939.html"
+      ]
+    },
+    "zhenhunxiaoshuo": {
+      "urls": [
+        "https://www.zhenhunxiaoshuo.com/",
+        "https://www.zhenhunxiaoshuo.com/modaozushi/",
+        "https://www.zhenhunxiaoshuo.com/5419.html"
+      ]
+    }
   }
 }

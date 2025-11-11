@@ -34,7 +34,7 @@ class KadokadoSearcher(BaseSearcher):
             "limit": "96",
         }
         try:
-            async with self._http_get(self.SEARCH_URL, params=params) as resp:
+            async with self.session.get(self.SEARCH_URL, params=params) as resp:
                 resp.raise_for_status()
                 return await self._response_to_str(resp)
         except Exception:

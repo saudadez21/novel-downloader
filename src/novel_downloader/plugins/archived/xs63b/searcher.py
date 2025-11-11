@@ -22,19 +22,20 @@ class Xs63bSearcher(BaseSearcher):
 
     async def _fetch_html(self, keyword: str) -> str:
         headers = {
+            **self.session.headers,
             "Host": "www.xs63b.com",
             "Origin": "https://www.xs63b.com",
             "Referer": "https://www.xs63b.com/",
         }
         try:
-            async with self._http_get(self.BASE_URL, headers=headers) as resp:
+            async with self.session.get(self.BASE_URL, headers=headers) as resp:
                 resp.raise_for_status()
                 base_html = await self._response_to_str(resp)
             data = {
                 "_token": self._parse_token(base_html),
                 "kw": keyword,
             }
-            async with self._http_post(
+            async with self.session.post(
                 self.SEARCH_URL, data=data, headers=headers
             ) as resp:
                 resp.raise_for_status()

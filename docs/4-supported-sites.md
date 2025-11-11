@@ -93,6 +93,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [轻之文库](https://www.linovel.net/)                         | linovel    | ✅     | ✅     | ⚠️     | ✅     | 简      |
 | [三七轻小说](https://www.37yq.com/)                          | n37yq      | ✅     | ✅     | ⚠️     | ✅     | 简      |
 | [哔哩轻小说](https://www.linovelib.com/)                     | linovelib  | ✅     | ✅     | ⚠️     | ⚠️     | 简      |
+| [轻小说文库](https://www.wenku8.net/)                        | wenku8     | ✅     | ✅     | ✅     | ⚠️     | 简      |
 | [ESJ Zone](https://www.esjzone.cc)                           | esjzone   | ✅     | ✅     | ✅     | ✅     | 简      |
 | [神凑轻小说](https://www.shencou.com/)                        | shencou   | ✅     | ✅     | ⚠️     | ⚠️     | 简      |
 | [轻小说百科](https://lnovel.org/)                             | lnovel    | ✅     | ✅     | ⚠️     | ⚠️     | 简 / 繁 |
@@ -108,9 +109,11 @@ novel-cli download --site ttkan shengxu-chendong
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
 | [有度中文网](https://www.yodu.org/)                          | yodu      | ✅     | ⚠️     | ⚠️     | ✅     | 简      |
 | [名著阅读](https://b.guidaye.com/)                           | guidaye   | ❌     | ❌     | ❌     | ⚠️     | 简      |
+| [读书](https://www.dushu.com/)                              | dushu     | ✅     | ❌     | ⚠️     | ⚠️     | 简      |
 | [鲲弩小说](https://www.kunnu.com/)                           | kunnu     | ✅     | ❌     | ❌     | ❌     | 简      |
 | [西方奇幻小说网](https://www.westnovel.com/)                 | westnovel | ❌     | ❌     | ❌     | ⚠️     | 简     |
 | [西方奇幻小说网子站点](https://www.westnovel.com/)        | westnovel_sub | ❌     | ❌     | ❌     | ⚠️     | 简     |
+| [天涯书库](https://www.tianyabooks.com/)                   | tianyabooks | ✅     | ❌     | ❌     | ⚠️     | 简     |
 
 #### 类笔趣阁 / 第三方转载站
 
@@ -128,16 +131,20 @@ novel-cli download --site ttkan shengxu-chendong
 | [爱下电子书](https://ixdzs8.com/)                             | ixdzs8   | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [大熊猫文学网](https://www.dxmwx.org/)                        | dxmwx    | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [25中文网](https://www.i25zw.com/)                           | i25zw     | ❌     | ❌     | ❌     | ✅     | 简      |
+| [69书吧](https://www.69shuba.com/)                           | n69shuba  | ❌     | ❌     | ⚠️     | ⚠️     | 简      |
+| [台灣小說網](https://twkan.com/)                             | twkan     | ❌     | ❌     | ⚠️     | ⚠️     | 繁      |
 | [101看书](https://101kanshu.com/)                           | n101kanshu | ❌     | ❌     | ⚠️     | ✅     | 繁      |
 | [老幺小说网](https://www.laoyaoxs.org/)                     | laoyaoxs  | ❌     | ❌     | ❌     | ✅     | 简      |
 | [全本小说网](https://quanben5.com/)                          | quanben5  | ❌     | ❌     | ❌     | ✅     | 简 / 繁 |
 | [书林文学](http://shu111.com)                                | shu111    | ❌     | ❌     | ⚠️     | ❌     | 简      |
 | [万相书城](https://wxsck.com/) ([备用](https://www.wxscs.com/index.html)) | wxsck    | ❌     | ❌     | ⚠️     | ❌     | 简      |
+| [笔仙阁](https://m.bixiange.me/)                             | bixiange  | ❌     | ❌     | ❌     | ✅     | 简      |
 | [笔趣阁](http://www.b520.cc)                                 | b520      | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [笔趣阁](https://www.biquge345.com/)                         | biquge345 | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [书海阁小说网](https://www.shuhaige.net/)                     | shuhaige | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [小说虎](https://www.xshbook.com/)                           | xshbook   | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [顶点小说网](https://www.23ddw.net/)                         | n23ddw    | ❌     | ❌     | ❌     | ✅     | 简      |
+| [69书吧](https://www.69hao.com/) ([备用](https://www.69hsw.com/)) | n69hao    | ❌     | ❌     | ❌     | ⚠️     | 简      |
 | [一笔阁](https://www.yibige.org/)                            | yibige    | ❌     | ❌     | ⚠️     | ⚠️     | 简 / 繁 |
 | [乐文小说网](https://www.lewenn.net/)                        | lewenn    | ❌     | ❌     | ⚠️     | ❌     | 简      |
 | [笔趣读](https://www.blqudu.cc/)                             | blqudu    | ❌     | ❌     | ⚠️     | ❌     | 简      |
@@ -150,6 +157,8 @@ novel-cli download --site ttkan shengxu-chendong
 | [八一中文网](https://www.ktshu.cc/)                           | ktshu    | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [37阅读网](https://www.37yue.com/)                           | n37yue   | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [笔下文学网](https://www.bxwx9.org/)                          | bxwx9    | ❌     | ❌     | ⚠️     | ✅     | 简      |
+| [绿色小说网](https://www.lvsewx.cc/)                          | lvsewx   | ❌     | ❌     | ❌     | ❌     | 简      |
+| [大众文学](https://m.shauthor.com/)                          | shauthor  | ❌     | ❌     | ⚠️     | ⚠️     | 简      |
 
 #### 同人
 
@@ -187,6 +196,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [海外书包](https://www.haiwaishubao.com/)                  | haiwaishubao | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [红袖招](https://hongxiuzhao.net/)                          | hongxiuzhao | ❌     | ❌     | ⚠️     | ⚠️     | 简      |
 | [有爱爱](https://www.uaa.com/)                              | uaa         | ✅     | ❌     | ✅     | ⚠️     | 简      |
+| [三五中文](https://m.mjyhb.com/)                            | mjyhb       | ❌     | ❌     | ⚠️     | ⚠️     | 简      |
 
 #### 已归档站点
 
@@ -260,7 +270,7 @@ novel-cli download --site ttkan shengxu-chendong
 
 * **轻之文库 (linovel)**
   * 书籍: `https://www.linovel.net/book/101752.html` -> Book ID: `101752`
-  * 章节: `https://www.linovel.net/book/101752/16996.html` -> Chapter ID: `101752`
+  * 章节: `https://www.linovel.net/book/101752/16996.html` -> Chapter ID: `16996`
   * 已知问题:
     * 图片资源可能偶尔无法正常加载或失效
 
@@ -272,6 +282,18 @@ novel-cli download --site ttkan shengxu-chendong
   * 书籍: `https://www.linovelib.com/novel/1234.html` -> Book ID: `1234`
   * 章节: `https://www.linovelib.com/novel/1234/47800.html` -> Chapter ID: `47800`
   * 风控: 请求过于频繁可能触发限制, 导致封禁或限流 (推荐请求间隔大于 2 秒)
+
+* **轻小说文库 (wenku8)**
+  * 书籍: `https://www.wenku8.net/novel/2/2835/index.htm` -> Book ID: `2-2835`
+  * 章节: `https://www.wenku8.net/novel/2/2835/113354.htm` -> Chapter ID: `113354`
+  * 目录访问:
+    * 先打开详细页面 (如 `https://www.wenku8.net/book/2835.htm`), 再点击 "小说目录" 查看
+  * 备用:
+    * `https://www.wenku8.cc`
+    * `https://www.wenku8.com`
+  * 注意:
+    * 该站点使用 `Cloudflare` 防护机制, 当出现 403 响应时, 可尝试将后端切换为 `curl_cffi` 并配置 `impersonate = "chrome136"`
+    * 切换后通常可正常访问, 但当 `request_interval < 3.0` 时, 仍可能再次触发 403
 
 * **无限轻小说 (n8novel)**
   * 书籍: `https://www.8novel.com/novelbooks/3365/` -> Book ID: `3365`
@@ -321,6 +343,10 @@ novel-cli download --site ttkan shengxu-chendong
   * 书籍: `https://b.guidaye.com/kongbu/654/` -> Book ID: `kongbu-654`
   * 章节: `https://b.guidaye.com/kongbu/654/170737.html` -> Chapter ID: `170737`
 
+* **读书 (dushu)**
+  * 书籍: `https://www.dushu.com/showbook/138752/` -> Book ID: `138752`
+  * 章节: `https://www.dushu.com/showbook/138752/1982168.html` -> Chapter ID: `1982168`
+
 * **鲲弩小说 (kunnu)**
   * 书籍: `https://www.kunnu.com/guichui/` -> Book ID: `guichui`
   * 章节: `https://www.kunnu.com/guichui/27427.htm` -> Chapter ID: `27427`
@@ -332,6 +358,10 @@ novel-cli download --site ttkan shengxu-chendong
 * **西方奇幻小说网子站点 (westnovel_sub)**
   * 书籍: `https://www.westnovel.com/q/list/725.html` -> Book ID: `q-list-725`
   * 章节: `https://www.westnovel.com/q/showinfo-2-40238-0.html` -> Chapter ID: `2-40238-0`
+
+* **天涯书库 (tianyabooks)**
+  * 书籍: `https://www.tianyabooks.com/net/changshengjie/` -> Book ID: `net-changshengjie`
+  * 章节: `https://www.tianyabooks.com/net/changshengjie/59453.html` -> Chapter ID: `59453`
 
 #### 类笔趣阁 / 第三方转载站
 
@@ -368,6 +398,20 @@ novel-cli download --site ttkan shengxu-chendong
   * 书籍: `https://www.i25zw.com/book/64371.html` -> Book ID: `64371`
   * 章节: `https://www.i25zw.com/64371/153149757.html` -> Chapter ID: `153149757`
 
+* **69书吧 (n69shuba)**
+  * 书籍: `https://www.69shuba.com/book/88724.htm` -> Book ID: `88724`
+  * 章节: `https://www.69shuba.com/txt/88724/39943182` -> Chapter ID: `39943182`
+  * 注意:
+    * 该站点使用 `Cloudflare` 防护机制, 当出现 403 响应时, 可尝试将后端切换为 `curl_cffi` 并配置 `impersonate = "chrome136"`
+    * 切换后通常可正常访问, 但当 `request_interval < 3.0` 时, 仍可能再次触发 403
+
+* **台灣小說網 (twkan)**
+  * 书籍: `https://twkan.com/book/78813.html` -> Book ID: `78813`
+  * 章节: `https://twkan.com/txt/78813/47726772` -> Chapter ID: `47726772`
+  * 注意:
+    * 该站点使用 `Cloudflare` 防护机制, 当出现 403 响应时, 可尝试将后端切换为 `curl_cffi` 并配置 `impersonate = "chrome136"`
+    * 切换后通常可正常访问, 但当 `request_interval < 3.0` 时, 仍可能再次触发 403
+
 * **101看书 (n101kanshu)**
   * 书籍: `https://101kanshu.com/book/7994.html` -> Book ID: `7994`
   * 章节: `https://101kanshu.com/txt/7994/9137080.html` -> Chapter ID: `9137080`
@@ -392,6 +436,11 @@ novel-cli download --site ttkan shengxu-chendong
 * **万相书城 (wxsck)**
   * 书籍: `https://wxsck.com/book/20297/` -> Book ID: `20297`
   * 章节: `https://wxsck.com/book/20297/6660334.html` -> Chapter ID: `6660334`
+
+* **笔仙阁 (bixiange)**
+  * 书籍: `https://m.bixiange.me/wxxz/20921/` -> Book ID: `wxxz-20921`
+  * 章节: `https://m.bixiange.me/wxxz/20921/index/1.html` -> Chapter ID: `1`
+  * 注意: 该站点直接提供 txt 下载。
 
 * **笔趣阁 (b520)**
   * 书籍: `http://www.b520.cc/8_8187/` -> Book ID: `8_8187`
@@ -426,6 +475,10 @@ novel-cli download --site ttkan shengxu-chendong
 * **顶点小说网 (n23ddw)**
   * 书籍: `https://www.23ddw.net/du/80/80892/` -> Book ID: `80-80892`
   * 章节: `https://www.23ddw.net/du/80/80892/13055110.html` -> Chapter ID: `13055110`
+
+* **69书吧 (n69hao)**
+  * 书籍: `https://www.69hao.com/48/` -> Book ID: `48`
+  * 章节: `https://www.69hao.com/48/38642.html` -> Chapter ID: `38642`
 
 * **追书网.com (mangg_com)**
   * 书籍: `https://www.mangg.com/id57715/` -> Book ID: `id57715`
@@ -462,6 +515,15 @@ novel-cli download --site ttkan shengxu-chendong
 * **笔下文学网 (bxwx9)**
   * 书籍: `https://www.bxwx9.org/b/48/48453/` -> Book ID: `48-48453`
   * 章节: `https://www.bxwx9.org/b/48/48453/175908.html` -> Chapter ID: `175908`
+
+* **绿色小说网 (lvsewx)**
+  * 书籍: `https://www.lvsewx.cc/ebook/20645.html` -> Book ID: `20645`
+  * 章节: `https://www.lvscwx.cc/books/20/20645/7237914.html` -> Chapter ID: `7237914`
+  * 注意: 大部分书籍的最后几章都不完整
+
+* **大众文学 (shauthor)**
+  * 书籍: `https://m.shauthor.com/info_s5o/` -> Book ID: `s5o`
+  * 章节: `https://m.shauthor.com/read_s5o/jjhl0.html` -> Chapter ID: `jjhl0`
 
 #### 同人
 
@@ -550,6 +612,10 @@ novel-cli download --site ttkan shengxu-chendong
 * **有爱爱 (uaa)**
   * 书籍: `https://www.uaa.com/novel/intro?id=11304099` -> Book ID: `11304099`
   * 章节: `https://www.uaa.com/novel/chapter?id=234639` -> Chapter ID: `234639`
+
+* **三五中文 (mjyhb)**
+  * 书籍: `https://m.mjyhb.com/info_3119/` -> Book ID: `3119`
+  * 章节: `https://m.mjyhb.com/read_3119/62d0d.html` -> Chapter ID: `62d0d`
 
 #### 已归档站点
 

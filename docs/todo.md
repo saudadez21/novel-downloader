@@ -8,6 +8,15 @@
   * 网页端接口已基本解析完成，但 VIP 章节返回的为图片格式
   * 计划在有空时尝试使用 APP 端接口解决
 
+### 搜索功能增强
+
+* 增强现有搜索机制
+
+  * 在站点内搜索 API 不可用或结果为空时, 允许 fallback 到搜索引擎 (如 Google/Bing)
+  * 支持通过搜索引擎语法 (如 `site:example.com <书名>`) 自动发现书籍目录页 URL
+  * 可配置搜索引擎类型、最大结果数与缓存策略
+  * 在 CLI 中提供交互式选择搜索结果并直接下载
+
 ### 广告过滤与章节标题归一化
 
 * Parser 中已对常见第三方网站广告进行基础过滤
@@ -102,6 +111,10 @@ user_prompt = "请翻译成中文：{text}"
 ### 命令行交互
 
 * 整理并精简命令行参数
+* 新增章节下载功能
+  * CLI 支持通过 `--chapter-id` 参数指定章节 ID, 仅下载该章节并导出为单独 txt 文件
+  * 当传入章节 URL 时, 自动解析出 `book_id` 与 `chapter_id`, 并询问是否下载整本或仅该章节
+  * 增加相关交互提示与输出信息, 优化体验
 
 ### 导出模板支持
 
@@ -133,6 +146,97 @@ user_prompt = "请翻译成中文：{text}"
 {% endfor %}
 {% endfor %}
 ```
+
+### 数据结构与存储规范化
+
+> 设计原因: 部分站点使用加密字体或 CSS / JS 动态混淆来隐藏正文或排版信息
+>
+> 将这些资源直接以原始形式保存, 可在本地导出时更准确地还原内容, 减少手动还原误差与字符映射偏差
+
+为支持多类型资源 (图片、字体、CSS 等), 将 `extra.image_positions` 字段迁移至统一的 `extra.resources` 管理结构, 以统一管理章节关联的多类型资源
+
+新结构示例:
+
+```json
+{
+    "resources": [
+        {
+            "category": "image",
+            "position": 0,
+            "type": "url",
+            "data": "https://example.com/a.jpg"
+        },
+        {
+            "category": "image",
+            "position": 3,
+            "type": "base64",
+            "data": "iVBORw0KGgo...",
+            "mime": "image/jpeg"
+        },
+        {
+            "category": "font",
+            "type": "url",
+            "data": "https://example.com/font.woff2"
+        },
+        {
+            "category": "font",
+            "type": "base64",
+            "data": "d09GRgABAAAA...",
+            "mime": "font/woff2"
+        },
+        {
+            "category": "css",
+            "type": "text",
+            "data": "body { color: red; }"
+        }
+    ]
+}
+```
+
+| 字段名      | 类型   | 说明                                                       |
+| ---------- | ------ | ---------------------------------------------------------- |
+| `category` | `str`  | 资源类型, 如 `image` / `font` / `css` / `audio` 等          |
+| `position` | `int`  | 用于图片资源, 指示资源在正文中的位置 (1-based, 0 表示章节开头) |
+| `type`     | `str`  | 数据类型：`url` / `base64` / `text`                         |
+| `data`     | `str`  | 实际内容或引用地址                                          |
+| `mime`     | `str`  | MIME 类型, 用于 Base64 或其他二进制资源                      |
+
+同时暂时添加对 `image_positions` 的兼容或自动转换脚本
+
+**需更新模块**
+
+以下模块需适配新的 `resources` 结构:
+
+* `novel_downloader.plugins.base.client`
+* `novel_downloader.plugins.common.client`
+* `novel_downloader.plugins.sites.esjzone.parser`
+* `novel_downloader.plugins.sites.kadokado.parser`
+* `novel_downloader.plugins.sites.linovel.parser`
+* `novel_downloader.plugins.sites.linovelib.parser`
+* `novel_downloader.plugins.sites.lnovel.parser`
+* `novel_downloader.plugins.sites.n37yq.parser`
+* `novel_downloader.plugins.sites.n8novel.parser`
+* `novel_downloader.plugins.sites.novelpia.parser`
+* `novel_downloader.plugins.sites.qidian.parser`
+* `novel_downloader.plugins.sites.qqbook.parser`
+* `novel_downloader.plugins.sites.sfacg.parser`
+* `novel_downloader.plugins.sites.shaoniandream.parser`
+* `novel_downloader.plugins.sites.shencou.parser`
+* `novel_downloader.plugins.sites.syosetu.parser`
+* `novel_downloader.plugins.sites.syosetu18.parser`
+* `novel_downloader.plugins.sites.wenku8.parser`
+* `novel_downloader.plugins.sites.yodu.parser`
+
+**潜在更新模块**
+
+部分底层构建模块可能需要增加对字体与样式资源的支持:
+
+* **`novel_downloader.libs.epub_builder`**
+  * `EpubBuilder` 需新增 `add_font` 相关 API
+  * 后续可支持在 EPUB 内嵌字体与样式
+* **`novel_downloader.libs.html_builder`**
+  * `HtmlBuilder` 需新增 `add_font` 接口；
+  * 优化生成 HTML 时的字体与css引用逻辑
 
 ### 打包与分发
 
@@ -175,15 +279,9 @@ user_prompt = "请翻译成中文：{text}"
 
   * 支持登录
 
-* [台灣小說網](https://twkan.com/)
-
-* [笔仙阁](https://m.bixiange.me/)
-
 * [52书库](https://www.52shuku.net/)
 
 * [努努书坊](https://www.kanunu8.com/)
-
-* [天涯书库](https://www.tianyabooks.com/)
 
 * [飞卢小说网](https://b.faloo.com/)
 
@@ -270,42 +368,49 @@ user_prompt = "请翻译成中文：{text}"
 
 * [完本神站](https://www.wanben.info/)
 
+  * 站点的章节内容经常混杂 HTML 文本
+
 * [全职小说网](https://www.quanzhifashi.com/)
+
+  * 部分章节不全或无法访问
+  * 部分书籍出现 `索引文件不存在！` 提示
 
 * 笔趣阁
 
   * [站点 1](https://www.bqu9.cc/)
   * [站点 2](https://www.nibiqu.cc/)
-  * [站点 3](https://www.boqugew.com/)
+  * [站点 3](https://m.chenkuan.com/)
+    * 加载较慢，体验不佳
   * [站点 4](https://www.biquge.tw/)
-  * [站点 6](https://www.beqege.cc/)
-  * [站点 7](https://m.chenkuan.com/)
+  * [站点 5](https://www.beqege.cc/)
+    * `curl_cffi`
 
 * [笔趣趣](https://www.biququ.com/)
 
+  * `curl_cffi`
+
 * [燃火小说](https://www.ranwen.la/)
 
-* [绿色小说网](https://www.lvsewx.cc/)
+  * `curl_cffi`
 
 * [42中文网](https://www.42zw.la/)
 
+  * 部分章节不全或无法访问
+  * 部分书籍出现 `索引文件不存在！` 提示
+
 * [文海小说](https://www.zgzl.net/)
+
+  * 加载较慢，体验不佳
 
 * [小说之家](https://xszj.org/)
 
-* [三五中文](https://m.mjyhb.com/)
+  * [繁体](https://m.xszj.org/)
+  * 目录分页过多
 
 * [帝书阁](https://www.23dishuge.com/)
 
-* [大众文学](https://m.shauthor.com/)
-
-* [小說之家](https://m.xszj.org/)
-
-* 69书吧
-
-  * [站点 1](https://www.69hsw.com/)
-  * [站点 2](https://www.69hao.com/)
-  * [站点 3](https://www.69hsz.net/)
+  * 目录分页过多
+  * 结构和 `小说之家` 几乎一样
 
 * [大灰狼小说聚合网](https://api.langge.cf/)
 
@@ -315,18 +420,10 @@ user_prompt = "请翻译成中文：{text}"
 
   * 需提供 `cf_clearance` Cookie
 
-* [轻小说文库](https://www.wenku8.net/)
-
-  * 需提供 `cf_clearance` cookie
-
 * [真白萌](https://masiro.me/)
 
   * 需要登录
   * 需提供 `cf_clearance` Cookie
-
-* [69书吧](https://www.69shuba.com/)
-
-  * 需绕过 Cloudflare
 
 * [塔读文学](https://www.tadu.com/)
 

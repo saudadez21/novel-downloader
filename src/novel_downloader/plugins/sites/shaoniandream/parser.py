@@ -161,10 +161,17 @@ class ShaoniandreamParser(BaseParser):
             except Exception:
                 pass
 
-        image_positions: dict[int, list[str]] = {}
+        image_positions: dict[int, list[dict[str, Any]]] = {}
         if chapter_pics:
-            img_urls = [img_prefix + pic["url"] for pic in chapter_pics if "url" in pic]
-            image_positions[len(paragraphs)] = img_urls
+            img_objs = []
+            for pic in chapter_pics:
+                url = pic.get("url")
+                if not url:
+                    continue
+                full_url = img_prefix + url
+                img_objs.append({"type": "url", "data": full_url})
+            if img_objs:
+                image_positions[len(paragraphs)] = img_objs
 
         if not (paragraphs or image_positions):
             return None

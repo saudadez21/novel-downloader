@@ -239,7 +239,7 @@ class EsjzoneParser(BaseParser):
 
         # Walk the forum content and produce plain text lines + image map
         all_lines: list[str] = []
-        image_positions: dict[int, list[str]] = {}
+        image_positions: dict[int, list[dict[str, Any]]] = {}
         for root in tree.xpath('//div[contains(@class, "forum-content")]'):
             lines, img_map = self._collect_lines_and_images(
                 root,
@@ -275,9 +275,9 @@ class EsjzoneParser(BaseParser):
         *,
         font_bytes_map: dict[str, bytes],
         font_mappings: dict[str, dict[str, str]],
-    ) -> tuple[list[str], dict[int, list[str]]]:
+    ) -> tuple[list[str], dict[int, list[dict[str, Any]]]]:
         lines: list[str] = []
-        image_positions: dict[int, list[str]] = defaultdict(list)
+        image_positions: dict[int, list[dict[str, Any]]] = defaultdict(list)
         buf: list[str] = []
 
         def apply_map(s: str, active_map: dict[str, str] | None) -> str:
@@ -296,7 +296,12 @@ class EsjzoneParser(BaseParser):
                 flush_line()
             # 1-based: images after paragraph N -> key N
             idx = len(lines)
-            image_positions[idx].append(src)
+            src = src.strip()
+            if not src:
+                return
+            if src.startswith("//"):
+                src = "https:" + src
+            image_positions[idx].append({"type": "url", "data": src})
 
         def build_section_map(section: etree._Element) -> dict[str, str] | None:
             style_attr = section.get("style", "")

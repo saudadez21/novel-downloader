@@ -25,7 +25,7 @@ class DxmwxSearcher(BaseSearcher):
     async def _fetch_html(self, keyword: str) -> str:
         url = self.SEARCH_URL.format(query=self._quote(keyword))
         try:
-            async with self._http_get(url) as resp:
+            async with self.session.get(url) as resp:
                 resp.raise_for_status()
                 return await self._response_to_str(resp)
         except Exception:

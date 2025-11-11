@@ -1,46 +1,53 @@
 #!/usr/bin/env python3
 """
 Async health check for novel sites.
-- Concurrency limited (default 20)
-- Supports per-site one or multiple test URLs
-- Skips duplicate issue creation
-- Designed to run in CI on a schedule
 
-Environment (in CI):
-  GITHUB_TOKEN       -> GitHub token
-  GITHUB_REPOSITORY  -> "owner/repo"
+  * Concurrency limited (default 12)
+  * Runs aiohttp, curl_cffi, and httpx concurrently
+  * Each site locked across libs to avoid duplicate hits
+
+Usage:
+  python scripts/check_sites_health.py
 """
 
 from __future__ import annotations
 
 import asyncio
+import html
 import json
-import os
-from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime
+from pathlib import Path
 from time import perf_counter
 from typing import Any
 
 import aiohttp
+import httpx
+from curl_cffi.requests import AsyncSession
+from rich.console import Console
+from rich.progress import (
+    BarColumn,
+    Progress,
+    SpinnerColumn,
+    TaskID,
+    TextColumn,
+    TimeElapsedColumn,
+    TimeRemainingColumn,
+)
+from rich.table import Table
+from rich.text import Text
 
 # ----------------------------
 # Configuration
 # ----------------------------
 
-CONFIG_PATH = "scripts/data/site_health_config.json"
-DEFAULT_MAX_CONCURRENT = 20
-DEFAULT_TIMEOUT_SECS = 12
-DEFAULT_RETRIES = 1
-
-GITHUB_API = "https://api.github.com"
-LABEL_SITE_HEALTH = "site-health"
-LABEL_UNREACHABLE = "unreachable"
+CONFIG_PATH = Path("scripts/data/site_health_config.json")
+OUTPUT_PATH = Path("dev/site_health_report.html")
 
 USER_AGENT = (
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
     "AppleWebKit/537.36 (KHTML, like Gecko) "
-    "Chrome/134.0.0.0 Safari/537.36"
+    "Chrome/136.0.0.0 Safari/537.36"
 )
 USER_HEADERS = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",  # noqa: E501
@@ -50,265 +57,349 @@ USER_HEADERS = {
     "Connection": "keep-alive",
 }
 
-_DEFAULT_TIMEOUT = aiohttp.ClientTimeout(total=30)
+HTML_TEMPLATE = """<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Site Health Report</title>
+
+<!-- Optional Highlight.js -->
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof hljs !== 'undefined') {
+    document.querySelectorAll('#failed-responses pre code').forEach(block => {
+      hljs.highlightElement(block);
+    });
+  }
+});
+</script>
+
+<style>
+body {{
+    font-family: monospace;
+    background: #1e1e1e;
+    color: #e0e0e0;
+    padding: 1em 2em;
+}}
+pre {{
+    background: #2a2a2a;
+    color: #ccc;
+    padding: 0.75em;
+    white-space: pre-wrap;
+    border-radius: 4px;
+    overflow-x: auto;
+}}
+a {{
+    color: #4ea1ff;
+}}
+h1 {{
+    color: #ffd166;
+    margin-bottom: 0.2em;
+}}
+h2 {{
+    color: #06d6a0;
+    margin-top: 1.5em;
+    border-bottom: 1px solid #333;
+    padding-bottom: 0.3em;
+}}
+h3 {{
+    color: #ef476f;
+    margin-top: 1em;
+}}
+hr {{
+    border: 0;
+    border-top: 1px solid #333;
+    margin: 2em 0;
+}}
+</style>
+</head>
+<body>
+<h1>Site Health Summary ({timestamp})</h1>
+{summary_html}
+<hr>
+<h2>Failed Responses</h2>
+<div id="failed-responses">
+{failed_html}
+</div>
+</body>
+</html>
+"""
+
+console = Console()
+
+# ----------------------------
+# Data structure
+# ----------------------------
 
 
 @dataclass
 class SiteResult:
     site: str
-    ok: bool
-    message: str
+    lib: str
     url: str
-    elapsed: float  # seconds
-
-
-def _utc_now_iso() -> str:
-    return datetime.now(UTC).isoformat()
-
-
-def _fmt_duration(seconds: float) -> str:
-    # Human-friendly formatting for the summary line
-    if seconds < 1:
-        return f"{seconds * 1000:.0f} ms"
-    return f"{seconds:.2f} s"
-
-
-def normalize_sites(obj: Mapping[str, Any]) -> dict[str, list[str]]:
-    out: dict[str, list[str]] = {}
-    for k, v in obj.items():
-        if isinstance(v, str):
-            out[k] = [v]
-        elif isinstance(v, Iterable):
-            out[k] = [str(x) for x in v]
-        else:
-            raise TypeError(f"Invalid URL mapping for site {k!r}: {type(v).__name__}")
-    return out
-
-
-def load_config(path: str = CONFIG_PATH) -> dict[str, Any]:
-    """Load config from JSON file; fallback to defaults."""
-    if not os.path.exists(path):
-        print(f"Config file not found: {path}. Using defaults.")
-        return {
-            "max_concurrent": DEFAULT_MAX_CONCURRENT,
-            "timeout": DEFAULT_TIMEOUT_SECS,
-            "retries": DEFAULT_RETRIES,
-            "sites": {},
-        }
-    with open(path, encoding="utf-8") as f:
-        data = json.load(f)
-    return data
+    status: int
+    text: str
+    elapsed: float
 
 
 # ----------------------------
-# GitHub helpers
+# Utilities
 # ----------------------------
 
 
-def _gh_headers(token: str) -> dict[str, str]:
-    return {
-        "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-        "User-Agent": "novel-downloader-health-check",
-    }
+def load_config(cfg_path: Path) -> dict[str, Any] | None:
+    if not cfg_path.is_file():
+        return None
+    with open(cfg_path, encoding="utf-8") as f:
+        return json.load(f)
 
 
-async def ensure_labels_exist(
-    session: aiohttp.ClientSession, token: str, repo: str
+def save_html_summary(
+    grouped: dict[str, dict[str, list[SiteResult]]],
+    slow_t: float,
+    very_slow_t: float,
+    output_path: Path = OUTPUT_PATH,
 ) -> None:
-    desired = {
-        LABEL_SITE_HEALTH: {"color": "1d76db", "description": "Site health monitoring"},
-        LABEL_UNREACHABLE: {"color": "d73a4a", "description": "Unreachable site"},
-    }
-    headers = _gh_headers(token)
-    for name, meta in desired.items():
-        url = f"{GITHUB_API}/repos/{repo}/labels/{name}"
-        async with session.get(url, headers=headers, timeout=_DEFAULT_TIMEOUT) as r:
-            if r.status == 404:
-                async with session.post(
-                    f"{GITHUB_API}/repos/{repo}/labels",
-                    headers=headers,
-                    json={"name": name, **meta},
-                    timeout=_DEFAULT_TIMEOUT,
-                ):
-                    pass
+    """Render the site check summary as a standalone HTML report."""
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    console = Console(record=True, width=140)
+    console.print("\n[bold cyan]=== Site Health Summary ===[/bold cyan]\n")
+    failed_entries: list[tuple[str, str, str, str]] = []  # (lib, site, url, text)
 
+    for lib_name, sites in grouped.items():
+        table = Table(
+            title=f"[cyan]{lib_name}[/cyan]",
+            show_header=True,
+            header_style="bold magenta",
+            expand=True,
+        )
+        table.add_column("Status", justify="center", no_wrap=True)
+        table.add_column("Time", justify="right", no_wrap=True)
+        table.add_column("Site", justify="left", no_wrap=True)
+        table.add_column("URL", justify="left")
 
-async def fetch_open_health_issues(
-    session: aiohttp.ClientSession, token: str, repo: str
-) -> dict[str, int]:
-    headers = _gh_headers(token)
-    params = {"state": "open", "labels": LABEL_SITE_HEALTH, "per_page": "100"}
-    url = f"{GITHUB_API}/repos/{repo}/issues"
-    async with session.get(
-        url, headers=headers, params=params, timeout=_DEFAULT_TIMEOUT
-    ) as r:
-        if r.status >= 400:
-            text = await r.text()
-            raise RuntimeError(f"GitHub issues GET failed: {r.status} {text}")
-        issues = await r.json()
-    result: dict[str, int] = {}
-    for issue in issues:
-        title = str(issue.get("title", ""))
-        if title.startswith("site(") and "): unreachable" in title:
-            site = title.split("(", 1)[1].split(")", 1)[0]
-            result[site] = int(issue.get("number"))
-    return result
+        for res_list in sites.values():
+            for r in res_list:
+                # Status color
+                if r.status <= 0:
+                    s_style = "red"
+                    status_text = Text("ERR", style=s_style)
+                elif r.status < 300:
+                    s_style = "green"
+                    status_text = Text(str(r.status), style=s_style)
+                elif r.status < 400:
+                    s_style = "yellow"
+                    status_text = Text(str(r.status), style=s_style)
+                else:
+                    s_style = "red"
+                    status_text = Text(str(r.status), style=s_style)
 
+                # Time color
+                if r.elapsed > very_slow_t:
+                    t_style = "red"
+                elif r.elapsed > slow_t:
+                    t_style = "yellow"
+                else:
+                    t_style = "green"
+                time_text = Text(f"{r.elapsed:.2f}s", style=t_style)
 
-async def create_issue(
-    session: aiohttp.ClientSession, token: str, repo: str, site: str, message: str
-) -> str | None:
-    headers = _gh_headers(token)
-    title = f"site({site}): unreachable"
-    body = (
-        f"Site `{site}` appears unreachable.\n\n"
-        f"- Error: `{message}`\n"
-        f"- Checked at: {_utc_now_iso()}\n\n"
-        "_This issue was automatically generated by the site health check script._"
+                table.add_row(status_text, time_text, r.site, r.url)
+
+                if r.status >= 400 or r.status == 0:
+                    failed_entries.append((lib_name, r.site, r.url, r.text))
+
+        console.print(table)
+
+    # Rich-rendered console HTML
+    summary_html = console.export_html(inline_styles=True)
+
+    # Build failed response section
+    failed_parts: list[str] = []
+    for lib, site, url, text in failed_entries:
+        failed_parts.append(
+            f"<h3>{lib} :: {site}</h3>"
+            f"<p><a href='{url}' target='_blank'>{url}</a></p>"
+            f"<pre><code class='language-html'>{html.escape(text or '')}</code></pre>"
+        )
+
+    # Fill in template
+    html_output = HTML_TEMPLATE.format(
+        timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        summary_html=summary_html,
+        failed_html="\n".join(failed_parts),
     )
-    async with session.post(
-        f"{GITHUB_API}/repos/{repo}/issues",
-        headers=headers,
-        json={
-            "title": title,
-            "body": body,
-            "labels": [LABEL_SITE_HEALTH, LABEL_UNREACHABLE],
-        },
-        timeout=_DEFAULT_TIMEOUT,
-    ) as r:
-        if r.status >= 400:
-            text = await r.text()
-            print(f"Failed to create issue for {site}: {r.status} {text}")
-            return None
-        data = await r.json()
-    issue_url = data.get("html_url")
-    print(f"Created issue for {site}: {issue_url}")
-    return str(issue_url) if issue_url else None
+
+    output_path.write_text(html_output, encoding="utf-8")
+    print(f"[HTML] Report saved to: {output_path.resolve()}")
 
 
 # ----------------------------
-# HTTP check
+# Fetchers
 # ----------------------------
 
 
-async def _fetch_ok(
-    session: aiohttp.ClientSession, url: str, timeout: aiohttp.ClientTimeout
-) -> tuple[bool, str]:
-    try:
-        async with session.get(url, timeout=timeout) as resp:
-            if 200 <= resp.status < 400:
-                return True, str(resp.status)
-            return False, f"HTTP {resp.status}"
-    except Exception as e:
-        return False, f"{type(e).__name__}: {e}"
-
-
-async def check_one_site(
-    session: aiohttp.ClientSession,
-    site: str,
-    urls: list[str],
-    timeout_secs: int,
-    retries: int,
-    sem: asyncio.Semaphore,
-) -> SiteResult:
-    timeout = aiohttp.ClientTimeout(total=timeout_secs)
-    last_msg = "no urls"
-    start = perf_counter()
-    for url in urls:
-        for attempt in range(retries + 1):
-            async with sem:
-                ok, msg = await _fetch_ok(session, url, timeout)
-            if ok:
-                return SiteResult(
-                    site=site,
-                    ok=True,
-                    message=msg,
-                    url=url,
-                    elapsed=perf_counter() - start,
-                )
-            last_msg = msg
-            if attempt < retries:
-                await asyncio.sleep(0.5)
-    return SiteResult(
-        site=site,
-        ok=False,
-        message=last_msg,
-        url=urls[0] if urls else "",
-        elapsed=perf_counter() - start,
-    )
-
-
-async def run_checks(
-    sites: dict[str, list[str]], max_concurrent: int, timeout_secs: int, retries: int
+async def fetch_aiohttp(
+    site: str, urls: list[str], cfg: dict[str, Any]
 ) -> list[SiteResult]:
-    sem = asyncio.Semaphore(max_concurrent)
-    connector = aiohttp.TCPConnector(ssl=False, limit_per_host=max_concurrent)
+    results = []
     async with aiohttp.ClientSession(
-        headers=USER_HEADERS, connector=connector
-    ) as session:
-        tasks = [
-            check_one_site(session, site, urls, timeout_secs, retries, sem)
-            for site, urls in sites.items()
-        ]
-        return await asyncio.gather(*tasks)
+        headers=USER_HEADERS, timeout=aiohttp.ClientTimeout(total=cfg["timeout"])
+    ) as sess:
+        for url in urls:
+            start = perf_counter()
+            try:
+                async with sess.get(url) as resp:
+                    text = await resp.text(errors="ignore")
+                    results.append(
+                        SiteResult(
+                            site,
+                            "aiohttp",
+                            url,
+                            resp.status,
+                            text,
+                            perf_counter() - start,
+                        )
+                    )
+            except Exception as e:
+                results.append(
+                    SiteResult(site, "aiohttp", url, 0, str(e), perf_counter() - start)
+                )
+    return results
+
+
+async def fetch_httpx(
+    site: str, urls: list[str], cfg: dict[str, Any]
+) -> list[SiteResult]:
+    results = []
+    async with httpx.AsyncClient(
+        headers=USER_HEADERS, timeout=cfg["timeout"], follow_redirects=True
+    ) as client:
+        for url in urls:
+            start = perf_counter()
+            try:
+                resp = await client.get(url)
+                results.append(
+                    SiteResult(
+                        site,
+                        "httpx",
+                        url,
+                        resp.status_code,
+                        resp.text,
+                        perf_counter() - start,
+                    )
+                )
+            except Exception as e:
+                results.append(
+                    SiteResult(site, "httpx", url, 0, str(e), perf_counter() - start)
+                )
+    return results
+
+
+async def fetch_curl_cffi(
+    site: str, urls: list[str], cfg: dict[str, Any]
+) -> list[SiteResult]:
+    results = []
+    async with AsyncSession(
+        headers=USER_HEADERS, timeout=cfg["timeout"], impersonate="chrome136"
+    ) as sess:
+        for url in urls:
+            start = perf_counter()
+            try:
+                resp = await sess.get(url)
+                results.append(
+                    SiteResult(
+                        site,
+                        "curl_cffi",
+                        url,
+                        resp.status_code,
+                        resp.text,
+                        perf_counter() - start,
+                    )
+                )
+            except Exception as e:
+                results.append(
+                    SiteResult(
+                        site, "curl_cffi", url, 0, str(e), perf_counter() - start
+                    )
+                )
+    return results
 
 
 # ----------------------------
-# Main
+# Main Runner
+# ----------------------------
+
+
+async def run_check_for_lib(
+    lib_name: str,
+    config: dict[str, Any],
+    site_locks: dict[str, asyncio.Lock],
+    progress: Progress,
+    task_id: TaskID,
+) -> dict[str, list[SiteResult]]:
+    sem = asyncio.Semaphore(config.get("max_concurrent", 12))
+    sites = config["sites"]
+    results: dict[str, list[SiteResult]] = {}
+
+    async def run_site(site_key: str, urls: list[str]):
+        lock = site_locks[site_key]
+        async with sem, lock:
+            if lib_name == "aiohttp":
+                r = await fetch_aiohttp(site_key, urls, config)
+            elif lib_name == "httpx":
+                r = await fetch_httpx(site_key, urls, config)
+            else:
+                r = await fetch_curl_cffi(site_key, urls, config)
+            results[site_key] = r
+            progress.advance(task_id)
+
+    await asyncio.gather(*(run_site(k, v["urls"]) for k, v in sites.items()))
+    return results
+
+
+# ----------------------------
+# Orchestrator
 # ----------------------------
 
 
 async def async_main() -> int:
-    config = load_config()
-    sites = normalize_sites(config.get("sites", {}))
-    if not sites:
-        print("No sites configured.")
-        return 0
+    config = load_config(CONFIG_PATH)
+    if config is None:
+        console.print(f"[red]Config file not found: {CONFIG_PATH}[/red]")
+        return 1
 
-    results = await run_checks(
-        sites,
-        config.get("max_concurrent", DEFAULT_MAX_CONCURRENT),
-        config.get("timeout", DEFAULT_TIMEOUT_SECS),
-        config.get("retries", DEFAULT_RETRIES),
-    )
+    slow_t = config["speed_levels"]["slow"]
+    very_slow_t = config["speed_levels"]["very_slow"]
+    site_locks = {k: asyncio.Lock() for k in config["sites"]}
 
-    failed = {r.site: r.message for r in results if not r.ok}
-    ok_sites = {r.site for r in results if r.ok}
+    grouped: dict[str, dict[str, list[SiteResult]]] = {}
 
-    print("\n=== Site Health Summary ===")
-    for r in sorted(results, key=lambda x: x.site):
-        status = "OK" if r.ok else "FAIL"
-        print(
-            f"[{status}] {r.site:15s} -> {r.message:>8s} "
-            f"in {_fmt_duration(r.elapsed)} ({r.url})"
-        )
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("{task.description}"),
+        BarColumn(),
+        "[progress.percentage]{task.percentage:>3.0f}%",
+        TimeElapsedColumn(),
+        TimeRemainingColumn(),
+        console=console,
+    ) as progress:
+        tasks = {}
+        for lib in ("aiohttp", "curl_cffi", "httpx"):
+            task_id = progress.add_task(
+                f"[cyan]{lib}[/cyan]", total=len(config["sites"])
+            )
+            coro = run_check_for_lib(lib, config, site_locks, progress, task_id)
+            tasks[lib] = asyncio.create_task(coro)
 
-    token = os.getenv("GITHUB_TOKEN")
-    repo = os.getenv("GITHUB_REPOSITORY")
-    if not token or not repo:
-        print(
-            "Missing GITHUB_TOKEN or GITHUB_REPOSITORY; skipping GitHub issue creation."
-        )
-        return 1 if failed else 0
+        for lib, t in tasks.items():
+            grouped[lib] = await t
 
-    async with aiohttp.ClientSession() as gh_session:
-        await ensure_labels_exist(gh_session, token, repo)
-        open_issues = await fetch_open_health_issues(gh_session, token, repo)
-
-        for site, message in failed.items():
-            if site in open_issues:
-                print(f"{site}: open issue already exists (#{open_issues[site]})")
-                continue
-            await create_issue(gh_session, token, repo, site, message)
-
-        recovered = [s for s in ok_sites if s in open_issues]
-        if recovered:
-            print("\nRecovered sites (please close manually):")
-            print(", ".join(sorted(recovered)))
-
-    return 1 if failed else 0
+    save_html_summary(grouped, slow_t, very_slow_t)
+    return 0
 
 
 def main() -> None:

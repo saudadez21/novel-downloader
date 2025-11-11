@@ -141,7 +141,7 @@ class N8novelParser(BaseParser):
         wrapper = html.fromstring(f"<div>{html_list[1]}</div>")
 
         paragraphs: list[str] = []
-        image_positions: dict[int, list[str]] = {}
+        image_positions: dict[int, list[dict[str, Any]]] = {}
         image_idx = 0
 
         def append_para(txt: str | None) -> None:
@@ -160,18 +160,36 @@ class N8novelParser(BaseParser):
 
             # A picture‑gallery block
             if tag == "div" and "content-pics" in (node.get("class") or ""):
-                for img in node.xpath(".//img"):
-                    src = img.get("src")
-                    full = src if not src.startswith("/") else self.BASE_URL + src
-                    image_positions.setdefault(image_idx, []).append(full)
+                for src in node.xpath(".//img/@src"):
+                    src = src.strip()
+                    if not src:
+                        continue
+                    if src.startswith("//"):
+                        src = "https:" + src
+                    elif src.startswith("/"):
+                        src = self.BASE_URL + src
+                    image_positions.setdefault(image_idx, []).append(
+                        {
+                            "type": "url",
+                            "data": src,
+                        }
+                    )
                 append_para(node.tail)
 
             # Standalone img
             elif tag == "img":
-                src = node.get("src")
+                src = (node.get("src") or "").strip()
                 if src:
-                    full = src if not src.startswith("/") else self.BASE_URL + src
-                    image_positions.setdefault(image_idx, []).append(full)
+                    if src.startswith("//"):
+                        src = "https:" + src
+                    elif src.startswith("/"):
+                        src = self.BASE_URL + src
+                    image_positions.setdefault(image_idx, []).append(
+                        {
+                            "type": "url",
+                            "data": src,
+                        }
+                    )
                 append_para(node.tail)
 
             # Line break -> text in .tail is next paragraph
