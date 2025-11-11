@@ -47,6 +47,7 @@ DOWNLOAD_SUPPORT_SITES = {
     "lvsewx": "绿色小说网 (lvsewx)",
     "mangg_com": "追书网.com (mangg_com)",
     "mangg_net": "追书网.net (mangg_net)",
+    "mjyhb": "三五中文 (mjyhb)",
     "n8novel": "无限轻小说 (n8novel)",
     # "n8tsw": "笔趣阁 (n8tsw)",
     "n17k": "17K小说网 (n17k)",

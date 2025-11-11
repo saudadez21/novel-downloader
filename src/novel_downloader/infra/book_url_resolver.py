@@ -436,6 +436,15 @@ def extract_mangg_net(path: str, query: str) -> BookURLInfo | None:
     return None
 
 
+@register_extractor(["m.mjyhb.com"])
+def extract_mjyhb(path: str, query: str) -> BookURLInfo | None:
+    if m := re.search(r"^/read_([a-z0-9]+)/([a-z0-9]+)(?:_\d+)?\.html$", path, re.I):
+        return _make_info("mjyhb", m.group(1), m.group(2))
+    if m := re.search(r"^/info_([a-z0-9]+)/?$", path, re.I):
+        return _make_info("mjyhb", m.group(1), None)
+    return None
+
+
 @register_extractor(["101kanshu.com"])
 def extract_n101kanshu(path: str, query: str) -> BookURLInfo | None:
     if m := re.search("^/txt/(\\d+)/(\\d+)\\.html$", path):

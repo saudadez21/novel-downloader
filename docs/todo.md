@@ -412,8 +412,6 @@ user_prompt = "请翻译成中文：{text}"
   * 目录分页过多
   * 结构和 `小说之家` 几乎一样
 
-* [三五中文](https://m.mjyhb.com/)
-
 * [大灰狼小说聚合网](https://api.langge.cf/)
 
   * API 风格与当前框架不兼容，需要单独流程

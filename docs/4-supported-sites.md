@@ -196,6 +196,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [海外书包](https://www.haiwaishubao.com/)                  | haiwaishubao | ❌     | ❌     | ⚠️     | ✅     | 简      |
 | [红袖招](https://hongxiuzhao.net/)                          | hongxiuzhao | ❌     | ❌     | ⚠️     | ⚠️     | 简      |
 | [有爱爱](https://www.uaa.com/)                              | uaa         | ✅     | ❌     | ✅     | ⚠️     | 简      |
+| [三五中文](https://m.mjyhb.com/)                            | mjyhb       | ❌     | ❌     | ⚠️     | ⚠️     | 简      |
 
 #### 已归档站点
 
@@ -611,6 +612,10 @@ novel-cli download --site ttkan shengxu-chendong
 * **有爱爱 (uaa)**
   * 书籍: `https://www.uaa.com/novel/intro?id=11304099` -> Book ID: `11304099`
   * 章节: `https://www.uaa.com/novel/chapter?id=234639` -> Chapter ID: `234639`
+
+* **三五中文 (mjyhb)**
+  * 书籍: `https://m.mjyhb.com/info_3119/` -> Book ID: `3119`
+  * 章节: `https://m.mjyhb.com/read_3119/62d0d.html` -> Chapter ID: `62d0d`
 
 #### 已归档站点
 
