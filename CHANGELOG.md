@@ -1,3 +1,13 @@
+## v2.5.0 (2025-11-11)
+
+### Feat
+
+- **sites**: add new book sources and update media structure (#127)
+- **fetcher**: support optional backend via aiohttp / httpx / curl_cffi (#126)
+- **cli**: add interactive mode and new prompts module (#125)
+- **plugins**: merge downloader and exporter, add translator and new site supports (#124)
+- **scripts**: extract site data test flow from pytest into standalone script (#114)
+
 ## v2.4.1 (2025-10-18)
 
 ### Feat
