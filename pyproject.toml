@@ -123,7 +123,7 @@ omit = [
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "2.4.1"
+version = "2.5.0"
 version_files = [
     "src/novel_downloader/__init__.py"
 ]
