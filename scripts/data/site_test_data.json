@@ -994,6 +994,32 @@
         ]
       }
     ],
+    "tianyabooks": [
+      {
+        "book_id": "bl_novels-candy",
+        "chap_ids": [
+          "143693"
+        ]
+      },
+      {
+        "book_id": "book-Chernyshevsky_01",
+        "chap_ids": [
+          "5880"
+        ]
+      },
+      {
+        "book_id": "fantasy-SongOfFireAndIce6",
+        "chap_ids": [
+          "11201"
+        ]
+      },
+      {
+        "book_id": "world-Tazaki",
+        "chap_ids": [
+          "100078"
+        ]
+      }
+    ],
     "tongrenquan": [
       {
         "book_id": "9420",

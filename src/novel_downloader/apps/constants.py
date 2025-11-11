@@ -73,6 +73,7 @@ DOWNLOAD_SUPPORT_SITES = {
     "syosetu18": "小説家になろう (syosetu18)",
     "syosetu_org": "ハーメルン (syosetu_org)",
     "shuhaige": "书海阁小说网 (shuhaige)",
+    "tianyabooks": "天涯书库 (tianyabooks)",
     "tongrenquan": "同人圈 (tongrenquan)",
     "tongrenshe": "同人社 (tongrenshe)",
     "trxs": "同人小说网 (trxs)",

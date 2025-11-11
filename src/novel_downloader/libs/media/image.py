@@ -15,23 +15,25 @@ def detect_image_format(data: bytes) -> str | None:
     if len(data) < 12:
         return None
 
-    header = data[:64].strip()
+    header = data[:64]
 
     # --- common formats ---
     if header.startswith(b"\xff\xd8\xff"):
         return "jpeg"
     if header.startswith(b"\x89PNG\r\n\x1a\n"):
         return "png"
-    if header.startswith(b"GIF87a") or header.startswith(b"GIF89a"):
+    if header.startswith((b"GIF87a", b"GIF89a")):
         return "gif"
     if header[:4] == b"RIFF" and header[8:12] == b"WEBP":
         return "webp"
     if header.startswith(b"BM"):
         return "bmp"
-    if header[:2] in (b"II", b"MM"):
+    if header[:4] in (b"II*\x00", b"MM\x00*"):
         return "tiff"
     if header[:4] == b"\x00\x00\x01\x00":
         return "ico"
+    if header[:4] == b"\x00\x00\x02\x00":
+        return "cur"
 
     # --- svg / xml-based ---
     lower_head = header.lower()
@@ -45,6 +47,15 @@ def detect_image_format(data: bytes) -> str | None:
     #     return "rast"  # Sun raster
     # if header.startswith(b"#define "):
     #     return "xbm"  # X bitmap (ASCII text image)
+
+    # if header.startswith(b"8BPS"):
+    #     return "psd"
+    # if header.startswith(b"\x00\x00\x00\x0CjP  "):
+    #     return "jp2"
+    # if b"ftypheic" in header[:12] or b"ftypheix" in header[:12]:
+    #     return "heic"
+    # if b"ftypavif" in header[:12]:
+    #     return "avif"
 
     # # PBM/PGM/PPM (Netpbm formats)
     # if len(header) >= 3 and header[0] == ord(b"P"):

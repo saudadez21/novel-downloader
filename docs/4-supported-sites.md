@@ -113,6 +113,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [鲲弩小说](https://www.kunnu.com/)                           | kunnu     | ✅     | ❌     | ❌     | ❌     | 简      |
 | [西方奇幻小说网](https://www.westnovel.com/)                 | westnovel | ❌     | ❌     | ❌     | ⚠️     | 简     |
 | [西方奇幻小说网子站点](https://www.westnovel.com/)        | westnovel_sub | ❌     | ❌     | ❌     | ⚠️     | 简     |
+| [天涯书库](https://www.tianyabooks.com/)                   | tianyabooks | ✅     | ❌     | ❌     | ⚠️     | 简     |
 
 #### 类笔趣阁 / 第三方转载站
 
@@ -353,6 +354,10 @@ novel-cli download --site ttkan shengxu-chendong
 * **西方奇幻小说网子站点 (westnovel_sub)**
   * 书籍: `https://www.westnovel.com/q/list/725.html` -> Book ID: `q-list-725`
   * 章节: `https://www.westnovel.com/q/showinfo-2-40238-0.html` -> Chapter ID: `2-40238-0`
+
+* **天涯书库 (tianyabooks)**
+  * 书籍: `https://www.tianyabooks.com/net/changshengjie/` -> Book ID: `net-changshengjie`
+  * 章节: `https://www.tianyabooks.com/net/changshengjie/59453.html` -> Chapter ID: `59453`
 
 #### 类笔趣阁 / 第三方转载站
 

@@ -681,6 +681,17 @@ def extract_syosetu(path: str, query: str) -> BookURLInfo | None:
     return None
 
 
+@register_extractor(["www.tianyabooks.com"])
+def extract_tianyabooks(path: str, query: str) -> BookURLInfo | None:
+    if m := re.match(r"^/([^/]+)/([^/]+)/(\d+)\.html$", path):
+        category, book, chap_id = m.groups()
+        return _make_info("tianyabooks", f"{category}-{book}", chap_id)
+    if m := re.match(r"^/([^/]+)/([^/]+)/?$", path):
+        category, book = m.groups()
+        return _make_info("tianyabooks", f"{category}-{book}", None)
+    return None
+
+
 @register_extractor(["www.tongrenquan.org"])
 def extract_tongrenquan(path: str, query: str) -> BookURLInfo | None:
     if m := re.search("^/tongren/(\\d+)/(\\d+)\\.html$", path):
