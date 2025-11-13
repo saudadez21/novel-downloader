@@ -34,14 +34,14 @@ class ShaoniandreamParser(BaseParser):
 
     def parse_book_info(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        if len(html_list) < 2:
+        if len(raw_pages) < 2:
             return None
 
-        info_tree = html.fromstring(html_list[0])
-        catalog_data = json.loads(html_list[1])
+        info_tree = html.fromstring(raw_pages[0])
+        catalog_data = json.loads(raw_pages[1])
         data = catalog_data.get("data", {})
         readdir = data.get("readdir", [])
 
@@ -110,16 +110,16 @@ class ShaoniandreamParser(BaseParser):
             "extra": {},
         }
 
-    def parse_chapter(
+    def parse_chapter_content(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        if not html_list:
+        if not raw_pages:
             return None
 
-        raw_json = json.loads(html_list[0])
+        raw_json = json.loads(raw_pages[0])
         if raw_json.get("status") != 1:
             raise ValueError("Invalid chapter response")
 

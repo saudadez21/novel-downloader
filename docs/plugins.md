@@ -64,8 +64,8 @@ class FetcherProtocol(Protocol):
         attempt: int = 1,
         **kwargs: Any,
     ) -> bool: ...
-    async def get_book_info(self, book_id: str, **kwargs: Any) -> list[str]: ...
-    async def get_book_chapter(self, book_id: str, chapter_id: str, **kwargs: Any) -> list[str]: ...
+    async def fetch_book_info(self, book_id: str, **kwargs: Any) -> list[str]: ...
+    async def fetch_chapter_content(self, book_id: str, chapter_id: str, **kwargs: Any) -> list[str]: ...
 
     @property
     def is_logged_in(self) -> bool: ...
@@ -101,11 +101,11 @@ class B520Fetcher(BaseFetcher):
     BOOK_INFO_URL = "http://www.b520.cc/{book_id}/"
     CHAPTER_URL   = "http://www.b520.cc/{book_id}/{chapter_id}.html"
 
-    async def get_book_info(self, book_id: str, **kwargs: Any) -> list[str]:
+    async def fetch_book_info(self, book_id: str, **kwargs: Any) -> list[str]:
         url = self.BOOK_INFO_URL.format(book_id=book_id)
         return [await self.fetch(url, headers={"Referer": "http://www.b520.cc/"})]
 
-    async def get_book_chapter(self, book_id: str, chapter_id: str, **kwargs: Any) -> list[str]:
+    async def fetch_chapter_content(self, book_id: str, chapter_id: str, **kwargs: Any) -> list[str]:
         url = self.CHAPTER_URL.format(book_id=book_id, chapter_id=chapter_id)
         return [await self.fetch(url, headers={"Referer": "http://www.b520.cc/"}, encoding="gbk")]
 ```
@@ -180,12 +180,12 @@ class I25zwFetcher(GenericFetcher):
 class ParserProtocol(Protocol):
     def parse_book_info(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None: ...
-    def parse_chapter(
+    def parse_chapter_content(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None: ...
@@ -237,11 +237,11 @@ from novel_downloader.schemas import BookInfoDict, ChapterDict, ChapterInfoDict,
 class AaatxtParser(BaseParser):
     site_name: str = "aaatxt"
 
-    def parse_book_info(self, html_list: list[str], **kwargs: Any) -> BookInfoDict | None:
-        if not html_list:
+    def parse_book_info(self, raw_pages: list[str], **kwargs: Any) -> BookInfoDict | None:
+        if not raw_pages:
             return None
 
-        tree = html.fromstring(html_list[0])
+        tree = html.fromstring(raw_pages[0])
         book_name = self._first_str(tree.xpath("//div[@class='xiazai']/h1/text()"))
         author    = self._first_str(tree.xpath("//span[@id='author']/a/text()"))
         cover_url = self._first_str(tree.xpath("//div[@id='txtbook']//div[@class='fm']//img/@src"))
@@ -268,10 +268,10 @@ class AaatxtParser(BaseParser):
             "extra": {"download_url": download_url},
         }
 
-    def parse_chapter(self, html_list: list[str], chapter_id: str, **kwargs: Any) -> ChapterDict | None:
-        if not html_list:
+    def parse_chapter_content(self, raw_pages: list[str], chapter_id: str, **kwargs: Any) -> ChapterDict | None:
+        if not raw_pages:
             return None
-        tree = html.fromstring(html_list[0])
+        tree = html.fromstring(raw_pages[0])
         raw_title = self._first_str(tree.xpath("//div[@id='content']//h1/text()"))
         title = raw_title.split("-", 1)[-1].strip()
 

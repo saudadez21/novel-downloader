@@ -74,13 +74,13 @@ class QidianParser(BaseParser):
 
     def parse_book_info(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        if not html_list:
+        if not raw_pages:
             return None
 
-        doc = html.fromstring(html_list[0])
+        doc = html.fromstring(raw_pages[0])
 
         # --- Book name ---
         book_name = self._first_str(doc.xpath('//h1[@id="bookName"]/text()'))
@@ -184,17 +184,17 @@ class QidianParser(BaseParser):
             "extra": {},
         }
 
-    def parse_chapter(
+    def parse_chapter_content(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        if not html_list:
-            logger.warning("qidian parser: html_list is empty (chapter=%s)", chapter_id)
+        if not raw_pages:
+            logger.warning("qidian parser: raw_pages is empty (chapter=%s)", chapter_id)
             return None
         try:
-            ssr_data = self._find_ssr_page_context(html_list[0])
+            ssr_data = self._find_ssr_page_context(raw_pages[0])
             chapter_info = self._extract_chapter_info(ssr_data)
         except Exception as e:
             logger.warning(

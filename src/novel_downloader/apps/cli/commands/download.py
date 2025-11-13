@@ -167,7 +167,7 @@ class DownloadCmd(Command):
                             return
 
                     for book in books:
-                        await client.download(book, ui=download_ui)
+                        await client.download_book(book, ui=download_ui)
             except ValueError as e:
                 ui.warn(
                     t("'{site}' is currently not supported: {err}").format(
@@ -189,12 +189,12 @@ class DownloadCmd(Command):
             export_ui = CLIExportUI()
 
             for book in download_ui.completed_books:
-                client.process(
+                client.process_book(
                     book,
                     processors=adapter.get_processor_configs(site),
                     ui=process_ui,
                 )
-                client.export(
+                client.export_book(
                     book,
                     cfg=adapter.get_exporter_config(site),
                     formats=formats,

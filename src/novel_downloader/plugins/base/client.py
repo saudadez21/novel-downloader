@@ -14,7 +14,7 @@ import types
 from pathlib import Path
 from typing import Any, Protocol, Self, cast
 
-from novel_downloader.libs.filesystem import img_name
+from novel_downloader.libs.filesystem import image_filename
 from novel_downloader.plugins.protocols import FetcherProtocol, ParserProtocol
 from novel_downloader.plugins.protocols.ui import (
     DownloadUI,
@@ -37,6 +37,7 @@ from novel_downloader.schemas import (
 )
 
 ONE_DAY = 86400  # seconds
+logger = logging.getLogger(__name__)
 
 
 class AbstractClient(abc.ABC):
@@ -76,8 +77,6 @@ class AbstractClient(abc.ABC):
         self._output_dir = Path(cfg.output_dir)
         self._debug_dir = Path.cwd() / "debug" / site
 
-        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
-
     async def init(self, fetcher_cfg: FetcherConfig, parser_cfg: ParserConfig) -> None:
         if self._fetcher or self._parser:
             await self.close()
@@ -109,7 +108,6 @@ class AbstractClient(abc.ABC):
         """
         ...
 
-    @abc.abstractmethod
     async def download(
         self,
         book: BookConfig,
@@ -121,13 +119,43 @@ class AbstractClient(abc.ABC):
         Download a single book.
 
         :param book: BookConfig with at least 'book_id'.
-        :param cancel_event: Optional asyncio.Event to allow cancellation.
+        :param ui: Optional DownloadUI to report progress or messages.
+        """
+        await self.download_book(book, ui=ui, **kwargs)
+
+    @abc.abstractmethod
+    async def download_book(
+        self,
+        book: BookConfig,
+        *,
+        ui: DownloadUI | None = None,
+        **kwargs: Any,
+    ) -> None:
+        """
+        Download a single book.
+
+        :param book: BookConfig with at least ``book_id``.
         :param ui: Optional DownloadUI to report progress or messages.
         """
         ...
 
     @abc.abstractmethod
-    def process(
+    async def download_chapter(
+        self,
+        book_id: str,
+        chapter_id: str,
+        **kwargs: Any,
+    ) -> None:
+        """
+        Download a specific chapter by its identifier.
+
+        :param book_id: Identifier of the book to download.
+        :param chapter_id: Identifier of the chapter to download.
+        """
+        ...
+
+    @abc.abstractmethod
+    def process_book(
         self,
         book: BookConfig,
         processors: list[ProcessorConfig],
@@ -144,7 +172,7 @@ class AbstractClient(abc.ABC):
         ...
 
     @abc.abstractmethod
-    async def cache_images(
+    async def cache_medias(
         self,
         book: BookConfig,
         *,
@@ -161,7 +189,6 @@ class AbstractClient(abc.ABC):
         """
         ...
 
-    @abc.abstractmethod
     def export(
         self,
         book: BookConfig,
@@ -180,6 +207,59 @@ class AbstractClient(abc.ABC):
         :param formats: Optional list of format strings (e.g., ['epub', 'txt']).
         :param ui: Optional ExportUI for reporting export progress.
         :return: A mapping from format name to the resulting file path.
+        """
+        return self.export_book(
+            book=book,
+            cfg=cfg,
+            formats=formats,
+            stage=stage,
+            ui=ui,
+            **kwargs,
+        )
+
+    @abc.abstractmethod
+    def export_book(
+        self,
+        book: BookConfig,
+        cfg: ExporterConfig | None = None,
+        *,
+        formats: list[str] | None = None,
+        stage: str | None = None,
+        ui: ExportUI | None = None,
+        **kwargs: Any,
+    ) -> dict[str, list[Path]]:
+        """
+        Persist the assembled book to disk in one or more formats.
+
+        :param book: The :class:`BookConfig` instance to export.
+        :param cfg: Optional :class:`ExporterConfig` defining export parameters.
+        :param formats: Optional list of format identifiers (e.g. ``['epub', 'txt']``).
+        :param stage: Optional export stage name, used for multi-phase exports.
+        :param ui: Optional :class:`ExportUI` for reporting progress.
+        :return: Mapping from format name to generated file paths.
+        """
+        ...
+
+    @abc.abstractmethod
+    def export_chapter(
+        self,
+        book_id: str,
+        chapter_id: str,
+        cfg: ExporterConfig | None = None,
+        *,
+        formats: list[str] | None = None,
+        stage: str | None = None,
+        **kwargs: Any,
+    ) -> dict[str, list[Path]]:
+        """
+        Persist a single chapter to disk in one or more formats.
+
+        :param book_id: Identifier of the book to download.
+        :param chapter_id: Identifier of the chapter to download.
+        :param cfg: Optional :class:`ExporterConfig` defining export parameters.
+        :param formats: Optional list of format identifiers (e.g. ``['epub', 'txt']``).
+        :param stage: Optional export stage name.
+        :return: Mapping from format name to generated file paths.
         """
         ...
 
@@ -244,7 +324,7 @@ class BaseClient(AbstractClient, abc.ABC):
     Abstract intermediate client that provides reusable helper methods.
     """
 
-    def export(
+    def export_book(
         self,
         book: BookConfig,
         cfg: ExporterConfig | None = None,
@@ -289,13 +369,37 @@ class BaseClient(AbstractClient, abc.ABC):
 
             except Exception as e:
                 results[fmt] = []
-                self.logger.warning(f"Error exporting {fmt}: {e}")
+                logger.warning(f"Error exporting {fmt}: {e}")
                 if ui:
                     ui.on_error(book, fmt, e)
 
         return results
 
-    async def _get_book_info(self, book_id: str) -> BookInfoDict:
+    def export_chapter(
+        self,
+        book_id: str,
+        chapter_id: str,
+        cfg: ExporterConfig | None = None,
+        *,
+        formats: list[str] | None = None,
+        stage: str | None = None,
+        **kwargs: Any,
+    ) -> dict[str, list[Path]]:
+        """
+        Persist the assembled chapter to disk.
+
+        :param cfg: Optional ExporterConfig defining export parameters.
+        :param formats: Optional list of format strings (e.g., ['epub', 'txt']).
+        :return: A mapping from format name to the resulting file path.
+        """
+        # TODO: placeholder
+        return {}
+
+    async def get_book_info(
+        self,
+        book_id: str,
+        **kwargs: Any,
+    ) -> BookInfoDict:
         """
         Attempt to fetch and parse the book_info for a given book_id.
 
@@ -308,13 +412,13 @@ class BaseClient(AbstractClient, abc.ABC):
             if book_info and time.time() - book_info.get("last_checked", 0.0) < ONE_DAY:
                 return book_info
         except FileNotFoundError as exc:
-            self.logger.debug("No cached book_info found for %s: %s", book_id, exc)
+            logger.debug("No cached book_info found for %s: %s", book_id, exc)
         except Exception as exc:
-            self.logger.info("Failed to load cached book_info for %s: %s", book_id, exc)
+            logger.info("Failed to load cached book_info for %s: %s", book_id, exc)
 
         try:
-            info_html = await self.fetcher.get_book_info(book_id)
-            self._save_html_pages(book_id, "info", info_html)
+            info_html = await self.fetcher.fetch_book_info(book_id)
+            self._save_raw_pages(book_id, "info", info_html)
 
             book_info = self.parser.parse_book_info(info_html)
             if book_info:
@@ -323,9 +427,7 @@ class BaseClient(AbstractClient, abc.ABC):
                 return book_info
 
         except Exception as exc:
-            self.logger.warning(
-                "Failed to fetch/parse book_info for %s: %s", book_id, exc
-            )
+            logger.warning("Failed to fetch/parse book_info for %s: %s", book_id, exc)
 
         if book_info is None:
             raise LookupError(f"Unable to load book_info for {book_id}")
@@ -373,11 +475,11 @@ class BaseClient(AbstractClient, abc.ABC):
 
         return cast(BookInfoDict, data)
 
-    def _save_html_pages(
+    def _save_raw_pages(
         self,
         book_id: str,
         filename: str,
-        html_list: list[str],
+        raw_pages: list[str],
         *,
         folder: str = "html",
     ) -> None:
@@ -388,13 +490,13 @@ class BaseClient(AbstractClient, abc.ABC):
 
         :param book_id: The book identifier
         :param filename: used as filename prefix
-        :param html_list: list of HTML strings to save
+        :param raw_pages: list of HTML strings to save
         """
         if not self._save_html:
             return
         html_dir = self._debug_dir / folder
         html_dir.mkdir(parents=True, exist_ok=True)
-        for i, html in enumerate(html_list):
+        for i, html in enumerate(raw_pages):
             (html_dir / f"{book_id}_{filename}_{i}.html").write_text(
                 html, encoding="utf-8"
             )
@@ -426,7 +528,7 @@ class BaseClient(AbstractClient, abc.ABC):
             name += f"_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         return f"{name}.{ext}"
 
-    def _collect_img_map(self, chap: ChapterDict) -> dict[int, list[dict[str, Any]]]:
+    def _build_image_map(self, chap: ChapterDict) -> dict[int, list[dict[str, Any]]]:
         """
         Collect and normalize `image_positions` into {int: [ {type, data, ...}, ... ]}.
         """
@@ -468,11 +570,11 @@ class BaseClient(AbstractClient, abc.ABC):
                 result.setdefault(key, []).extend(items)
         return result
 
-    def _extract_img_urls(self, chap: ChapterDict) -> list[str]:
+    def _extract_image_urls(self, chap: ChapterDict) -> list[str]:
         """
         Extract all image URLs from 'extra' field.
         """
-        img_map = self._collect_img_map(chap)
+        img_map = self._build_image_map(chap)
         urls: list[str] = []
         for imgs in img_map.values():
             for img in imgs:
@@ -481,7 +583,7 @@ class BaseClient(AbstractClient, abc.ABC):
         return urls
 
     @staticmethod
-    def _resolve_img_path(
+    def _resolve_image_path(
         img_dir: Path | None,
         url: str | None,
         *,
@@ -498,11 +600,11 @@ class BaseClient(AbstractClient, abc.ABC):
         if not img_dir or not url:
             return None
 
-        path = img_dir / img_name(url, name=name)
+        path = img_dir / image_filename(url, name=name)
         return path if path.is_file() else None
 
     @staticmethod
-    def _select_chapter_ids(
+    def _extract_chapter_ids(
         vols: list[VolumeInfoDict],
         start_id: str | None,
         end_id: str | None,
@@ -587,9 +689,10 @@ class BaseClient(AbstractClient, abc.ABC):
 
         return result
 
-    def _resolve_stage_selection(self, book_id: str) -> str:
+    def _detect_latest_stage(self, book_id: str) -> str:
         """
         Return the chosen stage name for export (e.g., 'raw', 'cleaner', 'corrector').
+
         Strategy:
           * If pipeline.json exists, walk pipeline in reverse and pick the last stage
             whose recorded sqlite file exists.

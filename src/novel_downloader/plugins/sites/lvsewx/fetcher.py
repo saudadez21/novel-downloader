@@ -21,7 +21,7 @@ class LvsewxFetcher(BaseFetcher):
     BOOK_INFO_URL = "https://www.lvsewx.cc/ebook/{bid}.html"
     CHAPTER_URL = "https://www.lvsewx.cc/books/{prefix}/{bid}/{cid}.html"
 
-    async def get_book_info(
+    async def fetch_book_info(
         self,
         book_id: str,
         **kwargs: Any,
@@ -29,7 +29,7 @@ class LvsewxFetcher(BaseFetcher):
         url = self.BOOK_INFO_URL.format(bid=book_id)
         return [await self.fetch(url, encoding="gbk", **kwargs)]
 
-    async def get_book_chapter(
+    async def fetch_chapter_content(
         self,
         book_id: str,
         chapter_id: str,

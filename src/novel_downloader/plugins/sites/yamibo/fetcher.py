@@ -5,6 +5,7 @@ novel_downloader.plugins.sites.yamibo.fetcher
 
 """
 
+import logging
 from collections.abc import Mapping
 from typing import Any
 
@@ -12,6 +13,8 @@ from lxml import html
 from novel_downloader.plugins.base.fetcher import BaseFetcher
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import LoginField
+
+logger = logging.getLogger(__name__)
 
 
 @registrar.register_fetcher()
@@ -45,11 +48,11 @@ class YamiboFetcher(BaseFetcher):
 
         if await self._check_login_status():
             self._is_logged_in = True
-            self.logger.debug("Logged in via cookies: yamibo")
+            logger.debug("Logged in via cookies: yamibo")
             return True
 
         if not (username and password):
-            self.logger.warning("No credentials provided: yamibo")
+            logger.warning("No credentials provided: yamibo")
             return False
 
         for _ in range(attempt):
@@ -64,7 +67,7 @@ class YamiboFetcher(BaseFetcher):
         self._is_logged_in = False
         return False
 
-    async def get_book_info(
+    async def fetch_book_info(
         self,
         book_id: str,
         **kwargs: Any,
@@ -72,7 +75,7 @@ class YamiboFetcher(BaseFetcher):
         url = self.book_info_url(book_id=book_id)
         return [await self.fetch(url, **kwargs)]
 
-    async def get_book_chapter(
+    async def fetch_chapter_content(
         self,
         book_id: str,
         chapter_id: str,
@@ -145,11 +148,11 @@ class YamiboFetcher(BaseFetcher):
         try:
             resp_1 = await self.session.get(self.LOGIN_URL)
         except Exception as exc:
-            self.logger.warning("yamibo _api_login failed at step 1 (request): %s", exc)
+            logger.warning("yamibo _api_login failed at step 1 (request): %s", exc)
             return False
 
         if not resp_1.ok:
-            self.logger.warning(
+            logger.warning(
                 "yamibo _api_login HTTP error at step 1: %s, status=%s",
                 self.LOGIN_URL,
                 resp_1.status,
@@ -161,11 +164,11 @@ class YamiboFetcher(BaseFetcher):
             csrf_value_list = tree.xpath('//input[@name="_csrf-frontend"]/@value')
             csrf_value = csrf_value_list[0] if csrf_value_list else ""
         except Exception as exc:
-            self.logger.warning("yamibo _api_login parse error at step 1: %s", exc)
+            logger.warning("yamibo _api_login parse error at step 1: %s", exc)
             return False
 
         if not csrf_value:
-            self.logger.warning("yamibo _api_login: CSRF token not found.")
+            logger.warning("yamibo _api_login: CSRF token not found.")
             return False
 
         data_2 = {
@@ -187,11 +190,11 @@ class YamiboFetcher(BaseFetcher):
                 self.LOGIN_URL, data=data_2, headers=headers
             )
         except Exception as exc:
-            self.logger.warning("yamibo _api_login failed at step 2 (request): %s", exc)
+            logger.warning("yamibo _api_login failed at step 2 (request): %s", exc)
             return False
 
         if not resp_2.ok:
-            self.logger.warning(
+            logger.warning(
                 "yamibo _api_login HTTP error at step 2: %s, status=%s",
                 self.LOGIN_URL,
                 resp_2.status,

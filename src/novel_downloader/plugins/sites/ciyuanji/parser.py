@@ -37,13 +37,13 @@ class CiyuanjiParser(BaseParser):
 
     def parse_book_info(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        if not html_list:
+        if not raw_pages:
             return None
 
-        data = self._find_next_data(html_list[0])
+        data = self._find_next_data(raw_pages[0])
         if not data:
             logger.warning("ciyuanji book_info: __NEXT_DATA__ not found")
             return None
@@ -69,25 +69,25 @@ class CiyuanjiParser(BaseParser):
             "extra": {},
         }
 
-    def parse_chapter(
+    def parse_chapter_content(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        if not html_list:
-            logger.warning("ciyuanji chapter %s: html_list is empty", chapter_id)
+        if not raw_pages:
+            logger.warning("ciyuanji chapter %s: raw_pages is empty", chapter_id)
             return None
 
-        if self._check_login(html_list[0]):
+        if self._check_login(raw_pages[0]):
             logger.warning("ciyuanji chapter %s: VIP login required", chapter_id)
             return None
 
-        if self._check_unlock(html_list[0]):
+        if self._check_unlock(raw_pages[0]):
             logger.warning("ciyuanji chapter %s: locked (need purchase)", chapter_id)
             return None
 
-        data = self._find_next_data(html_list[0])
+        data = self._find_next_data(raw_pages[0])
         if not data:
             logger.warning("ciyuanji chapter %s: __NEXT_DATA__ not found", chapter_id)
             return None

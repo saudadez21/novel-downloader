@@ -74,6 +74,7 @@ where = ["src"]
 include = ["novel_downloader", "novel_downloader.*"]
 
 [tool.setuptools.package-data]
+"novel_downloader" = ["py.typed"]
 "novel_downloader.resources.config" = ["*.toml"]
 "novel_downloader.resources.text" = ["*.txt"]
 "novel_downloader.resources.js_scripts" = ["*.js"]

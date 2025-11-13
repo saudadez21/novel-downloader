@@ -33,14 +33,14 @@ class SfacgParser(BaseParser):
 
     def parse_book_info(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        if len(html_list) < 2:
+        if len(raw_pages) < 2:
             return None
 
-        info_tree = html.fromstring(html_list[0])
-        catalog_tree = html.fromstring(html_list[1])
+        info_tree = html.fromstring(raw_pages[0])
+        catalog_tree = html.fromstring(raw_pages[1])
 
         # Book metadata
         book_name = self._first_str(
@@ -118,29 +118,29 @@ class SfacgParser(BaseParser):
             "extra": {},
         }
 
-    def parse_chapter(
+    def parse_chapter_content(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        if not html_list:
+        if not raw_pages:
             return None
 
         # check if chapter is locked
         keywords = ["本章为VIP章节"]  # 本章为VIP章节，订阅后可立即阅读
-        if any(kw in html_list[0] for kw in keywords):
+        if any(kw in raw_pages[0] for kw in keywords):
             return None
 
-        tree = html.fromstring(html_list[0])
+        tree = html.fromstring(raw_pages[0])
         content = ""
         image_positions: dict[int, list[dict[str, Any]]] = {}
 
-        is_vip = "/ajax/ashx/common.ashx" in html_list[0]
+        is_vip = "/ajax/ashx/common.ashx" in raw_pages[0]
 
         # case: VIP chapter -> needs OCR from base64 image
         if is_vip:
-            if len(html_list) < 2:
+            if len(raw_pages) < 2:
                 logger.warning("sfacg chapter %s :: missing VIP img data", chapter_id)
                 return None
 
@@ -153,13 +153,13 @@ class SfacgParser(BaseParser):
                 image_positions[0] = [
                     {
                         "type": "base64",
-                        "data": html_list[1].strip(),
+                        "data": raw_pages[1].strip(),
                         "mime": "image/gif",
                     }
                 ]
 
             else:
-                content = self.parse_vip_chapter(html_list[1])
+                content = self.parse_vip_chapter(raw_pages[1])
 
         # case: normal HTML text chapter
         else:

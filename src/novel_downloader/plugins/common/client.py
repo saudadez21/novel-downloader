@@ -6,6 +6,7 @@ novel_downloader.plugins.common.client
 
 import asyncio
 import base64
+import logging
 from html import escape
 from pathlib import Path
 from typing import Any, Final, final
@@ -36,6 +37,8 @@ from novel_downloader.schemas import (
     ProcessorConfig,
     VolumeInfoDict,
 )
+
+logger = logging.getLogger(__name__)
 
 
 @final
@@ -84,7 +87,7 @@ class CommonClient(BaseClient):
             ui.on_login_success()
         return True
 
-    async def download(
+    async def download_book(
         self,
         book: BookConfig,
         *,
@@ -94,7 +97,7 @@ class CommonClient(BaseClient):
         """
         Download a single book.
 
-        :param book: BookConfig with at least 'book_id'.
+        :param book: BookConfig with at least ``book_id``.
         :param ui: Optional DownloadUI to report progress or messages.
         """
         book_id = book.book_id
@@ -109,20 +112,20 @@ class CommonClient(BaseClient):
             await ui.on_start(book)
 
         # ---- metadata ---
-        book_info = await self._get_book_info(book_id=book_id)
+        book_info = await self.get_book_info(book_id=book_id)
         with ChapterStorage(raw_base, filename="chapter.raw.sqlite") as storage:
-            book_info = await self._repair_chapter_ids(
+            book_info = await self._dl_fix_chapter_ids(
                 book_id,
                 book_info,
                 storage,
             )
 
-        await self._download_info_images(book_id, book_info)
+        await self._fetch_info_images(book_id, book_info)
 
         vols = book_info["volumes"]
-        plan = self._select_chapter_ids(vols, start_id, end_id, ignore_set)
+        plan = self._extract_chapter_ids(vols, start_id, end_id, ignore_set)
         if not plan:
-            self.logger.info(
+            logger.info(
                 "Nothing to do after filtering (site=%s, book=%s)", self._site, book_id
             )
             return
@@ -152,7 +155,7 @@ class CommonClient(BaseClient):
                 # need_refetch=True for encrypted, False for plain
                 storage.upsert_chapters(batch, need_refetch=need_refetch)
             except Exception as e:
-                self.logger.error(
+                logger.error(
                     "Storage batch upsert failed (site=%s, book=%s, size=%d, need_refetch=%s): %s",  # noqa: E501
                     self._site,
                     book_id,
@@ -176,7 +179,7 @@ class CommonClient(BaseClient):
                 if isinstance(item, StopToken):
                     break
 
-                need = self._need_refetch(item)
+                need = self._dl_check_refetch(item)
                 bucket = _batch(need)
                 bucket.append(item)
                 if len(bucket) >= self._storage_batch_size:
@@ -189,7 +192,7 @@ class CommonClient(BaseClient):
                     await bump(1)
                     return
 
-                chap = await self._process_chapter(book_id, cid)
+                chap = await self.get_chapter(book_id, cid)
                 if chap is not None:
                     await save_q.put(chap)
 
@@ -211,13 +214,13 @@ class CommonClient(BaseClient):
                 await save_q.put(STOP)
                 await storage_task
             except asyncio.CancelledError:
-                self.logger.info("Download cancelled, stopping storage worker...")
+                logger.info("Download cancelled, stopping storage worker...")
                 await save_q.put(STOP)
 
                 try:
                     await asyncio.wait_for(storage_task, timeout=10)
                 except TimeoutError:
-                    self.logger.warning("Storage worker did not exit, cancelling.")
+                    logger.warning("Storage worker did not exit, cancelling.")
                     storage_task.cancel()
                     await asyncio.gather(storage_task, return_exceptions=True)
 
@@ -231,13 +234,23 @@ class CommonClient(BaseClient):
         if ui:
             await ui.on_complete(book)
 
-        self.logger.info(
+        logger.info(
             "Download completed for site=%s book=%s",
             self._site,
             book_id,
         )
 
-    def process(
+    async def download_chapter(
+        self,
+        book_id: str,
+        chapter_id: str,
+        **kwargs: Any,
+    ) -> None:
+        """Download a single chapter."""
+        # TODO: placeholder
+        return
+
+    def process_book(
         self,
         book: BookConfig,
         processors: list[ProcessorConfig],
@@ -289,19 +302,17 @@ class CommonClient(BaseClient):
                 if ui:
                     ui.on_stage_complete(book, stage_name)
 
-            self.logger.info(
-                "All stages completed successfully for book %s", book.book_id
-            )
+            logger.info("All stages completed successfully for book %s", book.book_id)
 
         except Exception as e:
-            self.logger.warning(
+            logger.warning(
                 "Processing failed at stage '%s' for book %s: %s",
                 stage_name,
                 book.book_id,
                 e,
             )
 
-    async def cache_images(
+    async def cache_medias(
         self,
         book: BookConfig,
         *,
@@ -327,12 +338,12 @@ class CommonClient(BaseClient):
 
         # ---- metadata ---
         book_info = self._load_book_info(book_id=book_id)
-        await self._download_info_images(book_id, book_info)
+        await self._fetch_info_images(book_id, book_info)
 
         vols = book_info["volumes"]
-        plan = self._select_chapter_ids(vols, start_id, end_id, ignore_set)
+        plan = self._extract_chapter_ids(vols, start_id, end_id, ignore_set)
         if not plan:
-            self.logger.info(
+            logger.info(
                 "Nothing to do after filtering (site=%s, book=%s)", self._site, book_id
             )
             return
@@ -343,12 +354,12 @@ class CommonClient(BaseClient):
                 if chap is None:
                     continue
 
-                imgs = self._extract_img_urls(chap)
-                await self.fetcher.download_images(
+                imgs = self._extract_image_urls(chap)
+                await self.fetcher.fetch_images(
                     img_dir,
                     imgs,
-                    batch_size=concurrent,
                     on_exist="overwrite" if force_update else "skip",
+                    concurrent=concurrent,
                 )
 
     def export_as_txt(
@@ -373,14 +384,14 @@ class CommonClient(BaseClient):
         if not raw_base.is_dir():
             return []
 
-        stage = stage or self._resolve_stage_selection(book_id)
+        stage = stage or self._detect_latest_stage(book_id)
         book_info = self._load_book_info(book_id, stage=stage)
 
         # --- Filter volumes & chapters ---
         orig_vols = book_info.get("volumes", [])
         vols = self._filter_volumes(orig_vols, start_id, end_id, ignore_set)
         if not vols:
-            self.logger.info(
+            logger.info(
                 "Nothing to do after filtering (site=%s, book=%s)", self._site, book_id
             )
             return []
@@ -388,14 +399,14 @@ class CommonClient(BaseClient):
         # --- Prepare header (book metadata) ---
         name = book_info["book_name"]
         author = book_info.get("author") or ""
-        header_txt = self._build_txt_header(book_info, name, author)
+        header_txt = self._xp_txt_header(book_info, name, author)
 
         # --- Build body by volumes & chapters ---
         parts: list[str] = [header_txt]
         with ChapterStorage(raw_base, filename=f"chapter.{stage}.sqlite") as storage:
             for v_idx, volume in enumerate(vols, start=1):
                 vol_title = volume.get("volume_name") or f"卷 {v_idx}"
-                parts.append(self._build_txt_volume_heading(vol_title, volume))
+                parts.append(self._xp_txt_volume_heading(vol_title, volume))
 
                 # Collect chapter ids then batch fetch
                 cids = [
@@ -416,7 +427,7 @@ class CommonClient(BaseClient):
                     if not ch:
                         continue
 
-                    parts.append(self._build_txt_chapter(ch_title, ch))
+                    parts.append(self._xp_txt_chapter(ch_title, ch))
 
         final_text = "\n".join(parts)
 
@@ -434,11 +445,11 @@ class CommonClient(BaseClient):
             result = write_file(
                 content=final_text, filepath=out_path, on_exist="overwrite"
             )
-            self.logger.info(
+            logger.info(
                 "Exported TXT (site=%s, book=%s): %s", self._site, book_id, out_path
             )
         except Exception as e:
-            self.logger.error(
+            logger.error(
                 "Failed to write TXT (site=%s, book=%s) to %s: %s",
                 self._site,
                 book_id,
@@ -499,14 +510,14 @@ class CommonClient(BaseClient):
 
         img_dir = raw_base / "images"
 
-        stage = stage or self._resolve_stage_selection(book_id)
+        stage = stage or self._detect_latest_stage(book_id)
         book_info = self._load_book_info(book_id, stage=stage)
 
         # --- Filter volumes & chapters ---
         orig_vols = book_info.get("volumes", [])
         vols = self._filter_volumes(orig_vols, start_id, end_id, ignore_set)
         if not vols:
-            self.logger.info(
+            logger.info(
                 "Nothing to do after filtering (site=%s, book=%s)", self._site, book_id
             )
             return []
@@ -514,7 +525,7 @@ class CommonClient(BaseClient):
         # --- Prepare header (book metadata) ---
         name = book_info["book_name"]
         author = book_info.get("author") or ""
-        cover_path = self._resolve_img_path(
+        cover_path = self._resolve_image_path(
             img_dir, book_info.get("cover_url"), name="cover"
         )
         cover = cover_path.read_bytes() if cover_path else None
@@ -561,7 +572,7 @@ class CommonClient(BaseClient):
                     if not ch:
                         continue
 
-                    chapter_obj = self._build_html_chapter(
+                    chapter_obj = self._xp_html_chapter(
                         builder=builder,
                         cid=cid,
                         chap_title=ch_title,
@@ -576,11 +587,11 @@ class CommonClient(BaseClient):
 
         try:
             out_path = builder.export(self._output_dir)
-            self.logger.info(
+            logger.info(
                 "Exported HTML (site=%s, book=%s): %s", self._site, book_id, out_path
             )
         except Exception as e:
-            self.logger.error(
+            logger.error(
                 "Failed to write HTML (site=%s, book=%s): %s",
                 self._site,
                 book_id,
@@ -614,14 +625,14 @@ class CommonClient(BaseClient):
         if cfg.include_picture:
             img_dir = raw_base / "images"
 
-        stage = stage or self._resolve_stage_selection(book_id)
+        stage = stage or self._detect_latest_stage(book_id)
         book_info = self._load_book_info(book_id, stage=stage)
 
         # --- Filter volumes & chapters ---
         orig_vols = book_info.get("volumes", [])
         vols = self._filter_volumes(orig_vols, start_id, end_id, ignore_set)
         if not vols:
-            self.logger.info(
+            logger.info(
                 "Nothing to do after filtering (site=%s, book=%s)", self._site, book_id
             )
             return []
@@ -632,7 +643,7 @@ class CommonClient(BaseClient):
         book_summary = book_info.get("summary", "")
 
         # --- Generate intro + cover ---
-        cover_path = self._resolve_img_path(img_dir, book_info.get("cover_url"))
+        cover_path = self._resolve_image_path(img_dir, book_info.get("cover_url"))
 
         css_text = EPUB_CSS_MAIN_PATH.read_text(encoding="utf-8")
         main_css = EpubStyleSheet(
@@ -645,7 +656,7 @@ class CommonClient(BaseClient):
             for v_idx, vol in enumerate(vols, start=1):
                 vol_title = vol.get("volume_name") or f"卷 {v_idx}"
 
-                vol_cover = self._resolve_img_path(img_dir, vol.get("volume_cover"))
+                vol_cover = self._resolve_image_path(img_dir, vol.get("volume_cover"))
                 vol_cover = vol_cover or cover_path
 
                 epub = EpubBuilder(
@@ -682,7 +693,7 @@ class CommonClient(BaseClient):
                     if not ch:
                         continue
 
-                    chapter_obj = self._build_epub_chapter(
+                    chapter_obj = self._xp_epub_chapter(
                         book=epub,
                         css=[main_css],
                         cid=cid,
@@ -700,14 +711,14 @@ class CommonClient(BaseClient):
 
                 try:
                     outputs.append(epub.export(out_path))
-                    self.logger.info(
+                    logger.info(
                         "Exported EPUB (site=%s, book=%s): %s",
                         self._site,
                         book_id,
                         out_path,
                     )
                 except Exception as e:
-                    self.logger.error(
+                    logger.error(
                         "Failed to write EPUB (site=%s, book=%s) to %s: %s",
                         self._site,
                         book_id,
@@ -741,14 +752,14 @@ class CommonClient(BaseClient):
         if cfg.include_picture:
             img_dir = raw_base / "images"
 
-        stage = stage or self._resolve_stage_selection(book_id)
+        stage = stage or self._detect_latest_stage(book_id)
         book_info = self._load_book_info(book_id, stage=stage)
 
         # --- Filter volumes & chapters ---
         orig_vols = book_info.get("volumes", [])
         vols = self._filter_volumes(orig_vols, start_id, end_id, ignore_set)
         if not vols:
-            self.logger.info(
+            logger.info(
                 "Nothing to do after filtering (site=%s, book=%s)", self._site, book_id
             )
             return []
@@ -758,7 +769,7 @@ class CommonClient(BaseClient):
         author = book_info.get("author") or ""
 
         # --- Generate intro + cover ---
-        cover_path = self._resolve_img_path(
+        cover_path = self._resolve_image_path(
             img_dir, book_info.get("cover_url"), name="cover"
         )
 
@@ -785,7 +796,7 @@ class CommonClient(BaseClient):
             for v_idx, vol in enumerate(vols, start=1):
                 vol_title = vol.get("volume_name") or f"卷 {v_idx}"
 
-                vol_cover = self._resolve_img_path(img_dir, vol.get("volume_cover"))
+                vol_cover = self._resolve_image_path(img_dir, vol.get("volume_cover"))
 
                 curr_vol = EpubVolume(
                     id=f"vol_{v_idx}",
@@ -816,7 +827,7 @@ class CommonClient(BaseClient):
                     if not ch:
                         continue
 
-                    chapter_obj = self._build_epub_chapter(
+                    chapter_obj = self._xp_epub_chapter(
                         book=epub,
                         css=[main_css],
                         cid=cid,
@@ -839,11 +850,11 @@ class CommonClient(BaseClient):
 
         try:
             epub.export(out_path)
-            self.logger.info(
+            logger.info(
                 "Exported EPUB (site=%s, book=%s): %s", self._site, book_id, out_path
             )
         except Exception as e:
-            self.logger.error(
+            logger.error(
                 "Failed to write EPUB (site=%s, book=%s) to %s: %s",
                 self._site,
                 book_id,
@@ -853,9 +864,7 @@ class CommonClient(BaseClient):
             return []
         return [out_path]
 
-    async def _download_info_images(
-        self, book_id: str, book_info: BookInfoDict
-    ) -> None:
+    async def _fetch_info_images(self, book_id: str, book_info: BookInfoDict) -> None:
         """
         Download cover and volume images for a book.
 
@@ -867,7 +876,7 @@ class CommonClient(BaseClient):
 
         # --- cover image ---
         if cover_url := book_info.get("cover_url"):
-            await self.fetcher.download_image(cover_url, img_dir, name="cover")
+            await self.fetcher.fetch_image(cover_url, img_dir, name="cover")
 
         # --- volume covers ---
         vol_covers = [
@@ -876,12 +885,13 @@ class CommonClient(BaseClient):
             if (cover := v.get("volume_cover"))
         ]
         if vol_covers:
-            await self.fetcher.download_images(img_dir, vol_covers)
+            await self.fetcher.fetch_images(img_dir, vol_covers)
 
-    async def _process_chapter(
+    async def get_chapter(
         self,
         book_id: str,
-        cid: str,
+        chapter_id: str,
+        **kwargs: Any,
     ) -> ChapterDict | None:
         """
         Fetches, saves raw HTML, parses a single chapter,
@@ -891,43 +901,45 @@ class CommonClient(BaseClient):
         """
         for attempt in range(self._retry_times + 1):
             try:
-                html_list = await self.fetcher.get_book_chapter(book_id, cid)
-                self._save_html_pages(book_id, cid, html_list)
+                raw_pages = await self.fetcher.fetch_chapter_content(
+                    book_id, chapter_id
+                )
+                self._save_raw_pages(book_id, chapter_id, raw_pages)
 
-                if self._is_access_limited(html_list):
-                    self.logger.warning(
+                if self._dl_check_restricted(raw_pages):
+                    logger.warning(
                         "Access limited (site=%s, book=%s, chapter=%s)",
                         self._site,
                         book_id,
-                        cid,
+                        chapter_id,
                     )
                     return None
 
                 chap = await asyncio.to_thread(
-                    self.parser.parse_chapter, html_list, cid
+                    self.parser.parse_chapter_content, raw_pages, chapter_id
                 )
                 if not chap:
-                    if self._skip_empty_chapter(html_list):
-                        self.logger.warning(
+                    if self._dl_check_empty(raw_pages):
+                        logger.warning(
                             "Empty parse result (site=%s, book=%s, chapter=%s)",
                             self._site,
                             book_id,
-                            cid,
+                            chapter_id,
                         )
                         return None
                     raise ValueError("Empty parse result")
 
-                imgs = self._extract_img_urls(chap)
+                imgs = self._extract_image_urls(chap)
                 img_dir = self._raw_data_dir / book_id / "images"
-                await self.fetcher.download_images(img_dir, imgs)
+                await self.fetcher.fetch_images(img_dir, imgs)
                 return chap
             except Exception as e:
                 if attempt < self._retry_times:
-                    self.logger.info(
+                    logger.info(
                         "Retrying (site=%s, book=%s, chapter=%s, attempt=%d): %s",
                         self._site,
                         book_id,
-                        cid,
+                        chapter_id,
                         attempt + 1,
                         e,
                     )
@@ -936,25 +948,22 @@ class CommonClient(BaseClient):
                         base=backoff, mul_spread=1.2, max_sleep=backoff + 3
                     )
                 else:
-                    self.logger.warning(
+                    logger.warning(
                         "Failed chapter (site=%s, book=%s, chapter=%s): %s",
                         self._site,
                         book_id,
-                        cid,
+                        chapter_id,
                         e,
                     )
         return None
 
-    async def _repair_chapter_ids(
+    async def _dl_fix_chapter_ids(
         self,
         book_id: str,
         book_info: BookInfoDict,
         storage: ChapterStorage,
     ) -> BookInfoDict:
-        """
-        Fill in missing chapterId fields by retrieving the previous chapter
-        and following its 'next_cid'. Uses storage to avoid refetching.
-        """
+        """Fix missing chapterId fields by using next_cid relations."""
         prev_cid: str = ""
         for vol in book_info["volumes"]:
             for chap in vol["chapters"]:
@@ -970,9 +979,9 @@ class CommonClient(BaseClient):
                 data = storage.get_chapter(prev_cid)
                 if not data:
                     # fetch+parse previous to discover next
-                    data = await self._process_chapter(book_id, prev_cid)
+                    data = await self.get_chapter(book_id, prev_cid)
                     if not data:
-                        self.logger.warning(
+                        logger.warning(
                             "Failed to fetch chapter (site=%s, book=%s, prev=%s) during repair",  # noqa: E501
                             self._site,
                             book_id,
@@ -988,7 +997,7 @@ class CommonClient(BaseClient):
 
                 next_cid = data.get("extra", {}).get("next_cid")
                 if not next_cid:
-                    self.logger.warning(
+                    logger.warning(
                         "No next_cid (site=%s, book=%s, prev=%s)",
                         self._site,
                         book_id,
@@ -996,7 +1005,7 @@ class CommonClient(BaseClient):
                     )
                     continue
 
-                self.logger.info(
+                logger.info(
                     "Repaired chapterId (site=%s, book=%s): %s <- %s",
                     self._site,
                     book_id,
@@ -1009,26 +1018,26 @@ class CommonClient(BaseClient):
         self._save_book_info(book_id, book_info)
         return book_info
 
-    def _is_access_limited(self, html_list: list[str]) -> bool:
+    def _dl_check_restricted(self, raw_pages: list[str]) -> bool:
         """
         Return True if page content indicates access restriction
         (e.g. login required, paywall, VIP, subscription, etc.)
 
-        :param html_list: List of raw HTML strings.
+        :param raw_pages: List of raw HTML strings.
         """
         return False
 
-    def _skip_empty_chapter(self, html_list: list[str]) -> bool:
+    def _dl_check_empty(self, raw_pages: list[str]) -> bool:
         """
         Return True if parse_chapter returns empty but should be skipped.
         """
         return False
 
-    def _need_refetch(self, chap: ChapterDict) -> bool:
+    def _dl_check_refetch(self, chap: ChapterDict) -> bool:
         """Override this hook to decide if a chapter needs refetch."""
         return False
 
-    def _build_txt_header(self, book_info: BookInfoDict, name: str, author: str) -> str:
+    def _xp_txt_header(self, book_info: BookInfoDict, name: str, author: str) -> str:
         """
         Top-of-file metadata block.
         """
@@ -1056,7 +1065,7 @@ class CommonClient(BaseClient):
 
         return "\n".join(lines).strip() + "\n\n"
 
-    def _build_txt_volume_heading(self, vol_title: str, volume: VolumeInfoDict) -> str:
+    def _xp_txt_volume_heading(self, vol_title: str, volume: VolumeInfoDict) -> str:
         """
         Render a volume heading. Include optional info if present.
         """
@@ -1074,7 +1083,7 @@ class CommonClient(BaseClient):
         line = f"=== {vol_title.strip()} ==="
         return f"{line}\n" + ("\n".join(meta_bits) + "\n\n" if meta_bits else "\n\n")
 
-    def _build_txt_chapter(self, chap_title: str | None, chap: ChapterDict) -> str:
+    def _xp_txt_chapter(self, chap_title: str | None, chap: ChapterDict) -> str:
         """
         Render one chapter to text
         """
@@ -1085,7 +1094,7 @@ class CommonClient(BaseClient):
         body = "\n".join(s for line in cleaned.splitlines() if (s := line.strip()))
 
         # Extras
-        extras_txt = self._render_txt_extras(chap.get("extra", {}) or {})
+        extras_txt = self._xp_txt_extras(chap.get("extra", {}) or {})
 
         return (
             f"{title_line}\n\n{body}\n\n{extras_txt}\n\n"
@@ -1093,7 +1102,7 @@ class CommonClient(BaseClient):
             else f"{title_line}\n\n{body}\n\n"
         )
 
-    def _render_txt_extras(self, extras: dict[str, Any]) -> str:
+    def _xp_txt_extras(self, extras: dict[str, Any]) -> str:
         """
         Format the extras dict into a string.
 
@@ -1101,7 +1110,7 @@ class CommonClient(BaseClient):
         """
         return ""
 
-    def _build_epub_chapter(
+    def _xp_epub_chapter(
         self,
         *,
         book: EpubBuilder,
@@ -1119,7 +1128,7 @@ class CommonClient(BaseClient):
         content = chap.get("content", "")
 
         extras = chap.get("extra") or {}
-        image_positions = self._collect_img_map(chap)
+        image_positions = self._build_image_map(chap)
         html_parts: list[str] = [f"<h2>{escape(title)}</h2>"]
 
         def _append_image(item: dict[str, Any]) -> None:
@@ -1139,7 +1148,7 @@ class CommonClient(BaseClient):
                     if not (data.startswith("http://") or data.startswith("https://")):
                         return
 
-                    local = self._resolve_img_path(img_dir, data)
+                    local = self._resolve_image_path(img_dir, data)
                     if not local:
                         return
 
@@ -1160,7 +1169,7 @@ class CommonClient(BaseClient):
                 html_parts.append(self._IMAGE_WRAPPER.format(img=img_tag))
 
             except Exception as e:
-                self.logger.debug("EPUB image add failed: %s", e)
+                logger.debug("EPUB image add failed: %s", e)
 
         # Images before first paragraph
         for item in image_positions.get(0, []):
@@ -1180,7 +1189,7 @@ class CommonClient(BaseClient):
                 for item in items:
                     _append_image(item)
 
-        if extras_epub := self._render_epub_extras(extras):
+        if extras_epub := self._xp_epub_extras(extras):
             html_parts.append(extras_epub)
 
         xhtml = "\n".join(html_parts)
@@ -1192,7 +1201,7 @@ class CommonClient(BaseClient):
             css=css,
         )
 
-    def _render_epub_extras(self, extras: dict[str, Any]) -> str:
+    def _xp_epub_extras(self, extras: dict[str, Any]) -> str:
         """
         Format the extras dict into a string.
 
@@ -1200,7 +1209,7 @@ class CommonClient(BaseClient):
         """
         return ""
 
-    def _build_html_chapter(
+    def _xp_html_chapter(
         self,
         *,
         builder: HtmlBuilder,
@@ -1217,7 +1226,7 @@ class CommonClient(BaseClient):
         content = chap.get("content", "")
 
         extras = chap.get("extra") or {}
-        image_positions = self._collect_img_map(chap)
+        image_positions = self._build_image_map(chap)
         html_parts: list[str] = []
 
         def _append_image(item: dict[str, Any]) -> None:
@@ -1237,7 +1246,7 @@ class CommonClient(BaseClient):
                     if not (data.startswith("http://") or data.startswith("https://")):
                         return
 
-                    local = self._resolve_img_path(img_dir, data)
+                    local = self._resolve_image_path(img_dir, data)
                     if not local:
                         return
 
@@ -1260,7 +1269,7 @@ class CommonClient(BaseClient):
                 html_parts.append(self._IMAGE_WRAPPER.format(img=img_tag))
 
             except Exception as e:
-                self.logger.debug("EPUB image add failed: %s", e)
+                logger.debug("EPUB image add failed: %s", e)
 
         # Images before first paragraph
         for item in image_positions.get(0, []):
@@ -1280,7 +1289,7 @@ class CommonClient(BaseClient):
                 for item in items:
                     _append_image(item)
 
-        if extras_part := self._render_html_extras(extras):
+        if extras_part := self._xp_html_extras(extras):
             html_parts.append(extras_part)
 
         html_str = "\n".join(html_parts)
@@ -1290,7 +1299,7 @@ class CommonClient(BaseClient):
             content=html_str,
         )
 
-    def _render_html_extras(self, extras: dict[str, Any]) -> str:
+    def _xp_html_extras(self, extras: dict[str, Any]) -> str:
         """
         Format the extras dict into a string.
 

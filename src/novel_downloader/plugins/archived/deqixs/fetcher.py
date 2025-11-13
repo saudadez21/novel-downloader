@@ -5,9 +5,12 @@ novel_downloader.plugins.archived.deqixs.fetcher
 
 """
 
+import logging
 from typing import Any
 
 from novel_downloader.plugins.base.fetcher import BaseFetcher
+
+logger = logging.getLogger(__name__)
 
 
 class DeqixsFetcher(BaseFetcher):
@@ -19,7 +22,7 @@ class DeqixsFetcher(BaseFetcher):
     BOOK_INFO_URL = "https://www.deqixs.com/xiaoshuo/{book_id}/"
     CHAPTER_URL = "https://www.deqixs.com/xiaoshuo/{book_id}/{chapter_id}.html"
 
-    async def get_book_info(
+    async def fetch_book_info(
         self,
         book_id: str,
         **kwargs: Any,
@@ -27,7 +30,7 @@ class DeqixsFetcher(BaseFetcher):
         url = self.book_info_url(book_id=book_id)
         return [await self.fetch(url, **kwargs)]
 
-    async def get_book_chapter(
+    async def fetch_chapter_content(
         self,
         book_id: str,
         chapter_id: str,
@@ -47,8 +50,8 @@ class DeqixsFetcher(BaseFetcher):
             try:
                 html = await self.fetch(full_url, **kwargs)
             except Exception as exc:
-                self.logger.warning(
-                    "deqixs get_book_chapter(book=%s, chapter=%s, page=%d) failed: %s",
+                logger.warning(
+                    "deqixs fetch_chapter(book=%s, chapter=%s, page=%d) failed: %s",
                     book_id,
                     chapter_id,
                     idx,

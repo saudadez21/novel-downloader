@@ -30,14 +30,14 @@ class QbtrParser(BaseParser):
 
     def parse_book_info(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        if not html_list:
+        if not raw_pages:
             return None
 
         # Parse the main info page
-        tree = html.fromstring(html_list[0])
+        tree = html.fromstring(raw_pages[0])
         # Book name
         book_name = self._first_str(tree.xpath('//div[@class="infos"]/h1/text()'))
         # Tags: the second breadcrumb (e.g., "同人小说")
@@ -75,8 +75,8 @@ class QbtrParser(BaseParser):
 
         # Parse the download page (second HTML)
         download_url = ""
-        if len(html_list) > 1 and html_list[1]:
-            dtree = html.fromstring(html_list[1])
+        if len(raw_pages) > 1 and raw_pages[1]:
+            dtree = html.fromstring(raw_pages[1])
             a = dtree.xpath('//a[@id="dowloadnUrl"]')
             if a:
                 link = a[0].get("link") or a[0].get("href") or ""
@@ -93,16 +93,16 @@ class QbtrParser(BaseParser):
             "extra": {"download_url": download_url},
         }
 
-    def parse_chapter(
+    def parse_chapter_content(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        if not html_list:
+        if not raw_pages:
             return None
 
-        tree = html.fromstring(html_list[0])
+        tree = html.fromstring(raw_pages[0])
 
         raw_title = self._first_str(
             tree.xpath('//div[contains(@class,"read_chapterName")]//h1/text()')

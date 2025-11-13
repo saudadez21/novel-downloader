@@ -58,10 +58,10 @@ async def main() -> None:
 
     # 在异步上下文中执行下载
     async with client:
-        await client.download(book)
+        await client.download_book(book)
 
     # 下载完成后执行导出操作
-    client.export(book, formats=["txt", "epub"])
+    client.export_book(book, formats=["txt", "epub"])
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -126,21 +126,21 @@ class ClientProtocol(Protocol):
         self, *, ui: LoginUI, login_cfg: dict[str, str] | None = None, **kwargs: Any
     ) -> bool: ...
 
-    async def download(
+    async def download_book(
         self, book: BookConfig, *, ui: DownloadUI | None = None, **kwargs: Any
     ) -> None: ...
 
-    def process(
+    def process_book(
         self, book: BookConfig, processors: list[ProcessorConfig], *,
         ui: ProcessUI | None = None, **kwargs: Any
     ) -> None: ...
 
-    async def cache_images(
+    async def cache_medias(
         self, book: BookConfig, *, force_update: bool = False, concurrent: int = 10,
         **kwargs: Any
     ) -> None: ...
 
-    def export(
+    def export_book(
         self,
         book: BookConfig,
         cfg: ExporterConfig | None = None,
@@ -354,7 +354,7 @@ from novel_downloader.schemas import BookConfig
 site = "n23qb"  # 站点标识
 book = BookConfig(book_id="12282")
 client = registrar.get_client(site)
-client.export(book, formats=["epub"])
+client.export_book(book, formats=["epub"])
 ```
 
 ### B. 通过搜索后立即下载+导出
@@ -388,10 +388,10 @@ async def main() -> None:
     client = registrar.get_client(site, cfg)
 
     async with client:
-        await client.download(book)
+        await client.download_book(book)
 
     # 导出为 txt 与 epub
-    export_result = client.export(book, formats=["txt", "epub"])
+    export_result = client.export_book(book, formats=["txt", "epub"])
 
     print("\n导出完成:")
     for fmt, paths in export_result.items():
@@ -475,10 +475,10 @@ async def main() -> None:
         # 登录 (若站点要求)
         await client.login(ui=SimpleLoginUI())
         # 下载
-        await client.download(book)
+        await client.download_book(book)
 
     # 导出为 txt 与 epub
-    export_result = client.export(book, formats=["txt", "epub"])
+    export_result = client.export_book(book, formats=["txt", "epub"])
 
     print("\n导出完成:")
     for fmt, paths in export_result.items():
@@ -517,10 +517,10 @@ async def main() -> None:
     client = registrar.get_client(site, cfg)
 
     async with client:
-        await client.download(book, ui=SimpleDownloadUI())
+        await client.download_book(book, ui=SimpleDownloadUI())
 
     # 导出为 txt 与 epub
-    export_result = client.export(book, formats=["txt", "epub"])
+    export_result = client.export_book(book, formats=["txt", "epub"])
 
     print("\n导出完成:")
     for fmt, paths in export_result.items():

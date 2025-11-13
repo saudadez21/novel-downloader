@@ -22,7 +22,7 @@ class XiaoshuogeFetcher(BaseFetcher):
     BOOK_CATALOG_URL = "http://www.xiaoshuoge.info/html/{book_id}/"
     CHAPTER_URL = "http://www.xiaoshuoge.info/html/{book_id}/{chapter_id}.html"
 
-    async def get_book_info(
+    async def fetch_book_info(
         self,
         book_id: str,
         **kwargs: Any,
@@ -45,7 +45,7 @@ class XiaoshuogeFetcher(BaseFetcher):
         )
         return [info_html, catalog_html]
 
-    async def get_book_chapter(
+    async def fetch_chapter_content(
         self,
         book_id: str,
         chapter_id: str,

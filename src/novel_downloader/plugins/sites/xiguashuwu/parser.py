@@ -63,18 +63,18 @@ class XiguashuwuParser(BaseParser):
 
     def parse_book_info(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
         """
         Parse a book info page and extract metadata and chapter structure.
 
-        :param html_list: Raw HTML of the book info page.
+        :param raw_pages: Raw HTML of the book info page.
         :return: Parsed metadata and chapter structure as a dictionary.
         """
-        if not html_list:
+        if not raw_pages:
             return None
-        info_tree = html.fromstring(html_list[0])
+        info_tree = html.fromstring(raw_pages[0])
 
         book_name = self._first_str(info_tree.xpath('//p[@class="title"]/text()'))
 
@@ -95,7 +95,7 @@ class XiguashuwuParser(BaseParser):
         summary = "\n".join(p.xpath("string()").strip() for p in paras).strip()
 
         chapters: list[ChapterInfoDict] = []
-        for catalog_html in html_list[1:]:
+        for catalog_html in raw_pages[1:]:
             cat_tree = html.fromstring(catalog_html)
             links = cat_tree.xpath(
                 '//section[contains(@class,"BCsectionTwo")]'
@@ -132,26 +132,26 @@ class XiguashuwuParser(BaseParser):
             extra={},
         )
 
-    def parse_chapter(
+    def parse_chapter_content(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
         """
         Parse chapter pages and extract clean text or simplified HTML.
 
-        :param html_list: Raw HTML of the chapter page.
+        :param raw_pages: Raw HTML of the chapter page.
         :param chapter_id: Identifier of the chapter being parsed.
         :return: Cleaned chapter content as plain text or minimal HTML.
         """
-        if not html_list:
+        if not raw_pages:
             return None
 
         title_text = ""
         paragraphs: list[str] = []
 
-        for page_idx, html_str in enumerate(html_list, start=1):
+        for page_idx, html_str in enumerate(raw_pages, start=1):
             if page_idx == 1:
                 tree = html.fromstring(html_str)
                 title_text = self._extract_chapter_title(tree)

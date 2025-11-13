@@ -23,7 +23,7 @@ class Wenku8Fetcher(BaseFetcher):
     BOOK_CATALOG_URL = "https://www.wenku8.net/novel/{book_path}/index.htm"
     CHAPTER_URL = "https://www.wenku8.net/novel/{book_id}/{chapter_id}.htm"
 
-    async def get_book_info(
+    async def fetch_book_info(
         self,
         book_id: str,
         **kwargs: Any,
@@ -44,7 +44,7 @@ class Wenku8Fetcher(BaseFetcher):
         )
         return [info_resp, catalog_resp]
 
-    async def get_book_chapter(
+    async def fetch_chapter_content(
         self,
         book_id: str,
         chapter_id: str,

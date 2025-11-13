@@ -28,13 +28,13 @@ class Syosetu18Parser(BaseParser):
 
     def parse_book_info(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        if not html_list:
+        if not raw_pages:
             return None
 
-        tree = html.fromstring(html_list[0])
+        tree = html.fromstring(raw_pages[0])
 
         book_name = self._first_str(
             tree.xpath('//h1[contains(@class,"p-novel__title")]/text()')
@@ -75,7 +75,7 @@ class Syosetu18Parser(BaseParser):
             vol_chaps = []
             vol_idx += 1
 
-        for html_page in html_list:
+        for html_page in raw_pages:
             t = html.fromstring(html_page)
 
             for elem in t.xpath('//div[@class="p-eplist"]/*'):
@@ -117,16 +117,16 @@ class Syosetu18Parser(BaseParser):
             "extra": {},
         }
 
-    def parse_chapter(
+    def parse_chapter_content(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        if not html_list:
+        if not raw_pages:
             return None
 
-        tree = html.fromstring(html_list[0])
+        tree = html.fromstring(raw_pages[0])
 
         title = self._first_str(
             tree.xpath('//h1[contains(@class,"p-novel__title")]/text()')

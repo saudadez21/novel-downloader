@@ -25,7 +25,7 @@ class TwkanFetcher(BaseFetcher):
     BOOK_CATALOG_URL = "https://twkan.com/ajax_novels/chapterlist/{book_id}.html"
     CHAPTER_URL = "https://twkan.com/txt/{book_id}/{chapter_id}"
 
-    async def get_book_info(self, book_id: str, **kwargs: Any) -> list[str]:
+    async def fetch_book_info(self, book_id: str, **kwargs: Any) -> list[str]:
         info_headers = {
             **self.headers,
             "Referer": "https://twkan.com/",
@@ -44,7 +44,7 @@ class TwkanFetcher(BaseFetcher):
         )
         return [info_resp, catalog_resp]
 
-    async def get_book_chapter(
+    async def fetch_chapter_content(
         self, book_id: str, chapter_id: str, **kwargs: Any
     ) -> list[str]:
         headers = {

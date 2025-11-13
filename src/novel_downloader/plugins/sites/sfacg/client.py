@@ -18,8 +18,8 @@ class SfacgClient(CommonClient):
     def workers(self) -> int:
         return 1
 
-    def _is_access_limited(self, html_list: list[str]) -> bool:
-        return bool(html_list and "本章为VIP章节" in html_list[0])
+    def _dl_check_restricted(self, raw_pages: list[str]) -> bool:
+        return bool(raw_pages and "本章为VIP章节" in raw_pages[0])
 
-    def _skip_empty_chapter(self, html_list: list[str]) -> bool:
-        return bool(html_list and "/ajax/ashx/common.ashx" in html_list[0])
+    def _dl_check_empty(self, raw_pages: list[str]) -> bool:
+        return bool(raw_pages and "/ajax/ashx/common.ashx" in raw_pages[0])

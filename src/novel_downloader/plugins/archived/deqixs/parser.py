@@ -30,13 +30,13 @@ class DeqixsParser(BaseParser):
 
     def parse_book_info(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        if not html_list:
+        if not raw_pages:
             return None
 
-        tree = html.fromstring(html_list[0])
+        tree = html.fromstring(raw_pages[0])
 
         # Extract book title and word count
         book_name = tree.xpath("//div[@class='itemtxt']/h1/a/text()")[0].strip()
@@ -87,18 +87,18 @@ class DeqixsParser(BaseParser):
             "extra": {},
         }
 
-    def parse_chapter(
+    def parse_chapter_content(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        if not html_list:
+        if not raw_pages:
             return None
 
         title_text = ""
         paragraphs: list[str] = []
-        for curr_html in html_list:
+        for curr_html in raw_pages:
             tree = html.fromstring(curr_html)
             # Extract title once
             if not title_text:

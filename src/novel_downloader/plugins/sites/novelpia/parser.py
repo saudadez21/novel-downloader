@@ -31,13 +31,13 @@ class NovelpiaParser(BaseParser):
 
     def parse_book_info(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        if len(html_list) < 2:
+        if len(raw_pages) < 2:
             return None
 
-        info = json.loads(html_list[0])
+        info = json.loads(raw_pages[0])
         novel = info.get("novel", {})
         if not novel:
             return None
@@ -58,7 +58,7 @@ class NovelpiaParser(BaseParser):
 
         # --- Chapter volumes & listings ---
         chapters: list[ChapterInfoDict] = []
-        for curr_html in html_list[1:]:
+        for curr_html in raw_pages[1:]:
             t = html.fromstring(curr_html)
             rows = t.xpath("//tr[contains(@class,'ep_style5')]")
             for r in rows:
@@ -98,16 +98,16 @@ class NovelpiaParser(BaseParser):
             "extra": {"novel_id": novel.get("novel_no")},
         }
 
-    def parse_chapter(
+    def parse_chapter_content(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        if not html_list:
+        if not raw_pages:
             return None
 
-        data = json.loads(html_list[0])
+        data = json.loads(raw_pages[0])
         s: list[dict[str, str]] = data.get("s", [])
         if not s:
             return None

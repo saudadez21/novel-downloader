@@ -114,7 +114,7 @@ class ExportCmd(Command):
         export_ui = CLIExportUI()
 
         for book in books:
-            client.export(
+            client.export_book(
                 book,
                 cfg=adapter.get_exporter_config(site),
                 formats=formats,

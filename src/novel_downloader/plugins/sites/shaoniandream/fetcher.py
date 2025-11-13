@@ -4,11 +4,14 @@ novel_downloader.plugins.sites.shaoniandream.fetcher
 ----------------------------------------------------
 """
 
+import logging
 import random
 from typing import Any
 
 from novel_downloader.plugins.base.fetcher import BaseFetcher
 from novel_downloader.plugins.registry import registrar
+
+logger = logging.getLogger(__name__)
 
 
 @registrar.register_fetcher()
@@ -28,7 +31,7 @@ class ShaoniandreamFetcher(BaseFetcher):
     CHAPTER_SIGN_URL = "https://www.shaoniandream.com/booklibrary/membersinglechaptersign/chapter_id/{chapter_id}"
     CHAPTER_URL = "https://www.shaoniandream.com/booklibrary/membersinglechapter/chapter_id/{chapter_id}"
 
-    async def get_book_info(
+    async def fetch_book_info(
         self,
         book_id: str,
         **kwargs: Any,
@@ -68,7 +71,7 @@ class ShaoniandreamFetcher(BaseFetcher):
         detail_html = resp.text
         return [info_html, detail_html]
 
-    async def get_book_chapter(
+    async def fetch_chapter_content(
         self,
         book_id: str,
         chapter_id: str,
@@ -117,7 +120,7 @@ class ShaoniandreamFetcher(BaseFetcher):
 
         resp = await self.session.post(url, params=params, headers=headers)
         if not resp.ok:
-            self.logger.warning(
+            logger.warning(
                 "esjzone book detail key HTTP failed for %s, status=%s",
                 url,
                 resp.status,
@@ -127,7 +130,7 @@ class ShaoniandreamFetcher(BaseFetcher):
         try:
             resp_json: dict[str, Any] = resp.json()
         except Exception as exc:
-            self.logger.warning(
+            logger.warning(
                 "esjzone book detail key JSON parse failed for %s: %s", url, exc
             )
             return ""
@@ -156,7 +159,7 @@ class ShaoniandreamFetcher(BaseFetcher):
 
         resp = await self.session.post(url, params=params, headers=headers)
         if not resp.ok:
-            self.logger.warning(
+            logger.warning(
                 "esjzone chapter key HTTP failed for %s, status=%s", url, resp.status
             )
             return ""
@@ -164,9 +167,7 @@ class ShaoniandreamFetcher(BaseFetcher):
         try:
             resp_json: dict[str, Any] = resp.json()
         except Exception as exc:
-            self.logger.warning(
-                "esjzone chapter key JSON parse failed for %s: %s", url, exc
-            )
+            logger.warning("esjzone chapter key JSON parse failed for %s: %s", url, exc)
             return ""
 
         if (
@@ -190,5 +191,5 @@ class ShaoniandreamFetcher(BaseFetcher):
             keywords = {"验证码登录", "账号密码登录"}
             return not any(kw in bookcase_html for kw in keywords)
         except Exception as e:
-            self.logger.info("shaoniandream login check failed: %s", e)
+            logger.info("shaoniandream login check failed: %s", e)
         return False

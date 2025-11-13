@@ -36,15 +36,15 @@ class N69yueParser(BaseParser):
 
     def parse_book_info(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        if len(html_list) < 2:
+        if len(raw_pages) < 2:
             return None
 
-        info_tree = html.fromstring(html_list[0])
-        catalog_data = json.loads(html_list[1])
-        use_font = self._has_fonts(html_list[0])
+        info_tree = html.fromstring(raw_pages[0])
+        catalog_data = json.loads(raw_pages[1])
+        use_font = self._has_fonts(raw_pages[0])
 
         # --- base info ---
         book_name = self._first_str(info_tree.xpath("//h1/text()"))
@@ -113,16 +113,16 @@ class N69yueParser(BaseParser):
             "extra": {},
         }
 
-    def parse_chapter(
+    def parse_chapter_content(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        if not html_list:
+        if not raw_pages:
             return None
 
-        tree = html.fromstring(html_list[0])
+        tree = html.fromstring(raw_pages[0])
 
         title = self._first_str(
             tree.xpath("//main[contains(@class,'reading-container')]//h2/text()")

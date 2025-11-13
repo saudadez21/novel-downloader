@@ -24,7 +24,7 @@ class RuochuFetcher(GenericFetcher):
     BOOK_CATALOG_URL = "https://www.ruochu.com/chapter/{book_id}"
     CHAPTER_URL = "https://a.ruochu.com/ajax/chapter/content/{chapter_id}"
 
-    async def get_book_chapter(
+    async def fetch_chapter_content(
         self, book_id: str, chapter_id: str, **kwargs: Any
     ) -> list[str]:
         if not self.CHAPTER_URL:

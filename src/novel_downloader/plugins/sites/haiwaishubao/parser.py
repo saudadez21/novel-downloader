@@ -27,13 +27,13 @@ class HaiwaishubaoParser(BaseParser):
 
     def parse_book_info(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        if not html_list:
+        if not raw_pages:
             return None
 
-        tree = html.fromstring(html_list[0])
+        tree = html.fromstring(raw_pages[0])
 
         # Book metadata
         book_name = self._first_str(
@@ -68,7 +68,7 @@ class HaiwaishubaoParser(BaseParser):
 
         # Chapter volumes & listings
         chapters: list[ChapterInfoDict] = []
-        for catalog_html in html_list[1:]:
+        for catalog_html in raw_pages[1:]:
             cat_tree = html.fromstring(catalog_html)
             for a in cat_tree.xpath('//ol[contains(@class,"BCsectionTwo-top")]//a'):
                 href = (a.get("href") or "").strip()
@@ -103,19 +103,19 @@ class HaiwaishubaoParser(BaseParser):
             "extra": {},
         }
 
-    def parse_chapter(
+    def parse_chapter_content(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        if not html_list:
+        if not raw_pages:
             return None
 
         title: str = ""
         paragraphs: list[str] = []
 
-        for h in html_list:
+        for h in raw_pages:
             tree = html.fromstring(h)
             if not title:
                 title = self._first_str(tree.xpath('//h1[@id="chapterTitle"]/text()'))

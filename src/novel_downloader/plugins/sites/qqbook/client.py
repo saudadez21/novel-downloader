@@ -19,7 +19,7 @@ class QqbookClient(CommonClient):
     def workers(self) -> int:
         return 1
 
-    def _need_refetch(self, chap: ChapterDict) -> bool:
+    def _dl_check_refetch(self, chap: ChapterDict) -> bool:
         """
         Return True if the chapter is marked as font-encrypted
         and should be upserted with need_refetch=True.

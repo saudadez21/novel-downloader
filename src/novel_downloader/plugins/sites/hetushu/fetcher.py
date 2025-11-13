@@ -30,7 +30,7 @@ class HetushuFetcher(BaseFetcher):
     CHAPTER_URL = "https://{base_url}/book/{book_id}/{chapter_id}.html"
     CHAPTER_TOKEN_URL = "https://{base_url}/book/{book_id}/r{chapter_id}.json"
 
-    async def get_book_info(
+    async def fetch_book_info(
         self,
         book_id: str,
         **kwargs: Any,
@@ -54,7 +54,7 @@ class HetushuFetcher(BaseFetcher):
         )
         return [info_html, catalog_html]
 
-    async def get_book_chapter(
+    async def fetch_chapter_content(
         self,
         book_id: str,
         chapter_id: str,

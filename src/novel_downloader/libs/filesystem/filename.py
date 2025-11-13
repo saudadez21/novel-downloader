@@ -49,7 +49,7 @@ def url_to_hashed_name(
     return f"{name}{suffix}"
 
 
-def img_name(url: str, *, name: str | None = None) -> str:
+def image_filename(url: str, *, name: str | None = None) -> str:
     """
     Generate a hashed filename for an image URL,
     using a default set of allowed image suffixes.

@@ -8,6 +8,7 @@ novel_downloader.plugins.sites.qidian.fetcher
 import base64
 import hashlib
 import json
+import logging
 import random
 import time
 from collections.abc import Mapping
@@ -18,6 +19,8 @@ from novel_downloader.libs.time_utils import async_jitter_sleep
 from novel_downloader.plugins.base.fetcher import BaseFetcher
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import FetcherConfig, LoginField
+
+logger = logging.getLogger(__name__)
 
 
 @registrar.register_fetcher()
@@ -71,7 +74,7 @@ class QidianFetcher(BaseFetcher):
 
         is_logged_in = await self._check_login_status()
         if is_logged_in:
-            self.logger.info("Login check failed; refreshing cookie base values.")
+            logger.info("Login check failed; refreshing cookie base values.")
             self._update_fp_val(reflush=True)
             # retry once
             is_logged_in = await self._check_login_status()
@@ -79,7 +82,7 @@ class QidianFetcher(BaseFetcher):
         self._is_logged_in = is_logged_in
         return is_logged_in
 
-    async def get_book_info(
+    async def fetch_book_info(
         self,
         book_id: str,
         **kwargs: Any,
@@ -87,7 +90,7 @@ class QidianFetcher(BaseFetcher):
         url = self.book_info_url(book_id=book_id)
         return [await self.fetch(url, **kwargs)]
 
-    async def get_book_chapter(
+    async def fetch_chapter_content(
         self,
         book_id: str,
         chapter_id: str,
@@ -252,9 +255,7 @@ class QidianFetcher(BaseFetcher):
         actual = set(cookies)
         missing = required - actual
         if missing:
-            self.logger.warning(
-                "Missing required cookies (qidian): %s", ", ".join(missing)
-            )
+            logger.warning("Missing required cookies (qidian): %s", ", ".join(missing))
         return not missing
 
     @staticmethod

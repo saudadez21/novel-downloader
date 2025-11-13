@@ -7,11 +7,11 @@ Filesystem utilities, including file I/O and filename sanitization.
 """
 
 __all__ = [
-    "img_name",
+    "image_filename",
     "sanitize_filename",
     "write_file",
 ]
 
 from .file import write_file
-from .filename import img_name
+from .filename import image_filename
 from .sanitize import sanitize_filename

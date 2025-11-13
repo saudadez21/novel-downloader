@@ -25,7 +25,7 @@ class NovelpiaFetcher(BaseFetcher):
     BOOK_CATALOG_URL = "https://novelpia.jp/proc/episode_list"
     CHAPTER_URL = "https://novelpia.jp/proc/viewer_data/{chapter_id}"
 
-    async def get_book_info(
+    async def fetch_book_info(
         self,
         book_id: str,
         **kwargs: Any,
@@ -70,7 +70,7 @@ class NovelpiaFetcher(BaseFetcher):
         results.extend(pages)
         return results
 
-    async def get_book_chapter(
+    async def fetch_chapter_content(
         self,
         book_id: str,
         chapter_id: str,

@@ -15,12 +15,14 @@ from pathlib import Path
 from typing import Any, Literal, Self
 
 from novel_downloader.infra.http_defaults import IMAGE_HEADERS
-from novel_downloader.libs.filesystem import img_name, write_file
+from novel_downloader.libs.filesystem import image_filename, write_file
 from novel_downloader.libs.time_utils import async_jitter_sleep
 from novel_downloader.plugins.utils.rate_limiter import TokenBucketRateLimiter
-from novel_downloader.schemas import FetcherConfig, LoginField
+from novel_downloader.schemas import FetcherConfig, LoginField, MediaResource
 
 from .session_base import BaseSession
+
+logger = logging.getLogger(__name__)
 
 
 class BaseFetcher(abc.ABC):
@@ -64,8 +66,6 @@ class BaseFetcher(abc.ABC):
             TokenBucketRateLimiter(config.max_rps) if config.max_rps > 0 else None
         )
 
-        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
-
     async def init(
         self,
         **kwargs: Any,
@@ -100,7 +100,7 @@ class BaseFetcher(abc.ABC):
         return self._is_logged_in
 
     @abc.abstractmethod
-    async def get_book_info(
+    async def fetch_book_info(
         self,
         book_id: str,
         **kwargs: Any,
@@ -114,7 +114,7 @@ class BaseFetcher(abc.ABC):
         ...
 
     @abc.abstractmethod
-    async def get_book_chapter(
+    async def fetch_chapter_content(
         self,
         book_id: str,
         chapter_id: str,
@@ -129,7 +129,54 @@ class BaseFetcher(abc.ABC):
         """
         ...
 
-    async def download_image(
+    async def fetch_data(self, url: str, **kwargs: Any) -> bytes:
+        """
+        Fetch arbitrary binary data from a remote URL.
+
+        :param url: The target URL.
+        :return: The raw response body as bytes.
+        """
+        # TODO
+        return b""
+
+    async def fetch_media(
+        self,
+        resource: MediaResource,
+        media_dir: Path,
+        *,
+        on_exist: Literal["overwrite", "skip"] = "skip",
+    ) -> Path | None:
+        """
+        Download or persist a single media resource entry.
+
+        :param resource: A :class:`MediaResource` entry.
+        :param media_dir: Target directory to store the media.
+        :param on_exist: Behavior when file already exists.
+        :return: Saved path or ``None`` if skipped.
+        """
+        # TODO
+        return None
+
+    async def fetch_medias(
+        self,
+        media_dir: Path,
+        resources: list[MediaResource],
+        batch_size: int = 10,
+        *,
+        on_exist: Literal["overwrite", "skip"] = "skip",
+    ) -> None:
+        """
+        Process and persist a list of media resources asynchronously.
+
+        :param media_dir: Destination directory.
+        :param resources: List of :class:`MediaResource` items.
+        :param batch_size: Number of concurrent tasks per batch.
+        :param on_exist: Behavior when existing files are found.
+        """
+        # TODO
+        return
+
+    async def fetch_image(
         self,
         url: str,
         img_dir: Path,
@@ -147,17 +194,15 @@ class BaseFetcher(abc.ABC):
         :return: Path of saved image, or None if failed/skipped.
         """
         img_dir.mkdir(parents=True, exist_ok=True)
-        return await self._download_one_image(
-            url, img_dir, name=name, on_exist=on_exist
-        )
+        return await self._fetch_one_image(url, img_dir, name=name, on_exist=on_exist)
 
-    async def download_images(
+    async def fetch_images(
         self,
         img_dir: Path,
         urls: list[str],
-        batch_size: int = 10,
         *,
         on_exist: Literal["overwrite", "skip"] = "skip",
+        concurrent: int = 5,
     ) -> None:
         """
         Download images to `img_dir` in batches.
@@ -166,25 +211,24 @@ class BaseFetcher(abc.ABC):
 
         :param img_dir: Destination folder.
         :param urls: List of image URLs (http/https).
-        :param batch_size: Concurrency per batch.
         :param on_exist: What to do when file exists.
+        :param concurrent: Concurrency per batch.
         """
         if not urls:
             return
 
         img_dir.mkdir(parents=True, exist_ok=True)
 
-        batch_size = max(1, batch_size)
+        batch_size = max(1, concurrent)
         for i in range(0, len(urls), batch_size):
             batch = urls[i : i + batch_size]
             tasks = [
-                self._download_one_image(url, img_dir, on_exist=on_exist)
-                for url in batch
+                self._fetch_one_image(url, img_dir, on_exist=on_exist) for url in batch
             ]
             results = await asyncio.gather(*tasks, return_exceptions=True)
             for r in results:
                 if isinstance(r, Exception):
-                    self.logger.warning("Image download error: %s", r)
+                    logger.warning("Image download error: %s", r)
 
     async def load_state(self) -> bool:
         """
@@ -305,7 +349,7 @@ class BaseFetcher(abc.ABC):
         """
         return self.session.headers
 
-    async def _download_one_image(
+    async def _fetch_one_image(
         self,
         url: str,
         folder: Path,
@@ -314,16 +358,16 @@ class BaseFetcher(abc.ABC):
         on_exist: Literal["overwrite", "skip"],
     ) -> Path | None:
         """Download a single image and save with a hashed filename."""
-        save_path = folder / img_name(url, name=name)
+        save_path = folder / image_filename(url, name=name)
 
         if save_path.exists() and on_exist == "skip":
-            self.logger.debug("Skip existing image: %s", save_path)
+            logger.debug("Skip existing image: %s", save_path)
             return save_path
 
         try:
             resp = await self.session.get(url, headers=IMAGE_HEADERS)
         except Exception as e:
-            self.logger.warning(
+            logger.warning(
                 "Image request failed (site=%s) %s: %s",
                 self.site_name,
                 url,
@@ -332,7 +376,7 @@ class BaseFetcher(abc.ABC):
             return None
 
         if not resp.content:
-            self.logger.warning(
+            logger.warning(
                 "Empty response for image (site=%s): %s",
                 self.site_name,
                 url,
@@ -340,7 +384,7 @@ class BaseFetcher(abc.ABC):
             return None
 
         if not resp.ok:
-            self.logger.warning(
+            logger.warning(
                 "Image request failed (site=%s) %s: HTTP %s",
                 self.site_name,
                 url,
@@ -349,7 +393,7 @@ class BaseFetcher(abc.ABC):
             return None
 
         write_file(content=resp.content, filepath=save_path, on_exist="overwrite")
-        self.logger.debug("Saved image: %s <- %s", save_path, url)
+        logger.debug("Saved image: %s <- %s", save_path, url)
         return save_path
 
     def _resolve_base_url(self, locale_style: str) -> str:
@@ -409,7 +453,7 @@ class GenericFetcher(BaseFetcher):
     USE_PAGINATED_CATALOG: bool = False
     USE_PAGINATED_CHAPTER: bool = False
 
-    async def get_book_info(self, book_id: str, **kwargs: Any) -> list[str]:
+    async def fetch_book_info(self, book_id: str, **kwargs: Any) -> list[str]:
         book_id = self._transform_book_id(book_id)
         pages: list[str] = []
 
@@ -448,7 +492,7 @@ class GenericFetcher(BaseFetcher):
 
         return pages
 
-    async def get_book_chapter(
+    async def fetch_chapter_content(
         self, book_id: str, chapter_id: str, **kwargs: Any
     ) -> list[str]:
         book_id = self._transform_book_id(book_id)

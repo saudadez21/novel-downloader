@@ -23,7 +23,7 @@ class TianyabooksFetcher(BaseFetcher):
     BOOK_INFO_URL = "https://www.tianyabooks.com/{book_id}/"
     CHAPTER_URL = "https://www.tianyabooks.com/{book_id}/{chapter_id}.html"
 
-    async def get_book_info(
+    async def fetch_book_info(
         self,
         book_id: str,
         **kwargs: Any,
@@ -32,7 +32,7 @@ class TianyabooksFetcher(BaseFetcher):
         url = self.BOOK_INFO_URL.format(book_id=book_id)
         return [await self.fetch(url, encoding="gbk", **kwargs)]
 
-    async def get_book_chapter(
+    async def fetch_chapter_content(
         self,
         book_id: str,
         chapter_id: str,

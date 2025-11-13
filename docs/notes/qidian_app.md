@@ -2636,7 +2636,7 @@ def jitter_sleep(
     time.sleep(duration)
 
 
-def download_image(
+def fetch_image(
     url: str,
     target_dir: Path,
 ) -> Path:
@@ -2670,7 +2670,7 @@ def extract_image_map(cid: str, blocks: list[dict[str, Any]]) -> dict[int, list[
             idx = max(blk.get("Attach", 1) - 1, 0)
             url = blk["Url"]
             try:
-                local = download_image(url, IMG_DIR / f"c{cid}")
+                local = fetch_image(url, IMG_DIR / f"c{cid}")
                 src = os.path.relpath(local, start=OUT_DIR).replace(os.sep, "/")
             except Exception:
                 src = url
