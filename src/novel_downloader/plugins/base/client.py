@@ -9,7 +9,6 @@ Abstract base class providing common
 import abc
 import json
 import logging
-import time
 import types
 from pathlib import Path
 from typing import Any, Protocol, Self, cast
@@ -36,7 +35,6 @@ from novel_downloader.schemas import (
     VolumeInfoDict,
 )
 
-ONE_DAY = 86400  # seconds
 logger = logging.getLogger(__name__)
 
 
@@ -394,45 +392,6 @@ class BaseClient(AbstractClient, abc.ABC):
         """
         # TODO: placeholder
         return {}
-
-    async def get_book_info(
-        self,
-        book_id: str,
-        **kwargs: Any,
-    ) -> BookInfoDict:
-        """
-        Attempt to fetch and parse the book_info for a given book_id.
-
-        :param book_id: identifier of the book
-        :return: parsed BookInfoDict
-        """
-        book_info: BookInfoDict | None = None
-        try:
-            book_info = self._load_book_info(book_id)
-            if book_info and time.time() - book_info.get("last_checked", 0.0) < ONE_DAY:
-                return book_info
-        except FileNotFoundError as exc:
-            logger.debug("No cached book_info found for %s: %s", book_id, exc)
-        except Exception as exc:
-            logger.info("Failed to load cached book_info for %s: %s", book_id, exc)
-
-        try:
-            info_html = await self.fetcher.fetch_book_info(book_id)
-            self._save_raw_pages(book_id, "info", info_html)
-
-            book_info = self.parser.parse_book_info(info_html)
-            if book_info:
-                book_info["last_checked"] = time.time()
-                self._save_book_info(book_id, book_info)
-                return book_info
-
-        except Exception as exc:
-            logger.warning("Failed to fetch/parse book_info for %s: %s", book_id, exc)
-
-        if book_info is None:
-            raise LookupError(f"Unable to load book_info for {book_id}")
-
-        return book_info
 
     def _save_book_info(
         self, book_id: str, book_info: BookInfoDict, stage: str = "raw"
