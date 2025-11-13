@@ -102,7 +102,7 @@ def format_filename(
     *,
     append_timestamp: bool = True,
     timestamp_format: str = "%Y%m%d_%H%M%S",
-    ext: str = "txt",
+    ext: str = "",
     **fields: str,
 ) -> str:
     """Generate a filename from a template and keyword fields."""
@@ -113,4 +113,8 @@ def format_filename(
 
         name += f"_{datetime.now().strftime(timestamp_format)}"
 
-    return f"{name}.{ext.lstrip('.')}" if ext else name
+    ext = ext.lstrip(".")
+    if not ext:
+        return name
+
+    return f"{name}.{ext}"

@@ -119,13 +119,22 @@ class HtmlBuilder:
         for chap in volume.chapters:
             self.add_chapter(chap)
 
-    def export(self, output_path: str | Path) -> Path:
+    def export(
+        self,
+        output_path: str | Path,
+        *,
+        folder: str | None = None,
+    ) -> Path:
         """
-        Build and export the current book as an EPUB file.
+        Build and export the current book as an HTML folder.
 
-        :param output_path: Path to save the final .epub file.
+        :param output_path: Path to the parent directory where folder will be created
+        :param folder: Optional folder name. If None, use the book title
         """
-        return self._build_html(output_path=Path(output_path))
+        return self._build_html(
+            output_path=Path(output_path),
+            folder=folder,
+        )
 
     def _prepare_output_dir(self, html_dir: Path) -> None:
         css_dir = html_dir / CSS_DIR
@@ -250,8 +259,11 @@ class HtmlBuilder:
             )
             write_file(chap_html, chap_dir / chap.filename)
 
-    def _build_html(self, output_path: Path) -> Path:
-        html_dir = output_path / sanitize_filename(self.title)
+    def _build_html(self, output_path: Path, folder: str | None) -> Path:
+        folder_name = (
+            sanitize_filename(folder) if folder else sanitize_filename(self.title)
+        )
+        html_dir = output_path / folder_name
         self._prepare_output_dir(html_dir)
         self._write_media(html_dir)
         self._build_index(html_dir)

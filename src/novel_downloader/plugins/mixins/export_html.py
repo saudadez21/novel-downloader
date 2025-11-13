@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol
 
 from novel_downloader.infra.persistence.chapter_storage import ChapterStorage
+from novel_downloader.libs.filesystem import format_filename
 from novel_downloader.libs.html_builder import HtmlBuilder, HtmlChapter, HtmlVolume
 from novel_downloader.schemas import BookConfig, ChapterDict, ExporterConfig
 
@@ -140,7 +141,13 @@ class ExportHtmlMixin:
                     builder.add_volume(curr_vol)
 
         try:
-            out_path = builder.export(self._output_dir)
+            out_name = format_filename(
+                cfg.filename_template,
+                title=name,
+                author=author,
+                append_timestamp=cfg.append_timestamp,
+            )
+            out_path = builder.export(self._output_dir, folder=out_name)
             logger.info(
                 "Exported HTML (site=%s, book=%s): %s", self._site, book_id, out_path
             )
