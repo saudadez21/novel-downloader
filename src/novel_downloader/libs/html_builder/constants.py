@@ -8,6 +8,7 @@ CHAPTER_DIR = "chapters"
 CSS_DIR = "css"
 JS_DIR = "js"
 MEDIA_DIR = "media"
+FONT_DIR = "fonts"
 
 IMAGE_MEDIA_EXTS: dict[str, str] = {
     "image/png": "png",
@@ -17,25 +18,36 @@ IMAGE_MEDIA_EXTS: dict[str, str] = {
     "image/webp": "webp",
 }
 
-INDEX_TEMPLATE = """\
+FONT_FORMAT_MAP = {
+    "ttf": "truetype",
+    "otf": "opentype",
+    "woff": "woff",
+    "woff2": "woff2",
+}
+
+DEFAULT_FONT_FALLBACK_STACK = (
+    'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+)
+
+INDEX_TEMPLATE = f"""\
 <!DOCTYPE html>
-<html lang="{lang}">
+<html lang="{{lang}}">
 <head>
   <meta charset="utf-8">
-  <title>{book_name}</title>
-  <link rel="stylesheet" href="css/index.css">
-  <script defer src="js/main.js"></script>
+  <title>{{book_name}}</title>
+  <link rel="stylesheet" href="{CSS_DIR}/index.css">
+  <script defer src="{JS_DIR}/main.js"></script>
 </head>
 <body>
   <div id="progress-bar"></div>
 
   <header>
-    {header}
+    {{header}}
   </header>
 
   <main class="toc">
     <h2>目录</h2>
-    {toc_html}
+    {{toc_html}}
   </main>
 
   <!-- Floating controls -->
@@ -49,30 +61,38 @@ INDEX_TEMPLATE = """\
 </html>
 """
 
-CHAPTER_TEMPLATE = """\
+FONT_FACE_TEMPLATE = """\
+@font-face {{
+  font-family: "{family}";
+  src: url("{url}") format("{format}");
+}}
+"""
+
+CHAPTER_TEMPLATE = f"""\
 <!DOCTYPE html>
-<html lang="{lang}">
+<html lang="{{lang}}">
 <head>
   <meta charset="utf-8">
-  <title>{title}</title>
-  <link rel="stylesheet" href="../css/chapter.css">
-  <script defer src="../js/main.js"></script>
+  <title>{{title}}</title>
+  <link rel="stylesheet" href="../{CSS_DIR}/chapter.css">
+  <script defer src="../{JS_DIR}/main.js"></script>
+  {{font_styles}}
 </head>
 <body>
   <div id="progress-bar"></div>
 
-  <h1>{title}</h1>
+  <h1 class="chapter-title">{{title}}</h1>
   <div class="chapter-content">
-    {content}
+    {{content}}
   </div>
 
   <nav class="chapter-nav"
-       data-prev="{prev_link}"
-       data-next="{next_link}"
+       data-prev="{{prev_link}}"
+       data-next="{{next_link}}"
        data-menu="../index.html">
-    <a id="prev-link" href="{prev_link}" class="nav-button">← 上一章</a>
+    <a id="prev-link" href="{{prev_link}}" class="nav-button">← 上一章</a>
     <a id="menu-link" href="../index.html" class="nav-button">☰ 目录</a>
-    <a id="next-link" href="{next_link}" class="nav-button">下一章 →</a>
+    <a id="next-link" href="{{next_link}}" class="nav-button">下一章 →</a>
   </nav>
 
   <!-- Floating controls -->
