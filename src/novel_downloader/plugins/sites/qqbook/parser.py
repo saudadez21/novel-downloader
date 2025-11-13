@@ -74,7 +74,7 @@ class QqbookParser(BaseParser):
 
     def parse_book_info(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
         """
@@ -82,14 +82,14 @@ class QqbookParser(BaseParser):
 
         Order: [info, catalog]
 
-        :param html_list: Raw HTML of the book info page.
+        :param raw_pages: Raw HTML of the book info page.
         :return: Parsed metadata and chapter structure as a dictionary.
         """
-        if len(html_list) < 2:
+        if len(raw_pages) < 2:
             return None
 
-        info_tree = html.fromstring(html_list[0])
-        catalog_dict = json.loads(html_list[1])
+        info_tree = html.fromstring(raw_pages[0])
+        catalog_dict = json.loads(raw_pages[1])
 
         book_name = self._first_str(
             info_tree.xpath('//meta[@property="og:novel:book_name"]/@content')
@@ -178,17 +178,17 @@ class QqbookParser(BaseParser):
             "extra": {},
         }
 
-    def parse_chapter(
+    def parse_chapter_content(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        if not html_list:
-            logger.warning("QQbook chapter %s :: html_list is empty", chapter_id)
+        if not raw_pages:
+            logger.warning("QQbook chapter %s :: raw_pages is empty", chapter_id)
             return None
         try:
-            nuxt_block = self._find_nuxt_block(html_list[0])
+            nuxt_block = self._find_nuxt_block(raw_pages[0])
             data_list = nuxt_block.get("data")
             if not data_list:
                 return None

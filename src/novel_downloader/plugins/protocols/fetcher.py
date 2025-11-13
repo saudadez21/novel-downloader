@@ -3,22 +3,28 @@
 novel_downloader.plugins.protocols.fetcher
 ------------------------------------------
 
-Protocol defining the interface for asynchronous fetching, login, and session management
+Protocol defining the interface for asynchronous fetching, authentication,
+and session management for site-specific clients.
+
+This protocol abstracts the behavior of network requesters that
+retrieve book metadata, chapters, and media files from supported
+novel platforms.
 """
 
 import types
 from pathlib import Path
 from typing import Any, Literal, Protocol, Self
 
-from novel_downloader.schemas import LoginField
+from novel_downloader.schemas import LoginField, MediaResource
 
 
 class FetcherProtocol(Protocol):
     """
-    An async requester must be able to fetch raw HTML/data for:
-      * a book's info page,
-      * a specific chapter page,
-    and manage login/shutdown asynchronously.
+    Protocol for an asynchronous network fetcher.
+
+    Implementations are responsible for performing HTTP requests,
+    handling login sessions, caching state, and downloading
+    both textual and binary resources.
     """
 
     async def init(
@@ -26,16 +32,20 @@ class FetcherProtocol(Protocol):
         **kwargs: Any,
     ) -> None:
         """
-        Perform async initialization, such as creating a session.
+        Perform asynchronous initialization.
 
-        This should be called before using any other method
-        if initialization is required.
+        Typical responsibilities include creating a network session,
+        applying proxy settings, or restoring state.
+
+        This should be called before invoking any other fetch operation.
         """
         ...
 
     async def close(self) -> None:
         """
-        Shutdown and clean up any resources.
+        Gracefully close and clean up all network or file resources.
+
+        Should terminate open sessions and release internal caches.
         """
         ...
 
@@ -48,59 +58,79 @@ class FetcherProtocol(Protocol):
         **kwargs: Any,
     ) -> bool:
         """
-        Attempt to log in asynchronously.
+        Attempt to authenticate asynchronously.
 
-        :returns: True if login succeeded.
+        Implementations should support login via credentials,
+        cookies, or a combination of both.
+
+        :param username: Username or account identifier.
+        :param password: Account password.
+        :param cookies: Optional cookie mapping for session restoration.
+        :param attempt: Retry counter for recursive or multi-step login.
+        :returns: ``True`` if login succeeded, otherwise ``False``.
         """
         ...
 
-    async def get_book_info(
+    @property
+    def is_logged_in(self) -> bool:
+        """
+        Whether the fetcher is currently authenticated.
+
+        :return: ``True`` if an active session is authenticated.
+        """
+        ...
+
+    @property
+    def login_fields(self) -> list[LoginField]:
+        """
+        List of fields required for interactive or programmatic login.
+
+        :return: A list of :class:`LoginField` describing credential fields
+                 (e.g. username, password, captcha, etc.).
+        """
+        ...
+
+    async def fetch_book_info(
         self,
         book_id: str,
         **kwargs: Any,
     ) -> list[str]:
         """
-        Fetch the raw HTML (or JSON) of the book info page asynchronously.
+        Retrieve the raw HTML or JSON content of a book's info page.
 
-        :param book_id: The book identifier.
-        :return: The page content as string list.
+        :param book_id: The book identifier on the target site.
+        :return: A list of strings containing the raw page data.
         """
         ...
 
-    async def get_book_chapter(
+    async def fetch_chapter_content(
         self,
         book_id: str,
         chapter_id: str,
         **kwargs: Any,
     ) -> list[str]:
         """
-        Fetch the raw HTML (or JSON) of a single chapter asynchronously.
+        Retrieve the raw HTML or JSON content of a single chapter.
 
-        :param book_id: The book identifier.
         :param chapter_id: The chapter identifier.
-        :return: The page content as string list.
+        :param book_id: Optional book identifier if available.
+        :return: A list of strings containing the raw page data.
         """
         ...
 
-    async def load_state(self) -> bool:
+    async def fetch_data(self, url: str, **kwargs: Any) -> bytes:
         """
-        Restore session state from a persistent storage,
-        allowing the requester to resume a previous authenticated session.
+        Fetch arbitrary binary data from a remote URL.
 
-        :return: True if the session state was successfully loaded and applied.
-        """
-        ...
+        Useful for retrieving cover images, font files, or
+        other non-HTML assets directly.
 
-    async def save_state(self) -> bool:
-        """
-        Persist the current session state to a file
-        or other storage, so that it can be restored in future sessions.
-
-        :return: True if the session state was successfully saved.
+        :param url: The target URL.
+        :return: The raw response body as bytes.
         """
         ...
 
-    async def download_image(
+    async def fetch_image(
         self,
         url: str,
         img_dir: Path,
@@ -119,33 +149,79 @@ class FetcherProtocol(Protocol):
         """
         ...
 
-    async def download_images(
+    async def fetch_images(
         self,
         img_dir: Path,
         urls: list[str],
+        *,
+        on_exist: Literal["overwrite", "skip"] = "skip",
+        concurrent: int = 5,
+    ) -> None:
+        """
+        Download image URLs directly to disk.
+
+        :param img_dir: Destination directory.
+        :param urls: List of image URLs.
+        :param on_exist: Behavior when file already exists.
+        :param concurrent: Maximum number of concurrent downloads.
+        """
+        ...
+
+    async def fetch_media(
+        self,
+        resource: MediaResource,
+        media_dir: Path,
+        *,
+        on_exist: Literal["overwrite", "skip"] = "skip",
+    ) -> Path | None:
+        """
+        Download or persist a single media resource entry.
+
+        :param resource: A :class:`MediaResource` entry.
+        :param media_dir: Target directory to store the media.
+        :param on_exist: Behavior when file already exists.
+        :return: Saved path or ``None`` if skipped.
+        """
+        ...
+
+    async def fetch_medias(
+        self,
+        media_dir: Path,
+        resources: list[MediaResource],
         batch_size: int = 10,
         *,
         on_exist: Literal["overwrite", "skip"] = "skip",
     ) -> None:
         """
-        Download images to `img_dir` in batches.
+        Process and persist a list of media resources asynchronously.
 
-        :param img_dir: Destination folder.
-        :param urls: List of image URLs (http/https).
-        :param batch_size: Concurrency per batch.
-        :param on_exist: What to do when file exists.
+        :param media_dir: Destination directory.
+        :param resources: List of :class:`MediaResource` items.
+        :param batch_size: Number of concurrent tasks per batch.
+        :param on_exist: Behavior when existing files are found.
         """
         ...
 
-    @property
-    def is_logged_in(self) -> bool:
+    async def load_state(self) -> bool:
         """
-        Indicates whether the requester is currently authenticated.
+        Restore session state from persistent storage.
+
+        This allows the fetcher to resume a previous authenticated session
+        without requiring manual login.
+
+        :return: ``True`` if the session state was successfully restored.
         """
         ...
 
-    @property
-    def login_fields(self) -> list[LoginField]:
+    async def save_state(self) -> bool:
+        """
+        Persist the current session state to a file or other storage backend.
+
+        The saved state should allow later recovery of authentication cookies
+        or tokens.
+
+        :return: ``True`` if the session state was successfully saved.
+        """
         ...
 
     async def __aenter__(self) -> Self:

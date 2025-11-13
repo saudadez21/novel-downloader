@@ -24,7 +24,7 @@ class N69shubaFetcher(BaseFetcher):
     BOOK_CATALOG_URL = "https://www.69shuba.com/book/{book_id}/"
     CHAPTER_URL = "https://www.69shuba.com/txt/{book_id}/{chapter_id}"
 
-    async def get_book_info(self, book_id: str, **kwargs: Any) -> list[str]:
+    async def fetch_book_info(self, book_id: str, **kwargs: Any) -> list[str]:
         headers = {
             **self.headers,
             "Referer": "https://www.69shuba.com/",
@@ -39,7 +39,7 @@ class N69shubaFetcher(BaseFetcher):
         )
         return [info_resp, catalog_resp]
 
-    async def get_book_chapter(
+    async def fetch_chapter_content(
         self, book_id: str, chapter_id: str, **kwargs: Any
     ) -> list[str]:
         headers = {

@@ -284,10 +284,9 @@ novel-cli download --site ttkan shengxu-chendong
   * 风控: 请求过于频繁可能触发限制, 导致封禁或限流 (推荐请求间隔大于 2 秒)
 
 * **轻小说文库 (wenku8)**
-  * 书籍: `https://www.wenku8.net/novel/2/2835/index.htm` -> Book ID: `2-2835`
+  * 书籍: `https://www.wenku8.net/book/2835.htm` -> Book ID: `2835`
   * 章节: `https://www.wenku8.net/novel/2/2835/113354.htm` -> Chapter ID: `113354`
-  * 目录访问:
-    * 先打开详细页面 (如 `https://www.wenku8.net/book/2835.htm`), 再点击 "小说目录" 查看
+  * 目录: `https://www.wenku8.net/novel/2/2835/index.htm` -> Book ID: `2835`
   * 备用:
     * `https://www.wenku8.cc`
     * `https://www.wenku8.com`
@@ -307,10 +306,9 @@ novel-cli download --site ttkan shengxu-chendong
     * 若章节设有访问密码, 请先在网页端输入并解锁后, 再开始下载。
 
 * **神凑轻小说 (shencou)**
-  * 书籍: `https://www.shencou.com/read/3/3540/index.html` -> Book ID: `3-3540`
+  * 书籍: `https://www.shencou.com/books/read_3540.html` -> Book ID: `3540`
   * 章节: `https://www.shencou.com/read/3/3540/156328.html` -> Chapter ID: `156328`
-  * 目录访问:
-    * 先打开详细页面 (如 `https://www.shencou.com/books/read_3540.html`), 再点击 "小说目录" 查看
+  * 目录: `https://www.shencou.com/read/3/3540/index.html` -> Book ID: `3540`
   * 已知问题:
     * 图片资源可能无法正常加载或失效
     * 目录页中仍保留了一些已删除章节的重复条目, 却未同步删除

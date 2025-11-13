@@ -45,13 +45,13 @@ class N8novelParser(BaseParser):
 
     def parse_book_info(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        if not html_list:
+        if not raw_pages:
             return None
 
-        tree = html.fromstring(html_list[0])
+        tree = html.fromstring(raw_pages[0])
 
         # --- Basic metadata ---
         book_name = self._first_str(tree.xpath("//li[contains(@class,'h2')]/text()"))
@@ -123,22 +123,22 @@ class N8novelParser(BaseParser):
             "extra": {},
         }
 
-    def parse_chapter(
+    def parse_chapter_content(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        if len(html_list) < 2:
+        if len(raw_pages) < 2:
             return None
 
         try:
-            id_title_map = self._build_id_title_map(html_list[0])
+            id_title_map = self._build_id_title_map(raw_pages[0])
             title = id_title_map.get(chapter_id) or ""
         except Exception:
             title = ""
 
-        wrapper = html.fromstring(f"<div>{html_list[1]}</div>")
+        wrapper = html.fromstring(f"<div>{raw_pages[1]}</div>")
 
         paragraphs: list[str] = []
         image_positions: dict[int, list[dict[str, Any]]] = {}

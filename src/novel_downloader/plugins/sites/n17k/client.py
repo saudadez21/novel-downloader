@@ -14,5 +14,5 @@ class N17kClient(CommonClient):
     Specialized client for n17k novel sites.
     """
 
-    def _is_access_limited(self, html_list: list[str]) -> bool:
-        return "VIP章节, 余下还有" in html_list[0]
+    def _dl_check_restricted(self, raw_pages: list[str]) -> bool:
+        return "VIP章节, 余下还有" in raw_pages[0]

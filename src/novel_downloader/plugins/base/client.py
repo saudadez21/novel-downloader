@@ -9,12 +9,11 @@ Abstract base class providing common
 import abc
 import json
 import logging
-import time
 import types
 from pathlib import Path
-from typing import Any, Protocol, Self, cast
+from typing import Any, Self, cast
 
-from novel_downloader.libs.filesystem import img_name
+from novel_downloader.libs.filesystem import image_filename
 from novel_downloader.plugins.protocols import FetcherProtocol, ParserProtocol
 from novel_downloader.plugins.protocols.ui import (
     DownloadUI,
@@ -32,11 +31,12 @@ from novel_downloader.schemas import (
     ExporterConfig,
     FetcherConfig,
     ParserConfig,
+    PipelineMeta,
     ProcessorConfig,
     VolumeInfoDict,
 )
 
-ONE_DAY = 86400  # seconds
+logger = logging.getLogger(__name__)
 
 
 class AbstractClient(abc.ABC):
@@ -76,8 +76,6 @@ class AbstractClient(abc.ABC):
         self._output_dir = Path(cfg.output_dir)
         self._debug_dir = Path.cwd() / "debug" / site
 
-        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
-
     async def init(self, fetcher_cfg: FetcherConfig, parser_cfg: ParserConfig) -> None:
         if self._fetcher or self._parser:
             await self.close()
@@ -109,7 +107,6 @@ class AbstractClient(abc.ABC):
         """
         ...
 
-    @abc.abstractmethod
     async def download(
         self,
         book: BookConfig,
@@ -121,13 +118,43 @@ class AbstractClient(abc.ABC):
         Download a single book.
 
         :param book: BookConfig with at least 'book_id'.
-        :param cancel_event: Optional asyncio.Event to allow cancellation.
+        :param ui: Optional DownloadUI to report progress or messages.
+        """
+        await self.download_book(book, ui=ui, **kwargs)
+
+    @abc.abstractmethod
+    async def download_book(
+        self,
+        book: BookConfig,
+        *,
+        ui: DownloadUI | None = None,
+        **kwargs: Any,
+    ) -> None:
+        """
+        Download a single book.
+
+        :param book: BookConfig with at least ``book_id``.
         :param ui: Optional DownloadUI to report progress or messages.
         """
         ...
 
     @abc.abstractmethod
-    def process(
+    async def download_chapter(
+        self,
+        book_id: str,
+        chapter_id: str,
+        **kwargs: Any,
+    ) -> None:
+        """
+        Download a specific chapter by its identifier.
+
+        :param book_id: Identifier of the book to download.
+        :param chapter_id: Identifier of the chapter to download.
+        """
+        ...
+
+    @abc.abstractmethod
+    def process_book(
         self,
         book: BookConfig,
         processors: list[ProcessorConfig],
@@ -144,7 +171,7 @@ class AbstractClient(abc.ABC):
         ...
 
     @abc.abstractmethod
-    async def cache_images(
+    async def cache_medias(
         self,
         book: BookConfig,
         *,
@@ -161,7 +188,6 @@ class AbstractClient(abc.ABC):
         """
         ...
 
-    @abc.abstractmethod
     def export(
         self,
         book: BookConfig,
@@ -180,6 +206,59 @@ class AbstractClient(abc.ABC):
         :param formats: Optional list of format strings (e.g., ['epub', 'txt']).
         :param ui: Optional ExportUI for reporting export progress.
         :return: A mapping from format name to the resulting file path.
+        """
+        return self.export_book(
+            book=book,
+            cfg=cfg,
+            formats=formats,
+            stage=stage,
+            ui=ui,
+            **kwargs,
+        )
+
+    @abc.abstractmethod
+    def export_book(
+        self,
+        book: BookConfig,
+        cfg: ExporterConfig | None = None,
+        *,
+        formats: list[str] | None = None,
+        stage: str | None = None,
+        ui: ExportUI | None = None,
+        **kwargs: Any,
+    ) -> dict[str, list[Path]]:
+        """
+        Persist the assembled book to disk in one or more formats.
+
+        :param book: The :class:`BookConfig` instance to export.
+        :param cfg: Optional :class:`ExporterConfig` defining export parameters.
+        :param formats: Optional list of format identifiers (e.g. ``['epub', 'txt']``).
+        :param stage: Optional export stage name, used for multi-phase exports.
+        :param ui: Optional :class:`ExportUI` for reporting progress.
+        :return: Mapping from format name to generated file paths.
+        """
+        ...
+
+    @abc.abstractmethod
+    def export_chapter(
+        self,
+        book_id: str,
+        chapter_id: str,
+        cfg: ExporterConfig | None = None,
+        *,
+        formats: list[str] | None = None,
+        stage: str | None = None,
+        **kwargs: Any,
+    ) -> dict[str, list[Path]]:
+        """
+        Persist a single chapter to disk in one or more formats.
+
+        :param book_id: Identifier of the book to download.
+        :param chapter_id: Identifier of the chapter to download.
+        :param cfg: Optional :class:`ExporterConfig` defining export parameters.
+        :param formats: Optional list of format identifiers (e.g. ``['epub', 'txt']``).
+        :param stage: Optional export stage name.
+        :return: Mapping from format name to generated file paths.
         """
         ...
 
@@ -222,115 +301,13 @@ class AbstractClient(abc.ABC):
         await self.close()
 
 
-class SafeDict(dict[str, Any]):
-    def __missing__(self, key: str) -> str:
-        return f"{{{key}}}"
-
-
-class _ExportFunc(Protocol):
-    def __call__(
-        self,
-        book: BookConfig,
-        cfg: ExporterConfig | None = None,
-        *,
-        stage: str | None,
-        **kwargs: Any,
-    ) -> list[Path]:
-        ...
-
-
 class BaseClient(AbstractClient, abc.ABC):
     """
     Abstract intermediate client that provides reusable helper methods.
     """
 
-    def export(
-        self,
-        book: BookConfig,
-        cfg: ExporterConfig | None = None,
-        *,
-        formats: list[str] | None = None,
-        stage: str | None = None,
-        ui: ExportUI | None = None,
-        **kwargs: Any,
-    ) -> dict[str, list[Path]]:
-        """
-        Persist the assembled book to disk.
-
-        :param book: The book configuration to export.
-        :param cfg: Optional ExporterConfig defining export parameters.
-        :param formats: Optional list of format strings (e.g., ['epub', 'txt']).
-        :param ui: Optional ExportUI for reporting export progress.
-        :return: A mapping from format name to the resulting file path.
-        """
-        formats = formats or ["epub"]
-        results: dict[str, list[Path]] = {}
-
-        for fmt in formats:
-            method_name = f"export_as_{fmt.lower()}"
-            export_func: _ExportFunc | None = getattr(self, method_name, None)
-
-            if not callable(export_func):
-                if ui:
-                    ui.on_unsupported(book, fmt)
-                results[fmt] = []
-                continue
-
-            if ui:
-                ui.on_start(book, fmt)
-
-            try:
-                paths = export_func(book, cfg, stage=stage, **kwargs)
-                results[fmt] = paths
-
-                if paths and ui:
-                    for path in paths:
-                        ui.on_success(book, fmt, path)
-
-            except Exception as e:
-                results[fmt] = []
-                self.logger.warning(f"Error exporting {fmt}: {e}")
-                if ui:
-                    ui.on_error(book, fmt, e)
-
-        return results
-
-    async def _get_book_info(self, book_id: str) -> BookInfoDict:
-        """
-        Attempt to fetch and parse the book_info for a given book_id.
-
-        :param book_id: identifier of the book
-        :return: parsed BookInfoDict
-        """
-        book_info: BookInfoDict | None = None
-        try:
-            book_info = self._load_book_info(book_id)
-            if book_info and time.time() - book_info.get("last_checked", 0.0) < ONE_DAY:
-                return book_info
-        except FileNotFoundError as exc:
-            self.logger.debug("No cached book_info found for %s: %s", book_id, exc)
-        except Exception as exc:
-            self.logger.info("Failed to load cached book_info for %s: %s", book_id, exc)
-
-        try:
-            info_html = await self.fetcher.get_book_info(book_id)
-            self._save_html_pages(book_id, "info", info_html)
-
-            book_info = self.parser.parse_book_info(info_html)
-            if book_info:
-                book_info["last_checked"] = time.time()
-                self._save_book_info(book_id, book_info)
-                return book_info
-
-        except Exception as exc:
-            self.logger.warning(
-                "Failed to fetch/parse book_info for %s: %s", book_id, exc
-            )
-
-        if book_info is None:
-            raise LookupError(f"Unable to load book_info for {book_id}")
-
-        return book_info
+    def _book_dir(self, book_id: str) -> Path:
+        return self._raw_data_dir / book_id
 
     def _save_book_info(
         self, book_id: str, book_info: BookInfoDict, stage: str = "raw"
@@ -341,9 +318,9 @@ class BaseClient(AbstractClient, abc.ABC):
         :param book_id: identifier of the book
         :param book_info: dict containing metadata about the book
         """
-        target_dir = self._raw_data_dir / book_id
-        target_dir.mkdir(parents=True, exist_ok=True)
-        (target_dir / f"book_info.{stage}.json").write_text(
+        base = self._book_dir(book_id)
+        base.mkdir(parents=True, exist_ok=True)
+        (base / f"book_info.{stage}.json").write_text(
             json.dumps(book_info, ensure_ascii=False, indent=2),
             encoding="utf-8",
         )
@@ -357,7 +334,9 @@ class BaseClient(AbstractClient, abc.ABC):
         :raises ValueError: if the JSON is invalid or has an unexpected structure.
         :return: Parsed BookInfoDict.
         """
-        info_path = self._raw_data_dir / book_id / f"book_info.{stage}.json"
+        base = self._book_dir(book_id)
+        info_path = base / f"book_info.{stage}.json"
+
         if not info_path.is_file():
             raise FileNotFoundError(f"Missing metadata file: {info_path}")
 
@@ -373,11 +352,64 @@ class BaseClient(AbstractClient, abc.ABC):
 
         return cast(BookInfoDict, data)
 
-    def _save_html_pages(
+    def _load_pipeline_meta(self, book_id: str) -> PipelineMeta:
+        """
+        Load and return the pipeline metadata for the given book.
+
+        The method attempts to read and parse ``pipeline.json`` stored
+        under the book's directory. If the file is missing, unreadable,
+        or contains unexpected structures, a default empty metadata
+        payload is returned.
+
+        :param book_id: Book identifier.
+        :return: A ``PipelineMeta`` dict with ``pipeline`` and ``executed`` keys.
+        """
+        base = self._book_dir(book_id)
+        meta_path = base / "pipeline.json"
+
+        if not meta_path.is_file():
+            return {"pipeline": [], "executed": {}}
+
+        try:
+            raw = json.loads(meta_path.read_text(encoding="utf-8"))
+        except Exception:
+            return {"pipeline": [], "executed": {}}
+
+        pipeline = raw.get("pipeline", [])
+        if not isinstance(pipeline, list):
+            pipeline = []
+
+        executed = raw.get("executed", {})
+        if not isinstance(executed, dict):
+            executed = {}
+
+        return cast(
+            PipelineMeta,
+            {
+                "pipeline": pipeline,
+                "executed": executed,
+            },
+        )
+
+    def _save_pipeline_meta(self, book_id: str, meta: PipelineMeta) -> None:
+        """
+        Serialize and write ``pipeline.json`` for the given book.
+
+        :param book_id: Book identifier.
+        :param meta: Pipeline metadata containing ``pipeline`` and ``executed`` records.
+        """
+        base = self._book_dir(book_id)
+        base.mkdir(parents=True, exist_ok=True)
+        (base / "pipeline.json").write_text(
+            json.dumps(meta, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+
+    def _save_raw_pages(
         self,
         book_id: str,
         filename: str,
-        html_list: list[str],
+        raw_pages: list[str],
         *,
         folder: str = "html",
     ) -> None:
@@ -388,45 +420,18 @@ class BaseClient(AbstractClient, abc.ABC):
 
         :param book_id: The book identifier
         :param filename: used as filename prefix
-        :param html_list: list of HTML strings to save
+        :param raw_pages: list of HTML strings to save
         """
         if not self._save_html:
             return
         html_dir = self._debug_dir / folder
         html_dir.mkdir(parents=True, exist_ok=True)
-        for i, html in enumerate(html_list):
+        for i, html in enumerate(raw_pages):
             (html_dir / f"{book_id}_{filename}_{i}.html").write_text(
                 html, encoding="utf-8"
             )
 
-    def _get_filename(
-        self,
-        filename_template: str,
-        *,
-        title: str,
-        author: str | None = None,
-        append_timestamp: bool = True,
-        ext: str = "txt",
-        **extra_fields: str,
-    ) -> str:
-        """
-        Generate a filename based on the configured template and metadata fields.
-
-        :param title: Book title (required).
-        :param author: Author name (optional).
-        :param ext: File extension (e.g., "txt", "epub").
-        :param extra_fields: Any additional fields used in the filename template.
-        :return: Formatted filename with extension.
-        """
-        context = SafeDict(title=title, author=author or "", **extra_fields)
-        name = filename_template.format_map(context)
-        if append_timestamp:
-            from datetime import datetime
-
-            name += f"_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-        return f"{name}.{ext}"
-
-    def _collect_img_map(self, chap: ChapterDict) -> dict[int, list[dict[str, Any]]]:
+    def _build_image_map(self, chap: ChapterDict) -> dict[int, list[dict[str, Any]]]:
         """
         Collect and normalize `image_positions` into {int: [ {type, data, ...}, ... ]}.
         """
@@ -468,11 +473,11 @@ class BaseClient(AbstractClient, abc.ABC):
                 result.setdefault(key, []).extend(items)
         return result
 
-    def _extract_img_urls(self, chap: ChapterDict) -> list[str]:
+    def _extract_image_urls(self, chap: ChapterDict) -> list[str]:
         """
         Extract all image URLs from 'extra' field.
         """
-        img_map = self._collect_img_map(chap)
+        img_map = self._build_image_map(chap)
         urls: list[str] = []
         for imgs in img_map.values():
             for img in imgs:
@@ -481,7 +486,7 @@ class BaseClient(AbstractClient, abc.ABC):
         return urls
 
     @staticmethod
-    def _resolve_img_path(
+    def _resolve_image_path(
         img_dir: Path | None,
         url: str | None,
         *,
@@ -498,11 +503,11 @@ class BaseClient(AbstractClient, abc.ABC):
         if not img_dir or not url:
             return None
 
-        path = img_dir / img_name(url, name=name)
+        path = img_dir / image_filename(url, name=name)
         return path if path.is_file() else None
 
     @staticmethod
-    def _select_chapter_ids(
+    def _extract_chapter_ids(
         vols: list[VolumeInfoDict],
         start_id: str | None,
         end_id: str | None,
@@ -587,32 +592,22 @@ class BaseClient(AbstractClient, abc.ABC):
 
         return result
 
-    def _resolve_stage_selection(self, book_id: str) -> str:
+    def _detect_latest_stage(self, book_id: str) -> str:
         """
         Return the chosen stage name for export (e.g., 'raw', 'cleaner', 'corrector').
+
         Strategy:
           * If pipeline.json exists, walk pipeline in reverse and pick the last stage
             whose recorded sqlite file exists.
           * Fallback: any executed record with an existing sqlite file.
           * Else: 'raw'.
         """
-        base_dir = self._raw_data_dir / book_id
-        pipeline_path = base_dir / "pipeline.json"
-        if not pipeline_path.is_file():
-            return "raw"
+        base = self._book_dir(book_id)
+        meta = self._load_pipeline_meta(book_id)
 
-        try:
-            meta = json.loads(pipeline_path.read_text(encoding="utf-8"))
-        except Exception:
-            return "raw"
-
-        pipeline: list[str] = meta.get("pipeline", [])
-        if not pipeline:
-            return "raw"
-
-        for stg in reversed(pipeline):
-            db_file = base_dir / f"chapter.{stg}.sqlite"
-            info_file = base_dir / f"book_info.{stg}.json"
+        for stg in reversed(meta["pipeline"]):
+            db_file = base / f"chapter.{stg}.sqlite"
+            info_file = base / f"book_info.{stg}.json"
             if db_file.is_file() and info_file.is_file():
                 return stg
 

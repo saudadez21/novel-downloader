@@ -5,6 +5,7 @@ novel_downloader.plugins.sites.qidian.client
 """
 
 import asyncio
+import logging
 from html import escape
 from typing import Any
 
@@ -12,6 +13,8 @@ from novel_downloader.libs.time_utils import async_jitter_sleep
 from novel_downloader.plugins.common.client import CommonClient
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import ChapterDict
+
+logger = logging.getLogger(__name__)
 
 
 @registrar.register_client()
@@ -25,31 +28,32 @@ class QidianClient(CommonClient):
         return 1
 
     @staticmethod
-    def _check_restricted(html_list: list[str]) -> bool:
+    def _check_restricted(raw_pages: list[str]) -> bool:
         """
         Return True if page content indicates access restriction
         (e.g. not subscribed/purchased).
 
-        :param html_list: Raw HTML string.
+        :param raw_pages: Raw HTML string.
         """
-        if not html_list:
+        if not raw_pages:
             return True
         markers = ["这是VIP章节", "需要订阅", "订阅后才能阅读"]
-        return any(m in html_list[0] for m in markers)
+        return any(m in raw_pages[0] for m in markers)
 
     @staticmethod
-    def _check_encrypted(html_list: list[str]) -> bool:
-        if not html_list:
+    def _check_encrypted(raw_pages: list[str]) -> bool:
+        if not raw_pages:
             return True
-        return '"cES":2' in html_list[0]
+        return '"cES":2' in raw_pages[0]
 
-    def _need_refetch(self, chap: ChapterDict) -> bool:
+    def _dl_check_refetch(self, chap: ChapterDict) -> bool:
         return bool(chap.get("extra", {}).get("encrypted", False))
 
-    async def _process_chapter(
+    async def get_chapter(
         self,
         book_id: str,
-        cid: str,
+        chapter_id: str,
+        **kwargs: Any,
     ) -> ChapterDict | None:
         """
         Fetch, debug-save, parse a single chapter with retries.
@@ -58,27 +62,29 @@ class QidianClient(CommonClient):
         """
         for attempt in range(self._retry_times + 1):
             try:
-                html_list = await self.fetcher.get_book_chapter(book_id, cid)
-                if self._check_restricted(html_list):
-                    self.logger.info(
+                raw_pages = await self.fetcher.fetch_chapter_content(
+                    book_id, chapter_id
+                )
+                if self._check_restricted(raw_pages):
+                    logger.info(
                         "qidian: restricted chapter content (book=%s, chapter=%s)",
                         book_id,
-                        cid,
+                        chapter_id,
                     )
                     return None
-                encrypted = self._check_encrypted(html_list)
+                encrypted = self._check_encrypted(raw_pages)
 
                 folder = "html_encrypted" if encrypted else "html_plain"
-                self._save_html_pages(book_id, cid, html_list, folder=folder)
+                self._save_raw_pages(book_id, chapter_id, raw_pages, folder=folder)
 
                 chap = await asyncio.to_thread(
-                    self.parser.parse_chapter, html_list, cid
+                    self.parser.parse_chapter_content, raw_pages, chapter_id
                 )
                 if encrypted and not chap:
-                    self.logger.info(
+                    logger.info(
                         "qidian: failed to parse encrypted chapter (book=%s, chapter=%s)",  # noqa: E501
                         book_id,
-                        cid,
+                        chapter_id,
                     )
                     return None
                 if not chap:
@@ -87,10 +93,10 @@ class QidianClient(CommonClient):
 
             except Exception as e:
                 if attempt < self._retry_times:
-                    self.logger.info(
+                    logger.info(
                         "qidian: retrying chapter (book=%s, chapter=%s, attempt=%s): %s",  # noqa: E501
                         book_id,
-                        cid,
+                        chapter_id,
                         attempt + 1,
                         e,
                     )
@@ -101,15 +107,15 @@ class QidianClient(CommonClient):
                         max_sleep=backoff + 3,
                     )
                 else:
-                    self.logger.warning(
+                    logger.warning(
                         "qidian: failed chapter (book=%s, chapter=%s): %s",
                         book_id,
-                        cid,
+                        chapter_id,
                         e,
                     )
         return None
 
-    def _render_txt_extras(self, extras: dict[str, Any]) -> str:
+    def _xp_txt_extras(self, extras: dict[str, Any]) -> str:
         """
         render "作者说" for TXT:
           * Clean content
@@ -124,7 +130,7 @@ class QidianClient(CommonClient):
         body = "\n".join(s for line in note.splitlines() if (s := line.strip()))
         return f"作者说\n\n{body}"
 
-    def _render_epub_extras(self, extras: dict[str, Any]) -> str:
+    def _xp_epub_extras(self, extras: dict[str, Any]) -> str:
         """
         Render "作者说" section for EPUB.
 
@@ -141,5 +147,5 @@ class QidianClient(CommonClient):
         ]
         return "\n".join(parts)
 
-    def _render_html_extras(self, extras: dict[str, Any]) -> str:
-        return self._render_epub_extras(extras)
+    def _xp_html_extras(self, extras: dict[str, Any]) -> str:
+        return self._xp_epub_extras(extras)

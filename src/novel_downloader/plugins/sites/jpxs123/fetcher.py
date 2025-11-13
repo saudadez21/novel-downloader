@@ -24,7 +24,7 @@ class Jpxs123Fetcher(BaseFetcher):
     BOOK_INFO_URL = "https://www.jpxs123.com/{book_id}.html"
     CHAPTER_URL = "https://www.jpxs123.com/{book_id}/{chapter_id}.html"
 
-    async def get_book_info(
+    async def fetch_book_info(
         self,
         book_id: str,
         **kwargs: Any,
@@ -52,7 +52,7 @@ class Jpxs123Fetcher(BaseFetcher):
         download_html = await self.fetch(download_url, **kwargs) if download_url else ""
         return [info_html, download_html]
 
-    async def get_book_chapter(
+    async def fetch_chapter_content(
         self,
         book_id: str,
         chapter_id: str,

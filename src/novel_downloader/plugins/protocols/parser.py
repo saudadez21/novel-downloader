@@ -4,6 +4,9 @@ novel_downloader.plugins.protocols.parser
 -----------------------------------------
 
 Protocol defining the interface for parsing book metadata and chapter content.
+
+A parser is responsible for extracting structured data from the raw
+HTML or JSON returned by a :class:`FetcherProtocol`.
 """
 
 from typing import Any, Protocol
@@ -13,35 +16,42 @@ from novel_downloader.schemas import BookInfoDict, ChapterDict
 
 class ParserProtocol(Protocol):
     """
-    A parser must be able to:
-      * extract book metadata from an HTML string,
-      * extract a single chapter's text from an HTML string
+    Protocol for a site-specific parser implementation.
+
+    A parser transforms raw HTML or JSON data fetched from a site into
+    structured Python dictionaries suitable for downstream processing.
     """
 
     def parse_book_info(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
         """
-        Parse and return a dictionary of book information from the raw HTML.
+        Parse book-level metadata from raw HTML, JSON, or text responses.
 
-        :param html_list: The HTML list of a book's info pages.
-        :return: A dict containing metadata like title, author, chapters list, etc.
+        Usually called with the result of
+        :meth:`FetcherProtocol.fetch_book_info`.
+
+        :param raw_pages: Raw page contents for the book info section.
+        :return: Parsed :class:`BookInfoDict`, or ``None`` if parsing fails.
         """
         ...
 
-    def parse_chapter(
+    def parse_chapter_content(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
         """
-        Parse chapter page and extract the content of one chapter.
+        Parse a chapter's data from raw HTML, JSON, or text responses.
 
-        :param html_list: The HTML list of the chapter pages.
+        Usually called with the result of
+        :meth:`FetcherProtocol.fetch_chapter_content`.
+
+        :param raw_pages: Raw page contents for the chapter.
         :param chapter_id: Identifier of the chapter being parsed.
-        :return: The chapter's data.
+        :return: Parsed :class:`ChapterDict`, or ``None`` if parsing fails.
         """
         ...

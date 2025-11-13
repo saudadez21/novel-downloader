@@ -28,15 +28,15 @@ class PiaotiaParser(BaseParser):
 
     def parse_book_info(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        if len(html_list) < 2:
+        if len(raw_pages) < 2:
             return None
 
         # Parse trees
-        info_tree = html.fromstring(html_list[0])
-        catalog_tree = html.fromstring(html_list[1])
+        info_tree = html.fromstring(raw_pages[0])
+        catalog_tree = html.fromstring(raw_pages[1])
 
         book_name = self._first_str(info_tree.xpath("//span[@style]//h1/text()"))
         author = self._first_str(
@@ -107,9 +107,9 @@ class PiaotiaParser(BaseParser):
             "extra": {},
         }
 
-    def parse_chapter(
+    def parse_chapter_content(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
@@ -124,16 +124,16 @@ class PiaotiaParser(BaseParser):
             `<div id=”device” style=”background-color...”>`,
             并也没有对应的 `</div>`
 
-        :param html_list: The HTML list of the chapter pages.
+        :param raw_pages: The HTML list of the chapter pages.
         :param chapter_id: Identifier of the chapter being parsed.
         :return: The chapter's data.
         """
-        if not html_list:
+        if not raw_pages:
             return None
 
         # normalize broken HTML
         raw = (
-            html_list[0]
+            raw_pages[0]
             .replace("<head>", "")
             .replace("</head>", "")
             .replace("<body>", "")

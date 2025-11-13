@@ -14,8 +14,8 @@ class KadokadoClient(CommonClient):
     Specialized client for kadokado novel sites.
     """
 
-    def _is_access_limited(self, html_list: list[str]) -> bool:
-        if len(html_list) < 2:
+    def _dl_check_restricted(self, raw_pages: list[str]) -> bool:
+        if len(raw_pages) < 2:
             return False
         limited_flags = {"NOT_LOGIN", "NOT_SUBSCRIBED", "NOT_PURCHASED"}
-        return any(f'"{flag}"' in html_list[1] for flag in limited_flags)
+        return any(f'"{flag}"' in raw_pages[1] for flag in limited_flags)

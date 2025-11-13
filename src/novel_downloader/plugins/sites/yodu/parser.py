@@ -34,13 +34,13 @@ class YoduParser(BaseParser):
 
     def parse_book_info(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        if not html_list:
+        if not raw_pages:
             return None
 
-        tree = html.fromstring(html_list[0])
+        tree = html.fromstring(raw_pages[0])
 
         # --- Metadata ---
         book_name = (
@@ -166,13 +166,13 @@ class YoduParser(BaseParser):
             "extra": {},
         }
 
-    def parse_chapter(
+    def parse_chapter_content(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        if not html_list:
+        if not raw_pages:
             return None
 
         title: str = ""
@@ -180,7 +180,7 @@ class YoduParser(BaseParser):
         image_positions: dict[int, list[dict[str, Any]]] = {}
         image_idx = 0
 
-        for curr_html in html_list:
+        for curr_html in raw_pages:
             tree = html.fromstring(curr_html)
             decrypt: bool = "/en/common/read.ttf" in curr_html
 
@@ -220,7 +220,7 @@ class YoduParser(BaseParser):
 
         content = "\n".join(paragraphs)
 
-        m = self._NEXTPAGE_RE.search(html_list[-1])
+        m = self._NEXTPAGE_RE.search(raw_pages[-1])
         next_cid = m.group(1) if m else None
 
         return {

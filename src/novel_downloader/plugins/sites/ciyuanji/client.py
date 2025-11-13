@@ -21,7 +21,7 @@ class CiyuanjiClient(CommonClient):
     def workers(self) -> int:
         return 1
 
-    def _collect_img_map(self, chap: ChapterDict) -> dict[int, list[dict[str, Any]]]:
+    def _build_image_map(self, chap: ChapterDict) -> dict[int, list[dict[str, Any]]]:
         """
         Collect and normalize all images into {int: [ {type, data, ...}, ... ]}.
         """

@@ -21,7 +21,7 @@ class BixiangeFetcher(BaseFetcher):
     INFO_HTML_SUFFIX = {"cyjk", "khjj", "guanchang"}
     CHAPTER_NO_INDEX = {"cyjk", "khjj", "guanchang"}
 
-    async def get_book_info(
+    async def fetch_book_info(
         self,
         book_id: str,
         **kwargs: Any,
@@ -36,7 +36,7 @@ class BixiangeFetcher(BaseFetcher):
 
         return [await self.fetch(url, **kwargs)]
 
-    async def get_book_chapter(
+    async def fetch_chapter_content(
         self,
         book_id: str,
         chapter_id: str,

@@ -14,5 +14,5 @@ class RuochuClient(CommonClient):
     Specialized client for ruochu novel sites.
     """
 
-    def _is_access_limited(self, html_list: list[str]) -> bool:
-        return '"chapter"' not in html_list[0]
+    def _dl_check_restricted(self, raw_pages: list[str]) -> bool:
+        return '"chapter"' not in raw_pages[0]

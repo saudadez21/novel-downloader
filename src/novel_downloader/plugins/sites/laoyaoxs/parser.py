@@ -28,14 +28,14 @@ class LaoyaoxsParser(BaseParser):
 
     def parse_book_info(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        if len(html_list) < 2:
+        if len(raw_pages) < 2:
             return None
 
-        info_tree = html.fromstring(html_list[0])
-        catalog_tree = html.fromstring(html_list[1])
+        info_tree = html.fromstring(raw_pages[0])
+        catalog_tree = html.fromstring(raw_pages[1])
 
         # Metadata extraction
         book_name = self._first_str(
@@ -99,16 +99,16 @@ class LaoyaoxsParser(BaseParser):
             "extra": {},
         }
 
-    def parse_chapter(
+    def parse_chapter_content(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        if not html_list:
+        if not raw_pages:
             return None
 
-        tree = html.fromstring(html_list[0])
+        tree = html.fromstring(raw_pages[0])
 
         title_text = self._first_str(
             tree.xpath('//div[@id="chapter-name"]//h2/text()')

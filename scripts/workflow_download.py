@@ -115,7 +115,7 @@ async def download_books(
     async with client:
         for book in books:
             try:
-                await client.download(book, ui=ui)
+                await client.download_book(book, ui=ui)
             except Exception as e:
                 logger.warning("Failed to download %s (%s): %s", book.book_id, site, e)
 
@@ -135,7 +135,7 @@ def export_books(
 
     for book in books:
         try:
-            client.export(
+            client.export_book(
                 book,
                 exporter_cfg,
                 formats=formats,

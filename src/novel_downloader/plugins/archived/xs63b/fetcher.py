@@ -7,10 +7,13 @@ novel_downloader.plugins.archived.xs63b.fetcher
 
 import asyncio
 import base64
+import logging
 import re
 from typing import Any
 
 from novel_downloader.plugins.base.fetcher import BaseFetcher
+
+logger = logging.getLogger(__name__)
 
 
 class Xs63bFetcher(BaseFetcher):
@@ -27,7 +30,7 @@ class Xs63bFetcher(BaseFetcher):
     _JSARR_PATTERN = re.compile(r"var\s+jsarr\s*=\s*\[([^\]]+)\]")
     _JSSTR_PATTERN = re.compile(r"var\s+jsstr\s*=\s*\"([^\"]+)\";")
 
-    async def get_book_info(
+    async def fetch_book_info(
         self,
         book_id: str,
         **kwargs: Any,
@@ -50,7 +53,7 @@ class Xs63bFetcher(BaseFetcher):
         )
         return [info_html, catalog_html]
 
-    async def get_book_chapter(
+    async def fetch_chapter_content(
         self,
         book_id: str,
         chapter_id: str,
@@ -73,8 +76,8 @@ class Xs63bFetcher(BaseFetcher):
             try:
                 html = await self.fetch(chapter_url, **kwargs)
             except Exception as exc:
-                self.logger.warning(
-                    "xs63b get_book_chapter(%s) failed: %s",
+                logger.warning(
+                    "xs63b fetch_chapter_content(%s) failed: %s",
                     chapter_url,
                     exc,
                 )

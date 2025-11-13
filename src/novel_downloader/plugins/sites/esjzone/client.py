@@ -19,6 +19,6 @@ class EsjzoneClient(CommonClient):
         "btn-send-pw",
     ]
 
-    def _is_access_limited(self, html_list: list[str]) -> bool:
-        html = html_list[0]
+    def _dl_check_restricted(self, raw_pages: list[str]) -> bool:
+        html = raw_pages[0]
         return all(marker in html for marker in self.ENCRYPTED_MARKERS)

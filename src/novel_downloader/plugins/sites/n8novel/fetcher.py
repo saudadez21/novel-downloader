@@ -29,7 +29,7 @@ class N8novelFetcher(BaseFetcher):
         r'["\'](\d+(?:,\d+)*)["\']\s*\.split\s*\(\s*["\']\s*,\s*["\']\s*\)', re.DOTALL
     )
 
-    async def get_book_info(
+    async def fetch_book_info(
         self,
         book_id: str,
         **kwargs: Any,
@@ -37,7 +37,7 @@ class N8novelFetcher(BaseFetcher):
         url = self.book_info_url(book_id=book_id)
         return [await self.fetch(url, **kwargs)]
 
-    async def get_book_chapter(
+    async def fetch_chapter_content(
         self,
         book_id: str,
         chapter_id: str,

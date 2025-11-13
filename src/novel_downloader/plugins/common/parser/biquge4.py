@@ -42,13 +42,13 @@ class Biquge4Parser(BaseParser):
 
     def parse_book_info(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        if not html_list:
+        if not raw_pages:
             return None
 
-        tree = html.fromstring(html_list[0])
+        tree = html.fromstring(raw_pages[0])
 
         # --- Basic meta extraction ---
         book_name = self._first_str(
@@ -164,9 +164,9 @@ class Biquge4Parser(BaseParser):
             "extra": {},
         }
 
-    def parse_chapter(
+    def parse_chapter_content(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
@@ -176,13 +176,13 @@ class Biquge4Parser(BaseParser):
 
         导致使用 `lxml` 时结构混乱, 因此这里采用正则表达式来截取该 DIV 内容并手动清理
         """
-        if not html_list:
+        if not raw_pages:
             return None
 
         title = ""
         paragraphs: list[str] = []
 
-        for curr_html in html_list:
+        for curr_html in raw_pages:
             if not title:
                 m_titles = self.TITLE_RE.findall(curr_html)
                 if m_titles:

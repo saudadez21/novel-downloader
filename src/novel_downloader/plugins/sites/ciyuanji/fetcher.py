@@ -22,7 +22,7 @@ class CiyuanjiFetcher(BaseFetcher):
     BOOK_INFO_URL = "https://www.ciyuanji.com/b_d_{book_id}.html"
     CHAPTER_URL = "https://www.ciyuanji.com/chapter/{book_id}_{chapter_id}.html"
 
-    async def get_book_info(
+    async def fetch_book_info(
         self,
         book_id: str,
         **kwargs: Any,
@@ -36,7 +36,7 @@ class CiyuanjiFetcher(BaseFetcher):
         url = self.book_info_url(book_id=book_id)
         return [await self.fetch(url, **kwargs)]
 
-    async def get_book_chapter(
+    async def fetch_chapter_content(
         self,
         book_id: str,
         chapter_id: str,

@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+"""
+This script has grown to ~1500 LOC.
+
+TODO (probably never):
+  * Break into multiple files
+  * Make it readable
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -122,10 +130,10 @@ def load_config(cfg_path: Path) -> None:
     NAV_HELPER = NavHelper(TEST_DATA)
 
 
-def save_html_parts(html_list: list[str], html_dir: Path, filename_prefix: str) -> None:
+def save_html_parts(raw_pages: list[str], html_dir: Path, filename_prefix: str) -> None:
     """Save HTML parts like {prefix}_1.html, {prefix}_2.html, ..."""
     html_dir.mkdir(parents=True, exist_ok=True)
-    for idx, html in enumerate(html_list, start=1):
+    for idx, html in enumerate(raw_pages, start=1):
         (html_dir / f"{filename_prefix}_{idx}.html").write_text(html, encoding="utf-8")
 
 
@@ -244,7 +252,7 @@ async def run_fetch(args: argparse.Namespace) -> None:
                 else:
                     try:
                         logger.info("Fetching book info: %s:%s", site_key, book_id)
-                        info_htmls = await f.get_book_info(book_id)
+                        info_htmls = await f.fetch_book_info(book_id)
                         save_html_parts(info_htmls, book_dir, info_prefix)
                     except Exception as e:
                         logger.exception(
@@ -268,7 +276,7 @@ async def run_fetch(args: argparse.Namespace) -> None:
                         logger.info(
                             "Fetching chapter: %s:%s:%s", site_key, book_id, chap_id
                         )
-                        chap_htmls = await f.get_book_chapter(book_id, chap_id)
+                        chap_htmls = await f.fetch_chapter_content(book_id, chap_id)
                         save_html_parts(chap_htmls, book_dir, chap_prefix)
                     except Exception as e:
                         logger.exception(
@@ -310,9 +318,9 @@ def run_parse(args: argparse.Namespace) -> None:
             book_id = entry["book_id"]
 
             try:
-                html_list = load_html_parts(html_base, f"{book_id}_info")
-                if html_list:
-                    book_info = parser.parse_book_info(html_list)
+                raw_pages = load_html_parts(html_base, f"{book_id}_info")
+                if raw_pages:
+                    book_info = parser.parse_book_info(raw_pages)
                     cur.execute(
                         "INSERT OR REPLACE INTO books VALUES (?, ?, ?, ?)",
                         (
@@ -329,10 +337,10 @@ def run_parse(args: argparse.Namespace) -> None:
 
             for chap_id in entry["chap_ids"]:
                 try:
-                    html_list = load_html_parts(html_base, f"{book_id}_{chap_id}")
-                    if not html_list:
+                    raw_pages = load_html_parts(html_base, f"{book_id}_{chap_id}")
+                    if not raw_pages:
                         continue
-                    chapter = parser.parse_chapter(html_list, chap_id)
+                    chapter = parser.parse_chapter_content(raw_pages, chap_id)
                     cur.execute(
                         "INSERT OR REPLACE INTO chapters VALUES (?, ?, ?, ?, ?)",
                         (
@@ -360,7 +368,7 @@ def run_parse(args: argparse.Namespace) -> None:
 # ---------------------------------------------------------------------
 # Utilities
 # ---------------------------------------------------------------------
-def _get_versions_for_site_book(site: str, book_id: str) -> list[str]:
+def _list_book_versions(site: str, book_id: str) -> list[str]:
     """Return list of available dates for a given book."""
     with sqlite3.connect(SITE_DATA_PATH) as conn:
         cur = conn.cursor()
@@ -371,7 +379,7 @@ def _get_versions_for_site_book(site: str, book_id: str) -> list[str]:
         return [row[0] for row in cur.fetchall()]
 
 
-def _get_versions_for_chapter(site: str, book_id: str, chap_id: str) -> list[str]:
+def _list_chapter_versions(site: str, book_id: str, chap_id: str) -> list[str]:
     with sqlite3.connect(SITE_DATA_PATH) as conn:
         cur = conn.cursor()
         cur.execute(
@@ -381,7 +389,7 @@ def _get_versions_for_chapter(site: str, book_id: str, chap_id: str) -> list[str
         return [r[0] for r in cur.fetchall()]
 
 
-def _get_book_info_by_date(site: str, book_id: str, date: str) -> dict:
+def _load_book_snapshot(site: str, book_id: str, date: str) -> dict:
     with sqlite3.connect(SITE_DATA_PATH) as conn:
         cur = conn.cursor()
         cur.execute(
@@ -392,7 +400,7 @@ def _get_book_info_by_date(site: str, book_id: str, date: str) -> dict:
         return json.loads(row[0]) if row else {}
 
 
-def _get_chapter_by_date(site: str, book_id: str, chap_id: str, date: str) -> dict:
+def _load_chapter_snapshot(site: str, book_id: str, chap_id: str, date: str) -> dict:
     with sqlite3.connect(SITE_DATA_PATH) as conn:
         cur = conn.cursor()
         cur.execute(
@@ -1138,7 +1146,7 @@ def book_info_page(site: str, book_id: str) -> None:
     with ui.column().classes("w-full max-w-screen-lg min-w-[320px] mx-auto gap-4"):
         ui.label(f"Book Info: {site}/{book_id}").classes("text-h6")
 
-        versions = _get_versions_for_site_book(site, book_id)
+        versions = _list_book_versions(site, book_id)
         if not versions:
             ui.label("No versions found.")
             return
@@ -1193,8 +1201,8 @@ def book_info_page(site: str, book_id: str) -> None:
                 ui.html(html_block, sanitize=False)
 
         def _render_all() -> None:
-            data_a = _get_book_info_by_date(site, book_id, state["date_a"])
-            data_b = _get_book_info_by_date(site, book_id, state["date_b"])
+            data_a = _load_book_snapshot(site, book_id, state["date_a"])
+            data_b = _load_book_snapshot(site, book_id, state["date_b"])
             _render_meta_diff(data_a, data_b)
             _render_volumes_diff(data_a, data_b)
 
@@ -1217,7 +1225,7 @@ def chapter_page(site: str, book_id: str, chap_id: str) -> None:
     with ui.column().classes("w-full max-w-screen-lg min-w-[320px] mx-auto gap-4"):
         ui.label(f"Chapter: {site}/{book_id}/{chap_id}").classes("text-h6")
 
-        versions = _get_versions_for_chapter(site, book_id, chap_id)
+        versions = _list_chapter_versions(site, book_id, chap_id)
         if not versions:
             ui.label("No versions found.")
             return
@@ -1287,8 +1295,8 @@ def chapter_page(site: str, book_id: str, chap_id: str) -> None:
                 ui.html(html_block, sanitize=False)
 
         def _render_all() -> None:
-            a = _get_chapter_by_date(site, book_id, chap_id, state["date_a"]) or {}
-            b = _get_chapter_by_date(site, book_id, chap_id, state["date_b"]) or {}
+            a = _load_chapter_snapshot(site, book_id, chap_id, state["date_a"]) or {}
+            b = _load_chapter_snapshot(site, book_id, chap_id, state["date_b"]) or {}
             _render_title_diff(a, b)
             _render_content_diff(a, b)
             _render_extra_diff(a, b)

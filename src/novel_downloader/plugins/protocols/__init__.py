@@ -9,6 +9,7 @@ parser, and searcher interfaces.
 
 __all__ = [
     "ClientProtocol",
+    "_ClientContext",
     "FetcherProtocol",
     "ParserProtocol",
     "ProcessorProtocol",
@@ -18,7 +19,7 @@ __all__ = [
     "ProcessUI",
 ]
 
-from .client import ClientProtocol
+from .client import ClientProtocol, _ClientContext
 from .fetcher import FetcherProtocol
 from .parser import ParserProtocol
 from .processor import ProcessorProtocol

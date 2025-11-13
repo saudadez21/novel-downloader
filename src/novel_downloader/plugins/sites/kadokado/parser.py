@@ -29,14 +29,14 @@ class KadokadoParser(BaseParser):
 
     def parse_book_info(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        if len(html_list) < 2:
+        if len(raw_pages) < 2:
             return None
 
-        info = json.loads(html_list[0])
-        catalog = json.loads(html_list[1])
+        info = json.loads(raw_pages[0])
+        catalog = json.loads(raw_pages[1])
 
         book_name = info.get("displayName", "")
         author = info.get("ownerDisplayName", "")
@@ -90,17 +90,17 @@ class KadokadoParser(BaseParser):
             "extra": {},
         }
 
-    def parse_chapter(
+    def parse_chapter_content(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        if not html_list:
+        if not raw_pages:
             return None
 
-        info = json.loads(html_list[0])
-        content_resp = json.loads(html_list[1])
+        info = json.loads(raw_pages[0])
+        content_resp = json.loads(raw_pages[1])
         raw_content = content_resp.get("content")
         if not raw_content:
             return None

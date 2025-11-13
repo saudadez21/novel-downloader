@@ -5,10 +5,13 @@ novel_downloader.plugins.sites.kadokado.fetcher
 """
 
 import asyncio
+import logging
 from typing import Any
 
 from novel_downloader.plugins.base.fetcher import BaseFetcher
 from novel_downloader.plugins.registry import registrar
+
+logger = logging.getLogger(__name__)
 
 
 @registrar.register_fetcher()
@@ -25,7 +28,7 @@ class KadokadoFetcher(BaseFetcher):
     CHAPTER_CONT_URL = "https://api.kadokado.com.tw/v3/chapter/{chapter_id}/content"
     USER_API_URL = "https://api.kadokado.com.tw/v2/members/me"
 
-    async def get_book_info(
+    async def fetch_book_info(
         self,
         book_id: str,
         **kwargs: Any,
@@ -39,7 +42,7 @@ class KadokadoFetcher(BaseFetcher):
         )
         return [info_resp, catalog_resp]
 
-    async def get_book_chapter(
+    async def fetch_chapter_content(
         self,
         book_id: str,
         chapter_id: str,
@@ -62,21 +65,21 @@ class KadokadoFetcher(BaseFetcher):
         try:
             resp = await self.session.get(self.USER_API_URL)
         except Exception as e:
-            self.logger.info("KadoKado login check request failed: %s", e)
+            logger.info("KadoKado login check request failed: %s", e)
             return False
 
         if not resp.ok:
-            self.logger.info("KadoKado login check HTTP failed: status=%s", resp.status)
+            logger.info("KadoKado login check HTTP failed: status=%s", resp.status)
             return False
 
         try:
             data = resp.json()
         except Exception as e:
-            self.logger.info("KadoKado login check JSON parse failed: %s", e)
+            logger.info("KadoKado login check JSON parse failed: %s", e)
             return False
 
         if isinstance(data, dict) and data.get("memberId"):
             return True
 
-        self.logger.debug("KadoKado login check response: %s", data)
+        logger.debug("KadoKado login check response: %s", data)
         return False

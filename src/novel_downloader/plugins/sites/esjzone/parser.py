@@ -40,7 +40,7 @@ class EsjzoneParser(BaseParser):
 
     def parse_book_info(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
         """
@@ -49,13 +49,13 @@ class EsjzoneParser(BaseParser):
         注: 由于网站使用了多种不同的分卷格式, 已经尝试兼容常见情况,
         但仍可能存在未覆盖的 cases
 
-        :param html_list: Raw HTML of the book info page.
+        :param raw_pages: Raw HTML of the book info page.
         :return: Parsed metadata and chapter structure as a dictionary.
         """
-        if not html_list or self._is_forum_page(html_list):
+        if not raw_pages or self._is_forum_page(raw_pages):
             return None
 
-        tree = html.fromstring(html_list[0])
+        tree = html.fromstring(raw_pages[0])
 
         # --- Basic metadata ---
         book_name = self._first_str(
@@ -206,22 +206,22 @@ class EsjzoneParser(BaseParser):
             "extra": {},
         }
 
-    def parse_chapter(
+    def parse_chapter_content(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        if not html_list:
+        if not raw_pages:
             return None
-        if self._is_forum_page(html_list):
+        if self._is_forum_page(raw_pages):
             logger.warning("esjzone chapter %s :: please login to access", chapter_id)
             return None
-        if self._is_encrypted_chapter(html_list[0]):
+        if self._is_encrypted_chapter(raw_pages[0]):
             logger.warning("esjzone chapter %s :: chapter is encrypted", chapter_id)
             return None
 
-        tree = html.fromstring(html_list[0])
+        tree = html.fromstring(raw_pages[0])
         title = self._first_str(tree.xpath("//h2/text()"))
 
         # Collect embedded font bytes (for obfuscated glyph decoding)

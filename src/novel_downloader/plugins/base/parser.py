@@ -46,28 +46,28 @@ class BaseParser(abc.ABC):
     @abc.abstractmethod
     def parse_book_info(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
         """
         Parse and return a dictionary of book information from the raw HTML.
 
-        :param html_list: The HTML list of a book's info pages.
+        :param raw_pages: The HTML list of a book's info pages.
         :return: A dict containing metadata like title, author, chapters list, etc.
         """
         ...
 
     @abc.abstractmethod
-    def parse_chapter(
+    def parse_chapter_content(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
         """
         Parse chapter page and extract the content of one chapter.
 
-        :param html_list: The HTML list of the chapter pages.
+        :param raw_pages: The HTML list of the chapter pages.
         :param chapter_id: Identifier of the chapter being parsed.
         :return: The chapter's data.
         """

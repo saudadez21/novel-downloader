@@ -49,14 +49,14 @@ class Xs63bParser(BaseParser):
 
     def parse_book_info(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        if len(html_list) < 2:
+        if len(raw_pages) < 2:
             return None
 
-        info_tree = html.fromstring(html_list[0])
-        catalog_tree = html.fromstring(html_list[1])
+        info_tree = html.fromstring(raw_pages[0])
+        catalog_tree = html.fromstring(raw_pages[1])
 
         book_name = self._first_str(info_tree.xpath(self.TITLE_SELECTOR))
         author = self._first_str(info_tree.xpath(self.AUTHOR_SELECTOR))
@@ -113,19 +113,19 @@ class Xs63bParser(BaseParser):
             "extra": {},
         }
 
-    def parse_chapter(
+    def parse_chapter_content(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        if not html_list:
+        if not raw_pages:
             return None
 
         title = ""
         paragraphs: list[str] = []
 
-        for html_str in html_list:
+        for html_str in raw_pages:
             tree = html.fromstring(html_str)
 
             if not title:

@@ -35,14 +35,14 @@ class HetushuParser(BaseParser):
 
     def parse_book_info(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        if len(html_list) < 2:
+        if len(raw_pages) < 2:
             return None
 
-        tree = html.fromstring(html_list[0])
-        catalog_data: list[list[str]] = json.loads(html_list[1])
+        tree = html.fromstring(raw_pages[0])
+        catalog_data: list[list[str]] = json.loads(raw_pages[1])
 
         # --- Metadata ---
         book_name = self._first_str(
@@ -119,22 +119,22 @@ class HetushuParser(BaseParser):
             "extra": {},
         }
 
-    def parse_chapter(
+    def parse_chapter_content(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        if len(html_list) < 2 or not html_list[1]:
+        if len(raw_pages) < 2 or not raw_pages[1]:
             return None
 
-        tree = html.fromstring(html_list[0])
+        tree = html.fromstring(raw_pages[0])
 
         title = ""
         paragraphs: list[str] = []
         intro_paragraphs: list[str] = []
         start_collecting = False
-        orders = self._parse_chapter_order(html_list[1])
+        orders = self._parse_chapter_order(raw_pages[1])
 
         for elem in tree.xpath('//div[@id="content"]/*'):
             tag = elem.tag.lower()

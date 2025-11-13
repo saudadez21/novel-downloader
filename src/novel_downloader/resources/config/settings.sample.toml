@@ -24,7 +24,6 @@ log_level = "INFO"                 # 日志级别: DEBUG, INFO, WARNING, ERROR
 [general.font_ocr]
 decode_font = false                # 是否尝试本地解码混淆字体
 batch_size = 32
-save_font_debug = false            # 是否保存字体解码调试数据
 
 # 以下为 PaddleOCR 文本识别的可选参数
 # 默认情况下, 请保持注释, 程序会使用 PaddleOCR 内置的默认值
@@ -46,27 +45,14 @@ book_ids = [
 login_required = true              # 是否需要登录才能访问
 
 [sites.qqbook]  # QQ 阅读
-book_ids = [
-  "0000000000",
-  "0000000000"
-]
 login_required = true
 
 [sites.esjzone]  # ESJ Zone
-book_ids = [
-  "0000000000",
-  "0000000000"
-]
 login_required = true
 # username = "youremail@domain.com"  # 登录邮箱
 # password = "yourpassword"          # 登录密码
 
 [sites.linovelib]  # 哔哩轻小说
-book_ids = [
-  "0000000000",
-  "0000000000"
-]
-split_mode = "book"                # 导出方式: book / volume
 login_required = false
 request_interval = 2.5
 

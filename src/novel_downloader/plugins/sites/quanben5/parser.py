@@ -28,13 +28,13 @@ class Quanben5Parser(BaseParser):
 
     def parse_book_info(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        if not html_list:
+        if not raw_pages:
             return None
 
-        tree = html.fromstring(html_list[0])
+        tree = html.fromstring(raw_pages[0])
         book_name = self._first_str(tree.xpath("//h3/span/text()"))
         author = self._first_str(
             tree.xpath(
@@ -73,16 +73,16 @@ class Quanben5Parser(BaseParser):
             "extra": {},
         }
 
-    def parse_chapter(
+    def parse_chapter_content(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        if not html_list:
+        if not raw_pages:
             return None
 
-        tree = html.fromstring(html_list[0])
+        tree = html.fromstring(raw_pages[0])
 
         # Extract the chapter title
         title = self._first_str(tree.xpath('//h1[@class="title1"]/text()'))

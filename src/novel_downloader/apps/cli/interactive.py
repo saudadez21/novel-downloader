@@ -153,7 +153,7 @@ async def _do_download(adapter: ConfigAdapter, site: str, book: BookConfig) -> N
                     ui.warn(t("Login failed."))
                     return
 
-            await client.download(book, ui=download_ui)
+            await client.download_book(book, ui=download_ui)
 
     except ValueError as e:
         ui.warn(
@@ -167,7 +167,7 @@ async def _do_download(adapter: ConfigAdapter, site: str, book: BookConfig) -> N
         return
 
     process_ui = CLIProcessUI()
-    client.process(
+    client.process_book(
         book,
         processors=adapter.get_processor_configs(site),
         ui=process_ui,
@@ -208,7 +208,7 @@ def _interactive_export(
     )
 
     try:
-        client.export(
+        client.export_book(
             book,
             cfg=adapter.get_exporter_config(site),
             formats=formats,

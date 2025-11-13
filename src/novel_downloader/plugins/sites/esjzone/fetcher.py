@@ -5,6 +5,7 @@ novel_downloader.plugins.sites.esjzone.fetcher
 
 """
 
+import logging
 import re
 from collections.abc import Mapping
 from typing import Any
@@ -12,6 +13,8 @@ from typing import Any
 from novel_downloader.plugins.base.fetcher import BaseFetcher
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import LoginField
+
+logger = logging.getLogger(__name__)
 
 
 @registrar.register_fetcher()
@@ -48,11 +51,11 @@ class EsjzoneFetcher(BaseFetcher):
 
         if await self._check_login_status():
             self._is_logged_in = True
-            self.logger.debug("Logged in via cookies: esjzone")
+            logger.debug("Logged in via cookies: esjzone")
             return True
 
         if not (username and password):
-            self.logger.warning("No credentials provided: esjzone")
+            logger.warning("No credentials provided: esjzone")
             return False
 
         for _ in range(attempt):
@@ -67,7 +70,7 @@ class EsjzoneFetcher(BaseFetcher):
         self._is_logged_in = False
         return False
 
-    async def get_book_info(
+    async def fetch_book_info(
         self,
         book_id: str,
         **kwargs: Any,
@@ -75,7 +78,7 @@ class EsjzoneFetcher(BaseFetcher):
         url = self.book_info_url(book_id=book_id)
         return [await self.fetch(url, **kwargs)]
 
-    async def get_book_chapter(
+    async def fetch_chapter_content(
         self,
         book_id: str,
         chapter_id: str,
@@ -156,7 +159,7 @@ class EsjzoneFetcher(BaseFetcher):
 
         resp = await self.session.post(url, data=data)
         if not resp.ok:
-            self.logger.warning(
+            logger.warning(
                 "esjzone getAuthToken HTTP failed for %s, status=%s", url, resp.status
             )
             return ""
@@ -166,9 +169,7 @@ class EsjzoneFetcher(BaseFetcher):
             text = resp.text
             return self._extract_token(text)
         except Exception as exc:
-            self.logger.warning(
-                "esjzone getAuthToken parse failed for %s: %s", url, exc
-            )
+            logger.warning("esjzone getAuthToken parse failed for %s: %s", url, exc)
             return ""
 
     async def _api_login(self, username: str, password: str) -> bool:
@@ -195,18 +196,18 @@ class EsjzoneFetcher(BaseFetcher):
             self._API_LOGIN_URL, data=payload, headers=headers
         )
         if not resp.ok:
-            self.logger.warning("esjzone login HTTP failed, status=%s", resp.status)
+            logger.warning("esjzone login HTTP failed, status=%s", resp.status)
             return False
 
         try:
             result = resp.json()
         except Exception as exc:
-            self.logger.warning("esjzone login JSON parse failed: %s", exc)
+            logger.warning("esjzone login JSON parse failed: %s", exc)
             return False
 
         status_code: int = result.get("status", 301)
         if status_code != 200:
-            self.logger.warning("esjzone login failed: %s", result.get("msg", ""))
+            logger.warning("esjzone login failed: %s", result.get("msg", ""))
             return False
 
         return True
@@ -233,7 +234,7 @@ class EsjzoneFetcher(BaseFetcher):
             self._API_UNLOCK_URL, data=payload, headers=headers
         )
         if not resp.ok:
-            self.logger.warning(
+            logger.warning(
                 "esjzone unlock HTTP failed for %s, status=%s", chap_url, resp.status
             )
             return ""
@@ -241,13 +242,11 @@ class EsjzoneFetcher(BaseFetcher):
         try:
             result = resp.json()
         except Exception as exc:
-            self.logger.warning(
-                "esjzone unlock JSON parse failed for %s: %s", chap_url, exc
-            )
+            logger.warning("esjzone unlock JSON parse failed for %s: %s", chap_url, exc)
             return ""
 
         if result.get("status") != 200:
-            self.logger.warning(
+            logger.warning(
                 "esjzone unlock failed for %s: %s", chap_url, result.get("msg", "")
             )
             return ""

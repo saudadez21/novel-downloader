@@ -30,14 +30,14 @@ class Ixdzs8Parser(BaseParser):
 
     def parse_book_info(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        if len(html_list) < 2 or not html_list[0] or not html_list[1]:
+        if len(raw_pages) < 2 or not raw_pages[0] or not raw_pages[1]:
             return None
 
         # Parse HTML
-        tree = html.fromstring(html_list[0])
+        tree = html.fromstring(raw_pages[0])
 
         book_name = self._meta(tree, "og:novel:book_name") or self._first_str(
             tree.xpath("//div[@class='n-text']/h1/text()")
@@ -90,7 +90,7 @@ class Ixdzs8Parser(BaseParser):
 
         data = {}
         with contextlib.suppress(Exception):
-            data = json.loads(html_list[1])
+            data = json.loads(raw_pages[1])
         clist = data.get("data", []) if isinstance(data, dict) else []
 
         chapters: list[ChapterInfoDict] = []
@@ -126,15 +126,15 @@ class Ixdzs8Parser(BaseParser):
             "extra": {},
         }
 
-    def parse_chapter(
+    def parse_chapter_content(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        if not html_list:
+        if not raw_pages:
             return None
-        tree = html.fromstring(html_list[0])
+        tree = html.fromstring(raw_pages[0])
 
         title = self._first_str(tree.xpath("//div[@class='page-d-top']/h1/text()"))
         if not title:

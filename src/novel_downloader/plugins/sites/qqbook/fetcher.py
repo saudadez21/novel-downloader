@@ -6,10 +6,13 @@ novel_downloader.plugins.sites.qqbook.fetcher
 """
 
 import asyncio
+import logging
 from typing import Any
 
 from novel_downloader.plugins.base.fetcher import BaseFetcher
 from novel_downloader.plugins.registry import registrar
+
+logger = logging.getLogger(__name__)
 
 
 @registrar.register_fetcher()
@@ -28,7 +31,7 @@ class QqbookFetcher(BaseFetcher):
 
     USER_HOMEPAGE_API_URL = "https://book.qq.com/api/user/homepage"
 
-    async def get_book_info(
+    async def fetch_book_info(
         self,
         book_id: str,
         **kwargs: Any,
@@ -50,7 +53,7 @@ class QqbookFetcher(BaseFetcher):
         )
         return [info_html, catalog_html]
 
-    async def get_book_chapter(
+    async def fetch_chapter_content(
         self,
         book_id: str,
         chapter_id: str,
@@ -120,23 +123,23 @@ class QqbookFetcher(BaseFetcher):
         try:
             resp = await self.session.get(self.USER_HOMEPAGE_API_URL)
         except Exception as e:
-            self.logger.info("QQ book login check request failed: %s", e)
+            logger.info("QQ book login check request failed: %s", e)
             return False
 
         if not resp.ok:
-            self.logger.info("QQ book login check HTTP failed: status=%s", resp.status)
+            logger.info("QQ book login check HTTP failed: status=%s", resp.status)
             return False
 
         try:
             payload = resp.json()
         except Exception as e:
-            self.logger.info("QQ book login check JSON parse failed: %s", e)
+            logger.info("QQ book login check JSON parse failed: %s", e)
             return False
 
         if payload.get("code") == 0:
             return True
 
-        self.logger.info(
+        logger.info(
             "QQ book login invalid (code=%s): %s",
             payload.get("code"),
             payload.get("msg"),

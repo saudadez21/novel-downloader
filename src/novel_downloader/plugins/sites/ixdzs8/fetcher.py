@@ -25,7 +25,7 @@ class Ixdzs8Fetcher(BaseFetcher):
     CHAPTER_URL = "https://ixdzs8.com/read/{book_id}/{chapter_id}.html"
     _TOKEN_PATTERN = re.compile(r'let\s+token\s*=\s*"([^"]+)"')
 
-    async def get_book_info(
+    async def fetch_book_info(
         self,
         book_id: str,
         **kwargs: Any,
@@ -50,7 +50,7 @@ class Ixdzs8Fetcher(BaseFetcher):
         catalog_html = resp.text
         return [info_html, catalog_html]
 
-    async def get_book_chapter(
+    async def fetch_chapter_content(
         self,
         book_id: str,
         chapter_id: str,

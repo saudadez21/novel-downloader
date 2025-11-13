@@ -27,7 +27,7 @@ class SfacgFetcher(BaseFetcher):
     CHAPTER_URL = "https://m.sfacg.com/c/{chapter_id}/"
     VIP_CHAPTER_URL = "https://m.sfacg.com/ajax/ashx/common.ashx"
 
-    async def get_book_info(
+    async def fetch_book_info(
         self,
         book_id: str,
         **kwargs: Any,
@@ -48,7 +48,7 @@ class SfacgFetcher(BaseFetcher):
 
         return [info_html, catalog_html]
 
-    async def get_book_chapter(
+    async def fetch_chapter_content(
         self,
         book_id: str,
         chapter_id: str,

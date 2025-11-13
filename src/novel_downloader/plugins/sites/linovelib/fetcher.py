@@ -5,17 +5,19 @@ novel_downloader.plugins.sites.linovelib.fetcher
 
 """
 
+import logging
 import re
 from pathlib import Path
 from typing import Any, Literal
 
 from novel_downloader.infra.http_defaults import DEFAULT_HEADERS
-from novel_downloader.libs.filesystem import img_name, write_file
+from novel_downloader.libs.filesystem import image_filename, write_file
 from novel_downloader.plugins.base.fetcher import BaseFetcher
 from novel_downloader.plugins.registry import registrar
 
 _IMG_HEADERS = DEFAULT_HEADERS.copy()
 _IMG_HEADERS["Referer"] = "https://www.linovelib.com/"
+logger = logging.getLogger(__name__)
 
 
 @registrar.register_fetcher()
@@ -34,7 +36,7 @@ class LinovelibFetcher(BaseFetcher):
 
     _VOL_ID_PATTERN: re.Pattern[str] = re.compile(r"/novel/\d+/(vol_\d+)\.html")
 
-    async def get_book_info(
+    async def fetch_book_info(
         self,
         book_id: str,
         **kwargs: Any,
@@ -82,7 +84,7 @@ class LinovelibFetcher(BaseFetcher):
         url = self.volume_url(book_id=book_id, vol_id=vol_id)
         return await self.fetch(url, **kwargs)
 
-    async def get_book_chapter(
+    async def fetch_chapter_content(
         self,
         book_id: str,
         chapter_id: str,
@@ -176,7 +178,7 @@ class LinovelibFetcher(BaseFetcher):
         # /novel/{book_id}/{vol_id}.html
         return self._VOL_ID_PATTERN.findall(html_str)
 
-    async def _download_one_image(
+    async def _fetch_one_image(
         self,
         url: str,
         folder: Path,
@@ -184,16 +186,16 @@ class LinovelibFetcher(BaseFetcher):
         name: str | None = None,
         on_exist: Literal["overwrite", "skip"],
     ) -> Path | None:
-        save_path = folder / img_name(url, name=name)
+        save_path = folder / image_filename(url, name=name)
 
         if save_path.exists() and on_exist == "skip":
-            self.logger.debug("linovelib image: skip existing %s", save_path)
+            logger.debug("linovelib image: skip existing %s", save_path)
             return save_path
 
         try:
             resp = await self.session.get(url, headers=_IMG_HEADERS)
         except Exception as e:
-            self.logger.warning(
+            logger.warning(
                 "Image request failed (site=linovelib) %s: %s",
                 url,
                 e,
@@ -201,7 +203,7 @@ class LinovelibFetcher(BaseFetcher):
             return None
 
         if not resp.ok:
-            self.logger.warning(
+            logger.warning(
                 "Image request failed (site=linovelib) %s: HTTP %s",
                 url,
                 resp.status,
@@ -209,5 +211,5 @@ class LinovelibFetcher(BaseFetcher):
             return None
 
         write_file(content=resp.content, filepath=save_path, on_exist="overwrite")
-        self.logger.debug("linovelib image: saved %s <- %s", save_path, url)
+        logger.debug("linovelib image: saved %s <- %s", save_path, url)
         return save_path

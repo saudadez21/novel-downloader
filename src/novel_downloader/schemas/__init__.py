@@ -18,6 +18,7 @@ __all__ = [
     "BookInfoDict",
     "ChapterDict",
     "ChapterInfoDict",
+    "MediaResource",
     "VolumeInfoDict",
     "LoginField",
     "SearchResult",
@@ -30,6 +31,7 @@ from .book import (
     BookInfoDict,
     ChapterDict,
     ChapterInfoDict,
+    MediaResource,
     VolumeInfoDict,
 )
 from .config import (

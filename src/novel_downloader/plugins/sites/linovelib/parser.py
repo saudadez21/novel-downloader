@@ -36,13 +36,13 @@ class LinovelibParser(BaseParser):
 
     def parse_book_info(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        if not html_list:
+        if not raw_pages:
             return None
 
-        tree = html.fromstring(html_list[0])
+        tree = html.fromstring(raw_pages[0])
 
         book_name = (
             self._first_str(
@@ -104,7 +104,7 @@ class LinovelibParser(BaseParser):
         )
 
         # --- volume pages ---
-        vol_pages = html_list[1:]
+        vol_pages = raw_pages[1:]
         volumes: list[VolumeInfoDict] = []
         for vol_page in vol_pages:
             vol_tree = html.fromstring(vol_page)
@@ -182,13 +182,13 @@ class LinovelibParser(BaseParser):
             "extra": {},
         }
 
-    def parse_chapter(
+    def parse_chapter_content(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        if not html_list:
+        if not raw_pages:
             return None
 
         try:
@@ -201,7 +201,7 @@ class LinovelibParser(BaseParser):
         image_positions: dict[int, list[dict[str, Any]]] = {}
         image_idx = 0
 
-        for curr_html in html_list:
+        for curr_html in raw_pages:
             tree = html.fromstring(curr_html)
 
             if not title:

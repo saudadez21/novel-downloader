@@ -182,7 +182,9 @@ class TaskManager:
                     )
                     if not success:
                         return
-                await client.download(BookConfig(book_id=task.book_id), ui=download_ui)
+                await client.download_book(
+                    BookConfig(book_id=task.book_id), ui=download_ui
+                )
 
         task.asyncio_task = asyncio.create_task(download_books())
         await task.asyncio_task
@@ -210,7 +212,7 @@ class TaskManager:
                     continue
 
                 await asyncio.to_thread(
-                    client.process,
+                    client.process_book,
                     BookConfig(book_id=current_task.book_id),
                     processors=processors,
                     ui=WebProcessUI(current_task),
@@ -236,7 +238,7 @@ class TaskManager:
             try:
                 client = self._get_client(current_task.site)
                 await asyncio.to_thread(
-                    client.export,
+                    client.export_book,
                     BookConfig(book_id=current_task.book_id),
                     cfg=self._adapter.get_exporter_config(current_task.site),
                     ui=WebExportUI(current_task),

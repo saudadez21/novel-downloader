@@ -662,13 +662,12 @@ def extract_shauthor(path: str, query: str) -> BookURLInfo | None:
 
 @register_extractor(["www.shencou.com"])
 def extract_shencou(path: str, query: str) -> BookURLInfo | None:
-    if path.startswith("/books/read_"):
-        logger.warning("请在 '详细页面' 内点击 '小说目录'")
-        return None
-    if m := re.search("^/read/(\\d+)/(\\d+)/(\\d+)\\.html$", path):
-        return _make_info("shencou", f"{m.group(1)}-{m.group(2)}", m.group(3))
-    if m := re.search("^/read/(\\d+)/(\\d+)/", path):
-        return _make_info("shencou", f"{m.group(1)}-{m.group(2)}", None)
+    if m := re.match(r"^/books/read_(\d+)\.html$", path):
+        return _make_info("shencou", m.group(1), None)
+    if m := re.match(r"^/read/\d+/(\d+)/(\d+)\.html$", path):
+        return _make_info("shencou", m.group(1), m.group(2))
+    if m := re.match(r"^/read/\d+/(\d+)/", path):
+        return _make_info("shencou", m.group(1), None)
     return None
 
 
@@ -802,13 +801,12 @@ def extract_wanbengo(path: str, query: str) -> BookURLInfo | None:
 
 @register_extractor(["www.wenku8.net"])
 def extract_wenku8(path: str, query: str) -> BookURLInfo | None:
-    if path.startswith("/book/"):
-        logger.warning("请在 '详细页面' 内点击 '小说目录'")
-        return None
-    if m := re.search("^/novel/(\\d+)/(\\d+)/(\\d+)\\.htm$", path):
-        return _make_info("wenku8", f"{m.group(1)}-{m.group(2)}", m.group(3))
-    if m := re.search("^/novel/(\\d+)/(\\d+)/", path):
-        return _make_info("wenku8", f"{m.group(1)}-{m.group(2)}", None)
+    if m := re.match(r"^/book/(\d+)\.htm$", path):
+        return _make_info("wenku8", m.group(1), None)
+    if m := re.match(r"^/novel/\d+/(\d+)/(\d+)\.htm$", path):
+        return _make_info("wenku8", m.group(1), m.group(2))
+    if m := re.match(r"^/novel/\d+/(\d+)/", path):
+        return _make_info("wenku8", m.group(1), None)
     return None
 
 

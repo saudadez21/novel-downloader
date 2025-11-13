@@ -40,13 +40,13 @@ class FanqienovelParser(BaseParser):
 
     def parse_book_info(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         **kwargs: Any,
     ) -> BookInfoDict | None:
-        if not html_list:
+        if not raw_pages:
             return None
 
-        data = self._extract_initial_state(html_list[0])
+        data = self._extract_initial_state(raw_pages[0])
         page = data.get("page") or {}
         if not isinstance(page, dict):
             return None
@@ -136,16 +136,16 @@ class FanqienovelParser(BaseParser):
             },
         }
 
-    def parse_chapter(
+    def parse_chapter_content(
         self,
-        html_list: list[str],
+        raw_pages: list[str],
         chapter_id: str,
         **kwargs: Any,
     ) -> ChapterDict | None:
-        if not html_list:
+        if not raw_pages:
             return None
 
-        html_str = html_list[0]
+        html_str = raw_pages[0]
         self._check_font(html_str)
 
         data = self._extract_initial_state(html_str)

@@ -22,7 +22,7 @@ class AaatxtFetcher(GenericFetcher):
     BOOK_INFO_URL = "http://www.aaatxt.com/shu/{book_id}.html"
     CHAPTER_URL = "http://www.aaatxt.com/yuedu/{chapter_id}.html"
 
-    async def get_book_chapter(
+    async def fetch_chapter_content(
         self,
         book_id: str,
         chapter_id: str,

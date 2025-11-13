@@ -18,6 +18,22 @@ ALLOWED_IMAGE_SUFFIXES = {
     ".webp",
     ".svg",
 }
+DEFAULT_FONT_SUFFIX = ".ttf"
+ALLOWED_FONT_SUFFIXES = {
+    ".ttf",
+    ".otf",
+    ".woff",
+    ".woff2",
+    ".ttc",
+    ".pfa",
+    ".pfb",
+    ".eot",
+}
+
+
+class SafeDict(dict[str, str]):
+    def __missing__(self, key: str) -> str:
+        return f"{{{key}}}"
 
 
 def url_to_hashed_name(
@@ -49,7 +65,7 @@ def url_to_hashed_name(
     return f"{name}{suffix}"
 
 
-def img_name(url: str, *, name: str | None = None) -> str:
+def image_filename(url: str, *, name: str | None = None) -> str:
     """
     Generate a hashed filename for an image URL,
     using a default set of allowed image suffixes.
@@ -63,3 +79,42 @@ def img_name(url: str, *, name: str | None = None) -> str:
         default_suffix=DEFAULT_IMAGE_SUFFIX,
         allowed_suffixes=ALLOWED_IMAGE_SUFFIXES,
     )
+
+
+def font_filename(url: str, *, name: str | None = None) -> str:
+    """
+    Generate a hashed filename for a font URL,
+    preserving the file extension if it's in the allowed list.
+
+    :param url: The font URL to hash.
+    :param name: Optional explicit name (no suffix).
+    """
+    return url_to_hashed_name(
+        url,
+        name=name,
+        default_suffix=DEFAULT_FONT_SUFFIX,
+        allowed_suffixes=ALLOWED_FONT_SUFFIXES,
+    )
+
+
+def format_filename(
+    template: str,
+    *,
+    append_timestamp: bool = True,
+    timestamp_format: str = "%Y%m%d_%H%M%S",
+    ext: str = "",
+    **fields: str,
+) -> str:
+    """Generate a filename from a template and keyword fields."""
+    name = template.format_map(SafeDict(**fields))
+
+    if append_timestamp:
+        from datetime import datetime
+
+        name += f"_{datetime.now().strftime(timestamp_format)}"
+
+    ext = ext.lstrip(".")
+    if not ext:
+        return name
+
+    return f"{name}.{ext}"
