@@ -11,7 +11,7 @@ import json
 import logging
 import types
 from pathlib import Path
-from typing import Any, Protocol, Self, cast
+from typing import Any, Self, cast
 
 from novel_downloader.libs.filesystem import image_filename
 from novel_downloader.plugins.protocols import FetcherProtocol, ParserProtocol
@@ -300,98 +300,10 @@ class AbstractClient(abc.ABC):
         await self.close()
 
 
-class SafeDict(dict[str, Any]):
-    def __missing__(self, key: str) -> str:
-        return f"{{{key}}}"
-
-
-class _ExportFunc(Protocol):
-    def __call__(
-        self,
-        book: BookConfig,
-        cfg: ExporterConfig | None = None,
-        *,
-        stage: str | None,
-        **kwargs: Any,
-    ) -> list[Path]:
-        ...
-
-
 class BaseClient(AbstractClient, abc.ABC):
     """
     Abstract intermediate client that provides reusable helper methods.
     """
-
-    def export_book(
-        self,
-        book: BookConfig,
-        cfg: ExporterConfig | None = None,
-        *,
-        formats: list[str] | None = None,
-        stage: str | None = None,
-        ui: ExportUI | None = None,
-        **kwargs: Any,
-    ) -> dict[str, list[Path]]:
-        """
-        Persist the assembled book to disk.
-
-        :param book: The book configuration to export.
-        :param cfg: Optional ExporterConfig defining export parameters.
-        :param formats: Optional list of format strings (e.g., ['epub', 'txt']).
-        :param ui: Optional ExportUI for reporting export progress.
-        :return: A mapping from format name to the resulting file path.
-        """
-        formats = formats or ["epub"]
-        results: dict[str, list[Path]] = {}
-
-        for fmt in formats:
-            method_name = f"export_as_{fmt.lower()}"
-            export_func: _ExportFunc | None = getattr(self, method_name, None)
-
-            if not callable(export_func):
-                if ui:
-                    ui.on_unsupported(book, fmt)
-                results[fmt] = []
-                continue
-
-            if ui:
-                ui.on_start(book, fmt)
-
-            try:
-                paths = export_func(book, cfg, stage=stage, **kwargs)
-                results[fmt] = paths
-
-                if paths and ui:
-                    for path in paths:
-                        ui.on_success(book, fmt, path)
-
-            except Exception as e:
-                results[fmt] = []
-                logger.warning(f"Error exporting {fmt}: {e}")
-                if ui:
-                    ui.on_error(book, fmt, e)
-
-        return results
-
-    def export_chapter(
-        self,
-        book_id: str,
-        chapter_id: str,
-        cfg: ExporterConfig | None = None,
-        *,
-        formats: list[str] | None = None,
-        stage: str | None = None,
-        **kwargs: Any,
-    ) -> dict[str, list[Path]]:
-        """
-        Persist the assembled chapter to disk.
-
-        :param cfg: Optional ExporterConfig defining export parameters.
-        :param formats: Optional list of format strings (e.g., ['epub', 'txt']).
-        :return: A mapping from format name to the resulting file path.
-        """
-        # TODO: placeholder
-        return {}
 
     def _save_book_info(
         self, book_id: str, book_info: BookInfoDict, stage: str = "raw"
@@ -459,33 +371,6 @@ class BaseClient(AbstractClient, abc.ABC):
             (html_dir / f"{book_id}_{filename}_{i}.html").write_text(
                 html, encoding="utf-8"
             )
-
-    def _get_filename(
-        self,
-        filename_template: str,
-        *,
-        title: str,
-        author: str | None = None,
-        append_timestamp: bool = True,
-        ext: str = "txt",
-        **extra_fields: str,
-    ) -> str:
-        """
-        Generate a filename based on the configured template and metadata fields.
-
-        :param title: Book title (required).
-        :param author: Author name (optional).
-        :param ext: File extension (e.g., "txt", "epub").
-        :param extra_fields: Any additional fields used in the filename template.
-        :return: Formatted filename with extension.
-        """
-        context = SafeDict(title=title, author=author or "", **extra_fields)
-        name = filename_template.format_map(context)
-        if append_timestamp:
-            from datetime import datetime
-
-            name += f"_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-        return f"{name}.{ext}"
 
     def _build_image_map(self, chap: ChapterDict) -> dict[int, list[dict[str, Any]]]:
         """
