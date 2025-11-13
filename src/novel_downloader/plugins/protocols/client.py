@@ -20,6 +20,7 @@ from novel_downloader.schemas import (
     ExporterConfig,
     FetcherConfig,
     ParserConfig,
+    PipelineMeta,
     ProcessorConfig,
     VolumeInfoDict,
 )
@@ -311,6 +312,9 @@ class _ClientContext(Protocol):
     def workers(self) -> int:
         ...
 
+    def _book_dir(self, book_id: str) -> Path:
+        ...
+
     def _detect_latest_stage(self, book_id: str) -> str:
         """
         Determine the most recent processing stage for export.
@@ -331,6 +335,14 @@ class _ClientContext(Protocol):
 
     def _load_book_info(self, book_id: str, stage: str = "raw") -> BookInfoDict:
         """Load and return stored :class:`BookInfoDict` for a book."""
+        ...
+
+    def _load_pipeline_meta(self, book_id: str) -> PipelineMeta:
+        """Load and return the pipeline metadata for the given book."""
+        ...
+
+    def _save_pipeline_meta(self, book_id: str, meta: PipelineMeta) -> None:
+        """Serialize and write ``pipeline.json`` for the given book."""
         ...
 
     def _save_raw_pages(

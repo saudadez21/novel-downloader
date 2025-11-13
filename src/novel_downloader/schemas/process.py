@@ -8,7 +8,6 @@ from typing import TypedDict
 
 
 class ExecutedStageMeta(TypedDict):
-    file: str
     processed_at: str  # ISO 8601 timestamp
     depends_on: list[str]
     config_hash: str

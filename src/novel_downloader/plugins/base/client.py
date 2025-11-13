@@ -31,6 +31,7 @@ from novel_downloader.schemas import (
     ExporterConfig,
     FetcherConfig,
     ParserConfig,
+    PipelineMeta,
     ProcessorConfig,
     VolumeInfoDict,
 )
@@ -305,6 +306,9 @@ class BaseClient(AbstractClient, abc.ABC):
     Abstract intermediate client that provides reusable helper methods.
     """
 
+    def _book_dir(self, book_id: str) -> Path:
+        return self._raw_data_dir / book_id
+
     def _save_book_info(
         self, book_id: str, book_info: BookInfoDict, stage: str = "raw"
     ) -> None:
@@ -314,9 +318,9 @@ class BaseClient(AbstractClient, abc.ABC):
         :param book_id: identifier of the book
         :param book_info: dict containing metadata about the book
         """
-        target_dir = self._raw_data_dir / book_id
-        target_dir.mkdir(parents=True, exist_ok=True)
-        (target_dir / f"book_info.{stage}.json").write_text(
+        base = self._book_dir(book_id)
+        base.mkdir(parents=True, exist_ok=True)
+        (base / f"book_info.{stage}.json").write_text(
             json.dumps(book_info, ensure_ascii=False, indent=2),
             encoding="utf-8",
         )
@@ -330,7 +334,9 @@ class BaseClient(AbstractClient, abc.ABC):
         :raises ValueError: if the JSON is invalid or has an unexpected structure.
         :return: Parsed BookInfoDict.
         """
-        info_path = self._raw_data_dir / book_id / f"book_info.{stage}.json"
+        base = self._book_dir(book_id)
+        info_path = base / f"book_info.{stage}.json"
+
         if not info_path.is_file():
             raise FileNotFoundError(f"Missing metadata file: {info_path}")
 
@@ -345,6 +351,59 @@ class BaseClient(AbstractClient, abc.ABC):
             )
 
         return cast(BookInfoDict, data)
+
+    def _load_pipeline_meta(self, book_id: str) -> PipelineMeta:
+        """
+        Load and return the pipeline metadata for the given book.
+
+        The method attempts to read and parse ``pipeline.json`` stored
+        under the book's directory. If the file is missing, unreadable,
+        or contains unexpected structures, a default empty metadata
+        payload is returned.
+
+        :param book_id: Book identifier.
+        :return: A ``PipelineMeta`` dict with ``pipeline`` and ``executed`` keys.
+        """
+        base = self._book_dir(book_id)
+        meta_path = base / "pipeline.json"
+
+        if not meta_path.is_file():
+            return {"pipeline": [], "executed": {}}
+
+        try:
+            raw = json.loads(meta_path.read_text(encoding="utf-8"))
+        except Exception:
+            return {"pipeline": [], "executed": {}}
+
+        pipeline = raw.get("pipeline", [])
+        if not isinstance(pipeline, list):
+            pipeline = []
+
+        executed = raw.get("executed", {})
+        if not isinstance(executed, dict):
+            executed = {}
+
+        return cast(
+            PipelineMeta,
+            {
+                "pipeline": pipeline,
+                "executed": executed,
+            },
+        )
+
+    def _save_pipeline_meta(self, book_id: str, meta: PipelineMeta) -> None:
+        """
+        Serialize and write ``pipeline.json`` for the given book.
+
+        :param book_id: Book identifier.
+        :param meta: Pipeline metadata containing ``pipeline`` and ``executed`` records.
+        """
+        base = self._book_dir(book_id)
+        base.mkdir(parents=True, exist_ok=True)
+        (base / "pipeline.json").write_text(
+            json.dumps(meta, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
 
     def _save_raw_pages(
         self,
@@ -543,23 +602,12 @@ class BaseClient(AbstractClient, abc.ABC):
           * Fallback: any executed record with an existing sqlite file.
           * Else: 'raw'.
         """
-        base_dir = self._raw_data_dir / book_id
-        pipeline_path = base_dir / "pipeline.json"
-        if not pipeline_path.is_file():
-            return "raw"
+        base = self._book_dir(book_id)
+        meta = self._load_pipeline_meta(book_id)
 
-        try:
-            meta = json.loads(pipeline_path.read_text(encoding="utf-8"))
-        except Exception:
-            return "raw"
-
-        pipeline: list[str] = meta.get("pipeline", [])
-        if not pipeline:
-            return "raw"
-
-        for stg in reversed(pipeline):
-            db_file = base_dir / f"chapter.{stg}.sqlite"
-            info_file = base_dir / f"book_info.{stg}.json"
+        for stg in reversed(meta["pipeline"]):
+            db_file = base / f"chapter.{stg}.sqlite"
+            info_file = base / f"book_info.{stg}.json"
             if db_file.is_file() and info_file.is_file():
                 return stg
 

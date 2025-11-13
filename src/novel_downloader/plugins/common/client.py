@@ -14,10 +14,10 @@ from novel_downloader.plugins.mixins import (
     ExportEpubMixin,
     ExportHtmlMixin,
     ExportTxtMixin,
+    ProcessMixin,
 )
-from novel_downloader.plugins.protocols import ExportUI, LoginUI, ProcessUI
-from novel_downloader.plugins.utils.stage_runner import StageRunner
-from novel_downloader.schemas import BookConfig, ExporterConfig, ProcessorConfig
+from novel_downloader.plugins.protocols import ExportUI, LoginUI
+from novel_downloader.schemas import BookConfig, ExporterConfig
 
 logger = logging.getLogger(__name__)
 
@@ -34,12 +34,12 @@ class _ExportFunc(Protocol):
         ...
 
 
-# class CommonClient(DownloadMixin, BaseClient):
 class CommonClient(
     DownloadMixin,
     ExportEpubMixin,
     ExportHtmlMixin,
     ExportTxtMixin,
+    ProcessMixin,
     BaseClient,
 ):
     """
@@ -71,68 +71,6 @@ class CommonClient(
         if ui:
             ui.on_login_success()
         return True
-
-    def process_book(
-        self,
-        book: BookConfig,
-        processors: list[ProcessorConfig],
-        *,
-        ui: ProcessUI | None = None,
-        **kwargs: Any,
-    ) -> None:
-        """
-        Run all processors for a single book.
-
-        :param book: BookConfig to process.
-        :param ui: Optional ProcessUI to report progress.
-        """
-        raw_base = self._raw_data_dir / book.book_id
-
-        raw_sqlite = raw_base / "chapter.raw.sqlite"
-        book_info_path = raw_base / "book_info.raw.json"
-
-        # Pre-flight checks
-        if not raw_sqlite.is_file():
-            if ui:
-                ui.on_missing(book, "raw", raw_sqlite)
-            return
-        if not book_info_path.is_file():
-            if ui:
-                ui.on_missing(book, "book_info", book_info_path)
-            return
-
-        stage_name: str = "Unknown"
-        try:
-            runner = StageRunner(base_dir=raw_base, book=book)
-            for pconf in processors:
-                stage_name = pconf.name
-                if ui:
-                    ui.on_stage_start(book, stage_name)
-
-                def _progress(
-                    done: int,
-                    total: int,
-                    *,
-                    _b: BookConfig = book,
-                    _s: str = stage_name,
-                ) -> None:
-                    if ui:
-                        ui.on_stage_progress(_b, _s, done, total)
-
-                runner.run(pconf, on_progress=_progress)
-
-                if ui:
-                    ui.on_stage_complete(book, stage_name)
-
-            logger.info("All stages completed successfully for book %s", book.book_id)
-
-        except Exception as e:
-            logger.warning(
-                "Processing failed at stage '%s' for book %s: %s",
-                stage_name,
-                book.book_id,
-                e,
-            )
 
     def export_book(
         self,

@@ -9,9 +9,11 @@ __all__ = [
     "ExportEpubMixin",
     "ExportHtmlMixin",
     "ExportTxtMixin",
+    "ProcessMixin",
 ]
 
 from .download import DownloadMixin
 from .export_epub import ExportEpubMixin
 from .export_html import ExportHtmlMixin
 from .export_txt import ExportTxtMixin
+from .process import ProcessMixin
