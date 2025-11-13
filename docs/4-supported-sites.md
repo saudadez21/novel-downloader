@@ -284,10 +284,9 @@ novel-cli download --site ttkan shengxu-chendong
   * 风控: 请求过于频繁可能触发限制, 导致封禁或限流 (推荐请求间隔大于 2 秒)
 
 * **轻小说文库 (wenku8)**
-  * 书籍: `https://www.wenku8.net/novel/2/2835/index.htm` -> Book ID: `2-2835`
+  * 书籍: `https://www.wenku8.net/book/2835.htm` -> Book ID: `2835`
   * 章节: `https://www.wenku8.net/novel/2/2835/113354.htm` -> Chapter ID: `113354`
-  * 目录访问:
-    * 先打开详细页面 (如 `https://www.wenku8.net/book/2835.htm`), 再点击 "小说目录" 查看
+  * 目录: `https://www.wenku8.net/novel/2/2835/index.htm` -> Book ID: `2835`
   * 备用:
     * `https://www.wenku8.cc`
     * `https://www.wenku8.com`

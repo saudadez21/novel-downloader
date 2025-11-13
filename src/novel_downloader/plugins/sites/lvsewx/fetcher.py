@@ -35,6 +35,6 @@ class LvsewxFetcher(BaseFetcher):
         chapter_id: str,
         **kwargs: Any,
     ) -> list[str]:
-        prefix = book_id[:-3]
+        prefix = "0" if len(book_id) <= 3 else book_id[:-3]
         url = self.CHAPTER_URL.format(prefix=prefix, bid=book_id, cid=chapter_id)
         return [await self.fetch(url, encoding="gbk", **kwargs)]

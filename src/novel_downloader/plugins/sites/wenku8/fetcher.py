@@ -19,24 +19,19 @@ class Wenku8Fetcher(BaseFetcher):
 
     site_name: str = "wenku8"
 
-    BOOK_INFO_URL = "https://www.wenku8.net/book/{book_num}.htm"
-    BOOK_CATALOG_URL = "https://www.wenku8.net/novel/{book_path}/index.htm"
-    CHAPTER_URL = "https://www.wenku8.net/novel/{book_id}/{chapter_id}.htm"
+    BOOK_INFO_URL = "https://www.wenku8.net/book/{bid}.htm"
+    BOOK_CATALOG_URL = "https://www.wenku8.net/novel/{prefix}/{bid}/index.htm"
+    CHAPTER_URL = "https://www.wenku8.net/novel/{prefix}/{bid}/{cid}.htm"
 
     async def fetch_book_info(
         self,
         book_id: str,
         **kwargs: Any,
     ) -> list[str]:
-        parts = book_id.split("-")
-        if len(parts) != 2:
-            raise ValueError(f"Invalid book_id format: {book_id}")
+        prefix = self._compute_prefix(book_id)
 
-        group_id, book_num = parts
-        book_path = f"{group_id}/{book_num}"
-
-        info_url = self.BOOK_INFO_URL.format(book_num=book_num)
-        catalog_url = self.BOOK_CATALOG_URL.format(book_path=book_path)
+        info_url = self.BOOK_INFO_URL.format(bid=book_id)
+        catalog_url = self.BOOK_CATALOG_URL.format(prefix=prefix, bid=book_id)
 
         info_resp, catalog_resp = await asyncio.gather(
             self.fetch(info_url, **kwargs),
@@ -50,6 +45,11 @@ class Wenku8Fetcher(BaseFetcher):
         chapter_id: str,
         **kwargs: Any,
     ) -> list[str]:
-        book_id = book_id.replace("-", "/")
-        url = self.CHAPTER_URL.format(book_id=book_id, chapter_id=chapter_id)
+        prefix = self._compute_prefix(book_id)
+        url = self.CHAPTER_URL.format(prefix=prefix, bid=book_id, cid=chapter_id)
         return [await self.fetch(url, **kwargs)]
+
+    @staticmethod
+    def _compute_prefix(book_id: str) -> str:
+        # Wenku8 rule: IDs < 1000 placed in directory 0
+        return "0" if len(book_id) <= 3 else book_id[:-3]

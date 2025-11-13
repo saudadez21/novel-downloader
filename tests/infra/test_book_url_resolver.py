@@ -312,8 +312,10 @@ CASES_SUCCESS = [
     SuccessCase("https://www.uaa.com/novel/chapter?id=234639", "uaa", None, "234639"),
     SuccessCase("https://www.wanbengo.com/1/", "wanbengo", "1", None),
     SuccessCase("https://www.wanbengo.com/1/2.html", "wanbengo", "1", "2"),
-    SuccessCase("https://www.wenku8.net/novel/2/2835/index.htm", "wenku8", "2-2835", None),
-    SuccessCase("https://www.wenku8.net/novel/2/2835/113354.htm", "wenku8", "2-2835", "113354"),
+    SuccessCase("https://www.wenku8.net/book/2835.htm", "wenku8", "2835", None),
+    SuccessCase("https://www.wenku8.net/novel/2/2835/index.htm", "wenku8", "2835", None),
+    SuccessCase("https://www.wenku8.net/novel/2/2835/113354.htm", "wenku8", "2835", "113354"),
+    SuccessCase("https://www.wenku8.net/novel/0/265/index.htm", "wenku8", "265", None),
     SuccessCase("https://www.westnovel.com/ksl/sq/", "westnovel", "ksl-sq", None),
     SuccessCase("https://www.westnovel.com/ksl/sq/140072.html", "westnovel", "ksl-sq", "140072"),
     SuccessCase("https://www.westnovel.com/q/list/725.html", "westnovel_sub", "q-list-725", None),
@@ -348,7 +350,6 @@ CASES_SUCCESS = [
 
 CASES_HINT = [
     HintCase("https://www.shencou.com/books/read_3540.html", "请在 '详细页面' 内点击 '小说目录'"),
-    HintCase("https://www.wenku8.net/book/2835.htm", "请在 '详细页面' 内点击 '小说目录'"),
 ]
 
 CASES_INVALID = [
