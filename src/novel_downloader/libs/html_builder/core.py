@@ -14,17 +14,19 @@ from novel_downloader.infra.paths import (
 )
 from novel_downloader.libs.crypto.hash_utils import hash_bytes, hash_file
 from novel_downloader.libs.filesystem import sanitize_filename, write_file
+from novel_downloader.libs.media.font import detect_font_format
 from novel_downloader.libs.media.image import detect_image_format
 
 from .constants import (
     CHAPTER_DIR,
     CSS_DIR,
+    FONT_DIR,
     IMAGE_MEDIA_EXTS,
     INDEX_TEMPLATE,
     JS_DIR,
     MEDIA_DIR,
 )
-from .models import HtmlChapter, HtmlImage, HtmlVolume
+from .models import HtmlChapter, HtmlFont, HtmlImage, HtmlVolume
 
 
 class HtmlBuilder:
@@ -51,10 +53,16 @@ class HtmlBuilder:
 
         self._cover_filename: str | None = None
 
-        # builder state
+        # image state
         self.images: list[HtmlImage] = []
         self._img_map: dict[str, str] = {}
         self._img_idx = 0
+
+        # font state
+        self.fonts: list[HtmlFont] = []
+        self._font_map: dict[str, HtmlFont] = {}
+        self._font_idx = 0
+
         self._vol_idx = 0
 
         self.volumes: list[HtmlVolume] = []
@@ -73,7 +81,7 @@ class HtmlBuilder:
         data = image_path.read_bytes()
         # Try detecting from magic bytes
         fmt = detect_image_format(data)
-        ext = fmt.lower() if fmt else image_path.suffix.lower().lstrip(".")
+        ext = fmt.lower() if fmt else image_path.suffix.lower().lstrip(".") or "bin"
 
         filename = f"img_{self._img_idx}.{ext}"
 
@@ -104,6 +112,85 @@ class HtmlBuilder:
         self._img_map[h] = filename
         self._img_idx += 1
         return filename
+
+    def add_font(
+        self,
+        font_path: Path,
+        *,
+        family: str | None = None,
+        selectors: tuple[str, ...] = (),
+    ) -> HtmlFont | None:
+        """
+        Add a font from a file (deduped by hash) and return a HtmlFont.
+
+        :param font_path: Path to the font file.
+        :param family: CSS font-family name to use.
+        :param selectors: CSS selectors this font should apply to.
+        :return: HtmlFont instance, or None if the path is invalid.
+        """
+        if not (font_path.exists() and font_path.is_file()):
+            return None
+
+        h = hash_file(font_path)
+        if h in self._font_map:
+            return self._font_map[h]
+
+        data = font_path.read_bytes()
+        fmt = detect_font_format(data)
+        ext = fmt.lower() if fmt else font_path.suffix.lower().lstrip(".") or "bin"
+
+        family_name = family or f"FontFamily_{self._font_idx}"
+        filename = f"font_{self._font_idx}.{ext}"
+
+        font = HtmlFont(
+            data=data,
+            filename=filename,
+            family=family_name,
+            selectors=selectors,
+        )
+        self.fonts.append(font)
+        self._font_map[h] = font
+        self._font_idx += 1
+        return font
+
+    def add_font_bytes(
+        self,
+        data: bytes,
+        *,
+        family: str | None = None,
+        selectors: tuple[str, ...] = (),
+    ) -> HtmlFont | None:
+        """
+        Add a font from raw bytes (deduped by hash) and return a HtmlFont.
+
+        :param data: Raw font bytes.
+        :param family: CSS font-family name to use.
+        :param selectors: CSS selectors this font should apply to.
+        :return: HtmlFont instance, or None if data is empty.
+        """
+        if not data:
+            return None
+
+        h = hash_bytes(data)
+        if h in self._font_map:
+            return self._font_map[h]
+
+        fmt = detect_font_format(data)
+        ext = fmt.lower() if fmt else "bin"
+
+        family_name = family or f"FontFamily_{self._font_idx}"
+        filename = f"font_{self._font_idx}.{ext}"
+
+        font = HtmlFont(
+            data=data,
+            filename=filename,
+            family=family_name,
+            selectors=selectors,
+        )
+        self.fonts.append(font)
+        self._font_map[h] = font
+        self._font_idx += 1
+        return font
 
     def add_chapter(self, chap: HtmlChapter) -> None:
         """
@@ -167,6 +254,19 @@ class HtmlBuilder:
             cover_name = f"cover.{ext}"
             write_file(self.cover, media_dir / cover_name)
             self._cover_filename = cover_name
+
+    def _write_fonts(self, html_dir: Path) -> None:
+        """
+        Write all referenced fonts into /fonts.
+        """
+        if not self.fonts:
+            return
+
+        font_dir = html_dir / FONT_DIR
+        font_dir.mkdir(parents=True, exist_ok=True)
+
+        for font in self.fonts:
+            write_file(font.data, font_dir / font.filename)
 
     def _build_index(self, html_dir: Path) -> None:
         index_path = html_dir / "index.html"
@@ -266,6 +366,7 @@ class HtmlBuilder:
         html_dir = output_path / folder_name
         self._prepare_output_dir(html_dir)
         self._write_media(html_dir)
+        self._write_fonts(html_dir)
         self._build_index(html_dir)
         self._build_chapters(html_dir)
         return html_dir
