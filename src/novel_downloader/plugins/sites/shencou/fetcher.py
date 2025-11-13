@@ -5,40 +5,61 @@ novel_downloader.plugins.sites.shencou.fetcher
 
 """
 
+import asyncio
 import logging
 from pathlib import Path
 from typing import Any, Literal
 
 from novel_downloader.infra.http_defaults import IMAGE_HEADERS
 from novel_downloader.libs.filesystem import image_filename, write_file
-from novel_downloader.plugins.base.fetcher import GenericFetcher
+from novel_downloader.plugins.base.fetcher import BaseFetcher
 from novel_downloader.plugins.registry import registrar
 
 logger = logging.getLogger(__name__)
 
 
 @registrar.register_fetcher()
-class ShencouFetcher(GenericFetcher):
+class ShencouFetcher(BaseFetcher):
     """
     A session class for interacting with the 神凑轻小说 (www.shencou.com) novel.
     """
 
     site_name: str = "shencou"
 
-    BOOK_ID_REPLACEMENTS = [("-", "/")]
+    BOOK_INFO_URL = "https://www.shencou.com/books/read_{bid}.html"
+    BOOK_CATALOG_URL = "https://www.shencou.com/read/{prefix}/{bid}/index.html"
+    CHAPTER_URL = "https://www.shencou.com/read/{prefix}/{bid}/{cid}.html"
 
-    HAS_SEPARATE_CATALOG: bool = True
-    BOOK_INFO_URL = "https://www.shencou.com/books/read_{book_id}.html"
-    BOOK_CATALOG_URL = "https://www.shencou.com/read/{book_id}/index.html"
-    CHAPTER_URL = "https://www.shencou.com/read/{book_id}/{chapter_id}.html"
+    async def fetch_book_info(
+        self,
+        book_id: str,
+        **kwargs: Any,
+    ) -> list[str]:
+        prefix = self._compute_prefix(book_id)
 
-    @classmethod
-    def book_info_url(cls, **kwargs: Any) -> str:
-        if not cls.BOOK_INFO_URL:
-            raise NotImplementedError(f"{cls.__name__}.BOOK_INFO_URL not set")
-        book_id = kwargs["book_id"]
-        clean_id = book_id.rsplit("/", 1)[-1]
-        return cls.BOOK_INFO_URL.format(book_id=clean_id)
+        info_url = self.BOOK_INFO_URL.format(bid=book_id)
+        catalog_url = self.BOOK_CATALOG_URL.format(prefix=prefix, bid=book_id)
+
+        info_resp, catalog_resp = await asyncio.gather(
+            self.fetch(info_url, **kwargs),
+            self.fetch(catalog_url, **kwargs),
+        )
+        return [info_resp, catalog_resp]
+
+    async def fetch_chapter_content(
+        self,
+        book_id: str,
+        chapter_id: str,
+        **kwargs: Any,
+    ) -> list[str]:
+        prefix = self._compute_prefix(book_id)
+        url = self.CHAPTER_URL.format(prefix=prefix, bid=book_id, cid=chapter_id)
+        return [await self.fetch(url, **kwargs)]
+
+    @staticmethod
+    def _compute_prefix(book_id: str) -> str:
+        # prefix rule: IDs < 1000 placed in directory 0
+        return "0" if len(book_id) <= 3 else book_id[:-3]
 
     async def _fetch_one_image(
         self,

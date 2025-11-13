@@ -306,10 +306,9 @@ novel-cli download --site ttkan shengxu-chendong
     * 若章节设有访问密码, 请先在网页端输入并解锁后, 再开始下载。
 
 * **神凑轻小说 (shencou)**
-  * 书籍: `https://www.shencou.com/read/3/3540/index.html` -> Book ID: `3-3540`
+  * 书籍: `https://www.shencou.com/books/read_3540.html` -> Book ID: `3540`
   * 章节: `https://www.shencou.com/read/3/3540/156328.html` -> Chapter ID: `156328`
-  * 目录访问:
-    * 先打开详细页面 (如 `https://www.shencou.com/books/read_3540.html`), 再点击 "小说目录" 查看
+  * 目录: `https://www.shencou.com/read/3/3540/index.html` -> Book ID: `3540`
   * 已知问题:
     * 图片资源可能无法正常加载或失效
     * 目录页中仍保留了一些已删除章节的重复条目, 却未同步删除

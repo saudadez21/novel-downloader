@@ -225,8 +225,11 @@ CASES_SUCCESS = [
     SuccessCase("https://m.shauthor.com/info_s5o/#", "shauthor", "s5o", None),
     SuccessCase("https://m.shauthor.com/read_s5o/jjhl0.html", "shauthor", "s5o", "jjhl0"),
     SuccessCase("https://m.shauthor.com/read_s5o/jjhl1_2.html", "shauthor", "s5o", "jjhl1"),
-    SuccessCase("https://www.shencou.com/read/3/3540/index.html", "shencou", "3-3540", None),
-    SuccessCase("https://www.shencou.com/read/3/3540/156328.html", "shencou", "3-3540", "156328"),
+    SuccessCase("https://www.shencou.com/books/read_3540.html", "shencou", "3540", None),
+    SuccessCase("https://www.shencou.com/read/3/3540/index.html", "shencou", "3540", None),
+    SuccessCase("https://www.shencou.com/read/3/3540/156328.html", "shencou", "3540", "156328"),
+    SuccessCase("https://www.shencou.com/read/0/695/index.html", "shencou", "695", None),
+    SuccessCase("https://www.shencou.com/books/read_1.html", "shencou", "1", None),
     SuccessCase("http://www.shu111.com/book/282944.html", "shu111", "282944", None),
     SuccessCase("http://www.shu111.com/book/282944/96171674.html", "shu111", "282944", "96171674"),
     SuccessCase("https://www.shu111.com/book/282944.html", "shu111", "282944", None),
@@ -349,7 +352,6 @@ CASES_SUCCESS = [
 ]
 
 CASES_HINT = [
-    HintCase("https://www.shencou.com/books/read_3540.html", "请在 '详细页面' 内点击 '小说目录'"),
 ]
 
 CASES_INVALID = [
