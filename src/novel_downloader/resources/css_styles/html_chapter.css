@@ -1,8 +1,9 @@
 :root {
   --max-content-width: 70%;
-  --bg-color: #fdfdfd;
+  --bg-color: #fafafa;
   --text-color: #222;
   --accent-color: #0078d4;
+  --accent-hover: #005a9e;
   --shadow: 0 4px 12px rgba(0,0,0,0.1);
   --border-radius: 8px;
 }
@@ -17,17 +18,18 @@ body {
   color: var(--text-color);
 }
 
-/* Chapter Title & Content */
-h1 {
+/* Chapter Title */
+h1.chapter-title {
   width: var(--max-content-width);
   max-width: 1024px;
   min-width: 320px;
-  margin: 1.2em auto 0.8em auto;
+  margin: 1.8em auto 1.2em auto;
   font-size: 1.8em;
   text-align: center;
   line-height: 1.3;
 }
 
+/* Chapter Content */
 .chapter-content {
   width: var(--max-content-width);
   max-width: 1024px;
@@ -41,7 +43,7 @@ h1 {
   margin: 0.8em 0;
 }
 
-/* Regular chapter images */
+/* Images */
 .chapter-content img.chapter-image {
   display: block;
   width: 100%;
@@ -70,8 +72,6 @@ h1 {
   bottom: 0.6em;
   transform: translateX(-50%);
   display: flex;
-  justify-content: center;
-  align-items: center;
   gap: 1.2em;
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(10px);
@@ -88,15 +88,14 @@ h1 {
   transform: translate(-50%, 20%);
 }
 
-/* ===== Extra blocks (e.g. Author Notes) ===== */
-
+/* Extra Blocks (e.g. Author Notes) */
 .extra-block {
   width: var(--max-content-width);
   max-width: 1024px;
   min-width: 320px;
-  margin: 2em auto 3em auto;
+  margin: 2.4em auto 3em auto;
   padding: 1.2em 1.4em;
-  background: #fff;
+  background: var(--bg-color);
   border-radius: var(--border-radius);
   box-shadow: var(--shadow);
   line-height: 1.8;
@@ -120,6 +119,7 @@ h1 {
   text-indent: 2em;
 }
 
+/* Nav Buttons */
 .nav-button {
   text-decoration: none;
   border: none;
@@ -134,7 +134,7 @@ h1 {
 }
 
 .nav-button:hover {
-  background: #005a9e;
+  background: var(--accent-hover);
   transform: translateY(-2px);
 }
 
@@ -179,10 +179,10 @@ h1 {
 
 #floating-controls button:hover {
   transform: scale(1.1);
-  background: #005a9e;
+  background: var(--accent-hover);
 }
 
-/* Progress bar */
+/* Progress Bar */
 #progress-bar {
   position: fixed;
   top: 0;
@@ -193,7 +193,7 @@ h1 {
   z-index: 10000;
 }
 
-/* Image Fullscreen Overlay */
+/* Fullscreen Image Overlay */
 #img-overlay {
   position: fixed;
   top: 0; left: 0;
@@ -223,6 +223,22 @@ h1 {
 
 .chapter-content img {
   cursor: zoom-in;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 520px) {
+  .chapter-content {
+    padding: 0 1em;
+  }
+
+  h1.chapter-title {
+    font-size: 1.5em;
+    margin-top: 1.6em;
+  }
+
+  .extra-block {
+    padding: 1em 1.2em;
+  }
 }
 
 @media (min-width: 1200px) {

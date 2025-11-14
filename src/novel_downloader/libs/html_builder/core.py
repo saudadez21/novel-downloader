@@ -4,7 +4,6 @@ novel_downloader.libs.html_builder.core
 ---------------------------------------
 """
 
-from html import escape
 from pathlib import Path
 
 from novel_downloader.infra.paths import (
@@ -22,11 +21,10 @@ from .constants import (
     CSS_DIR,
     FONT_DIR,
     IMAGE_MEDIA_EXTS,
-    INDEX_TEMPLATE,
     JS_DIR,
     MEDIA_DIR,
 )
-from .models import HtmlChapter, HtmlFont, HtmlImage, HtmlVolume
+from .models import HtmlChapter, HtmlFont, HtmlImage, HtmlVolume, IndexDocument
 
 
 class HtmlBuilder:
@@ -43,15 +41,24 @@ class HtmlBuilder:
     ) -> None:
         # metadata
         self.title = title
-        self.author = author
-        self.description = description
-        self.cover = cover
-        self.subject = subject or []
-        self.serial_status = serial_status
-        self.word_count = word_count
         self.lang = language
-
+        self.cover = cover
         self._cover_filename: str | None = None
+        if cover:
+            fmt = detect_image_format(cover)
+            ext = fmt.lower() if fmt else "jpg"
+            self._cover_filename = f"cover.{ext}"
+
+        self._index = IndexDocument(
+            title=title,
+            author=author,
+            description=description,
+            subject=subject or [],
+            serial_status=serial_status,
+            word_count=word_count,
+            lang=language,
+            cover_filename=self._cover_filename,
+        )
 
         # image state
         self.images: list[HtmlImage] = []
@@ -65,7 +72,6 @@ class HtmlBuilder:
 
         self._vol_idx = 0
 
-        self.volumes: list[HtmlVolume] = []
         self._chapters: list[HtmlChapter] = []  # flattened reading order
 
     def add_image(self, image_path: Path) -> str:
@@ -197,14 +203,15 @@ class HtmlBuilder:
         Register a single chapter in the global reading order.
         """
         self._chapters.append(chap)
+        self._index.add_chapter(chap)
 
     def add_volume(self, volume: HtmlVolume) -> None:
         """Add a volume and all its chapters to the HTML."""
         self._vol_idx += 1
-        self.volumes.append(volume)
+        self._index.add_volume(volume)
 
         for chap in volume.chapters:
-            self.add_chapter(chap)
+            self._chapters.append(chap)
 
     def export(
         self,
@@ -247,13 +254,9 @@ class HtmlBuilder:
                 write_file(img.data, media_dir / img.filename)
 
         # Write cover image as media/cover.xxx
-        if self.cover:
+        if self.cover and self._cover_filename:
             media_dir.mkdir(parents=True, exist_ok=True)
-            fmt = detect_image_format(self.cover)
-            ext = fmt.lower() if fmt else "jpg"
-            cover_name = f"cover.{ext}"
-            write_file(self.cover, media_dir / cover_name)
-            self._cover_filename = cover_name
+            write_file(self.cover, media_dir / self._cover_filename)
 
     def _write_fonts(self, html_dir: Path) -> None:
         """
@@ -271,74 +274,7 @@ class HtmlBuilder:
     def _build_index(self, html_dir: Path) -> None:
         index_path = html_dir / "index.html"
 
-        # --- Header ---
-        header_parts: list[str] = []
-
-        header_parts.append(f"<h1>{escape(self.title)}</h1>")
-
-        if self.author:
-            header_parts.append(f'<p class="author">作者：{escape(self.author)}</p>')
-
-        if self._cover_filename:
-            header_parts.append(
-                f'<img src="{MEDIA_DIR}/{self._cover_filename}" '
-                f'alt="封面" class="cover">'
-            )
-
-        meta_parts: list[str] = []
-
-        if self.serial_status:
-            meta_parts.append(f"状态：{escape(self.serial_status)}")
-        if self.word_count:
-            meta_parts.append(f"字数：{escape(str(self.word_count))}")
-        if meta_parts:
-            header_parts.append(f'<p class="meta">{"　".join(meta_parts)}</p>')
-
-        if self.subject:
-            tags_str = " / ".join(escape(tag) for tag in self.subject)
-            header_parts.append(f'<p class="tags">标签：{tags_str}</p>')
-
-        if self.description:
-            header_parts.append(
-                f'<p class="description">{escape(self.description)}</p>'
-            )
-
-        header_html = "\n    ".join(header_parts)
-
-        # --- TOC grouped by volume ---
-        toc_blocks: list[str] = []
-        for vol in self.volumes:
-            vol_parts: list[str] = []
-            vol_parts.append(
-                f'<section class="volume">\n' f"  <h3>{escape(vol.title)}</h3>"
-            )
-
-            if vol.intro:
-                vol_parts.append(f'  <p class="volume-intro">{escape(vol.intro)}</p>')
-
-            if vol.chapters:
-                vol_parts.append("  <ul>")
-                for chap in vol.chapters:
-                    href = f"{CHAPTER_DIR}/{chap.filename}"
-                    vol_parts.append(
-                        f'    <li><a href="{href}">{escape(chap.title)}</a></li>'
-                    )
-                vol_parts.append("  </ul>")
-
-            vol_parts.append("</section>")
-            toc_blocks.append("\n".join(vol_parts))
-
-        toc_html = "\n\n".join(toc_blocks)
-
-        # --- Render template ---
-        index_html = INDEX_TEMPLATE.format(
-            lang=self.lang,
-            book_name=escape(self.title),
-            header=header_html,
-            toc_html=toc_html,
-        )
-
-        write_file(index_html, index_path)
+        write_file(self._index.to_html(), index_path)
 
     def _build_chapters(self, html_dir: Path) -> None:
         chap_dir = html_dir / CHAPTER_DIR

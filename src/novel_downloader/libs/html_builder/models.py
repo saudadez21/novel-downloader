@@ -7,15 +7,27 @@ novel_downloader.libs.html_builder.models
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from html import escape
 
 from .constants import (
+    CHAPTER_DIR,
     CHAPTER_TEMPLATE,
     DEFAULT_FONT_FALLBACK_STACK,
     FONT_DIR,
     FONT_FACE_TEMPLATE,
     FONT_FORMAT_MAP,
+    INDEX_TEMPLATE,
+    MEDIA_DIR,
 )
+
+
+def escape(text: str) -> str:
+    """Escape &, <, > for text-node HTML."""
+    text = text.replace("&", "&amp;")
+    text = text.replace("<", "&lt;")
+    text = text.replace(">", "&gt;")
+    text = text.replace('"', "&quot;")
+    text = text.replace("'", "&#x27;")
+    return text
 
 
 @dataclass(frozen=True)
@@ -115,3 +127,111 @@ class HtmlVolume:
     title: str
     intro: str = ""
     chapters: list[HtmlChapter] = field(default_factory=list)
+
+
+@dataclass(slots=True)
+class IndexDocument:
+    # metadata
+    title: str = ""
+    author: str = ""
+    description: str = ""
+    subject: list[str] = field(default_factory=list)
+    serial_status: str = ""
+    word_count: str = "0"
+    lang: str = "zh-Hans"
+
+    # computed / runtime state
+    cover_filename: str | None = None
+    toc_blocks: list[str] = field(init=False, default_factory=list)
+
+    def clear(self) -> None:
+        self.toc_blocks.clear()
+
+    def add_volume(self, volume: HtmlVolume) -> None:
+        """Append a volume section (with its chapters) into the TOC."""
+        parts: list[str] = []
+        parts.append(f'<section class="volume">\n  <h3>{escape(volume.title)}</h3>')
+
+        if volume.intro:
+            parts.append(f'  <p class="volume-intro">{escape(volume.intro)}</p>')
+
+        if volume.chapters:
+            parts.append("  <ul>")
+            for chap in volume.chapters:
+                href = f"{CHAPTER_DIR}/{chap.filename}"
+                parts.append(f'    <li><a href="{href}">{escape(chap.title)}</a></li>')
+            parts.append("  </ul>")
+
+        parts.append("</section>")
+        self.toc_blocks.append("\n".join(parts))
+
+    def add_chapter(self, chap: HtmlChapter) -> None:
+        """
+        Append a standalone chapter (not part of any volume) into the TOC.
+
+        We reuse the same .volume + <ul> structure so existing CSS continues
+        to work; each standalone chapter is rendered as its own small section.
+        """
+        href = f"{CHAPTER_DIR}/{chap.filename}"
+        title = escape(chap.title)
+
+        block = (
+            f'<section class="volume">\n'
+            f"  <h3>{title}</h3>\n"
+            f"  <ul>\n"
+            f'    <li><a href="{href}">{title}</a></li>\n'
+            f"  </ul>\n"
+            f"</section>"
+        )
+        self.toc_blocks.append(block)
+
+    def _build_header_html(self) -> str:
+        header_parts: list[str] = []
+
+        # Title
+        header_parts.append(f"<h1>{escape(self.title)}</h1>")
+
+        # Author
+        if self.author:
+            header_parts.append(f'<p class="author">作者：{escape(self.author)}</p>')
+
+        # Cover (if any)
+        if self.cover_filename:
+            header_parts.append(
+                f'<img src="{MEDIA_DIR}/{self.cover_filename}" '
+                f'alt="封面" class="cover">'
+            )
+
+        # Meta: 状态 / 字数
+        meta_bits: list[str] = []
+        if self.serial_status:
+            meta_bits.append(f"状态：{escape(self.serial_status)}")
+        if self.word_count:
+            meta_bits.append(f"字数：{escape(str(self.word_count))}")
+        if meta_bits:
+            header_parts.append(f'<p class="meta">{"　".join(meta_bits)}</p>')
+
+        # Tags
+        if self.subject:
+            tags_str = " / ".join(escape(tag) for tag in self.subject)
+            header_parts.append(f'<p class="tags">标签：{tags_str}</p>')
+
+        # Description
+        if self.description:
+            header_parts.append(
+                f'<p class="description">{escape(self.description)}</p>'
+            )
+
+        return "\n    ".join(header_parts)
+
+    def to_html(self) -> str:
+        """Generate the full HTML for index.html using INDEX_TEMPLATE."""
+        header_html = self._build_header_html()
+        toc_html = "\n".join(self.toc_blocks)
+
+        return INDEX_TEMPLATE.format(
+            lang=self.lang,
+            book_name=escape(self.title),
+            header=header_html,
+            toc_html=toc_html,
+        )
