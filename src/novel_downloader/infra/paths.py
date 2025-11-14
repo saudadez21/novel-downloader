@@ -42,14 +42,9 @@ RES = files("novel_downloader.resources")
 DEFAULT_CONFIG_FILE = RES.joinpath("config", "settings.sample.toml")
 
 # CSS Styles
-EPUB_CSS_MAIN_PATH = RES.joinpath("css_styles", "epub_main.css")
-EPUB_CSS_INTRO_PATH = RES.joinpath("css_styles", "epub_intro.css")
+EPUB_CSS_STYLE_PATH = RES.joinpath("css_styles", "epub_style.css")
 HTML_CSS_INDEX_PATH = RES.joinpath("css_styles", "html_index.css")
 HTML_CSS_CHAPTER_PATH = RES.joinpath("css_styles", "html_chapter.css")
-
-# Images
-# VOLUME_BORDER_IMAGE_PATH = RES.joinpath("images", "volume_border.png")
-VOLUME_BORDER_IMAGE_PATH = RES.joinpath("images", "volume_border_tinify.png")
 
 # JSON
 FANQIENOVEL_MAP_PATH = RES.joinpath("json", "fanqienovel.json")

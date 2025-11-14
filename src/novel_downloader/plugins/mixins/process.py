@@ -18,6 +18,7 @@ from novel_downloader.schemas import (
 )
 
 logger = logging.getLogger(__name__)
+PROCESS_BATCH: int = 200
 
 
 if TYPE_CHECKING:
@@ -25,8 +26,6 @@ if TYPE_CHECKING:
 
     class ProcessClientContext(_ClientContext, Protocol):
         """"""
-
-        PROCESS_BATCH: int
 
         def _pc_prepare_env(
             self,
@@ -84,8 +83,6 @@ class ProcessMixin:
     """
     Provides the `process_book()` API for clients.
     """
-
-    PROCESS_BATCH = 200
 
     def process_book(
         self: "ProcessClientContext",
@@ -263,7 +260,7 @@ class ProcessMixin:
                 else:
                     batch_ok.append(processed)
 
-                if (len(batch_need) + len(batch_ok)) >= self.PROCESS_BATCH:
+                if (len(batch_need) + len(batch_ok)) >= PROCESS_BATCH:
                     _flush()
 
                 done += 1

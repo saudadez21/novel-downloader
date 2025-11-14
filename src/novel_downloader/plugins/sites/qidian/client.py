@@ -141,9 +141,9 @@ class QidianClient(CommonClient):
             return ""
 
         parts = [
-            "<hr />",
-            "<h3>作者说</h3>",
+            '<div class="extra-block">\n<hr />\n<h3>作者说</h3>',
             *(f"<p>{escape(s)}</p>" for ln in note.splitlines() if (s := ln.strip())),
+            "</div>",
         ]
         return "\n".join(parts)
 

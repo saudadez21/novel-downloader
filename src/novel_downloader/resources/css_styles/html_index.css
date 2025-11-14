@@ -3,6 +3,7 @@
   --bg-color: #fafafa;
   --text-color: #222;
   --accent-color: #0078d4;
+  --accent-hover: #005a9e;
   --border-radius: 8px;
   --shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
@@ -17,19 +18,40 @@ body {
   margin: 0;
 }
 
-header, main.toc {
+/* Layout Containers */
+header,
+main.toc {
   width: 100%;
   max-width: 1024px;
-  min-width: 320px;
   margin: 2em auto;
   padding: 0 1.5em;
 }
 
+/* Header Typography */
 header {
   text-align: center;
   margin-bottom: 2em;
 }
 
+.author,
+.meta,
+.tags,
+.description {
+  margin: 0.4em 0;
+  font-size: 0.95em;
+  color: #555;
+}
+
+.tags {
+  color: #777;
+}
+
+.description {
+  margin-top: 1em;
+  line-height: 1.8;
+}
+
+/* Cover Image */
 .cover {
   max-width: 280px;
   margin: 1em auto;
@@ -38,23 +60,42 @@ header {
   box-shadow: var(--shadow);
 }
 
-.volume h3 {
-  margin-top: 1.5em;
-  border-bottom: 2px solid #e0e0e0;
-  padding-bottom: 0.3em;
+/* TOC Volume Blocks */
+.volume {
+  margin: 2em 0;
 }
 
-.volume ul { list-style: none; padding-left: 1em; }
-.volume li { margin: 0.4em 0; }
+.volume h3 {
+  margin-top: 1.5em;
+  padding-bottom: 0.3em;
+  border-bottom: 2px solid #e0e0e0;
+  font-size: 1.1em;
+}
+
+.volume-intro {
+  margin: 0.5em 0 1em 0.5em;
+  font-size: 0.95em;
+  color: #666;
+}
+
+/* Volume’s chapter list */
+.volume ul {
+  list-style: none;
+  padding-left: 1.2em;
+}
+
+.volume li {
+  margin: 0.4em 0;
+}
 
 .volume li a {
   text-decoration: none;
   color: var(--accent-color);
-  transition: color 0.2s ease;
+  transition: color 0.15s ease, text-decoration 0.15s ease;
 }
 
 .volume li a:hover {
-  color: #005a9e;
+  color: var(--accent-hover);
   text-decoration: underline;
 }
 
@@ -93,7 +134,7 @@ header {
 }
 
 #floating-controls button:hover {
-  background: #005a9e;
+  background: var(--accent-hover);
   transform: scale(1.1);
 }
 
@@ -106,4 +147,19 @@ header {
   background: linear-gradient(90deg, #0078d4, #00b8ff);
   width: 0;
   z-index: 10000;
+}
+
+/* Small screens */
+@media (max-width: 520px) {
+  header, main.toc {
+    padding: 0 1em;
+  }
+
+  .cover {
+    max-width: 65%;
+  }
+
+  .volume ul {
+    padding-left: 0.6em;
+  }
 }

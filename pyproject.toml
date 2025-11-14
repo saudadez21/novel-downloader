@@ -80,7 +80,6 @@ include = ["novel_downloader", "novel_downloader.*"]
 "novel_downloader.resources.js_scripts" = ["*.js"]
 "novel_downloader.resources.json" = ["*.json"]
 "novel_downloader.resources.css_styles" = ["*.css"]
-"novel_downloader.resources.images" = ["*.png"]
 "novel_downloader.locales" = ["*/LC_MESSAGES/*.mo"]
 
 [tool.setuptools.dynamic]
