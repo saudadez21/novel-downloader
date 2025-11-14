@@ -10,6 +10,7 @@ ROOT_PATH = "OEBPS"
 IMAGE_DIR = "Images"
 TEXT_DIR = "Text"
 CSS_DIR = "Styles"
+FONT_DIR = "Fonts"
 
 XHTML_NS = "http://www.w3.org/1999/xhtml"
 EPUB_NS = "http://www.idpf.org/2007/ops"
@@ -27,37 +28,182 @@ IMAGE_MEDIA_TYPES: dict[str, str] = {
     "webp": "image/webp",
 }
 
-CONTAINER_TEMPLATE = """\
+FONT_FORMAT_MAP: dict[str, str] = {
+    "ttf": "truetype",
+    "otf": "opentype",
+    "woff": "woff",
+    "woff2": "woff2",
+}
+
+FONT_MEDIA_TYPES: dict[str, str] = {
+    "ttf": "font/ttf",
+    "otf": "font/otf",
+    "woff": "font/woff",
+    "woff2": "font/woff2",
+}
+
+CONTAINER_TEMPLATE = f"""\
 <?xml version="1.0" encoding="UTF-8"?>
 <container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
     <rootfiles>
-        <rootfile full-path="{root_path}/content.opf"
+        <rootfile full-path="{ROOT_PATH}/content.opf"
             media-type="application/oebps-package+xml"/>
     </rootfiles>
 </container>
 """
 
 COVER_IMAGE_TEMPLATE = (
-    f'<div style="text-align: center; margin: 0; padding: 0;">'
+    '<div style="text-align: center; margin: 0; padding: 0;">'
     f'<img src="../{IMAGE_DIR}/cover.{{ext}}" alt="cover" '
-    f'style="max-width: 100%; height: auto;" />'
-    f"</div>"
+    'style="max-width: 100%; height: auto;" />'
+    "</div>"
 )
 
-CSS_TMPLATE = (
-    f'<link href="../{CSS_DIR}/{{filename}}" '
-    f'rel="stylesheet" type="{{media_type}}"/>'
+DEFAULT_FONT_FALLBACK_STACK = (
+    'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
 )
+
+FONT_FACE_TEMPLATE = f"""\
+@font-face {{
+  font-family: "{{family}}";
+  src: url("../{FONT_DIR}/{{filename}}") format("{{format}}");
+}}
+"""
+
+COVER_TEMPLATE = f"""\
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="{XHTML_NS}" xmlns:epub="{EPUB_NS}" lang="{{lang}}" xml:lang="{{lang}}">
+<head>
+  <title>{{title}}</title>
+</head>
+<body>
+<div style="text-align: center; margin: 0; padding: 0;">
+  <img src="../{IMAGE_DIR}/cover.{{ext}}" alt="cover" style="max-width: 100%; height: auto;" />
+</div>
+</body>
+</html>
+"""  # noqa: E501
+
+XHTML_TEMPLATE = f"""\
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="{XHTML_NS}" xmlns:epub="{EPUB_NS}" lang="{{lang}}" xml:lang="{{lang}}">
+<head>
+  <title>{{title}}</title>
+  <link rel="stylesheet" href="../{CSS_DIR}/style.css" type="text/css"/>
+{{font_styles}}
+</head>
+<body>
+{{content}}
+</body>
+</html>
+"""
+
+INTRO_TEMPLATE = f"""\
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="{XHTML_NS}" xmlns:epub="{EPUB_NS}" lang="{{lang}}" xml:lang="{{lang}}">
+<head>
+  <title>{{title}}</title>
+  <link rel="stylesheet" href="../{CSS_DIR}/style.css" type="text/css"/>
+{{font_styles}}
+</head>
+<body>
+  <div class="intro">
+    <h2 class="intro-title">{{title}}</h2>
+    <div class="intro-info">
+      {{info_block}}
+    </div>
+    {{description_block}}
+  </div>
+</body>
+</html>
+"""
+
+VOLUME_COVER_TEMPLATE = f"""\
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="{XHTML_NS}" xmlns:epub="{EPUB_NS}" lang="{{lang}}" xml:lang="{{lang}}">
+<head>
+  <title>{{title}}</title>
+  <link rel="stylesheet" href="../{CSS_DIR}/style.css" type="text/css"/>
+</head>
+<body>
+  <img class="width100" src="../{IMAGE_DIR}/{{image_name}}" alt="{{title}}"/>
+</body>
+</html>
+"""
+
+VOLUME_TITLE_TEMPLATE = f"""\
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="{XHTML_NS}" xmlns:epub="{EPUB_NS}" lang="{{lang}}" xml:lang="{{lang}}">
+<head>
+  <title>{{full_title}}</title>
+  <link rel="stylesheet" href="../{CSS_DIR}/style.css" type="text/css"/>
+</head>
+<body>
+  <h1 class="head">{{line1}}<br/><b>{{line2}}</b></h1>
+</body>
+</html>
+"""
+
+VOLUME_INTRO_TEMPLATE = f"""\
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="{XHTML_NS}" xmlns:epub="{EPUB_NS}" lang="{{lang}}" xml:lang="{{lang}}">
+<head>
+  <title>{{title}}</title>
+  <link rel="stylesheet" href="../{CSS_DIR}/style.css" type="text/css"/>
+{{font_styles}}
+</head>
+<body>
+  <div>
+    <h2 class="vol-title">{{title}}</h2>
+    <div class="vol-description">
+      {{description}}
+    </div>
+  </div>
+</body>
+</html>
+"""
+
+VOLUME_INTRO_DESC_TEMPLATE = f"""\
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html xmlns="{XHTML_NS}" xmlns:epub="{EPUB_NS}" lang="{{lang}}" xml:lang="{{lang}}">
+<head>
+  <title>{{title}}</title>
+  <link rel="stylesheet" href="../{CSS_DIR}/style.css" type="text/css"/>
+{{font_styles}}
+</head>
+<body>
+  <div>
+    <h3 class="vol-title">简介</h3>
+    <div class="vol-description">
+      {{description}}
+    </div>
+  </div>
+</body>
+</html>
+"""
 
 CHAP_TMPLATE = f"""\
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html>
 <html xmlns="{XHTML_NS}" xmlns:epub="{EPUB_NS}" lang="{{lang}}" xml:lang="{{lang}}">
-  <head>
-    <title>{{title}}</title>
-{{xlinks}}
-  </head>
-  <body>{{content}}</body>
+<head>
+  <title>{{title}}</title>
+  <link rel="stylesheet" href="../{CSS_DIR}/style.css" type="text/css"/>
+{{font_styles}}
+</head>
+<body>
+  <h2 class="chapter-title">{{title}}</h2>
+  <div class="chapter-content">
+    {{content}}
+  </div>
+</body>
 </html>
 """
 
@@ -109,5 +255,5 @@ OPF_TEMPLATE = f"""\
   <spine{{spine_toc}}>
 {{spine_items}}
   </spine>
-{{guide_section}}</package>
+</package>
 """  # noqa: E501

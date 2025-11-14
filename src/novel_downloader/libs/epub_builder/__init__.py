@@ -22,12 +22,7 @@ __all__ = [
     "EpubBuilder",
     "EpubChapter",
     "EpubVolume",
-    "EpubStyleSheet",
 ]
 
 from .core import EpubBuilder
-from .models import (
-    EpubChapter,
-    EpubStyleSheet,
-    EpubVolume,
-)
+from .models import EpubChapter, EpubVolume

@@ -35,8 +35,9 @@ if TYPE_CHECKING:
 
         async def get_chapter(
             self,
+            book_id: str,
             chapter_id: str,
-            book_id: str | None = None,
+            **kwargs: Any,
         ) -> ChapterDict | None:
             ...
 
@@ -53,7 +54,7 @@ if TYPE_CHECKING:
         ) -> BookInfoDict:
             ...
 
-        def _dl_check_restricted(self, html_list: list[str]) -> bool:
+        def _dl_check_restricted(self, raw_pages: list[str]) -> bool:
             ...
 
         def _dl_check_empty(self, raw_pages: list[str]) -> bool:
@@ -503,12 +504,12 @@ class DownloadMixin:
         if vol_covers:
             await self.fetcher.fetch_images(img_dir, vol_covers)
 
-    def _dl_check_restricted(self, html_list: list[str]) -> bool:
+    def _dl_check_restricted(self, raw_pages: list[str]) -> bool:
         """
         Return True if page content indicates access restriction
         (e.g. login required, paywall, VIP, subscription, etc.)
 
-        :param html_list: List of raw HTML strings.
+        :param raw_pages: List of raw HTML strings.
         """
         return False
 

@@ -88,6 +88,38 @@ h1 {
   transform: translate(-50%, 20%);
 }
 
+/* ===== Extra blocks (e.g. Author Notes) ===== */
+
+.extra-block {
+  width: var(--max-content-width);
+  max-width: 1024px;
+  min-width: 320px;
+  margin: 2em auto 3em auto;
+  padding: 1.2em 1.4em;
+  background: #fff;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  line-height: 1.8;
+}
+
+.extra-block hr {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 0 0 1.2em 0;
+}
+
+.extra-block h3 {
+  margin: 0 0 0.8em 0;
+  font-size: 1.2em;
+  color: var(--accent-color);
+  font-weight: 600;
+}
+
+.extra-block p {
+  margin: 0.6em 0;
+  text-indent: 2em;
+}
+
 .nav-button {
   text-decoration: none;
   border: none;

@@ -277,7 +277,7 @@ class ClientProtocol(Protocol):
         ...
 
 
-class _ClientContext(Protocol):
+class _ClientContext(ClientProtocol, Protocol):
     """
     Internal protocol used for mixin typing.
 

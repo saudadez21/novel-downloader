@@ -5,50 +5,52 @@ novel_downloader.libs.epub_builder.core
 
 Orchestrates the end-to-end EPUB build process by:
   * Managing metadata (title, author, description, language, etc.)
-  * Collecting and deduplicating resources (chapters, images, stylesheets)
+  * Collecting and deduplicating resources (chapters, images, stylesheets, fonts)
   * Registering everything in the OPF manifest and spine
   * Generating nav.xhtml, toc.ncx, content.opf, and the zipped .epub file
 
 Provides:
-  * methods to add chapters, volumes, images, and styles
+  * methods to add chapters, volumes, images, and fonts
   * a clean `export()` entry point that writes the final EPUB archive
 """
+
+from __future__ import annotations
 
 import zipfile
 from pathlib import Path
 from zipfile import ZIP_DEFLATED, ZIP_STORED
 
-from novel_downloader.infra.paths import (
-    EPUB_CSS_INTRO_PATH,
-    VOLUME_BORDER_IMAGE_PATH,
-)
+from novel_downloader.infra.paths import EPUB_CSS_STYLE_PATH
 from novel_downloader.libs.crypto.hash_utils import hash_bytes, hash_file
+from novel_downloader.libs.media.font import detect_font_format
 from novel_downloader.libs.media.image import detect_image_format
 
 from .constants import (
-    COVER_IMAGE_TEMPLATE,
+    CONTAINER_TEMPLATE,
     CSS_DIR,
+    FONT_DIR,
+    FONT_FORMAT_MAP,
+    FONT_MEDIA_TYPES,
     IMAGE_DIR,
     IMAGE_MEDIA_TYPES,
     ROOT_PATH,
     TEXT_DIR,
 )
-from .documents import (
+from .models import (
+    EpubChapter,
+    EpubCover,
+    EpubFont,
+    EpubImage,
+    EpubIntro,
+    EpubVolume,
+    EpubVolumeCover,
+    EpubVolumeIntro,
+    EpubVolumeIntroDesc,
+    EpubVolumeTitle,
+    EpubXhtmlFile,
     NavDocument,
     NCXDocument,
     OpfDocument,
-)
-from .models import (
-    ChapterEntry,
-    EpubChapter,
-    EpubImage,
-    EpubStyleSheet,
-    EpubVolume,
-)
-from .utils import (
-    build_book_intro,
-    build_container_xml,
-    build_volume_intro,
 )
 
 
@@ -64,23 +66,18 @@ class EpubBuilder:
         word_count: str = "0",
         uid: str = "",
         language: str = "zh-Hans",
-    ):
-        # metadata
-        self.title = title
-        self.author = author
-        self.description = description
-        self.language = language
-        self.subject = subject or []
-        self.serial_status = serial_status
-        self.word_count = word_count
-        self.uid = uid
-
+    ) -> None:
         # builder state
-        self.chapters: list[EpubChapter] = []
+        self.items: list[EpubXhtmlFile] = []
         self.images: list[EpubImage] = []
-        self.styles: list[EpubStyleSheet] = []
+        self.fonts: list[EpubFont] = []
+
         self._img_map: dict[str, str] = {}
         self._img_idx = 0
+
+        self._font_map: dict[str, EpubFont] = {}
+        self._font_idx = 0
+
         self._vol_idx = 0
 
         # core EPUB documents
@@ -91,7 +88,7 @@ class EpubBuilder:
             author=author,
             description=description,
             uid=uid,
-            subject=self.subject,
+            subject=subject or [],
             language=language,
         )
 
@@ -104,9 +101,35 @@ class EpubBuilder:
         )
         self.opf.add_manifest_item("ncx", "toc.ncx", self.ncx.media_type)
 
-        self._init_styles()
+        # register the css
+        self.opf.add_manifest_item(
+            id="style",
+            href=f"{CSS_DIR}/style.css",
+            media_type="text/css",
+        )
+
         self._init_cover(cover_path)
-        self._init_intro()
+
+        intro = EpubIntro(
+            id="intro",
+            filename="intro.xhtml",
+            title="书籍简介",
+            book_title=title,
+            author=author,
+            description=description,
+            subject=subject or [],
+            serial_status=serial_status,
+            word_count=word_count,
+        )
+        self.items.append(intro)
+        self.opf.add_manifest_item(
+            intro.id,
+            f"{TEXT_DIR}/{intro.filename}",
+            intro.media_type,
+        )
+        self.opf.add_spine_item(intro.id)
+        self.nav.add_chapter(intro.id, intro.title, f"{TEXT_DIR}/{intro.filename}")
+        self.ncx.add_chapter(intro.id, intro.title, f"{TEXT_DIR}/{intro.filename}")
 
     def add_image(self, image_path: Path) -> str:
         """
@@ -142,7 +165,7 @@ class EpubBuilder:
         self._img_idx += 1
         return filename
 
-    def add_image_bytes(self, data: bytes, mime_type: str) -> str:
+    def add_image_bytes(self, data: bytes, mime_type: str = "") -> str:
         """
         Add an image resource from bytes (deduped by hash) and register it.
         """
@@ -186,8 +209,115 @@ class EpubBuilder:
         self._img_idx += 1
         return filename
 
+    def add_font(
+        self,
+        font_path: Path,
+        *,
+        family: str | None = None,
+        selectors: tuple[str, ...] = (),
+    ) -> EpubFont | None:
+        """
+        Add a font from a file (deduped by hash) and register it in the manifest.
+
+        :param font_path: Path to the font file.
+        :param family: CSS font-family name. If None, a unique name is generated.
+        :param selectors: CSS selectors this font should apply to in chapters.
+        :return: EpubFont instance, or None if invalid/unsupported.
+        """
+        if not (font_path.exists() and font_path.is_file()):
+            return None
+
+        h = hash_file(font_path)
+        if h in self._font_map:
+            return self._font_map[h]
+
+        data = font_path.read_bytes()
+        fmt = detect_font_format(data)
+        ext = fmt.lower() if fmt else font_path.suffix.lower().lstrip(".") or "bin"
+
+        media_type = FONT_MEDIA_TYPES.get(ext)
+        if not media_type:
+            return None
+
+        res_id = f"font_{self._font_idx}"
+        family_name = family or f"FontFamily_{self._font_idx}"
+        filename = f"{res_id}.{ext}"
+        format = FONT_FORMAT_MAP.get(ext, "truetype")
+
+        font = EpubFont(
+            id=res_id,
+            filename=filename,
+            media_type=media_type,
+            format=format,
+            data=data,
+            family=family_name,
+            selectors=selectors,
+        )
+        self.fonts.append(font)
+        self.opf.add_manifest_item(
+            font.id,
+            f"{FONT_DIR}/{font.filename}",
+            font.media_type,
+        )
+        self._font_map[h] = font
+        self._font_idx += 1
+        return font
+
+    def add_font_bytes(
+        self,
+        data: bytes,
+        *,
+        family: str | None = None,
+        selectors: tuple[str, ...] = (),
+    ) -> EpubFont | None:
+        """
+        Add a font from raw bytes (deduped by hash) and register it.
+
+        :param data: Raw font bytes.
+        :param family: CSS font-family name. If None, a unique name is generated.
+        :param selectors: CSS selectors this font should apply to in chapters.
+        :return: EpubFont instance, or None if invalid/unsupported.
+        """
+        if not data:
+            return None
+
+        h = hash_bytes(data)
+        if h in self._font_map:
+            return self._font_map[h]
+
+        fmt = detect_font_format(data)
+        ext = fmt.lower() if fmt else "bin"
+
+        media_type = FONT_MEDIA_TYPES.get(ext)
+        if not media_type:
+            return None
+
+        res_id = f"font_{self._font_idx}"
+        family_name = family or f"FontFamily_{self._font_idx}"
+        filename = f"{res_id}.{ext}"
+        format = FONT_FORMAT_MAP.get(ext, "truetype")
+
+        font = EpubFont(
+            id=res_id,
+            filename=filename,
+            media_type=media_type,
+            format=format,
+            data=data,
+            family=family_name,
+            selectors=selectors,
+        )
+        self.fonts.append(font)
+        self.opf.add_manifest_item(
+            font.id,
+            f"{FONT_DIR}/{font.filename}",
+            font.media_type,
+        )
+        self._font_map[h] = font
+        self._font_idx += 1
+        return font
+
     def add_chapter(self, chap: EpubChapter) -> None:
-        self.chapters.append(chap)
+        self.items.append(chap)
         self.opf.add_manifest_item(
             chap.id,
             f"{TEXT_DIR}/{chap.filename}",
@@ -199,85 +329,82 @@ class EpubBuilder:
 
     def add_volume(self, volume: EpubVolume) -> None:
         """Add a volume cover, intro, and all its chapters to the EPUB."""
-        # volume-specific cover
-        if volume.cover:
-            filename = self.add_image(volume.cover)
-            if filename:
-                cover_html = f'<img class="width100" src="../{IMAGE_DIR}/{filename}"/>'
-                cover_chap = EpubChapter(
-                    id=f"vol_{self._vol_idx}_cover",
-                    title=volume.title,
-                    content=cover_html,
-                    filename=f"vol_{self._vol_idx}_cover.xhtml",
-                )
-                self.chapters.append(cover_chap)
-                self.opf.add_manifest_item(
-                    cover_chap.id,
-                    f"{TEXT_DIR}/{cover_chap.filename}",
-                    cover_chap.media_type,
-                )
-                self.opf.add_spine_item(cover_chap.id)
+        vol_id = f"vol_{self._vol_idx}"
+        self._vol_idx += 1
 
-        # volume intro page
-        intro_content = build_volume_intro(volume.title, volume.intro)
-        vol_intro = EpubChapter(
-            id=f"vol_{self._vol_idx}",
-            title=volume.title,
-            content=intro_content,
-            css=[self.intro_css],
-            filename=f"vol_{self._vol_idx}.xhtml",
-        )
-        self.chapters.append(vol_intro)
+        cover_filename: str = ""
+        if volume.cover_path:
+            cover_filename = self.add_image(volume.cover_path)
+
+        if cover_filename:
+            vol_cover: EpubVolumeCover | EpubVolumeTitle = EpubVolumeCover(
+                id=f"{vol_id}-cover",
+                filename=f"{vol_id}_cover.xhtml",
+                title=volume.title,
+                image_name=cover_filename,
+            )
+        else:
+            vol_cover = EpubVolumeTitle(
+                id=f"{vol_id}-title",
+                filename=f"{vol_id}_title.xhtml",
+                full_title=volume.title,
+            )
+
+        self.items.append(vol_cover)
         self.opf.add_manifest_item(
-            vol_intro.id,
-            f"{TEXT_DIR}/{vol_intro.filename}",
-            vol_intro.media_type,
+            vol_cover.id,
+            f"{TEXT_DIR}/{vol_cover.filename}",
+            vol_cover.media_type,
         )
-        self.opf.add_spine_item(vol_intro.id)
+        self.opf.add_spine_item(vol_cover.id)
+
+        if volume.intro:
+            if cover_filename:
+                vol_intro: EpubVolumeIntro | EpubVolumeIntroDesc = EpubVolumeIntro(
+                    id=f"{vol_id}-intro",
+                    filename=f"{vol_id}_intro.xhtml",
+                    title=volume.title,
+                    description=volume.intro,
+                )
+            else:
+                vol_intro = EpubVolumeIntroDesc(
+                    id=f"{vol_id}-intro",
+                    filename=f"{vol_id}_intro.xhtml",
+                    title=volume.title,
+                    description=volume.intro,
+                )
+            self.items.append(vol_intro)
+            self.opf.add_manifest_item(
+                vol_intro.id,
+                f"{TEXT_DIR}/{vol_intro.filename}",
+                vol_intro.media_type,
+            )
+            self.opf.add_spine_item(vol_intro.id)
 
         # nested chapters
-        entries: list[ChapterEntry] = []
+        entries: list[tuple[str, str, str]] = []
         for chap in volume.chapters:
-            self.chapters.append(chap)
+            self.items.append(chap)
             self.opf.add_manifest_item(
                 chap.id,
                 f"{TEXT_DIR}/{chap.filename}",
                 chap.media_type,
             )
             self.opf.add_spine_item(chap.id)
-            entries.append(
-                ChapterEntry(
-                    id=chap.id,
-                    label=chap.title,
-                    src=f"{TEXT_DIR}/{chap.filename}",
-                )
-            )
+            entries.append((chap.id, chap.title, f"{TEXT_DIR}/{chap.filename}"))
 
         # TOC updates
         self.ncx.add_volume(
-            id=f"vol_{self._vol_idx}",
+            id=vol_cover.id,
             label=volume.title,
-            src=f"{TEXT_DIR}/{vol_intro.filename}",
+            src=f"{TEXT_DIR}/{vol_cover.filename}",
             chapters=entries,
         )
         self.nav.add_volume(
-            id=f"vol_{self._vol_idx}",
+            id=vol_cover.id,
             label=volume.title,
-            src=f"{TEXT_DIR}/{vol_intro.filename}",
+            src=f"{TEXT_DIR}/{vol_cover.filename}",
             chapters=entries,
-        )
-
-        self._vol_idx += 1
-
-    def add_stylesheet(self, css: EpubStyleSheet) -> None:
-        """
-        Register an external CSS file in the EPUB.
-        """
-        self.styles.append(css)
-        self.opf.add_manifest_item(
-            css.id,
-            f"{CSS_DIR}/{css.filename}",
-            css.media_type,
         )
 
     def export(self, output_path: str | Path) -> Path:
@@ -288,46 +415,19 @@ class EpubBuilder:
         """
         return self._build_epub(output_path=Path(output_path))
 
-    def _init_styles(self) -> None:
-        # volume border & intro CSS
-        self.intro_css = EpubStyleSheet(
-            id="intro_style",
-            content=EPUB_CSS_INTRO_PATH.read_text("utf-8"),
-            filename="intro_style.css",
-        )
-        self.styles.append(self.intro_css)
-        self.opf.add_manifest_item(
-            "intro_style",
-            f"{CSS_DIR}/intro_style.css",
-            "text/css",
-        )
-
-        try:
-            border_bytes = VOLUME_BORDER_IMAGE_PATH.read_bytes()
-        except FileNotFoundError:
-            return
-        border = EpubImage(
-            id="img-volume-border",
-            data=border_bytes,
-            media_type="image/png",
-            filename="volume_border.png",
-        )
-        self.images.append(border)
-        self.opf.add_manifest_item(
-            border.id,
-            f"{IMAGE_DIR}/{border.filename}",
-            border.media_type,
-        )
-
     def _init_cover(self, cover_path: Path | None) -> None:
         if not cover_path or not cover_path.is_file():
             return
-        ext = cover_path.suffix.lower().lstrip(".")
+
+        data = cover_path.read_bytes()
+        # Try detecting from magic bytes
+        fmt = detect_image_format(data)
+        ext = fmt.lower() if fmt else cover_path.suffix.lower().lstrip(".")
+
         mtype = IMAGE_MEDIA_TYPES.get(ext)
         if not mtype:
             return
 
-        data = cover_path.read_bytes()
         cover_img = EpubImage(
             id="cover-img",
             data=data,
@@ -342,56 +442,24 @@ class EpubBuilder:
             properties="cover-image",
         )
 
-        cover_chapter = EpubChapter(
-            id="cover",
-            title="Cover",
-            content=COVER_IMAGE_TEMPLATE.format(ext=ext),
-            filename="cover.xhtml",
-        )
-        self.chapters.append(cover_chapter)
+        cover_item = EpubCover(ext=ext)
+        self.items.append(cover_item)
         self.opf.add_manifest_item(
-            cover_chapter.id,
-            f"{TEXT_DIR}/{cover_chapter.filename}",
-            cover_chapter.media_type,
+            cover_item.id,
+            f"{TEXT_DIR}/{cover_item.filename}",
+            cover_item.media_type,
         )
-        self.opf.add_spine_item(cover_chapter.id)
+        self.opf.add_spine_item(cover_item.id)
         self.nav.add_chapter(
-            cover_chapter.id,
-            cover_chapter.title,
-            f"{TEXT_DIR}/{cover_chapter.filename}",
+            cover_item.id,
+            cover_item.title,
+            f"{TEXT_DIR}/{cover_item.filename}",
         )
         self.ncx.add_chapter(
-            cover_chapter.id,
-            cover_chapter.title,
-            f"{TEXT_DIR}/{cover_chapter.filename}",
+            cover_item.id,
+            cover_item.title,
+            f"{TEXT_DIR}/{cover_item.filename}",
         )
-        self.opf.include_cover = True
-
-    def _init_intro(self) -> None:
-        intro_html = build_book_intro(
-            book_name=self.title,
-            author=self.author,
-            serial_status=self.serial_status,
-            subject=self.subject,
-            word_count=self.word_count,
-            summary=self.description,
-        )
-        intro = EpubChapter(
-            id="intro",
-            title="书籍简介",
-            content=intro_html,
-            filename="intro.xhtml",
-            css=[self.intro_css],
-        )
-        self.chapters.append(intro)
-        self.opf.add_manifest_item(
-            intro.id,
-            f"{TEXT_DIR}/{intro.filename}",
-            intro.media_type,
-        )
-        self.opf.add_spine_item(intro.id)
-        self.nav.add_chapter(intro.id, intro.title, f"{TEXT_DIR}/{intro.filename}")
-        self.ncx.add_chapter(intro.id, intro.title, f"{TEXT_DIR}/{intro.filename}")
 
     def _build_epub(self, output_path: Path) -> Path:
         """
@@ -407,10 +475,10 @@ class EpubBuilder:
                 compress_type=ZIP_STORED,
             )
 
-            # container
+            # container.xml
             epub.writestr(
                 "META-INF/container.xml",
-                build_container_xml(),
+                CONTAINER_TEMPLATE,
                 compress_type=ZIP_DEFLATED,
             )
 
@@ -432,18 +500,23 @@ class EpubBuilder:
             )
 
             # stylesheets
-            for css in self.styles:
-                path = f"{ROOT_PATH}/{CSS_DIR}/{css.filename}"
-                epub.writestr(path, css.content, compress_type=ZIP_DEFLATED)
+            style_text = EPUB_CSS_STYLE_PATH.read_text("utf-8")
+            path = f"{ROOT_PATH}/{CSS_DIR}/style.css"
+            epub.writestr(path, style_text, compress_type=ZIP_DEFLATED)
 
-            # chapters
-            for chap in self.chapters:
-                path = f"{ROOT_PATH}/{TEXT_DIR}/{chap.filename}"
-                epub.writestr(path, chap.to_xhtml(), compress_type=ZIP_DEFLATED)
+            # items
+            for item in self.items:
+                path = f"{ROOT_PATH}/{TEXT_DIR}/{item.filename}"
+                epub.writestr(path, item.to_xhtml(), compress_type=ZIP_DEFLATED)
 
             # images
             for img in self.images:
                 path = f"{ROOT_PATH}/{IMAGE_DIR}/{img.filename}"
                 epub.writestr(path, img.data, compress_type=ZIP_DEFLATED)
+
+            # fonts
+            for font in self.fonts:
+                path = f"{ROOT_PATH}/{FONT_DIR}/{font.filename}"
+                epub.writestr(path, font.data, compress_type=ZIP_DEFLATED)
 
         return output_path

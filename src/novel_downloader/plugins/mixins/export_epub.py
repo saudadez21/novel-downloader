@@ -10,14 +10,8 @@ from html import escape
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol
 
-from novel_downloader.infra.paths import EPUB_CSS_MAIN_PATH
 from novel_downloader.infra.persistence.chapter_storage import ChapterStorage
-from novel_downloader.libs.epub_builder import (
-    EpubBuilder,
-    EpubChapter,
-    EpubStyleSheet,
-    EpubVolume,
-)
+from novel_downloader.libs.epub_builder import EpubBuilder, EpubChapter, EpubVolume
 from novel_downloader.libs.filesystem import format_filename, sanitize_filename
 from novel_downloader.schemas import BookConfig, ChapterDict, ExporterConfig
 
@@ -36,11 +30,10 @@ if TYPE_CHECKING:
             self,
             *,
             book: EpubBuilder,
-            css: list[EpubStyleSheet],
             cid: str,
             chap_title: str | None,
             chap: ChapterDict,
-            img_dir: Path | None = None,
+            medias_dir: Path | None = None,
         ) -> EpubChapter:
             ...
 
@@ -74,9 +67,9 @@ class ExportEpubMixin:
         if not raw_base.is_dir():
             return []
 
-        img_dir: Path | None = None
+        medias_dir: Path | None = None
         if cfg.include_picture:
-            img_dir = raw_base / "medias"
+            medias_dir = raw_base / "medias"
 
         stage = stage or self._detect_latest_stage(book_id)
         book_info = self._load_book_info(book_id, stage=stage)
@@ -96,12 +89,7 @@ class ExportEpubMixin:
         book_summary = book_info.get("summary", "")
 
         # --- Generate intro + cover ---
-        cover_path = self._resolve_image_path(img_dir, book_info.get("cover_url"))
-
-        css_text = EPUB_CSS_MAIN_PATH.read_text(encoding="utf-8")
-        main_css = EpubStyleSheet(
-            id="main_style", content=css_text, filename="main.css"
-        )
+        cover_path = self._resolve_image_path(medias_dir, book_info.get("cover_url"))
 
         # --- Compile columes ---
         outputs: list[Path] = []
@@ -109,10 +97,12 @@ class ExportEpubMixin:
             for v_idx, vol in enumerate(vols, start=1):
                 vol_title = vol.get("volume_name") or f"卷 {v_idx}"
 
-                vol_cover = self._resolve_image_path(img_dir, vol.get("volume_cover"))
+                vol_cover = self._resolve_image_path(
+                    medias_dir, vol.get("volume_cover")
+                )
                 vol_cover = vol_cover or cover_path
 
-                epub = EpubBuilder(
+                builder = EpubBuilder(
                     title=f"{name} - {vol_title}",
                     author=author,
                     description=vol.get("volume_intro") or book_summary,
@@ -122,7 +112,6 @@ class ExportEpubMixin:
                     word_count=vol.get("word_count", ""),
                     uid=f"{self._site}_{book_id}_v{v_idx}",
                 )
-                epub.add_stylesheet(main_css)
 
                 # Collect chapter ids then batch fetch
                 cids = [
@@ -147,14 +136,13 @@ class ExportEpubMixin:
                         continue
 
                     chapter_obj = self._xp_epub_chapter(
-                        book=epub,
-                        css=[main_css],
+                        book=builder,
                         cid=cid,
                         chap_title=ch_title,
                         chap=ch,
-                        img_dir=img_dir,
+                        medias_dir=medias_dir,
                     )
-                    epub.add_chapter(chapter_obj)
+                    builder.add_chapter(chapter_obj)
                     seen_cids.add(cid)
 
                 out_name = format_filename(
@@ -167,7 +155,7 @@ class ExportEpubMixin:
                 out_path = self._output_dir / sanitize_filename(out_name)
 
                 try:
-                    outputs.append(epub.export(out_path))
+                    outputs.append(builder.export(out_path))
                     logger.info(
                         "Exported EPUB (site=%s, book=%s): %s",
                         self._site,
@@ -205,9 +193,9 @@ class ExportEpubMixin:
         if not raw_base.is_dir():
             return []
 
-        img_dir: Path | None = None
+        medias_dir: Path | None = None
         if cfg.include_picture:
-            img_dir = raw_base / "medias"
+            medias_dir = raw_base / "medias"
 
         stage = stage or self._detect_latest_stage(book_id)
         book_info = self._load_book_info(book_id, stage=stage)
@@ -227,11 +215,11 @@ class ExportEpubMixin:
 
         # --- Generate intro + cover ---
         cover_path = self._resolve_image_path(
-            img_dir, book_info.get("cover_url"), name="cover"
+            medias_dir, book_info.get("cover_url"), name="cover"
         )
 
         # --- Initialize EPUB ---
-        epub = EpubBuilder(
+        builder = EpubBuilder(
             title=name,
             author=author,
             description=book_info.get("summary", ""),
@@ -241,11 +229,6 @@ class ExportEpubMixin:
             word_count=book_info.get("word_count", ""),
             uid=f"{self._site}_{book_id}",
         )
-        css_text = EPUB_CSS_MAIN_PATH.read_text(encoding="utf-8")
-        main_css = EpubStyleSheet(
-            id="main_style", content=css_text, filename="main.css"
-        )
-        epub.add_stylesheet(main_css)
 
         # --- Compile columes ---
         seen_cids: set[str] = set()
@@ -253,13 +236,15 @@ class ExportEpubMixin:
             for v_idx, vol in enumerate(vols, start=1):
                 vol_title = vol.get("volume_name") or f"卷 {v_idx}"
 
-                vol_cover = self._resolve_image_path(img_dir, vol.get("volume_cover"))
+                vol_cover = self._resolve_image_path(
+                    medias_dir, vol.get("volume_cover")
+                )
 
                 curr_vol = EpubVolume(
                     id=f"vol_{v_idx}",
                     title=vol_title,
                     intro=vol.get("volume_intro", ""),
-                    cover=vol_cover,
+                    cover_path=vol_cover,
                 )
 
                 # Collect chapter ids then batch fetch
@@ -269,7 +254,7 @@ class ExportEpubMixin:
                     if c.get("chapterId")
                 ]
                 if not cids:
-                    epub.add_volume(curr_vol)
+                    builder.add_volume(curr_vol)
                     continue
                 chap_map = storage.get_chapters(cids)
 
@@ -285,19 +270,18 @@ class ExportEpubMixin:
                         continue
 
                     chapter_obj = self._xp_epub_chapter(
-                        book=epub,
-                        css=[main_css],
+                        book=builder,
                         cid=cid,
                         chap_title=ch_title,
                         chap=ch,
-                        img_dir=img_dir,
+                        medias_dir=medias_dir,
                     )
 
                     curr_vol.chapters.append(chapter_obj)
                     seen_cids.add(cid)
 
                 if curr_vol.chapters:
-                    epub.add_volume(curr_vol)
+                    builder.add_volume(curr_vol)
 
         # --- Finalize EPUB ---
         out_name = format_filename(
@@ -310,7 +294,7 @@ class ExportEpubMixin:
         out_path = self._output_dir / sanitize_filename(out_name)
 
         try:
-            epub.export(out_path)
+            builder.export(out_path)
             logger.info(
                 "Exported EPUB (site=%s, book=%s): %s", self._site, book_id, out_path
             )
@@ -329,11 +313,10 @@ class ExportEpubMixin:
         self: "ExportEpubClientContext",
         *,
         book: EpubBuilder,
-        css: list[EpubStyleSheet],
         cid: str,
         chap_title: str | None,
         chap: ChapterDict,
-        img_dir: Path | None = None,
+        medias_dir: Path | None = None,
     ) -> EpubChapter:
         """
         Build a Chapter object with XHTML content and optionally place images
@@ -344,10 +327,10 @@ class ExportEpubMixin:
 
         extras = chap.get("extra") or {}
         image_positions = self._build_image_map(chap)
-        html_parts: list[str] = [f"<h2>{escape(title)}</h2>"]
+        html_parts: list[str] = []
 
         def _append_image(item: dict[str, Any]) -> None:
-            if not img_dir:
+            if not medias_dir:
                 return
 
             typ = item.get("type")
@@ -363,7 +346,7 @@ class ExportEpubMixin:
                     if not (data.startswith("http://") or data.startswith("https://")):
                         return
 
-                    local = self._resolve_image_path(img_dir, data)
+                    local = self._resolve_image_path(medias_dir, data)
                     if not local:
                         return
 
@@ -413,7 +396,6 @@ class ExportEpubMixin:
             filename=f"c{cid}.xhtml",
             title=title,
             content=xhtml,
-            css=css,
         )
 
     def _xp_epub_extras(self, extras: dict[str, Any]) -> str:
