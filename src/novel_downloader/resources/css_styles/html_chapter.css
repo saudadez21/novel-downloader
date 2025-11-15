@@ -119,6 +119,15 @@ h1.chapter-title {
   text-indent: 2em;
 }
 
+/* Inline flipped characters */
+.refl {
+  display: inline-block;
+  transform: scaleX(-1);
+  -webkit-transform: scaleX(-1); /* iOS / WebKit */
+  transform-origin: center;
+  -webkit-transform-origin: center;
+}
+
 /* Nav Buttons */
 .nav-button {
   text-decoration: none;

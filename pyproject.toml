@@ -119,6 +119,8 @@ testpaths = ["tests"]
 [tool.coverage.run]
 omit = [
   "src/novel_downloader/apps/*",
+  "src/novel_downloader/plugins/archived/*",
+  "src/novel_downloader/plugins/sites/*",
 ]
 
 [tool.commitizen]

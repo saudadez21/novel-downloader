@@ -195,3 +195,12 @@ h1.head b {
   text-indent: 2em;
   line-height: 1.6;
 }
+
+/* Inline flipped characters */
+.refl {
+  display: inline-block;
+  transform: scaleX(-1);
+  -webkit-transform: scaleX(-1); /* iOS / WebKit */
+  transform-origin: center;
+  -webkit-transform-origin: center;
+}

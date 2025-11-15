@@ -21,7 +21,7 @@ _FONT_OCR: "FontOCR | None" = None
 _FONT_OCR_LOCK = threading.Lock()
 
 
-def get_font_ocr(cfg: FontOCRConfig) -> "FontOCR | None":
+def get_font_ocr(cfg: FontOCRConfig | None = None) -> "FontOCR | None":
     """
     Try to initialize and return a singleton FontOCR instance.
     Returns None if FontOCR or its dependencies are not available.
@@ -37,6 +37,7 @@ def get_font_ocr(cfg: FontOCRConfig) -> "FontOCR | None":
         try:
             from .core import FontOCR
 
+            cfg = cfg or FontOCRConfig()
             _FONT_OCR = FontOCR(
                 model_name=cfg.model_name,
                 model_dir=cfg.model_dir,

@@ -99,6 +99,15 @@ header {
   text-decoration: underline;
 }
 
+/* Inline flipped characters */
+.refl {
+  display: inline-block;
+  transform: scaleX(-1);
+  -webkit-transform: scaleX(-1); /* iOS / WebKit */
+  transform-origin: center;
+  -webkit-transform-origin: center;
+}
+
 /* Floating Controls */
 #floating-controls {
   position: fixed;

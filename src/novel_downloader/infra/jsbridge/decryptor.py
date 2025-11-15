@@ -17,7 +17,9 @@ from importlib.resources.abc import Traversable
 from pathlib import Path
 from typing import Any, Final
 
-from novel_downloader.infra.network import download
+import requests
+
+from novel_downloader.infra.http_defaults import DEFAULT_USER_HEADERS
 from novel_downloader.infra.paths import (
     EXPR_TO_JSON_SCRIPT_PATH,
     JS_SCRIPT_DIR,
@@ -270,12 +272,14 @@ class NodeDecryptor:
                 if spec.fock_asset:
                     fock_path = self.script_dir / spec.fock_asset.basename
                     if not fock_path.exists():
-                        download(
+                        logger.debug("Fetching Fock asset from %s", spec.fock_asset.url)
+                        resp = requests.get(
                             spec.fock_asset.url,
-                            self.script_dir,
-                            filename=spec.fock_asset.basename,
-                            on_exist="skip",
+                            headers=DEFAULT_USER_HEADERS,
+                            timeout=15,
                         )
+                        resp.raise_for_status()
+                        fock_path.write_bytes(resp.content)
 
                 cmd: list[str] | None = ["node", str(dst_script)]
                 logger.debug("%s decryptor prepared with Node.", spec.name.upper())

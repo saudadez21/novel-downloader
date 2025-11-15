@@ -188,3 +188,4 @@ raw_data/
 check_format.py
 check_site_name.py
 temp.py
+tests/data/
