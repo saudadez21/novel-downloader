@@ -7,6 +7,8 @@ novel_downloader.schemas.book
 
 from typing import Any, Literal, NotRequired, TypedDict
 
+MediaType = Literal["image", "font", "css", "script", "audio", "other"]
+
 
 class ChapterDict(TypedDict):
     id: str
@@ -16,11 +18,16 @@ class ChapterDict(TypedDict):
 
 
 class MediaResource(TypedDict):
-    category: Literal["image", "font", "css", "script", "other"]
-    type: Literal["url", "base64", "text"]
-    data: str
-    position: NotRequired[int]
+    type: MediaType
+    paragraph_index: NotRequired[int]
+    range: NotRequired[dict[str, int]]
+    url: NotRequired[str]
+    base64: NotRequired[str]
     mime: NotRequired[str]
+    text: NotRequired[str]
+    alt: NotRequired[str]
+    width: NotRequired[int]
+    height: NotRequired[int]
 
 
 class ChapterInfoDict(TypedDict):

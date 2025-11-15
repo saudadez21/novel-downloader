@@ -161,8 +161,6 @@ user_prompt = "请翻译成中文：{text}"
 
 以下模块需适配新的 `resources` 结构:
 
-* `novel_downloader.plugins.base.client`
-* `novel_downloader.plugins.common.client`
 * `novel_downloader.plugins.sites.esjzone.parser`
 * `novel_downloader.plugins.sites.kadokado.parser`
 * `novel_downloader.plugins.sites.linovel.parser`

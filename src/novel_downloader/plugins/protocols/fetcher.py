@@ -118,7 +118,7 @@ class FetcherProtocol(Protocol):
         """
         ...
 
-    async def fetch_data(self, url: str, **kwargs: Any) -> bytes:
+    async def fetch_data(self, url: str, **kwargs: Any) -> bytes | None:
         """
         Fetch arbitrary binary data from a remote URL.
 
@@ -167,21 +167,32 @@ class FetcherProtocol(Protocol):
         """
         ...
 
+    async def fetch_fonts(
+        self,
+        font_dir: Path,
+        urls: list[str],
+        *,
+        on_exist: Literal["overwrite", "skip"] = "skip",
+        concurrent: int = 5,
+    ) -> None:
+        """Download fonts to `font_dir` in batches."""
+        ...
+
     async def fetch_media(
         self,
         media_dir: Path,
         resources: list[MediaResource],
-        batch_size: int = 10,
         *,
         on_exist: Literal["overwrite", "skip"] = "skip",
+        concurrent: int = 5,
     ) -> None:
         """
         Process and persist a list of media resources asynchronously.
 
         :param media_dir: Destination directory.
         :param resources: List of :class:`MediaResource` items.
-        :param batch_size: Number of concurrent tasks per batch.
         :param on_exist: Behavior when existing files are found.
+        :param concurrent: Number of concurrent tasks per batch.
         """
         ...
 

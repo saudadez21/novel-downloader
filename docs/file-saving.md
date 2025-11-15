@@ -121,7 +121,8 @@ CREATE TABLE IF NOT EXISTS chapters (
     {
       "type": "font",
       "base64": "d09GRgABAAAA...",
-      "mime": "font/woff2"
+      "mime": "font/woff2",
+      "range": { "start": 1, "end": 3 }
     },
     {
       "type": "css",
@@ -135,22 +136,37 @@ CREATE TABLE IF NOT EXISTS chapters (
 
 资源列表包含章节内出现的远程资源、内嵌资源、字体资源和 CSS 文本:
 
-| 字段名                 | 类型             | 说明                                                   |
-| --------------------- | ---------------- | ------------------------------------------------------ |
-| **`type`**            | `str`            | 资源类型, 例如: `image` / `font` / `css` / `audio` 等   |
-| **`paragraph_index`** | `int` (optional) | 资源对应正文段落的位置 (1-based, `0` 表示章节开头)        |
-| **`url`**             | `str` (optional) | 远程资源的 URL                                          |
-| **`base64`**          | `str` (optional) | Base64 格式的资源内容                                   |
-| **`mime`**            | `str` (optional) | Base64 内容的 MIME 类型, 如 `image/jpeg`、`font/woff2`  |
-| **`text`**            | `str` (optional) | 文本内容                                                |
-| **`alt`**             | `str` (optional) | 资源的替代文本                                          |
-| **`width`**           | `int` (optional) | 图片宽度                                                |
-| **`height`**          | `int` (optional) | 图片高度                                                |
+| 字段名                 | 类型               | 说明                                                   |
+| --------------------- | ------------------ | ------------------------------------------------------ |
+| **`type`**            | `str`              | 资源类型, 例如: `image` / `font` / `css` / `audio` 等   |
+| **`paragraph_index`** | `int` (optional)   | 资源对应正文段落的位置 (1-based, `0` 表示章节开头)        |
+| **`range`**           | `dict` (optional)  | 资源对正文段落的适用范围                                 |
+| **`url`**             | `str` (optional)   | 远程资源的 URL                                          |
+| **`base64`**          | `str` (optional)   | Base64 格式的资源内容                                   |
+| **`mime`**            | `str` (optional)   | Base64 内容的 MIME 类型, 如 `image/jpeg`、`font/woff2`  |
+| **`text`**            | `str` (optional)   | 文本内容                                                |
+| **`alt`**             | `str` (optional)   | 资源的替代文本                                          |
+| **`width`**           | `int` (optional)   | 图片宽度                                                |
+| **`height`**          | `int` (optional)   | 图片高度                                                |
 
 说明:
 
 * 一个段落可能包含多个资源, 因此 `paragraph_index` 可以重复
 * `paragraph_index = 0` 表示资源在第一段落之前出现
+
+**`range` 字段说明**
+
+`range` 用于描述资源对正文段落的适用范围, 采用 1-based、闭区间 表示:
+
+```json
+"range": { "start": 1, "end": 3 }
+```
+
+当资源同时具备段落定位信息时, 解析顺序如下:
+
+1. 使用 `paragraph_index`
+2. 若无 `paragraph_index`, 则检查 `range`
+3. 若两者均不存在, 则视为适用于全部段落
 
 #### 章节资源文件夹
 

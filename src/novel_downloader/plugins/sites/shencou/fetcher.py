@@ -10,7 +10,6 @@ import logging
 from pathlib import Path
 from typing import Any, Literal
 
-from novel_downloader.infra.http_defaults import IMAGE_HEADERS
 from novel_downloader.libs.filesystem import image_filename, write_file
 from novel_downloader.plugins.base.fetcher import BaseFetcher
 from novel_downloader.plugins.registry import registrar
@@ -75,27 +74,15 @@ class ShencouFetcher(BaseFetcher):
             logger.debug("Skip existing image: %s", save_path)
             return save_path
 
-        try:
-            resp = await self.session.get(url, headers=IMAGE_HEADERS)
-        except Exception as e:
-            logger.warning(
-                "Image request failed (site=shencou) %s: %s",
-                url,
-                e,
-            )
+        content = await self.fetch_data(url, headers=self.IMAGE_HEADERS)
+        if content is None:
             return None
 
-        if not resp.ok:
-            logger.warning(
-                "Image request failed (site=shencou) %s: HTTP %s",
-                url,
-                resp.status,
-            )
-            return None
-        if resp.content.startswith(b"<html"):
-            logger.warning("Non-image content for %s (site=shencou)", url)
+        prefix = content[:128].lstrip().lower()
+        if prefix.startswith(b"<html") or prefix.startswith(b"<!doctype html"):
+            logger.warning("Non-image content (HTML) at %s (site=shencou)", url)
             return None
 
-        write_file(content=resp.content, filepath=save_path, on_exist="overwrite")
+        write_file(content=content, filepath=save_path, on_exist="overwrite")
         logger.debug("Saved image: %s <- %s", save_path, url)
         return save_path

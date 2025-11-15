@@ -14,8 +14,8 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any, Literal, Self
 
-from novel_downloader.infra.http_defaults import IMAGE_HEADERS
-from novel_downloader.libs.filesystem import image_filename, write_file
+from novel_downloader.infra.http_defaults import DEFAULT_USER_HEADERS, IMAGE_HEADERS
+from novel_downloader.libs.filesystem import font_filename, image_filename, write_file
 from novel_downloader.libs.time_utils import async_jitter_sleep
 from novel_downloader.plugins.utils.rate_limiter import TokenBucketRateLimiter
 from novel_downloader.schemas import FetcherConfig, LoginField, MediaResource
@@ -33,6 +33,7 @@ class BaseFetcher(abc.ABC):
     site_name: str
     BASE_URL_MAP: dict[str, str] = {}
     DEFAULT_BASE_URL: str = ""
+    IMAGE_HEADERS: dict[str, str] = IMAGE_HEADERS
 
     def __init__(
         self,
@@ -129,34 +130,93 @@ class BaseFetcher(abc.ABC):
         """
         ...
 
-    async def fetch_data(self, url: str, **kwargs: Any) -> bytes:
+    async def fetch_data(self, url: str, **kwargs: Any) -> bytes | None:
         """
         Fetch arbitrary binary data from a remote URL.
 
         :param url: The target URL.
-        :return: The raw response body as bytes.
+        :return: raw content if success, else None
         """
-        # TODO: placeholder
-        return b""
+        try:
+            resp = await self.session.get(url, **kwargs)
+        except Exception as e:
+            logger.warning(
+                "Request failed (site=%s) %s: %s",
+                self.site_name,
+                url,
+                e,
+            )
+            return None
+
+        if not resp.ok:
+            logger.warning(
+                "Request failed (site=%s) %s: HTTP %s",
+                self.site_name,
+                url,
+                resp.status,
+            )
+            return None
+
+        if not resp.content:
+            logger.warning(
+                "Empty response (site=%s): %s",
+                self.site_name,
+                url,
+            )
+            return None
+
+        return resp.content
 
     async def fetch_media(
         self,
         media_dir: Path,
         resources: list[MediaResource],
-        batch_size: int = 10,
         *,
         on_exist: Literal["overwrite", "skip"] = "skip",
+        concurrent: int = 5,
     ) -> None:
         """
         Process and persist a list of media resources asynchronously.
 
         :param media_dir: Destination directory.
         :param resources: List of :class:`MediaResource` items.
-        :param batch_size: Number of concurrent tasks per batch.
         :param on_exist: Behavior when existing files are found.
+        :param concurrent: Number of concurrent tasks per batch.
         """
-        # TODO: placeholder
-        return
+        if not resources:
+            return
+
+        media_dir.mkdir(parents=True, exist_ok=True)
+
+        img_urls: list[str] = []
+        font_urls: list[str] = []
+
+        for res in resources:
+            url = res.get("url")
+            if not url:
+                continue
+
+            r_type = res.get("type")
+            if r_type == "image":
+                img_urls.append(url)
+            elif r_type == "font":
+                font_urls.append(url)
+
+        if img_urls:
+            await self.fetch_images(
+                media_dir,
+                img_urls,
+                on_exist=on_exist,
+                concurrent=concurrent,
+            )
+
+        if font_urls:
+            await self.fetch_fonts(
+                media_dir,
+                font_urls,
+                on_exist=on_exist,
+                concurrent=concurrent,
+            )
 
     async def fetch_image(
         self,
@@ -211,6 +271,31 @@ class BaseFetcher(abc.ABC):
             for r in results:
                 if isinstance(r, Exception):
                     logger.warning("Image download error: %s", r)
+
+    async def fetch_fonts(
+        self,
+        font_dir: Path,
+        urls: list[str],
+        *,
+        on_exist: Literal["overwrite", "skip"] = "skip",
+        concurrent: int = 5,
+    ) -> None:
+        """Download fonts to `font_dir` in batches."""
+        if not urls:
+            return
+
+        font_dir.mkdir(parents=True, exist_ok=True)
+
+        batch_size = max(1, concurrent)
+        for i in range(0, len(urls), batch_size):
+            batch = urls[i : i + batch_size]
+            tasks = [
+                self._fetch_one_font(url, font_dir, on_exist=on_exist) for url in batch
+            ]
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            for r in results:
+                if isinstance(r, Exception):
+                    logger.warning("Font download error: %s", r)
 
     async def load_state(self) -> bool:
         """
@@ -346,36 +431,35 @@ class BaseFetcher(abc.ABC):
             logger.debug("Skip existing image: %s", save_path)
             return save_path
 
-        try:
-            resp = await self.session.get(url, headers=IMAGE_HEADERS)
-        except Exception as e:
-            logger.warning(
-                "Image request failed (site=%s) %s: %s",
-                self.site_name,
-                url,
-                e,
-            )
+        content = await self.fetch_data(url, headers=self.IMAGE_HEADERS)
+        if content is None:
             return None
 
-        if not resp.content:
-            logger.warning(
-                "Empty response for image (site=%s): %s",
-                self.site_name,
-                url,
-            )
-            return None
-
-        if not resp.ok:
-            logger.warning(
-                "Image request failed (site=%s) %s: HTTP %s",
-                self.site_name,
-                url,
-                resp.status,
-            )
-            return None
-
-        write_file(content=resp.content, filepath=save_path, on_exist="overwrite")
+        write_file(content=content, filepath=save_path, on_exist="overwrite")
         logger.debug("Saved image: %s <- %s", save_path, url)
+        return save_path
+
+    async def _fetch_one_font(
+        self,
+        url: str,
+        folder: Path,
+        *,
+        name: str | None = None,
+        on_exist: Literal["overwrite", "skip"],
+    ) -> Path | None:
+        """Download a single font and save with a hashed filename."""
+        save_path = folder / font_filename(url, name=name)
+
+        if save_path.exists() and on_exist == "skip":
+            logger.debug("Skip existing font: %s", save_path)
+            return save_path
+
+        content = await self.fetch_data(url, headers=DEFAULT_USER_HEADERS)
+        if content is None:
+            return None
+
+        write_file(content=content, filepath=save_path, on_exist="overwrite")
+        logger.debug("Saved font: %s <- %s", save_path, url)
         return save_path
 
     def _resolve_base_url(self, locale_style: str) -> str:

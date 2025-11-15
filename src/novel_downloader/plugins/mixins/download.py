@@ -270,7 +270,7 @@ class DownloadMixin:
 
         raw_base = self._raw_data_dir / book_id
         raw_base.mkdir(parents=True, exist_ok=True)
-        img_dir = raw_base / "media"
+        media_dir = raw_base / "media"
 
         # ---- metadata ---
         book_info = self._load_book_info(book_id=book_id)
@@ -290,13 +290,14 @@ class DownloadMixin:
                 if chap is None:
                     continue
 
-                imgs = self._extract_image_urls(chap)
-                await self.fetcher.fetch_images(
-                    img_dir,
-                    imgs,
-                    on_exist="overwrite" if force_update else "skip",
-                    concurrent=concurrent,
-                )
+                resources = chap["extra"].get("resources")
+                if resources:
+                    await self.fetcher.fetch_media(
+                        media_dir,
+                        resources,
+                        on_exist="overwrite" if force_update else "skip",
+                        concurrent=concurrent,
+                    )
 
     async def get_book_info(
         self: "DownloadClientContext",
@@ -380,9 +381,11 @@ class DownloadMixin:
                         return None
                     raise ValueError("Empty parse result")
 
-                imgs = self._extract_image_urls(chap)
-                img_dir = self._raw_data_dir / book_id / "media"
-                await self.fetcher.fetch_images(img_dir, imgs)
+                resources = chap["extra"].get("resources")
+                if resources:
+                    media_dir = self._raw_data_dir / book_id / "media"
+                    await self.fetcher.fetch_media(media_dir, resources)
+
                 return chap
             except Exception as e:
                 if attempt < self._retry_times:

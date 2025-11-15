@@ -122,6 +122,8 @@ h1.chapter-title {
 /* Inline flipped characters */
 .refl {
   display: inline-block;
+  text-indent: 0;
+  vertical-align: baseline;
   transform: scaleX(-1);
   -webkit-transform: scaleX(-1); /* iOS / WebKit */
   transform-origin: center;

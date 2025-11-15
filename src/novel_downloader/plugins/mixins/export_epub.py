@@ -12,8 +12,18 @@ from typing import TYPE_CHECKING, Any, Protocol
 
 from novel_downloader.infra.persistence.chapter_storage import ChapterStorage
 from novel_downloader.libs.epub_builder import EpubBuilder, EpubChapter, EpubVolume
-from novel_downloader.libs.filesystem import format_filename, sanitize_filename
-from novel_downloader.schemas import BookConfig, ChapterDict, ExporterConfig
+from novel_downloader.libs.filesystem import (
+    font_filename,
+    format_filename,
+    image_filename,
+    sanitize_filename,
+)
+from novel_downloader.schemas import (
+    BookConfig,
+    ChapterDict,
+    ExporterConfig,
+    MediaResource,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -33,11 +43,17 @@ if TYPE_CHECKING:
             cid: str,
             chap_title: str | None,
             chap: ChapterDict,
-            media_dir: Path | None = None,
+            media_dir: Path,
+            include_picture: bool = True,
         ) -> EpubChapter:
             ...
 
         def _xp_epub_extras(self, extras: dict[str, Any]) -> str:
+            ...
+
+        def _xp_epub_chap_post(
+            self, html_parts: list[str], chap: ChapterDict
+        ) -> list[str]:
             ...
 
 
@@ -67,9 +83,7 @@ class ExportEpubMixin:
         if not raw_base.is_dir():
             return []
 
-        media_dir: Path | None = None
-        if cfg.include_picture:
-            media_dir = raw_base / "media"
+        media_dir = raw_base / "media"
 
         stage = stage or self._detect_latest_stage(book_id)
         book_info = self._load_book_info(book_id, stage=stage)
@@ -139,6 +153,7 @@ class ExportEpubMixin:
                         chap_title=ch_title,
                         chap=ch,
                         media_dir=media_dir,
+                        include_picture=cfg.include_picture,
                     )
                     builder.add_chapter(chapter_obj)
                     seen_cids.add(cid)
@@ -191,9 +206,7 @@ class ExportEpubMixin:
         if not raw_base.is_dir():
             return []
 
-        media_dir: Path | None = None
-        if cfg.include_picture:
-            media_dir = raw_base / "media"
+        media_dir = raw_base / "media"
 
         stage = stage or self._detect_latest_stage(book_id)
         book_info = self._load_book_info(book_id, stage=stage)
@@ -271,6 +284,7 @@ class ExportEpubMixin:
                         chap_title=ch_title,
                         chap=ch,
                         media_dir=media_dir,
+                        include_picture=cfg.include_picture,
                     )
 
                     curr_vol.chapters.append(chapter_obj)
@@ -312,86 +326,90 @@ class ExportEpubMixin:
         cid: str,
         chap_title: str | None,
         chap: ChapterDict,
-        media_dir: Path | None = None,
+        media_dir: Path,
+        include_picture: bool = True,
     ) -> EpubChapter:
         """
-        Build a Chapter object with XHTML content and optionally place images
-        from `chap.extra['image_positions']` (1-based index; 0 = before 1st paragraph).
+        Build a Chapter object with XHTML content and optionally place images / font.
         """
         title = chap_title or chap.get("title", "").strip()
         content = chap.get("content", "")
+        resources: list[MediaResource] = chap.get("extra", {}).get("resources", [])
 
-        extras = chap.get("extra") or {}
-        image_positions = self._build_image_map(chap)
+        lines = content.splitlines()
+        max_i = len(lines)
+
+        images_by_index: dict[int, list[MediaResource]] = {}
+        added_fonts = []
         html_parts: list[str] = []
 
-        def _append_image(item: dict[str, Any]) -> None:
-            if not media_dir:
-                return
-
-            typ = item.get("type")
-            data = (item.get("data") or "").strip()
-            if not data:
-                return
-
+        def _append_image(res: MediaResource) -> None:
+            fname: str | None = None
             try:
-                if typ == "url":
-                    # ---- Handle normal URL ----
-                    if data.startswith("//"):
-                        data = "https:" + data
-                    if not (data.startswith("http://") or data.startswith("https://")):
-                        return
+                if url := res.get("url"):
+                    local = media_dir / image_filename(url)
+                    if local and local.is_file():
+                        fname = book.add_image(local)
 
-                    local = self._resolve_image_path(media_dir, data)
-                    if not local:
-                        return
-
-                    fname = book.add_image(local)
-
-                elif typ == "base64":
-                    # ---- Handle base64-encoded image ----
-                    mime = item.get("mime", "image/png")
-                    raw = base64.b64decode(data)
+                elif b64 := res.get("base64"):
+                    mime = res.get("mime", "image/png")
+                    raw = base64.b64decode(b64)
                     fname = book.add_image_bytes(raw, mime_type=mime)
 
-                else:
-                    # Unknown type
-                    return
-
-                # ---- Append <img> HTML ----
-                img_tag = f'<img src="../Images/{fname}" alt="image"/>'
-                html_parts.append(self._IMAGE_WRAPPER.format(img=img_tag))
+                if fname:
+                    alt = escape(res.get("alt") or "image")
+                    tag = f'<img src="../Images/{fname}" alt="{alt}"/>'
+                    html_parts.append(self._IMAGE_WRAPPER.format(img=tag))
 
             except Exception as e:
                 logger.debug("EPUB image add failed: %s", e)
 
-        # Images before first paragraph
-        for item in image_positions.get(0, []):
-            _append_image(item)
+        for r in resources:
+            typ = r.get("type")
 
-        # Paragraphs + inline-after images
-        lines = content.splitlines()
-        for i, line in enumerate(lines, start=1):
-            if ln := line.strip():
+            if typ == "font":
+                try:
+                    if url := r.get("url"):
+                        local = media_dir / font_filename(url)
+                        if local.is_file() and (f := book.add_font(local)):
+                            added_fonts.append(f)
+
+                    elif b64 := r.get("base64"):
+                        raw = base64.b64decode(b64)
+                        if f := book.add_font_bytes(raw):
+                            added_fonts.append(f)
+
+                except Exception as e:
+                    logger.debug("EPUB font add failed: %s", e)
+
+            elif typ == "image" and include_picture:
+                idx = r.get("paragraph_index", max_i)
+                if idx == 0:
+                    _append_image(r)
+                    continue
+
+                idx = min(idx, max_i)
+                images_by_index.setdefault(idx, []).append(r)
+
+        for i, ln in enumerate(lines, start=1):
+            if ln := ln.strip():
                 html_parts.append(f"<p>{escape(ln)}</p>")
-            for item in image_positions.get(i, []):
-                _append_image(item)
 
-        max_i = len(lines)
-        for k, items in image_positions.items():
-            if k > max_i:
-                for item in items:
-                    _append_image(item)
+            if items := images_by_index.get(i):
+                for res in items:
+                    _append_image(res)
 
-        if extras_epub := self._xp_epub_extras(extras):
-            html_parts.append(extras_epub)
+        html_parts = self._xp_epub_chap_post(html_parts, chap)
+        xhtml_str = "\n".join(html_parts)
+        extras_part = self._xp_epub_extras(chap.get("extra") or {})
 
-        xhtml = "\n".join(html_parts)
         return EpubChapter(
             id=f"c_{cid}",
             filename=f"c{cid}.xhtml",
             title=title,
-            content=xhtml,
+            fonts=added_fonts,
+            content=xhtml_str,
+            extra_block=extras_part,
         )
 
     def _xp_epub_extras(self, extras: dict[str, Any]) -> str:
@@ -401,3 +419,7 @@ class ExportEpubMixin:
         Subclasses may override this method to render extra info.
         """
         return ""
+
+    def _xp_epub_chap_post(self, html_parts: list[str], chap: ChapterDict) -> list[str]:
+        """Allows subclasses to inject HTML or modify structure."""
+        return html_parts

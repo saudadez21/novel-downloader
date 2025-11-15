@@ -15,6 +15,7 @@ from .constants import (
     CHAP_TMPLATE,
     COVER_TEMPLATE,
     DEFAULT_FONT_FALLBACK_STACK,
+    FONT_DIR,
     FONT_FACE_TEMPLATE,
     INTRO_TEMPLATE,
     NAV_TEMPLATE,
@@ -72,6 +73,7 @@ class EpubFont(EpubResource):
             family=self.family,
             filename=self.filename,
             format=self.format,
+            font_dir=FONT_DIR,
         )
 
 
@@ -305,6 +307,7 @@ class EpubVolumeIntroDesc(EpubXhtmlContent):
 @dataclass(slots=True)
 class EpubChapter(EpubXhtmlContent):
     default_selector: str = ".chapter-content"
+    extra_block: str = ""
 
     def to_xhtml(self, lang: str = "zh-Hans") -> str:
         """Generate the XHTML for a chapter."""
@@ -313,6 +316,7 @@ class EpubChapter(EpubXhtmlContent):
             title=escape_text(self.title),
             font_styles=self._build_font_styles(),
             content=self.content,
+            extra_block=self.extra_block,
         )
 
 
