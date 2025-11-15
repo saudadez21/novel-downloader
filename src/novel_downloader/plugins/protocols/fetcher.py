@@ -169,23 +169,6 @@ class FetcherProtocol(Protocol):
 
     async def fetch_media(
         self,
-        resource: MediaResource,
-        media_dir: Path,
-        *,
-        on_exist: Literal["overwrite", "skip"] = "skip",
-    ) -> Path | None:
-        """
-        Download or persist a single media resource entry.
-
-        :param resource: A :class:`MediaResource` entry.
-        :param media_dir: Target directory to store the media.
-        :param on_exist: Behavior when file already exists.
-        :return: Saved path or ``None`` if skipped.
-        """
-        ...
-
-    async def fetch_medias(
-        self,
         media_dir: Path,
         resources: list[MediaResource],
         batch_size: int = 10,

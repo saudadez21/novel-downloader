@@ -63,7 +63,7 @@ class ExportHtmlMixin:
         if not raw_base.is_dir():
             return []
 
-        img_dir = raw_base / "medias"
+        img_dir = raw_base / "media"
 
         stage = stage or self._detect_latest_stage(book_id)
         book_info = self._load_book_info(book_id, stage=stage)

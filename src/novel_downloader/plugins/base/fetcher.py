@@ -136,28 +136,10 @@ class BaseFetcher(abc.ABC):
         :param url: The target URL.
         :return: The raw response body as bytes.
         """
-        # TODO
+        # TODO: placeholder
         return b""
 
     async def fetch_media(
-        self,
-        resource: MediaResource,
-        media_dir: Path,
-        *,
-        on_exist: Literal["overwrite", "skip"] = "skip",
-    ) -> Path | None:
-        """
-        Download or persist a single media resource entry.
-
-        :param resource: A :class:`MediaResource` entry.
-        :param media_dir: Target directory to store the media.
-        :param on_exist: Behavior when file already exists.
-        :return: Saved path or ``None`` if skipped.
-        """
-        # TODO
-        return None
-
-    async def fetch_medias(
         self,
         media_dir: Path,
         resources: list[MediaResource],
@@ -173,7 +155,7 @@ class BaseFetcher(abc.ABC):
         :param batch_size: Number of concurrent tasks per batch.
         :param on_exist: Behavior when existing files are found.
         """
-        # TODO
+        # TODO: placeholder
         return
 
     async def fetch_image(

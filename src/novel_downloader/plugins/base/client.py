@@ -171,7 +171,7 @@ class AbstractClient(abc.ABC):
         ...
 
     @abc.abstractmethod
-    async def cache_medias(
+    async def cache_media(
         self,
         book: BookConfig,
         *,

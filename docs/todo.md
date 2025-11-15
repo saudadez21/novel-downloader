@@ -155,52 +155,6 @@ user_prompt = "请翻译成中文：{text}"
 
 为支持多类型资源 (图片、字体、CSS 等), 将 `extra.image_positions` 字段迁移至统一的 `extra.resources` 管理结构, 以统一管理章节关联的多类型资源
 
-新结构示例:
-
-```json
-{
-    "resources": [
-        {
-            "category": "image",
-            "position": 0,
-            "type": "url",
-            "data": "https://example.com/a.jpg"
-        },
-        {
-            "category": "image",
-            "position": 3,
-            "type": "base64",
-            "data": "iVBORw0KGgo...",
-            "mime": "image/jpeg"
-        },
-        {
-            "category": "font",
-            "type": "url",
-            "data": "https://example.com/font.woff2"
-        },
-        {
-            "category": "font",
-            "type": "base64",
-            "data": "d09GRgABAAAA...",
-            "mime": "font/woff2"
-        },
-        {
-            "category": "css",
-            "type": "text",
-            "data": "body { color: red; }"
-        }
-    ]
-}
-```
-
-| 字段名      | 类型   | 说明                                                       |
-| ---------- | ------ | ---------------------------------------------------------- |
-| `category` | `str`  | 资源类型, 如 `image` / `font` / `css` / `audio` 等          |
-| `position` | `int`  | 用于图片资源, 指示资源在正文中的位置 (1-based, 0 表示章节开头) |
-| `type`     | `str`  | 数据类型：`url` / `base64` / `text`                         |
-| `data`     | `str`  | 实际内容或引用地址                                          |
-| `mime`     | `str`  | MIME 类型, 用于 Base64 或其他二进制资源                      |
-
 同时暂时添加对 `image_positions` 的兼容或自动转换脚本
 
 **需更新模块**
@@ -217,8 +171,6 @@ user_prompt = "请翻译成中文：{text}"
 * `novel_downloader.plugins.sites.n37yq.parser`
 * `novel_downloader.plugins.sites.n8novel.parser`
 * `novel_downloader.plugins.sites.novelpia.parser`
-* `novel_downloader.plugins.sites.qidian.parser`
-* `novel_downloader.plugins.sites.qqbook.parser`
 * `novel_downloader.plugins.sites.sfacg.parser`
 * `novel_downloader.plugins.sites.shaoniandream.parser`
 * `novel_downloader.plugins.sites.shencou.parser`
@@ -226,17 +178,6 @@ user_prompt = "请翻译成中文：{text}"
 * `novel_downloader.plugins.sites.syosetu18.parser`
 * `novel_downloader.plugins.sites.wenku8.parser`
 * `novel_downloader.plugins.sites.yodu.parser`
-
-**潜在更新模块**
-
-部分底层构建模块可能需要增加对字体与样式资源的支持:
-
-* **`novel_downloader.libs.epub_builder`**
-  * `EpubBuilder` 需新增 `add_font` 相关 API
-  * 后续可支持在 EPUB 内嵌字体与样式
-* **`novel_downloader.libs.html_builder`**
-  * `HtmlBuilder` 需新增 `add_font` 接口；
-  * 优化生成 HTML 时的字体与css引用逻辑
 
 ### 打包与分发
 

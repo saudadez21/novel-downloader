@@ -179,7 +179,7 @@ class ClientProtocol(Protocol):
         """
         ...
 
-    async def cache_medias(
+    async def cache_media(
         self,
         book: BookConfig,
         *,

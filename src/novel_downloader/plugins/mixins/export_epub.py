@@ -33,7 +33,7 @@ if TYPE_CHECKING:
             cid: str,
             chap_title: str | None,
             chap: ChapterDict,
-            medias_dir: Path | None = None,
+            media_dir: Path | None = None,
         ) -> EpubChapter:
             ...
 
@@ -67,9 +67,9 @@ class ExportEpubMixin:
         if not raw_base.is_dir():
             return []
 
-        medias_dir: Path | None = None
+        media_dir: Path | None = None
         if cfg.include_picture:
-            medias_dir = raw_base / "medias"
+            media_dir = raw_base / "media"
 
         stage = stage or self._detect_latest_stage(book_id)
         book_info = self._load_book_info(book_id, stage=stage)
@@ -89,7 +89,7 @@ class ExportEpubMixin:
         book_summary = book_info.get("summary", "")
 
         # --- Generate intro + cover ---
-        cover_path = self._resolve_image_path(medias_dir, book_info.get("cover_url"))
+        cover_path = self._resolve_image_path(media_dir, book_info.get("cover_url"))
 
         # --- Compile columes ---
         outputs: list[Path] = []
@@ -97,9 +97,7 @@ class ExportEpubMixin:
             for v_idx, vol in enumerate(vols, start=1):
                 vol_title = vol.get("volume_name") or f"卷 {v_idx}"
 
-                vol_cover = self._resolve_image_path(
-                    medias_dir, vol.get("volume_cover")
-                )
+                vol_cover = self._resolve_image_path(media_dir, vol.get("volume_cover"))
                 vol_cover = vol_cover or cover_path
 
                 builder = EpubBuilder(
@@ -140,7 +138,7 @@ class ExportEpubMixin:
                         cid=cid,
                         chap_title=ch_title,
                         chap=ch,
-                        medias_dir=medias_dir,
+                        media_dir=media_dir,
                     )
                     builder.add_chapter(chapter_obj)
                     seen_cids.add(cid)
@@ -193,9 +191,9 @@ class ExportEpubMixin:
         if not raw_base.is_dir():
             return []
 
-        medias_dir: Path | None = None
+        media_dir: Path | None = None
         if cfg.include_picture:
-            medias_dir = raw_base / "medias"
+            media_dir = raw_base / "media"
 
         stage = stage or self._detect_latest_stage(book_id)
         book_info = self._load_book_info(book_id, stage=stage)
@@ -215,7 +213,7 @@ class ExportEpubMixin:
 
         # --- Generate intro + cover ---
         cover_path = self._resolve_image_path(
-            medias_dir, book_info.get("cover_url"), name="cover"
+            media_dir, book_info.get("cover_url"), name="cover"
         )
 
         # --- Initialize EPUB ---
@@ -236,9 +234,7 @@ class ExportEpubMixin:
             for v_idx, vol in enumerate(vols, start=1):
                 vol_title = vol.get("volume_name") or f"卷 {v_idx}"
 
-                vol_cover = self._resolve_image_path(
-                    medias_dir, vol.get("volume_cover")
-                )
+                vol_cover = self._resolve_image_path(media_dir, vol.get("volume_cover"))
 
                 curr_vol = EpubVolume(
                     id=f"vol_{v_idx}",
@@ -274,7 +270,7 @@ class ExportEpubMixin:
                         cid=cid,
                         chap_title=ch_title,
                         chap=ch,
-                        medias_dir=medias_dir,
+                        media_dir=media_dir,
                     )
 
                     curr_vol.chapters.append(chapter_obj)
@@ -316,7 +312,7 @@ class ExportEpubMixin:
         cid: str,
         chap_title: str | None,
         chap: ChapterDict,
-        medias_dir: Path | None = None,
+        media_dir: Path | None = None,
     ) -> EpubChapter:
         """
         Build a Chapter object with XHTML content and optionally place images
@@ -330,7 +326,7 @@ class ExportEpubMixin:
         html_parts: list[str] = []
 
         def _append_image(item: dict[str, Any]) -> None:
-            if not medias_dir:
+            if not media_dir:
                 return
 
             typ = item.get("type")
@@ -346,7 +342,7 @@ class ExportEpubMixin:
                     if not (data.startswith("http://") or data.startswith("https://")):
                         return
 
-                    local = self._resolve_image_path(medias_dir, data)
+                    local = self._resolve_image_path(media_dir, data)
                     if not local:
                         return
 

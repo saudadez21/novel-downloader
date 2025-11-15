@@ -135,7 +135,7 @@ class ClientProtocol(Protocol):
         ui: ProcessUI | None = None, **kwargs: Any
     ) -> None: ...
 
-    async def cache_medias(
+    async def cache_media(
         self, book: BookConfig, *, force_update: bool = False, concurrent: int = 10,
         **kwargs: Any
     ) -> None: ...

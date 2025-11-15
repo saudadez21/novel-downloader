@@ -248,7 +248,7 @@ class DownloadMixin:
         # TODO: placeholder
         return
 
-    async def cache_medias(
+    async def cache_media(
         self: "DownloadClientContext",
         book: BookConfig,
         *,
@@ -270,7 +270,7 @@ class DownloadMixin:
 
         raw_base = self._raw_data_dir / book_id
         raw_base.mkdir(parents=True, exist_ok=True)
-        img_dir = raw_base / "medias"
+        img_dir = raw_base / "media"
 
         # ---- metadata ---
         book_info = self._load_book_info(book_id=book_id)
@@ -381,7 +381,7 @@ class DownloadMixin:
                     raise ValueError("Empty parse result")
 
                 imgs = self._extract_image_urls(chap)
-                img_dir = self._raw_data_dir / book_id / "medias"
+                img_dir = self._raw_data_dir / book_id / "media"
                 await self.fetcher.fetch_images(img_dir, imgs)
                 return chap
             except Exception as e:
@@ -488,7 +488,7 @@ class DownloadMixin:
         :param book_id: Unique ID of the book.
         :param book_info: Metadata dictionary containing cover URLs.
         """
-        img_dir = self._raw_data_dir / book_id / "medias"
+        img_dir = self._raw_data_dir / book_id / "media"
         img_dir.mkdir(parents=True, exist_ok=True)
 
         # --- cover image ---
