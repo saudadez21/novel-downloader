@@ -14,6 +14,7 @@ from novel_downloader.schemas import (
     BookInfoDict,
     ChapterDict,
     ChapterInfoDict,
+    MediaResource,
     VolumeInfoDict,
 )
 
@@ -162,8 +163,8 @@ class N37yqParser(BaseParser):
         )
 
         paragraphs: list[str] = []
-        image_positions: dict[int, list[dict[str, Any]]] = {}
-        image_idx = 0
+        resources: list[MediaResource] = []
+        curr_paragraph_idx = 0
 
         for node in tree.xpath("//div[@id='TextContent']/*"):
             tag = (node.tag or "").lower()
@@ -171,7 +172,7 @@ class N37yqParser(BaseParser):
                 txt = (node.text_content() or "").strip()
                 if txt:
                     paragraphs.append(txt)
-                    image_idx += 1
+                    curr_paragraph_idx += 1
 
             elif tag == "div" and "divimage" in (node.get("class") or ""):
                 for src in node.xpath(".//img/@src"):
@@ -180,10 +181,12 @@ class N37yqParser(BaseParser):
                         continue
                     if src.startswith("//"):
                         src = "https:" + src
-                    image_positions.setdefault(image_idx, []).append(
+
+                    resources.append(
                         {
-                            "type": "url",
-                            "data": src,
+                            "type": "image",
+                            "paragraph_index": curr_paragraph_idx,
+                            "url": src,
                         }
                     )
 
@@ -192,14 +195,16 @@ class N37yqParser(BaseParser):
                 if src:
                     if src.startswith("//"):
                         src = "https:" + src
-                    image_positions.setdefault(image_idx, []).append(
+
+                    resources.append(
                         {
-                            "type": "url",
-                            "data": src,
+                            "type": "image",
+                            "paragraph_index": curr_paragraph_idx,
+                            "url": src,
                         }
                     )
 
-        if not (paragraphs or image_positions):
+        if not (paragraphs or resources):
             return None
 
         content = "\n".join(paragraphs)
@@ -210,6 +215,6 @@ class N37yqParser(BaseParser):
             "content": content,
             "extra": {
                 "site": self.site_name,
-                "image_positions": image_positions,
+                "resources": resources,
             },
         }
