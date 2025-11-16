@@ -213,7 +213,7 @@ h1.chapter-title {
   background: rgba(0,0,0,0.9);
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
   overflow-y: auto;
   overflow-x: hidden;
   z-index: 9999;
