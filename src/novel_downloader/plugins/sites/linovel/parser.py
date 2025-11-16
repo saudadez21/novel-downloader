@@ -13,6 +13,7 @@ from novel_downloader.schemas import (
     BookInfoDict,
     ChapterDict,
     ChapterInfoDict,
+    MediaResource,
     VolumeInfoDict,
 )
 
@@ -165,8 +166,8 @@ class LinovelParser(BaseParser):
         )
 
         paragraphs: list[str] = []
-        image_positions: dict[int, list[dict[str, Any]]] = {}
-        image_idx = 0
+        resources: list[MediaResource] = []
+        curr_paragraph_idx = 0
 
         for p in tree.xpath(
             '//div[contains(@class,"article-text")]//p[contains(@class,"l")]'
@@ -182,20 +183,24 @@ class LinovelParser(BaseParser):
                 if not urls:
                     continue
 
-                img_objs: list[dict[str, Any]] = []
                 for url in urls:
                     if url.startswith("//"):
                         url = "https:" + url
-                    img_objs.append({"type": "url", "data": url})
+                    resources.append(
+                        {
+                            "type": "image",
+                            "paragraph_index": curr_paragraph_idx,
+                            "url": url,
+                        }
+                    )
 
-                image_positions.setdefault(image_idx, []).extend(img_objs)
             else:
                 txt = p.text_content().replace("\xa0", " ").strip()
                 if txt:
                     paragraphs.append(txt)
-                    image_idx += 1
+                    curr_paragraph_idx += 1
 
-        if not (paragraphs or image_positions):
+        if not (paragraphs or resources):
             return None
 
         content = "\n".join(paragraphs)
@@ -206,6 +211,6 @@ class LinovelParser(BaseParser):
             "content": content,
             "extra": {
                 "site": self.site_name,
-                "image_positions": image_positions,
+                "resources": resources,
             },
         }
