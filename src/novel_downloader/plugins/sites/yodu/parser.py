@@ -17,6 +17,7 @@ from novel_downloader.schemas import (
     BookInfoDict,
     ChapterDict,
     ChapterInfoDict,
+    MediaResource,
     VolumeInfoDict,
 )
 
@@ -177,8 +178,8 @@ class YoduParser(BaseParser):
 
         title: str = ""
         paragraphs: list[str] = []
-        image_positions: dict[int, list[dict[str, Any]]] = {}
-        image_idx = 0
+        resources: list[MediaResource] = []
+        curr_paragraph_idx = 0
 
         for curr_html in raw_pages:
             tree = html.fromstring(curr_html)
@@ -193,6 +194,7 @@ class YoduParser(BaseParser):
                 '//div[@id="TextContent"]//p | //div[@id="TextContent"]//img'
             ):
                 tag = (node.tag or "").lower()
+
                 if tag == "p":
                     txt = "".join(node.xpath(".//text()")).strip()
                     if not txt:
@@ -201,25 +203,29 @@ class YoduParser(BaseParser):
                         txt = self._apply_font_mapping(txt)
                     if txt:
                         paragraphs.append(txt)
-                        image_idx += 1
+                        curr_paragraph_idx += 1
+
                 elif tag == "img":
                     src = (node.get("src") or "").strip()
                     if not src:
                         continue
                     if src.startswith("//"):
                         src = "https:" + src
-                    image_positions.setdefault(image_idx, []).append(
+
+                    resources.append(
                         {
-                            "type": "url",
-                            "data": src,
+                            "type": "image",
+                            "paragraph_index": curr_paragraph_idx,
+                            "url": src,
                         }
                     )
 
-        if not (paragraphs or image_positions):
+        if not (paragraphs or resources):
             return None
 
         content = "\n".join(paragraphs)
 
+        # detect next chapter
         m = self._NEXTPAGE_RE.search(raw_pages[-1])
         next_cid = m.group(1) if m else None
 
@@ -230,7 +236,7 @@ class YoduParser(BaseParser):
             "extra": {
                 "site": self.site_name,
                 "next_cid": next_cid,
-                "image_positions": image_positions,
+                "resources": resources,
             },
         }
 

@@ -153,22 +153,6 @@ user_prompt = "请翻译成中文：{text}"
 {% endfor %}
 ```
 
-### 数据结构与存储规范化
-
-> 设计原因: 部分站点使用加密字体或 CSS / JS 动态混淆来隐藏正文或排版信息
->
-> 将这些资源直接以原始形式保存, 可在本地导出时更准确地还原内容, 减少手动还原误差与字符映射偏差
-
-为支持多类型资源 (图片、字体、CSS 等), 将 `extra.image_positions` 字段迁移至统一的 `extra.resources` 管理结构, 以统一管理章节关联的多类型资源
-
-同时暂时添加对 `image_positions` 的兼容或自动转换脚本
-
-**需更新模块**
-
-以下模块需适配新的 `resources` 结构:
-
-* `novel_downloader.plugins.sites.yodu.parser`
-
 ### 打包与分发
 
 * 计划提供可执行文件打包方案
