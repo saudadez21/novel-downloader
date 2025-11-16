@@ -13,6 +13,7 @@ from novel_downloader.schemas import (
     BookInfoDict,
     ChapterDict,
     ChapterInfoDict,
+    MediaResource,
     VolumeInfoDict,
 )
 
@@ -134,8 +135,8 @@ class Syosetu18Parser(BaseParser):
 
         # Extract paragraphs of content
         paragraphs: list[str] = []
-        image_positions: dict[int, list[dict[str, Any]]] = {}
-        image_idx = 0
+        resources: list[MediaResource] = []
+        curr_paragraph_idx = 0
 
         for div in tree.xpath(
             '//div[@class="p-novel__body"]/div[contains(@class,"p-novel__text")]'
@@ -148,19 +149,21 @@ class Syosetu18Parser(BaseParser):
                         continue
                     if not src.startswith("http"):
                         src = "https:" + src
-                    image_positions.setdefault(image_idx, []).append(
+
+                    resources.append(
                         {
-                            "type": "url",
-                            "data": src,
+                            "type": "image",
+                            "paragraph_index": curr_paragraph_idx,
+                            "url": src,
                         }
                     )
 
                 # --- collect text ---
                 if text := p.text_content().strip():
                     paragraphs.append(text)
-                    image_idx += 1
+                    curr_paragraph_idx += 1
 
-        if not (paragraphs or image_positions):
+        if not (paragraphs or resources):
             return None
 
         content = "\n".join(paragraphs)
@@ -171,6 +174,6 @@ class Syosetu18Parser(BaseParser):
             "content": content,
             "extra": {
                 "site": self.site_name,
-                "image_positions": image_positions,
+                "resources": resources,
             },
         }

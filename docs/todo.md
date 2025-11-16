@@ -167,8 +167,6 @@ user_prompt = "请翻译成中文：{text}"
 
 以下模块需适配新的 `resources` 结构:
 
-* `novel_downloader.plugins.sites.syosetu.parser`
-* `novel_downloader.plugins.sites.syosetu18.parser`
 * `novel_downloader.plugins.sites.wenku8.parser`
 * `novel_downloader.plugins.sites.yodu.parser`
 
