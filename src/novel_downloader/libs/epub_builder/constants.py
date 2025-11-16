@@ -63,10 +63,10 @@ DEFAULT_FONT_FALLBACK_STACK = (
     'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
 )
 
-FONT_FACE_TEMPLATE = f"""\
+FONT_FACE_TEMPLATE = """\
 @font-face {{
-  font-family: "{{family}}";
-  src: url("../{FONT_DIR}/{{filename}}") format("{{format}}");
+  font-family: "{family}";
+  src: url("../{font_dir}/{filename}") format("{format}");
 }}
 """
 
@@ -203,6 +203,7 @@ CHAP_TMPLATE = f"""\
   <div class="chapter-content">
     {{content}}
   </div>
+  {{extra_block}}
 </body>
 </html>
 """

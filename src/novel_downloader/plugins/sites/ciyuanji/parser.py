@@ -97,20 +97,23 @@ class CiyuanjiParser(BaseParser):
             logger.warning("ciyuanji chapter %s: chapterContent not found", chapter_id)
             return None
 
-        content_enc = chapter_content.get("content", "")
-        if not content_enc:
+        enc_content = chapter_content.get("content", "")
+        if not enc_content:
             logger.warning("ciyuanji chapter %s: no encrypted content", chapter_id)
             return None
-
-        # Try to decrypt
-        content = self._decrypt_chapter(content_enc)
 
         # Build result
         return {
             "id": str(chapter_content.get("chapterId", chapter_id)),
             "title": chapter_content.get("chapterName", ""),
-            "content": content,
-            "extra": chapter_content,
+            "content": self._decrypt_chapter(enc_content),
+            "extra": {
+                "site": self.site_name,
+                "wordCount": chapter_content.get("wordCount"),
+                "raw_content": enc_content,
+                "latestUpdateTime": chapter_content.get("latestUpdateTime"),
+                "resources": self._build_resources(chapter_content),
+            },
         }
 
     def _build_volumes(
@@ -230,3 +233,53 @@ class CiyuanjiParser(BaseParser):
         cipher = DES.new(cls._CHAPTER_KEY, DES.MODE_ECB)
         plaintext: str = unpad(cipher.decrypt(ciphertext), 8).decode("utf-8")
         return plaintext
+
+    @staticmethod
+    def _build_resources(chapter_content: dict[str, Any]) -> list[dict[str, Any]]:
+        """Build unified resources list from Ciyuanji chapter_content."""
+        resources: list[dict[str, Any]] = []
+
+        for img in chapter_content.get("imgList", []) or []:
+            pidx = img.get("paragraphIndex")
+            url = img.get("imgUrl")
+
+            if pidx is None or not url:
+                continue
+
+            entry: dict[str, Any] = {
+                "type": "image",
+                "paragraph_index": int(pidx),
+                "url": url,
+            }
+
+            # Optional fields
+            if img.get("width"):
+                entry["width"] = int(img["width"])
+            if img.get("height"):
+                entry["height"] = int(img["height"])
+            if img.get("imgName"):
+                entry["alt"] = img["imgName"]
+
+            resources.append(entry)
+
+        for w in chapter_content.get("wordList", []) or []:
+            pidx = w.get("paragraphIndex")
+            img_url = w.get("imgUrl")
+            text_alt = w.get("content")
+
+            if pidx is None or not img_url:
+                continue
+
+            entry = {
+                "type": "image",
+                "paragraph_index": int(pidx),
+                "url": img_url,
+            }
+
+            if text_alt:
+                entry["alt"] = text_alt
+
+            resources.append(entry)
+
+        resources.sort(key=lambda r: r.get("paragraph_index", 0))
+        return resources

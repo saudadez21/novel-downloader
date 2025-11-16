@@ -5,21 +5,19 @@ novel_downloader.plugins.sites.esjzone.parser
 
 """
 
-import base64
 import logging
 import re
-from collections import defaultdict
 from typing import Any
 from urllib.parse import unquote
 
 from lxml import etree, html
-from novel_downloader.libs.fontocr import get_font_ocr
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
     BookInfoDict,
     ChapterDict,
     ChapterInfoDict,
+    MediaResource,
     VolumeInfoDict,
 )
 
@@ -37,6 +35,7 @@ class EsjzoneParser(BaseParser):
     _VALID_TITLE_RE = re.compile(r"[^\W_]", re.UNICODE)
     _FONT_FAMILY_RE = re.compile(r"font-family\s*:\s*'([^']+)'")
     _BASE64_RE = re.compile(r"base64,([A-Za-z0-9+/=]+)")
+    _DATA_URL_RE = re.compile(r"^data:(?P<mime>[^;]+);base64,(?P<data>.+)$")
 
     def parse_book_info(
         self,
@@ -224,159 +223,202 @@ class EsjzoneParser(BaseParser):
         tree = html.fromstring(raw_pages[0])
         title = self._first_str(tree.xpath("//h2/text()"))
 
-        # Collect embedded font bytes (for obfuscated glyph decoding)
-        font_bytes_map: dict[str, bytes] = {}
+        # Collect embedded font base64 data
+        font_base64_map: dict[str, str] = {}
         for link in tree.xpath(
             '//div[contains(@class, "forum-content")]//link[@rel="stylesheet"]'
         ):
             style_href = link.get("href")
             if style_href:
-                font_name, font_bytes = self._extract_font_info(style_href)
-                if font_name and font_bytes:
-                    font_bytes_map[font_name] = font_bytes
+                font_name, font_b64 = self._extract_font_info(style_href)
+                if font_name and font_b64:
+                    font_base64_map[font_name] = font_b64
 
-        font_mappings: dict[str, dict[str, str]] = {}
+        paragraphs: list[str] = []
+        resources: list[MediaResource] = []
 
-        # Walk the forum content and produce plain text lines + image map
-        all_lines: list[str] = []
-        image_positions: dict[int, list[dict[str, Any]]] = {}
-        for root in tree.xpath('//div[contains(@class, "forum-content")]'):
-            lines, img_map = self._collect_lines_and_images(
-                root,
-                font_bytes_map=font_bytes_map,
-                font_mappings=font_mappings,
+        buf: list[str] = []  # current paragraph buffer
+        current_paragraph_no: int = 0
+        current_paragraph_fonts: set[str] = set()
+
+        open_font_spans: dict[str, dict[str, int]] = {}
+
+        def add_font_resource(font_name: str, start: int, end: int) -> None:
+            if start <= 0 or end < start:
+                return
+            b64 = font_base64_map.get(font_name)
+            if not b64:
+                return
+
+            resources.append(
+                {
+                    "type": "font",
+                    "range": {"start": start, "end": end},
+                    "base64": b64,
+                    "mime": "font/woff2",
+                }
             )
 
-            # Merge image maps, re-indexing by current length prior to this root
-            if img_map:
-                base = len(all_lines)
-                for k, urls in img_map.items():
-                    image_positions.setdefault(k + base, []).extend(urls)
+        def flush_paragraph() -> None:
+            nonlocal current_paragraph_no
 
-            all_lines.extend(lines)
+            text = "".join(buf).strip()
+            if not text:
+                buf.clear()
+                current_paragraph_fonts.clear()
+                return
 
-        if not (all_lines or image_positions):
+            paragraphs.append(text)
+            current_paragraph_no += 1
+            paragraph_no = current_paragraph_no
+
+            paragraph_fonts = set(current_paragraph_fonts)
+
+            for font_name in list(open_font_spans.keys()):
+                if font_name not in paragraph_fonts:
+                    span = open_font_spans.pop(font_name)
+                    start = span["start"]
+                    end = span.get("end", start)
+                    if end < start:
+                        end = start
+                    add_font_resource(font_name, start, end)
+
+            for font_name in paragraph_fonts:
+                if font_name in open_font_spans:
+                    open_font_spans[font_name]["end"] = paragraph_no
+                else:
+                    open_font_spans[font_name] = {
+                        "start": paragraph_no,
+                        "end": paragraph_no,
+                    }
+
+            buf.clear()
+            current_paragraph_fonts.clear()
+
+        def add_text_segment(raw: str, active_font: str | None) -> None:
+            if not raw or not raw.strip():
+                return
+            buf.append(raw)
+            if active_font and active_font in font_base64_map:
+                current_paragraph_fonts.add(active_font)
+
+        def add_img_node(img_el: etree._Element) -> None:
+            nonlocal current_paragraph_no
+
+            src = img_el.get("src", "") or ""
+            if not src:
+                return
+
+            if buf:
+                flush_paragraph()
+
+            paragraph_index = current_paragraph_no
+
+            if src.startswith("//"):
+                src = "https:" + src
+
+            res: MediaResource = {
+                "type": "image",
+                "paragraph_index": paragraph_index,
+            }
+
+            m = self._DATA_URL_RE.match(src)
+            if m:
+                res["mime"] = m.group("mime")
+                res["base64"] = m.group("data")
+            else:
+                res["url"] = src
+
+            alt = img_el.get("alt")
+            if alt:
+                res["alt"] = alt.strip()
+
+            resources.append(res)
+
+        def get_section_font(
+            section: etree._Element, inherited_font: str | None
+        ) -> str | None:
+            style_attr = section.get("style", "")
+            fam = self._FONT_FAMILY_RE.search(style_attr)
+            if not fam:
+                return inherited_font
+            return fam.group(1)
+
+        BLOCK_TAGS = {"p"}
+
+        def walk(n: etree._Element, active_font: str | None) -> None:
+            tag = n.tag.lower() if isinstance(n.tag, str) else ""
+
+            if tag in {"script", "style", "link", "meta"}:
+                return
+
+            # SECTION = font change context
+            if tag == "section":
+                local_font = get_section_font(n, active_font)
+
+                if n.text and n.text.strip():
+                    add_text_segment(n.text, local_font)
+
+                for child in n:
+                    walk(child, local_font)
+                    if child.tail and child.tail.strip():
+                        add_text_segment(child.tail, local_font)
+                return
+
+            # Paragraph-like block
+            if tag in BLOCK_TAGS:
+                if n.text and n.text.strip():
+                    add_text_segment(n.text, active_font)
+                for child in n:
+                    walk(child, active_font)
+                    if child.tail and child.tail.strip():
+                        add_text_segment(child.tail, active_font)
+                flush_paragraph()
+                return
+
+            # Line break
+            if tag == "br":
+                flush_paragraph()
+                return
+
+            # Images
+            if tag == "img":
+                add_img_node(n)
+                return
+
+            # Generic inline
+            if n.text and n.text.strip():
+                add_text_segment(n.text, active_font)
+
+            for child in n:
+                walk(child, active_font)
+                if child.tail and child.tail.strip():
+                    add_text_segment(child.tail, active_font)
+
+        for root in tree.xpath('//div[contains(@class, "forum-content")]'):
+            walk(root, active_font=None)
+
+        flush_paragraph()
+
+        # Close all remaining font spans
+        for font_name, span in list(open_font_spans.items()):
+            start = span["start"]
+            end = span.get("end", current_paragraph_no)
+            add_font_resource(font_name, start, end)
+
+        if not (paragraphs or resources):
             return None
+        content = "\n".join(paragraphs)
 
-        content = "\n".join(all_lines)
         return {
             "id": chapter_id,
             "title": title,
             "content": content,
             "extra": {
                 "site": self.site_name,
-                "image_positions": image_positions,
+                "resources": resources,
             },
         }
-
-    def _collect_lines_and_images(
-        self,
-        node: etree._Element,
-        *,
-        font_bytes_map: dict[str, bytes],
-        font_mappings: dict[str, dict[str, str]],
-    ) -> tuple[list[str], dict[int, list[dict[str, Any]]]]:
-        lines: list[str] = []
-        image_positions: dict[int, list[dict[str, Any]]] = defaultdict(list)
-        buf: list[str] = []
-
-        def apply_map(s: str, active_map: dict[str, str] | None) -> str:
-            if not active_map:
-                return s
-            return "".join(active_map.get(ch, ch) for ch in s)
-
-        def flush_line() -> None:
-            text = "".join(buf).strip()
-            if text:
-                lines.append(text)
-            buf.clear()
-
-        def add_img(src: str) -> None:
-            if buf:
-                flush_line()
-            # 1-based: images after paragraph N -> key N
-            idx = len(lines)
-            src = src.strip()
-            if not src:
-                return
-            if src.startswith("//"):
-                src = "https:" + src
-            image_positions[idx].append({"type": "url", "data": src})
-
-        def build_section_map(section: etree._Element) -> dict[str, str] | None:
-            style_attr = section.get("style", "")
-            fam = self._FONT_FAMILY_RE.search(style_attr)
-            if not fam:
-                return None
-            font_name = fam.group(1)
-            if not self._decode_font:
-                return font_mappings.get(font_name)
-            if font_name not in font_bytes_map:
-                return font_mappings.get(font_name)
-
-            raw_text = section.xpath("string(.)")
-            char_set = set(raw_text) - {" ", "\n", "\u3000"}
-            mapping = self._build_font_mapping(
-                font_bytes_map[font_name],
-                char_set,
-                mapped=font_mappings.get(font_name, {}),
-            )
-            if mapping:
-                font_mappings[font_name] = mapping
-            return mapping or None
-
-        BLOCK_TAGS = {"p"}
-
-        def walk(n: etree._Element, active_map: dict[str, str] | None) -> None:
-            tag = n.tag.lower() if isinstance(n.tag, str) else ""
-
-            # Skip non-content
-            if tag in {"script", "style", "link", "meta"}:
-                return
-
-            if tag == "section":
-                local_map = build_section_map(n) or active_map
-                # text before first child
-                if n.text and n.text.strip():
-                    buf.append(apply_map(n.text, local_map))
-                for child in n:
-                    walk(child, local_map)
-                    if child.tail and child.tail.strip():
-                        buf.append(apply_map(child.tail, local_map))
-                return
-
-            if tag in BLOCK_TAGS:
-                if n.text and n.text.strip():
-                    buf.append(apply_map(n.text, active_map))
-                for child in n:
-                    walk(child, active_map)
-                    if child.tail and child.tail.strip():
-                        buf.append(apply_map(child.tail, active_map))
-                flush_line()
-                return
-
-            if tag == "br":
-                flush_line()
-                return
-
-            if tag == "img":
-                src = n.get("src", "") or ""
-                if src:
-                    add_img(src)
-                return
-
-            if n.text and n.text.strip():
-                buf.append(apply_map(n.text, active_map))
-            for child in n:
-                walk(child, active_map)
-                if child.tail and child.tail.strip():
-                    buf.append(apply_map(child.tail, active_map))
-
-        walk(node, active_map=None)
-        flush_line()
-
-        # Convert defaultdict to plain dict
-        return lines, dict(image_positions)
 
     def _is_forum_page(self, html_str: list[str]) -> bool:
         if not html_str:
@@ -419,78 +461,32 @@ class EsjzoneParser(BaseParser):
         return "/assets/img/oops_art.jpg" in html_str and "btn-send-pw" in html_str
 
     @classmethod
-    def _extract_font_info(cls, style_href: str) -> tuple[str, bytes]:
+    def _extract_font_info(cls, style_href: str) -> tuple[str, str]:
         """
-        Extract font family name and raw font bytes from a CSS data URI.
+        Extract font family name and base64 string from CSS data URI.
 
         :param style_href: href attribute value from <link rel="stylesheet">.
-        :return: (font_name, font_bytes) or ("", b"") if not found.
+        :return: (font_name, font_bytes) or ("", "") if not found.
         """
         if not style_href.startswith("data:text/css"):
-            return "", b""
+            return "", ""
 
         try:
-            css_text = unquote(style_href.split(",", 1)[1])
+            parts = style_href.split(",", 1)
+            if len(parts) < 2:
+                return "", ""
+            css_text = unquote(parts[1])
 
             font_name_match = cls._FONT_FAMILY_RE.search(css_text)
             if not font_name_match:
-                return "", b""
+                return "", ""
             font_name = font_name_match.group(1)
 
             font_data_match = cls._BASE64_RE.search(css_text)
             if not font_data_match:
-                return font_name, b""
+                return font_name, ""
 
-            font_bytes = base64.b64decode(font_data_match.group(1))
-            return font_name, font_bytes
+            return font_name, font_data_match.group(1)
         except Exception as e:
             logger.warning("esjzone: Failed to extract font info: %s", e)
-            return "", b""
-
-    def _build_font_mapping(
-        self,
-        font_bytes: bytes,
-        char_set: set[str],
-        mapped: dict[str, str] | None = None,
-    ) -> dict[str, str]:
-        """
-        Build a mapping from obfuscated glyphs to real characters.
-
-        :param font_bytes: Raw TTF/OTF/WOFF2 font bytes.
-        :param char_set: Subset of characters actually present in the text.
-        :param mapped: Optional partial mapping cache (already-known mappings).
-        :return: Mapping dict (obfuscated_char -> real_char).
-        """
-        if not font_bytes or not char_set:
-            return mapped or {}
-
-        ocr = get_font_ocr(self._fontocr_cfg)
-        if ocr is None:
-            return mapped or {}
-
-        mapping = dict(mapped or {})
-
-        try:
-            remaining = char_set - mapping.keys()
-            if not remaining:
-                return mapping
-            font_chars = ocr.extract_font_charset_bytes(font_bytes)
-            font = ocr.load_render_font_bytes(font_bytes)
-            remaining &= font_chars
-            if not remaining:
-                return mapping
-
-            rendered = [(ch, ocr.render_char_image_array(ch, font)) for ch in remaining]
-
-            imgs_to_query = [img for _, img in rendered]
-            fused = ocr.predict(imgs_to_query, batch_size=self._batch_size)
-            for (ch, _), preds in zip(rendered, fused, strict=False):
-                if not preds:
-                    continue
-                real_char, _ = preds
-                mapping[ch] = real_char
-
-            return mapping
-        except Exception as e:
-            logger.warning("esjzone: Failed to build font mapping: %s", e)
-            return {}
+            return "", ""

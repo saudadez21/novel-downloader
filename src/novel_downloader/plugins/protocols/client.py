@@ -179,7 +179,7 @@ class ClientProtocol(Protocol):
         """
         ...
 
-    async def cache_medias(
+    async def cache_media(
         self,
         book: BookConfig,
         *,
@@ -382,16 +382,6 @@ class _ClientContext(ClientProtocol, Protocol):
         ignore: frozenset[str],
     ) -> list[str]:
         """Select chapter IDs matching the specified range and exclusions."""
-        ...
-
-    def _build_image_map(self, chap: ChapterDict) -> dict[int, list[dict[str, Any]]]:
-        """
-        Collect and normalize `image_positions` into {int: [ {type, data, ...}, ... ]}.
-        """
-        ...
-
-    def _extract_image_urls(self, chap: ChapterDict) -> list[str]:
-        """Extract all image URLs from 'extra' field."""
         ...
 
     @staticmethod

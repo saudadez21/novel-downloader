@@ -11,9 +11,18 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol
 
 from novel_downloader.infra.persistence.chapter_storage import ChapterStorage
-from novel_downloader.libs.filesystem import format_filename
+from novel_downloader.libs.filesystem import (
+    font_filename,
+    format_filename,
+    image_filename,
+)
 from novel_downloader.libs.html_builder import HtmlBuilder, HtmlChapter, HtmlVolume
-from novel_downloader.schemas import BookConfig, ChapterDict, ExporterConfig
+from novel_downloader.schemas import (
+    BookConfig,
+    ChapterDict,
+    ExporterConfig,
+    MediaResource,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -31,11 +40,16 @@ if TYPE_CHECKING:
             cid: str,
             chap_title: str | None,
             chap: ChapterDict,
-            img_dir: Path | None = None,
+            media_dir: Path | None = None,
         ) -> HtmlChapter:
             ...
 
         def _xp_html_extras(self, extras: dict[str, Any]) -> str:
+            ...
+
+        def _xp_html_chap_post(
+            self, html_parts: list[str], chap: ChapterDict
+        ) -> list[str]:
             ...
 
 
@@ -63,7 +77,7 @@ class ExportHtmlMixin:
         if not raw_base.is_dir():
             return []
 
-        img_dir = raw_base / "medias"
+        media_dir = raw_base / "media"
 
         stage = stage or self._detect_latest_stage(book_id)
         book_info = self._load_book_info(book_id, stage=stage)
@@ -81,7 +95,7 @@ class ExportHtmlMixin:
         name = book_info["book_name"]
         author = book_info.get("author") or ""
         cover_path = self._resolve_image_path(
-            img_dir, book_info.get("cover_url"), name="cover"
+            media_dir, book_info.get("cover_url"), name="cover"
         )
         cover = cover_path.read_bytes() if cover_path else None
 
@@ -132,7 +146,7 @@ class ExportHtmlMixin:
                         cid=cid,
                         chap_title=ch_title,
                         chap=ch,
-                        img_dir=img_dir,
+                        media_dir=media_dir,
                     )
 
                     curr_vol.chapters.append(chapter_obj)
@@ -168,86 +182,93 @@ class ExportHtmlMixin:
         cid: str,
         chap_title: str | None,
         chap: ChapterDict,
-        img_dir: Path | None = None,
+        media_dir: Path,
     ) -> HtmlChapter:
         """
-        Build a Chapter object with HTML content and optionally place images
-        from `chap.extra['image_positions']` (1-based index; 0 = before 1st paragraph).
+        Build a Chapter object with HTML content and optionally place images / font.
         """
         title = chap_title or chap.get("title", "").strip()
         content = chap.get("content", "")
+        resources: list[MediaResource] = chap.get("extra", {}).get("resources", [])
 
-        extras = chap.get("extra") or {}
-        image_positions = self._build_image_map(chap)
+        lines = content.splitlines()
+        max_i = len(lines)
+
+        images_by_index: dict[int, list[MediaResource]] = {}
+        added_fonts = []
         html_parts: list[str] = []
 
-        def _append_image(item: dict[str, Any]) -> None:
-            if not img_dir:
-                return
-
-            typ = item.get("type")
-            data = (item.get("data") or "").strip()
-            if not data:
-                return
-
+        def _append_image(res: MediaResource) -> None:
+            fname: str | None = None
             try:
-                if typ == "url":
-                    # ---- Handle normal URL ----
-                    if data.startswith("//"):
-                        data = "https:" + data
-                    if not (data.startswith("http://") or data.startswith("https://")):
-                        return
+                if url := res.get("url"):
+                    if url.startswith("//"):
+                        url = "https:" + url
+                    if url.startswith(("http://", "https://")):
+                        local = media_dir / image_filename(url)
+                        if local and local.is_file():
+                            fname = builder.add_image(local)
 
-                    local = self._resolve_image_path(img_dir, data)
-                    if not local:
-                        return
-
-                    fname = builder.add_image(local)
-
-                elif typ == "base64":
-                    # ---- Handle base64-encoded image ----
-                    mime = item.get("mime", "image/png")
-                    raw = base64.b64decode(data)
+                elif b64 := res.get("base64"):
+                    mime = res.get("mime", "image/png")
+                    raw = base64.b64decode(b64)
                     fname = builder.add_image_bytes(raw, mime_type=mime)
 
-                else:
-                    # Unknown type
-                    return
-
-                # ---- Append <img> HTML ----
-                html_parts.append(
-                    f'<img src="../media/{fname}" alt="image" class="chapter-image"/>'
-                )
+                if fname:
+                    alt = escape(res.get("alt") or "image")
+                    html_parts.append(
+                        f'<img src="../media/{fname}" alt="{alt}" class="chapter-image"/>'  # noqa: E501
+                    )
 
             except Exception as e:
-                logger.debug("EPUB image add failed: %s", e)
+                logger.debug("HTML image add failed: %s", e)
 
-        # Images before first paragraph
-        for item in image_positions.get(0, []):
-            _append_image(item)
+        for r in resources:
+            typ = r.get("type")
 
-        # Paragraphs + inline-after images
-        lines = content.splitlines()
-        for i, line in enumerate(lines, start=1):
-            if ln := line.strip():
+            if typ == "font":
+                try:
+                    if url := r.get("url"):
+                        local = media_dir / font_filename(url)
+                        if local.is_file() and (f := builder.add_font(local)):
+                            added_fonts.append(f)
+
+                    elif b64 := r.get("base64"):
+                        raw = base64.b64decode(b64)
+                        if f := builder.add_font_bytes(raw):
+                            added_fonts.append(f)
+
+                except Exception as e:
+                    logger.debug("EPUB font add failed: %s", e)
+
+            elif typ == "image":
+                idx = r.get("paragraph_index", max_i)
+
+                if idx == 0:
+                    _append_image(r)
+                    continue
+
+                idx = min(idx, max_i)
+                images_by_index.setdefault(idx, []).append(r)
+
+        for i, ln in enumerate(lines, start=1):
+            if ln := ln.strip():
                 html_parts.append(f"<p>{escape(ln)}</p>")
-            for item in image_positions.get(i, []):
-                _append_image(item)
 
-        max_i = len(lines)
-        for k, items in image_positions.items():
-            if k > max_i:
-                for item in items:
-                    _append_image(item)
+            if items := images_by_index.get(i):
+                for res in items:
+                    _append_image(res)
 
-        if extras_part := self._xp_html_extras(extras):
-            html_parts.append(extras_part)
-
+        html_parts = self._xp_html_chap_post(html_parts, chap)
         html_str = "\n".join(html_parts)
+        extras_part = self._xp_html_extras(chap.get("extra") or {})
+
         return HtmlChapter(
             filename=f"c{cid}.html",
             title=title,
             content=html_str,
+            extra_content=extras_part,
+            fonts=added_fonts,
         )
 
     def _xp_html_extras(self, extras: dict[str, Any]) -> str:
@@ -257,3 +278,7 @@ class ExportHtmlMixin:
         Subclasses may override this method to render extra info.
         """
         return ""
+
+    def _xp_html_chap_post(self, html_parts: list[str], chap: ChapterDict) -> list[str]:
+        """Allows subclasses to inject HTML or modify structure."""
+        return html_parts

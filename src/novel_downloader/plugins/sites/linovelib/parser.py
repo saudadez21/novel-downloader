@@ -18,6 +18,7 @@ from novel_downloader.schemas import (
     BookInfoDict,
     ChapterDict,
     ChapterInfoDict,
+    MediaResource,
     VolumeInfoDict,
 )
 
@@ -198,8 +199,8 @@ class LinovelibParser(BaseParser):
 
         title: str = ""
         paragraphs: list[str] = []
-        image_positions: dict[int, list[dict[str, Any]]] = {}
-        image_idx = 0
+        resources: list[MediaResource] = []
+        curr_paragraph_idx = 0
 
         for curr_html in raw_pages:
             tree = html.fromstring(curr_html)
@@ -232,9 +233,8 @@ class LinovelibParser(BaseParser):
                         txt = self._map_subst(txt)
 
                     txt = self._norm_space(txt)
-
                     p_texts.append(txt)
-                    image_idx += 1
+                    curr_paragraph_idx += 1
 
                 elif tag == "img":
                     src = node.get("data-src") or node.get("src", "")
@@ -243,10 +243,12 @@ class LinovelibParser(BaseParser):
                     src = src.strip()
                     if src.startswith("//"):
                         src = "https:" + src
-                    image_positions.setdefault(image_idx, []).append(
+
+                    resources.append(
                         {
-                            "type": "url",
-                            "data": src,
+                            "type": "image",
+                            "paragraph_index": curr_paragraph_idx,
+                            "url": src,
                         }
                     )
 
@@ -265,7 +267,7 @@ class LinovelibParser(BaseParser):
             if page_content:
                 paragraphs.append(page_content)
 
-        if not (paragraphs or image_positions):
+        if not (paragraphs or resources):
             return None
 
         content = "\n".join(paragraphs)
@@ -276,7 +278,7 @@ class LinovelibParser(BaseParser):
             "content": content,
             "extra": {
                 "site": self.site_name,
-                "image_positions": image_positions,
+                "resources": resources,
             },
         }
 

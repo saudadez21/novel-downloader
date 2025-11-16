@@ -13,6 +13,7 @@ from novel_downloader.schemas import (
     BookInfoDict,
     ChapterDict,
     ChapterInfoDict,
+    MediaResource,
     VolumeInfoDict,
 )
 
@@ -148,8 +149,8 @@ class Wenku8Parser(BaseParser):
         title = self._first_str(tree.xpath('//div[@id="title"]/text()'))
 
         paragraphs: list[str] = []
-        image_positions: dict[int, list[dict[str, Any]]] = {}
-        image_idx = 0
+        resources: list[MediaResource] = []
+        curr_paragraph_idx = 0
 
         # Iterate through direct children of content div
         for elem in tree.xpath('//div[@id="content"]/*'):
@@ -160,7 +161,7 @@ class Wenku8Parser(BaseParser):
                 # include tail (might have text after ul)
                 if tail := (elem.tail or "").strip():
                     paragraphs.append(tail)
-                    image_idx += 1
+                    curr_paragraph_idx += 1
                 continue
 
             elif tag == "div" and "divimage" in (elem.get("class") or ""):
@@ -175,32 +176,33 @@ class Wenku8Parser(BaseParser):
                         src = "https:" + src
                     # elif src.startswith("/"):
                     #     src = self.BASE_URL + src
-                    image_positions.setdefault(image_idx, []).append(
+                    resources.append(
                         {
-                            "type": "url",
-                            "data": src,
+                            "type": "image",
+                            "paragraph_index": curr_paragraph_idx,
+                            "url": src,
                         }
                     )
                 if tail := (elem.tail or "").strip():
                     paragraphs.append(tail)
-                    image_idx += 1
+                    curr_paragraph_idx += 1
                 continue
 
             elif tag == "br":
                 if tail := (elem.tail or "").strip():
                     paragraphs.append(tail)
-                    image_idx += 1
+                    curr_paragraph_idx += 1
                 continue
 
             else:
                 if text := elem.text_content().strip():
                     paragraphs.append(text)
-                    image_idx += 1
+                    curr_paragraph_idx += 1
                 if tail := (elem.tail or "").strip():
                     paragraphs.append(tail)
-                    image_idx += 1
+                    curr_paragraph_idx += 1
 
-        if not (paragraphs or image_positions):
+        if not (paragraphs or resources):
             return None
 
         content = "\n".join(paragraphs)
@@ -211,6 +213,6 @@ class Wenku8Parser(BaseParser):
             "content": content,
             "extra": {
                 "site": self.site_name,
-                "image_positions": image_positions,
+                "resources": resources,
             },
         }

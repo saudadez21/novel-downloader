@@ -25,7 +25,6 @@ from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
     BookConfig,
     BookInfoDict,
-    ChapterDict,
     ChapterInfoDict,
     ClientConfig,
     ExporterConfig,
@@ -171,7 +170,7 @@ class AbstractClient(abc.ABC):
         ...
 
     @abc.abstractmethod
-    async def cache_medias(
+    async def cache_media(
         self,
         book: BookConfig,
         *,
@@ -430,60 +429,6 @@ class BaseClient(AbstractClient, abc.ABC):
             (html_dir / f"{book_id}_{filename}_{i}.html").write_text(
                 html, encoding="utf-8"
             )
-
-    def _build_image_map(self, chap: ChapterDict) -> dict[int, list[dict[str, Any]]]:
-        """
-        Collect and normalize `image_positions` into {int: [ {type, data, ...}, ... ]}.
-        """
-        extra = chap.get("extra")
-        if not isinstance(extra, dict):
-            return {}
-
-        raw_map = extra.get("image_positions")
-        if not isinstance(raw_map, dict):
-            return {}
-
-        result: dict[int, list[dict[str, Any]]] = {}
-
-        for k, v in raw_map.items():
-            try:
-                key = int(k)
-            except Exception:
-                key = 0
-            items: list[dict[str, str]] = []
-            if isinstance(v, list | tuple):
-                for u in v:
-                    if isinstance(u, str):
-                        s = u.strip()
-                        if s:
-                            item = {
-                                "type": "url" if s.startswith("http") else "data",
-                                "data": s,
-                            }
-                            items.append(item)
-                    elif isinstance(u, dict):
-                        if "data" in u:
-                            items.append(u)
-            elif isinstance(v, str) and (s := v.strip()):
-                items.append(
-                    {"type": "url" if s.startswith("http") else "data", "data": s}
-                )
-
-            if items:
-                result.setdefault(key, []).extend(items)
-        return result
-
-    def _extract_image_urls(self, chap: ChapterDict) -> list[str]:
-        """
-        Extract all image URLs from 'extra' field.
-        """
-        img_map = self._build_image_map(chap)
-        urls: list[str] = []
-        for imgs in img_map.values():
-            for img in imgs:
-                if img.get("type") == "url" and isinstance(img.get("data"), str):
-                    urls.append(img["data"])
-        return urls
 
     @staticmethod
     def _resolve_image_path(

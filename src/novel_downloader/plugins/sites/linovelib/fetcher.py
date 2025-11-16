@@ -7,16 +7,11 @@ novel_downloader.plugins.sites.linovelib.fetcher
 
 import logging
 import re
-from pathlib import Path
-from typing import Any, Literal
+from typing import Any
 
-from novel_downloader.infra.http_defaults import DEFAULT_HEADERS
-from novel_downloader.libs.filesystem import image_filename, write_file
 from novel_downloader.plugins.base.fetcher import BaseFetcher
 from novel_downloader.plugins.registry import registrar
 
-_IMG_HEADERS = DEFAULT_HEADERS.copy()
-_IMG_HEADERS["Referer"] = "https://www.linovelib.com/"
 logger = logging.getLogger(__name__)
 
 
@@ -36,6 +31,11 @@ class LinovelibFetcher(BaseFetcher):
 
     _VOL_ID_PATTERN: re.Pattern[str] = re.compile(r"/novel/\d+/(vol_\d+)\.html")
 
+    IMAGE_HEADERS = {
+        **BaseFetcher.IMAGE_HEADERS,
+        "Referer": "https://www.linovelib.com/",
+    }
+
     async def fetch_book_info(
         self,
         book_id: str,
@@ -49,13 +49,13 @@ class LinovelibFetcher(BaseFetcher):
         :param book_id: The book identifier.
         :return: The page content as string list.
         """
-        url = self.book_info_url(book_id=book_id)
+        url = self.BOOK_INFO_URL.format(book_id=book_id)
         info_html = await self.fetch(url, **kwargs)
 
         vol_ids = self._extract_vol_ids(info_html)
         vol_ids.reverse()
         if not vol_ids:
-            url = self.catalog_url(book_id=book_id)
+            url = self.BOOK_CATALOG_UTL.format(book_id=book_id)
             catalog_html = await self.fetch(url, **kwargs)
             vol_ids = self._extract_vol_ids(catalog_html)
 
@@ -81,7 +81,7 @@ class LinovelibFetcher(BaseFetcher):
         :param vol_id: The volume identifier.
         :return: The volume content as a string.
         """
-        url = self.volume_url(book_id=book_id, vol_id=vol_id)
+        url = self.BOOK_VOL_URL.format(book_id=book_id, vol_id=vol_id)
         return await self.fetch(url, **kwargs)
 
     async def fetch_chapter_content(
@@ -116,48 +116,6 @@ class LinovelibFetcher(BaseFetcher):
         return pages
 
     @classmethod
-    def book_info_url(cls, book_id: str) -> str:
-        """
-        Construct the URL for fetching a book's info page.
-
-        :param book_id: The identifier of the book.
-        :return: Fully qualified URL for the book info page.
-        """
-        return cls.BOOK_INFO_URL.format(book_id=book_id)
-
-    @classmethod
-    def catalog_url(cls, book_id: str) -> str:
-        """
-        Construct the URL for fetching a catalog page.
-
-        :param book_id: The identifier of the book.
-        :return: Fully qualified catalog URL.
-        """
-        return cls.BOOK_CATALOG_UTL.format(book_id=book_id)
-
-    @classmethod
-    def volume_url(cls, book_id: str, vol_id: str) -> str:
-        """
-        Construct the URL for fetching a specific volume.
-
-        :param book_id: The identifier of the book.
-        :param vol_id: The identifier of the volume.
-        :return: Fully qualified volume URL.
-        """
-        return cls.BOOK_VOL_URL.format(book_id=book_id, vol_id=vol_id)
-
-    @classmethod
-    def chapter_url(cls, book_id: str, chapter_id: str) -> str:
-        """
-        Construct the URL for fetching a specific chapter.
-
-        :param book_id: The identifier of the book.
-        :param chapter_id: The identifier of the chapter.
-        :return: Fully qualified chapter URL.
-        """
-        return cls.CHAPTER_URL.format(book_id=book_id, chapter_id=chapter_id)
-
-    @classmethod
     def relative_chapter_url(cls, book_id: str, chapter_id: str, idx: int) -> str:
         """
         Return the relative URL path for a given chapter.
@@ -177,39 +135,3 @@ class LinovelibFetcher(BaseFetcher):
         """
         # /novel/{book_id}/{vol_id}.html
         return self._VOL_ID_PATTERN.findall(html_str)
-
-    async def _fetch_one_image(
-        self,
-        url: str,
-        folder: Path,
-        *,
-        name: str | None = None,
-        on_exist: Literal["overwrite", "skip"],
-    ) -> Path | None:
-        save_path = folder / image_filename(url, name=name)
-
-        if save_path.exists() and on_exist == "skip":
-            logger.debug("linovelib image: skip existing %s", save_path)
-            return save_path
-
-        try:
-            resp = await self.session.get(url, headers=_IMG_HEADERS)
-        except Exception as e:
-            logger.warning(
-                "Image request failed (site=linovelib) %s: %s",
-                url,
-                e,
-            )
-            return None
-
-        if not resp.ok:
-            logger.warning(
-                "Image request failed (site=linovelib) %s: HTTP %s",
-                url,
-                resp.status,
-            )
-            return None
-
-        write_file(content=resp.content, filepath=save_path, on_exist="overwrite")
-        logger.debug("linovelib image: saved %s <- %s", save_path, url)
-        return save_path

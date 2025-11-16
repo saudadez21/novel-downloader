@@ -5,11 +5,8 @@ novel_downloader.plugins.sites.wxsck.fetcher
 """
 
 import logging
-from pathlib import Path
-from typing import Any, Literal
+from typing import Any
 
-from novel_downloader.infra.http_defaults import IMAGE_HEADERS
-from novel_downloader.libs.filesystem import image_filename, write_file
 from novel_downloader.plugins.base.fetcher import BaseFetcher
 from novel_downloader.plugins.registry import registrar
 
@@ -58,40 +55,6 @@ class WxsckFetcher(BaseFetcher):
             else f"/book/{book_id}/{chapter_id}.html"
         )
 
-    async def _fetch_one_image(
-        self,
-        url: str,
-        folder: Path,
-        *,
-        name: str | None = None,
-        on_exist: Literal["overwrite", "skip"],
-    ) -> Path | None:
-        save_path = folder / image_filename(url, name=name)
-
-        if save_path.exists() and on_exist == "skip":
-            logger.debug("Skip existing image: %s", save_path)
-            return save_path
-
-        try:
-            resp = await self.session.get(
-                url, headers=IMAGE_HEADERS, allow_redirects=True
-            )
-        except Exception as e:
-            logger.warning(
-                "Image request failed (site=wxsck) %s: %s",
-                url,
-                e,
-            )
-            return None
-
-        if not resp.ok:
-            logger.warning(
-                "Image request failed (site=wxsck) %s: HTTP %s",
-                url,
-                resp.status,
-            )
-            return None
-
-        write_file(content=resp.content, filepath=save_path, on_exist="overwrite")
-        logger.debug("Saved image: %s <- %s", save_path, url)
-        return save_path
+    async def fetch_data(self, url: str, **kwargs: Any) -> bytes | None:
+        kwargs.setdefault("allow_redirects", True)
+        return await super().fetch_data(url, **kwargs)

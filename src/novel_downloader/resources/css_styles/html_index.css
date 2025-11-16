@@ -99,6 +99,15 @@ header {
   text-decoration: underline;
 }
 
+/* Inline flipped characters */
+.refl {
+  display: inline-block;
+  transform: scaleX(-1);
+  -webkit-transform: scaleX(-1); /* iOS / WebKit */
+  transform-origin: center;
+  -webkit-transform-origin: center;
+}
+
 /* Floating Controls */
 #floating-controls {
   position: fixed;
@@ -147,6 +156,34 @@ header {
   background: linear-gradient(90deg, #0078d4, #00b8ff);
   width: 0;
   z-index: 10000;
+}
+
+/* Fullscreen Image Overlay */
+#img-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 9999;
+  padding: 0;
+}
+
+#img-overlay.hidden {
+  display: none;
+}
+
+#img-fullscreen {
+  max-width: 95%;
+  max-height: 95%;
+  cursor: zoom-out;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
 
 /* Small screens */

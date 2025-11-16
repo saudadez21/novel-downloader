@@ -17,6 +17,7 @@ from novel_downloader.schemas import (
     BookInfoDict,
     ChapterDict,
     ChapterInfoDict,
+    MediaResource,
     VolumeInfoDict,
 )
 
@@ -134,7 +135,7 @@ class SfacgParser(BaseParser):
 
         tree = html.fromstring(raw_pages[0])
         content = ""
-        image_positions: dict[int, list[dict[str, Any]]] = {}
+        resources: list[MediaResource] = []
 
         is_vip = "/ajax/ashx/common.ashx" in raw_pages[0]
 
@@ -150,13 +151,14 @@ class SfacgParser(BaseParser):
                     "(enable decode_font to OCR)",
                     chapter_id,
                 )
-                image_positions[0] = [
+                resources.append(
                     {
-                        "type": "base64",
-                        "data": raw_pages[1].strip(),
+                        "type": "image",
+                        "paragraph_index": 0,
+                        "base64": raw_pages[1].strip(),
                         "mime": "image/gif",
                     }
-                ]
+                )
 
             else:
                 content = self.parse_vip_chapter(raw_pages[1])
@@ -168,10 +170,11 @@ class SfacgParser(BaseParser):
                 logger.warning("sfacg chapter %s :: missing content div", chapter_id)
                 return None
 
-            lines, image_positions = self.parse_normal_chapter(content_divs[0])
+            lines, new_resources = self.parse_normal_chapter(content_divs[0])
             content = "\n".join(lines)
+            resources.extend(new_resources)
 
-        if not (content or image_positions):
+        if not (content or resources):
             return None
 
         title = self._first_str(
@@ -185,25 +188,25 @@ class SfacgParser(BaseParser):
             "extra": {
                 "site": self.site_name,
                 "vip": is_vip,
-                "image_positions": image_positions,
+                "resources": resources,
             },
         }
 
     def parse_normal_chapter(
         self, content_div: html.HtmlElement
-    ) -> tuple[list[str], dict[int, list[dict[str, Any]]]]:
+    ) -> tuple[list[str], list[MediaResource]]:
         paragraphs: list[str] = []
-        image_positions: dict[int, list[dict[str, Any]]] = {}
-        image_idx = 0
+        resources: list[MediaResource] = []
+        curr_paragraph_idx = 0
 
         def append_para(txt: str | None) -> None:
-            nonlocal image_idx
+            nonlocal curr_paragraph_idx
             if not txt:
                 return
             cleaned = txt.strip()
             if cleaned:
                 paragraphs.append(cleaned)
-                image_idx += 1
+                curr_paragraph_idx += 1
 
         for elem in content_div.iter():
             if elem.text and elem.tag not in ("img",):
@@ -214,10 +217,12 @@ class SfacgParser(BaseParser):
                 if src:
                     if src.startswith("//"):
                         src = "https:" + src
-                    image_positions.setdefault(image_idx, []).append(
+
+                    resources.append(
                         {
-                            "type": "url",
-                            "data": src,
+                            "type": "image",
+                            "paragraph_index": curr_paragraph_idx,
+                            "url": src,
                         }
                     )
 
@@ -226,7 +231,7 @@ class SfacgParser(BaseParser):
             if elem.tail and elem.tail.strip():
                 append_para(elem.tail)
 
-        return paragraphs, image_positions
+        return paragraphs, resources
 
     def parse_vip_chapter(self, img_base64: str) -> str:
         ocr = get_font_ocr(self._fontocr_cfg)

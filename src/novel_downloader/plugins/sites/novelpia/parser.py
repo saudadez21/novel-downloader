@@ -15,6 +15,7 @@ from novel_downloader.schemas import (
     BookInfoDict,
     ChapterDict,
     ChapterInfoDict,
+    MediaResource,
     VolumeInfoDict,
 )
 
@@ -123,8 +124,8 @@ class NovelpiaParser(BaseParser):
         doc = html.fromstring(html_doc)
 
         paragraphs: list[str] = []
-        image_positions: dict[int, list[dict[str, Any]]] = {}
-        image_idx = 0
+        resources: list[MediaResource] = []
+        curr_paragraph_idx = 0
 
         for p_elem in doc.xpath(".//p"):
             # ---- collect images ----
@@ -134,10 +135,12 @@ class NovelpiaParser(BaseParser):
                     continue
                 if src.startswith("//"):
                     src = "https:" + src
-                image_positions.setdefault(image_idx, []).append(
+
+                resources.append(
                     {
-                        "type": "url",
-                        "data": src,
+                        "type": "image",
+                        "paragraph_index": curr_paragraph_idx,
+                        "url": src,
                     }
                 )
 
@@ -162,9 +165,9 @@ class NovelpiaParser(BaseParser):
             text_content = p_elem.text_content().strip()
             if text_content:
                 paragraphs.append(text_content)
-                image_idx += 1
+                curr_paragraph_idx += 1
 
-        if not (paragraphs or image_positions):
+        if not (paragraphs or resources):
             return None
 
         content = "\n".join(paragraphs)
@@ -175,6 +178,6 @@ class NovelpiaParser(BaseParser):
             "content": content,
             "extra": {
                 "site": self.site_name,
-                "image_positions": image_positions,
+                "resources": resources,
             },
         }

@@ -79,37 +79,110 @@ CREATE TABLE IF NOT EXISTS chapters (
 
 字段说明:
 
-* **id**: 章节 ID
-* **title**: 章节标题
-* **content**: 章节正文
-* **extra**: JSON 格式的附加字段 (作者话、时间戳等)
+| 字段名       | 说明                                      |
+| ----------- | ----------------------------------------- |
+| **id**      | 章节 ID                                    |
+| **title**   | 章节标题                                   |
+| **content** | 章节正文                                   |
+| **extra**   | JSON 字符串, 包含附加信息，如资源、更新时间等 |
 
-示例查询返回的记录 (`get_chapter("1")`):
+**extra 字段结构**
+
+`extra` 字段以 JSON 格式保存章节的附加数据:
 
 ```json
 {
-  "id": "1",
-  "title": "第一章 示例章节",
-  "content": "这里是章节正文内容的示例。",
-  "extra": {
-    "author_say": "作者的话示例。",
-    "updated_at": "2025-05-09 12:00",
-    "update_timestamp": 1744180800,
-    "modify_time": 1744184400,
-    "word_count": 1024,
-    "seq": 1,
-    "volume": "示例卷"
-  }
+  "site": "example_site",
+  "wordCount": 2114,
+  "resources": [
+    {
+      "type": "image",
+      "paragraph_index": 0,
+      "url": "https://example.com/chap_cover.jpg",
+      "alt": "章节封面图"
+    },
+    {
+      "type": "image",
+      "paragraph_index": 3,
+      "base64": "iVBORw0KGgo...",
+      "mime": "image/jpeg",
+      "alt": "插图 1"
+    },
+    {
+      "type": "image",
+      "paragraph_index": 3,
+      "url": "https://example.com/sample2.png",
+      "alt": "插图 2"
+    },
+    {
+      "type": "font",
+      "url": "https://example.com/font.woff2"
+    },
+    {
+      "type": "font",
+      "base64": "d09GRgABAAAA...",
+      "mime": "font/woff2",
+      "range": { "start": 1, "end": 3 }
+    },
+    {
+      "type": "css",
+      "text": "body { color: black; }"
+    }
+  ]
 }
 ```
 
-#### 章节图片
+**resources 字段说明**
 
-```text
-raw_data/{site_name}/{book_id}/images/
+资源列表包含章节内出现的远程资源、内嵌资源、字体资源和 CSS 文本:
+
+| 字段名                 | 类型               | 说明                                                   |
+| --------------------- | ------------------ | ------------------------------------------------------ |
+| **`type`**            | `str`              | 资源类型, 例如: `image` / `font` / `css` / `audio` 等   |
+| **`paragraph_index`** | `int` (optional)   | 资源对应正文段落的位置 (1-based, `0` 表示章节开头)        |
+| **`range`**           | `dict` (optional)  | 资源对正文段落的适用范围                                 |
+| **`url`**             | `str` (optional)   | 远程资源的 URL                                          |
+| **`base64`**          | `str` (optional)   | Base64 格式的资源内容                                   |
+| **`mime`**            | `str` (optional)   | Base64 内容的 MIME 类型, 如 `image/jpeg`、`font/woff2`  |
+| **`text`**            | `str` (optional)   | 文本内容                                                |
+| **`alt`**             | `str` (optional)   | 资源的替代文本                                          |
+| **`width`**           | `int` (optional)   | 图片宽度                                                |
+| **`height`**          | `int` (optional)   | 图片高度                                                |
+
+说明:
+
+* 一个段落可能包含多个资源, 因此 `paragraph_index` 可以重复
+* `paragraph_index = 0` 表示资源在第一段落之前出现
+
+**`range` 字段说明**
+
+`range` 用于描述资源对正文段落的适用范围, 采用 1-based、闭区间 表示:
+
+```json
+"range": { "start": 1, "end": 3 }
 ```
 
-存放章节中下载的所有远程图片, 供 EPUB/HTML 导出时内联或引用。
+当资源同时具备段落定位信息时, 解析顺序如下:
+
+1. 使用 `paragraph_index`
+2. 若无 `paragraph_index`, 则检查 `range`
+3. 若两者均不存在, 则视为适用于全部段落
+
+#### 章节资源文件夹
+
+```text
+raw_data/{site_name}/{book_id}/media/
+```
+
+用于保存本地下载的远程资源 (通常是 `image` 和 `font` 的 URL 内容)。
+
+这些文件会在 EPUB 或 HTML 导出阶段内联或引用。
+
+**存储策略说明**
+
+* URL 资源 (如 `image`、`font`) 会下载到 `media/`
+* Base64 资源不会在此目录生成文件, 通常在打包时直接使用
+* URL 资源在保存时会使用 URL 的哈希值作为文件名, 并使用推测的扩展名: `{sha1_hash}.{ext}`
 
 ---
 
@@ -117,22 +190,48 @@ raw_data/{site_name}/{book_id}/images/
 
 存放整合后导出的书籍文件。
 
-#### 全书 TXT 导出 (`make_txt`)
+#### 全书 TXT 导出
 
 ```text
 downloads/{book_name}_{author}.txt
 ```
 
-#### 全书 EPUB 导出 (`make_epub`)
+#### 全书 EPUB 导出
 
 ```text
 downloads/{book_name}_{author}.epub
 ```
 
-#### 分卷 EPUB 导出 (`export_by_volume`)
+#### 分卷 EPUB 导出
 
 每个卷都会生成独立的 EPUB，文件名中包含卷名:
 
 ```text
 downloads/{book_name}_{volume_name}_{author}.epub
+```
+
+#### 全书 HTML 导出
+
+HTML 导出包含完整书籍内容、目录页、章节页面以及相关静态资源。
+
+输出目录结构如下:
+
+```bash
+downloads/{book_name}_{author}/
+├── index.html                  # 书籍首页 / 目录页
+├── css/
+│   ├── index.css               # 目录页样式
+│   └── chapter.css             # 章节页统一样式
+├── js/
+│   └── main.js                 # 导航 / 交互逻辑
+├── chapters/                   # 章节文本
+│   ├── c001.html
+│   ├── c002.html
+│   ├── c003.html
+│   └── ...
+└── media/
+    ├── cover.jpg               # 封面图
+    ├── img_1.png               # 章节中引用的图片
+    ├── img_2.png
+    └── ...                     # 字体 / 资源缓存
 ```

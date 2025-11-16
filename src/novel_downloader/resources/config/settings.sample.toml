@@ -107,6 +107,7 @@ local_plugins_path = "./novel_plugins"
 formats = [
   "txt",
   "epub",
+#   "html",
 ]
 
 [output.naming]

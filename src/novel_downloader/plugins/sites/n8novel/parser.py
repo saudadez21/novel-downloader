@@ -15,6 +15,7 @@ from novel_downloader.schemas import (
     BookInfoDict,
     ChapterDict,
     ChapterInfoDict,
+    MediaResource,
     VolumeInfoDict,
 )
 
@@ -141,17 +142,18 @@ class N8novelParser(BaseParser):
         wrapper = html.fromstring(f"<div>{raw_pages[1]}</div>")
 
         paragraphs: list[str] = []
-        image_positions: dict[int, list[dict[str, Any]]] = {}
-        image_idx = 0
+        resources: list[MediaResource] = []
+        curr_paragraph_idx = 0
 
         def append_para(txt: str | None) -> None:
-            nonlocal image_idx
+            nonlocal curr_paragraph_idx
             if not txt:
                 return
+
             cleaned = txt.strip()
             if cleaned and not self._is_ad(cleaned):
                 paragraphs.append(cleaned)
-                image_idx += 1  # bump on successful append
+                curr_paragraph_idx += 1
 
         append_para(wrapper.text)
 
@@ -168,12 +170,15 @@ class N8novelParser(BaseParser):
                         src = "https:" + src
                     elif src.startswith("/"):
                         src = self.BASE_URL + src
-                    image_positions.setdefault(image_idx, []).append(
+
+                    resources.append(
                         {
-                            "type": "url",
-                            "data": src,
+                            "type": "image",
+                            "paragraph_index": curr_paragraph_idx,
+                            "url": src,
                         }
                     )
+
                 append_para(node.tail)
 
             # Standalone img
@@ -184,12 +189,15 @@ class N8novelParser(BaseParser):
                         src = "https:" + src
                     elif src.startswith("/"):
                         src = self.BASE_URL + src
-                    image_positions.setdefault(image_idx, []).append(
+
+                    resources.append(
                         {
-                            "type": "url",
-                            "data": src,
+                            "type": "image",
+                            "paragraph_index": curr_paragraph_idx,
+                            "url": src,
                         }
                     )
+
                 append_para(node.tail)
 
             # Line break -> text in .tail is next paragraph
@@ -201,7 +209,7 @@ class N8novelParser(BaseParser):
                 append_para(node.text_content())
                 append_para(node.tail)
 
-        if not (paragraphs or image_positions):
+        if not (paragraphs or resources):
             return None
 
         content = "\n".join(paragraphs)
@@ -212,7 +220,7 @@ class N8novelParser(BaseParser):
             "content": content,
             "extra": {
                 "site": self.site_name,
-                "image_positions": image_positions,
+                "resources": resources,
             },
         }
 
