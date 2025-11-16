@@ -244,7 +244,7 @@ class SfacgParser(BaseParser):
         cache: list[str] = []
 
         # decode & preprocess
-        img = ocr.gif_to_array_bytes(img_bytes)
+        img = ocr.load_image_array_bytes(img_bytes, white_bg=True)
         img = ocr.filter_orange_watermark(img)
         lines = ocr.split_by_height(
             img,
@@ -257,7 +257,7 @@ class SfacgParser(BaseParser):
         # filter out completely empty (white) lines
         non_empty_lines = [line for line in lines if not ocr.is_empty_image(line)]
 
-        preds = ocr.predict(non_empty_lines, batch_size=32)
+        preds = ocr.predict(non_empty_lines, batch_size=self._batch_size)
         for line, (text, _) in zip(non_empty_lines, preds, strict=False):
             first_2 = ocr.crop_chars_region(line, 2, left_margin=14, char_width=28)
             if ocr.is_empty_image(first_2) and cache:

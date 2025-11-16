@@ -28,6 +28,7 @@ DOWNLOAD_SUPPORT_SITES = {
     "dushu": "读书 (dushu)",
     "dxmwx": "大熊猫文学网 (dxmwx)",
     "esjzone": "ESJ Zone (esjzone)",
+    "faloo": "飞卢小说网 (faloo)",
     "fanqienovel": "番茄小说网 (fanqienovel)",
     "fsshu": "笔趣阁 (fsshu)",
     "guidaye": "名著阅读 (guidaye)",

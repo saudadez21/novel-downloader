@@ -89,6 +89,8 @@ CASES_SUCCESS = [
     SuccessCase("https://tw.dxmwx.org/book/55598.html", "dxmwx", "55598", None),
     SuccessCase("https://www.esjzone.cc/detail/1660702902.html", "esjzone", "1660702902", None),
     SuccessCase("https://www.esjzone.cc/forum/1660702902/294593.html", "esjzone", "1660702902", "294593"),
+    SuccessCase("https://b.faloo.com/1482723.html", "faloo", "1482723", None),
+    SuccessCase("https://b.faloo.com/1482723_1.html", "faloo", "1482723", "1"),
     SuccessCase("https://fanqienovel.com/page/7276384138653862966", "fanqienovel", "7276384138653862966", None),
     SuccessCase("https://fanqienovel.com/reader/7276663560427471412", "fanqienovel", None, "7276663560427471412"),
     SuccessCase("https://fanqienovel.com/reader/7276663560427471412?enter_from=page", "fanqienovel", None, "7276663560427471412"),

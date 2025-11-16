@@ -254,6 +254,15 @@ def extract_esjzone(path: str, query: str) -> BookURLInfo | None:
     return None
 
 
+@register_extractor(["b.faloo.com"])
+def extract_faloo(path: str, query: str) -> BookURLInfo | None:
+    if m := re.search(r"^/(\d+)_(\d+)\.html$", path):
+        return _make_info("faloo", m.group(1), m.group(2))
+    if m := re.search(r"^/(\d+)\.html$", path):
+        return _make_info("faloo", m.group(1), None)
+    return None
+
+
 @register_extractor(["fanqienovel.com"])
 def extract_fanqienovel(path: str, query: str) -> BookURLInfo | None:
     if m := re.search("^/reader/(\\d+)", path):

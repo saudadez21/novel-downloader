@@ -165,6 +165,23 @@ class AiohttpSession(BaseSession):
                 return value
         return None
 
+    def clear_cookie(self, name: str) -> None:
+        if self._session is None:
+            return
+
+        jar = self._session.cookie_jar
+        jar.clear(predicate=lambda morsel: morsel.key == name)
+
+    def clear_cookies(self) -> None:
+        """
+        Remove all cookies stored in the aiohttp session.
+        """
+        if self._session is None:
+            return
+
+        jar = self._session.cookie_jar
+        jar.clear()
+
     @property
     def session(self) -> aiohttp.ClientSession:
         """

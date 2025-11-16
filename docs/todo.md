@@ -198,10 +198,6 @@ user_prompt = "请翻译成中文：{text}"
 
 * [努努书坊](https://www.kanunu8.com/)
 
-* [飞卢小说网](https://b.faloo.com/)
-
-  * VIP 章节需登录访问
-
 * [书海小说网](https://www.shuhai.com/)
 
   * VIP 章节需登录访问

@@ -157,6 +157,18 @@ class BaseSession(ABC):
         """
         ...
 
+    @abstractmethod
+    def clear_cookie(self, name: str) -> None:
+        """Remove a single cookie."""
+        raise NotImplementedError
+
+    @abstractmethod
+    def clear_cookies(self) -> None:
+        """
+        Remove all cookies stored in the session.
+        """
+        ...
+
     @property
     def headers(self) -> dict[str, str]:
         """
