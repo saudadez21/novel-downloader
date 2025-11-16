@@ -18,6 +18,7 @@ from novel_downloader.schemas import (
     BookInfoDict,
     ChapterDict,
     ChapterInfoDict,
+    MediaResource,
     VolumeInfoDict,
 )
 
@@ -149,7 +150,9 @@ class ShaoniandreamParser(BaseParser):
             para_enc = p.get("content", "")
             if not para_enc:
                 continue
-            paragraphs.append(self._RE_TAG_I.sub("", decrypt(para_enc)).strip())
+            text = self._RE_TAG_I.sub("", decrypt(para_enc)).strip()
+            if text:
+                paragraphs.append(text)
 
         postscript = ""
         miaoshu_enc = data.get("miaoshu")
@@ -161,19 +164,24 @@ class ShaoniandreamParser(BaseParser):
             except Exception:
                 pass
 
-        image_positions: dict[int, list[dict[str, Any]]] = {}
+        resources: list[MediaResource] = []
+        curr_paragraph_idx = len(paragraphs)
+
         if chapter_pics:
-            img_objs = []
             for pic in chapter_pics:
                 url = pic.get("url")
                 if not url:
                     continue
                 full_url = img_prefix + url
-                img_objs.append({"type": "url", "data": full_url})
-            if img_objs:
-                image_positions[len(paragraphs)] = img_objs
+                resources.append(
+                    {
+                        "type": "image",
+                        "paragraph_index": curr_paragraph_idx,
+                        "url": full_url,
+                    }
+                )
 
-        if not (paragraphs or image_positions):
+        if not (paragraphs or resources):
             return None
 
         content = "\n".join(paragraphs)
@@ -184,6 +192,6 @@ class ShaoniandreamParser(BaseParser):
             "content": content,
             "extra": {
                 "site": self.site_name,
-                "image_positions": image_positions,
+                "resources": resources,
             },
         }
