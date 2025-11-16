@@ -167,7 +167,6 @@ user_prompt = "请翻译成中文：{text}"
 
 以下模块需适配新的 `resources` 结构:
 
-* `novel_downloader.plugins.sites.lnovel.parser`
 * `novel_downloader.plugins.sites.n37yq.parser`
 * `novel_downloader.plugins.sites.n8novel.parser`
 * `novel_downloader.plugins.sites.novelpia.parser`

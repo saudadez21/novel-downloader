@@ -14,6 +14,7 @@ from novel_downloader.schemas import (
     BookInfoDict,
     ChapterDict,
     ChapterInfoDict,
+    MediaResource,
     VolumeInfoDict,
 )
 
@@ -132,42 +133,52 @@ class LnovelParser(BaseParser):
         title = self._first_str(tree.xpath("//main//h1/text()"))
 
         paragraphs: list[str] = []
-        image_positions: dict[int, list[dict[str, Any]]] = {}
-        image_idx = 0
+        resources: list[MediaResource] = []
+        curr_paragraph_idx = 0
 
         for idx, elem in enumerate(tree.xpath('//*[@id="chaptersShowContent"]/*')):
             tag = elem.tag.lower()
+
             if tag == "p":
                 txt = "".join(elem.xpath(".//text()")).strip()
                 if idx < 2 and txt:
                     txt = txt.replace(title, "").replace(vol_name, "").strip()
                 if txt:
                     paragraphs.append(txt)
-                    image_idx += 1
+                    curr_paragraph_idx += 1
+
             elif tag == "img":
                 src = (elem.get("src") or "").strip()
-                src = self.BASE_URL + src if src.startswith("/") else src
-                image_positions.setdefault(image_idx, []).append(
-                    {
-                        "type": "url",
-                        "data": src,
-                    }
-                )
+                if src.startswith("/"):
+                    src = self.BASE_URL + src
+
+                if src:
+                    resources.append(
+                        {
+                            "type": "image",
+                            "paragraph_index": curr_paragraph_idx,
+                            "url": src,
+                        }
+                    )
 
         # image gallery right after content block
         for src in tree.xpath(
             '//*[@id="chaptersShowContent"]/following-sibling::a[img]//img/@src'
         ):
             src = (src or "").strip()
-            src = self.BASE_URL + src if src.startswith("/") else src
-            image_positions.setdefault(image_idx, []).append(
-                {
-                    "type": "url",
-                    "data": src,
-                }
-            )
+            if src.startswith("/"):
+                src = self.BASE_URL + src
 
-        if not (paragraphs or image_positions):
+            if src:
+                resources.append(
+                    {
+                        "type": "image",
+                        "paragraph_index": curr_paragraph_idx,
+                        "url": src,
+                    }
+                )
+
+        if not (paragraphs or resources):
             return None
 
         content = "\n".join(paragraphs)
@@ -178,6 +189,6 @@ class LnovelParser(BaseParser):
             "content": content,
             "extra": {
                 "site": self.site_name,
-                "image_positions": image_positions,
+                "resources": resources,
             },
         }
