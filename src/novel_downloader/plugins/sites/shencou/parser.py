@@ -13,6 +13,7 @@ from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
     BookInfoDict,
     ChapterDict,
+    MediaResource,
     VolumeInfoDict,
 )
 
@@ -137,8 +138,6 @@ class ShencouParser(BaseParser):
 
         tree = html.fromstring(raw_pages[0])
         title = self._first_str(tree.xpath("//h1/text()"))
-        if not title:
-            return None
 
         # strip book-name prefix if present
         bc = tree.xpath('//div[@id="breadCrumb"]//a/text()')
@@ -152,18 +151,18 @@ class ShencouParser(BaseParser):
         marker = anchors[0]
 
         paragraphs: list[str] = []
-        image_positions: dict[int, list[dict[str, Any]]] = {}
-        image_idx = 0
+        resources: list[MediaResource] = []
+        curr_paragraph_idx = 0
 
         def append_para(txt: str | None) -> None:
-            nonlocal image_idx
+            nonlocal curr_paragraph_idx
             if not txt:
                 return
             for ln in txt.replace("\xa0", " ").splitlines():
                 cleaned = ln.strip()
                 if cleaned:
                     paragraphs.append(cleaned)
-                    image_idx += 1
+                    curr_paragraph_idx += 1
 
         append_para(marker.tail)
 
@@ -196,12 +195,15 @@ class ShencouParser(BaseParser):
                             continue
                         if src.startswith("//"):
                             src = "https:" + src
-                        image_positions.setdefault(image_idx, []).append(
+
+                        resources.append(
                             {
-                                "type": "url",
-                                "data": src,
+                                "type": "image",
+                                "paragraph_index": curr_paragraph_idx,
+                                "url": src,
                             }
                         )
+
                     append_para(sib.tail)
                     continue
 
@@ -211,12 +213,15 @@ class ShencouParser(BaseParser):
                     if src:
                         if src.startswith("//"):
                             src = "https:" + src
-                        image_positions.setdefault(image_idx, []).append(
+
+                        resources.append(
                             {
-                                "type": "url",
-                                "data": src,
+                                "type": "image",
+                                "paragraph_index": curr_paragraph_idx,
+                                "url": src,
                             }
                         )
+
                     append_para(sib.tail)
                     continue
 
@@ -228,7 +233,7 @@ class ShencouParser(BaseParser):
                 append_para(sib.tail)
                 continue
 
-        if not (paragraphs or image_positions):
+        if not (paragraphs or resources):
             return None
 
         content = "\n".join(paragraphs)
@@ -239,6 +244,6 @@ class ShencouParser(BaseParser):
             "content": content,
             "extra": {
                 "site": self.site_name,
-                "image_positions": image_positions,
+                "resources": resources,
             },
         }
