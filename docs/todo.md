@@ -32,6 +32,12 @@
   * 可能因 `cookie expired` 导致失效
   * 需要考虑增加过期检测与重新获取机制 (暂未复现)
 
+* **esjzone**
+  * 部分使用自定义字体的页面, 即使加载了相同的字体文件, 仍出现以下现象
+    * 字体文件已成功加载
+    * 部分文字能按照自定义字体正常渲染
+    * 另一部分文字没有按自定义字体渲染
+
 ### EPUB 导出优化
 
 * 当前主要性能瓶颈集中在 `zipfile` 的写入阶段, 以及图片缓存缺失时的重复下载
@@ -161,7 +167,6 @@ user_prompt = "请翻译成中文：{text}"
 
 以下模块需适配新的 `resources` 结构:
 
-* `novel_downloader.plugins.sites.esjzone.parser`
 * `novel_downloader.plugins.sites.kadokado.parser`
 * `novel_downloader.plugins.sites.linovel.parser`
 * `novel_downloader.plugins.sites.linovelib.parser`

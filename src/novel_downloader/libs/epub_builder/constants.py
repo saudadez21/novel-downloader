@@ -203,9 +203,7 @@ CHAP_TMPLATE = f"""\
   <div class="chapter-content">
     {{content}}
   </div>
-  <div class="extra-block">
-    {{extra_block}}
-  </div>
+  {{extra_block}}
 </body>
 </html>
 """

@@ -85,9 +85,7 @@ CHAPTER_TEMPLATE = f"""\
   <div class="chapter-content">
     {{content}}
   </div>
-  <div class="extra-block">
-    {{extra_block}}
-  </div>
+  {{extra_block}}
 
   <nav class="chapter-nav"
        data-prev="{{prev_link}}"

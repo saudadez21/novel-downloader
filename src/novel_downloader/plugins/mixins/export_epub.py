@@ -401,7 +401,7 @@ class ExportEpubMixin:
 
         html_parts = self._xp_epub_chap_post(html_parts, chap)
         xhtml_str = "\n".join(html_parts)
-        extras_part = self._xp_epub_extras(chap.get("extra") or {})
+        extra_content = self._xp_epub_extras(chap.get("extra") or {})
 
         return EpubChapter(
             id=f"c_{cid}",
@@ -409,7 +409,7 @@ class ExportEpubMixin:
             title=title,
             fonts=added_fonts,
             content=xhtml_str,
-            extra_block=extras_part,
+            extra_content=extra_content,
         )
 
     def _xp_epub_extras(self, extras: dict[str, Any]) -> str:

@@ -307,7 +307,7 @@ class EpubVolumeIntroDesc(EpubXhtmlContent):
 @dataclass(slots=True)
 class EpubChapter(EpubXhtmlContent):
     default_selector: str = ".chapter-content"
-    extra_block: str = ""
+    extra_content: str = ""
 
     def to_xhtml(self, lang: str = "zh-Hans") -> str:
         """Generate the XHTML for a chapter."""
@@ -316,8 +316,13 @@ class EpubChapter(EpubXhtmlContent):
             title=escape_text(self.title),
             font_styles=self._build_font_styles(),
             content=self.content,
-            extra_block=self.extra_block,
+            extra_block=self._build_extra_block(),
         )
+
+    def _build_extra_block(self) -> str:
+        if not self.extra_content:
+            return ""
+        return f'<br />\n<div class="extra-block">\n{self.extra_content}\n</div>'
 
 
 @dataclass(slots=True)

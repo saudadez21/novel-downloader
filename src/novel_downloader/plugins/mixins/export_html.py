@@ -267,8 +267,8 @@ class ExportHtmlMixin:
             filename=f"c{cid}.html",
             title=title,
             content=html_str,
+            extra_content=extras_part,
             fonts=added_fonts,
-            extra_block=extras_part,
         )
 
     def _xp_html_extras(self, extras: dict[str, Any]) -> str:

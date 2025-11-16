@@ -6,7 +6,6 @@ novel_downloader.plugins.sites.qidian.client
 
 import asyncio
 import logging
-from html import escape
 from typing import Any
 
 from novel_downloader.libs.time_utils import async_jitter_sleep
@@ -144,15 +143,23 @@ class QidianClient(CommonClient):
 
         Clean text, wrap as HTML-safe, and format with heading.
         """
-        note = (extras.get("author_say") or "").strip()
+        note = extras.get("author_say")
         if not note:
             return ""
 
-        parts = [
-            "<hr />\n<h3>作者说</h3>",
-            *(f"<p>{escape(s)}</p>" for ln in note.splitlines() if (s := ln.strip())),
-        ]
-        return "\n".join(parts)
+        out = ["<h3>作者说</h3>"]
+
+        for ln in note.splitlines():
+            ln = ln.strip()
+            if not ln:
+                continue
+
+            if "<" in ln or ">" in ln or "&" in ln:
+                ln = ln.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+            out.append(f"<p>{ln}</p>")
+
+        return "\n".join(out)
 
     def _xp_epub_chap_post(self, html_parts: list[str], chap: ChapterDict) -> list[str]:
         refl_list = chap["extra"].get("refl_list", [])

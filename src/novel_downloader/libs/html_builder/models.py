@@ -69,7 +69,7 @@ class HtmlChapter:
     filename: str
     title: str
     content: str
-    extra_block: str = ""
+    extra_content: str = ""
     fonts: list[HtmlFont] = field(default_factory=list)
 
     def to_html(
@@ -86,7 +86,7 @@ class HtmlChapter:
             prev_link=prev_link,
             next_link=next_link,
             content=self.content,
-            extra_block=self.extra_block,
+            extra_block=self._build_extra_block(),
             font_styles=self._build_font_styles(),
         )
 
@@ -122,6 +122,11 @@ class HtmlChapter:
 
         blocks.append("</style>")
         return "\n".join(blocks)
+
+    def _build_extra_block(self) -> str:
+        if not self.extra_content:
+            return ""
+        return f'<div class="extra-block">\n{self.extra_content}\n</div>'
 
 
 @dataclass
