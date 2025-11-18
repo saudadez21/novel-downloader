@@ -516,9 +516,7 @@ class OpfDocument(EpubResource):
         """
         from datetime import UTC, datetime
 
-        now_iso = (
-            datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-        )
+        now_iso = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
         # ---------- metadata ----------
         meta = []

@@ -14,7 +14,6 @@ __all__ = [
     "FontOCRConfig",
     "ExporterConfig",
     "ProcessorConfig",
-    "PipelineConfig",
     "BookInfoDict",
     "ChapterDict",
     "ChapterInfoDict",
@@ -43,7 +42,6 @@ from .config import (
     FetcherConfig,
     FontOCRConfig,
     ParserConfig,
-    PipelineConfig,
     ProcessorConfig,
 )
 from .process import ExecutedStageMeta, PipelineMeta

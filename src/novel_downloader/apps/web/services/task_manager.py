@@ -189,8 +189,7 @@ class TaskManager:
         task.asyncio_task = asyncio.create_task(download_books())
         await task.asyncio_task
 
-        pipeline_cfg = adapter.get_pipeline_config(task.site)
-        if pipeline_cfg and pipeline_cfg.processors:
+        if adapter.get_processor_configs(task.site):
             task.status = Status.PROCESSING
             await self._process_waiting.put(task)
             self._ensure_worker("_process_worker_task", self._process_worker)

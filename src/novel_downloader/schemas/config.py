@@ -85,12 +85,6 @@ class ProcessorConfig:
     options: dict[str, Any] = field(default_factory=dict)
 
 
-@dataclass
-class PipelineConfig:
-    raw_data_dir: str = "./raw_data"
-    processors: list[ProcessorConfig] = field(default_factory=list)
-
-
 @dataclass(frozen=True, slots=True)
 class BookConfig:
     book_id: str

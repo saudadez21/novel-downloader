@@ -24,8 +24,6 @@ class FontOCR:
     Version 4 of the FontOCR utility.
     """
 
-    WHITE = np.array([255, 255, 255])
-
     def __init__(
         self,
         model_name: str | None = None,
@@ -249,9 +247,9 @@ class FontOCR:
 
         return chunks
 
-    @classmethod
+    @staticmethod
     def split_by_white_lines(
-        cls, img_arr: NDArray[np.uint8], padding: int = 4
+        img_arr: NDArray[np.uint8], padding: int = 4
     ) -> list[NDArray[np.uint8]]:
         """
         Split an RGB image (numpy array) into multiple blocks using full-white
@@ -262,31 +260,31 @@ class FontOCR:
         :param padding: Number of white pixels to pad on the top and bottom.
         :return: List of sliced blocks as numpy arrays.
         """
-        height = img_arr.shape[0]
+        h, w, _ = img_arr.shape
 
-        white_rows = [row for row in range(height) if np.all(img_arr[row] == cls.WHITE)]
+        white_row_mask = (img_arr == 255).all(axis=2).all(axis=1)
+        white_rows = np.flatnonzero(white_row_mask)
 
-        if not white_rows:
-            blocks = [(0, height)]
+        # Compute block boundaries using vectorized diff
+        if white_rows.size == 0:
+            start_idx = np.array([0])
+            end_idx = np.array([h])
         else:
-            cut_points = [0] + white_rows + [height]
-            blocks = [
-                (cut_points[i - 1], cut_points[i])
-                for i in range(1, len(cut_points))
-                if cut_points[i] - cut_points[i - 1] > 1
-            ]
+            cuts = np.concatenate(([0], white_rows, [h]))
+            # Differences > 1 -> non-empty slices
+            diff = cuts[1:] - cuts[:-1]
+            mask = diff > 1
+            start_idx = cuts[:-1][mask]
+            end_idx = cuts[1:][mask]
+
+        # Pre-create pad rows (padding * white rows)
+        pad_block = np.full((padding, w, 3), 255, dtype=np.uint8)
 
         results = []
-        for start, end in blocks:
+        for start, end in zip(start_idx, end_idx, strict=False):
             block = img_arr[start:end]
-
-            padded_block = np.pad(
-                block,
-                pad_width=((padding, padding), (0, 0), (0, 0)),
-                mode="constant",
-                constant_values=255,
-            )
-
+            # concatenate instead of np.pad (much faster)
+            padded_block = np.concatenate((pad_block, block, pad_block), axis=0)
             results.append(padded_block)
 
         return results
@@ -338,9 +336,10 @@ class FontOCR:
         :return: True if this line starts a new paragraph.
         """
         h, w, _ = img.shape
-        gray = img.mean(axis=2)
         max_scan = min(w, paragraph_threshold)
-        return all(gray[:, col].min() >= white_threshold for col in range(max_scan))
+        # Integer RGB sum: avoids float mean
+        rgb_sum = img[:, :max_scan, :].sum(axis=2, dtype=np.uint16)
+        return bool((rgb_sum >= 3 * white_threshold).all())
 
     @staticmethod
     def load_render_font(

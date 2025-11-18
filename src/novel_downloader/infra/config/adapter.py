@@ -18,7 +18,6 @@ from novel_downloader.schemas import (
     FetcherConfig,
     FontOCRConfig,
     ParserConfig,
-    PipelineConfig,
     ProcessorConfig,
 )
 
@@ -199,28 +198,6 @@ class ConfigAdapter:
         global_procs = self._to_processor_cfgs(plugin_rows)
 
         return site_procs if site_procs else global_procs
-
-    def get_pipeline_config(self, site: str) -> PipelineConfig:
-        """
-        Build a PipelineConfig from [[plugins.processors]].
-
-        Precedence:
-          * If site has plugins.processors, use those.
-          * Else use global plugins.processors.
-        """
-        g = self._gen_cfg()
-        s = self._site_cfg(site)
-        plugins = self._config.get("plugins") or {}
-
-        raw_data_dir = g.get("raw_data_dir", "./raw_data")
-
-        site_rows = s.get("processors") or []
-        site_procs = self._to_processor_cfgs(site_rows)
-        plugin_rows = plugins.get("processors") or []
-        global_procs = self._to_processor_cfgs(plugin_rows)
-
-        processors = site_procs if site_procs else global_procs
-        return PipelineConfig(raw_data_dir=raw_data_dir, processors=processors)
 
     def get_book_ids(self, site: str) -> list[BookConfig]:
         """
