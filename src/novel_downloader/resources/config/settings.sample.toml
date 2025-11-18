@@ -56,6 +56,10 @@ login_required = true
 login_required = false
 request_interval = 2.5
 
+[sites.faloo]
+request_interval = 3.0
+login_required = true
+
 [sites.sfacg]
 login_required = true
 

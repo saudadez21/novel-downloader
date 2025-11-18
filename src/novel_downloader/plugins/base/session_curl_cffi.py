@@ -148,6 +148,21 @@ class CurlCffiSession(BaseSession):
                 return None
         return value
 
+    def clear_cookie(self, name: str) -> None:
+        if self._session is None:
+            return
+
+        self._session.cookies.pop(name, None)
+
+    def clear_cookies(self) -> None:
+        """
+        Remove all cookies stored in the curl_cffi session.
+        """
+        if self._session is None:
+            return
+
+        self._session.cookies.clear()
+
     @property
     def session(self) -> AsyncSession[Any]:
         """

@@ -80,6 +80,7 @@ novel-cli download --site ttkan shengxu-chendong
 | [QQ阅读](https://book.qq.com/)                               | qqbook    | ❌     | ❌     | ✅     | ⚠️     | 简      |
 | [17K小说网](https://www.17k.com/)                            | n17k      | ✅     | ❌     | ⚠️     | ⚠️     | 简      |
 | [番茄小说网](https://fanqienovel.com/)                      | fanqienovel | ✅     | ❌     | ⚠️     | ⚠️     | 简      |
+| [飞卢小说网](https://b.faloo.com/)                           | faloo     | ❌     | ✅     | ✅     | ⚠️     | 简      |
 | [若初文学网](https://www.ruochu.com/)                        | ruochu    | ❌     | ❌     | ⚠️     | ❌     | 简      |
 
 #### 轻小说 / 二次元向平台
@@ -244,6 +245,10 @@ novel-cli download --site ttkan shengxu-chendong
 * **番茄小说网 (fanqienovel)**
   * 书籍: `https://fanqienovel.com/page/7276384138653862966` -> Book ID: `7276384138653862966`
   * 章节: `https://fanqienovel.com/reader/7276663560427471412` -> Chapter ID: `7276663560427471412`
+
+* **飞卢小说网 (faloo)**
+  * 书籍: `https://b.faloo.com/1482723.html` -> Book ID: `1482723`
+  * 章节: `https://b.faloo.com/1482723_1.html` -> Chapter ID: `1`
 
 * **若初文学网 (ruochu)**
   * 书籍: `https://www.ruochu.com/book/158713` -> Book ID: `158713`

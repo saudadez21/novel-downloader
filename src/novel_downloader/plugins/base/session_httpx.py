@@ -168,6 +168,23 @@ class HttpxSession(BaseSession):
                 return None
         return value
 
+    def clear_cookie(self, name: str) -> None:
+        if self._session is None:
+            return
+
+        jar = self._session.cookies.jar
+        for cookie in jar:
+            if cookie.name == name:
+                jar.clear(cookie.domain, cookie.path, cookie.name)
+
+    def clear_cookies(self) -> None:
+        """
+        Remove all cookies stored in the httpx session.
+        """
+        if self._session is None:
+            return
+        self._session.cookies.clear()
+
     @property
     def session(self) -> httpx.AsyncClient:
         """

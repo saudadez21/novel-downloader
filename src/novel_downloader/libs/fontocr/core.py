@@ -160,8 +160,10 @@ class FontOCR:
 
         return img
 
-    @staticmethod
-    def load_image_array_bytes(data: bytes) -> NDArray[np.uint8]:
+    @classmethod
+    def load_image_array_bytes(
+        cls, data: bytes, white_bg: bool = False
+    ) -> NDArray[np.uint8]:
         """
         Decode image bytes into an RGB NumPy array.
 
@@ -170,40 +172,26 @@ class FontOCR:
         and returns a NumPy array suitable for OCR inference.
 
         :param data: Image file content as raw bytes.
+        :param white_bg: If True, flatten images with transparency onto white.
         :return: NumPy array of shape (H, W, 3), dtype=uint8, in RGB order.
         :raises PIL.UnidentifiedImageError, OSError: If input bytes cannot be decoded.
         """
-        with Image.open(io.BytesIO(data)) as im:
-            im = im.convert("RGB")
-            return np.asarray(im)
+        with Image.open(io.BytesIO(data)) as img:
+            return cls._pil_to_rgb_array(img, white_bg)
 
-    @staticmethod
-    def gif_to_array(path: Path) -> NDArray[np.uint8]:
+    @classmethod
+    def load_image_array_path(
+        cls, path: Path, white_bg: bool = False
+    ) -> NDArray[np.uint8]:
         """
         Convert a GIF image into a numpy array with white background.
 
-        :param path: Path to the GIF file
+        :param path: Image file path.
+        :param white_bg: If True, flatten images with transparency onto white.
         :return: Numpy array representing the image (H, W, 3)
         """
         with Image.open(path) as img:
-            img = img.convert("RGBA")
-            background = Image.new("RGBA", img.size, (255, 255, 255, 255))
-            background.paste(img, mask=img.getchannel("A"))
-            return np.array(background.convert("RGB"))
-
-    @staticmethod
-    def gif_to_array_bytes(data: bytes) -> NDArray[np.uint8]:
-        """
-        Convert a GIF (in bytes) into a numpy array with white background.
-
-        :param data: Raw GIF bytes
-        :return: Numpy array representing the image (H, W, 3)
-        """
-        with Image.open(io.BytesIO(data)) as img:
-            img = img.convert("RGBA")
-            background = Image.new("RGBA", img.size, (255, 255, 255, 255))
-            background.paste(img, mask=img.getchannel("A"))
-            return np.array(background.convert("RGB"))
+            return cls._pil_to_rgb_array(img, white_bg)
 
     @staticmethod
     def filter_orange_watermark(img: NDArray[np.uint8]) -> NDArray[np.uint8]:
@@ -260,6 +248,48 @@ class FontOCR:
         return chunks
 
     @staticmethod
+    def split_by_white_lines(
+        img_arr: NDArray[np.uint8], padding: int = 4
+    ) -> list[NDArray[np.uint8]]:
+        """
+        Split an RGB image (numpy array) into multiple blocks using full-white
+        horizontal separator lines, then add fixed white padding to the top and
+        bottom of each block.
+
+        :param img_arr: Input RGB image array with shape (H, W, 3).
+        :param padding: Number of white pixels to pad on the top and bottom.
+        :return: List of sliced blocks as numpy arrays.
+        """
+        h, w, _ = img_arr.shape
+
+        white_row_mask = (img_arr == 255).all(axis=2).all(axis=1)
+        white_rows = np.flatnonzero(white_row_mask)
+
+        # Compute block boundaries using vectorized diff
+        if white_rows.size == 0:
+            start_idx = np.array([0])
+            end_idx = np.array([h])
+        else:
+            cuts = np.concatenate(([0], white_rows, [h]))
+            # Differences > 1 -> non-empty slices
+            diff = cuts[1:] - cuts[:-1]
+            mask = diff > 1
+            start_idx = cuts[:-1][mask]
+            end_idx = cuts[1:][mask]
+
+        # Pre-create pad rows (padding * white rows)
+        pad_block = np.full((padding, w, 3), 255, dtype=np.uint8)
+
+        results = []
+        for start, end in zip(start_idx, end_idx, strict=False):
+            block = img_arr[start:end]
+            # concatenate instead of np.pad (much faster)
+            padded_block = np.concatenate((pad_block, block, pad_block), axis=0)
+            results.append(padded_block)
+
+        return results
+
+    @staticmethod
     def crop_chars_region(
         img: NDArray[np.uint8],
         num_chars: int,
@@ -289,6 +319,27 @@ class FontOCR:
         :return: True if all pixels are white, False otherwise
         """
         return bool(np.all(img == 255))
+
+    @staticmethod
+    def is_new_paragraph(
+        img: np.ndarray,
+        white_threshold: int = 250,
+        paragraph_threshold: int = 30,
+    ) -> bool:
+        """
+        Determine whether a line image represents the start of a new paragraph,
+        based on the amount of leading full-white columns.
+
+        :param img: Input line image as (H, W, 3) numpy array.
+        :param white_threshold: Minimum pixel value considered as white (0-255).
+        :param paragraph_threshold: Left margin (in px) to classify as new paragraph.
+        :return: True if this line starts a new paragraph.
+        """
+        h, w, _ = img.shape
+        max_scan = min(w, paragraph_threshold)
+        # Integer RGB sum: avoids float mean
+        rgb_sum = img[:, :max_scan, :].sum(axis=2, dtype=np.uint16)
+        return bool((rgb_sum >= 3 * white_threshold).all())
 
     @staticmethod
     def load_render_font(
@@ -361,3 +412,16 @@ class FontOCR:
                 except ValueError:
                     continue
         return charset
+
+    @staticmethod
+    def _pil_to_rgb_array(img: Image.Image, white_bg: bool) -> NDArray[np.uint8]:
+        """Convert PIL image to RGB numpy array, optionally flattening alpha."""
+        if white_bg and ("A" in img.getbands()):
+            img = img.convert("RGBA")
+            bg = Image.new("RGBA", img.size, (255, 255, 255, 255))
+            bg.paste(img, mask=img.getchannel("A"))
+            img = bg.convert("RGB")
+        else:
+            img = img.convert("RGB")
+
+        return np.asarray(img)
