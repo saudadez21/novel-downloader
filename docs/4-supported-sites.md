@@ -89,6 +89,7 @@ novel-cli download --site ttkan shengxu-chendong
 
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 | 支持语言 |
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
+| [刺猬猫](https://www.ciweimao.com/)                          | ciweimao  | ✅     | ✅     | ✅     | ⚠️     | 简      |
 | [次元姬](https://www.ciyuanji.com/)                          | ciyuanji  | ✅     | ✅     | ✅     | ✅     | 简      |
 | [SF轻小说](https://m.sfacg.com)                              | sfacg      | ✅     | ✅     | ✅     | ⚠️     | 简      |
 | [轻之文库](https://www.linovel.net/)                         | linovel    | ✅     | ✅     | ⚠️     | ✅     | 简      |
@@ -255,6 +256,10 @@ novel-cli download --site ttkan shengxu-chendong
   * 章节: `https://www.ruochu.com/book/158713/13869103` -> Chapter ID: `13869103`
 
 #### 轻小说 / 二次元向平台
+
+* **刺猬猫 (ciweimao)**
+  * 书籍: `https://www.ciweimao.com/book/100011781` -> Book ID: `100011781`
+  * 章节: `https://www.ciweimao.com/chapter/100257072` -> Chapter ID: `100257072`
 
 * **次元姬 (ciyuanji)**
   * 书籍: `https://www.ciyuanji.com/b_d_12030.html` -> Book ID: `12030`

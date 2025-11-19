@@ -200,6 +200,17 @@ def extract_ciluke(path: str, query: str) -> BookURLInfo | None:
     return None
 
 
+@register_extractor(["www.ciweimao.com"])
+def extract_ciweimao(path: str, query: str) -> BookURLInfo | None:
+    if m := re.search(r"^/chapter/(\d+)$", path):
+        return _make_info("ciweimao", None, m.group(1))
+    if m := re.search(r"^/book/(\d+)$", path):
+        return _make_info("ciweimao", m.group(1), None)
+    if m := re.search(r"^/chapter-list/(\d+)(?:/|$)", path):
+        return _make_info("ciweimao", m.group(1), None)
+    return None
+
+
 @register_extractor(["www.ciyuanji.com"])
 def extract_ciyuanji(path: str, query: str) -> BookURLInfo | None:
     if m := re.search("^/chapter/(\\d+)_(\\d+)\\.html$", path):

@@ -126,13 +126,11 @@ class ConfigAdapter:
         """
         s = self._site_cfg(site)
         out = self._config.get("output") or {}
-        naming = out.get("naming") or {}
-        epub_opts = out.get("epub") or {}
 
         return ExporterConfig(
-            append_timestamp=naming.get("append_timestamp", True),
-            filename_template=naming.get("filename_template", "{title}_{author}"),
-            include_picture=epub_opts.get("include_picture", True),
+            append_timestamp=out.get("append_timestamp", True),
+            filename_template=out.get("filename_template", "{title}_{author}"),
+            include_picture=out.get("include_picture", True),
             split_mode=s.get("split_mode", "book"),
         )
 

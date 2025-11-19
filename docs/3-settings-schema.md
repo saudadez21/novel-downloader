@@ -14,8 +14,6 @@
     - [`book_ids` 字段说明](#book_ids-字段说明)
     - [示例: 起点 (`qidian`)](#示例-起点-qidian)
   - [output 配置](#output-配置)
-    - [命名规则 `[output.naming]`](#命名规则-outputnaming)
-    - [EPUB 选项 `[output.epub]`](#epub-选项-outputepub)
     - [示例配置](#示例配置-1)
   - [plugins 配置](#plugins-配置)
     - [主配置项](#主配置项-1)
@@ -239,22 +237,12 @@ book_id = "1012584111"
 
 控制导出格式, 文件命名与 EPUB 细节
 
-| 参数名          | 类型        | 默认值     | 说明                                       |
-| -------------- | ----------- | --------- | ------------------------------------------ |
-| `formats`      | `list[str]` | `[]`      | 输出格式                                    |
-
-#### 命名规则 `[output.naming]`
-
-| 参数名                         | 类型    | 默认值                         | 说明                                       |
-| ----------------------------- | ------- | ----------------------------- | ------------------------------------------ |
-| `append_timestamp`            | bool    | true                          | 输出文件名是否追加时间戳                     |
-| `filename_template`           | string  | `"{title}_{author}"`          | 文件名模板                                  |
-
-#### EPUB 选项 `[output.epub]`
-
-| 参数名                         | 类型    | 默认值                         | 说明                                       |
-| ----------------------------- | ------- | ----------------------------- | ------------------------------------------ |
-| `include_picture`             | bool    | true                          | 是否下载并嵌入章节中的图片 (可能增加文件体积) |
+| 参数名                        | 类型         | 默认值                | 说明                                       |
+| ----------------------------- | ----------- | --------------------- | ------------------------------------------ |
+| `formats`                     | `list[str]` | `[]`                  | 输出格式                                    |
+| `append_timestamp`            | bool        | true                  | 输出文件名是否追加时间戳                     |
+| `filename_template`           | string      | `"{title}_{author}"`  | 文件名模板                                  |
+| `include_picture`             | bool        | true                  | 是否下载并嵌入章节中的图片 (可能增加文件体积) |
 
 #### 示例配置
 
@@ -264,12 +252,8 @@ formats = [
     "txt",
     "epub",
 ]
-
-[output.naming]
 append_timestamp = false
 filename_template = "{title}_{author}"
-
-[output.epub]
 include_picture = true
 ```
 

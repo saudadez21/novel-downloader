@@ -23,6 +23,7 @@ DOWNLOAD_SUPPORT_SITES = {
     "blqudu": "笔趣读 (blqudu)",
     "bxwx9": "笔下文学网 (bxwx9)",
     "ciluke": "思路客 (ciluke)",
+    "ciweimao": "刺猬猫 (ciweimao)",
     "ciyuanji": "次元姬小说网 (ciyuanji)",
     "czbooks": "小说狂人 (czbooks)",
     "dushu": "读书 (dushu)",
