@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.plugins.base.response
---------------------------------------
+novel_downloader.infra.sessions.response
+----------------------------------------
 """
 
 from __future__ import annotations

@@ -1,52 +1,63 @@
 #!/usr/bin/env python3
 """
-novel_downloader.plugins.base.session_curl_cffi
------------------------------------------------
+novel_downloader.infra.sessions._httpx
+--------------------------------------
 """
-
-# mypy: disable-error-code=unused-ignore
 
 import json
 from pathlib import Path
 from typing import Any, Unpack
 
-from curl_cffi.requests import AsyncSession
+import httpx
 
-from novel_downloader.plugins.base.response import BaseResponse
-from novel_downloader.plugins.base.session_base import (
+from .base import (
     BaseSession,
     GetRequestKwargs,
     PostRequestKwargs,
 )
+from .response import BaseResponse
 
 
-class CurlCffiSession(BaseSession):
-    """Session backend using curl_cffi for browser-like HTTP requests."""
+class HttpxSession(BaseSession):
+    """Session backend based on httpx providing async HTTP/1.1 and HTTP/2 support."""
 
-    _session: AsyncSession[Any] | None
+    _session: httpx.AsyncClient | None
 
     async def init(
         self,
         **kwargs: Any,
     ) -> None:
-        if self._session:
+        if self._session and not self._session.is_closed:
             return
+        limits = httpx.Limits(
+            max_keepalive_connections=self._max_connections,
+            max_connections=self._max_connections,
+        )
+        proxy = self._build_proxy_config(
+            self._proxy,
+            self._proxy_user,
+            self._proxy_pass,
+        )
 
-        self._session = AsyncSession(
+        self._session = httpx.AsyncClient(
+            http2=self._http2,
+            timeout=self._timeout,
+            verify=self._verify_ssl,
             headers=self._headers,
             cookies=self._cookies,
-            timeout=self._timeout,
-            impersonate=self._impersonate,  # type: ignore[arg-type]
-            verify=self._verify_ssl,
-            proxy=self._proxy,
+            limits=limits,
+            proxy=proxy,
+            trust_env=self._trust_env,
         )
 
     async def close(self) -> None:
         """
         Shutdown and clean up any resources.
         """
-        if self._session is not None:
-            await self._session.close()
+        if self._session is None:
+            return
+        if not self._session.is_closed:
+            await self._session.aclose()
         self._session = None
 
     async def get(
@@ -58,10 +69,8 @@ class CurlCffiSession(BaseSession):
         encoding: str = "utf-8",
         **kwargs: Unpack[GetRequestKwargs],
     ) -> BaseResponse:
-        if verify is not None:
-            kwargs.setdefault("verify", verify)  # type: ignore[typeddict-item]
         if allow_redirects is not None:
-            kwargs.setdefault("allow_redirects", allow_redirects)  # type: ignore[typeddict-item]
+            kwargs.setdefault("follow_redirects", allow_redirects)  # type: ignore[typeddict-item]
 
         r = await self.session.get(url, **kwargs)
         return BaseResponse(
@@ -80,10 +89,8 @@ class CurlCffiSession(BaseSession):
         encoding: str = "utf-8",
         **kwargs: Unpack[PostRequestKwargs],
     ) -> BaseResponse:
-        if verify is not None:
-            kwargs.setdefault("verify", verify)  # type: ignore[typeddict-item]
         if allow_redirects is not None:
-            kwargs.setdefault("allow_redirects", allow_redirects)  # type: ignore[typeddict-item]
+            kwargs.setdefault("follow_redirects", allow_redirects)  # type: ignore[typeddict-item]
 
         r = await self.session.post(url, **kwargs)
         return BaseResponse(
@@ -97,7 +104,7 @@ class CurlCffiSession(BaseSession):
         if self._session is None:
             return False
 
-        filename = filename or "curl_cffi.cookies"
+        filename = filename or "httpx.cookies"
         path = cookies_dir / filename
         if not path.exists():
             return False
@@ -107,25 +114,32 @@ class CurlCffiSession(BaseSession):
         except Exception:
             return False
 
-        cookies = {
-            item["name"]: item["value"]
-            for item in data
-            if "name" in item and "value" in item
-        }
-        self._session.cookies.update(cookies)
+        for item in data:
+            name = item.get("name")
+            value = item.get("value")
+            domain = item.get("domain", "")
+            path_ = item.get("path", "/")
+            if name and value:
+                self._session.cookies.set(name, value, domain=domain, path=path_)
         return True
 
     def save_cookies(self, cookies_dir: Path, filename: str | None = None) -> bool:
         if self._session is None:
             return False
 
-        filename = filename or "curl_cffi.cookies"
+        filename = filename or "httpx.cookies"
         cookies_dir.mkdir(parents=True, exist_ok=True)
 
-        cookies: list[dict[str, str]] = []
-        for name, value in self._session.cookies.items():
-            cookies.append({"name": name, "value": value})
-
+        cookies: list[dict[str, str | None]] = []
+        for cookie in self.session.cookies.jar:
+            cookies.append(
+                {
+                    "name": cookie.name,
+                    "value": cookie.value,
+                    "domain": cookie.domain,
+                    "path": cookie.path,
+                }
+            )
         (cookies_dir / filename).write_text(
             json.dumps(cookies, ensure_ascii=False, indent=2), encoding="utf-8"
         )
@@ -137,6 +151,12 @@ class CurlCffiSession(BaseSession):
         self._session.cookies.update(cookies)
 
     def get_cookie(self, key: str) -> str | None:
+        """
+        Retrieve the value of a cookie by name from the active session.
+
+        :param key: Cookie name.
+        :return: The cookie value if found, else None.
+        """
         if self._session is None:
             return None
 
@@ -152,24 +172,44 @@ class CurlCffiSession(BaseSession):
         if self._session is None:
             return
 
-        self._session.cookies.pop(name, None)
+        jar = self._session.cookies.jar
+        for cookie in jar:
+            if cookie.name == name:
+                jar.clear(cookie.domain, cookie.path, cookie.name)
 
     def clear_cookies(self) -> None:
         """
-        Remove all cookies stored in the curl_cffi session.
+        Remove all cookies stored in the httpx session.
         """
         if self._session is None:
             return
-
         self._session.cookies.clear()
 
     @property
-    def session(self) -> AsyncSession[Any]:
+    def session(self) -> httpx.AsyncClient:
         """
-        Return the active AsyncSession.
+        Return the active httpx.AsyncClient.
 
         :raises RuntimeError: If the session is uninitialized.
         """
         if self._session is None:
             raise RuntimeError("Session is not initialized or has been shut down.")
         return self._session
+
+    @staticmethod
+    def _build_proxy_config(
+        proxy: str | None = None,
+        proxy_user: str | None = None,
+        proxy_pass: str | None = None,
+    ) -> str | httpx.Proxy | None:
+        """Builds proxy configuration."""
+        if not proxy:
+            return None
+
+        if "@" in proxy:
+            return proxy
+
+        if proxy_user and proxy_pass:
+            return httpx.Proxy(proxy, auth=(proxy_user, proxy_pass))
+
+        return proxy

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.plugins.base.session_base
-------------------------------------------
+novel_downloader.infra.sessions.base
+------------------------------------
 """
 
 from __future__ import annotations
@@ -13,8 +13,9 @@ from pathlib import Path
 from typing import Any, Self, TypedDict, Unpack
 
 from novel_downloader.infra.http_defaults import DEFAULT_USER_HEADERS
-from novel_downloader.plugins.base.response import BaseResponse
 from novel_downloader.schemas import FetcherConfig
+
+from .response import BaseResponse
 
 
 class BaseRequestKwargs(TypedDict, total=False):

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.plugins.base.session_aiohttp
----------------------------------------------
+novel_downloader.infra.sessions._aiohttp
+----------------------------------------
 """
 
 import json
@@ -10,12 +10,12 @@ from typing import Any, Unpack
 
 import aiohttp
 
-from novel_downloader.plugins.base.response import BaseResponse
-from novel_downloader.plugins.base.session_base import (
+from .base import (
     BaseSession,
     GetRequestKwargs,
     PostRequestKwargs,
 )
+from .response import BaseResponse
 
 
 class AiohttpSession(BaseSession):
