@@ -1,3 +1,18 @@
+## v3.0.0 (2025-11-20)
+
+### Feat
+
+- **client**: implement full download and export support (#136)
+- **sites**: add support for ciweimao (#135)
+- **sites**: add support for faloo (#134)
+
+### Refactor
+
+- **parser**: unify chapter resources into `extra.resources` structure (#133)
+- **libs**: enhance epub_builder with font support and cleanup (#132)
+- **libs**: enhance html_builder with custom font support and cleanup (#130)
+- **plugins**: split CommonClient into modular mixins (#129)
+
 ## v2.5.0 (2025-11-11)
 
 ### Feat
