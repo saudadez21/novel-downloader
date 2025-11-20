@@ -176,6 +176,7 @@ omit = [
   "src/novel_downloader/plugins/processors/*",
   "src/novel_downloader/plugins/sites/*",
   "src/novel_downloader/plugins/search.py",
+  "src/novel_downloader/__main__.py",
 ]
 
 [tool.commitizen]
