@@ -25,13 +25,16 @@ def content_prefix(
     :param ignore_chars: Characters to ignore when counting content.
     :return: Truncated string preserving original whitespace and line breaks.
     """
+    if n <= 0:
+        return ""
+
     ignore = ignore_chars or set()
-    cnt = 0
+    count = 0
 
     for i, ch in enumerate(text):
         if ch not in ignore:
-            cnt += 1
-            if cnt >= n:
+            count += 1
+            if count == n:
                 return text[: i + 1]
 
     return text

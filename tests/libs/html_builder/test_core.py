@@ -107,7 +107,7 @@ def test_add_font_bytes():
 
 
 # ---------------------------------------------------------------------
-# add_chapter → index entry & chapter list
+# add_chapter -> index entry & chapter list
 # ---------------------------------------------------------------------
 def test_add_chapter_to_index():
     b = HtmlBuilder("Book")
@@ -120,7 +120,7 @@ def test_add_chapter_to_index():
 
 
 # ---------------------------------------------------------------------
-# add_volume → index + chapters flattened
+# add_volume -> index + chapters flattened
 # ---------------------------------------------------------------------
 def test_add_volume_to_index():
     b = HtmlBuilder("Book")

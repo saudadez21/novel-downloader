@@ -86,7 +86,7 @@ def test_roundtrip_large_numbers(exp):
         for val in (n, -n):
             s = arabic_to_chinese(val)
             r = chinese_to_arabic(s)
-            assert r == val, f"Large round-trip failed: {val} → {s} → {r}"
+            assert r == val, f"Large round-trip failed: {val} -> {s} -> {r}"
 
 
 # -------------------------

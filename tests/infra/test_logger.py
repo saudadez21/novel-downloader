@@ -46,7 +46,6 @@ def test_setup_logging_basic(monkeypatch, tmp_path):
       * file handler using mocked handler
     """
 
-    # monkeypatch TimedRotatingFileHandler → FakeHandler
     monkeypatch.setattr(
         logger_mod,
         "TimedRotatingFileHandler",

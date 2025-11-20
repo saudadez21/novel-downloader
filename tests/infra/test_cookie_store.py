@@ -109,7 +109,7 @@ def test_cookie_store_mtime_no_reload(tmp_path):
 
     store = CookieStore(tmp_path)
 
-    # First load → fills cache
+    # First load -> fills cache
     store.load_all()
     assert store.cache == {"a": "1"}
 

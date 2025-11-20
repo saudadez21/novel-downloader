@@ -122,6 +122,5 @@ def test_format_filename_timestamp_added():
 
 
 def test_format_filename_missing_field_safe():
-    # missing field → SafeDict returns {missing}
     name = format_filename("item_{missing}", append_timestamp=False, ext="txt")
     assert name == "item_{missing}.txt"

@@ -36,7 +36,7 @@ class FakeFile:
 
 
 def test_get_translation_missing_mo(monkeypatch):
-    """If .mo file does not exist → NullTranslations."""
+    """If .mo file does not exist -> NullTranslations."""
 
     def fake_files(_package):
         obj = types.SimpleNamespace()
@@ -50,7 +50,7 @@ def test_get_translation_missing_mo(monkeypatch):
 
 
 def test_get_translation_valid_mo(monkeypatch):
-    """If .mo exists → return GNUTranslations."""
+    """If .mo exists -> return GNUTranslations."""
 
     def fake_files(_package):
         obj = types.SimpleNamespace()
