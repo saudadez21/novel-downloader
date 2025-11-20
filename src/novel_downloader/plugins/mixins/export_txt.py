@@ -128,24 +128,68 @@ class ExportTxtMixin:
         out_path = self._output_dir / sanitize_filename(out_name)
 
         # --- Save final text ---
-        try:
-            result = write_file(
-                content=final_text, filepath=out_path, on_exist="overwrite"
-            )
-            logger.info(
-                "Exported TXT (site=%s, book=%s): %s", self._site, book_id, out_path
-            )
-        except Exception as e:
-            logger.error(
-                "Failed to write TXT (site=%s, book=%s) to %s: %s",
-                self._site,
-                book_id,
-                out_path,
-                e,
-            )
-            return []
-
+        result = write_file(content=final_text, filepath=out_path, on_exist="overwrite")
+        logger.info(
+            "Exported TXT (site=%s, book=%s): %s", self._site, book_id, out_path
+        )
         return [result]
+
+    def _export_chapter_txt(
+        self: "ExportTxtClientContext",
+        book_id: str,
+        chapter_id: str,
+        cfg: ExporterConfig,
+        *,
+        stage: str | None = None,
+        **kwargs: Any,
+    ) -> Path | None:
+        """Export a single chapter into a TXT file."""
+        raw_base = self._raw_data_dir / book_id
+        if not raw_base.is_dir():
+            return None
+
+        # --- stage ---
+        stage = stage or self._detect_latest_stage(book_id)
+
+        # --- Load chapter ---
+        dbfile = raw_base / f"chapter.{stage}.sqlite"
+        if not dbfile.exists():
+            return None
+
+        with ChapterStorage(raw_base, filename=f"chapter.{stage}.sqlite") as storage:
+            chap = storage.get_chapter(chapter_id)
+
+        if chap is None:
+            return None
+
+        chap_title = (chap.get("title") or f"chapter_{chapter_id}").strip()
+        final_text = self._xp_txt_chapter(chap_title, chap)
+
+        # --- Output file name ---
+        out_name = format_filename(
+            cfg.filename_template,
+            title=chap_title,
+            author="Unknown",
+            append_timestamp=cfg.append_timestamp,
+            ext="txt",
+        )
+        out_path = self._output_dir / sanitize_filename(out_name)
+
+        # --- Save file ---
+        result = write_file(
+            content=final_text,
+            filepath=out_path,
+            on_exist="overwrite",
+        )
+
+        logger.info(
+            "Exported TXT chapter (site=%s, book=%s, chapter=%s): %s",
+            self._site,
+            book_id,
+            chapter_id,
+            out_path,
+        )
+        return result
 
     def _xp_txt_header(self, book_info: BookInfoDict, name: str, author: str) -> str:
         """

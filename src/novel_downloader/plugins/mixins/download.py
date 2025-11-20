@@ -245,8 +245,41 @@ class DownloadMixin:
         :param book_id: Book identifier.
         :param chapter_id: Identifier of the chapter to download.
         """
-        # TODO: placeholder
-        return
+        raw_base = self._raw_data_dir / book_id
+        raw_base.mkdir(parents=True, exist_ok=True)
+
+        # ---- fetch chapter ----
+        chap = await self.get_chapter(book_id, chapter_id)
+        if chap is None:
+            logger.warning(
+                "Chapter fetch returned None (site=%s, book=%s, chapter=%s)",
+                self._site,
+                book_id,
+                chapter_id,
+            )
+            return
+
+        # ---- save directly ----
+        with ChapterStorage(raw_base, filename="chapter.raw.sqlite") as storage:
+            need_refetch = self._dl_check_refetch(chap)
+            try:
+                storage.upsert_chapters([chap], need_refetch=need_refetch)
+            except Exception as e:
+                logger.error(
+                    "Failed to save chapter (site=%s, book=%s, chapter=%s): %s",
+                    self._site,
+                    book_id,
+                    chapter_id,
+                    e,
+                )
+                raise
+
+        logger.info(
+            "Single chapter downloaded (site=%s, book=%s, chapter=%s)",
+            self._site,
+            book_id,
+            chapter_id,
+        )
 
     async def cache_media(
         self: "DownloadClientContext",

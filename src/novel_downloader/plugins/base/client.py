@@ -248,7 +248,7 @@ class AbstractClient(abc.ABC):
         formats: list[str] | None = None,
         stage: str | None = None,
         **kwargs: Any,
-    ) -> dict[str, list[Path]]:
+    ) -> dict[str, Path | None]:
         """
         Persist a single chapter to disk in one or more formats.
 

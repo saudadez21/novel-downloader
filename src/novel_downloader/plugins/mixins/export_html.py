@@ -154,26 +154,91 @@ class ExportHtmlMixin:
                 if curr_vol.chapters:
                     builder.add_volume(curr_vol)
 
-        try:
-            out_name = format_filename(
-                cfg.filename_template,
-                title=name,
-                author=author,
-                append_timestamp=cfg.append_timestamp,
-            )
-            out_path = builder.export(self._output_dir, folder=out_name)
-            logger.info(
-                "Exported HTML (site=%s, book=%s): %s", self._site, book_id, out_path
-            )
-        except Exception as e:
-            logger.error(
-                "Failed to write HTML (site=%s, book=%s): %s",
-                self._site,
-                book_id,
-                e,
-            )
-            return []
+        out_name = format_filename(
+            cfg.filename_template,
+            title=name,
+            author=author,
+            append_timestamp=cfg.append_timestamp,
+        )
+        out_path = builder.export(self._output_dir, folder=out_name)
+        logger.info(
+            "Exported HTML (site=%s, book=%s): %s", self._site, book_id, out_path
+        )
         return [out_path]
+
+    def _export_chapter_html(
+        self: "ExportHtmlClientContext",
+        book_id: str,
+        chapter_id: str,
+        cfg: ExporterConfig,
+        *,
+        stage: str | None = None,
+        **kwargs: Any,
+    ) -> Path | None:
+        """Export a single chapter into a HTML file."""
+        raw_base = self._raw_data_dir / book_id
+        if not raw_base.is_dir():
+            return None
+
+        # --- detect stage ---
+        stage = stage or self._detect_latest_stage(book_id)
+
+        # --- load chapter ---
+        dbfile = raw_base / f"chapter.{stage}.sqlite"
+        if not dbfile.exists():
+            return None
+
+        with ChapterStorage(raw_base, filename=f"chapter.{stage}.sqlite") as storage:
+            chap = storage.get_chapter(chapter_id)
+
+        if chap is None:
+            return None
+
+        # ---- basic fields ----
+        chap_title = (chap.get("title") or f"chapter_{chapter_id}").strip()
+        media_dir = raw_base / "media"
+
+        # ---- builder (no metadata known) ----
+        builder = HtmlBuilder(
+            title=chap_title,
+            author="Unknown",
+            description="",
+            cover=None,
+            subject=[],
+            serial_status="",
+            word_count="0",
+        )
+
+        # ---- build a chapter ----
+        chapter_obj = self._xp_html_chapter(
+            builder=builder,
+            cid=chapter_id,
+            chap_title=chap_title,
+            chap=chap,
+            media_dir=media_dir,
+        )
+
+        builder.add_chapter(chapter_obj)
+
+        # ---- output file/folder name ----
+        out_name = format_filename(
+            cfg.filename_template,
+            title=chap_title,
+            author="Unknown",
+            append_timestamp=cfg.append_timestamp,
+        )
+
+        out_path = builder.export(self._output_dir, folder=out_name)
+
+        logger.info(
+            "Exported HTML chapter (site=%s, book=%s, chapter=%s): %s",
+            self._site,
+            book_id,
+            chapter_id,
+            out_path,
+        )
+
+        return out_path
 
     def _xp_html_chapter(
         self: "ExportHtmlClientContext",
