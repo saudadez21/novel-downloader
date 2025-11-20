@@ -145,10 +145,10 @@ class SfacgParser(BaseParser):
                 logger.warning("sfacg chapter %s :: missing VIP img data", chapter_id)
                 return None
 
-            if not self._decode_font:
+            if not self._enable_ocr:
                 logger.warning(
                     "sfacg chapter %s :: VIP chapter not decoded "
-                    "(enable decode_font to OCR)",
+                    "(enable enable_ocr to OCR)",
                     chapter_id,
                 )
                 resources.append(

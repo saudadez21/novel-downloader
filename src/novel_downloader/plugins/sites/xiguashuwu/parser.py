@@ -278,7 +278,7 @@ class XiguashuwuParser(BaseParser):
             return char
         if url in self._GLYPH_CACHE:
             return self._GLYPH_CACHE[url]
-        if self._decode_font:
+        if self._enable_ocr:
             char = self._recognize_glyph_from_url(url)
             if char:
                 self._GLYPH_CACHE[url] = char

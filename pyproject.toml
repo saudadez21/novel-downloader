@@ -7,14 +7,23 @@ authors = [
 license = {file = "LICENSE"}
 readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">=3.11"
-keywords = ["novel", "web novel", "qidian", "biquge", "ebook"]
+keywords = [
+  "novel",
+  "web novel",
+  "qidian",
+  "epub",
+  "light novel",
+  "crawler",
+  "scraper",
+  "ebook",
+]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Environment :: Console",
     "License :: OSI Approved :: MIT License",
     "Natural Language :: Chinese (Simplified)",
+    "Natural Language :: Chinese (Traditional)",
     "Topic :: Utilities",
-    "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13"
@@ -22,7 +31,6 @@ classifiers = [
 dynamic = ["version"]
 dependencies = [
     "rich",
-    "nicegui",
     "requests",
     "pycryptodome",
     "aiohttp",
@@ -31,27 +39,70 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-font-recovery = [
+web-ui = [
+    "nicegui",
+]
+image-utils = [
     "brotli",
     "numpy",
     "fonttools",
     "pillow",
 ]
+httpx = [
+    "httpx[http2]",
+]
+curl_cffi = [
+    "curl_cffi",
+]
+all-backends = [
+    "httpx[http2]",
+    "curl_cffi",
+]
+all = [
+    "nicegui",
+    "brotli",
+    "numpy",
+    "fonttools",
+    "pillow",
+    "httpx[http2]",
+    "curl_cffi",
+]
 
-dev = [
-    "black",
-    "mypy",
-    "ruff",
+tests = [
     "pytest",
     "pytest-asyncio",
     "pytest-cov",
     "pytest-mock",
     "types-requests",
     "types-lxml",
-    "types-PyYAML",
+]
+ci = [
+    "pytest",
+    "pytest-asyncio",
+    "pytest-cov",
+    "pytest-mock",
+    "types-requests",
+    "types-lxml",
+    "nicegui",
+    "black",
+    "mypy",
+    "ruff",
+    "pre-commit",
+]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "pytest-cov",
+    "pytest-mock",
+    "types-requests",
+    "types-lxml",
+    "black",
+    "mypy",
+    "ruff",
     "pre-commit",
     "commitizen",
     "babel",
+    # "genbadge[all]",
 ]
 
 [project.scripts]
@@ -61,9 +112,10 @@ novel-web = "novel_downloader.apps.web.main:web_main"
 [project.urls]
 Homepage = "https://github.com/saudadez21/novel-downloader"
 Source = "https://github.com/saudadez21/novel-downloader"
+Issues = "https://github.com/saudadez21/novel-downloader/issues"
 
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
@@ -120,7 +172,9 @@ testpaths = ["tests"]
 omit = [
   "src/novel_downloader/apps/*",
   "src/novel_downloader/plugins/archived/*",
+  "src/novel_downloader/plugins/processors/*",
   "src/novel_downloader/plugins/sites/*",
+  "src/novel_downloader/plugins/search.py",
 ]
 
 [tool.commitizen]

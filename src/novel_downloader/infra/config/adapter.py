@@ -86,10 +86,14 @@ class ConfigAdapter:
         g_font = g.get("font_ocr") or {}
         s_font = s.get("font_ocr") or {}
         font_ocr: dict[str, Any] = {**g_font, **s_font}
+        enable_ocr = font_ocr.get("enable_ocr")
+        if enable_ocr is None:  # fallback: old field
+            enable_ocr = font_ocr.get("decode_font", False)
+        enable_ocr = bool(enable_ocr)
         return ParserConfig(
             cache_dir=g.get("cache_dir", "./novel_cache"),
             use_truncation=bool(s.get("use_truncation", True)),
-            decode_font=bool(font_ocr.get("decode_font", False)),
+            enable_ocr=enable_ocr,
             save_font_debug=bool(font_ocr.get("save_font_debug", False)),
             batch_size=int(font_ocr.get("batch_size", 32)),
             fontocr_cfg=self._dict_to_fontocr_cfg(font_ocr),
@@ -126,13 +130,11 @@ class ConfigAdapter:
         """
         s = self._site_cfg(site)
         out = self._config.get("output") or {}
-        naming = out.get("naming") or {}
-        epub_opts = out.get("epub") or {}
 
         return ExporterConfig(
-            append_timestamp=naming.get("append_timestamp", True),
-            filename_template=naming.get("filename_template", "{title}_{author}"),
-            include_picture=epub_opts.get("include_picture", True),
+            append_timestamp=out.get("append_timestamp", True),
+            filename_template=out.get("filename_template", "{title}_{author}"),
+            include_picture=out.get("include_picture", True),
             split_mode=s.get("split_mode", "book"),
         )
 

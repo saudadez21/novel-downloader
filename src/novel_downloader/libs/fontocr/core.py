@@ -165,7 +165,7 @@ class FontOCR:
         cls, data: bytes, white_bg: bool = False
     ) -> NDArray[np.uint8]:
         """
-        Decode image bytes into an RGB NumPy array.
+        Decode image bytes into an RGB NumPy array (with white background).
 
         Reads common image formats (e.g. PNG/JPEG/WebP) from an
         in-memory byte buffer using Pillow, converts the image to RGB,
@@ -184,7 +184,7 @@ class FontOCR:
         cls, path: Path, white_bg: bool = False
     ) -> NDArray[np.uint8]:
         """
-        Convert a GIF image into a numpy array with white background.
+        Load a image into an RGB NumPy array (with white background).
 
         :param path: Image file path.
         :param white_bg: If True, flatten images with transparency onto white.
@@ -197,6 +197,8 @@ class FontOCR:
     def filter_orange_watermark(img: NDArray[np.uint8]) -> NDArray[np.uint8]:
         """
         Remove orange-like watermark colors by replacing them with white.
+
+        Note: The input array will be modified in-place.
 
         :param img: Input image as numpy array (H, W, 3)
         :return: Filtered numpy array (H, W, 3)
@@ -214,6 +216,26 @@ class FontOCR:
         )
 
         img[mask_orange] = [255, 255, 255]
+        return img
+
+    @staticmethod
+    def filter_gray_watermark(
+        img: NDArray[np.uint8], threshold: int = 200
+    ) -> NDArray[np.uint8]:
+        """
+        Remove gray-like watermark colors by replacing them with white.
+
+        Note: The input array will be modified in-place.
+
+        :param img: Input image as numpy array (H, W, 3)
+        :return: Filtered numpy array (H, W, 3)
+        """
+        img16 = img.astype(np.uint16, copy=False)
+        sum_rgb = img16[..., 0] + img16[..., 1]
+        sum_rgb += img16[..., 2]
+
+        mask = sum_rgb > threshold * 3
+        img[mask] = (255, 255, 255)
         return img
 
     @staticmethod
@@ -262,8 +284,13 @@ class FontOCR:
         """
         h, w, _ = img_arr.shape
 
-        white_row_mask = (img_arr == 255).all(axis=2).all(axis=1)
-        white_rows = np.flatnonzero(white_row_mask)
+        # white_row_mask = (img_arr == 255).all(axis=2).all(axis=1)
+        # white_rows = np.flatnonzero(white_row_mask)
+
+        # bench: ~2x faster
+        pix_and = np.bitwise_and.reduce(img_arr, axis=2)
+        row_min = pix_and.min(axis=1)
+        white_rows = np.flatnonzero(row_min == 255)
 
         # Compute block boundaries using vectorized diff
         if white_rows.size == 0:
@@ -416,6 +443,9 @@ class FontOCR:
     @staticmethod
     def _pil_to_rgb_array(img: Image.Image, white_bg: bool) -> NDArray[np.uint8]:
         """Convert PIL image to RGB numpy array, optionally flattening alpha."""
+        if img.mode == "P":
+            img = img.convert("RGBA")
+
         if white_bg and ("A" in img.getbands()):
             img = img.convert("RGBA")
             bg = Image.new("RGBA", img.size, (255, 255, 255, 255))
@@ -424,4 +454,4 @@ class FontOCR:
         else:
             img = img.convert("RGB")
 
-        return np.asarray(img)
+        return np.array(img, copy=True)

@@ -267,7 +267,7 @@ class FontOCRConfig: ...
 class ParserConfig:
     cache_dir: str = "./novel_cache"
     use_truncation: bool = True
-    decode_font: bool = False
+    enable_ocr: bool = False
     batch_size: int = 32
     save_font_debug: bool = False
     fontocr_cfg: FontOCRConfig = field(default_factory=FontOCRConfig)

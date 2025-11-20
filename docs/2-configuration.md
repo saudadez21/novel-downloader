@@ -1,57 +1,167 @@
 ## 配置
 
-### 1. 初始化默认配置
+`novel-downloader` 的行为由 `settings.toml` 控制。
+
+本章节介绍如何创建、修改和使用配置文件。
+
+### 1. 初始化配置文件
+
+在任意工作目录下, 通过命令生成默认配置文件:
 
 ```bash
-# 创建一个新的工作目录
-mkdir novel-folder
-
-# 进入目录
-cd novel-folder
-
-# 在当前目录下生成 settings.toml (已存在则跳过)
 novel-cli config init
+```
 
-# 如果想强制覆盖
+若已存在同名文件并需覆盖:
+
+```bash
 novel-cli config init --force
 ```
 
-### 2. 编辑生成的 `settings.toml`
+生成内容包括:
+
+* `settings.toml`: 核心配置文件
+
+---
+
+### 2. 编辑 `settings.toml`
+
+基础结构如下 (站点名按需替换 `<site_name>`):
 
 ```toml
-[sites.qidian]
-# 小说 ID 列表
+[sites.<site_name>]
 book_ids = [
-  "1234567890",
-  "0987654321"
+  "123456",
+  "234567"
 ]
-login_required = true              # 是否需要登录才能访问
+login_required = false
 ```
 
-具体定义可参考 [settings.toml 配置说明](./3-settings-schema.md)
+最少配置只需为目标站点填写 `book_ids`:
 
-### 3. (可选) 注册配置到 CLI
+```toml
+[sites.linovelib]
+book_ids = ["1234"]
+```
+
+随后即可通过 CLI 启动下载:
 
 ```bash
-# 将当前目录下的 settings.toml 设为默认配置
+novel-cli download --site linovelib
+```
+
+> **说明**:
+>
+> 若 CLI 同时传入了 Book ID, 例如 `novel-cli download --site linovelib 5555`,
+> 则 **命令行参数会覆盖配置文件中的 `book_ids`**。
+
+---
+
+### 3. 登录与 Cookie 配置
+
+部分站点需要登录才能访问全部内容, 可按以下方式配置。
+
+#### Cookie 缓存机制
+
+程序会将登录后获取的 Cookie 自动缓存在运行目录下:
+
+```bash
+./novel_cache/<site_name>/*.cookies
+```
+
+如果遇到登录异常、Cookie 失效, 或不希望继续使用缓存内容, 可以直接删除对应的 `.cookies` 文件, 程序会在下次访问时尝试重新登录或提示输入 Cookie。
+
+#### 3.1 使用账号密码登录
+
+适用于: ESJ Zone、百合会等支持表单登录的站点。
+
+```toml
+[sites.<site_name>]
+login_required = true
+username = "your_username"
+password = "your_password"
+```
+
+也可不写入配置, CLI 会在需要时提示输入。
+
+---
+
+#### 3.2 使用 Cookie 登录
+
+适用于需要复杂登录逻辑 (如验证码、扫码登录) 的站点。
+
+步骤:
+
+1. 先在浏览器登录目标站点
+2. 打开开发者工具 (`F12` / `CTRL + SHITF + I`)
+3. 从网络请求中复制完整 Cookie 字符串
+4. 写入配置:
+
+```toml
+[sites.<site_name>]
+login_required = true
+cookie = "完整的 Cookie 字符串"
+```
+
+> 当前 Cookie 方式不支持自动续期; 过期后请重新复制。
+
+更多说明见: [复制 Cookies](./copy-cookies.md)
+
+---
+
+### 4. 注册配置文件到 CLI (可选)
+
+如果希望 CLI 在任何目录下都使用某个固定配置文件:
+
+```bash
 novel-cli config set-config ./settings.toml
 ```
 
+之后无需再在工作目录中放置配置文件。
+
 ### 配置文件查找顺序
 
-CLI 启动时会按以下优先级依次查找并加载配置 (越靠前优先级越高):
+CLI 每次运行时会按以下优先级查找配置 (高 -> 低):
 
-1. 通过命令行参数 `--config` 明确指定的配置文件
-2. 当前工作目录下的 `./settings.toml` 文件
-3. 已注册 (全局保存) 的配置文件
+(1) **命令行参数指定的文件**
 
-> 注: 使用 `novel-cli config init` 会在当前目录生成 `settings.toml` 和 `rules.toml`, 作为默认配置的模板文件, 方便后续编辑与使用。
+```bash
+novel-cli download --config path/to/settings.toml
+```
 
-### 站点信息查找顺序
+(2) **当前目录下的 `./settings.toml`**
 
-在解析有效配置后, CLI 将按以下优先级查找站点相关信息 (越靠前优先级越高):
+(3) **已注册的全局配置 (由 `config set-config` 设置)**
 
-1. `[sites.<sitename>]`
-   - 其中 `<sitename>` 对应命令行参数中 `--site sitename` 指定的站点名称
-2. `[sites.common]`
-   - 通用站点配置, 适用于所有未显式定义的站点项, 作为默认回退方案
+若存在多个匹配项, 上级优先级配置会覆盖下级。
+
+---
+
+### 6. 站点配置查找顺序
+
+解析站点信息时, 按以下优先级查找:
+
+1. **`[sites.<site_name>]`**: 匹配下载命令中 `--site <site_name>` 的具体配置。
+
+2. **`[sites.common]`**: 所有站点共享的默认配置, 作为回退选项。
+
+示例:
+
+```toml
+[sites.common]
+request_interval = 1.2
+
+[sites.linovelib]
+book_ids = ["1234"]
+```
+
+若 `linovelib` 未设置某个字段, 则会继承 `sites.common` 中的对应值。
+
+---
+
+### 配置文档导航
+
+* [安装说明](./1-installation.md)
+* [settings.toml 字段定义](./3-settings-schema.md)
+* [支持站点列表](./4-supported-sites.md)
+* [复制 Cookies](./copy-cookies.md)

@@ -22,14 +22,11 @@ save_html = false                  # 是否将抓取到的原始 HTML 保留到�
 log_level = "INFO"                 # 日志级别: DEBUG, INFO, WARNING, ERROR
 
 [general.font_ocr]
-decode_font = false                # 是否尝试本地解码混淆字体
+enable_ocr = false                # 是否尝试本地解析混淆字体 / 图片章节
 batch_size = 32
 
 # 以下为 PaddleOCR 文本识别的可选参数
 # 默认情况下, 请保持注释, 程序会使用 PaddleOCR 内置的默认值
-# 如果需要修改配置, 请取消注释并填写参数值 (参考官网文档)
-# https://www.paddleocr.ai/main/version3.x/module_usage/text_recognition.html
-
 model_name = "PP-OCRv5_mobile_rec"
 # model_dir = "/path/to/inference"
 # input_shape = [3, 48, 320]        # [C, H, W], 按所选模型文档填写, 不确定请注释
@@ -40,7 +37,7 @@ model_name = "PP-OCRv5_mobile_rec"
 [sites.qidian]  # 起点中文网
 book_ids = [
   "0000000000",
-  "0000000000"
+  "0000000000",
 ]
 login_required = true              # 是否需要登录才能访问
 
@@ -51,14 +48,6 @@ login_required = true
 login_required = true
 # username = "youremail@domain.com"  # 登录邮箱
 # password = "yourpassword"          # 登录密码
-
-[sites.linovelib]  # 哔哩轻小说
-login_required = false
-request_interval = 2.5
-
-[sites.faloo]
-request_interval = 3.0
-login_required = true
 
 [sites.sfacg]
 login_required = true
@@ -78,7 +67,18 @@ login_required = false
 backend = "curl_cffi"
 impersonate = "chrome136"
 
+[sites.linovelib]  # 哔哩轻小说
+login_required = false
+request_interval = 2.5
+
+[sites.faloo]
+request_interval = 3.0
+login_required = true
+
 [sites.ciyuanji]
+login_required = true
+
+[sites.ciweimao]
 login_required = true
 
 [sites.yamibo]
@@ -113,10 +113,6 @@ formats = [
   "epub",
 #   "html",
 ]
-
-[output.naming]
 append_timestamp = true            # 在文件名中追加时间戳
 filename_template = "{title}_{author}"  # 文件命名规则
-
-[output.epub]
 include_picture = true             # 是否附带书籍图片

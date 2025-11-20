@@ -1,5 +1,20 @@
 ## 站点支持
 
+本工具支持大量原创平台、轻小说站点、综合书库与第三方转载站点。
+
+可通过站点标识符 (`--site`) 或直接使用完整 URL 来下载书籍。
+
+**使用示例**
+
+```bash
+novel-cli download https://www.hetushu.com/book/5763/index.html
+novel-cli download https://www.23qb.com/book/12282/
+
+novel-cli download --site qidian 1010868264
+novel-cli download --site n23qb 12282
+novel-cli download --site ttkan shengxu-chendong
+```
+
 ### 目录
 
 - [站点支持](#站点支持)
@@ -24,20 +39,16 @@
     - [日语](#日语-1)
     - [NSFW](#nsfw-1)
     - [已归档站点](#已归档站点-1)
-  - [配置文件](#配置文件)
-  - [Cookie 与登录](#cookie-与登录)
-    - [在配置中保存账号信息](#在配置中保存账号信息)
-  - [注意事项](#注意事项)
 
 ---
 
 ### 关键词搜索 (Search)
 
 ```bash
-# 根据关键词搜索 (默认全站点)
+# 全站点搜索
 novel-cli search 关键词
 
-# 指定站点
+# 指定站点搜索
 novel-cli search --site b520 三体
 ```
 
@@ -47,32 +58,25 @@ novel-cli search --site b520 三体
 
 * **站点名称**: 支持的小说网站
 * **站点标识符**: CLI `--site` 与配置文件使用的短名称
-* **支持分卷**: 可识别并抓取分卷结构
-* **支持图片**: 可抓取章节插图并嵌入 EPUB
-* **支持登录**: 站点需要登录 (如书架/VIP/订阅)
-* **支持搜索**: 可通过关键词检索该站点
-* **支持语言**: 站点主要语言 (简/繁)
+* **支持分卷**: 是否支持卷结构识别
+* **支持图片**: 是否能抓取章节插图或封面
+* **支持登录**: 是否需要登录 (Cookie / 账号密码)
+* **支持搜索**: 是否支持站内搜索
+* **支持语言**: 站点主要语言 (简 / 繁)
 
-> 图例: ✅ 已支持; ❌ 不支持; ⚠️ 尚未在本库实现
+图例:
+
+* ✅ = 已支持
+* ❌ = 不支持
+* ⚠️ = 部分/未实现
 
 ---
 
 ### 支持站点总览
 
-**使用示例**
-
-```bash
-novel-cli download https://www.hetushu.com/book/5763/index.html
-novel-cli download https://www.23qb.com/book/12282/
-
-novel-cli download --site qidian 1010868264
-novel-cli download --site n23qb 12282
-novel-cli download --site ttkan shengxu-chendong
-```
-
 #### 主流原创 / 正版文学平台
 
-> 官方原创或具备正版渠道的平台
+> 官方原创写作或正版授权渠道的网站
 
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 | 支持语言 |
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
@@ -85,10 +89,11 @@ novel-cli download --site ttkan shengxu-chendong
 
 #### 轻小说 / 二次元向平台
 
-> 专注轻小说、幻想、异世界、恋爱等题材的网站
+> 涵盖轻小说、异世界、幻想、恋爱等题材的网站
 
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 | 支持语言 |
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
+| [刺猬猫](https://www.ciweimao.com/)                          | ciweimao  | ✅     | ✅     | ✅     | ⚠️     | 简      |
 | [次元姬](https://www.ciyuanji.com/)                          | ciyuanji  | ✅     | ✅     | ✅     | ✅     | 简      |
 | [SF轻小说](https://m.sfacg.com)                              | sfacg      | ✅     | ✅     | ✅     | ⚠️     | 简      |
 | [轻之文库](https://www.linovel.net/)                         | linovel    | ✅     | ✅     | ⚠️     | ✅     | 简      |
@@ -104,7 +109,7 @@ novel-cli download --site ttkan shengxu-chendong
 
 #### 综合书库 / 文库与名著
 
-> 综合阅读与名著文库类站点
+> 综合类阅读站、经典文库站
 
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 | 支持语言 |
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
@@ -118,7 +123,7 @@ novel-cli download --site ttkan shengxu-chendong
 
 #### 类笔趣阁 / 第三方转载站
 
-> 以转载/聚合为主的民间小说站
+> 以转载为主的第三方小说书源
 
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 | 支持语言 |
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
@@ -163,7 +168,7 @@ novel-cli download --site ttkan shengxu-chendong
 
 #### 同人
 
-> 以同人、百合、纯爱等衍生原创为主
+> 百合、同人、衍生原创类站点
 
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 | 支持语言 |
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
@@ -175,6 +180,8 @@ novel-cli download --site ttkan shengxu-chendong
 | [全本同人小说](https://www.qbtr.cc/)                         | qbtr        | ❌     | ❌     | ❌     | ✅     | 简      |
 
 #### 日语
+
+> 日本 Web 小说平台
 
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 |
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- |
@@ -201,6 +208,8 @@ novel-cli download --site ttkan shengxu-chendong
 
 #### 已归档站点
 
+> 已无法访问、结构重大变动或不再维护的网站
+
 | 站点名称                                                     | 站点标识符 | 支持分卷 | 支持图片 | 支持登录 | 支持搜索 | 支持语言 |
 | ----------------------------------------------------------- | --------- | ------- | ------- | ------- | ------- | ------- |
 | [3A电子书](http://www.aaatxt.com/)                           | aaatxt     | ❌     | ❌     | ⚠️     | ✅     | 简      |
@@ -216,9 +225,9 @@ novel-cli download --site ttkan shengxu-chendong
 
 ### 站点详解与 Book ID 规则
 
-> **说明**: Book ID 通常来源于小说详情页 URL 的路径段; Chapter ID 来自章节页 URL。
->
-> 下文对每个站点给出示例 URL -> 对应 ID以及注意。
+说明: Book ID 通常来自小说详情页的 URL, Chapter ID 通常来自章节页 URL。
+
+以下示例展示常见站点的 ID 提取方式及相关注意事项。
 
 #### 主流原创 / 正版文学平台
 
@@ -228,7 +237,8 @@ novel-cli download --site ttkan shengxu-chendong
   * 登录: 需要有效 Cookie
   * 其它:
     * 章节存在重复内容时请在 `settings.toml` 中该站点 (`[sites.qidian]`) 的 `use_truncation` 为 `true`。
-    * 近月更新章节可能使用字体加密, 可按需开启解密字体 (`decode_font` 参数)
+    * VIP 章节解析需要额外安装 [Node.js](https://nodejs.org/en/download)
+    * 新章节可能含有字体混淆, 可开启 `enable_ocr`
 
 * **QQ 阅读 (qqbook)**
   * 书籍: `https://book.qq.com/book-detail/41089201` -> Book ID: `41089201`
@@ -236,7 +246,7 @@ novel-cli download --site ttkan shengxu-chendong
   * 登录: 需要有效 Cookie
   * 其它:
     * VIP 章节解析需要额外安装 [Node.js](https://nodejs.org/en/download)
-    * VIP 章节可能使用字体加密, 可按需开启解密字体 (`decode_font` 参数)
+    * VIP 章节可能含有字体混淆, 可开启 `enable_ocr`
 
 * **17K小说网 (n17k)**
   * 书籍: `https://www.17k.com/book/3631088.html` -> Book ID: `3631088`
@@ -256,6 +266,10 @@ novel-cli download --site ttkan shengxu-chendong
 
 #### 轻小说 / 二次元向平台
 
+* **刺猬猫 (ciweimao)**
+  * 书籍: `https://www.ciweimao.com/book/100011781` -> Book ID: `100011781`
+  * 章节: `https://www.ciweimao.com/chapter/100257072` -> Chapter ID: `100257072`
+
 * **次元姬 (ciyuanji)**
   * 书籍: `https://www.ciyuanji.com/b_d_12030.html` -> Book ID: `12030`
   * 章节: `https://www.ciyuanji.com/chapter/12030_3046684.html` -> Chapter ID: `3046684`
@@ -269,7 +283,7 @@ novel-cli download --site ttkan shengxu-chendong
   * 章节: `https://m.sfacg.com/c/5417665/` -> Chapter ID: `5417665`
   * 登录: 需提供有效的 Cookie 才能访问订阅章节。
   * 其它:
-    * VIP 章节以图片形式返回, 可通过开启 `decode_font` 参数配合 OCR 识别为文本。
+    * VIP 章节以图片形式返回, 可通过开启 `enable_ocr` 参数配合 OCR 识别为文本。
     * OCR 识别结果并非完全可靠, 准确率大约在 **80%+**, 可能存在错误或缺字。
     * OCR 运算在 CPU 环境下较为耗时, 解析 VIP 章节速度会明显变慢, 建议在具备 GPU 的环境中运行。
 
@@ -661,74 +675,3 @@ novel-cli download --site ttkan shengxu-chendong
 * **69阅读 (n69yue)**
   * 书籍: `https://www.69yue.top/articlecategroy/15yu.html` -> Book ID: `15yu`
   * 章节: `https://www.69yue.top/article/15185363014257741.html` -> Chapter ID: `15185363014257741`
-
----
-
-### 配置文件
-
-在 `settings.toml` 中为目标站点添加书籍 ID 与登录方式:
-
-```toml
-# 以站点名为键, <site_name> 请替换为具体站点标识
-[sites.<site_name>]
-book_ids = [
-  "0000000000",
-  "0000000000"
-]
-login_required = false  # 需要登录时改为 true
-
-# 若需要登录, 可按需补充:
-# username = "yourusername"
-# password = "yourpassword"
-```
-
-示例: 下载 linovelib 的书籍
-
-```toml
-[sites.linovelib]
-book_ids = [
-  "1234"
-]
-login_required = false
-```
-
-配合 cli 直接下载:
-
-```bash
-novel-cli download --site linovelib
-```
-
-> 当命令行中同时传入 Book ID 时, 该 ID 会覆盖 `settings.toml` 中对应站点的 `book_ids` 设置
-
----
-
-### Cookie 与登录
-
-如需通过 Cookie 登录:
-1. 可在浏览器登录后
-2. 打开开发者工具 (F12) 复制完整的 Cookie 字符串 (详见 [复制 Cookies](./copy-cookies.md))
-
-当前基于会话的 Cookie 不支持自动续期, 每次运行如果过期需手动更新。后续版本将考虑优化此流程。
-
-#### 在配置中保存账号信息
-
-对于 ESJ Zone 和 百合会 等需要登录才能获取内容的站点, 可在 `settings.toml` 中开启登录并填写账号信息 (或在运行时按提示输入):
-
-```toml
-[sites.<site_name>]
-book_ids = [
-  "0000000000",
-  "0000000000"
-]
-login_required = true
-username = "yourusername"     # 登录账户
-password = "yourpassword"     # 登录密码
-```
-
----
-
-### 注意事项
-
-- **站点结构变更**: 若目标站点页面结构更新或章节抓取异常, 欢迎提 Issue 或提交 PR
-- **登录支持范围**: 登录功能受站点策略与接口限制, 部分场景需要手动配置 Cookie 或进行账号绑定
-- **请求频率**: 请合理设置抓取间隔, 避免触发风控或导致 IP 限制
