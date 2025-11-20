@@ -14,11 +14,13 @@ from typing import Any
 
 from lxml import html
 from novel_downloader.infra.cookies import CookieStore
-from novel_downloader.infra.jsbridge import get_decryptor
+from novel_downloader.infra.paths import QD_DECRYPT_SCRIPT_PATH
 from novel_downloader.libs.textutils import truncate_half_lines
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.plugins.utils.yuewen import (
+    AssetSpec,
+    NodeDecryptor,
     apply_css_text_rules,
     decode_qdfont_text,
 )
@@ -31,6 +33,19 @@ from novel_downloader.schemas import (
 )
 
 logger = logging.getLogger(__name__)
+
+QD_SCRIPT: AssetSpec = {
+    "type": "local",
+    "src": QD_DECRYPT_SCRIPT_PATH,
+    "filename": "qidian_decrypt_node.js",
+}
+QD_ASSETS: list[AssetSpec] = [
+    {
+        "type": "remote",
+        "url": "https://cococdn.qidian.com/coco/s12062024/4819793b.qeooxh.js",
+        "filename": "4819793b.qeooxh.js",
+    }
+]
 
 
 @registrar.register_parser()
@@ -48,6 +63,7 @@ class QidianParser(BaseParser):
         super().__init__(config)
         self._fuid = fuid
         self._cookie_store = CookieStore(self._cache_dir)
+        self._decryptor = NodeDecryptor(script=QD_SCRIPT, assets=QD_ASSETS)
 
     def parse_book_info(
         self,
@@ -229,8 +245,9 @@ class QidianParser(BaseParser):
         word_count = chapter_info.get("actualWords", 0)
 
         if self._is_vip(chapter_info):
-            decryptor = get_decryptor()
-            raw_html = decryptor.decrypt_qd(raw_html, cid, fkp, fuid)
+            raw_html = self._decryptor.decrypt(raw_html, cid, fkp, fuid)
+            if raw_html is None:
+                return None
 
         extra: dict[str, Any] = {
             "site": self.site_name,

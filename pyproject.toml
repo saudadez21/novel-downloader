@@ -172,12 +172,7 @@ testpaths = ["tests"]
 [tool.coverage.run]
 omit = [
   "src/novel_downloader/apps/*",
-  "src/novel_downloader/plugins/archived/*",
-  "src/novel_downloader/plugins/base/*",
-  "src/novel_downloader/plugins/common/*",
-  "src/novel_downloader/plugins/processors/*",
-  "src/novel_downloader/plugins/sites/*",
-  "src/novel_downloader/plugins/search.py",
+  "src/novel_downloader/plugins/*",
   "src/novel_downloader/__main__.py",
 ]
 

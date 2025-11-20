@@ -13,10 +13,13 @@ import re
 from typing import Any
 
 from lxml import html
-from novel_downloader.infra.jsbridge import get_decryptor
+from novel_downloader.infra.paths import QQ_DECRYPT_SCRIPT_PATH
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
+from novel_downloader.plugins.utils.js_eval import get_evaluator
 from novel_downloader.plugins.utils.yuewen import (
+    AssetSpec,
+    NodeDecryptor,
     apply_css_text_rules,
     decode_qdfont_text,
 )
@@ -24,10 +27,24 @@ from novel_downloader.schemas import (
     BookInfoDict,
     ChapterDict,
     ChapterInfoDict,
+    ParserConfig,
     VolumeInfoDict,
 )
 
 logger = logging.getLogger(__name__)
+
+QQ_SCRIPT: AssetSpec = {
+    "type": "local",
+    "src": QQ_DECRYPT_SCRIPT_PATH,
+    "filename": "qq_decrypt_node.js",
+}
+QQ_ASSETS: list[AssetSpec] = [
+    {
+        "type": "remote",
+        "url": "https://imgservices-1252317822.image.myqcloud.com/coco/s10192022/cefc2a5d.pz1phw.js",
+        "filename": "cefc2a5d.pz1phw.js",
+    }
+]
 
 
 @registrar.register_parser()
@@ -42,6 +59,13 @@ class QqbookParser(BaseParser):
         r"window\.__NUXT__\s*=\s*([\s\S]*?);?\s*<\/script>",
         re.S,
     )
+
+    def __init__(self, config: ParserConfig) -> None:
+        """
+        Initialize the QidianParser with the given configuration.
+        """
+        super().__init__(config)
+        self._decryptor = NodeDecryptor(script=QQ_SCRIPT, assets=QQ_ASSETS)
 
     def parse_book_info(
         self,
@@ -160,6 +184,8 @@ class QqbookParser(BaseParser):
             return None
         try:
             nuxt_block = self._find_nuxt_block(raw_pages[0])
+            if not isinstance(nuxt_block, dict):
+                return None
             data_list = nuxt_block.get("data")
             if not data_list:
                 return None
@@ -207,6 +233,8 @@ class QqbookParser(BaseParser):
         if encrypt:
             try:
                 content = self._parse_encrypted(content=content, cid=cid, bk_cfg=bk_cfg)
+                if content is None:
+                    return None
             except Exception as e:
                 logger.warning(
                     "QQbook chapter %s :: encrypted content decryption failed: %s",
@@ -255,11 +283,10 @@ class QqbookParser(BaseParser):
         content: str,
         cid: str,
         bk_cfg: dict[str, Any],
-    ) -> str:
-        decryptor = get_decryptor()
+    ) -> str | None:
         fkp = bk_cfg.get("fkp", "")
         fuid = bk_cfg.get("fuid", "")
-        return decryptor.decrypt_qq(
+        return self._decryptor.decrypt(
             ciphertext=content,
             chapter_id=cid,
             fkp=fkp,
@@ -331,10 +358,11 @@ class QqbookParser(BaseParser):
         return paragraphs_str, refl_list, resources
 
     @classmethod
-    def _find_nuxt_block(cls, html_str: str) -> dict[str, Any]:
+    def _find_nuxt_block(cls, html_str: str) -> dict[str, Any] | None:
         m = cls._NUXT_BLOCK_RE.search(html_str)
         if not m:
             return {}
         js_code = m.group(1).rstrip()  # RHS only
-        decryptor = get_decryptor()
-        return decryptor.eval_to_json(js_code)
+        decryptor = get_evaluator()
+        result: dict[str, Any] | None = decryptor.eval(js_code)
+        return result
