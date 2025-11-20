@@ -106,7 +106,7 @@
 
 | 参数名             | 类型         | 默认值      | 说明                                                        |
 | ----------------- | ------------ | ---------- | ----------------------------------------------------------- |
-| `decode_font`     | bool         | false      | 是否尝试本地解码混淆字体                                      |
+| `enable_ocr`     | bool         | false      | 是否尝试本地解码混淆字体                                      |
 | `batch_size`      | int          | 32         | OCR 模型推理时的批处理大小                                    |
 | `save_font_debug` | bool         | false      | 是否保存字体调试数据                                          |
 | `model_name`      | str/None     | None       | 模型名称, 如果设置为None, 则使用 `PP-OCRv5_server_rec`         |
@@ -140,7 +140,7 @@ save_html = false
 log_level = "INFO"
 
 [general.font_ocr]
-decode_font = false
+enable_ocr = false
 save_font_debug = false
 batch_size = 32
 ```

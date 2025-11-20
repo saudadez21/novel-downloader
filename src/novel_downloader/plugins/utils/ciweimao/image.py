@@ -60,9 +60,8 @@ def split_image(
     fh_2_2 = 2.2 * font_height
     pad_h = max(1, font_height >> 1)
 
-    h = img_arr.shape[0]
-    width = img_arr.shape[1]
-    pad_block = np.full((pad_h, width, 3), BACKGROUND_COLOR, dtype=np.uint8)
+    h, w, _ = img_arr.shape
+    pad_block = np.full((pad_h, w, 3), BACKGROUND_COLOR, dtype=np.uint8)
 
     now_y = 0.0
 

@@ -80,12 +80,13 @@ class CiweimaoParser(BaseParser):
             info_tree.xpath('//p[@class="update-state"]/text()')
         )
 
-        tags: list[str] = []
-        for t in info_tree.xpath(
-            '//p[@class="label-box"]//span[contains(@class,"label-warning")]//a/text()'
-        ):
-            if t and t.strip():
-                tags.append(t.strip())
+        tags: list[str] = [
+            t.strip()
+            for t in info_tree.xpath(
+                '//p[@class="label-box"]//span[contains(@class,"label-warning")]//a/text()'
+            )
+            if t.strip()
+        ]
 
         cat_val = self._first_str(
             info_tree.xpath('//meta[@property="og:novel:category"]/@content')
@@ -103,35 +104,14 @@ class CiweimaoParser(BaseParser):
         # --- Volumes & Chapters ---
         volumes: list[VolumeInfoDict] = []
         vol_idx: int = 1
-        vol_name: str | None = None
-        vol_chaps: list[ChapterInfoDict] = []
 
-        def flush_volume() -> None:
-            nonlocal vol_idx, vol_name, vol_chaps
-            if not vol_chaps:
-                return
-
-            volumes.append(
-                {
-                    "volume_name": vol_name or f"未命名卷 {vol_idx}",
-                    "chapters": vol_chaps,
-                }
-            )
-
-            vol_name = None
-            vol_chaps = []
-            vol_idx += 1
-
-        for box in catalog_tree.xpath('//div[contains(@class,"book-chapter-box")]'):
-            # volume name
-            h4 = box.xpath('.//h4[contains(@class,"sub-tit")]')
-            if h4:
-                # flush previous volume
-                flush_volume()
-                vol_name = h4[0].text_content().strip()
+        for vol in catalog_tree.xpath('//div[contains(@class,"book-chapter-box")]'):
+            vol_name = self._first_str(vol.xpath('.//h4[contains(@class,"sub-tit")]'))
+            vol_name = vol_name or f"未命名卷 {vol_idx}"
 
             # chapter list
-            for a in box.xpath('.//ul[contains(@class,"book-chapter-list")]//a'):
+            chapters: list[ChapterInfoDict] = []
+            for a in vol.xpath('.//ul[contains(@class,"book-chapter-list")]//a'):
                 href = a.get("href", "").strip()
                 if not href:
                     continue
@@ -142,7 +122,7 @@ class CiweimaoParser(BaseParser):
                 # accessibility: locked if contains icon-lock
                 accessible = not bool(a.xpath('.//i[contains(@class,"icon-lock")]'))
 
-                vol_chaps.append(
+                chapters.append(
                     {
                         "title": title,
                         "url": href,
@@ -151,8 +131,12 @@ class CiweimaoParser(BaseParser):
                     }
                 )
 
-        # Flush the last collected volume
-        flush_volume()
+            volumes.append(
+                {
+                    "volume_name": vol_name,
+                    "chapters": chapters,
+                }
+            )
 
         if not volumes:
             return None
@@ -203,7 +187,7 @@ class CiweimaoParser(BaseParser):
             img_b64 = raw_pages[1].strip()
             tsukkomi_list_str = raw_pages[2]
 
-            if self._decode_font:
+            if self._enable_ocr:
                 paragraphs, resources = self._parse_image_chapter(
                     img_b64, tsukkomi_list_str
                 )

@@ -225,7 +225,7 @@ class QidianParser(BaseParser):
                 chapter_info=chapter_info,
                 cid=cid,
             )
-            if not self._decode_font:
+            if not self._enable_ocr:
                 if refl_list:
                     extra["refl_list"] = refl_list
                 if resources:
@@ -271,9 +271,9 @@ class QidianParser(BaseParser):
         Qidian font-encrypted chapter parsing.
 
         Behavior:
-          * If self._decode_font is True:
+          * If self._enable_ocr is True:
               - Apply CSS + OCR decoding (decode_qdfont_text).
-          * If self._decode_font is False:
+          * If self._enable_ocr is False:
               - Apply CSS only (apply_css_text_rules).
               - DO NOT decode fonts.
               - Emit font resources (fixed URL + random font base64) and refl_list.
@@ -296,7 +296,7 @@ class QidianParser(BaseParser):
 
         paragraphs_str, refl_list = apply_css_text_rules(raw_html, css_str)
 
-        if self._decode_font:
+        if self._enable_ocr:
             decoded = decode_qdfont_text(
                 text=paragraphs_str,
                 fixed_font_url=fixed_font_url,

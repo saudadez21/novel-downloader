@@ -11,6 +11,101 @@
   * 可配置搜索引擎类型、最大结果数与缓存策略
   * 在 CLI 中提供交互式选择搜索结果并直接下载
 
+### 缓存与数据管理
+
+用于管理 `./raw_data/<site>/<book_id>/` 中的原始下载内容, 包括章节文本、书籍元数据、图片资源等。
+
+通过删除指定项目, 可在下次运行时强制重新下载对应内容, 用于处理数据损坏、章节更新、图片更新或资源不完整等情况。
+
+支持以下操作:
+
+* 删除指定章节的原始文本, 以强制重新抓取
+* 删除整本书的所有原始数据 (文本 / `metadata` / 图片等)
+* 删除书籍图片 (封面 / 插画等)
+* 删除 `metadata`, 以重新同步书籍信息
+* 按章节范围执行清理
+
+其中: **章节数据** 存储在 SQLite 中, 因此需增加对应的 Client API。
+
+**删除整本书的章节数据**
+
+Client 示例
+
+```python
+book = BookConfig(book_id="<book_id>")
+client.delete_book(book)
+```
+
+CLI 示例
+
+```bash
+novel-cli data rm <book_id>
+```
+
+**删除指定范围章节**
+
+Client 示例
+
+```python
+book = BookConfig(
+    book_id="<book_id>",
+    start_id="<start_chapter_id>",
+    end_id="<end_chapter_id>",
+)
+client.delete_book(book)
+```
+
+CLI 示例
+
+```bash
+novel-cli data rm <book_id> --start <start_chapter_id> --end <end_chapter_id>
+```
+
+**删除媒体资源 (图片 / 字体等)**
+
+CLI 示例
+
+```bash
+novel-cli data rm <book_id> --media
+```
+
+**删除 metadata**
+
+CLI 示例
+
+```bash
+novel-cli data rm <book_id> --metadata
+```
+
+**强制执行 (跳过确认提示)**
+
+CLI 示例
+
+```bash
+novel-cli data rm <book_id> --yes
+```
+
+**清理指定站点全部原始数据**
+
+CLI 示例
+
+```bash
+novel-cli data clear --site esjzone
+```
+
+**清理全部站点**
+
+CLI 示例
+
+```bash
+novel-cli data clear --all
+```
+
+**其他规划**
+
+* 考虑引入缓存索引文件, 加速查询与管理
+* 支持 dry-run 模式, 用于预览将被删除的文件列表
+
 ### 广告过滤与章节标题归一化
 
 * Parser 中已对常见第三方网站广告进行基础过滤
@@ -34,7 +129,7 @@
 
 ### EPUB 导出优化
 
-* 当前主要性能瓶颈集中在 `zipfile` 的写入阶段, 以及图片缓存缺失时的重复下载
+* 当前主要性能瓶颈集中在 `zipfile` 的写入阶段
 * 在缓存完整的情况下, `snakeviz` 分析结果显示 95% 以上的耗时集中在 ZIP 文件写入与压缩过程
 * 可进一步探索更高效的压缩与写入方式, 例如:
   * 使用内存缓冲区批量写入以减少磁盘 IO

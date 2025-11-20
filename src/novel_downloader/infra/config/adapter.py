@@ -86,10 +86,14 @@ class ConfigAdapter:
         g_font = g.get("font_ocr") or {}
         s_font = s.get("font_ocr") or {}
         font_ocr: dict[str, Any] = {**g_font, **s_font}
+        enable_ocr = font_ocr.get("enable_ocr")
+        if enable_ocr is None:  # fallback: old field
+            enable_ocr = font_ocr.get("decode_font", False)
+        enable_ocr = bool(enable_ocr)
         return ParserConfig(
             cache_dir=g.get("cache_dir", "./novel_cache"),
             use_truncation=bool(s.get("use_truncation", True)),
-            decode_font=bool(font_ocr.get("decode_font", False)),
+            enable_ocr=enable_ocr,
             save_font_debug=bool(font_ocr.get("save_font_debug", False)),
             batch_size=int(font_ocr.get("batch_size", 32)),
             fontocr_cfg=self._dict_to_fontocr_cfg(font_ocr),

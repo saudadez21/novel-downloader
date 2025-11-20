@@ -36,7 +36,7 @@ class BaseParser(abc.ABC):
         """
         self._fontocr_cfg = config.fontocr_cfg
         self._save_font_debug = config.save_font_debug
-        self._decode_font: bool = config.decode_font
+        self._enable_ocr: bool = config.enable_ocr
         self._batch_size = config.batch_size
         self._use_truncation = config.use_truncation
         self._cache_dir = Path(config.cache_dir) / self.site_name

@@ -212,10 +212,10 @@ class FalooParser(BaseParser):
             if not img_b64:
                 continue
 
-            if not self._decode_font:
+            if not self._enable_ocr:
                 logger.warning(
                     "faloo chapter %s :: VIP chapter not decoded "
-                    "(enable decode_font to OCR)",
+                    "(enable enable_ocr to OCR)",
                     chapter_id,
                 )
                 resources.append(

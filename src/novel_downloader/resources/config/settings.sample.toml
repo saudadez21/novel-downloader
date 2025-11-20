@@ -22,7 +22,7 @@ save_html = false                  # 是否将抓取到的原始 HTML 保留到�
 log_level = "INFO"                 # 日志级别: DEBUG, INFO, WARNING, ERROR
 
 [general.font_ocr]
-decode_font = false                # 是否尝试本地解码混淆字体
+enable_ocr = false                # 是否尝试本地解析混淆字体 / 图片章节
 batch_size = 32
 
 # 以下为 PaddleOCR 文本识别的可选参数

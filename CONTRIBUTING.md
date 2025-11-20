@@ -76,7 +76,7 @@ cd novel-downloader
 使用 `pip install -e` 以 "可编辑模式" 安装项目与开发依赖:
 
 ```bash
-pip install -e .[dev,font-recovery]
+pip install -e .[dev,all]
 ```
 
 项目中可能有额外依赖，请查看 `pyproject.toml`。

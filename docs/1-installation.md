@@ -1,70 +1,159 @@
 ## 安装
 
-**Python 环境**
-为避免包冲突, 建议创建独立环境
+### Python 环境
 
-推荐使用 [Conda](https://www.anaconda.com/download/success) 或 `venv` 创建独立环境, 避免包冲突:
-
-```bash
-conda create -n novel-downloader python=3.12 -y
-conda activate novel-downloader
-```
-
-或
+为避免包冲突, 建议使用虚拟环境:
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
+# Windows: .venv\Scripts\activate
 ```
 
 ---
 
 ### 安装 novel-downloader
 
-(1) 从 PyPI 安装:
+(1) 从 PyPI 安装
 
 ```bash
 pip install novel-downloader
 ```
 
-(2) 最新开发版 (从 GitHub 安装)
+安装后将提供以下可执行命令:
+
+* `novel-cli`
+* `novel-web` (如需使用 Web GUI, 需另行安装其依赖, 见下文)
+
+(2) 安装最新开发版 (GitHub)
 
 ```bash
-# 克隆项目
 git clone https://github.com/saudadez21/novel-downloader.git
 cd novel-downloader
-
-# (可选) 编译多语言支持
-pip install babel
-pybabel compile -d src/novel_downloader/locales
-
-# 安装为库并生成 CLI
-pip install .
 ```
 
-安装完成后, 会在系统 `PATH` 中生成 `novel-cli` 可执行命令。
+如需编译多语言支持:
+
+```bash
+pip install babel
+pybabel compile -d src/novel_downloader/locales
+```
+
+安装:
+
+```bash
+pip install .
+```
 
 ---
 
 ## 可选功能与依赖说明
 
-### Node.js 解密支持
+`novel-downloader` 提供多个可选模块，可根据需要选择性安装。
 
-起点与 QQ 阅读的 VIP 章节解密逻辑基于 JavaScript 实现, 因此需要额外安装 [Node.js](https://nodejs.org/en/download) 来完成解密。
+### Web 图形界面 (可选)
+
+Web GUI 基于 `NiceGUI`, 默认不会随主程序安装。
+
+如需使用 Web 图形界面, 请先安装对应可选依赖:
+
+```bash
+pip install novel-downloader[web-ui]
+```
+
+启动 GUI：
+
+```bash
+novel-web
+```
+
+若需局域网 / 外网访问 (请自行评估风险):
+
+```bash
+novel-web --listen public
+```
+
+运行中可按 `CTRL+C` 停止服务。
+
+### 可插拔式 HTTP 后端 (可选)
+
+默认使用 `aiohttp`, 如果需要切换其他后端, 可安装对应依赖。
+
+#### httpx 后端
+
+支持 HTTP/1.1 与 HTTP/2:
+
+```bash
+pip install httpx[http2]
+```
+
+启用方式 (`settings.toml`):
+
+```toml
+[general]
+backend = "httpx"
+```
+
+#### curl_cffi 后端
+
+支持 `libcurl` 与浏览器仿真 (impersonate):
+
+```bash
+pip install curl_cffi
+```
+
+启用方式:
+
+```toml
+[general]
+backend = "curl_cffi"
+impersonate = "chrome136"
+```
 
 ---
 
-### 字体解密 (`decode_font` 参数)
+### Node.js 解密支持 (部分站点必须)
 
-启用解密字体功能时, 需要安装额外依赖 (注意: OCR 准确率大约 98+%):
+起点 / QQ 阅读等站点的 VIP 章节解密逻辑基于 JavaScript, 需要安装 Node.js。
 
-(1) 安装扩展依赖:
+下载安装地址:
+
+[Download Node.js](https://nodejs.org/en/download)
+
+安装后可自动用于相关站点的解密流程。
+
+---
+
+### 字体混淆还原与图片章节 OCR (`enable_ocr`)
+
+如需处理「字体混淆章节」或「图片章节 -> 文字」, 需启用 OCR 模块。
+
+OCR 分为两部分:
+
+* 额外 Python 依赖 (`image-utils`)
+* PaddleOCR 推理框架 (启用文本识别)
+
+以下为完整安装流程。
+
+(1) 安装扩展依赖
 
 ```bash
-pip install novel-downloader[font-recovery]
+pip install novel-downloader[image-utils]
 ```
 
-(2) 安装 [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) 及其依赖, 请根据 paddlepaddle [文档](https://www.paddlepaddle.org.cn/install/quick?docurl=/documentation/docs/zh/develop/install/pip/windows-pip.html) 选择合适版本 (CPU / GPU 及 CUDA 支持):
+这将安装:
+
+* pillow
+* numpy
+* fonttools
+* brotli
+* 等处理字体与图片的依赖包
+
+(2) 安装 PaddlePaddle (CPU 或 GPU)
+
+请根据你的环境选择 CPU 或 GPU 版本及 CUDA 支持。
+
+官方安装说明: [文档](https://www.paddlepaddle.org.cn/install/quick?docurl=/documentation/docs/zh/develop/install/pip/windows-pip.html)
 
 **CPU 版本:**
 
@@ -72,41 +161,45 @@ pip install novel-downloader[font-recovery]
 python -m pip install paddlepaddle==3.1.1 -i https://www.paddlepaddle.org.cn/packages/stable/cpu/
 ```
 
-**GPU 版本 (根据 CUDA 版本选择对应包):**
+**GPU 版本 (据 CUDA 版本选择):**
 
 ```bash
 python -m pip install paddlepaddle-gpu==3.1.1 -i https://www.paddlepaddle.org.cn/packages/stable/cu118/
 ```
 
-(3) 根据 PaddleOCR [文档](https://www.paddleocr.ai/latest/version3.x/installation.html) 安装 PaddleOCR:
+(3) 安装 PaddleOCR
+
+官方安装说明: [文档](https://www.paddleocr.ai/latest/version3.x/installation.html)
 
 ```bash
 pip install paddleocr
 ```
 
-**开发环境版本**
+**开发测试环境使用版本**:
 
 ```bash
 paddleocr==3.2.0
 paddlepaddle==3.1.1
 ```
 
-(4) 编辑 `settings.toml` 配置文件, 开启字体解密功能, 并指定 OCR 模型:
+(4) 启用字体混淆还原 (`enable_ocr`)
+
+编辑 `settings.toml`:
 
 ```toml
 [general.font_ocr]
-decode_font = true  # 是否尝试本地解码混淆字体
+enable_ocr = true  # 是否尝试本地解码混淆字体
 batch_size = 32
 model_name = "PP-OCRv5_mobile_rec"
 ```
 
-可选模型参考 [OCR 性能基准](#ocr-性能基准)
-
 ---
 
-**常见报错与解决方法**
+**OCR 常见错误与处理**
 
-报错示例 (当 Windows 用户名包含中文时):
+(1) 路径含中文导致模型加载失败 (Windows)
+
+示例报错:
 
 ```bash
 FontOCR initialization failed: (NotFound) Cannot open file
@@ -114,29 +207,38 @@ C:\Users\用户名.paddlex\official_models\PP-OCRv5_mobile_rec\inference.json, p
 [Hint: Expected paddle::inference::IsFileExists(prog_file_) == true, but received paddle::inference::IsFileExists(prog_file_):0 != true:1.]
 ```
 
-解决方法: 将模型文件移动到不含中文的路径, 并在 `settings.toml` 中指定 `model_dir`:
+解决方法:
+
+1. 将模型目录移动到不含中文的路径
+2. 在 `settings.toml` 指定完整路径:
 
 ```toml
 [general.font_ocr]
-decode_font = true
+enable_ocr = true
 batch_size = 32
 model_name = "PP-OCRv5_mobile_rec"
 model_dir = 'D:\pdx_models\PP-OCRv5_mobile_rec'  # 改成实际路径
 ```
 
-> 模型目录至少需要包含: `inference.pdmodel`, `inference.pdiparams`, `inference.json`
+模型目录通常必须包含:
+
+* `inference.pdmodel`
+* `inference.pdiparams`
+* `inference.json`
 
 ---
 
-### OCR 性能基准
+### OCR 性能基准 (参考)
 
 **目标**: 评估处理「单章节」的平均耗时与识别准确率。
 
-> **测试环境**: Intel 12900H; NVIDIA GeForce RTX 3070 (8 GB 显存)
->
-> **参数**: `batch_size = 32`
->
-> **提示**: 实际使用中请根据 GPU/CPU 可用内存调整 `batch_size`: 过大可能因内存不足 (OOM) 或频繁换页导致崩溃或变慢
+**测试环境**:
+
+* Intel 12900H
+* NVIDIA RTX 3070 (8GB)
+* `batch_size = 32`
+
+> 注: 实际请根据设备内存调整 `batch_size`。
 
 #### GPU 设备
 
@@ -162,4 +264,4 @@ model_dir = 'D:\pdx_models\PP-OCRv5_mobile_rec'  # 改成实际路径
 
 * 使用 `PP-OCRv5` 时, 偶尔会返回繁体字 (如将简体 "杰" 识别为 "傑"), 并出现个别字符异常 (如 "口" 被识别为 "□")
 * 使用 `PP-OCRv3` 时, 偶尔会出现识别为空串 (不返回任何文字) 的情况
-* 在 CPU 上, Server 版耗时显著高于 Mobile 版; 若无 GPU, 优先考虑 Mobile 版以平衡速度与精度
+* CPU 上 server 版耗时极高, 若无 GPU 不建议使用 server 模型
