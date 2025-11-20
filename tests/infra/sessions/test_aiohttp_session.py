@@ -105,7 +105,7 @@ async def test_post_request(test_server, cfg):
 
 @pytest.mark.asyncio
 async def test_session_property_error(cfg):
-    """Access session before init → RuntimeError"""
+    """Access session before init -> RuntimeError"""
     s = AiohttpSession(cfg, cookies=None)
     with pytest.raises(RuntimeError):
         _ = s.session
