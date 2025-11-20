@@ -73,12 +73,15 @@ tests = [
     "types-requests",
     "types-lxml",
 ]
-dev = [
-    "novel-downloader[tests]",
+ci = [
+    ".[tests,web-ui]",
     "black",
     "mypy",
     "ruff",
     "pre-commit",
+]
+dev = [
+    ".[ci]",
     "commitizen",
     "babel",
     # "genbadge[all]",
