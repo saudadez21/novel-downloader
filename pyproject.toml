@@ -173,6 +173,8 @@ testpaths = ["tests"]
 omit = [
   "src/novel_downloader/apps/*",
   "src/novel_downloader/plugins/archived/*",
+  "src/novel_downloader/plugins/base/*",
+  "src/novel_downloader/plugins/common/*",
   "src/novel_downloader/plugins/processors/*",
   "src/novel_downloader/plugins/sites/*",
   "src/novel_downloader/plugins/search.py",

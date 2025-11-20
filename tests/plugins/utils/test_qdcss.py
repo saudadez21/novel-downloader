@@ -6,7 +6,7 @@ import pathlib
 import pytest
 from novel_downloader.plugins.utils.yuewen.qdcss import apply_css_text_rules
 
-DATA_BASE = pathlib.Path(__file__).resolve().parents[3] / "data" / "plugins" / "yuewen"
+DATA_BASE = pathlib.Path(__file__).resolve().parents[2] / "data" / "plugins" / "yuewen"
 
 # All case directories: case_qd_*
 CASE_DIRS = sorted([p for p in DATA_BASE.glob("case_qd_*") if p.is_dir()])

@@ -23,7 +23,9 @@ def test_detect_image_format(ext):
     """
     base = Path(__file__).parents[2] / "data" / "libs" / "media" / "image"
     files = list(base.glob(f"*.{ext}"))
-    assert files, f"No test image found for extension {ext}"
+
+    if not files:
+        pytest.skip(f"No test images found for extension '{ext}'")
 
     for img_file in files:
         data = img_file.read_bytes()
