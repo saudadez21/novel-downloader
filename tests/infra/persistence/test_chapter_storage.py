@@ -115,14 +115,12 @@ def test_dirty_and_clean_ids(tmp_storage: ChapterStorage):
 
 
 def test_load_existing_keys(tmp_path: Path):
-    store = ChapterStorage(tmp_path, "chap.db")
-    store.connect()
-    store.upsert_chapter(_make_chapter(1))
-    # reopen to trigger _load_existing_keys
-    store2 = ChapterStorage(tmp_path, "chap.db")
-    store2.connect()
-    assert store2.exists("chap1")
-    assert store2.need_refetch("chap1") is False
+    with ChapterStorage(tmp_path, "chap.db") as store:
+        store.upsert_chapter(_make_chapter(1))
+
+    with ChapterStorage(tmp_path, "chap.db") as store2:
+        assert store2.exists("chap1")
+        assert store2.need_refetch("chap1") is False
 
 
 # ---------------------------------------------------------------------

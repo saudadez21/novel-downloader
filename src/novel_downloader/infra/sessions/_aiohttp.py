@@ -32,7 +32,7 @@ class AiohttpSession(BaseSession):
 
         proxy_auth: aiohttp.BasicAuth | None = None
         if self._proxy_user and self._proxy_pass:
-            self._proxy_auth = aiohttp.BasicAuth(self._proxy_user, self._proxy_pass)
+            proxy_auth = aiohttp.BasicAuth(self._proxy_user, self._proxy_pass)
 
         timeout = aiohttp.ClientTimeout(total=self._timeout)
         connector = aiohttp.TCPConnector(
