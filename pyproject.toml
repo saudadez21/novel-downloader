@@ -55,14 +55,17 @@ curl_cffi = [
     "curl_cffi",
 ]
 all-backends = [
-    "novel-downloader[httpx]",
-    "novel-downloader[curl_cffi]",
+    "httpx[http2]",
+    "curl_cffi",
 ]
 all = [
-    "novel-downloader[image-utils]",
-    "novel-downloader[httpx]",
-    "novel-downloader[curl_cffi]",
-    "novel-downloader[web-ui]",
+    "nicegui",
+    "brotli",
+    "numpy",
+    "fonttools",
+    "pillow",
+    "httpx[http2]",
+    "curl_cffi",
 ]
 
 tests = [
@@ -74,14 +77,29 @@ tests = [
     "types-lxml",
 ]
 ci = [
-    ".[tests,web-ui]",
+    "pytest",
+    "pytest-asyncio",
+    "pytest-cov",
+    "pytest-mock",
+    "types-requests",
+    "types-lxml",
+    "nicegui",
     "black",
     "mypy",
     "ruff",
     "pre-commit",
 ]
 dev = [
-    ".[ci]",
+    "pytest",
+    "pytest-asyncio",
+    "pytest-cov",
+    "pytest-mock",
+    "types-requests",
+    "types-lxml",
+    "black",
+    "mypy",
+    "ruff",
+    "pre-commit",
     "commitizen",
     "babel",
     # "genbadge[all]",
