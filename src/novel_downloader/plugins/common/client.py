@@ -154,5 +154,35 @@ class CommonClient(
         :param formats: Optional list of format strings (e.g., ['epub', 'txt']).
         :return: A mapping from format name to the resulting file path.
         """
-        # TODO: placeholder
-        return {}
+        cfg = cfg or ExporterConfig()
+        formats = formats or ["txt"]
+        results: dict[str, Path | None] = {}
+
+        for fmt in formats:
+            method_name = f"_export_chapter_{fmt.lower()}"
+            export_func: _ExportChapterFunc | None = getattr(self, method_name, None)
+
+            if not callable(export_func):
+                logger.warning("Unsupported chapter export format '%s'", fmt)
+                results[fmt] = None
+                continue
+
+            try:
+                path = export_func(
+                    book_id=book_id,
+                    chapter_id=chapter_id,
+                    cfg=cfg,
+                    stage=stage,
+                    **kwargs,
+                )
+                results[fmt] = path
+
+            except Exception as e:
+                results[fmt] = None
+                logger.warning(
+                    "Error exporting chapter (format=%s): %s",
+                    fmt,
+                    e,
+                )
+
+        return results
