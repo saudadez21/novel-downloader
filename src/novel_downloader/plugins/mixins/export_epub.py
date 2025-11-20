@@ -303,20 +303,10 @@ class ExportEpubMixin:
         )
         out_path = self._output_dir / sanitize_filename(out_name)
 
-        try:
-            builder.export(out_path)
-            logger.info(
-                "Exported EPUB (site=%s, book=%s): %s", self._site, book_id, out_path
-            )
-        except Exception as e:
-            logger.error(
-                "Failed to write EPUB (site=%s, book=%s) to %s: %s",
-                self._site,
-                book_id,
-                out_path,
-                e,
-            )
-            return []
+        builder.export(out_path)
+        logger.info(
+            "Exported EPUB (site=%s, book=%s): %s", self._site, book_id, out_path
+        )
         return [out_path]
 
     def _xp_epub_chapter(

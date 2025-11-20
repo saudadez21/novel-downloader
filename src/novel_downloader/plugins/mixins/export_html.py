@@ -154,25 +154,16 @@ class ExportHtmlMixin:
                 if curr_vol.chapters:
                     builder.add_volume(curr_vol)
 
-        try:
-            out_name = format_filename(
-                cfg.filename_template,
-                title=name,
-                author=author,
-                append_timestamp=cfg.append_timestamp,
-            )
-            out_path = builder.export(self._output_dir, folder=out_name)
-            logger.info(
-                "Exported HTML (site=%s, book=%s): %s", self._site, book_id, out_path
-            )
-        except Exception as e:
-            logger.error(
-                "Failed to write HTML (site=%s, book=%s): %s",
-                self._site,
-                book_id,
-                e,
-            )
-            return []
+        out_name = format_filename(
+            cfg.filename_template,
+            title=name,
+            author=author,
+            append_timestamp=cfg.append_timestamp,
+        )
+        out_path = builder.export(self._output_dir, folder=out_name)
+        logger.info(
+            "Exported HTML (site=%s, book=%s): %s", self._site, book_id, out_path
+        )
         return [out_path]
 
     def _xp_html_chapter(
