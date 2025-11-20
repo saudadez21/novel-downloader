@@ -309,6 +309,84 @@ class ExportEpubMixin:
         )
         return [out_path]
 
+    def _export_chapter_epub(
+        self: "ExportEpubClientContext",
+        book_id: str,
+        chapter_id: str,
+        cfg: ExporterConfig,
+        *,
+        stage: str | None = None,
+        **kwargs: Any,
+    ) -> Path | None:
+        """Export a single chapter into a standalone EPUB file."""
+        raw_base = self._raw_data_dir / book_id
+        if not raw_base.is_dir():
+            return None
+
+        media_dir = raw_base / "media"
+
+        # --- detect stage ---
+        stage = stage or self._detect_latest_stage(book_id)
+
+        # --- load chapter ---
+        dbfile = raw_base / f"chapter.{stage}.sqlite"
+        if not dbfile.exists():
+            return None
+
+        with ChapterStorage(raw_base, filename=f"chapter.{stage}.sqlite") as storage:
+            chap = storage.get_chapter(chapter_id)
+
+        if chap is None:
+            return None
+
+        chap_title = (chap.get("title") or f"chapter_{chapter_id}").strip()
+
+        builder = EpubBuilder(
+            title=chap_title,
+            author="Unknown",
+            description="",
+            cover_path=None,
+            subject=[],
+            serial_status="",
+            word_count="0",
+            uid=f"{self._site}_{book_id}_{chapter_id}",
+        )
+
+        # --- build chapter XHTML ---
+        chapter_obj = self._xp_epub_chapter(
+            book=builder,
+            cid=chapter_id,
+            chap_title=chap_title,
+            chap=chap,
+            media_dir=media_dir,
+            include_picture=cfg.include_picture,
+        )
+
+        builder.add_chapter(chapter_obj)
+
+        # --- filename pattern ---
+        out_name = format_filename(
+            cfg.filename_template,
+            title=chap_title,
+            author="Unknown",
+            append_timestamp=cfg.append_timestamp,
+            ext="epub",
+        )
+
+        out_path = self._output_dir / sanitize_filename(out_name)
+
+        # --- export epub ---
+        builder.export(out_path)
+
+        logger.info(
+            "Exported EPUB chapter (site=%s, book=%s, chapter=%s): %s",
+            self._site,
+            book_id,
+            chapter_id,
+            out_path,
+        )
+        return out_path
+
     def _xp_epub_chapter(
         self: "ExportEpubClientContext",
         *,
