@@ -19,6 +19,7 @@ locale_style = "simplified"        # simplified / traditional
 
 [general.debug]
 save_html = false                  # 是否将抓取到的原始 HTML 保留到磁盘
+log_dir = "./logs"
 log_level = "INFO"                 # 日志级别: DEBUG, INFO, WARNING, ERROR
 
 [general.font_ocr]

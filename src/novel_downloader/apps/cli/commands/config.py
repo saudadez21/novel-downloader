@@ -9,7 +9,7 @@ from argparse import ArgumentParser, Namespace, _SubParsersAction
 from pathlib import Path
 
 from novel_downloader.apps.cli import ui
-from novel_downloader.infra.config import copy_default_config, save_config_file
+from novel_downloader.infra.config import copy_default_config
 from novel_downloader.infra.i18n import t
 from novel_downloader.infra.paths import DEFAULT_CONFIG_FILENAME
 from novel_downloader.infra.persistence.state import state_mgr
@@ -31,7 +31,7 @@ class ConfigCmd(Command):
         parser = subparsers.add_parser(cls.name, help=cls.help)
         sub = parser.add_subparsers(dest="subcommand", required=True)
 
-        for subcmd in (ConfigInitCmd, ConfigSetLangCmd, ConfigSetConfigCmd):
+        for subcmd in (ConfigInitCmd, ConfigSetLangCmd):
             subcmd.register(sub)
 
     @classmethod
@@ -106,23 +106,3 @@ class ConfigSetLangCmd(Command):
         lang_std = LANG_MAP.get(lang_input, lang_input)
         state_mgr.set_language(lang_std)
         ui.success(t("Language switched to {lang}").format(lang=lang_std))
-
-
-class ConfigSetConfigCmd(Command):
-    name = "set-config"
-    help = t("Set and save a custom TOML configuration file.")
-
-    @classmethod
-    def add_arguments(cls, parser: ArgumentParser) -> None:
-        parser.add_argument("path", type=str, help="Path to the configuration file")
-
-    @classmethod
-    def run(cls, args: Namespace) -> None:
-        try:
-            save_config_file(args.path)
-            ui.success(
-                t("Configuration file saved from {path}.").format(path=args.path)
-            )
-        except Exception as e:
-            ui.error(t("Failed to save configuration file: {err}").format(err=str(e)))
-            raise

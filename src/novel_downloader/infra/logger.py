@@ -14,7 +14,7 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 
-from novel_downloader.infra.paths import LOGGER_DIR, PACKAGE_NAME
+from novel_downloader.infra.paths import PACKAGE_NAME
 
 _MUTE_LOGGERS: set[str] = {
     "fontTools.ttLib.tables._p_o_s_t",
@@ -30,10 +30,10 @@ def _normalize_level(level: int | str) -> int:
 
 
 def setup_logging(
+    log_dir: str | Path = "./logs",
     log_filename: str | None = None,
     console_level: int | str = "INFO",
     file_level: int | str = "DEBUG",
-    log_dir: str | Path | None = None,
     *,
     console: bool = True,
     file: bool = True,
@@ -43,10 +43,10 @@ def setup_logging(
     """
     Create and configure a package logger with optional console and file handlers.
 
+    :param log_dir: Directory where log files will be saved.
     :param log_filename: Base log file name (without date suffix).
     :param console_level: Minimum level for the console handler (string or int).
     :param file_level: Minimum level for the file handler (string or int).
-    :param log_dir: Directory where log files will be saved.
     :param console: Add a console handler.
     :param file: Add a file handler.
     :param backup_count: How many rotated files to keep.
@@ -71,7 +71,7 @@ def setup_logging(
     if file:
         file_level = _normalize_level(file_level)
 
-        base_dir = Path(log_dir) if log_dir else LOGGER_DIR
+        base_dir = Path(log_dir)
         base_dir.mkdir(parents=True, exist_ok=True)
         base_name = log_filename or PACKAGE_NAME
         log_path = base_dir / f"{base_name}.log"

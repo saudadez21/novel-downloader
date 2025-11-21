@@ -10,8 +10,6 @@ __all__ = [
     "copy_default_config",
     "get_config_value",
     "load_config",
-    "save_config",
-    "save_config_file",
     "ConfigAdapter",
 ]
 
@@ -20,6 +18,4 @@ from .file_io import (
     copy_default_config,
     get_config_value,
     load_config,
-    save_config,
-    save_config_file,
 )

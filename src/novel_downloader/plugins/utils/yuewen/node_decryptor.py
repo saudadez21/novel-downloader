@@ -14,7 +14,6 @@ import json
 import logging
 import shutil
 import subprocess
-import uuid
 from importlib.resources.abc import Traversable
 from pathlib import Path
 from typing import Literal, TypedDict
@@ -22,7 +21,6 @@ from typing import Literal, TypedDict
 import requests
 
 from novel_downloader.infra.http_defaults import DEFAULT_USER_HEADERS
-from novel_downloader.infra.paths import JS_SCRIPT_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -57,10 +55,10 @@ class NodeDecryptor:
 
     def __init__(
         self,
+        script_dir: Path,
         script: AssetSpec,
         assets: list[AssetSpec] | None = None,
         *,
-        script_dir: Path = JS_SCRIPT_DIR,
         node_bin: str = "node",
         request_timeout: float = 15.0,
         headers: dict[str, str] = DEFAULT_USER_HEADERS,
@@ -72,8 +70,6 @@ class NodeDecryptor:
         self.node_bin = node_bin
         self.request_timeout = request_timeout
         self.headers = headers
-
-        self.script_dir.mkdir(parents=True, exist_ok=True)
 
         self.has_node = shutil.which(node_bin) is not None
         self._prepared = False
@@ -105,32 +101,28 @@ class NodeDecryptor:
             logger.info("decrypt skipped: script not available.")
             return None
 
-        task_id = uuid.uuid4().hex
-        in_path = self.script_dir / f"in_{task_id}.json"
-        out_path = self.script_dir / f"out_{task_id}.txt"
-
         try:
-            in_path.write_text(
-                json.dumps([ciphertext, chapter_id, fkp, fuid]),
-                encoding="utf-8",
-            )
+            input_json = json.dumps([ciphertext, chapter_id, fkp, fuid])
 
             proc = subprocess.run(
-                [self.node_bin, str(self._script_path), in_path.name, out_path.name],
-                capture_output=True,
+                [self.node_bin, str(self._script_path)],
+                input=input_json,
                 text=True,
+                capture_output=True,
+                encoding="utf-8",
                 cwd=self.script_dir,
+                timeout=self.request_timeout,
             )
 
             if proc.returncode != 0:
                 stderr = (proc.stderr or "").strip()
                 raise RuntimeError(f"decrypt failed: {stderr or 'non-zero exit code'}")
 
-            return out_path.read_text(encoding="utf-8").strip()
+            return (proc.stdout or "").strip()
 
-        finally:
-            in_path.unlink(missing_ok=True)
-            out_path.unlink(missing_ok=True)
+        except Exception as exc:
+            logger.warning("decrypt failed: %s", exc)
+            return None
 
     def _prepare(self) -> None:
         """Ensure main script + all assets exist on disk (lazy, once)."""
@@ -142,7 +134,8 @@ class NodeDecryptor:
             return
 
         try:
-            self._script_path = self._ensure_asset(self.script)
+            self.script_dir.mkdir(parents=True, exist_ok=True)
+            self._script_path = self._ensure_asset(self.script).resolve()
             for a in self.assets:
                 self._ensure_asset(a)
 

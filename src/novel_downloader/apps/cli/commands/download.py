@@ -135,8 +135,10 @@ class DownloadCmd(Command):
             ui.warn(t("No book IDs provided. Exiting."))
             return
 
-        log_level = adapter.get_log_level()
-        ui.setup_logging(console_level=log_level)
+        ui.setup_logging(
+            log_dir=adapter.get_log_dir(),
+            console_level=adapter.get_log_level(),
+        )
 
         plugins_cfg = adapter.get_plugins_config()
         if plugins_cfg.get("enable_local_plugins"):

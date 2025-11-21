@@ -52,11 +52,10 @@ def test_setup_logging_basic(monkeypatch, tmp_path):
         lambda *a, **k: FakeHandler(),
     )
 
-    # monkeypatch logger_dir
-    monkeypatch.setattr(logger_mod, "LOGGER_DIR", tmp_path)
-
     # first run
-    log = logger_mod.setup_logging(log_filename="testlog", console=True, file=True)
+    log = logger_mod.setup_logging(
+        log_dir=tmp_path, log_filename="testlog", console=True, file=True
+    )
     handlers1 = log.handlers.copy()
 
     assert len(handlers1) == 2  # file + console
@@ -85,17 +84,14 @@ def test_setup_logging_no_console(monkeypatch, tmp_path):
         "TimedRotatingFileHandler",
         lambda *a, **k: FakeHandler(),
     )
-    monkeypatch.setattr(logger_mod, "LOGGER_DIR", tmp_path)
 
-    log = logger_mod.setup_logging(console=False, file=True)
+    log = logger_mod.setup_logging(log_dir=tmp_path, console=False, file=True)
     assert len(log.handlers) == 1
     assert isinstance(log.handlers[0], FakeHandler)
 
 
 def test_setup_logging_no_file(monkeypatch, tmp_path):
     """File handler disabled."""
-    monkeypatch.setattr(logger_mod, "LOGGER_DIR", tmp_path)
-
-    log = logger_mod.setup_logging(console=True, file=False)
+    log = logger_mod.setup_logging(log_dir=tmp_path, console=True, file=False)
     assert len(log.handlers) == 1
     assert isinstance(log.handlers[0], logging.StreamHandler)

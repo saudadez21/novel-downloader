@@ -63,7 +63,12 @@ class QidianParser(BaseParser):
         super().__init__(config)
         self._fuid = fuid
         self._cookie_store = CookieStore(self._cache_dir)
-        self._decryptor = NodeDecryptor(script=QD_SCRIPT, assets=QD_ASSETS)
+        script_dir = self._cache_dir / "scripts"
+        self._decryptor = NodeDecryptor(
+            script_dir=script_dir,
+            script=QD_SCRIPT,
+            assets=QD_ASSETS,
+        )
 
     def parse_book_info(
         self,

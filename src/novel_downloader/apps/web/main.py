@@ -63,7 +63,8 @@ def web_main() -> None:
     host = "127.0.0.1" if args.listen == "local" else "0.0.0.0"
 
     log_level = get_config_value(["general", "debug", "log_level"], "INFO")
-    setup_logging(console_level=log_level)
+    log_dir = get_config_value(["general", "debug", "log_dir"], "./logs")
+    setup_logging(log_dir=log_dir, console_level=log_level)
 
     app.on_startup(mount_exports)
     app.on_shutdown(shutdown)

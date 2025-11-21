@@ -13,7 +13,7 @@ Strategy:
 
 from __future__ import annotations
 
-__all__ = ["JsEvaluator", "get_evaluator"]
+__all__ = ["JsEvaluator"]
 
 import json
 import logging
@@ -24,7 +24,7 @@ from importlib.resources.abc import Traversable
 from pathlib import Path
 from typing import Any
 
-from novel_downloader.infra.paths import EXPR_TO_JSON_SCRIPT_PATH, JS_SCRIPT_DIR
+from novel_downloader.infra.paths import EXPR_TO_JSON_SCRIPT_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -270,7 +270,7 @@ class JsEvaluator:
 
     def __init__(
         self,
-        script_dir: Path = JS_SCRIPT_DIR,
+        script_dir: Path,
         script_src: Traversable | Path = EXPR_TO_JSON_SCRIPT_PATH,
         node_bin: str = "node",
         script_name: str = "expr_to_json.js",
@@ -359,14 +359,3 @@ class JsEvaluator:
             encoding="utf-8",
             cwd=self.script_dir,
         )
-
-
-_EVALUATOR: JsEvaluator | None = None
-
-
-def get_evaluator() -> JsEvaluator:
-    """Singleton JsEvaluator."""
-    global _EVALUATOR
-    if _EVALUATOR is None:
-        _EVALUATOR = JsEvaluator()
-    return _EVALUATOR

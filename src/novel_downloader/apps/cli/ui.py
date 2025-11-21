@@ -20,12 +20,13 @@ from __future__ import annotations
 import logging
 from collections.abc import Iterable, Sequence
 from logging.handlers import TimedRotatingFileHandler
+from pathlib import Path
 
 from rich.console import Console
 from rich.prompt import Confirm, Prompt
 from rich.status import Status
 
-from novel_downloader.infra.paths import LOGGER_DIR, PACKAGE_NAME
+from novel_downloader.infra.paths import PACKAGE_NAME
 
 _MUTE_LOGGERS: set[str] = {
     "fontTools.ttLib.tables._p_o_s_t",
@@ -197,6 +198,8 @@ def _normalize_level(level: int | str) -> int:
 
 
 def setup_logging(
+    log_dir: str | Path = "./logs",
+    log_filename: str | None = None,
     console_level: int | str = "INFO",
     file_level: int | str = "DEBUG",
     *,
@@ -223,8 +226,10 @@ def setup_logging(
     if file:
         file_level = _normalize_level(file_level)
 
-        LOGGER_DIR.mkdir(parents=True, exist_ok=True)
-        log_path = LOGGER_DIR / f"{PACKAGE_NAME}.log"
+        base_dir = Path(log_dir)
+        base_dir.mkdir(parents=True, exist_ok=True)
+        base_name = log_filename or PACKAGE_NAME
+        log_path = base_dir / f"{base_name}.log"
 
         fh = TimedRotatingFileHandler(
             filename=log_path,

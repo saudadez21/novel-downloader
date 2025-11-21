@@ -9,6 +9,7 @@ site into structured dataclass-based config models.
 
 import contextlib
 from collections.abc import Mapping
+from pathlib import Path
 from typing import Any, TypeVar
 
 from novel_downloader.schemas import (
@@ -248,6 +249,18 @@ class ConfigAdapter:
         """
         debug_cfg = self._gen_cfg().get("debug", {})
         return debug_cfg.get("log_level") or "INFO"
+
+    def get_log_dir(self) -> Path:
+        """
+        Retrieve the log directory from ``general.debug``.
+
+        :return: A Path object pointing to the log directory.
+        """
+        debug_cfg = self._gen_cfg().get("debug", {})
+        log_dir = debug_cfg.get("log_dir") or "./logs"
+
+        # Convert to Path, expand "~", and make absolute
+        return Path(log_dir).expanduser().resolve()
 
     def _gen_cfg(self) -> dict[str, Any]:
         """

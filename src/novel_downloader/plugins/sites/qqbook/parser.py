@@ -16,7 +16,7 @@ from lxml import html
 from novel_downloader.infra.paths import QQ_DECRYPT_SCRIPT_PATH
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
-from novel_downloader.plugins.utils.js_eval import get_evaluator
+from novel_downloader.plugins.utils.js_eval import JsEvaluator
 from novel_downloader.plugins.utils.yuewen import (
     AssetSpec,
     NodeDecryptor,
@@ -65,7 +65,13 @@ class QqbookParser(BaseParser):
         Initialize the QidianParser with the given configuration.
         """
         super().__init__(config)
-        self._decryptor = NodeDecryptor(script=QQ_SCRIPT, assets=QQ_ASSETS)
+        script_dir = self._cache_dir / "scripts"
+        self._decryptor = NodeDecryptor(
+            script_dir=script_dir,
+            script=QQ_SCRIPT,
+            assets=QQ_ASSETS,
+        )
+        self._evaluator = JsEvaluator(script_dir=script_dir)
 
     def parse_book_info(
         self,
@@ -357,12 +363,10 @@ class QqbookParser(BaseParser):
 
         return paragraphs_str, refl_list, resources
 
-    @classmethod
-    def _find_nuxt_block(cls, html_str: str) -> dict[str, Any] | None:
-        m = cls._NUXT_BLOCK_RE.search(html_str)
+    def _find_nuxt_block(self, html_str: str) -> dict[str, Any] | None:
+        m = self._NUXT_BLOCK_RE.search(html_str)
         if not m:
             return {}
         js_code = m.group(1).rstrip()  # RHS only
-        decryptor = get_evaluator()
-        result: dict[str, Any] | None = decryptor.eval(js_code)
+        result: dict[str, Any] | None = self._evaluator.eval(js_code)
         return result

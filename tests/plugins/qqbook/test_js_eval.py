@@ -4,7 +4,7 @@ import pathlib
 import re
 
 import pytest
-from novel_downloader.plugins.utils.js_eval import get_evaluator
+from novel_downloader.plugins.utils.js_eval import JsEvaluator
 
 DATA_BASE = pathlib.Path(__file__).resolve().parents[2] / "data" / "plugins" / "qqbook"
 
@@ -32,7 +32,7 @@ def extract_js_rhs(html: str) -> str | None:
     reason="No QQ book test data found under tests/data/plugins/qqbook/",
 )
 @pytest.mark.parametrize("case_dir", CASE_DIRS)
-def test_qqbook_js_eval(case_dir: pathlib.Path):
+def test_qqbook_js_eval(case_dir: pathlib.Path, tmp_path):
     """
     Test whether js_eval can parse QQBook's window.__NUXT__ JS block
     """
@@ -45,7 +45,7 @@ def test_qqbook_js_eval(case_dir: pathlib.Path):
     js_code = extract_js_rhs(html)
     assert js_code, f"No __NUXT__ block found in: {case_dir}"
 
-    evaluator = get_evaluator()
+    evaluator = JsEvaluator(script_dir=tmp_path)
 
     # Direct Python parser
     try:
