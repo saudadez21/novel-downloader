@@ -6,18 +6,17 @@
   - [目录](#目录)
   - [general 配置](#general-配置)
     - [主配置项](#主配置项)
+    - [parser 子节 `[general.parser]`](#parser-子节-generalparser)
+    - [output 子节 `[general.output]`](#output-子节-generaloutput)
     - [调试子节 `[general.debug]`](#调试子节-generaldebug)
-    - [字体/OCR 子节 `[general.font_ocr]`](#字体ocr-子节-generalfont_ocr)
     - [示例配置](#示例配置)
   - [sites 配置](#sites-配置)
     - [通用键](#通用键)
     - [`book_ids` 字段说明](#book_ids-字段说明)
     - [示例: 起点 (`qidian`)](#示例-起点-qidian)
-  - [output 配置](#output-配置)
-    - [示例配置](#示例配置-1)
   - [plugins 配置](#plugins-配置)
     - [主配置项](#主配置项-1)
-    - [示例配置](#示例配置-2)
+    - [示例配置](#示例配置-1)
   - [processors 配置](#processors-配置)
     - [内置处理器概览 (简要)](#内置处理器概览-简要)
       - [`cleaner`](#cleaner)
@@ -93,30 +92,65 @@
 
 因此, 在遇到访问异常 (如 403、TLS 握手失败、Cloudflare 验证循环等) 时, 建议根据具体站点情况灵活调整后端和相关参数。
 
+#### parser 子节 `[general.parser]`
+
+该配置用于处理 **混淆字体解码** 与 **图片章节 OCR 识别**, 并控制图片章节的 **去水印** 与 **切割方式**。
+
+| 参数名             | 类型          | 默认值      | 说明                                                        |
+| ------------------ | ------------ | ---------- | ----------------------------------------------------------- |
+| `enable_ocr`       | bool         | false      | 是否启用本地 OCR, 用于识别混淆字体或图片章节文本                |
+| `batch_size`       | int          | 32         | OCR 模型推理时的批处理大小                                    |
+| `remove_watermark` | bool         | false      | 是否尝试对图片章节进行去水印 (部分站点支持)                     |
+| `cut_mode`         | string       | `"none"`   | 图片章节切割模式: `none` (整图) / `line` (按行) / `paragraph` (按段落) |
+| `model_name`       | str/None     | None       | OCR 模型名称, 如果设置为 `None`, 则使用 `PP-OCRv5_server_rec`  |
+| `model_dir`        | str/None     | None       | OCR 模型存储路径                                              |
+| `input_shape`      | tuple/None   | None       | OCR 模型输入图像尺寸, 格式为 (C, H, W)                         |
+| `device`           | str/None     | None       | 用于推理的设备, 例如: "cpu"、"gpu"、"npu"、"gpu:0"、"gpu:0,1"  |
+| `cpu_threads`      | int          | 10         | 在 CPU 上推理时使用的线程数量                                  |
+| `enable_hpi`       | bool         | false      | 是否启用高性能推理                                             |
+
+功能说明:
+
+* **混淆字体章节**
+  * 若未开启解析或解析失败, 程序将在导出 EPUB/HTML 时自动嵌入对应字体文件, 确保显示正常
+
+* **图片章节切割**
+  * 当未开启 OCR 或识别失败时, 图片章节会根据 `cut_mode` 进行切割
+  * 由于整图经常过长且不适合在 EPUB 阅读器中显示, 建议使用 `line` 或 `paragraph` 模式以获得更好的阅读体验。
+
+依赖说明:
+
+若 `cut_mode` 为 `line` / `paragraph` 或启用了 `enable_ocr`, 需安装额外的图像处理依赖
+
+```bash
+pip install novel-downloader[image-utils]
+```
+
+OCR 功能依赖 `PaddleOCR` 及其模型, 请参考安装指南:
+
+* [安装说明](./1-installation.md)
+
+`PaddleOCR` 配置参考官方文档:
+
+* [PaddleOCR 文档](https://www.paddleocr.ai/main/version3.x/module_usage/text_recognition.html#_4)
+
+#### output 子节 `[general.output]`
+
+控制导出格式, 文件命名与 EPUB 细节
+
+| 参数名                        | 类型         | 默认值                | 说明                                       |
+| ----------------------------- | ----------- | --------------------- | ------------------------------------------ |
+| `formats`                     | `list[str]` | `[]`                  | 输出格式                                    |
+| `append_timestamp`            | bool        | true                  | 输出文件名是否追加时间戳                     |
+| `filename_template`           | string      | `"{title}_{author}"`  | 文件名模板                                  |
+| `include_picture`             | bool        | true                  | 是否下载并嵌入章节中的图片 (可能增加文件体积) |
+
 #### 调试子节 `[general.debug]`
 
 | 参数名                | 类型   | 默认值             | 说明                                 |
 | -------------------- | ------ | ----------------- | ------------------------------------ |
 | `debug.save_html`    | bool   | false             | 是否保存抓取到的原始 HTML 到磁盘        |
 | `debug.log_level`    | string | `"INFO"`          | 日志级别: DEBUG, INFO, WARNING, ERROR |
-
-#### 字体/OCR 子节 `[general.font_ocr]`
-
-用于支持混淆字体破解与文本识别
-
-| 参数名             | 类型         | 默认值      | 说明                                                        |
-| ----------------- | ------------ | ---------- | ----------------------------------------------------------- |
-| `enable_ocr`     | bool         | false      | 是否尝试本地解码混淆字体                                      |
-| `batch_size`      | int          | 32         | OCR 模型推理时的批处理大小                                    |
-| `save_font_debug` | bool         | false      | 是否保存字体调试数据                                          |
-| `model_name`      | str/None     | None       | 模型名称, 如果设置为None, 则使用 `PP-OCRv5_server_rec`         |
-| `model_dir`       | str/None     | None       | 模型存储路径                                                  |
-| `input_shape`     | tuple/None   | None       | 模型输入图像尺寸, 格式为 (C, H, W)                             |
-| `device`          | str/None     | None       | 用于推理的设备, 例如: "cpu"、"gpu"、"npu"、"gpu:0"、"gpu:0,1"  |
-| `cpu_threads`     | int          | 10         | 在 CPU 上推理时使用的线程数量                                  |
-| `enable_hpi`      | bool         | false      | 是否启用高性能推理                                             |
-
-> **PaddleOCR** 相关配置可见官网 [文档](https://www.paddleocr.ai/main/version3.x/module_usage/text_recognition.html#_4)
 
 #### 示例配置
 
@@ -135,14 +169,22 @@ workers = 4
 skip_existing = true
 storage_batch_size = 4
 
-[general.debug]
-save_html = false
-log_level = "INFO"
+[general.output]
+formats = [
+    "txt",
+    "epub",
+    "html",
+]
+include_picture = true
 
-[general.font_ocr]
+[general.parser]
 enable_ocr = false
-save_font_debug = false
 batch_size = 32
+
+remove_watermark = true
+cut_mode = "paragraph"
+
+model_name = "PP-OCRv5_mobile_rec"
 ```
 
 ---
@@ -229,32 +271,6 @@ ignore_ids = ["507161874", "516065132"]
 
 [[sites.qidian.book_ids]]
 book_id = "1012584111"
-```
-
----
-
-### output 配置
-
-控制导出格式, 文件命名与 EPUB 细节
-
-| 参数名                        | 类型         | 默认值                | 说明                                       |
-| ----------------------------- | ----------- | --------------------- | ------------------------------------------ |
-| `formats`                     | `list[str]` | `[]`                  | 输出格式                                    |
-| `append_timestamp`            | bool        | true                  | 输出文件名是否追加时间戳                     |
-| `filename_template`           | string      | `"{title}_{author}"`  | 文件名模板                                  |
-| `include_picture`             | bool        | true                  | 是否下载并嵌入章节中的图片 (可能增加文件体积) |
-
-#### 示例配置
-
-```toml
-[output]
-formats = [
-    "txt",
-    "epub",
-]
-append_timestamp = false
-filename_template = "{title}_{author}"
-include_picture = true
 ```
 
 ---

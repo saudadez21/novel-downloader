@@ -1,4 +1,6 @@
+import os
 import warnings
+from pathlib import Path
 
 import pytest
 from novel_downloader.infra.config.adapter import ConfigAdapter
@@ -7,7 +9,7 @@ from novel_downloader.schemas import (
     ClientConfig,
     ExporterConfig,
     FetcherConfig,
-    FontOCRConfig,
+    OCRConfig,
     ParserConfig,
     ProcessorConfig,
 )
@@ -54,7 +56,7 @@ def test_get_parser_config_input_shape_to_tuple():
     adapter = make_adapter(cfg)
     pc = adapter.get_parser_config("unknown")
 
-    assert pc.fontocr_cfg.input_shape == (1, 32, 32)
+    assert pc.ocr_cfg.input_shape == (1, 32, 32)
 
 
 def test_get_client_config_basic():
@@ -268,15 +270,15 @@ def test_dict_to_book_cfg_ignore_ids():
     assert out.ignore_ids == frozenset({"1", "2", "3"})
 
 
-def test_dict_to_fontocr_cfg_basic():
-    out = ConfigAdapter._dict_to_fontocr_cfg({"precision": "fp16"})
-    assert isinstance(out, FontOCRConfig)
+def test_dict_to_ocr_cfg_basic():
+    out = ConfigAdapter._dict_to_ocr_cfg({"precision": "fp16"})
+    assert isinstance(out, OCRConfig)
     assert out.precision == "fp16"
 
 
-def test_dict_to_fontocr_cfg_not_dict():
-    out = ConfigAdapter._dict_to_fontocr_cfg("xx")
-    assert isinstance(out, FontOCRConfig)
+def test_dict_to_ocr_cfg_not_dict():
+    out = ConfigAdapter._dict_to_ocr_cfg("xx")
+    assert isinstance(out, OCRConfig)
 
 
 def test_to_processor_cfgs_non_list_returns_empty():
@@ -316,3 +318,45 @@ def test_convert_fmt_dict_warns():
 
     assert result == ["txt"]
     assert any("legacy" in str(wi.message) for wi in w)
+
+
+def test_get_log_dir_specific(tmp_path):
+    cfg = {"general": {"debug": {"log_dir": str(tmp_path / "mylogs")}}}
+    adapter = ConfigAdapter(cfg)
+    out = adapter.get_log_dir()
+
+    assert isinstance(out, Path)
+    assert out == (tmp_path / "mylogs").resolve()
+
+
+def test_get_log_dir_default(tmp_path, monkeypatch):
+    # change cwd so "./logs" is predictable
+    monkeypatch.chdir(tmp_path)
+
+    adapter = ConfigAdapter({"general": {}})
+    result = adapter.get_log_dir()
+
+    assert result == (tmp_path / "logs").resolve()
+
+
+def test_get_log_dir_expand_user(monkeypatch, tmp_path):
+    user_logs = tmp_path / "expanded_logs"
+
+    if os.name == "nt":  # Windows
+        monkeypatch.setenv("USERPROFILE", str(tmp_path))
+    else:  # Linux/macOS
+        monkeypatch.setenv("HOME", str(tmp_path))
+
+    cfg = {"general": {"debug": {"log_dir": "~/expanded_logs"}}}
+    adapter = ConfigAdapter(cfg)
+    out = adapter.get_log_dir()
+
+    assert out == user_logs.resolve()
+
+
+def test_get_log_dir_invalid_type_fallback():
+    cfg = {"general": {"debug": {"log_dir": 123}}}
+    adapter = ConfigAdapter(cfg)
+
+    with pytest.raises(TypeError):
+        adapter.get_log_dir()

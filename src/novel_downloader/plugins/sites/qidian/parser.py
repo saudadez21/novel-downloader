@@ -21,8 +21,8 @@ from novel_downloader.plugins.registry import registrar
 from novel_downloader.plugins.utils.yuewen import (
     AssetSpec,
     NodeDecryptor,
+    YuewenQDFontMixin,
     apply_css_text_rules,
-    decode_qdfont_text,
 )
 from novel_downloader.schemas import (
     BookInfoDict,
@@ -49,7 +49,7 @@ QD_ASSETS: list[AssetSpec] = [
 
 
 @registrar.register_parser()
-class QidianParser(BaseParser):
+class QidianParser(YuewenQDFontMixin, BaseParser):
     """
     Parser for 起点中文网 site.
     """
@@ -339,33 +339,32 @@ class QidianParser(BaseParser):
             logger.warning("qidian parser: fixedFontWoff2 missing (chapter=%s)", cid)
             return "", [], []
 
+        # --- CSS extract ---
         paragraphs_str, refl_list = apply_css_text_rules(raw_html, css_str)
 
+        # --- OCR path ---
         if self._enable_ocr:
-            decoded = decode_qdfont_text(
-                text=paragraphs_str,
-                fixed_font_url=fixed_font_url,
-                random_font_data=bytes(rf_data),
-                reflected_chars=refl_list,
-                cache_root=self._cache_dir,
-                fontocr_config=self._fontocr_cfg,
-                batch_size=self._batch_size,
-            )
-            return decoded, [], []
+            try:
+                decoded = self._decode_qdfont(
+                    text=paragraphs_str,
+                    fixed_font_url=fixed_font_url,
+                    random_font_data=bytes(rf_data),
+                    reflected_chars=refl_list,
+                )
+                return decoded, [], []
+            except Exception as e:
+                logger.warning(
+                    "qidian parser: OCR decoding failed (cid=%s): %s - falling back to font resources",  # noqa: E501
+                    cid,
+                    e,
+                )
 
+        # --- fallback: emit font resources ---
         random_bytes = bytes(rf_data)
         random_b64 = base64.b64encode(random_bytes).decode("ascii")
-
         resources: list[dict[str, Any]] = [
-            {
-                "type": "font",
-                "url": fixed_font_url,
-            },
-            {
-                "type": "font",
-                "base64": random_b64,
-                "mime": "font/ttf",
-            },
+            {"type": "font", "url": fixed_font_url},
+            {"type": "font", "base64": random_b64, "mime": "font/ttf"},
         ]
 
         return paragraphs_str, refl_list, resources

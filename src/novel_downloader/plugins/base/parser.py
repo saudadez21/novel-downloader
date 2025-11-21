@@ -10,9 +10,14 @@ import abc
 import re
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from novel_downloader.schemas import BookInfoDict, ChapterDict, ParserConfig
+
+if TYPE_CHECKING:
+    import numpy as np
+    from numpy.typing import NDArray
+    from paddleocr import TextRecognition
 
 
 class BaseParser(abc.ABC):
@@ -34,14 +39,34 @@ class BaseParser(abc.ABC):
 
         :param config: ParserConfig object controlling parsing behavior.
         """
-        self._fontocr_cfg = config.fontocr_cfg
-        self._save_font_debug = config.save_font_debug
+        self._ocr_cfg = config.ocr_cfg
         self._enable_ocr: bool = config.enable_ocr
         self._batch_size = config.batch_size
         self._use_truncation = config.use_truncation
+        self._remove_watermark = config.remove_watermark
+        self._cut_mode = config.cut_mode
         self._cache_dir = Path(config.cache_dir) / self.site_name
 
+        self._ocr_model: "TextRecognition | None" = None
+
         self._ad_pattern = self._compile_ads_pattern()
+
+    @property
+    def ocr_model(self) -> "TextRecognition":
+        if self._ocr_model is None:
+            from paddleocr import TextRecognition
+
+            self._ocr_model = TextRecognition(  # takes 5 ~ 12 sec to init
+                model_name=self._ocr_cfg.model_name,
+                model_dir=self._ocr_cfg.model_dir,
+                input_shape=self._ocr_cfg.input_shape,
+                device=self._ocr_cfg.device,
+                precision=self._ocr_cfg.precision,
+                cpu_threads=self._ocr_cfg.cpu_threads,
+                enable_hpi=self._ocr_cfg.enable_hpi,
+            )
+
+        return self._ocr_model
 
     @abc.abstractmethod
     def parse_book_info(
@@ -127,3 +152,20 @@ class BaseParser(abc.ABC):
         for old, new in replaces:
             value = value.replace(old, new)
         return value.strip()
+
+    def _extract_text_from_image(
+        self,
+        images: "list[NDArray[np.uint8]]",
+        batch_size: int = 1,
+    ) -> list[tuple[str, float]]:
+        """
+        Perform OCR on a list of images and extract recognized text.
+
+        :param images: A list of image arrays (np.ndarray) to be processed by OCR.
+        :param batch_size: Number of images to process per inference batch (minimum 1).
+        :return: A list of tuples in the form (text, confidence_score).
+        """
+        return [
+            (pred.get("rec_text"), pred.get("rec_score"))
+            for pred in self.ocr_model.predict(images, batch_size=batch_size)
+        ]

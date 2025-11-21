@@ -34,7 +34,7 @@ class FetcherConfig:
 
 
 @dataclass
-class FontOCRConfig:
+class OCRConfig:
     model_name: str | None = None
     model_dir: str | None = None
     input_shape: tuple[int, int, int] | None = None
@@ -50,8 +50,9 @@ class ParserConfig:
     use_truncation: bool = True
     enable_ocr: bool = False
     batch_size: int = 32
-    save_font_debug: bool = False
-    fontocr_cfg: FontOCRConfig = field(default_factory=FontOCRConfig)
+    remove_watermark: bool = False
+    cut_mode: str = "none"
+    ocr_cfg: OCRConfig = field(default_factory=OCRConfig)
 
 
 @dataclass

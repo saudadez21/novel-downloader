@@ -202,7 +202,7 @@ model_name = "PP-OCRv5_mobile_rec"
 示例报错:
 
 ```bash
-FontOCR initialization failed: (NotFound) Cannot open file
+(NotFound) Cannot open file
 C:\Users\用户名.paddlex\official_models\PP-OCRv5_mobile_rec\inference.json, please confirm whether the file is normal.
 [Hint: Expected paddle::inference::IsFileExists(prog_file_) == true, but received paddle::inference::IsFileExists(prog_file_):0 != true:1.]
 ```

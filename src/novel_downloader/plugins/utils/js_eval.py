@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.libs.js_eval
------------------------------
+novel_downloader.plugins.utils.js_eval
+--------------------------------------
 
 Unified JS -> JSON evaluator with fast-path IIFE parsing.
 

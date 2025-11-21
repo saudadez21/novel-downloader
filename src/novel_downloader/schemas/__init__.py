@@ -11,7 +11,7 @@ __all__ = [
     "ClientConfig",
     "ParserConfig",
     "FetcherConfig",
-    "FontOCRConfig",
+    "OCRConfig",
     "ExporterConfig",
     "ProcessorConfig",
     "BookInfoDict",
@@ -40,7 +40,7 @@ from .config import (
     ClientConfig,
     ExporterConfig,
     FetcherConfig,
-    FontOCRConfig,
+    OCRConfig,
     ParserConfig,
     ProcessorConfig,
 )

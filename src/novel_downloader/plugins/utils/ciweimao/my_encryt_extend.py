@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.plugins.utils.ciweimao.my_encryt
--------------------------------------------------
+novel_downloader.plugins.utils.ciweimao.my_encryt_extend
+--------------------------------------------------------
 """
 
 import base64

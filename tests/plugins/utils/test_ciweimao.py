@@ -1,4 +1,4 @@
-from novel_downloader.plugins.utils.ciweimao.my_encryt import my_decrypt
+from novel_downloader.plugins.utils.ciweimao import my_decrypt
 
 ENCRYT_KEYS = [
     "riZBIkTTqO/MI67HGtMvVGHjCiZPMLXfThf+LsWaUHE=",

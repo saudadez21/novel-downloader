@@ -10,10 +10,9 @@ import logging
 from typing import Any
 
 from lxml import html
-from novel_downloader.libs.fontocr import get_font_ocr
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
-from novel_downloader.plugins.utils.ciweimao.my_encryt import my_decrypt
+from novel_downloader.plugins.utils.ciweimao import my_decrypt
 from novel_downloader.schemas import (
     BookInfoDict,
     ChapterDict,
@@ -299,11 +298,7 @@ class CiweimaoParser(BaseParser):
         img_base64: str,
         tsukkomi_list_json_str: str,
     ) -> tuple[list[str], list[MediaResource]]:
-        ocr = get_font_ocr(self._fontocr_cfg)
-        if not ocr:
-            logger.warning("fail to load OCR")
-            return [], []
-
+        from novel_downloader.libs import imagekit
         from novel_downloader.plugins.utils.ciweimao.image import split_image
 
         paragraphs: list[str] = []
@@ -313,11 +308,13 @@ class CiweimaoParser(BaseParser):
         # decode & preprocess
         image_tsukkomi_list = json.loads(tsukkomi_list_json_str)
         img_bytes = base64.b64decode(img_base64)
-        img_arr = ocr.load_image_array_bytes(img_bytes)
+        img_arr = imagekit.load_image_array_bytes(img_bytes)
 
         result = split_image(img_arr, image_tsukkomi_list)
 
-        ocr_outputs = ocr.predict(result.images, batch_size=self._batch_size)
+        ocr_outputs = self._extract_text_from_image(
+            result.images, batch_size=self._batch_size
+        )
 
         for blk in result.blocks:
             if blk["type"] == "image":

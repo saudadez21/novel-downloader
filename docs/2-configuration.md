@@ -123,28 +123,6 @@ novel-cli download --config path/to/settings.toml
 
 ---
 
-### 5. 站点配置查找顺序
-
-解析站点信息时, 按以下优先级查找:
-
-1. **`[sites.<site_name>]`**: 匹配下载命令中 `--site <site_name>` 的具体配置。
-
-2. **`[sites.common]`**: 所有站点共享的默认配置, 作为回退选项。
-
-示例:
-
-```toml
-[sites.common]
-request_interval = 1.2
-
-[sites.linovelib]
-book_ids = ["1234"]
-```
-
-若 `linovelib` 未设置某个字段, 则会继承 `sites.common` 中的对应值。
-
----
-
 ### 配置文档导航
 
 * [安装说明](./1-installation.md)

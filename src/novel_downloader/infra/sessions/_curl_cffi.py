@@ -32,6 +32,10 @@ class CurlCffiSession(BaseSession):
         if self._session:
             return
 
+        proxy_auth = None
+        if self._proxy_user and self._proxy_pass:
+            proxy_auth = (self._proxy_user, self._proxy_pass)
+
         self._session = AsyncSession(
             headers=self._headers,
             cookies=self._cookies,
@@ -39,6 +43,8 @@ class CurlCffiSession(BaseSession):
             impersonate=self._impersonate,  # type: ignore[arg-type]
             verify=self._verify_ssl,
             proxy=self._proxy,
+            proxy_auth=proxy_auth,
+            trust_env=self._trust_env,
         )
 
     async def close(self) -> None:
