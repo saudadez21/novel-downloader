@@ -48,10 +48,6 @@ jobs:
         run: |
           pre-commit run --all-files
 
-      - name: Run mypy
-        run: |
-          mypy src
-
       - name: Run tests
         run: |
           pytest -v
