@@ -1,3 +1,9 @@
+## v3.0.1 (2025-11-22)
+
+### Fix
+
+- **sites**: add fallback for qidian volume extraction (#139)
+
 ## v3.0.0 (2025-11-20)
 
 ### Feat
