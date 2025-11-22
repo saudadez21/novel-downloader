@@ -67,10 +67,12 @@ def filter_orange_watermark(img: NDArray[np.uint8]) -> NDArray[np.uint8]:
 
 
 def filter_gray_watermark(
-    img: NDArray[np.uint8], threshold: int = 200
+    img: NDArray[np.uint8],
+    threshold: int = 200,
+    background: tuple[int, int, int] = (255, 255, 255),
 ) -> NDArray[np.uint8]:
     """
-    Remove gray-like watermark colors by replacing them with white.
+    Remove gray-like watermark colors by replacing them with background color.
 
     Note: The input array will be modified in-place.
 
@@ -80,9 +82,8 @@ def filter_gray_watermark(
     img16 = img.astype(np.uint16, copy=False)
     sum_rgb = img16[..., 0] + img16[..., 1]
     sum_rgb += img16[..., 2]
-
     mask = sum_rgb > threshold * 3
-    img[mask] = (255, 255, 255)
+    img[mask] = background
     return img
 
 
@@ -218,6 +219,54 @@ def is_new_paragraph(
     # Integer RGB sum: avoids float mean
     rgb_sum = img[:, :max_scan, :].sum(axis=2, dtype=np.uint16)
     return bool((rgb_sum >= 3 * white_threshold).all())
+
+
+def encode_image_array(
+    img: NDArray[np.uint8],
+    format: str = "JPEG",
+) -> bytes:
+    """
+    Encode a single RGB image array into the specified format and return
+    the raw image bytes.
+
+    :param img: Image as a numpy array (H, W, 3), dtype=uint8, RGB.
+    :param format: Output format ("JPEG" or "PNG").
+    :return: Encoded image bytes.
+    """
+    pil_img = Image.fromarray(img)
+
+    buf = io.BytesIO()
+    if format == "JPEG":
+        pil_img.save(buf, format=format, quality=95, subsampling=0)
+    else:
+        pil_img.save(buf, format=format)
+    return buf.getvalue()
+
+
+def concat_image_slices_vertical(
+    slices: list[NDArray[np.uint8]],
+    format: str = "JPEG",
+) -> bytes:
+    """
+    Vertically concatenate a list of RGB image slices and return the encoded
+    image bytes in the specified format.
+
+    :param slices: List of image numpy arrays (H, W, 3).
+    :param format: Output image format ("JPEG" or "PNG").
+    :return: Encoded image bytes.
+    :raises ValueError: If slices is empty.
+    """
+    if not slices:
+        raise ValueError("No slices provided.")
+    combined = np.concatenate(slices, axis=0)
+    img = Image.fromarray(combined, mode="RGB")
+    buf = io.BytesIO()
+    format = format.upper()
+    if format == "JPEG":
+        img.save(buf, format="JPEG", quality=95, subsampling=0)
+    else:
+        img.save(buf, format=format)
+    return buf.getvalue()
 
 
 def _pil_to_rgb_array(img: Image.Image, white_bg: bool) -> NDArray[np.uint8]:

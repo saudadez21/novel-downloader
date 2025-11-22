@@ -12,7 +12,7 @@ from typing import Any, Literal, TypedDict
 import numpy as np
 from numpy.typing import NDArray
 
-BACKGROUND_COLOR = np.array([248, 239, 218], dtype=np.uint8)
+from novel_downloader.libs import imagekit
 
 
 class ImageBlock(TypedDict):
@@ -34,9 +34,11 @@ class SplitResult:
 def split_image(
     img_arr: NDArray[np.uint8],
     image_tsukkomi_list: dict[str, Any],
+    background: tuple[int, int, int] = (255, 255, 255),
+    remove_watermark: bool = False,
 ) -> SplitResult:
     """
-    Split a Ciweimao chapter image into OCR-ready text slices and inline image blocks.
+    Split a chapter image into OCR-ready text slices and inline image blocks.
 
     The function uses Tsukkomi metadata (`tsukkomi_list` and `imageInfoMaps`) to
     determine where text lines and image lines are located. Text segments are cropped,
@@ -47,6 +49,8 @@ def split_image(
     :param image_tsukkomi_list: Tsukkomi metadata.
     :return: SplitResult containing cropped OCR image slices and logical block order.
     """
+    bg_arr = np.array(background, dtype=np.uint8)
+
     tsukkomi_list = image_tsukkomi_list["tsukkomi_list"]
     imageInfoMaps = image_tsukkomi_list["imageInfoMaps"]
     font_height = image_tsukkomi_list["height"]
@@ -58,10 +62,10 @@ def split_image(
     fh_1_2 = 1.2 * font_height
     fh_1_5 = int(font_height * 1.5)
     fh_2_2 = 2.2 * font_height
-    pad_h = max(1, font_height >> 1)
+    pad_h = max(1, font_height >> 2)
 
     h, w, _ = img_arr.shape
-    pad_block = np.full((pad_h, w, 3), BACKGROUND_COLOR, dtype=np.uint8)
+    pad_block = np.full((pad_h, w, 3), bg_arr, dtype=np.uint8)
 
     now_y = 0.0
 
@@ -99,7 +103,8 @@ def split_image(
 
             # slice text block
             block = img_arr[start_y:end_y, :, :]
-            block = filter_gray_watermark(block)
+            if remove_watermark:
+                block = imagekit.filter_gray_watermark(block, background=background)
             block = np.concatenate((pad_block, block, pad_block), axis=0)
 
             image_idx = len(images)
@@ -117,23 +122,3 @@ def split_image(
             )
 
     return SplitResult(images=images, blocks=blocks)
-
-
-def filter_gray_watermark(
-    img: NDArray[np.uint8], threshold: int = 200
-) -> NDArray[np.uint8]:
-    """
-    Remove gray-like watermark colors by replacing them with white.
-
-    Note: The input array will be modified in-place.
-
-    :param img: Input image as numpy array (H, W, 3)
-    :return: Filtered numpy array (H, W, 3)
-    """
-    img16 = img.astype(np.uint16, copy=False)
-    sum_rgb = img16[..., 0] + img16[..., 1]
-    sum_rgb += img16[..., 2]
-
-    mask = sum_rgb > threshold * 3
-    img[mask] = BACKGROUND_COLOR
-    return img

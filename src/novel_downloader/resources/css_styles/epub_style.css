@@ -79,6 +79,8 @@ img {
 }
 
 .intro-description {
+  margin-left: 0;
+  margin-right: 0;
   margin-top: 0.5em;
 }
 
@@ -95,7 +97,8 @@ img {
 }
 
 .vol-description {
-  margin: 0 1.2em 1.2em;
+  margin: 0;
+  margin-top: 0.5em;
 }
 
 .vol-description p {
@@ -132,7 +135,7 @@ h1.head b {
 }
 
 .chapter-content {
-  margin: 0 1.2em 1.5em;
+  margin: 0;
   font-size: 1em;
 }
 
@@ -173,7 +176,8 @@ h1.head b {
 /* ===== Extra blocks (e.g. Author Notes) ===== */
 
 .extra-block {
-  margin: 2em 1.2em 1.5em;
+  margin-left: 0;
+  margin-right: 0;
   padding: 0;
 }
 

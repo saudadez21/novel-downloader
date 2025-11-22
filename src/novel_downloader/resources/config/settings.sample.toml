@@ -37,7 +37,7 @@ enable_ocr = false                 # 是否尝试本地解析混淆字体 / 图�
 batch_size = 32
 
 remove_watermark = false           # 图片章节是否尝试去水印
-cut_mode = "none"                  # none | line | paragraph
+cut_mode = "none"                  # none | paragraph | page
 
 # 以下为 PaddleOCR 文本识别的可选参数
 model_name = "PP-OCRv5_mobile_rec"

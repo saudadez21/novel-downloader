@@ -93,6 +93,7 @@ ci = [
 dev = [
     "pytest",
     "pytest-asyncio",
+    "pytest-aiohttp",
     "pytest-cov",
     "pytest-mock",
     "types-requests",

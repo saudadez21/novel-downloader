@@ -32,6 +32,7 @@ class BaseParser(abc.ABC):
     ADS: set[str] = set()
 
     _SPACE_RE = re.compile(r"\s+")
+    _OCR_MODEL: "TextRecognition | None" = None
 
     def __init__(self, config: ParserConfig):
         """
@@ -47,16 +48,14 @@ class BaseParser(abc.ABC):
         self._cut_mode = config.cut_mode
         self._cache_dir = Path(config.cache_dir) / self.site_name
 
-        self._ocr_model: "TextRecognition | None" = None
-
         self._ad_pattern = self._compile_ads_pattern()
 
     @property
     def ocr_model(self) -> "TextRecognition":
-        if self._ocr_model is None:
+        if BaseParser._OCR_MODEL is None:
             from paddleocr import TextRecognition
 
-            self._ocr_model = TextRecognition(  # takes 5 ~ 12 sec to init
+            BaseParser._OCR_MODEL = TextRecognition(  # takes 5 ~ 12 sec to init
                 model_name=self._ocr_cfg.model_name,
                 model_dir=self._ocr_cfg.model_dir,
                 input_shape=self._ocr_cfg.input_shape,
@@ -66,7 +65,7 @@ class BaseParser(abc.ABC):
                 enable_hpi=self._ocr_cfg.enable_hpi,
             )
 
-        return self._ocr_model
+        return BaseParser._OCR_MODEL
 
     @abc.abstractmethod
     def parse_book_info(

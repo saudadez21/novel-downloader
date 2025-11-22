@@ -1,8 +1,11 @@
 import io
 
 import numpy as np
+import pytest
 from novel_downloader.libs.imagekit import (
+    concat_image_slices_vertical,
     crop_chars_region,
+    encode_image_array,
     filter_gray_watermark,
     filter_orange_watermark,
     is_empty_image,
@@ -30,6 +33,13 @@ def pil_to_bytes(img: Image.Image, fmt="PNG") -> bytes:
     buf = io.BytesIO()
     img.save(buf, format=fmt)
     return buf.getvalue()
+
+
+def create_test_image(width=10, height=10, color=(255, 0, 0)):
+    """Create a simple RGB numpy test image."""
+    img = np.zeros((height, width, 3), dtype=np.uint8)
+    img[:, :] = color
+    return img
 
 
 def test_load_image_array_bytes():
@@ -133,3 +143,74 @@ def test_is_new_paragraph_false():
     img = np.full((10, 50, 3), 255, dtype=np.uint8)
     img[:, 0:5] = 0  # black indent area
     assert is_new_paragraph(img, paragraph_threshold=20) is False
+
+
+@pytest.mark.parametrize("format", ["JPEG", "PNG"])
+def test_encode_image_array_basic(format):
+    img = create_test_image()
+
+    encoded = encode_image_array(img, format=format)
+
+    # Should return bytes
+    assert isinstance(encoded, bytes)
+    assert len(encoded) > 0
+
+    # Should be loadable by PIL
+    loaded = Image.open(io.BytesIO(encoded))
+    assert loaded.size == (10, 10)
+    assert loaded.mode == "RGB"
+
+
+def test_encode_image_array_actual_color():
+    color = (123, 50, 200)
+    img = create_test_image(color=color)
+
+    encoded = encode_image_array(img, format="PNG")  # PNG is lossless
+    loaded = np.array(Image.open(io.BytesIO(encoded)))
+
+    assert loaded.shape == img.shape
+    np.testing.assert_array_equal(loaded, img)
+
+
+@pytest.mark.parametrize("format", ["JPEG", "PNG"])
+def test_concat_image_slices_vertical_basic(format):
+    slice1 = create_test_image(height=5, color=(255, 0, 0))
+    slice2 = create_test_image(height=7, color=(0, 255, 0))
+
+    encoded = concat_image_slices_vertical([slice1, slice2], format=format)
+    loaded = np.array(Image.open(io.BytesIO(encoded)))
+
+    assert loaded.shape == (12, 10, 3)
+
+    expected_top = np.array([255, 0, 0])
+    expected_bottom = np.array([0, 255, 0])
+
+    top = loaded[:5]
+    bottom = loaded[5:]
+
+    if format == "PNG":
+        # PNG is lossless
+        assert np.all(top == expected_top)
+        assert np.all(bottom == expected_bottom)
+    else:
+        # JPEG: allow lossy compression, check mean error
+        top_mean_error = np.mean(np.abs(top - expected_top))
+        bottom_mean_error = np.mean(np.abs(bottom - expected_bottom))
+
+        assert top_mean_error <= 15
+        assert bottom_mean_error <= 15
+
+
+def test_concat_image_slices_vertical_empty():
+    """Should raise error when empty list is provided."""
+    with pytest.raises(ValueError, match="No slices provided"):
+        concat_image_slices_vertical([])
+
+
+def test_concat_image_slices_vertical_one_slice():
+    """Concatenating one slice should return the same image."""
+    img = create_test_image(height=8)
+    encoded = concat_image_slices_vertical([img], format="PNG")
+    loaded = np.array(Image.open(io.BytesIO(encoded)))
+
+    np.testing.assert_array_equal(loaded, img)

@@ -101,7 +101,7 @@
 | `enable_ocr`       | bool         | false      | 是否启用本地 OCR, 用于识别混淆字体或图片章节文本                |
 | `batch_size`       | int          | 32         | OCR 模型推理时的批处理大小                                    |
 | `remove_watermark` | bool         | false      | 是否尝试对图片章节进行去水印 (部分站点支持)                     |
-| `cut_mode`         | string       | `"none"`   | 图片章节切割模式: `none` (整图) / `line` (按行) / `paragraph` (按段落) |
+| `cut_mode`         | string       | `"none"`   | 图片章节切割模式: `none` (整图) / `paragraph` (按段落) / `page` (按页) |
 | `model_name`       | str/None     | None       | OCR 模型名称, 如果设置为 `None`, 则使用 `PP-OCRv5_server_rec`  |
 | `model_dir`        | str/None     | None       | OCR 模型存储路径                                              |
 | `input_shape`      | tuple/None   | None       | OCR 模型输入图像尺寸, 格式为 (C, H, W)                         |
@@ -116,11 +116,12 @@
 
 * **图片章节切割**
   * 当未开启 OCR 或识别失败时, 图片章节会根据 `cut_mode` 进行切割
-  * 由于整图经常过长且不适合在 EPUB 阅读器中显示, 建议使用 `line` 或 `paragraph` 模式以获得更好的阅读体验。
+  * 由于整图经常过长且不适合在 EPUB 阅读器中显示, 建议使用 `paragraph` / `page` 模式以获得更好的阅读体验。
+  * 需要注意的是, `paragraph` 模式可能会因产生大量小图而显著增加文件体积, 例如约 1000 个章节可能膨胀至 1.5 GB
 
 依赖说明:
 
-若 `cut_mode` 为 `line` / `paragraph` 或启用了 `enable_ocr`, 需安装额外的图像处理依赖
+若 `cut_mode` 为 `paragraph` / `page` 或启用了 `enable_ocr`, 需安装额外的图像处理依赖
 
 ```bash
 pip install novel-downloader[image-utils]

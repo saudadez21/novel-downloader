@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-novel_downloader.plugins.utils.ciweimao.image_chapter
------------------------------------------------------
+novel_downloader.plugins.utils.ciweimao.chapter
+-----------------------------------------------
 """
 
 import base64
@@ -18,14 +18,23 @@ from .my_encryt_extend import my_decrypt
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
+    import numpy as np
+    from numpy.typing import NDArray
+
     from novel_downloader.plugins.protocols.parser import _ParserContext
 
     class CiweimaoChapterContext(_ParserContext, Protocol):
         """"""
 
+        _CHAPTER_BACKGROUND: tuple[int, int, int]
+        _PAGE_LINE_LIMIT: int
+
 
 class CiweimaoChapterMixin:
     """Ciweimao chapter parser mixin."""
+
+    _CHAPTER_BACKGROUND: tuple[int, int, int] = (255, 255, 255)
+    _PAGE_LINE_LIMIT: int = 15
 
     def _parse_text_chapter(
         self: "CiweimaoChapterContext",
@@ -98,36 +107,153 @@ class CiweimaoChapterMixin:
         img_base64: str,
         tsukkomi_list_json_str: str,
     ) -> tuple[list[str], list[MediaResource]]:
-        from novel_downloader.libs import imagekit
-        from novel_downloader.plugins.utils.ciweimao.image import split_image
+        try:
+            if not self._enable_ocr and self._cut_mode == "none":
+                return [], [
+                    {
+                        "type": "image",
+                        "paragraph_index": 0,
+                        "base64": img_base64,
+                        "mime": "image/jpeg",
+                    }
+                ]
 
-        paragraphs: list[str] = []
-        resources: list[MediaResource] = []
-        current_paragraph_no: int = 0
+            from novel_downloader.libs import imagekit
 
-        # decode & preprocess
-        image_tsukkomi_list = json.loads(tsukkomi_list_json_str)
-        img_bytes = base64.b64decode(img_base64)
-        img_arr = imagekit.load_image_array_bytes(img_bytes)
+            from .image import split_image
 
-        result = split_image(img_arr, image_tsukkomi_list)
+            # decode & preprocess
+            tsukkomi_list = json.loads(tsukkomi_list_json_str)
+            img_bytes = base64.b64decode(img_base64)
+            img_arr = imagekit.load_image_array_bytes(img_bytes)
 
-        ocr_outputs = self._extract_text_from_image(
-            result.images, batch_size=self._batch_size
-        )
+            result = split_image(
+                img_arr,
+                tsukkomi_list,
+                background=self._CHAPTER_BACKGROUND,
+                remove_watermark=self._remove_watermark,
+            )
 
-        for blk in result.blocks:
-            if blk["type"] == "image":
+            if self._enable_ocr:
+                paragraphs: list[str] = []
+                resources: list[MediaResource] = []
+                current_paragraph_no: int = 0
+
+                try:
+                    ocr_outputs = self._extract_text_from_image(
+                        result.images, batch_size=self._batch_size
+                    )
+
+                    for blk in result.blocks:
+                        if blk["type"] == "image":
+                            resources.append(
+                                {
+                                    "type": "image",
+                                    "paragraph_index": current_paragraph_no,
+                                    "url": blk["url"],
+                                }
+                            )
+                        elif blk["type"] == "paragraph":
+                            para_text = [
+                                ocr_outputs[i][0].strip() for i in blk["image_idxs"]
+                            ]
+                            paragraphs.append("".join(para_text))
+                            current_paragraph_no += 1
+
+                    return paragraphs, resources
+                except Exception as e:
+                    logger.warning(
+                        "OCR failed, falling back to image slicing mode.",
+                        exc_info=e,
+                    )
+
+            if self._cut_mode == "paragraph":
+                resources = []
+                for blk in result.blocks:
+                    if blk["type"] == "image":
+                        resources.append(
+                            {
+                                "type": "image",
+                                "paragraph_index": 0,
+                                "url": blk["url"],
+                            }
+                        )
+                    elif blk["type"] == "paragraph":
+                        para_slices = [result.images[i] for i in blk["image_idxs"]]
+                        img_bytes = imagekit.concat_image_slices_vertical(
+                            para_slices, format="JPEG"
+                        )
+                        resources.append(
+                            {
+                                "type": "image",
+                                "paragraph_index": 0,
+                                "base64": base64.b64encode(img_bytes).decode("ascii"),
+                                "mime": "image/jpeg",
+                            }
+                        )
+
+                return [], resources
+
+            resources = []
+            page_buffer: "list[NDArray[np.uint8]]" = []
+            page_line_count = 0
+
+            def flush_page() -> None:
+                nonlocal page_buffer, page_line_count
+
+                if not page_buffer:
+                    return
+
+                img_bytes = imagekit.concat_image_slices_vertical(
+                    page_buffer, format="JPEG"
+                )
+
                 resources.append(
                     {
                         "type": "image",
-                        "paragraph_index": current_paragraph_no,
-                        "url": blk["url"],
+                        "paragraph_index": 0,
+                        "base64": base64.b64encode(img_bytes).decode("ascii"),
+                        "mime": "image/jpeg",
                     }
                 )
-            elif blk["type"] == "paragraph":
-                para_text = [ocr_outputs[i][0].strip() for i in blk["image_idxs"]]
-                paragraphs.append("".join(para_text))
-                current_paragraph_no += 1
 
-        return paragraphs, resources
+                # reset
+                page_buffer = []
+                page_line_count = 0
+
+            for blk in result.blocks:
+                if blk["type"] == "image":
+                    flush_page()
+                    resources.append(
+                        {
+                            "type": "image",
+                            "paragraph_index": 0,
+                            "url": blk["url"],
+                        }
+                    )
+                    continue
+
+                elif blk["type"] == "paragraph":
+                    for idx in blk["image_idxs"]:
+                        slc = result.images[idx]
+                        if page_line_count >= self._PAGE_LINE_LIMIT:
+                            flush_page()
+                        page_buffer.append(slc)
+                        page_line_count += 1
+                    continue
+
+            flush_page()
+
+            return [], resources
+
+        except Exception as e:
+            logger.warning("Unexpected error in image chapter parsing.", exc_info=e)
+
+        return [], [
+            {
+                "type": "image",
+                "paragraph_index": 0,
+                "base64": img_base64,
+                "mime": "image/jpeg",
+            }
+        ]

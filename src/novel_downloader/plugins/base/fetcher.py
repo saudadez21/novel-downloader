@@ -302,7 +302,10 @@ class BaseFetcher(abc.ABC):
 
         :return: True if the session state was loaded, False otherwise.
         """
-        return self.session.load_cookies(self._cache_dir)
+        self.session.load_cookies(self._cache_dir)
+
+        self._is_logged_in = await self._check_login_status()
+        return self._is_logged_in
 
     async def save_state(self) -> bool:
         """
