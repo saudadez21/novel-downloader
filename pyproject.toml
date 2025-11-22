@@ -69,6 +69,10 @@ all = [
 ]
 
 tests = [
+    "brotli",
+    "numpy",
+    "fonttools",
+    "pillow",
     "pytest",
     "pytest-asyncio",
     "pytest-aiohttp",
@@ -78,6 +82,10 @@ tests = [
     "types-lxml",
 ]
 ci = [
+    "brotli",
+    "numpy",
+    "fonttools",
+    "pillow",
     "pytest",
     "pytest-asyncio",
     "pytest-cov",
