@@ -86,6 +86,8 @@ ci = [
     "numpy",
     "fonttools",
     "pillow",
+    "curl_cffi",
+    "httpx[http2]",
     "pytest",
     "pytest-asyncio",
     "pytest-cov",
