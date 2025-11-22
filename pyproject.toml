@@ -90,6 +90,7 @@ ci = [
     "httpx[http2]",
     "pytest",
     "pytest-asyncio",
+    "pytest-aiohttp",
     "pytest-cov",
     "pytest-mock",
     "types-requests",
