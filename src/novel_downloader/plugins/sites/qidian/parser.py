@@ -142,7 +142,30 @@ class QidianParser(BaseParser):
                 url = self._first_str(li.xpath('.//a[@class="chapter-name"]/@href'))
                 cid = url.rstrip("/").split("/")[-1] if url else ""
                 chapters.append({"title": title, "url": url, "chapterId": cid})
-            volumes.append({"volume_name": vol_name, "chapters": chapters})
+            if chapters:
+                volumes.append({"volume_name": vol_name, "chapters": chapters})
+
+        if not volumes:
+            fragment = self._extract_div_block(raw_pages[0], 'id="allCatalog"')
+            if not fragment:
+                return None
+
+            vol_tree = html.fromstring(fragment)
+            for vol in vol_tree.xpath('//div[contains(@class, "catalog-volume")]'):
+                vol_name = self._first_str(
+                    vol.xpath('.//h3[@class="volume-name"]/text()')
+                )
+                vol_name = vol_name.split(chr(183))[0].strip()
+                chapters = []
+                for li in vol.xpath('.//ul[contains(@class,"volume-chapters")]/li'):
+                    title = self._first_str(
+                        li.xpath('.//a[@class="chapter-name"]/text()')
+                    )
+                    url = self._first_str(li.xpath('.//a[@class="chapter-name"]/@href'))
+                    cid = url.rstrip("/").split("/")[-1] if url else ""
+                    chapters.append({"title": title, "url": url, "chapterId": cid})
+                if chapters:
+                    volumes.append({"volume_name": vol_name, "chapters": chapters})
 
         if not volumes:
             return None
@@ -324,6 +347,45 @@ class QidianParser(BaseParser):
         ]
 
         return paragraphs_str, refl_list, resources
+
+    @staticmethod
+    def _extract_div_block(html_str: str, marker: str) -> str | None:
+        """Extracts a balanced <div> block containing the given marker."""
+        start = html_str.find(marker)
+        if start == -1:
+            return None
+
+        div_start = html_str.rfind("<div", 0, start)
+        if div_start == -1:
+            return None
+
+        depth = 0
+        i = div_start
+        n = len(html_str)
+
+        while i < n:
+            next_open = html_str.find("<div", i)
+            next_close = html_str.find("</div", i)
+
+            if next_close == -1:
+                return None
+
+            if next_open != -1 and next_open < next_close:
+                depth += 1
+                i = html_str.find(">", next_open)
+                if i == -1:
+                    return None
+                i += 1
+            else:
+                depth -= 1
+                close_end = html_str.find(">", next_close)
+                if close_end == -1:
+                    return None
+                i = close_end + 1
+                if depth == 0:
+                    return html_str[div_start:i]
+
+        return None
 
     @staticmethod
     def _find_ssr_page_context(html_str: str) -> dict[str, Any]:
