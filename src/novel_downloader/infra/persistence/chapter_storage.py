@@ -210,6 +210,45 @@ class ChapterStorage:
             )
         return result
 
+    def delete_chapter(self, chap_id: str) -> bool:
+        """
+        Delete a single chapter if it exists.
+
+        :param chap_id: Chapter identifier.
+        :return: True if a row was deleted, False otherwise.
+        """
+        cur = self.conn.execute(
+            "DELETE FROM chapters WHERE id = ?",
+            (chap_id,),
+        )
+        self.conn.commit()
+
+        self._refetch_flags.pop(chap_id, None)
+
+        return (cur.rowcount or 0) > 0
+
+    def delete_chapters(self, chap_ids: list[str]) -> int:
+        """
+        Delete multiple chapters if they exist (single transaction).
+
+        :param chap_ids: List of chapter identifiers.
+        :return: Number of rows deleted.
+        """
+        if not chap_ids:
+            return 0
+
+        unique_ids = set(chap_ids)
+
+        placeholders = ",".join("?" for _ in unique_ids)
+        query = f"DELETE FROM chapters WHERE id IN ({placeholders})"
+        cur = self.conn.execute(query, tuple(unique_ids))
+        self.conn.commit()
+
+        for cid in unique_ids:
+            self._refetch_flags.pop(cid, None)
+
+        return cur.rowcount or 0
+
     def close(self) -> None:
         """
         Close the database connection and clear in-memory caches.

@@ -5,6 +5,7 @@ novel_downloader.plugins.mixins
 """
 
 __all__ = [
+    "CleanupMixin",
     "DownloadMixin",
     "ExportEpubMixin",
     "ExportHtmlMixin",
@@ -12,6 +13,7 @@ __all__ = [
     "ProcessMixin",
 ]
 
+from .cleanup import CleanupMixin
 from .download import DownloadMixin
 from .export_epub import ExportEpubMixin
 from .export_html import ExportHtmlMixin

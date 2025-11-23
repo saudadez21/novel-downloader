@@ -10,6 +10,7 @@ from typing import Any, Protocol
 
 from novel_downloader.plugins.base.client import BaseClient
 from novel_downloader.plugins.mixins import (
+    CleanupMixin,
     DownloadMixin,
     ExportEpubMixin,
     ExportHtmlMixin,
@@ -48,6 +49,7 @@ class _ExportChapterFunc(Protocol):
 
 
 class CommonClient(
+    CleanupMixin,
     DownloadMixin,
     ExportEpubMixin,
     ExportHtmlMixin,
