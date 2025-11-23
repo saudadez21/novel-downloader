@@ -9,6 +9,7 @@ site into structured dataclass-based config models.
 
 import contextlib
 from collections.abc import Mapping
+from pathlib import Path
 from typing import Any, TypeVar
 
 from novel_downloader.schemas import (
@@ -16,7 +17,7 @@ from novel_downloader.schemas import (
     ClientConfig,
     ExporterConfig,
     FetcherConfig,
-    FontOCRConfig,
+    OCRConfig,
     ParserConfig,
     ProcessorConfig,
 )
@@ -83,20 +84,23 @@ class ConfigAdapter:
         :return: Fully populated configuration for the parser stage.
         """
         s, g = self._site_cfg(site), self._gen_cfg()
-        g_font = g.get("font_ocr") or {}
-        s_font = s.get("font_ocr") or {}
-        font_ocr: dict[str, Any] = {**g_font, **s_font}
-        enable_ocr = font_ocr.get("enable_ocr")
+        g_parser = g.get("parser") or g.get("font_ocr") or {}
+        s_parser = s.get("parser") or s.get("font_ocr") or {}
+        parser_cfg: dict[str, Any] = {**g_parser, **s_parser}
+
+        enable_ocr = parser_cfg.get("enable_ocr")
         if enable_ocr is None:  # fallback: old field
-            enable_ocr = font_ocr.get("decode_font", False)
+            enable_ocr = parser_cfg.get("decode_font", False)
         enable_ocr = bool(enable_ocr)
+
         return ParserConfig(
             cache_dir=g.get("cache_dir", "./novel_cache"),
             use_truncation=bool(s.get("use_truncation", True)),
             enable_ocr=enable_ocr,
-            save_font_debug=bool(font_ocr.get("save_font_debug", False)),
-            batch_size=int(font_ocr.get("batch_size", 32)),
-            fontocr_cfg=self._dict_to_fontocr_cfg(font_ocr),
+            batch_size=int(parser_cfg.get("batch_size", 32)),
+            remove_watermark=bool(parser_cfg.get("remove_watermark", False)),
+            cut_mode=str(parser_cfg.get("cut_mode", "none")),
+            ocr_cfg=self._dict_to_ocr_cfg(parser_cfg),
         )
 
     def get_client_config(self, site: str) -> ClientConfig:
@@ -124,12 +128,12 @@ class ConfigAdapter:
     def get_exporter_config(self, site: str) -> ExporterConfig:
         """
         Build an :class:`novel_downloader.models.ExporterConfig` from the
-        ``output`` and ``cleaner`` sections plus general settings.
-
-        :return: Fully populated configuration for text/ebook export.
+        `general.output` section with site-specific overrides.
         """
-        s = self._site_cfg(site)
-        out = self._config.get("output") or {}
+        s, g = self._site_cfg(site), self._gen_cfg()
+        g_out = g.get("output") or self._config.get("output") or {}
+        s_out = s.get("output") or {}
+        out = {**g_out, **s_out}
 
         return ExporterConfig(
             append_timestamp=out.get("append_timestamp", True),
@@ -166,14 +170,14 @@ class ConfigAdapter:
         """
         Return the list of export formats for a given site.
         """
-        s = self._site_cfg(site)
-        out: dict[str, Any] = self._config.get("output") or {}
-
-        fmt = (s.get("formats") if "formats" in s else None) or out.get("formats") or {}
+        s, g = self._site_cfg(site), self._gen_cfg()
+        g_out = g.get("output") or self._config.get("output") or {}
+        s_out = s.get("output") or {}
+        out = {**g_out, **s_out}
+        fmt = s.get("formats") or out.get("formats") or {}
 
         if isinstance(fmt, list):
             return fmt
-
         if isinstance(fmt, dict):
             return self._convert_fmt_dict(fmt)
 
@@ -248,6 +252,18 @@ class ConfigAdapter:
         """
         debug_cfg = self._gen_cfg().get("debug", {})
         return debug_cfg.get("log_level") or "INFO"
+
+    def get_log_dir(self) -> Path:
+        """
+        Retrieve the log directory from ``general.debug``.
+
+        :return: A Path object pointing to the log directory.
+        """
+        debug_cfg = self._gen_cfg().get("debug", {})
+        log_dir = debug_cfg.get("log_dir") or "./logs"
+
+        # Convert to Path, expand "~", and make absolute
+        return Path(log_dir).expanduser().resolve()
 
     def _gen_cfg(self) -> dict[str, Any]:
         """
@@ -329,18 +345,18 @@ class ConfigAdapter:
         )
 
     @staticmethod
-    def _dict_to_fontocr_cfg(data: dict[str, Any]) -> FontOCRConfig:
+    def _dict_to_ocr_cfg(data: dict[str, Any]) -> OCRConfig:
         """
-        Convert a raw ``font_ocr`` dict into a :class:`FontOCRConfig`.
+        Convert a raw ``font_ocr`` dict into a :class:`OCRConfig`.
         """
         if not isinstance(data, dict):
-            return FontOCRConfig()
+            return OCRConfig()
 
         ishape = data.get("input_shape")
         if isinstance(ishape, list):
             ishape = tuple(ishape)  # [C, H, W] -> (C, H, W)
 
-        return FontOCRConfig(
+        return OCRConfig(
             model_name=data.get("model_name"),
             model_dir=data.get("model_dir"),
             input_shape=ishape,

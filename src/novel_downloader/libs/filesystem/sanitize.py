@@ -44,6 +44,9 @@ def sanitize_filename(filename: str, max_length: int | None = 255) -> str:
     name = pattern.sub("_", filename).strip(" .")
 
     stem, dot, ext = name.rpartition(".")
+    if dot == "":  # no dot found
+        stem, ext = name, ""
+        dot = ""
     if os.name == "nt" and stem.upper() in _WIN_RESERVED_NAMES:
         stem = f"_{stem}"
     cleaned = f"{stem}{dot}{ext}" if ext else stem

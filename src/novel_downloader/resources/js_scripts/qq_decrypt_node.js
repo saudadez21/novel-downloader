@@ -1,14 +1,23 @@
 #!/usr/bin/env node
 
 // ---- GLOBAL ENVIRONMENT SHIMS ----
-const _setInterval = global.setInterval;
+const _realSetInterval = global.setInterval;
+global.setInterval = function(fn, t) {
+  if (typeof fn === "string") {
+    if (fn.includes("debugger")) {
+      // console.log("Blocked interval:", fn);
+      return 0;
+    }
+    // if (/somePattern/.test(fn)) return 0;
+  }
+  return _realSetInterval(fn, t);
+};
 
 const shimEnv = {
   location: {
     protocol: "https:",
     hostname: "book.qq.com",
   },
-  setInterval: (fn, t) => typeof fn === "function" ? _setInterval(fn, t) : undefined,
   document: {
     createElement: (tag) => {
       if (tag === "iframe") {
@@ -35,12 +44,11 @@ for (const [key, value] of Object.entries(shimEnv)) {
 }
 
 // ---- DECRYPT FUNCTION ----
-const Fock = require('./cefc2a5d.pz1phw.js');
+const Fock = require("./cefc2a5d.pz1phw.js");
 
 async function decrypt(enContent, cuChapterId, fkp, fuid) {
   Fock.setupUserKey(fuid);
   eval(atob(fkp));
-  isFockInit = true;
 
   return new Promise((resolve, reject) => {
     Fock.unlock(enContent, cuChapterId, (code, decrypted) => {
@@ -54,39 +62,25 @@ async function decrypt(enContent, cuChapterId, fkp, fuid) {
 }
 
 // ---- MAIN ----
-const fs = require('fs');
+let input = "";
 
-(async () => {
-  const [inputPath, outputPath] = process.argv.slice(2);
+process.stdin.on("data", chunk => input += chunk);
 
-  if (!inputPath || !outputPath) {
-    console.error("Usage: node decrypt_qq.js <input.json> <output.txt>");
-    process.exit(1);
-  }
-
+process.stdin.on("end", async () => {
   try {
-    const inputData = fs.readFileSync(inputPath, "utf-8");
-    const [raw_enContent, raw_cuChapterId, raw_fkp, raw_fuid] = JSON.parse(inputData);
+    const [raw_enContent, raw_cuChapterId, raw_fkp, raw_fuid] = JSON.parse(input);
 
-    const decryptPromise = decrypt(
+    const result = await decrypt(
       String(raw_enContent),
       String(raw_cuChapterId),
       String(raw_fkp),
-      String(raw_fuid)
+      String(raw_fuid),
     );
 
-    const timeoutMs = 5000;
-    const timerPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error(`decrypt timeout after ${timeoutMs}ms`)), timeoutMs);
-    });
-
-    const result = await Promise.race([decryptPromise, timerPromise]);
-    console.log("result", result);
-
-    fs.writeFileSync(outputPath, result, "utf-8");
+    process.stdout.write(result);
     process.exit(0);
   } catch (err) {
-    console.error("Failed to decrypt:", err);
+    console.error(String(err));
     process.exit(1);
   }
-})();
+});

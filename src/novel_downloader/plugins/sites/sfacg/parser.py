@@ -10,7 +10,6 @@ import logging
 from typing import Any
 
 from lxml import html
-from novel_downloader.libs.fontocr import get_font_ocr
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
@@ -234,19 +233,16 @@ class SfacgParser(BaseParser):
         return paragraphs, resources
 
     def parse_vip_chapter(self, img_base64: str) -> str:
-        ocr = get_font_ocr(self._fontocr_cfg)
-        if not ocr:
-            logger.warning("fail to load OCR")
-            return ""
+        from novel_downloader.libs import imagekit
 
         img_bytes = base64.b64decode(img_base64)
         paragraphs: list[str] = []
         cache: list[str] = []
 
         # decode & preprocess
-        img = ocr.load_image_array_bytes(img_bytes, white_bg=True)
-        img = ocr.filter_orange_watermark(img)
-        lines = ocr.split_by_height(
+        img = imagekit.load_image_array_bytes(img_bytes, white_bg=True)
+        img = imagekit.filter_orange_watermark(img)
+        lines = imagekit.split_by_height(
             img,
             height=38,
             top_offset=10,
@@ -255,12 +251,14 @@ class SfacgParser(BaseParser):
         )
 
         # filter out completely empty (white) lines
-        non_empty_lines = [line for line in lines if not ocr.is_empty_image(line)]
+        non_empty_lines = [line for line in lines if not imagekit.is_empty_image(line)]
 
-        preds = ocr.predict(non_empty_lines, batch_size=self._batch_size)
+        preds = self._extract_text_from_image(
+            non_empty_lines, batch_size=self._batch_size
+        )
         for line, (text, _) in zip(non_empty_lines, preds, strict=False):
-            first_2 = ocr.crop_chars_region(line, 2, left_margin=14, char_width=28)
-            if ocr.is_empty_image(first_2) and cache:
+            first_2 = imagekit.crop_chars_region(line, 2, left_margin=14, char_width=28)
+            if imagekit.is_empty_image(first_2) and cache:
                 paragraphs.append("".join(cache))
                 cache.clear()
 

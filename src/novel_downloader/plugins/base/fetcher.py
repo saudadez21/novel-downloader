@@ -15,12 +15,11 @@ from pathlib import Path
 from typing import Any, Literal, Self
 
 from novel_downloader.infra.http_defaults import DEFAULT_USER_HEADERS, IMAGE_HEADERS
+from novel_downloader.infra.sessions import create_session
 from novel_downloader.libs.filesystem import font_filename, image_filename, write_file
 from novel_downloader.libs.time_utils import async_jitter_sleep
 from novel_downloader.plugins.utils.rate_limiter import TokenBucketRateLimiter
 from novel_downloader.schemas import FetcherConfig, LoginField, MediaResource
-
-from .session_base import BaseSession
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +55,7 @@ class BaseFetcher(abc.ABC):
 
         self._cache_dir = Path(config.cache_dir) / self.site_name
 
-        self.session: BaseSession = self._create_session(
+        self.session = create_session(
             backend=config.backend,
             cfg=config,
             cookies=cookies,
@@ -303,7 +302,10 @@ class BaseFetcher(abc.ABC):
 
         :return: True if the session state was loaded, False otherwise.
         """
-        return self.session.load_cookies(self._cache_dir)
+        self.session.load_cookies(self._cache_dir)
+
+        self._is_logged_in = await self._check_login_status()
+        return self._is_logged_in
 
     async def save_state(self) -> bool:
         """
@@ -365,31 +367,6 @@ class BaseFetcher(abc.ABC):
             return resp.text
 
         raise RuntimeError("Unreachable code reached in fetch()")
-
-    @staticmethod
-    def _create_session(
-        backend: str,
-        cfg: FetcherConfig,
-        cookies: dict[str, str] | None = None,
-        **kwargs: Any,
-    ) -> BaseSession:
-        match backend:
-            case "aiohttp":
-                from novel_downloader.plugins.base.session_aiohttp import AiohttpSession
-
-                return AiohttpSession(cfg, cookies, **kwargs)
-            case "httpx":
-                from novel_downloader.plugins.base.session_httpx import HttpxSession
-
-                return HttpxSession(cfg, cookies, **kwargs)
-            case "curl_cffi":
-                from novel_downloader.plugins.base.session_curl_cffi import (
-                    CurlCffiSession,
-                )
-
-                return CurlCffiSession(cfg, cookies, **kwargs)
-            case _:
-                raise ValueError(f"Unsupported backend: {backend!r}")
 
     async def _check_login_status(self) -> bool:
         """

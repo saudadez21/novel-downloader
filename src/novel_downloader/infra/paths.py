@@ -6,40 +6,16 @@ novel_downloader.infra.paths
 """
 
 from importlib.resources import files
-from pathlib import Path
-
-from platformdirs import user_config_path
 
 PACKAGE_NAME = "novel_downloader"  # Python package name
-
-# -----------------------------------------------------------------------------
-# User-writable directories & files
-# -----------------------------------------------------------------------------
-
-# Base config directory (e.g. ~/AppData/Local/novel_downloader/)
-USER_CONFIG_DIR = user_config_path(PACKAGE_NAME, appauthor=False)
-
-# Subdirectories
-CONFIG_DIR = USER_CONFIG_DIR / "config"
-DATA_DIR = USER_CONFIG_DIR / "data"
-JS_SCRIPT_DIR = USER_CONFIG_DIR / "scripts"
-LOGGER_DIR = Path.cwd() / "logs"
-
-# Files under user dirs
-STATE_FILE = DATA_DIR / "state.json"
-SETTING_FILE = CONFIG_DIR / "settings.json"
-
-# Default config filename (used when copying embedded template)
-DEFAULT_CONFIG_FILENAME = "settings.toml"
-
-# -----------------------------------------------------------------------------
-# Embedded resources
-# -----------------------------------------------------------------------------
 
 RES = files("novel_downloader.resources")
 
 # Config
 DEFAULT_CONFIG_FILE = RES.joinpath("config", "settings.sample.toml")
+
+# Default config filename (used when copying embedded template)
+DEFAULT_CONFIG_FILENAME = "settings.toml"
 
 # CSS Styles
 EPUB_CSS_STYLE_PATH = RES.joinpath("css_styles", "epub_style.css")

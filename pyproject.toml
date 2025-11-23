@@ -69,16 +69,28 @@ all = [
 ]
 
 tests = [
+    "brotli",
+    "numpy",
+    "fonttools",
+    "pillow",
     "pytest",
     "pytest-asyncio",
+    "pytest-aiohttp",
     "pytest-cov",
     "pytest-mock",
     "types-requests",
     "types-lxml",
 ]
 ci = [
+    "brotli",
+    "numpy",
+    "fonttools",
+    "pillow",
+    "curl_cffi",
+    "httpx[http2]",
     "pytest",
     "pytest-asyncio",
+    "pytest-aiohttp",
     "pytest-cov",
     "pytest-mock",
     "types-requests",
@@ -92,6 +104,7 @@ ci = [
 dev = [
     "pytest",
     "pytest-asyncio",
+    "pytest-aiohttp",
     "pytest-cov",
     "pytest-mock",
     "types-requests",
@@ -171,10 +184,8 @@ testpaths = ["tests"]
 [tool.coverage.run]
 omit = [
   "src/novel_downloader/apps/*",
-  "src/novel_downloader/plugins/archived/*",
-  "src/novel_downloader/plugins/processors/*",
-  "src/novel_downloader/plugins/sites/*",
-  "src/novel_downloader/plugins/search.py",
+  "src/novel_downloader/plugins/*",
+  "src/novel_downloader/__main__.py",
 ]
 
 [tool.commitizen]

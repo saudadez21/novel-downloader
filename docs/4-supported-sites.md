@@ -269,6 +269,10 @@ novel-cli search --site b520 三体
 * **刺猬猫 (ciweimao)**
   * 书籍: `https://www.ciweimao.com/book/100011781` -> Book ID: `100011781`
   * 章节: `https://www.ciweimao.com/chapter/100257072` -> Chapter ID: `100257072`
+  * 登录: 需提供有效的 Cookie 才能访问订阅章节。
+  * 其它:
+    * VIP 章节以图片形式返回, 可通过开启 `enable_ocr` 参数配合 OCR 识别为文本。
+    * 因站点登录限制, 下载过程中如果在浏览器里登录会导致 Cookie 中途失效
 
 * **次元姬 (ciyuanji)**
   * 书籍: `https://www.ciyuanji.com/b_d_12030.html` -> Book ID: `12030`

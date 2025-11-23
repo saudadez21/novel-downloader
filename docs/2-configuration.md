@@ -107,19 +107,7 @@ cookie = "完整的 Cookie 字符串"
 
 更多说明见: [复制 Cookies](./copy-cookies.md)
 
----
-
-### 4. 注册配置文件到 CLI (可选)
-
-如果希望 CLI 在任何目录下都使用某个固定配置文件:
-
-```bash
-novel-cli config set-config ./settings.toml
-```
-
-之后无需再在工作目录中放置配置文件。
-
-### 配置文件查找顺序
+### 4. 配置文件查找顺序
 
 CLI 每次运行时会按以下优先级查找配置 (高 -> 低):
 
@@ -131,31 +119,7 @@ novel-cli download --config path/to/settings.toml
 
 (2) **当前目录下的 `./settings.toml`**
 
-(3) **已注册的全局配置 (由 `config set-config` 设置)**
-
 若存在多个匹配项, 上级优先级配置会覆盖下级。
-
----
-
-### 6. 站点配置查找顺序
-
-解析站点信息时, 按以下优先级查找:
-
-1. **`[sites.<site_name>]`**: 匹配下载命令中 `--site <site_name>` 的具体配置。
-
-2. **`[sites.common]`**: 所有站点共享的默认配置, 作为回退选项。
-
-示例:
-
-```toml
-[sites.common]
-request_interval = 1.2
-
-[sites.linovelib]
-book_ids = ["1234"]
-```
-
-若 `linovelib` 未设置某个字段, 则会继承 `sites.common` 中的对应值。
 
 ---
 

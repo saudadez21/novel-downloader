@@ -10,7 +10,7 @@ from typing import Any
 
 from novel_downloader.plugins.base.fetcher import BaseFetcher
 from novel_downloader.plugins.registry import registrar
-from novel_downloader.plugins.utils.ciweimao.my_encryt import my_decrypt
+from novel_downloader.plugins.utils.ciweimao import my_decrypt
 
 logger = logging.getLogger(__name__)
 

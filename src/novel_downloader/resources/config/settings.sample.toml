@@ -14,24 +14,41 @@ skip_existing = true               # 是否跳过已存在章节
 storage_batch_size = 1             # SQLite 批量提交的章节数量
 backend = "aiohttp"                # aiohttp / httpx / curl_cffi
 locale_style = "simplified"        # simplified / traditional
+login_required = false
 # http2 = false
 # impersonate = "chrome"
 
-[general.debug]
-save_html = false                  # 是否将抓取到的原始 HTML 保留到磁盘
-log_level = "INFO"                 # 日志级别: DEBUG, INFO, WARNING, ERROR
+# 输出文件格式及相关选项
+[general.output]
+formats = [
+  "txt",
+  "epub",
+#   "html",
+]
+append_timestamp = true            # 在文件名中追加时间戳
+filename_template = "{title}_{author}"
+include_picture = true             # 是否附带书籍图片
 
-[general.font_ocr]
-enable_ocr = false                # 是否尝试本地解析混淆字体 / 图片章节
+[general.parser]
+# 解析字体加密 / OCR / 图片章节等高级功能需要安装额外依赖
+# 参考文档: docs/1-installation.md
+
+enable_ocr = false                 # 是否尝试本地解析混淆字体 / 图片章节
 batch_size = 32
 
+remove_watermark = false           # 图片章节是否尝试去水印
+cut_mode = "none"                  # none | paragraph | page
+
 # 以下为 PaddleOCR 文本识别的可选参数
-# 默认情况下, 请保持注释, 程序会使用 PaddleOCR 内置的默认值
 model_name = "PP-OCRv5_mobile_rec"
 # model_dir = "/path/to/inference"
-# input_shape = [3, 48, 320]        # [C, H, W], 按所选模型文档填写, 不确定请注释
 # device = "gpu"                    # "cpu" / "gpu"
 # cpu_threads = 10
+
+[general.debug]
+save_html = false                  # 是否将抓取到的原始 HTML 保留到磁盘
+log_dir = "./logs"
+log_level = "INFO"                 # 日志级别: DEBUG, INFO, WARNING, ERROR
 
 # 各站点的特定配置
 [sites.qidian]  # 起点中文网
@@ -84,9 +101,6 @@ login_required = true
 [sites.yamibo]
 login_required = false
 
-[sites.common]
-login_required = false
-
 [plugins]
 # 是否启用本地插件目录
 enable_local_plugins = false
@@ -105,14 +119,3 @@ local_plugins_path = "./novel_plugins"
 
 # content_removes = "path/to/content-remove.json"
 # content_replace = "path/to/content-replace.json"
-
-# 输出文件格式及相关选项
-[output]
-formats = [
-  "txt",
-  "epub",
-#   "html",
-]
-append_timestamp = true            # 在文件名中追加时间戳
-filename_template = "{title}_{author}"  # 文件命名规则
-include_picture = true             # 是否附带书籍图片

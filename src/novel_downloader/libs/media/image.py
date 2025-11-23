@@ -32,8 +32,6 @@ def detect_image_format(data: bytes) -> str | None:
         return "tiff"
     if header[:4] == b"\x00\x00\x01\x00":
         return "ico"
-    if header[:4] == b"\x00\x00\x02\x00":
-        return "cur"
 
     # --- svg / xml-based ---
     lower_head = header.lower()
@@ -41,6 +39,8 @@ def detect_image_format(data: bytes) -> str | None:
         return "svg"
 
     # --- uncommon formats ---
+    # if header[:4] == b"\x00\x00\x02\x00":
+    #     return "cur"
     # if header.startswith(b"\x76\x2f\x31\x01"):
     #     return "exr"  # OpenEXR
     # if header.startswith(b"\x59\xA6\x6A\x95"):

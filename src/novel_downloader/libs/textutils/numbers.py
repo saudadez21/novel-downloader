@@ -89,23 +89,30 @@ def chinese_to_arabic(s: str) -> int:
 
     def _parse_section(sec: str) -> int:
         """Parse up to 千 unit."""
+        if not sec:
+            return 0
+
         num = 0
-        section_total = 0
+        total = 0
+
         for ch in sec:
             if ch in CHINESE_NUMERALS:
                 num = num * 10 + CHINESE_NUMERALS[ch]
             else:
                 unit = CHINESE_UNITS[ch]
-                section_total += (num or 1) * unit
+                total += (num or 1) * unit
                 num = 0
-        return section_total + num
+
+        return total + num
 
     total = 0
     rest = s
+
     for char, val in LARGE_UNITS:
         if char in rest:
             left, rest = rest.split(char, 1)
-            total += _parse_section(left) * val
+            left_val = _parse_section(left) if left else 1
+            total += left_val * val
 
     total += _parse_section(rest)
 
@@ -146,108 +153,51 @@ def arabic_to_chinese(num: int) -> str:
     num = -num if negative else num
 
     def _section_to_chinese(sec: int) -> str:
-        """
-        Convert a value 1..9999 into Chinese using 千/百/十 units,
-        without any large unit (万, 亿, ...) or leading '零'.
-        """
+        """Convert 1..9999 into Chinese without big units."""
         s = ""
         unit_pos = 0
         zero_flag = True
+
         while sec > 0:
             d = sec % 10
             if d == 0:
-                # only emit one '零' for consecutive zeros
                 if not zero_flag:
-                    s = digits[0] + s
+                    s = "零" + s
                     zero_flag = True
             else:
                 s = digits[d] + small_units[unit_pos] + s
                 zero_flag = False
             unit_pos += 1
             sec //= 10
+
         return s
 
-    result = ""
+    parts: list[str] = []
     section_pos = 0
+    need_zero = False
 
     while num > 0:
-        section = num % 10_000
-        if section != 0:
-            sec_str = _section_to_chinese(section)
-            result = sec_str + big_units[section_pos] + result
+        sec = num % 10_000
+        if sec == 0:
+            if parts:
+                need_zero = True
         else:
-            # if there's already something in `result`, and the next non-zero
-            # block will appear further left, we need a '零' separator
-            if result and not result.startswith("零"):
-                result = "零" + result
-
+            sec_str = _section_to_chinese(sec)
+            if need_zero:
+                parts.append("零")
+                need_zero = False
+            parts.append(sec_str + big_units[section_pos])
         num //= 10_000
         section_pos += 1
+
+    result = "".join(reversed(parts))
+
+    if result.startswith("一十") and len(result) > 2:
+        result = result[1:]
+    elif result == "一十":
+        result = "十"
 
     if negative:
         result = "负" + result
 
     return result
-
-
-if __name__ == "__main__":
-    import random
-
-    RED = "\033[91m"
-    GREEN = "\033[92m"
-    RESET = "\033[0m"
-    random.seed(42)
-
-    fail_count = 0
-    num_list = [
-        ("一千二百三十四", 1234),
-        ("一万五千", 15000),
-        ("一万零三", 10003),
-        ("三亿二千五百", 300002500),
-    ]
-    print("=== chinese_to_arabic() with fixed cases ===")
-    for s, expected in num_list:
-        actual = chinese_to_arabic(s)
-        if actual != expected:
-            print(f"{RED}FAIL:{RESET} “{s}” -> expected {expected}, got {actual}")
-            fail_count += 1
-
-    if fail_count:
-        print(f"{RED}{fail_count} chinese_to_arabic() tests failed.{RESET}\n")
-    else:
-        print(f"{GREEN}All {len(num_list)} chinese_to_arabic() tests passed!{RESET}\n")
-
-    fail_count = 0
-    print("=== Round-trip test for values 0 - 9999 ===")
-    for i in range(10_000):
-        s = arabic_to_chinese(i)
-        r = chinese_to_arabic(s)
-        if r != i:
-            print(f'{RED}FAIL round-trip:{RESET} {i} -> "{s}" -> {r}')
-            fail_count += 1
-            break
-
-    if fail_count:
-        print(f"{RED}{fail_count} round-trip failures in 0 - 9999.{RESET}\n")
-    else:
-        print(f"{GREEN}0 - 9999 round-trip all passed!{RESET}\n")
-
-    fail_count = 0
-    exponents = range(5, 22)  # test around 10^5...
-    print("=== Random round-trip at larger scales ===")
-    for exp in exponents:
-        lower = 10**exp
-        upper = 10 ** (exp + 1)
-        for _ in range(2):
-            i = random.randint(lower, upper - 1)
-            for val in (i, -i):
-                s = arabic_to_chinese(val)
-                r = chinese_to_arabic(s)
-                if r != val:
-                    print(f'{RED}FAIL:{RESET} {val} -> "{s}" -> {r}')
-                    fail_count += 1
-
-    if fail_count:
-        print(f"{RED}{fail_count} random large-scale failures.{RESET}")
-    else:
-        print(f"{GREEN}All random large-scale round-trips passed!{RESET}")

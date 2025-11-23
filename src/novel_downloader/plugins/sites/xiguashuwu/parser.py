@@ -19,7 +19,6 @@ from Crypto.Util.Padding import unpad
 from lxml import html
 from novel_downloader.infra.http_defaults import DEFAULT_USER_HEADERS
 from novel_downloader.infra.paths import XIGUASHUWU_MAP_PATH
-from novel_downloader.libs.fontocr import get_font_ocr
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
@@ -293,16 +292,14 @@ class XiguashuwuParser(BaseParser):
         :return: The recognized character (top-1) if OCR succeeds, otherwise None.
         """
         try:
-            ocr = get_font_ocr(self._fontocr_cfg)
-            if not ocr:
-                return None
+            from novel_downloader.libs import imagekit
 
             resp = requests.get(url, headers=DEFAULT_USER_HEADERS, timeout=15)
             resp.raise_for_status()
 
-            img_np = ocr.load_image_array_bytes(resp.content)
+            img_np = imagekit.load_image_array_bytes(resp.content)
 
-            char, score = ocr.predict([img_np])[0]
+            char, score = self._extract_text_from_image([img_np])[0]
 
             return char if score >= self._CONF_THRESHOLD else None
 

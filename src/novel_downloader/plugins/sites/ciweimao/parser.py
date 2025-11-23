@@ -4,16 +4,13 @@ novel_downloader.plugins.sites.ciweimao.parser
 ----------------------------------------------
 """
 
-import base64
-import json
 import logging
 from typing import Any
 
 from lxml import html
-from novel_downloader.libs.fontocr import get_font_ocr
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
-from novel_downloader.plugins.utils.ciweimao.my_encryt import my_decrypt
+from novel_downloader.plugins.utils.ciweimao import CiweimaoChapterMixin
 from novel_downloader.schemas import (
     BookInfoDict,
     ChapterDict,
@@ -26,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 @registrar.register_parser()
-class CiweimaoParser(BaseParser):
+class CiweimaoParser(CiweimaoChapterMixin, BaseParser):
     """
     Parser for 刺猬猫 book pages.
     """
@@ -106,7 +103,8 @@ class CiweimaoParser(BaseParser):
         vol_idx: int = 1
 
         for vol in catalog_tree.xpath('//div[contains(@class,"book-chapter-box")]'):
-            vol_name = self._first_str(vol.xpath('.//h4[contains(@class,"sub-tit")]'))
+            elems = vol.xpath('.//h4[contains(@class,"sub-tit")]')
+            vol_name = elems[0].text_content().strip() if elems else ""
             vol_name = vol_name or f"未命名卷 {vol_idx}"
 
             # chapter list
@@ -187,19 +185,9 @@ class CiweimaoParser(BaseParser):
             img_b64 = raw_pages[1].strip()
             tsukkomi_list_str = raw_pages[2]
 
-            if self._enable_ocr:
-                paragraphs, resources = self._parse_image_chapter(
-                    img_b64, tsukkomi_list_str
-                )
-            else:
-                resources.append(
-                    {
-                        "type": "image",
-                        "paragraph_index": 0,
-                        "base64": img_b64,
-                        "mime": "image/jpeg",
-                    }
-                )
+            paragraphs, resources = self._parse_image_chapter(
+                img_b64, tsukkomi_list_str
+            )
         else:
             detail_json_str = raw_pages[1]
             session_json_str = raw_pages[2]
@@ -223,114 +211,3 @@ class CiweimaoParser(BaseParser):
                 "resources": resources,
             },
         }
-
-    def _parse_text_chapter(
-        self,
-        detail_json_str: str,
-        session_json_str: str,
-    ) -> tuple[list[str], list[MediaResource]]:
-        """
-        Returns: (paragraphs, resources, title, author_say)
-        """
-        detail_obj = json.loads(detail_json_str)
-        session_obj = json.loads(session_json_str)
-
-        # structure from JS: chapter_content, encryt_keys, rad
-        enc_content = detail_obj.get("chapter_content")
-        enc_keys = detail_obj.get("encryt_keys") or []
-        access_key = session_obj.get("chapter_access_key")
-
-        if not enc_content or not enc_keys or not access_key:
-            logger.warning(
-                "Missing encryption fields in detail/session JSON: %s / %s",
-                detail_obj,
-                session_obj,
-            )
-            return [], []
-
-        decrypted_html = my_decrypt(
-            content=enc_content,
-            keys=enc_keys,
-            access_key=access_key,
-        )
-
-        # wrap into a root so lxml sees valid XML
-        root = html.fromstring(f"<root>{decrypted_html}</root>")
-
-        # remove all span elements (like <span>abcde</span>)
-        for span in root.xpath(".//span"):
-            parent = span.getparent()
-            if parent is not None:
-                parent.remove(span)
-
-        resources: list[MediaResource] = []
-        paragraphs: list[str] = []
-        curr_paragraph_idx = 0
-
-        for p_elem in root.xpath(".//p"):
-            # collect images in this paragraph
-            for img_elem in p_elem.xpath(".//img"):
-                src = (img_elem.get("src") or "").strip()
-                if not src:
-                    continue
-                if src.startswith("//"):
-                    src = "https:" + src
-
-                alt = img_elem.get("alt") or ""
-
-                resources.append(
-                    {
-                        "type": "image",
-                        "paragraph_index": curr_paragraph_idx,
-                        "url": src,
-                        "alt": alt,
-                    }
-                )
-
-            text_content = p_elem.text_content().strip()
-            if text_content:
-                paragraphs.append(text_content)
-                curr_paragraph_idx += 1
-
-        return paragraphs, resources
-
-    def _parse_image_chapter(
-        self,
-        img_base64: str,
-        tsukkomi_list_json_str: str,
-    ) -> tuple[list[str], list[MediaResource]]:
-        ocr = get_font_ocr(self._fontocr_cfg)
-        if not ocr:
-            logger.warning("fail to load OCR")
-            return [], []
-
-        from novel_downloader.plugins.utils.ciweimao.image import split_image
-
-        paragraphs: list[str] = []
-        resources: list[MediaResource] = []
-        current_paragraph_no: int = 0
-
-        # decode & preprocess
-        image_tsukkomi_list = json.loads(tsukkomi_list_json_str)
-        img_bytes = base64.b64decode(img_base64)
-        img_arr = ocr.load_image_array_bytes(img_bytes)
-
-        result = split_image(img_arr, image_tsukkomi_list)
-
-        ocr_outputs = ocr.predict(result.images, batch_size=self._batch_size)
-
-        for blk in result.blocks:
-            if blk["type"] == "image":
-                resources.append(
-                    {
-                        "type": "image",
-                        "paragraph_index": current_paragraph_no,
-                        "url": blk["url"],
-                    }
-                )
-            elif blk["type"] == "paragraph":
-                para_text = [ocr_outputs[i][0].strip() for i in blk["image_idxs"]]
-                paragraphs.append("".join(para_text))
-                current_paragraph_no += 1
-
-        return paragraphs, resources

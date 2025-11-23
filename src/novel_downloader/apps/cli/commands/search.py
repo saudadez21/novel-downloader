@@ -78,7 +78,10 @@ class SearchCmd(Command):
         if config_data is None:
             return
         adapter = ConfigAdapter(config=config_data)
-        ui.setup_logging(console_level=adapter.get_log_level())
+        ui.setup_logging(
+            log_dir=adapter.get_log_dir(),
+            console_level=adapter.get_log_level(),
+        )
 
         async def _run() -> None:
             from novel_downloader.plugins.search import search

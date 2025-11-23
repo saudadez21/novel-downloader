@@ -48,8 +48,8 @@ def write_file(
             delete=False,
             dir=filepath.parent,
         ) as tmp:
-            tmp.write(content)
             tmp_path = Path(tmp.name)
+            tmp.write(content)
         tmp_path.replace(filepath)
         return filepath
     except Exception:

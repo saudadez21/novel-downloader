@@ -7,8 +7,6 @@
 - [CLI 使用示例](#cli-使用示例)
   - [目录](#目录)
   - [快速开始](#快速开始)
-  - [配置优先级](#配置优先级)
-    - [常见方式](#常见方式)
   - [登录/鉴权](#登录鉴权)
   - [全局用法与帮助](#全局用法与帮助)
   - [子命令总览](#子命令总览)
@@ -16,7 +14,6 @@
     - [2. search 子命令](#2-search-子命令)
     - [3. export 子命令](#3-export-子命令)
     - [4. config 子命令](#4-config-子命令)
-    - [5. clean 子命令](#5-clean-子命令)
   - [附录 A: 术语与约定](#附录-a-术语与约定)
 
 ### 快速开始
@@ -31,38 +28,6 @@ novel-cli download --site b520 8_8187
 # 导出为 EPUB
 novel-cli export --format epub 88888
 ```
-
----
-
-### 配置优先级
-
-1. 命令行 `--config PATH`
-2. 当前目录 `./settings.toml`
-3. 已注册的全局配置 (通过 `config set-config` 设置)
-
-#### 常见方式
-
-* **显式指定配置 (优先级最高)**
-
-  ```bash
-  novel-cli --config "/path/to/settings.toml" download 123456 654321
-  ```
-
-* **使用当前目录的 `settings.toml`**
-
-  ```bash
-  cd novel-folder
-  novel-cli download 123456 654321
-  ```
-
-* **使用已注册的全局配置**
-
-  ```bash
-  # 先注册一次全局配置
-  novel-cli config set-config ./path/to/settings.toml
-  # 任意目录直接使用
-  novel-cli download 123456 654321
-  ```
 
 ---
 
@@ -246,7 +211,6 @@ novel-cli config COMMAND [ARGS]...
 
 * `init [--force]`: 在当前目录初始化默认配置文件 (`./settings.toml`); `--force` 覆盖已存在文件
 * `set-lang LANG`: 切换 CLI 语言 (`zh_CN` / `en_US`)
-* `set-config PATH`: 注册自定义 TOML 为**全局配置**
 
 **Examples**
 
@@ -254,54 +218,12 @@ novel-cli config COMMAND [ARGS]...
 # 切换界面语言为英文
 novel-cli config set-lang en_US
 
-# 注册新的 settings.toml
-novel-cli config set-config ./settings.toml
-
 # 初始化默认配置到当前目录
 novel-cli config init
 
 # 强制覆盖已存在的配置文件
 novel-cli config init --force
 ```
-
----
-
-#### 5. clean 子命令
-
-清理本地缓存与全局配置
-
-**Synopsis**
-
-```bash
-novel-cli clean [OPTIONS]
-```
-
-**Options**
-
-* `--logs`: 清理日志目录 (`logs/`)
-* `--cache`: 清理脚本缓存与浏览器数据 (`js_script/`、`browser_data/`)
-* `--data`: 清理状态文件与 Cookies
-* `--config`: 清理全局设置
-* `--all`: **清除所有**配置、缓存、状态
-* `--yes`: 跳过确认提示
-
-**Examples**
-
-```bash
-# 清理缓存目录和浏览器数据
-novel-cli clean --cache
-
-# 清理日志和状态文件
-novel-cli clean --logs --data
-
-# 交互确认后清理所有数据 (包括配置文件)
-novel-cli clean --all
-
-# 无需确认直接清理所有数据
-novel-cli clean --all --yes
-```
-
-> **注意**: `--all` 会删除包括设置文件在内的所有本地数据, 请谨慎使用。
 
 ---
 

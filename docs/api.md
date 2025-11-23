@@ -262,15 +262,16 @@ class DownloaderConfig:
     storage_batch_size: int = 1
 
 @dataclass
-class FontOCRConfig: ...
+class OCRConfig: ...
 @dataclass
 class ParserConfig:
     cache_dir: str = "./novel_cache"
     use_truncation: bool = True
     enable_ocr: bool = False
     batch_size: int = 32
-    save_font_debug: bool = False
-    fontocr_cfg: FontOCRConfig = field(default_factory=FontOCRConfig)
+    remove_watermark: bool = False
+    cut_mode: str = "none"
+    ocr_cfg: OCRConfig = field(default_factory=OCRConfig)
 
 @dataclass
 class TextCleanerConfig: ...
