@@ -119,6 +119,7 @@ class ConfigAdapter:
             output_dir=g.get("output_dir", "./downloads"),
             workers=self._pick("workers", 4, s, g),
             skip_existing=self._pick("skip_existing", True, s, g),
+            cache_metadata=bool(debug.get("cache_metadata", True)),
             save_html=bool(debug.get("save_html", False)),
             storage_batch_size=g.get("storage_batch_size", 1),
             fetcher_cfg=self.get_fetcher_config(site),

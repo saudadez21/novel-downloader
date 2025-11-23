@@ -58,6 +58,7 @@ class AbstractClient(abc.ABC):
         cfg = config or ClientConfig()
 
         self._save_html = cfg.save_html
+        self._cache_metadata = cfg.cache_metadata
         self._skip_existing = cfg.skip_existing
         self._request_interval = cfg.request_interval
         self._retry_times = cfg.retry_times
@@ -72,6 +73,7 @@ class AbstractClient(abc.ABC):
         self._parser: ParserProtocol | None = None
 
         self._raw_data_dir = Path(cfg.raw_data_dir) / site
+        self._cache_dir = Path(cfg.cache_dir) / site
         self._output_dir = Path(cfg.output_dir)
         self._debug_dir = Path.cwd() / "debug" / site
 

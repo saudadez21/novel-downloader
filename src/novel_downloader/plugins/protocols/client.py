@@ -288,6 +288,7 @@ class _ClientContext(ClientProtocol, Protocol):
     _site: str
 
     _output_dir: Path
+    _cache_dir: Path
     _raw_data_dir: Path
     _debug_dir: Path
 
@@ -295,6 +296,7 @@ class _ClientContext(ClientProtocol, Protocol):
     _retry_times: int
     _backoff_factor: float
 
+    _cache_metadata: bool
     _skip_existing: bool
     _storage_batch_size: int
 
