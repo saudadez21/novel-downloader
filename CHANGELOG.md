@@ -1,3 +1,13 @@
+## v3.1.0 (2025-11-24)
+
+### Feat
+
+- **client**: add cleanup APIs and CLI clean subcommands with documentation (#143)
+
+### Refactor
+
+- **core**: reorganize sessions, split fontocr, rewrite jsbridge, and improve test coverage (#142)
+
 ## v3.0.1 (2025-11-22)
 
 ### Fix
