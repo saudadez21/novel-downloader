@@ -219,7 +219,7 @@ cd novel-downloader
 
 pip install .
 # 或安装带可选功能:
-# pip install .[image-utils]
+# pip install .[all]
 ```
 
 ---
