@@ -119,6 +119,7 @@ class ConfigAdapter:
             output_dir=g.get("output_dir", "./downloads"),
             workers=self._pick("workers", 4, s, g),
             skip_existing=self._pick("skip_existing", True, s, g),
+            cache_metadata=bool(debug.get("cache_metadata", True)),
             save_html=bool(debug.get("save_html", False)),
             storage_batch_size=g.get("storage_batch_size", 1),
             fetcher_cfg=self.get_fetcher_config(site),
@@ -264,6 +265,26 @@ class ConfigAdapter:
 
         # Convert to Path, expand "~", and make absolute
         return Path(log_dir).expanduser().resolve()
+
+    def get_cache_dir(self) -> Path:
+        """
+        Retrieve the cache directory from ``general``.
+
+        :return: A Path object pointing to the cache directory.
+        """
+        cache_dir = self._gen_cfg().get("cache_dir") or "./novel_cache"
+        # Convert to Path, expand "~", and make absolute
+        return Path(cache_dir).expanduser().resolve()
+
+    def get_raw_data_dir(self) -> Path:
+        """
+        Retrieve the raw data directory from ``general``.
+
+        :return: A Path object pointing to the raw data directory.
+        """
+        raw_data_dir = self._gen_cfg().get("raw_data_dir") or "./raw_data"
+        # Convert to Path, expand "~", and make absolute
+        return Path(raw_data_dir).expanduser().resolve()
 
     def _gen_cfg(self) -> dict[str, Any]:
         """

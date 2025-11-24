@@ -12,23 +12,16 @@ import json
 from pathlib import Path
 from typing import Any
 
+from novel_downloader.infra.paths import STATE_PATH
+
 
 class StateManager:
     """
     Manages persistent state for user preferences and runtime flags.
     """
 
-    def __init__(self, path: Path | None = None) -> None:
-        if not path:
-            from platformdirs import user_config_path
-
-            from novel_downloader.infra.paths import PACKAGE_NAME
-
-            # Base config directory (e.g. ~/AppData/Local/novel_downloader/)
-            self._path = user_config_path(PACKAGE_NAME, appauthor=False) / "state.json"
-        else:
-            self._path = path
-
+    def __init__(self, path: Path = STATE_PATH) -> None:
+        self._path = path
         self._data = self._load()
 
     def get_language(self) -> str:

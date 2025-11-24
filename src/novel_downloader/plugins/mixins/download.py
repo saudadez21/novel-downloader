@@ -344,14 +344,30 @@ class DownloadMixin:
         :return: parsed BookInfoDict
         """
         book_info: BookInfoDict | None = None
-        try:
-            book_info = self._load_book_info(book_id)
-            if book_info and time.time() - book_info.get("last_checked", 0.0) < ONE_DAY:
-                return book_info
-        except FileNotFoundError as exc:
-            logger.debug("No cached book_info found for %s: %s", book_id, exc)
-        except Exception as exc:
-            logger.info("Failed to load cached book_info for %s: %s", book_id, exc)
+        if self._cache_metadata:
+            try:
+                book_info = self._load_book_info(book_id)
+                age = time.time() - book_info.get("last_checked", 0.0)
+
+                if age < ONE_DAY:
+                    logger.debug(
+                        "Using cached metadata for %s (age=%.1f sec)", book_id, age
+                    )
+                    return book_info
+
+                logger.debug(
+                    "Cached metadata for %s expired (age=%.1f sec), refetching",
+                    book_id,
+                    age,
+                )
+
+            except FileNotFoundError:
+                logger.debug("No cached metadata for %s", book_id)
+            except Exception as exc:
+                logger.info("Failed to load cached metadata for %s: %s", book_id, exc)
+
+        else:
+            logger.debug("Skipping cached metadata for book %s", book_id)
 
         try:
             info_html = await self.fetcher.fetch_book_info(book_id)
@@ -366,10 +382,7 @@ class DownloadMixin:
         except Exception as exc:
             logger.warning("Failed to fetch/parse book_info for %s: %s", book_id, exc)
 
-        if book_info is None:
-            raise LookupError(f"Unable to load book_info for {book_id}")
-
-        return book_info
+        raise LookupError(f"Unable to load book_info for {book_id}")
 
     async def get_chapter(
         self: "DownloadClientContext",

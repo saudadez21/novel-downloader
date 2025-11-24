@@ -72,6 +72,7 @@ class ClientConfig:
     raw_data_dir: str = "./raw_data"
     output_dir: str = "./downloads"
     workers: int = 4
+    cache_metadata: bool = True
     skip_existing: bool = True
     save_html: bool = False
     storage_batch_size: int = 1

@@ -196,6 +196,71 @@ class ClientProtocol(Protocol):
         """
         ...
 
+    def cleanup_book(
+        self,
+        book: BookConfig,
+        *,
+        remove_metadata: bool = True,
+        remove_chapters: bool = True,
+        remove_media: bool = False,
+        remove_all: bool = False,
+        stage: str = "raw",
+        **kwargs: Any,
+    ) -> None:
+        """
+        Cleanup an entire book, or selectively remove chapter data + metadata.
+
+        :param remove_all: If True, remove the entire book folder.
+        :param stage: Which stage/version of raw data to remove.
+        """
+        ...
+
+    def cleanup_metadata(
+        self,
+        book_id: str,
+        *,
+        stage: str = "raw",
+        **kwargs: Any,
+    ) -> None:
+        """
+        Delete metadata JSON for a book.
+        """
+        ...
+
+    def cleanup_chapters(
+        self,
+        book_id: str,
+        start_id: str | None = None,
+        end_id: str | None = None,
+        ignore_ids: frozenset[str] = frozenset(),
+        *,
+        stage: str = "raw",
+        **kwargs: Any,
+    ) -> None:
+        """
+        Delete populated chapter entries (in SQLite) for a given range.
+        """
+        ...
+
+    def cleanup_media(
+        self,
+        book_id: str,
+        **kwargs: Any,
+    ) -> None:
+        """
+        Delete images/media folder for this book.
+        """
+        ...
+
+    def cleanup_cache(
+        self,
+        **kwargs: Any,
+    ) -> None:
+        """
+        Remove local cache directory for site.
+        """
+        ...
+
     def export(
         self,
         book: BookConfig,
@@ -288,6 +353,7 @@ class _ClientContext(ClientProtocol, Protocol):
     _site: str
 
     _output_dir: Path
+    _cache_dir: Path
     _raw_data_dir: Path
     _debug_dir: Path
 
@@ -295,6 +361,7 @@ class _ClientContext(ClientProtocol, Protocol):
     _retry_times: int
     _backoff_factor: float
 
+    _cache_metadata: bool
     _skip_existing: bool
     _storage_batch_size: int
 
