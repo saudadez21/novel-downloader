@@ -266,6 +266,26 @@ class ConfigAdapter:
         # Convert to Path, expand "~", and make absolute
         return Path(log_dir).expanduser().resolve()
 
+    def get_cache_dir(self) -> Path:
+        """
+        Retrieve the cache directory from ``general``.
+
+        :return: A Path object pointing to the cache directory.
+        """
+        cache_dir = self._gen_cfg().get("cache_dir") or "./novel_cache"
+        # Convert to Path, expand "~", and make absolute
+        return Path(cache_dir).expanduser().resolve()
+
+    def get_raw_data_dir(self) -> Path:
+        """
+        Retrieve the raw data directory from ``general``.
+
+        :return: A Path object pointing to the raw data directory.
+        """
+        raw_data_dir = self._gen_cfg().get("raw_data_dir") or "./raw_data"
+        # Convert to Path, expand "~", and make absolute
+        return Path(raw_data_dir).expanduser().resolve()
+
     def _gen_cfg(self) -> dict[str, Any]:
         """
         A read-only view of the global ``general`` settings.

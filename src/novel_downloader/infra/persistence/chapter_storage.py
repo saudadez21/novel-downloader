@@ -249,6 +249,13 @@ class ChapterStorage:
 
         return cur.rowcount or 0
 
+    def vacuum(self) -> None:
+        """
+        Rebuild the SQLite file to reclaim disk space.
+        """
+        self.conn.execute("VACUUM")
+        self.conn.commit()
+
     def close(self) -> None:
         """
         Close the database connection and clear in-memory caches.

@@ -119,6 +119,8 @@ class CleanupMixin:
         # Delete rows from SQLite
         with ChapterStorage(raw_base, filename=f"chapter.{stage}.sqlite") as storage:
             deleted = storage.delete_chapters(cids)
+            if deleted > 0:
+                storage.vacuum()
             logger.info("Deleted %d chapters (requested %d)", deleted, len(cids))
 
     def cleanup_media(

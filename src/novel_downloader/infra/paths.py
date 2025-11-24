@@ -7,7 +7,12 @@ novel_downloader.infra.paths
 
 from importlib.resources import files
 
+from platformdirs import user_config_path
+
 PACKAGE_NAME = "novel_downloader"  # Python package name
+
+# Base config directory (e.g. ~/AppData/Local/novel_downloader/)
+STATE_PATH = user_config_path(PACKAGE_NAME, appauthor=False) / "state.json"
 
 RES = files("novel_downloader.resources")
 
