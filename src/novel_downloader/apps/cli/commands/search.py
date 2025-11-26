@@ -64,11 +64,18 @@ class SearchCmd(Command):
             metavar="SECS",
             help=t("Request timeout in seconds (default: 5.0)"),
         )
+        parser.add_argument(
+            "--format",
+            nargs="+",
+            help=t("Output format(s) (default: config)"),
+        )
 
     @classmethod
     def run(cls, args: Namespace) -> None:
         sites: Sequence[str] | None = args.site or None
         keyword: str = args.keyword
+        formats: list[str] | None = args.format
+
         overall_limit = None if args.limit is None else max(1, args.limit)
         per_site_limit = max(1, args.site_limit)
         timeout = max(0.1, float(args.timeout))
@@ -144,7 +151,7 @@ class SearchCmd(Command):
                 client.export_book(
                     book,
                     cfg=adapter.get_exporter_config(site),
-                    formats=args.format or adapter.get_export_fmt(site),
+                    formats=formats or adapter.get_export_fmt(site),
                     ui=export_ui,
                 )
 
