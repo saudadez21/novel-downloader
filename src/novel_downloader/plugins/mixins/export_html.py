@@ -44,6 +44,14 @@ if TYPE_CHECKING:
         ) -> HtmlChapter:
             ...
 
+        def _xp_html_missing_chapter(
+            self,
+            *,
+            cid: str,
+            chap_title: str | None,
+        ) -> HtmlChapter:
+            ...
+
         def _xp_html_extras(self, extras: dict[str, Any]) -> str:
             ...
 
@@ -139,6 +147,12 @@ class ExportHtmlMixin:
 
                     ch = chap_map.get(cid)
                     if not ch:
+                        if cfg.render_missing_chapter:
+                            chapter_obj = self._xp_html_missing_chapter(
+                                cid=cid,
+                                chap_title=ch_title,
+                            )
+                            curr_vol.chapters.append(chapter_obj)
                         continue
 
                     chapter_obj = self._xp_html_chapter(
@@ -334,6 +348,28 @@ class ExportHtmlMixin:
             content=html_str,
             extra_content=extras_part,
             fonts=added_fonts,
+        )
+
+    def _xp_html_missing_chapter(
+        self,
+        *,
+        cid: str,
+        chap_title: str | None,
+    ) -> HtmlChapter:
+        """
+        Build a placeholder HTML chapter when content is missing
+        or inaccessible.
+        """
+        title = chap_title or f"Chapter {cid}"
+
+        html_str = "<p>本章内容暂不可用</p>"
+
+        return HtmlChapter(
+            filename=f"c{cid}.html",
+            title=title,
+            content=html_str,
+            extra_content="",
+            fonts=[],
         )
 
     def _xp_html_extras(self, extras: dict[str, Any]) -> str:

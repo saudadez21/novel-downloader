@@ -142,9 +142,10 @@ OCR 功能依赖 `PaddleOCR` 及其模型, 请参考安装指南:
 | 参数名                        | 类型         | 默认值                | 说明                                       |
 | ----------------------------- | ----------- | --------------------- | ------------------------------------------ |
 | `formats`                     | `list[str]` | `[]`                  | 输出格式                                    |
-| `append_timestamp`            | bool        | true                  | 输出文件名是否追加时间戳                     |
+| `render_missing_chapter`      | bool        | `true`                | 是否在导出时为缺失章节插入占位内容            |
+| `append_timestamp`            | bool        | `true`                | 输出文件名是否追加时间戳                     |
 | `filename_template`           | string      | `"{title}_{author}"`  | 文件名模板                                  |
-| `include_picture`             | bool        | true                  | 是否下载并嵌入章节中的图片 (可能增加文件体积) |
+| `include_picture`             | bool        | `true`                | 是否下载并嵌入章节中的图片 (可能增加文件体积) |
 
 #### 调试子节 `[general.debug]`
 

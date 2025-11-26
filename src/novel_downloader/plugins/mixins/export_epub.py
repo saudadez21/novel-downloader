@@ -48,6 +48,14 @@ if TYPE_CHECKING:
         ) -> EpubChapter:
             ...
 
+        def _xp_epub_missing_chapter(
+            self,
+            *,
+            cid: str,
+            chap_title: str | None,
+        ) -> EpubChapter:
+            ...
+
         def _xp_epub_extras(self, extras: dict[str, Any]) -> str:
             ...
 
@@ -145,6 +153,13 @@ class ExportEpubMixin:
 
                     ch = chap_map.get(cid)
                     if not ch:
+                        if cfg.render_missing_chapter:
+                            chapter_obj = self._xp_epub_missing_chapter(
+                                cid=cid,
+                                chap_title=ch_title,
+                            )
+                            builder.add_chapter(chapter_obj)
+                            seen_cids.add(cid)
                         continue
 
                     chapter_obj = self._xp_epub_chapter(
@@ -276,6 +291,13 @@ class ExportEpubMixin:
 
                     ch = chap_map.get(cid)
                     if not ch:
+                        if cfg.render_missing_chapter:
+                            chapter_obj = self._xp_epub_missing_chapter(
+                                cid=cid,
+                                chap_title=ch_title,
+                            )
+                            curr_vol.chapters.append(chapter_obj)
+                            seen_cids.add(cid)
                         continue
 
                     chapter_obj = self._xp_epub_chapter(
@@ -478,6 +500,29 @@ class ExportEpubMixin:
             fonts=added_fonts,
             content=xhtml_str,
             extra_content=extra_content,
+        )
+
+    def _xp_epub_missing_chapter(
+        self,
+        *,
+        cid: str,
+        chap_title: str | None,
+    ) -> EpubChapter:
+        """
+        Build a placeholder Chapter when content is missing
+        or the chapter is inaccessible.
+        """
+        title = chap_title or f"Chapter {cid}"
+
+        xhtml_str = "<p>本章内容暂不可用</p>"
+
+        return EpubChapter(
+            id=f"c_{cid}",
+            filename=f"c{cid}.xhtml",
+            title=title,
+            fonts=[],
+            content=xhtml_str,
+            extra_content="",
         )
 
     def _xp_epub_extras(self, extras: dict[str, Any]) -> str:
