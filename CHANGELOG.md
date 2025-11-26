@@ -1,3 +1,15 @@
+## v3.1.1 (2025-11-26)
+
+### Feat
+
+- **export**: add missing chapter placeholder rendering (#151)
+- **sites**: add locked chapter detection for qidian (#150)
+- **libs**: add AES, DES and DES3 ciphers with ECB/CBC mode support (#145)
+
+### Fix
+
+- **cli**: add missing --format option to search command (#149)
+
 ## v3.1.0 (2025-11-24)
 
 ### Feat
