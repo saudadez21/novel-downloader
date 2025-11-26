@@ -20,9 +20,7 @@ class FalooClient(CommonClient):
 
     def _dl_check_restricted(self, raw_pages: list[str]) -> bool:
         raw_page = raw_pages[0]
-        if "您还没有订阅本章节" in raw_page:
-            return True
-        if "您还没有登录，请登录后在继续阅读本部小说" in raw_page:
-            return True
-
-        return False
+        return (
+            "您还没有订阅本章节" in raw_page
+            or "您还没有登录，请登录后在继续阅读本部小说" in raw_page
+        )

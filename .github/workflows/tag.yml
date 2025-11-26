@@ -29,5 +29,13 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag "v${{ steps.extract.outputs.version }}"
-          git push origin "v${{ steps.extract.outputs.version }}"
+
+          TAG="v${{ steps.extract.outputs.version }}"
+
+          # Remove existing tag locally & remotely (if exists)
+          git tag -d "$TAG" 2>/dev/null || true
+          git push origin :refs/tags/$TAG 2>/dev/null || true
+
+          # Create new tag
+          git tag "$TAG"
+          git push origin "$TAG"

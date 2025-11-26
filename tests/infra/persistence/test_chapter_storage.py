@@ -3,12 +3,13 @@ from collections.abc import Generator
 from pathlib import Path
 
 import pytest
+
 from novel_downloader.infra.persistence.chapter_storage import ChapterStorage
 from novel_downloader.schemas import ChapterDict
 
 
 @pytest.fixture()
-def tmp_storage(tmp_path: Path) -> Generator[ChapterStorage, None, None]:
+def tmp_storage(tmp_path: Path) -> Generator[ChapterStorage]:
     """Create a temporary ChapterStorage connected to an SQLite file."""
     store = ChapterStorage(tmp_path, "chapters.sqlite")
     store.connect()

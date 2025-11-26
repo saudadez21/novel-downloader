@@ -1,6 +1,7 @@
 import asyncio
 
 import pytest
+
 from novel_downloader.plugins.utils.rate_limiter import TokenBucketRateLimiter
 
 

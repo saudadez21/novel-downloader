@@ -43,8 +43,7 @@ def web_main() -> None:
         choices=["local", "public"],
         default="local",
         help=(
-            "Bind address mode: 'local' binds to 127.0.0.1; "
-            "'public' binds to 0.0.0.0."
+            "Bind address mode: 'local' binds to 127.0.0.1; 'public' binds to 0.0.0.0."
         ),
     )
     p.add_argument(

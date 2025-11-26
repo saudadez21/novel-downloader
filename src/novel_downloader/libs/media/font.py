@@ -44,7 +44,7 @@ def detect_font_format(data: bytes) -> str | None:
         return "ttc"
 
     # --- Embedded OpenType (EOT) ---
-    if header[:4] == b"L\0P\0" or header[:4] == b"\x4C\x50\x00\x00":
+    if header[:4] == b"L\0P\0" or header[:4] == b"\x4c\x50\x00\x00":
         return "eot"
 
     return None

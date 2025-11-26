@@ -26,6 +26,7 @@ from typing import Any
 
 from nicegui import ui
 from nicegui.events import KeyEventArguments
+
 from novel_downloader.infra.cookies import parse_cookies
 from novel_downloader.plugins import registry
 from novel_downloader.schemas import FetcherConfig, ParserConfig
@@ -437,7 +438,7 @@ def _iter_sorted_keys(d: dict[str, Any]) -> Iterable[str]:
 
 
 def _indent_css(level: int) -> str:
-    return f"margin-left:{level*16}px;" if level > 0 else ""
+    return f"margin-left:{level * 16}px;" if level > 0 else ""
 
 
 def _box_html(kind: str, body_html: str, indent_level: int = 0) -> str:
@@ -493,7 +494,7 @@ def _struct_diff_html(
             out.append(_box_html("struct", "<strong>dict</strong> {", level))
         a_keys = set(a.keys())
         b_keys = set(b.keys())
-        for k in _iter_sorted_keys({**{k: None for k in a_keys | b_keys}}):
+        for k in _iter_sorted_keys({**dict.fromkeys(a_keys | b_keys)}):
             in_a, in_b = k in a_keys, k in b_keys
             key_html = _code(str(k)) + ":"
             if in_a and not in_b:
@@ -674,22 +675,18 @@ def _char_level_diff(old: str, new: str) -> tuple[str, str]:
             new_out.append(b)
         elif tag == "delete":
             old_out.append(
-                '<del style="background:#ffeef0;color:#a00;text-decoration:line-through">%s</del>'  # noqa: E501
-                % a
+                f'<del style="background:#ffeef0;color:#a00;text-decoration:line-through">{a}</del>'  # noqa: E501
             )
         elif tag == "insert":
             new_out.append(
-                '<ins style="background:#e6ffed;color:#065f46;text-decoration:none">%s</ins>'  # noqa: E501
-                % b
+                f'<ins style="background:#e6ffed;color:#065f46;text-decoration:none">{b}</ins>'  # noqa: E501
             )
         elif tag == "replace":
             old_out.append(
-                '<del style="background:#ffeef0;color:#a00;text-decoration:line-through">%s</del>'  # noqa: E501
-                % a
+                f'<del style="background:#ffeef0;color:#a00;text-decoration:line-through">{a}</del>'  # noqa: E501
             )
             new_out.append(
-                '<ins style="background:#e6ffed;color:#065f46;text-decoration:none">%s</ins>'  # noqa: E501
-                % b
+                f'<ins style="background:#e6ffed;color:#065f46;text-decoration:none">{b}</ins>'  # noqa: E501
             )
     return "".join(old_out), "".join(new_out)
 

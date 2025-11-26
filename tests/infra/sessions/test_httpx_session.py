@@ -4,6 +4,7 @@ import aiohttp.web
 import httpx
 import pytest
 import pytest_asyncio
+
 from novel_downloader.infra.sessions._httpx import HttpxSession
 from novel_downloader.schemas import FetcherConfig
 

@@ -1,6 +1,7 @@
 import random
 
 import pytest
+
 from novel_downloader.libs.textutils.numbers import (
     arabic_to_chinese,
     chinese_to_arabic,

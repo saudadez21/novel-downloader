@@ -14,12 +14,7 @@ Security fixes are applied to the **latest stable release** and the **main** bra
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in **novel-downloader**, **do not create a public issue**.
-
-Instead, please report it privately through one of the following methods:
-
-- Email: `saudadez21@gmail.com`
-- Or use GitHub’s “Report a vulnerability” feature on the repository page.
+If you discover a security vulnerability in **novel-downloader**, please report it use GitHub's "Report a vulnerability" feature on the repository page.
 
 When reporting, please include:
 

@@ -12,7 +12,7 @@ from typing import Any, Literal, TypedDict
 import numpy as np
 from numpy.typing import NDArray
 
-from novel_downloader.libs import imagekit
+from novel_downloader.libs import image_utils
 
 
 class ImageBlock(TypedDict):
@@ -104,7 +104,7 @@ def split_image(
             # slice text block
             block = img_arr[start_y:end_y, :, :]
             if remove_watermark:
-                block = imagekit.filter_gray_watermark(block, background=background)
+                block = image_utils.filter_gray_watermark(block, background=background)
             block = np.concatenate((pad_block, block, pad_block), axis=0)
 
             image_idx = len(images)

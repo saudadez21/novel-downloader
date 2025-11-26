@@ -7,6 +7,7 @@ novel_downloader.plugins.sites.n69shuba.parser
 from typing import Any
 
 from lxml import html
+
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
@@ -57,7 +58,9 @@ class N69shubaParser(BaseParser):
         serial_status = stats[1].strip() if len(stats) > 1 else ""
 
         update_time = self._first_str(
-            info_tree.xpath('//div[@class="booknav2"]/p[contains(text(),"更新")]/text()'),
+            info_tree.xpath(
+                '//div[@class="booknav2"]/p[contains(text(),"更新")]/text()'
+            ),
             replaces=[("更新：", "")],
         )
 

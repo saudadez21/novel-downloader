@@ -17,6 +17,7 @@ import requests
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
 from lxml import html
+
 from novel_downloader.infra.http_defaults import DEFAULT_USER_HEADERS
 from novel_downloader.infra.paths import XIGUASHUWU_MAP_PATH
 from novel_downloader.plugins.base.parser import BaseParser
@@ -292,12 +293,12 @@ class XiguashuwuParser(BaseParser):
         :return: The recognized character (top-1) if OCR succeeds, otherwise None.
         """
         try:
-            from novel_downloader.libs import imagekit
+            from novel_downloader.libs import image_utils
 
             resp = requests.get(url, headers=DEFAULT_USER_HEADERS, timeout=15)
             resp.raise_for_status()
 
-            img_np = imagekit.load_image_array_bytes(resp.content)
+            img_np = image_utils.load_image_array_bytes(resp.content)
 
             char, score = self._extract_text_from_image([img_np])[0]
 

@@ -1,4 +1,5 @@
 import pytest
+
 from novel_downloader.infra.sessions.response import BaseResponse, Headers
 
 # ---------------------------------------------------------

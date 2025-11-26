@@ -4,6 +4,7 @@ import random
 
 import pytest
 from Crypto.Cipher import AES as RefAES
+
 from novel_downloader.libs.crypto.cipher import AES
 
 _rng = random.Random(20251123)

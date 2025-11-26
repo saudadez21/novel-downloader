@@ -1,4 +1,5 @@
 import pytest
+
 from novel_downloader.libs.mini_js import MiniJS
 
 # ---------------------------------------------------------------------
@@ -11,9 +12,9 @@ def _assert_raises(expr: str, exc_type: type[BaseException], msg_part: str) -> N
     m = MiniJS()
     with pytest.raises(exc_type) as exc_info:
         m.eval(expr)
-    assert msg_part in str(
-        exc_info.value
-    ), f"Expected message containing {msg_part!r}, got {str(exc_info.value)!r}"
+    assert msg_part in str(exc_info.value), (
+        f"Expected message containing {msg_part!r}, got {str(exc_info.value)!r}"
+    )
 
 
 # ---------------------------------------------------------------------
@@ -133,7 +134,9 @@ def test_optional_chaining_and_calls():
     assert m.eval("let p={x:1}; p?.x") == 1
     assert m.eval("let f=null; f?.(1)") is None
     assert m.eval("let q={inc:function(x){return x+1;}}; q?.inc(4)") == 5
-    code = "function make(){ return { add:function(x){ return x+2; } }; } make()?.add(3)"  # noqa: E501
+    code = (
+        "function make(){ return { add:function(x){ return x+2; } }; } make()?.add(3)"  # noqa: E501
+    )
     assert m.eval(code) == 5
 
 

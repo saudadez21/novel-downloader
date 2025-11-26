@@ -513,6 +513,6 @@ class JsTokenizer:
                 i += 1
                 continue
 
-            raise SyntaxError(f"Unexpected character at {code[i:i+10]!r}")
+            raise SyntaxError(f"Unexpected character at {code[i : i + 10]!r}")
 
         # no explicit EOF needed (parser uses bounds)

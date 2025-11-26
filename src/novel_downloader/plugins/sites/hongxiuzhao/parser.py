@@ -8,6 +8,7 @@ import json
 from typing import Any
 
 from lxml import html
+
 from novel_downloader.infra.paths import HONGXIUZHAO_MAP_PATH
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar

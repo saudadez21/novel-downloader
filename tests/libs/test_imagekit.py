@@ -2,7 +2,9 @@ import io
 
 import numpy as np
 import pytest
-from novel_downloader.libs.imagekit import (
+from PIL import Image
+
+from novel_downloader.libs.image_utils import (
     concat_image_slices_vertical,
     crop_chars_region,
     encode_image_array,
@@ -15,7 +17,6 @@ from novel_downloader.libs.imagekit import (
     split_by_height,
     split_by_white_lines,
 )
-from PIL import Image
 
 
 def create_rgb_image(width=50, height=40, color=(255, 0, 0)):

@@ -45,24 +45,20 @@ if TYPE_CHECKING:
             chap: ChapterDict,
             media_dir: Path,
             include_picture: bool = True,
-        ) -> EpubChapter:
-            ...
+        ) -> EpubChapter: ...
 
         def _xp_epub_missing_chapter(
             self,
             *,
             cid: str,
             chap_title: str | None,
-        ) -> EpubChapter:
-            ...
+        ) -> EpubChapter: ...
 
-        def _xp_epub_extras(self, extras: dict[str, Any]) -> str:
-            ...
+        def _xp_epub_extras(self, extras: dict[str, Any]) -> str: ...
 
         def _xp_epub_chap_post(
             self, html_parts: list[str], chap: ChapterDict
-        ) -> list[str]:
-            ...
+        ) -> list[str]: ...
 
 
 class ExportEpubMixin:

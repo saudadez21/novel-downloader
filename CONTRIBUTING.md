@@ -107,17 +107,12 @@ pre-commit run --all-files
 
 | 工具       | 功能                         | 配置位置          |
 | --------- | ---------------------------- | ---------------- |
-| **black** | 代码格式化                    | `pyproject.toml` |
 | **ruff**  | Lint / import 排序 / 简化检查 | `pyproject.toml` |
 | **mypy**  | 静态类型检查                  | `pyproject.toml` |
 
 主要配置如下:
 
 ```toml
-[tool.black]
-line-length = 88
-target-version = ["py312"]
-
 [tool.ruff]
 line-length = 88
 target-version = "py312"

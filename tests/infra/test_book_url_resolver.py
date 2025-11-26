@@ -5,6 +5,7 @@ import logging
 from dataclasses import dataclass
 
 import pytest
+
 from novel_downloader.infra.book_url_resolver import resolve_book_url
 
 
@@ -710,9 +711,9 @@ def test_resolver_extracts_expected_ids(case: SuccessCase):
     assert result is not None, f"{case.url}: expected BookURLInfo, got None"
     assert result["site_key"] == case.site_key
     assert result["book_id"] == case.book_id
-    assert (
-        result["chapter_id"] == case.chap_id
-    ), f"{case.url}: expected chapter_id={case.chap_id}, got {result['chapter_id']}"
+    assert result["chapter_id"] == case.chap_id, (
+        f"{case.url}: expected chapter_id={case.chap_id}, got {result['chapter_id']}"
+    )
 
 
 @pytest.mark.parametrize("case", CASES_HINT)
@@ -722,9 +723,9 @@ def test_resolver_logs_hint_and_returns_none(
     caplog.set_level(logging.WARNING)
     result = resolve_book_url(case.url)
     assert result is None, f"{case.url}: should return None for hint URLs"
-    assert any(
-        case.expected_hint in msg for msg in caplog.messages
-    ), f"{case.url}: expected hint '{case.expected_hint}' not found in logs"
+    assert any(case.expected_hint in msg for msg in caplog.messages), (
+        f"{case.url}: expected hint '{case.expected_hint}' not found in logs"
+    )
 
 
 @pytest.mark.parametrize("url", CASES_NONE)

@@ -4,7 +4,6 @@ novel_downloader.plugins.sites.fanqienovel.fetcher
 --------------------------------------------------
 """
 
-
 from novel_downloader.plugins.base.fetcher import GenericFetcher
 from novel_downloader.plugins.registry import registrar
 

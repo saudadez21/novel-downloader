@@ -1,0 +1,86 @@
+name: Bug Report
+description: Report a reproducible issue / 报告一个可复现的问题
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: checkboxes
+    id: latest_version
+    attributes:
+      label: Latest Version / 是否已更新到最新版本
+      description: Please confirm you are using the latest release. / 请确认你正在使用最新版本。
+      options:
+        - label: I am using the latest version / 我已更新到最新版本
+          required: true
+
+  - type: checkboxes
+    id: duplicate_issue
+    attributes:
+      label: Duplicate Check / 是否重复问题
+      description: Please search existing issues (including closed ones). / 请搜索现有问题 (包括已关闭的)。
+      options:
+        - label: I have searched existing issues / 我已搜索现有 Issue
+          required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug / 描述问题
+      description: Provide a clear and concise description of the issue. / 请清楚地描述你遇到的问题。
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: To Reproduce / 重现步骤
+      description: Steps to reproduce the behavior. / 描述如何重现问题。
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior / 预期行为
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior / 实际行为
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment_os
+    attributes:
+      label: Environment / 运行环境
+      options:
+        - Linux
+        - macOS
+        - Windows
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version / 软件版本
+      description: Provide your NovelKit version. / 请填写你使用的 NovelKit 版本。
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs (if any) / 日志文件 (如有)
+      description: Paste error logs or attach files. / 粘贴或附加你的日志文件。
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional context / 补充信息

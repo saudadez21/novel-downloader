@@ -4,6 +4,7 @@ import json
 import pathlib
 
 import pytest
+
 from novel_downloader.plugins.utils.yuewen.qdcss import apply_css_text_rules
 
 DATA_BASE = pathlib.Path(__file__).resolve().parents[2] / "data" / "plugins" / "yuewen"

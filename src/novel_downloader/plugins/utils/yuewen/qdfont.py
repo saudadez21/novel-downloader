@@ -29,12 +29,10 @@ if TYPE_CHECKING:
         _IGNORED_CHARS: set[str]
 
         @staticmethod
-        def _load_or_download_fixed_font(url: str, dest_path: Path) -> bytes:
-            ...
+        def _load_or_download_fixed_font(url: str, dest_path: Path) -> bytes: ...
 
         @staticmethod
-        def _load_mapping_cache(path: Path) -> dict[str, str]:
-            ...
+        def _load_mapping_cache(path: Path) -> dict[str, str]: ...
 
         def _build_font_mapping(
             self,
@@ -45,8 +43,7 @@ if TYPE_CHECKING:
             reflected_chars: set[str],
             existing_map: dict[str, str],
             batch_size: int = 32,
-        ) -> dict[str, str]:
-            ...
+        ) -> dict[str, str]: ...
 
 
 class YuewenQDFontMixin:
@@ -167,7 +164,7 @@ class YuewenQDFontMixin:
         random_charset = font_utils.extract_font_charset_bytes(random_font_bytes)
         random_font = font_utils.load_render_font_bytes(random_font_bytes)
 
-        render_tasks: list[tuple[str, "NDArray[np.uint8]"]] = []
+        render_tasks: list[tuple[str, NDArray[np.uint8]]] = []
 
         for chars, reflect in ((remaining_direct, False), (remaining_reflected, True)):
             for ch in chars:

@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+
 from novel_downloader.libs.media.font import detect_font_format
 
 FONT_TYPES = {

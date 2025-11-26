@@ -13,6 +13,7 @@ from html import unescape
 from typing import Any
 
 from lxml import html
+
 from novel_downloader.infra.cookies import CookieStore
 from novel_downloader.infra.paths import QD_DECRYPT_SCRIPT_PATH
 from novel_downloader.libs.textutils import truncate_half_lines

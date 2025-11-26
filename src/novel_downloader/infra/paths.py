@@ -23,9 +23,9 @@ DEFAULT_CONFIG_FILE = RES.joinpath("config", "settings.sample.toml")
 DEFAULT_CONFIG_FILENAME = "settings.toml"
 
 # CSS Styles
-EPUB_CSS_STYLE_PATH = RES.joinpath("css_styles", "epub_style.css")
-HTML_CSS_INDEX_PATH = RES.joinpath("css_styles", "html_index.css")
-HTML_CSS_CHAPTER_PATH = RES.joinpath("css_styles", "html_chapter.css")
+EPUB_CSS_STYLE_PATH = RES.joinpath("styles", "epub_style.css")
+HTML_CSS_INDEX_PATH = RES.joinpath("styles", "html_index.css")
+HTML_CSS_CHAPTER_PATH = RES.joinpath("styles", "html_chapter.css")
 
 # JSON
 FANQIENOVEL_MAP_PATH = RES.joinpath("json", "fanqienovel.json")
@@ -36,7 +36,7 @@ XIGUASHUWU_MAP_PATH = RES.joinpath("json", "xiguashuwu.json")
 YODU_MAP_PATH = RES.joinpath("json", "yodu.json")
 
 # JavaScript
-EXPR_TO_JSON_SCRIPT_PATH = RES.joinpath("js_scripts", "expr_to_json.js")
-QD_DECRYPT_SCRIPT_PATH = RES.joinpath("js_scripts", "qidian_decrypt_node.js")
-QQ_DECRYPT_SCRIPT_PATH = RES.joinpath("js_scripts", "qq_decrypt_node.js")
-HTML_JS_MAIN_PATH = RES.joinpath("js_scripts", "html_main.js")
+EXPR_TO_JSON_SCRIPT_PATH = RES.joinpath("scripts", "expr_to_json.js")
+QD_DECRYPT_SCRIPT_PATH = RES.joinpath("scripts", "qidian_decrypt_node.js")
+QQ_DECRYPT_SCRIPT_PATH = RES.joinpath("scripts", "qq_decrypt_node.js")
+HTML_JS_MAIN_PATH = RES.joinpath("scripts", "html_main.js")

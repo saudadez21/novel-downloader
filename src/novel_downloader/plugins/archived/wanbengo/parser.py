@@ -10,6 +10,7 @@ from html import unescape
 from typing import Any
 
 from lxml import html
+
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
@@ -171,9 +172,7 @@ class WanbengoParser(BaseParser):
             return True
         if self._is_ad_line(s):
             return True
-        if self._PUNCT_ONLY.match(s):
-            return True
-        return False
+        return bool(self._PUNCT_ONLY.match(s))
 
     @classmethod
     def _scrub_ascii_gibberish(cls, s: str) -> str:

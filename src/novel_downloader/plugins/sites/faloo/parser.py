@@ -9,6 +9,7 @@ import logging
 from typing import Any
 
 from lxml import html
+
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
@@ -247,18 +248,18 @@ class FalooParser(BaseParser):
         }
 
     def parse_image_chapter(self, img_base64: str) -> list[str]:
-        from novel_downloader.libs import imagekit
+        from novel_downloader.libs import image_utils
 
         img_bytes = base64.b64decode(img_base64)
         paragraphs: list[str] = []
         cache: list[str] = []
 
-        img_arr = imagekit.load_image_array_bytes(img_bytes)
-        img_lines = imagekit.split_by_white_lines(img_arr)
+        img_arr = image_utils.load_image_array_bytes(img_bytes)
+        img_lines = image_utils.split_by_white_lines(img_arr)
 
         preds = self._extract_text_from_image(img_lines, batch_size=self._batch_size)
         for line, (text, _) in zip(img_lines, preds, strict=False):
-            if cache and imagekit.is_new_paragraph(line, paragraph_threshold=30):
+            if cache and image_utils.is_new_paragraph(line, paragraph_threshold=30):
                 paragraphs.append("".join(cache))
                 cache.clear()
 

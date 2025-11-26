@@ -80,8 +80,7 @@ class _ParserContext(ParserProtocol, Protocol):
     _cache_dir: Path
 
     @property
-    def ocr_model(self) -> "TextRecognition":
-        ...
+    def ocr_model(self) -> "TextRecognition": ...
 
     def _is_ad_line(self, line: str) -> bool:
         """
@@ -103,12 +102,14 @@ class _ParserContext(ParserProtocol, Protocol):
         ...
 
     @staticmethod
-    def _first_str(xs: list[str], replaces: list[tuple[str, str]] | None = None) -> str:
-        ...
+    def _first_str(
+        xs: list[str], replaces: list[tuple[str, str]] | None = None
+    ) -> str: ...
 
     @staticmethod
-    def _join_strs(xs: list[str], replaces: list[tuple[str, str]] | None = None) -> str:
-        ...
+    def _join_strs(
+        xs: list[str], replaces: list[tuple[str, str]] | None = None
+    ) -> str: ...
 
     def _extract_text_from_image(
         self,

@@ -118,14 +118,14 @@ class CiweimaoChapterMixin:
                     }
                 ]
 
-            from novel_downloader.libs import imagekit
+            from novel_downloader.libs import image_utils
 
             from .image import split_image
 
             # decode & preprocess
             tsukkomi_list = json.loads(tsukkomi_list_json_str)
             img_bytes = base64.b64decode(img_base64)
-            img_arr = imagekit.load_image_array_bytes(img_bytes)
+            img_arr = image_utils.load_image_array_bytes(img_bytes)
 
             result = split_image(
                 img_arr,
@@ -180,7 +180,7 @@ class CiweimaoChapterMixin:
                         )
                     elif blk["type"] == "paragraph":
                         para_slices = [result.images[i] for i in blk["image_idxs"]]
-                        img_bytes = imagekit.concat_image_slices_vertical(
+                        img_bytes = image_utils.concat_image_slices_vertical(
                             para_slices, format="JPEG"
                         )
                         resources.append(
@@ -195,7 +195,7 @@ class CiweimaoChapterMixin:
                 return [], resources
 
             resources = []
-            page_buffer: "list[NDArray[np.uint8]]" = []
+            page_buffer: list[NDArray[np.uint8]] = []
             page_line_count = 0
 
             def flush_page() -> None:
@@ -204,7 +204,7 @@ class CiweimaoChapterMixin:
                 if not page_buffer:
                     return
 
-                img_bytes = imagekit.concat_image_slices_vertical(
+                img_bytes = image_utils.concat_image_slices_vertical(
                     page_buffer, format="JPEG"
                 )
 

@@ -222,9 +222,7 @@ class CorrectorProcessor:
             s = seg.strip()
             if not s:
                 return False
-            if th is not None and len(s) <= int(th):
-                return False
-            return True
+            return not (th is not None and len(s) <= int(th))
 
         mask = [_needs(seg) for seg in lines]
         batch = [seg for seg, m in zip(lines, mask, strict=False) if m]
