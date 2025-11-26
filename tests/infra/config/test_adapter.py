@@ -188,7 +188,7 @@ def test_get_processor_configs_site_overrides():
 
 
 def test_get_processor_configs_global():
-    cfg = {"plugins": {"processors": [{"name": "global"}]}}
+    cfg = {"general": {"processors": [{"name": "global"}]}}
     adapter = make_adapter(cfg)
     procs = adapter.get_processor_configs("x")
 

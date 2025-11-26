@@ -181,7 +181,7 @@ class DownloadMixin:
 
         async def producer(cid: str) -> None:
             async with sem:
-                if self._skip_existing and not storage.need_refetch(cid):
+                if self._cache_chapter and not storage.need_refetch(cid):
                     await bump(1)
                     return
 
@@ -344,7 +344,7 @@ class DownloadMixin:
         :return: parsed BookInfoDict
         """
         book_info: BookInfoDict | None = None
-        if self._cache_metadata:
+        if self._cache_book_info:
             try:
                 book_info = self._load_book_info(book_id)
                 age = time.time() - book_info.get("last_checked", 0.0)

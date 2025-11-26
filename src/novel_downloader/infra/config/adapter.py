@@ -118,8 +118,9 @@ class ConfigAdapter:
             cache_dir=g.get("cache_dir", "./novel_cache"),
             output_dir=g.get("output_dir", "./downloads"),
             workers=self._pick("workers", 4, s, g),
-            skip_existing=self._pick("skip_existing", True, s, g),
-            cache_metadata=bool(debug.get("cache_metadata", True)),
+            cache_book_info=bool(debug.get("cache_book_info", True)),
+            cache_chapter=self._pick("cache_chapter", True, s, g),
+            fetch_inaccessible=self._pick("fetch_inaccessible", False, s, g),
             save_html=bool(debug.get("save_html", False)),
             storage_batch_size=g.get("storage_batch_size", 1),
             fetcher_cfg=self.get_fetcher_config(site),
@@ -196,13 +197,12 @@ class ConfigAdapter:
         }
 
     def get_processor_configs(self, site: str) -> list[ProcessorConfig]:
-        s = self._site_cfg(site)
-        plugins = self._config.get("plugins") or {}
+        s, g = self._site_cfg(site), self._gen_cfg()
 
         site_rows = s.get("processors") or []
         site_procs = self._to_processor_cfgs(site_rows)
-        plugin_rows = plugins.get("processors") or []
-        global_procs = self._to_processor_cfgs(plugin_rows)
+        general_rows = g.get("processors") or []
+        global_procs = self._to_processor_cfgs(general_rows)
 
         return site_procs if site_procs else global_procs
 

@@ -352,17 +352,19 @@ class _ClientContext(ClientProtocol, Protocol):
 
     _site: str
 
-    _output_dir: Path
     _cache_dir: Path
     _raw_data_dir: Path
+    _output_dir: Path
     _debug_dir: Path
 
     _request_interval: float
     _retry_times: int
     _backoff_factor: float
 
-    _cache_metadata: bool
-    _skip_existing: bool
+    _cache_book_info: bool
+    _cache_chapter: bool
+    _fetch_inaccessible: bool
+
     _storage_batch_size: int
 
     @property
@@ -441,8 +443,8 @@ class _ClientContext(ClientProtocol, Protocol):
         """
         ...
 
-    @staticmethod
     def _extract_chapter_ids(
+        self,
         vols: list[VolumeInfoDict],
         start_id: str | None,
         end_id: str | None,

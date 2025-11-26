@@ -153,40 +153,13 @@ class QidianParser(YuewenQDFontMixin, BaseParser):
         ]
         summary = "\n".join(raw_lines) if raw_lines else summary_brief
 
-        volumes: list[VolumeInfoDict] = []
-        for vol in doc.xpath('//div[@id="allCatalog"]//div[@class="catalog-volume"]'):
-            vol_name = self._first_str(vol.xpath('.//h3[@class="volume-name"]/text()'))
-            vol_name = vol_name.split(chr(183))[0].strip()
-            chapters: list[ChapterInfoDict] = []
-            for li in vol.xpath('.//ul[contains(@class,"volume-chapters")]/li'):
-                title = self._first_str(li.xpath('.//a[@class="chapter-name"]/text()'))
-                url = self._first_str(li.xpath('.//a[@class="chapter-name"]/@href'))
-                cid = url.rstrip("/").split("/")[-1] if url else ""
-                chapters.append({"title": title, "url": url, "chapterId": cid})
-            if chapters:
-                volumes.append({"volume_name": vol_name, "chapters": chapters})
-
+        volumes = self._extract_volumes(doc)
         if not volumes:
             fragment = self._extract_div_block(raw_pages[0], 'id="allCatalog"')
             if not fragment:
                 return None
-
             vol_tree = html.fromstring(fragment)
-            for vol in vol_tree.xpath('//div[contains(@class, "catalog-volume")]'):
-                vol_name = self._first_str(
-                    vol.xpath('.//h3[@class="volume-name"]/text()')
-                )
-                vol_name = vol_name.split(chr(183))[0].strip()
-                chapters = []
-                for li in vol.xpath('.//ul[contains(@class,"volume-chapters")]/li'):
-                    title = self._first_str(
-                        li.xpath('.//a[@class="chapter-name"]/text()')
-                    )
-                    url = self._first_str(li.xpath('.//a[@class="chapter-name"]/@href'))
-                    cid = url.rstrip("/").split("/")[-1] if url else ""
-                    chapters.append({"title": title, "url": url, "chapterId": cid})
-                if chapters:
-                    volumes.append({"volume_name": vol_name, "chapters": chapters})
+            volumes = self._extract_volumes(vol_tree)
 
         if not volumes:
             return None
@@ -407,6 +380,29 @@ class QidianParser(YuewenQDFontMixin, BaseParser):
                     return html_str[div_start:i]
 
         return None
+
+    def _extract_volumes(self, root: html.HtmlElement) -> list[VolumeInfoDict]:
+        volumes: list[VolumeInfoDict] = []
+        for vol in root.xpath('//div[@id="allCatalog"]//div[@class="catalog-volume"]'):
+            vol_name = self._first_str(vol.xpath('.//h3[@class="volume-name"]/text()'))
+            vol_name = vol_name.split(chr(183))[0].strip()
+            chapters: list[ChapterInfoDict] = []
+            for li in vol.xpath('.//ul[contains(@class,"volume-chapters")]/li'):
+                title = self._first_str(li.xpath('.//a[@class="chapter-name"]/text()'))
+                url = self._first_str(li.xpath('.//a[@class="chapter-name"]/@href'))
+                cid = url.rstrip("/").split("/")[-1] if url else ""
+                locked = bool(li.xpath('.//em[contains(@class, "chapter-locked")]'))
+                chapters.append(
+                    {
+                        "title": title,
+                        "url": url,
+                        "chapterId": cid,
+                        "accessible": not locked,
+                    }
+                )
+            if chapters:
+                volumes.append({"volume_name": vol_name, "chapters": chapters})
+        return volumes
 
     @staticmethod
     def _find_ssr_page_context(html_str: str) -> dict[str, Any]:

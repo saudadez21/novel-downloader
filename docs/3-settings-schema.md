@@ -45,7 +45,9 @@
 | `output_dir`         | string  | `"./downloads"`   | 最终导出文件目录                             |
 | `cache_dir`          | string  | `"./novel_cache"` | 本地缓存目录 (字体 / 图片等)                  |
 | `workers`            | int     | 4                 | 下载任务协程数量                             |
-| `skip_existing`      | bool    | true              | 下载时跳过本地已存在的章节文件                 |
+| `cache_book_info`    | bool    | `true`            | 是否启用 book_info 缓存                      |
+| `cache_chapter`      | bool    | `true`            | 是否启用章节缓存                             |
+| `fetch_inaccessible` | bool    | `false`           | 是否尝试获取未订阅章节                        |
 | `http2`              | `bool`  | `true`            | 仅对 `httpx` 生效, 启用 HTTP/2 支持           |
 | `impersonate`        | `str \| None` | `None`      | 仅对 `curl_cffi` 生效, 启用浏览器指纹仿真模式  |
 | `storage_batch_size` | int     | 1                 | `sqlite` 每批提交的章节数 (提高写入性能)       |
@@ -167,7 +169,8 @@ raw_data_dir = "./raw_data"
 output_dir = "./downloads"
 cache_dir = "./novel_cache"
 workers = 4
-skip_existing = true
+cache_book_info = true
+cache_chapter = true
 storage_batch_size = 4
 
 [general.output]
