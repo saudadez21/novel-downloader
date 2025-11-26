@@ -72,8 +72,9 @@ class ClientConfig:
     raw_data_dir: str = "./raw_data"
     output_dir: str = "./downloads"
     workers: int = 4
-    cache_metadata: bool = True
-    skip_existing: bool = True
+    cache_book_info: bool = True
+    cache_chapter: bool = True
+    fetch_inaccessible: bool = False
     save_html: bool = False
     storage_batch_size: int = 1
     fetcher_cfg: FetcherConfig = field(default_factory=FetcherConfig)

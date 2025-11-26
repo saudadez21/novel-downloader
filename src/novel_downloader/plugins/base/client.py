@@ -58,8 +58,9 @@ class AbstractClient(abc.ABC):
         cfg = config or ClientConfig()
 
         self._save_html = cfg.save_html
-        self._cache_metadata = cfg.cache_metadata
-        self._skip_existing = cfg.skip_existing
+        self._cache_book_info = cfg.cache_book_info
+        self._cache_chapter = cfg.cache_chapter
+        self._fetch_inaccessible = cfg.fetch_inaccessible
         self._request_interval = cfg.request_interval
         self._retry_times = cfg.retry_times
         self._backoff_factor = cfg.backoff_factor
@@ -453,8 +454,8 @@ class BaseClient(AbstractClient, abc.ABC):
         path = img_dir / image_filename(url, name=name)
         return path if path.is_file() else None
 
-    @staticmethod
     def _extract_chapter_ids(
+        self,
         vols: list[VolumeInfoDict],
         start_id: str | None,
         end_id: str | None,
@@ -472,8 +473,10 @@ class BaseClient(AbstractClient, abc.ABC):
                         seen_start = True
                     else:
                         continue
-                if cid not in ignore and chap.get("accessible", True):
-                    out.append(cid)
+                if cid not in ignore:
+                    accessible = chap.get("accessible", True)
+                    if accessible or self._fetch_inaccessible:
+                        out.append(cid)
                 if end_id is not None and cid == end_id:
                     return out
         return out
