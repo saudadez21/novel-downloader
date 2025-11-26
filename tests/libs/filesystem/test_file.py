@@ -1,4 +1,5 @@
 import pytest
+
 from novel_downloader.libs.filesystem.file import write_file
 
 

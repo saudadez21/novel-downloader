@@ -10,6 +10,7 @@ import re
 from typing import Any
 
 from lxml import html
+
 from novel_downloader.infra.paths import FANQIENOVEL_MAP_PATH
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
@@ -83,9 +84,9 @@ class FanqienovelParser(BaseParser):
             if i < len(volume_names):
                 volume_name: str = str(volume_names[i])
             elif chapter_list:
-                volume_name = str(chapter_list[0].get("volume_name") or f"卷 {i+1}")
+                volume_name = str(chapter_list[0].get("volume_name") or f"卷 {i + 1}")
             else:
-                volume_name = f"卷 {i+1}"
+                volume_name = f"卷 {i + 1}"
 
             def _sort_key(ch_item: dict[str, Any]) -> Any:
                 v = ch_item.get("realChapterOrder") or ch_item.get("itemId") or "0"

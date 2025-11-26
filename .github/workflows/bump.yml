@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   bump:
@@ -40,6 +41,7 @@ jobs:
           git describe --tags --abbrev=0 || echo "No tag found"
 
       - name: Bump version
+        id: bump
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -47,15 +49,60 @@ jobs:
           # Perform version bump
           cz bump --yes --increment ${{ github.event.inputs.bump_type }}
 
-          # Get version from project
+          # Extract bumped version
           VERSION=$(cz version --project)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
           BRANCH="chore/bump/v$VERSION"
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
 
           # Delete local tag to avoid accidental push
           git tag -d "v$VERSION" || true
 
-          # Create and push a branch
+          # Create and push branch
           git checkout -b "$BRANCH"
           git push origin "$BRANCH"
 
-          echo "Version bumped to $VERSION and pushed to branch $BRANCH"
+      - name: Generate Changelog Preview
+        id: changelog
+        run: |
+          # Commitizen can produce changelog output in preview/dry-run mode
+          CHANGELOG=$(cz changelog --dry-run --unreleased || echo "")
+          # Escape EOF characters
+          CHANGELOG="${CHANGELOG//'%'/'%25'}"
+          CHANGELOG="${CHANGELOG//$'\n'/'%0A'}"
+          CHANGELOG="${CHANGELOG//$'\r'/'%0D'}"
+          echo "content=$CHANGELOG" >> $GITHUB_OUTPUT
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: ${{ steps.bump.outputs.branch }}
+          base: main
+          title: "chore: bump version to v${{ steps.bump.outputs.version }}"
+          body: |
+            ### Version Bump
+
+            This PR updates the project version.
+
+            ---
+
+            ### New Version
+
+            `v${{ steps.bump.outputs.version }}`
+
+            ---
+
+            ### Changelog Summary
+
+            ${{ steps.changelog.outputs.content }}
+
+            ---
+
+            ### Checklist
+
+            - Version number has been updated automatically
+            - Changelog reviewed or updated
+            - CI should pass for release pipeline
+
+          labels: version-bump

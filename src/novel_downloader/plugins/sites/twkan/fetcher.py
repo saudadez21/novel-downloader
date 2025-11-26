@@ -4,7 +4,6 @@ novel_downloader.plugins.sites.twkan.fetcher
 --------------------------------------------
 """
 
-
 import asyncio
 from typing import Any
 

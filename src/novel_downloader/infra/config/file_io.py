@@ -11,11 +11,10 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import Any, TypeVar
+from typing import Any
 
 from novel_downloader.infra.paths import DEFAULT_CONFIG_FILE
 
-T = TypeVar("T")
 logger = logging.getLogger(__name__)
 
 
@@ -122,7 +121,7 @@ def load_config(
     return _load_by_extension(path)
 
 
-def get_config_value(keys: list[str], default: T) -> T:
+def get_config_value(keys: list[str], default: Any) -> Any:
     """
     Safely retrieve a nested config value from the current config.
     """

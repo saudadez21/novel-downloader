@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+
 from novel_downloader.libs.media.image import detect_image_format
 
 IMG_TYPES = {

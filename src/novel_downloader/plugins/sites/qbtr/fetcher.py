@@ -8,6 +8,7 @@ novel_downloader.plugins.sites.qbtr.fetcher
 from typing import Any
 
 from lxml import html
+
 from novel_downloader.plugins.base.fetcher import BaseFetcher
 from novel_downloader.plugins.registry import registrar
 

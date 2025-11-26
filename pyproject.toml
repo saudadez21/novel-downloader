@@ -10,12 +10,11 @@ requires-python = ">=3.11"
 keywords = [
   "novel",
   "web novel",
-  "qidian",
-  "epub",
   "light novel",
   "crawler",
   "scraper",
   "ebook",
+  "epub",
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -96,7 +95,6 @@ ci = [
     "types-requests",
     "types-lxml",
     "nicegui",
-    "black",
     "mypy",
     "ruff",
     "pre-commit",
@@ -109,7 +107,6 @@ dev = [
     "pytest-mock",
     "types-requests",
     "types-lxml",
-    "black",
     "mypy",
     "ruff",
     "pre-commit",
@@ -142,21 +139,18 @@ include = ["novel_downloader", "novel_downloader.*"]
 "novel_downloader" = ["py.typed"]
 "novel_downloader.resources.config" = ["*.toml"]
 "novel_downloader.resources.text" = ["*.txt"]
-"novel_downloader.resources.js_scripts" = ["*.js"]
+"novel_downloader.resources.scripts" = ["*.js"]
 "novel_downloader.resources.json" = ["*.json"]
-"novel_downloader.resources.css_styles" = ["*.css"]
+"novel_downloader.resources.styles" = ["*.css"]
 "novel_downloader.locales" = ["*/LC_MESSAGES/*.mo"]
 
 [tool.setuptools.dynamic]
 version = {attr = "novel_downloader.__version__"}
 
-[tool.black]
-line-length = 88
-target-version = ["py312"]
-
 [tool.ruff]
 line-length = 88
-target-version = "py312"
+indent-width = 4
+target-version = "py313"
 
 [tool.ruff.lint]
 select = [
@@ -169,8 +163,11 @@ select = [
     "SIM" # flake8-simplify
 ]
 
+[tool.ruff.format]
+quote-style = "double"
+
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.13"
 ignore_missing_imports = true
 strict = true
 

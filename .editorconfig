@@ -33,9 +33,16 @@ indent_size = 2
 
 # === Markdown / Text files ===
 [*.md]
+indent_size = 4
 trim_trailing_whitespace = false  # Allow trailing spaces in Markdown for line breaks
 
 [*.txt]
+indent_size = 4
+
+[*.xml]
+indent_size = 2
+
+[*.html]
 indent_size = 2
 
 # === Shell scripts ===

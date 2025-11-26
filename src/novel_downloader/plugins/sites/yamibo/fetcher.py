@@ -10,6 +10,7 @@ from collections.abc import Mapping
 from typing import Any
 
 from lxml import html
+
 from novel_downloader.plugins.base.fetcher import BaseFetcher
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import LoginField

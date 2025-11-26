@@ -73,8 +73,7 @@ class BaseSession(ABC):
     async def init(
         self,
         **kwargs: Any,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @abstractmethod
     async def close(self) -> None:

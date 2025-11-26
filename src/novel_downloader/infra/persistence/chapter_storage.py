@@ -200,7 +200,7 @@ class ChapterStorage:
         """
         rows = self.conn.execute(query, tuple(chap_ids)).fetchall()
 
-        result: dict[str, ChapterDict | None] = {cid: None for cid in chap_ids}
+        result: dict[str, ChapterDict | None] = dict.fromkeys(chap_ids)
         for row in rows:
             result[row["id"]] = ChapterDict(
                 id=row["id"],

@@ -1,4 +1,5 @@
 import pytest
+
 from novel_downloader.infra.cookies import parse_cookies
 
 # ---------------------------------------------------------------------

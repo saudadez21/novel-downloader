@@ -7,6 +7,7 @@ novel_downloader.plugins.sites.westnovel.parser
 from typing import Any
 
 from lxml import html
+
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (

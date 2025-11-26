@@ -41,24 +41,20 @@ if TYPE_CHECKING:
             chap_title: str | None,
             chap: ChapterDict,
             media_dir: Path | None = None,
-        ) -> HtmlChapter:
-            ...
+        ) -> HtmlChapter: ...
 
         def _xp_html_missing_chapter(
             self,
             *,
             cid: str,
             chap_title: str | None,
-        ) -> HtmlChapter:
-            ...
+        ) -> HtmlChapter: ...
 
-        def _xp_html_extras(self, extras: dict[str, Any]) -> str:
-            ...
+        def _xp_html_extras(self, extras: dict[str, Any]) -> str: ...
 
         def _xp_html_chap_post(
             self, html_parts: list[str], chap: ChapterDict
-        ) -> list[str]:
-            ...
+        ) -> list[str]: ...
 
 
 class ExportHtmlMixin:

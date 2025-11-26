@@ -31,8 +31,7 @@ class _ExportBookFunc(Protocol):
         *,
         stage: str | None,
         **kwargs: Any,
-    ) -> list[Path]:
-        ...
+    ) -> list[Path]: ...
 
 
 class _ExportChapterFunc(Protocol):
@@ -44,8 +43,7 @@ class _ExportChapterFunc(Protocol):
         *,
         stage: str | None,
         **kwargs: Any,
-    ) -> Path | None:
-        ...
+    ) -> Path | None: ...
 
 
 class CommonClient(

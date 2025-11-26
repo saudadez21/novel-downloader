@@ -4,6 +4,7 @@ import pathlib
 import re
 
 import pytest
+
 from novel_downloader.plugins.utils.js_eval import JsEvaluator
 
 DATA_BASE = pathlib.Path(__file__).resolve().parents[2] / "data" / "plugins" / "qqbook"
@@ -60,9 +61,9 @@ def test_qqbook_js_eval(case_dir: pathlib.Path, tmp_path):
     mixed_result = evaluator.eval(js_code)
 
     # At least one success
-    assert any(
-        r is not None for r in (py_result, mixed_result, node_result)
-    ), f"All eval paths failed for case: {case_dir}"
+    assert any(r is not None for r in (py_result, mixed_result, node_result)), (
+        f"All eval paths failed for case: {case_dir}"
+    )
 
     # Compare all valid results to expected.json
     if py_result is not None:

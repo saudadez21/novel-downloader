@@ -7,8 +7,7 @@ on:
   push:
     branches: [ main ]
   pull_request:
-    branches-ignore:
-      - chore/bump/**
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -23,7 +22,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
           cache: "pip"
 
       - name: Cache pre-commit

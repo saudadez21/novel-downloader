@@ -31,8 +31,7 @@ if TYPE_CHECKING:
             self,
             book: BookConfig,
             ui: "ProcessUI | None",
-        ) -> tuple[BookInfoDict, list[str], set[str]] | None:
-            ...
+        ) -> tuple[BookInfoDict, list[str], set[str]] | None: ...
 
         def _pc_run_stage(
             self,
@@ -44,39 +43,33 @@ if TYPE_CHECKING:
             prev_output: str,
             completed_stages: list[str],
             ui: "ProcessUI | None",
-        ) -> BookInfoDict:
-            ...
+        ) -> BookInfoDict: ...
 
         def _pc_init_pipeline(
             self,
             book_id: str,
             processors: list[ProcessorConfig],
-        ) -> None:
-            ...
+        ) -> None: ...
 
         def _pc_record_execution(
             self,
             book_id: str,
             pconf: ProcessorConfig,
             completed_stages: list[str],
-        ) -> None:
-            ...
+        ) -> None: ...
 
         def _pc_is_incremental(
             self,
             book_id: str,
             pconf: ProcessorConfig,
             completed_stages: list[str],
-        ) -> bool:
-            ...
+        ) -> bool: ...
 
         @staticmethod
-        def _pc_hash_config(options: dict[str, Any]) -> str:
-            ...
+        def _pc_hash_config(options: dict[str, Any]) -> str: ...
 
         @staticmethod
-        def _utc_now_iso() -> str:
-            ...
+        def _utc_now_iso() -> str: ...
 
 
 class ProcessMixin:
@@ -307,10 +300,7 @@ class ProcessMixin:
             return False
 
         # Compare dependency chain
-        if rec.get("depends_on") != completed_stages:
-            return False
-
-        return True
+        return rec.get("depends_on") == completed_stages
 
     @staticmethod
     def _utc_now_iso() -> str:

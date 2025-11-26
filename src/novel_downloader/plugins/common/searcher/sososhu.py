@@ -11,6 +11,7 @@ from typing import ClassVar
 from urllib.parse import unquote, urlencode, urlparse
 
 from lxml import html
+
 from novel_downloader.plugins.base.searcher import BaseSearcher
 from novel_downloader.schemas import SearchResult
 

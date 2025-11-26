@@ -1,4 +1,5 @@
 import pytest
+
 from novel_downloader.infra.sessions import create_session
 from novel_downloader.schemas import FetcherConfig
 

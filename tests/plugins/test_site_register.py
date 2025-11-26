@@ -4,6 +4,7 @@ import inspect
 import pathlib
 
 import pytest
+
 from novel_downloader.plugins import registry
 
 SITES_DIR = (

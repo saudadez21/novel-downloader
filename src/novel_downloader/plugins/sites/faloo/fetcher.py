@@ -124,12 +124,9 @@ class FalooFetcher(BaseFetcher):
             return False
         resp_text = resp_list[0]
 
-        if any(kw in resp_text for kw in logged_out_keywords):
-            return False
-        if any(kw in resp_text for kw in logged_in_keywords):
-            return True
-
-        return False
+        return not any(kw in resp_text for kw in logged_out_keywords) and any(
+            kw in resp_text for kw in logged_in_keywords
+        )
 
     @classmethod
     def _extract_cookie_gate(cls, html: str) -> tuple[str, str] | None:

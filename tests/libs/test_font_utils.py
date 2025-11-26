@@ -2,6 +2,8 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from PIL import ImageFont
+
 from novel_downloader.libs.font_utils import (
     extract_font_charset,
     extract_font_charset_bytes,
@@ -11,7 +13,6 @@ from novel_downloader.libs.font_utils import (
     render_char_image_array,
     render_text_image,
 )
-from PIL import ImageFont
 
 FONT_DIR = Path(__file__).parents[1] / "data" / "libs" / "media" / "font"
 
@@ -57,9 +58,9 @@ def test_render_char_image_reflect(font_case):
     font_path, font = font_case
     img1 = render_char_image("C", font, size=64)
     img2 = render_char_image("C", font, size=64, is_reflect=True)
-    assert not np.array_equal(
-        np.array(img1), np.array(img2)
-    ), f"Reflection identical for font {font_path}"
+    assert not np.array_equal(np.array(img1), np.array(img2)), (
+        f"Reflection identical for font {font_path}"
+    )
 
 
 def test_render_text_image(font_case):

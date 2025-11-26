@@ -11,6 +11,7 @@ from typing import Any
 from urllib.parse import unquote
 
 from lxml import etree, html
+
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (

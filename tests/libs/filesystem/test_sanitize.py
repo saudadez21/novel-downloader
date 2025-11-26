@@ -1,6 +1,7 @@
 import os
 
 import pytest
+
 from novel_downloader.libs.filesystem.sanitize import sanitize_filename
 
 # ----------------------------------------------------------------------

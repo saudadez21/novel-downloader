@@ -3,6 +3,7 @@ import warnings
 from pathlib import Path
 
 import pytest
+
 from novel_downloader.infra.config.adapter import ConfigAdapter
 from novel_downloader.schemas import (
     BookConfig,

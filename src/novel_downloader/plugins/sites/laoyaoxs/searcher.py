@@ -8,6 +8,7 @@ novel_downloader.plugins.sites.laoyaoxs.searcher
 import logging
 
 from lxml import html
+
 from novel_downloader.plugins.base.searcher import BaseSearcher
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import SearchResult
@@ -77,7 +78,9 @@ class LaoyaoxsSearcher(BaseSearcher):
                 )
             )
             latest_chapter = self._first_str(
-                row.xpath('.//p[./b[contains(normalize-space(.),"最近更新")]]//a/text()')
+                row.xpath(
+                    './/p[./b[contains(normalize-space(.),"最近更新")]]//a/text()'
+                )
             )
             update_date = self._first_str(
                 row.xpath('.//div[contains(@class,"right")]//span/text()'),

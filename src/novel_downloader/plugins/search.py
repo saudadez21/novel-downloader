@@ -73,7 +73,7 @@ async def search_stream(
     per_site_limit: int = 5,
     timeout: float = 5.0,
     nsfw: bool = False,
-) -> AsyncGenerator[list[SearchResult], None]:
+) -> AsyncGenerator[list[SearchResult]]:
     """
     Stream search results from registered sites as soon as each site finishes.
 

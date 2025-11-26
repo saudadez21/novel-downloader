@@ -21,7 +21,7 @@ class FakeFile:
     def read(self, *a, **k):
         # Minimal MO header bytes
         return (
-            b"\xDE\x12\x04\x95"  # magic
+            b"\xde\x12\x04\x95"  # magic
             b"\x00\x00\x00\x00"  # version
             b"\x00\x00\x00\x00"  # nstrings
             b"\x00\x00\x00\x00"  # orig_tab_offset

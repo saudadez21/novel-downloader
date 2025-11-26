@@ -148,7 +148,7 @@ class ChapterStorage:
         """
         rows = self.conn.execute(query, chap_ids).fetchall()
 
-        result: dict[str, ChapterDict | None] = {chap_id: None for chap_id in chap_ids}
+        result: dict[str, ChapterDict | None] = dict.fromkeys(chap_ids)
         for row in rows:
             result[row["chap_id"]] = ChapterDict(
                 id=row["chap_id"],
@@ -197,10 +197,10 @@ def load_best_chapter_json(data_dir: Path, chap_id: str) -> ChapterDict | None:
 def generate_volumes(num_volumes: int, chapters_per: int) -> list[dict]:
     volumes = []
     for vi in range(num_volumes):
-        vol = {"volume_title": f"Volume {vi+1}", "chapters": []}
+        vol = {"volume_title": f"Volume {vi + 1}", "chapters": []}
         for ci in range(chapters_per):
-            chap_id = f"{vi+1}-{ci+1}"
-            chap_name = f"chap {ci+1}"
+            chap_id = f"{vi + 1}-{ci + 1}"
+            chap_name = f"chap {ci + 1}"
             vol["chapters"].append({"chapter_name": chap_name, "chapter_id": chap_id})
         volumes.append(vol)
     return volumes
@@ -335,16 +335,16 @@ def run_tests() -> None:
         times2.append(t1 - t0)
 
         print(
-            f"  Iteration {i+1}/{TEST_COUNT} - "
+            f"  Iteration {i + 1}/{TEST_COUNT} - "
             f"Scenario 0: {times0[-1]:.4f}s, "
             f"Scenario 1: {times1[-1]:.4f}s, "
             f"Scenario 2: {times2[-1]:.4f}s"
         )
 
     print("\nTests completed:")
-    print(f"  Average time Scenario 0: {sum(times0)/TEST_COUNT:.4f} seconds")
-    print(f"  Average time Scenario 1: {sum(times1)/TEST_COUNT:.4f} seconds")
-    print(f"  Average time Scenario 2: {sum(times2)/TEST_COUNT:.4f} seconds")
+    print(f"  Average time Scenario 0: {sum(times0) / TEST_COUNT:.4f} seconds")
+    print(f"  Average time Scenario 1: {sum(times1) / TEST_COUNT:.4f} seconds")
+    print(f"  Average time Scenario 2: {sum(times2) / TEST_COUNT:.4f} seconds")
 
 
 # --- Main Flow ---

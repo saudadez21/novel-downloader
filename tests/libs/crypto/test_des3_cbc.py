@@ -4,6 +4,7 @@ import random
 
 import pytest
 from Crypto.Cipher import DES3 as RefDES3
+
 from novel_downloader.libs.crypto.cipher import DES3
 
 _rng = random.Random(20251123)

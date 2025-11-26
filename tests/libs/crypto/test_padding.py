@@ -5,6 +5,7 @@ import random
 import pytest
 from Crypto.Util.Padding import pad as ref_pad
 from Crypto.Util.Padding import unpad as ref_unpad
+
 from novel_downloader.libs.crypto.padding import pad as my_pad
 from novel_downloader.libs.crypto.padding import unpad as my_unpad
 

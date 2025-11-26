@@ -1,37 +1,42 @@
 repos:
-  - repo: https://github.com/psf/black
-    rev: 23.12.1
-    hooks:
-      - id: black
-        language_version: python3
-
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.3.0
+    rev: v0.14.6
     hooks:
-      - id: ruff
+      - id: ruff-check
         args: [--fix]
-        additional_dependencies: []
+      - id: ruff-format
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=200"]
+      - id: mixed-line-ending
+        args: [--fix=lf]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.15.0
+    rev: v1.18.2
     hooks:
       - id: mypy
         files: ^src/
         args:
           - "--config-file=pyproject.toml"
+          - "--strict"
+          - "--ignore-missing-imports"
           - "--install-types"
           - "--non-interactive"
         additional_dependencies:
           - nicegui
 
   - repo: https://github.com/commitizen-tools/commitizen
-    rev: v4.6.3
+    rev: v4.10.0
     hooks:
       - id: commitizen
-        stages: [commit-msg]
+      - id: commitizen-branch
+        stages: [pre-push]

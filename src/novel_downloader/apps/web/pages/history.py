@@ -129,8 +129,9 @@ def page_history() -> None:
         ui.label(t("Download History")).classes("text-lg")
 
         # Toolbar (filters & sorting)
-        with ui.card().classes("w-full"), ui.row().classes(
-            "items-center gap-3 w-full flex-wrap"
+        with (
+            ui.card().classes("w-full"),
+            ui.row().classes("items-center gap-3 w-full flex-wrap"),
         ):
             ui.label(t("Type")).classes("text-sm text-caption")
             type_sel = (

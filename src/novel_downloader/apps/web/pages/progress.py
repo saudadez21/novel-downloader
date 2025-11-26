@@ -121,7 +121,7 @@ def _task_card(tsk: DownloadTask, *, active: bool) -> None:
                 async def cancel_this(tid: str = tsk.task_id) -> None:
                     ok = await manager.cancel_task(tid)
                     ui.notify(
-                        f'Task {tid[:8]} {t("Cancelled") if ok else t("Cancel failed")}',  # noqa: E501
+                        f"Task {tid[:8]} {t('Cancelled') if ok else t('Cancel failed')}",  # noqa: E501
                         color=("primary" if ok else "negative"),
                     )
 

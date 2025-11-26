@@ -12,6 +12,7 @@ from typing import Any
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
 from lxml import html
+
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (

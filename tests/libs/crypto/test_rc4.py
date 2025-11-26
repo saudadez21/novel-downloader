@@ -1,4 +1,5 @@
 import pytest
+
 from novel_downloader.libs.crypto.rc4 import (
     rc4_cipher,
     rc4_init,

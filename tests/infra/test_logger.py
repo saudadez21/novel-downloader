@@ -1,6 +1,7 @@
 import logging
 
 import pytest
+
 from novel_downloader.infra import logger as logger_mod
 
 

@@ -11,6 +11,7 @@ import aiohttp
 import aiohttp.web
 import pytest
 import pytest_asyncio
+
 from novel_downloader.infra.sessions.base import BaseSession
 from novel_downloader.schemas import FetcherConfig
 

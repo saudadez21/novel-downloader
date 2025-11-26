@@ -1,6 +1,7 @@
 import asyncio
 
 import pytest
+
 from novel_downloader.libs.time_utils import (
     _calc_sleep_duration,
     async_jitter_sleep,

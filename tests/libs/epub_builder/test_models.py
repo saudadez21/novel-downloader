@@ -1,4 +1,5 @@
 import pytest
+
 from novel_downloader.libs.epub_builder.constants import (
     DEFAULT_FONT_FALLBACK_STACK,
 )

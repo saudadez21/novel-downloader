@@ -10,6 +10,7 @@ import logging
 from typing import Any
 
 from lxml import html
+
 from novel_downloader.plugins.base.parser import BaseParser
 from novel_downloader.plugins.registry import registrar
 from novel_downloader.schemas import (
@@ -233,16 +234,16 @@ class SfacgParser(BaseParser):
         return paragraphs, resources
 
     def parse_vip_chapter(self, img_base64: str) -> str:
-        from novel_downloader.libs import imagekit
+        from novel_downloader.libs import image_utils
 
         img_bytes = base64.b64decode(img_base64)
         paragraphs: list[str] = []
         cache: list[str] = []
 
         # decode & preprocess
-        img = imagekit.load_image_array_bytes(img_bytes, white_bg=True)
-        img = imagekit.filter_orange_watermark(img)
-        lines = imagekit.split_by_height(
+        img = image_utils.load_image_array_bytes(img_bytes, white_bg=True)
+        img = image_utils.filter_orange_watermark(img)
+        lines = image_utils.split_by_height(
             img,
             height=38,
             top_offset=10,
@@ -251,14 +252,18 @@ class SfacgParser(BaseParser):
         )
 
         # filter out completely empty (white) lines
-        non_empty_lines = [line for line in lines if not imagekit.is_empty_image(line)]
+        non_empty_lines = [
+            line for line in lines if not image_utils.is_empty_image(line)
+        ]
 
         preds = self._extract_text_from_image(
             non_empty_lines, batch_size=self._batch_size
         )
         for line, (text, _) in zip(non_empty_lines, preds, strict=False):
-            first_2 = imagekit.crop_chars_region(line, 2, left_margin=14, char_width=28)
-            if imagekit.is_empty_image(first_2) and cache:
+            first_2 = image_utils.crop_chars_region(
+                line, 2, left_margin=14, char_width=28
+            )
+            if image_utils.is_empty_image(first_2) and cache:
                 paragraphs.append("".join(cache))
                 cache.clear()
 

@@ -278,8 +278,10 @@ def page_search() -> None:
     # ---------- Outer container ----------
     with ui.column().classes("w-full max-w-screen-lg min-w-[320px] mx-auto gap-4"):
         # ---------- Sticky toolbar ----------
-        with ui.card().props("flat bordered").classes(
-            "w-full sticky top-0 z-10 backdrop-blur"
+        with (
+            ui.card()
+            .props("flat bordered")
+            .classes("w-full sticky top-0 z-10 backdrop-blur")
         ):
             with ui.row().classes("items-center gap-2 w-full flex-wrap"):
                 get_sites, get_psl, get_timeout = _build_settings_dropdown(state)

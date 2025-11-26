@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+
 from novel_downloader.infra.config.file_io import (
     _load_by_extension,
     _resolve_file_path,

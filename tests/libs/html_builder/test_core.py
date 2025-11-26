@@ -1,4 +1,5 @@
 import pytest
+
 from novel_downloader.libs.html_builder.core import HtmlBuilder
 from novel_downloader.libs.html_builder.models import (
     HtmlChapter,
