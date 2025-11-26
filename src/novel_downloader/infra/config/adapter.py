@@ -138,6 +138,7 @@ class ConfigAdapter:
         out = {**g_out, **s_out}
 
         return ExporterConfig(
+            render_missing_chapter=out.get("render_missing_chapter", True),
             append_timestamp=out.get("append_timestamp", True),
             filename_template=out.get("filename_template", "{title}_{author}"),
             include_picture=out.get("include_picture", True),

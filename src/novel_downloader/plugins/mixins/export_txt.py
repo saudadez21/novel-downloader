@@ -42,6 +42,14 @@ if TYPE_CHECKING:
         def _xp_txt_chapter(self, chap_title: str | None, chap: ChapterDict) -> str:
             ...
 
+        def _xp_txt_missing_chapter(
+            self,
+            *,
+            cid: str,
+            chap_title: str | None,
+        ) -> str:
+            ...
+
         def _xp_txt_extras(self, extras: dict[str, Any]) -> str:
             ...
 
@@ -111,6 +119,13 @@ class ExportTxtMixin:
 
                     ch = chap_map.get(cid)
                     if not ch:
+                        if cfg.render_missing_chapter:
+                            parts.append(
+                                self._xp_txt_missing_chapter(
+                                    cid=cid,
+                                    chap_title=ch_title,
+                                )
+                            )
                         continue
 
                     parts.append(self._xp_txt_chapter(ch_title, ch))
@@ -255,6 +270,18 @@ class ExportTxtMixin:
             if extras_txt
             else f"{title_line}\n\n{body}\n\n"
         )
+
+    def _xp_txt_missing_chapter(
+        self,
+        *,
+        cid: str,
+        chap_title: str | None,
+    ) -> str:
+        """
+        Render a placeholder text block for missing or inaccessible chapters.
+        """
+        title = chap_title or f"Chapter {cid}"
+        return f"{title}\n\n本章内容暂不可用\n\n"
 
     def _xp_txt_extras(self, extras: dict[str, Any]) -> str:
         """

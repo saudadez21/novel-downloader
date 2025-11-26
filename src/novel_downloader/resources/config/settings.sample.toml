@@ -32,6 +32,7 @@ formats = [
 #   "html",
 ]
 append_timestamp = true            # 在文件名中追加时间戳
+render_missing_chapter = true
 filename_template = "{title}_{author}"
 include_picture = true             # 是否附带书籍图片
 

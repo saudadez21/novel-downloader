@@ -57,6 +57,7 @@ class ParserConfig:
 
 @dataclass
 class ExporterConfig:
+    render_missing_chapter: bool = True
     append_timestamp: bool = True
     filename_template: str = "{title}_{author}"
     include_picture: bool = True
