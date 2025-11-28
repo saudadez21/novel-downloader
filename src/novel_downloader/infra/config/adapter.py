@@ -2,15 +2,10 @@
 """
 novel_downloader.infra.config.adapter
 -------------------------------------
-
-Defines ConfigAdapter, which maps a raw configuration dictionary and
-site into structured dataclass-based config models.
 """
 
-import contextlib
-from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, TypeVar
+from typing import Any
 
 from novel_downloader.schemas import (
     BookConfig,
@@ -22,81 +17,79 @@ from novel_downloader.schemas import (
     ProcessorConfig,
 )
 
-T = TypeVar("T")
-
 
 class ConfigAdapter:
-    """
-    Adapter to map a raw configuration dictionary and site name
-    into structured dataclass configuration models.
+    """Adapter that provides convenient access to general and site-specific settings."""
 
-    Resolution order for each field:
-      1. ``config["sites"][<site>]`` (if present)
-      2. ``config["general"]`` (if present)
-      3. Hard-coded default passed by the caller
-    """
+    def __init__(self, config: dict[str, Any]) -> None:
+        """Initialize the adapter.
 
-    def __init__(self, config: Mapping[str, Any]) -> None:
-        """
-        Initialize the adapter with a configuration mapping and a site key.
-
-        :param config: Fully loaded configuration mapping.
+        Args:
+            config: A fully loaded configuration mapping.
         """
         self._config: dict[str, Any] = dict(config)
 
     def get_config(self) -> dict[str, Any]:
+        """Return the entire configuration mapping.
+
+        Returns:
+            The raw configuration dictionary stored in this adapter.
+        """
         return self._config
 
     def get_fetcher_config(self, site: str) -> FetcherConfig:
-        """
-        Build a :class:`novel_downloader.models.FetcherConfig` by resolving fields
-        from site-specific and general settings.
+        """Build a FetcherConfig by resolving fields from site and general settings.
 
-        :return: Fully populated configuration for the network fetcher.
+        Site-level settings override general ones; defaults are applied last.
+
+        Args:
+            site: The site key.
+
+        Returns:
+            A fully populated configuration for the network fetcher.
         """
-        s, g = self._site_cfg(site), self._gen_cfg()
+        site_cfg, general_cfg = self._site_cfg(site), self._gen_cfg()
+        cfg = {**general_cfg, **site_cfg}
+
         return FetcherConfig(
-            request_interval=self._pick("request_interval", 0.5, s, g),
-            retry_times=self._pick("retry_times", 3, s, g),
-            backoff_factor=self._pick("backoff_factor", 2.0, s, g),
-            timeout=self._pick("timeout", 30.0, s, g),
-            max_connections=self._pick("max_connections", 10, s, g),
-            max_rps=self._pick("max_rps", 1000.0, s, g),
-            user_agent=self._pick("user_agent", None, s, g),
-            headers=self._pick("headers", None, s, g),
-            impersonate=self._pick("impersonate", None, s, g),
-            verify_ssl=self._pick("verify_ssl", True, s, g),
-            http2=self._pick("http2", True, s, g),
-            proxy=self._pick("proxy", None, s, g),
-            proxy_user=self._pick("proxy_user", None, s, g),
-            proxy_pass=self._pick("proxy_pass", None, s, g),
-            trust_env=self._pick("trust_env", False, s, g),
-            cache_dir=g.get("cache_dir", "./novel_cache"),
-            backend=self._pick("backend", "aiohttp", s, g),
-            locale_style=self._pick("locale_style", "simplified", s, g),
+            cache_dir=general_cfg.get("cache_dir", "./novel_cache"),
+            request_interval=cfg.get("request_interval", 0.5),
+            retry_times=cfg.get("retry_times", 3),
+            backoff_factor=cfg.get("backoff_factor", 2.0),
+            timeout=cfg.get("timeout", 10.0),
+            max_connections=cfg.get("max_connections", 10),
+            max_rps=cfg.get("max_rps", 1000.0),
+            user_agent=cfg.get("user_agent"),
+            headers=cfg.get("headers"),
+            impersonate=cfg.get("impersonate"),
+            verify_ssl=cfg.get("verify_ssl", True),
+            http2=cfg.get("http2", True),
+            proxy=cfg.get("proxy"),
+            proxy_user=cfg.get("proxy_user"),
+            proxy_pass=cfg.get("proxy_pass"),
+            trust_env=cfg.get("trust_env", False),
+            backend=cfg.get("backend", "aiohttp"),
+            locale_style=cfg.get("locale_style", "simplified"),
         )
 
     def get_parser_config(self, site: str) -> ParserConfig:
-        """
-        Build a :class:`novel_downloader.models.ParserConfig` from general,
-        OCR-related, and site-specific settings.
+        """Build a ParserConfig from general, OCR-related, and site-specific settings.
 
-        :return: Fully populated configuration for the parser stage.
-        """
-        s, g = self._site_cfg(site), self._gen_cfg()
-        g_parser = g.get("parser") or g.get("font_ocr") or {}
-        s_parser = s.get("parser") or s.get("font_ocr") or {}
-        parser_cfg: dict[str, Any] = {**g_parser, **s_parser}
+        Args:
+            site: The site key.
 
-        enable_ocr = parser_cfg.get("enable_ocr")
-        if enable_ocr is None:  # fallback: old field
-            enable_ocr = parser_cfg.get("decode_font", False)
-        enable_ocr = bool(enable_ocr)
+        Returns:
+            A fully populated configuration for the parser stage.
+        """
+        site_cfg, general_cfg = self._site_cfg(site), self._gen_cfg()
+        general_parser = general_cfg.get("parser") or {}
+        site_parser = site_cfg.get("parser") or {}
+        parser_cfg: dict[str, Any] = {**general_parser, **site_parser}
 
         return ParserConfig(
-            cache_dir=g.get("cache_dir", "./novel_cache"),
-            use_truncation=bool(s.get("use_truncation", True)),
-            enable_ocr=enable_ocr,
+            cache_dir=general_cfg.get("cache_dir", "./novel_cache"),
+            use_truncation=bool(parser_cfg.get("use_truncation", True)),
+            enable_ocr=bool(parser_cfg.get("enable_ocr", False)),
             batch_size=int(parser_cfg.get("batch_size", 32)),
             remove_watermark=bool(parser_cfg.get("remove_watermark", False)),
             cut_mode=str(parser_cfg.get("cut_mode", "none")),
@@ -104,53 +97,69 @@ class ConfigAdapter:
         )
 
     def get_client_config(self, site: str) -> ClientConfig:
+        """Build a ClientConfig using both general and site-specific settings.
+
+        Site-level settings override general ones; defaults are applied last.
+
+        Args:
+            site: The site key.
+
+        Returns:
+            A fully populated configuration for the high-level client.
         """
-        Build a :class:`novel_downloader.models.ClientConfig` using both
-        general and site-specific settings.
-        """
-        s, g = self._site_cfg(site), self._gen_cfg()
-        debug = g.get("debug") or {}
+        site_cfg, general_cfg = self._site_cfg(site), self._gen_cfg()
+        cfg = {**general_cfg, **site_cfg}
+        debug_cfg = general_cfg.get("debug") or {}
+
         return ClientConfig(
-            request_interval=self._pick("request_interval", 0.5, s, g),
-            retry_times=self._pick("retry_times", 3, s, g),
-            backoff_factor=self._pick("backoff_factor", 2.0, s, g),
-            raw_data_dir=g.get("raw_data_dir", "./raw_data"),
-            cache_dir=g.get("cache_dir", "./novel_cache"),
-            output_dir=g.get("output_dir", "./downloads"),
-            workers=self._pick("workers", 4, s, g),
-            cache_book_info=bool(debug.get("cache_book_info", True)),
-            cache_chapter=self._pick("cache_chapter", True, s, g),
-            fetch_inaccessible=self._pick("fetch_inaccessible", False, s, g),
-            save_html=bool(debug.get("save_html", False)),
-            storage_batch_size=g.get("storage_batch_size", 1),
+            raw_data_dir=general_cfg.get("raw_data_dir", "./raw_data"),
+            cache_dir=general_cfg.get("cache_dir", "./novel_cache"),
+            output_dir=general_cfg.get("output_dir", "./downloads"),
+            workers=cfg.get("workers", 4),
+            request_interval=cfg.get("request_interval", 0.5),
+            retry_times=cfg.get("retry_times", 3),
+            backoff_factor=cfg.get("backoff_factor", 2.0),
+            storage_batch_size=cfg.get("storage_batch_size", 1),
+            cache_book_info=bool(cfg.get("cache_book_info", True)),
+            cache_chapter=cfg.get("cache_chapter", True),
+            fetch_inaccessible=cfg.get("fetch_inaccessible", False),
+            save_html=bool(debug_cfg.get("save_html", False)),
             fetcher_cfg=self.get_fetcher_config(site),
             parser_cfg=self.get_parser_config(site),
         )
 
     def get_exporter_config(self, site: str) -> ExporterConfig:
+        """Build an ExporterConfig from general.output with site-specific overrides.
+
+        Args:
+            site: The site key.
+
+        Returns:
+            The resolved exporter configuration.
         """
-        Build an :class:`novel_downloader.models.ExporterConfig` from the
-        `general.output` section with site-specific overrides.
-        """
-        s, g = self._site_cfg(site), self._gen_cfg()
-        g_out = g.get("output") or self._config.get("output") or {}
-        s_out = s.get("output") or {}
-        out = {**g_out, **s_out}
+        site_cfg, general_cfg = self._site_cfg(site), self._gen_cfg()
+        general_output = general_cfg.get("output") or {}
+        site_output = site_cfg.get("output") or {}
+        out = {**general_output, **site_output}
 
         return ExporterConfig(
             render_missing_chapter=out.get("render_missing_chapter", True),
             append_timestamp=out.get("append_timestamp", True),
             filename_template=out.get("filename_template", "{title}_{author}"),
             include_picture=out.get("include_picture", True),
-            split_mode=s.get("split_mode", "book"),
+            split_mode=out.get("split_mode", "book"),
         )
 
     def get_login_config(self, site: str) -> dict[str, str]:
-        """
-        Extract login-related fields from the current site configuration.
+        """Extract login-related fields from the current site configuration.
+
         Only non-empty string values are returned; values are stripped.
 
-        :return: A subset of ``{"username","password","cookies"}`` that are non-empty
+        Args:
+            site: The site key.
+
+        Returns:
+            A subset of {"username", "password", "cookies"} that are non-empty.
         """
         site_cfg = self._site_cfg(site)
         out: dict[str, str] = {}
@@ -163,32 +172,40 @@ class ConfigAdapter:
         return out
 
     def get_login_required(self, site: str) -> bool:
+        """Determine whether the given site requires login.
+
+        Args:
+            site: The site key.
+
+        Returns:
+            True if the site or general settings define ``login_required``.
+            Defaults to False if unspecified.
         """
-        Return whether the given site requires login before downloading.
-        """
-        s, g = self._site_cfg(site), self._gen_cfg()
-        return bool(s.get("login_required", g.get("login_required", False)))
+        site_cfg, general_cfg = self._site_cfg(site), self._gen_cfg()
+        cfg = {**general_cfg, **site_cfg}
+        return bool(cfg.get("login_required", False))
 
     def get_export_fmt(self, site: str) -> list[str]:
-        """
-        Return the list of export formats for a given site.
-        """
-        s, g = self._site_cfg(site), self._gen_cfg()
-        g_out = g.get("output") or self._config.get("output") or {}
-        s_out = s.get("output") or {}
-        out = {**g_out, **s_out}
-        fmt = s.get("formats") or out.get("formats") or {}
+        """Return the list of export formats for a given site.
 
-        if isinstance(fmt, list):
-            return fmt
-        if isinstance(fmt, dict):
-            return self._convert_fmt_dict(fmt)
+        Args:
+            site: The site key.
 
-        return []
+        Returns:
+            A list of enabled export format names. Empty if not configured.
+        """
+        site_cfg, general_cfg = self._site_cfg(site), self._gen_cfg()
+        general_output = general_cfg.get("output") or {}
+        site_output = site_cfg.get("output") or {}
+        out = {**general_output, **site_output}
+        fmt = out.get("formats")
+        return fmt if isinstance(fmt, list) else []
 
     def get_plugins_config(self) -> dict[str, Any]:
-        """
-        Return the plugin-related configuration section.
+        """Return the plugin-related configuration section.
+
+        Returns:
+            A mapping with normalized plugin-related configuration.
         """
         plugins_cfg = self._config.get("plugins") or {}
         return {
@@ -198,33 +215,50 @@ class ConfigAdapter:
         }
 
     def get_processor_configs(self, site: str) -> list[ProcessorConfig]:
-        s, g = self._site_cfg(site), self._gen_cfg()
+        """Build the list of ProcessorConfig objects for the given site.
 
-        site_rows = s.get("processors") or []
+        Site-specific processors take precedence over general ones. If the
+        site defines any processors, only those are returned. Otherwise, the
+        general processor list is used.
+
+        Args:
+            site: The site key.
+
+        Returns:
+            A list of ProcessorConfig objects in the order they should be run.
+        """
+        site_cfg, general_cfg = self._site_cfg(site), self._gen_cfg()
+
+        site_rows = site_cfg.get("processors") or []
         site_procs = self._to_processor_cfgs(site_rows)
-        general_rows = g.get("processors") or []
-        global_procs = self._to_processor_cfgs(general_rows)
+        general_rows = general_cfg.get("processors") or []
+        general_procs = self._to_processor_cfgs(general_rows)
 
-        return site_procs if site_procs else global_procs
+        return site_procs if site_procs else general_procs
 
     def get_book_ids(self, site: str) -> list[BookConfig]:
-        """
-        Extract and normalize the list of target books for the current site.
+        """Extract and normalize the list of target books for the current site.
 
         Accepted shapes for ``site.book_ids``:
-          * a single ``str`` or ``int`` (book id)
-          * a dict  with fields: book_id and optional start_id, end_id, ignore_ids
-          * a ``list`` containing any mix of the above
+          * a single str or int (book id)
+          * a dict with fields: ``book_id`` and optional ``start_id``, ``end_id``,
+            ``ignore_ids``
+          * a list containing any mix of the above
 
-        :return: Normalized list of :class:`BookConfig`-compatible dictionaries.
-        :raises ValueError: If ``book_ids`` is neither a scalar ``str|int``, ``dict``,
-                            nor ``list``.
+        Args:
+            site: The site key.
+
+        Returns:
+            A normalized list of BookConfig objects.
+
+        Raises:
+            ValueError: If ``book_ids`` is neither a scalar ``str|int``, dict, list.
         """
         site_cfg = self._site_cfg(site)
         raw = site_cfg.get("book_ids", [])
 
-        if isinstance(raw, (str | int)):
-            return [BookConfig(book_id=str(raw))]
+        if isinstance(raw, (str, int)):
+            return [self._dict_to_book_cfg({"book_id": raw})]
 
         if isinstance(raw, dict):
             return [self._dict_to_book_cfg(raw)]
@@ -236,8 +270,8 @@ class ConfigAdapter:
 
         result: list[BookConfig] = []
         for item in raw:
-            if isinstance(item, (str | int)):
-                result.append(BookConfig(book_id=str(item)))
+            if isinstance(item, (str, int)):
+                result.append(self._dict_to_book_cfg({"book_id": item}))
             elif isinstance(item, dict):
                 result.append(self._dict_to_book_cfg(item))
             else:
@@ -247,105 +281,102 @@ class ConfigAdapter:
         return result
 
     def get_log_level(self) -> str:
-        """
-        Retrieve the logging level from ``general.debug``.
+        """Return the configured logging level.
 
-        :return: One of ``"DEBUG"``, ``"INFO"``, ``"WARNING"``, ``"ERROR"``
+        The value is taken from ``general.debug.log_level``. If missing,
+        ``"INFO"`` is returned.
+
+        Returns:
+            The logging level string.
         """
         debug_cfg = self._gen_cfg().get("debug", {})
         return debug_cfg.get("log_level") or "INFO"
 
     def get_log_dir(self) -> Path:
-        """
-        Retrieve the log directory from ``general.debug``.
+        """Return the directory used to store log files.
 
-        :return: A Path object pointing to the log directory.
+        This reads ``general.debug.log_dir``. Defaults to ``"./logs"``.
+
+        Returns:
+            An absolute Path to the log directory.
         """
         debug_cfg = self._gen_cfg().get("debug", {})
         log_dir = debug_cfg.get("log_dir") or "./logs"
-
-        # Convert to Path, expand "~", and make absolute
         return Path(log_dir).expanduser().resolve()
 
     def get_cache_dir(self) -> Path:
-        """
-        Retrieve the cache directory from ``general``.
+        """Return the directory used for local resource caching.
 
-        :return: A Path object pointing to the cache directory.
+        This corresponds to ``general.cache_dir``. Defaults to
+        ``"./novel_cache"``.
+
+        Returns:
+            An absolute Path to the cache directory.
         """
         cache_dir = self._gen_cfg().get("cache_dir") or "./novel_cache"
-        # Convert to Path, expand "~", and make absolute
         return Path(cache_dir).expanduser().resolve()
 
     def get_raw_data_dir(self) -> Path:
-        """
-        Retrieve the raw data directory from ``general``.
+        """Return the directory used to store raw scraped data.
 
-        :return: A Path object pointing to the raw data directory.
+        This corresponds to ``general.raw_data_dir``. Defaults to
+        ``"./raw_data"``.
+
+        Returns:
+            An absolute Path for storing raw scraped data.
         """
         raw_data_dir = self._gen_cfg().get("raw_data_dir") or "./raw_data"
-        # Convert to Path, expand "~", and make absolute
         return Path(raw_data_dir).expanduser().resolve()
 
-    def _gen_cfg(self) -> dict[str, Any]:
-        """
-        A read-only view of the global ``general`` settings.
+    def get_output_dir(self) -> Path:
+        """Return the directory used for final output files.
 
-        :return: ``config["general"]`` if present, else ``{}``.
+        This corresponds to ``general.output_dir``. Defaults to
+        ``"./downloads"``.
+
+        Returns:
+            An absolute Path to the output directory.
         """
-        return self._config.get("general") or {}
+        output_dir = self._gen_cfg().get("output_dir") or "./downloads"
+        return Path(output_dir).expanduser().resolve()
+
+    def _gen_cfg(self) -> dict[str, Any]:
+        """Return the global ``general`` configuration mapping.
+
+        Returns:
+            The ``general`` dictionary or an empty dict if missing or invalid.
+        """
+        general = self._config.get("general")
+        return general if isinstance(general, dict) else {}
 
     def _site_cfg(self, site: str) -> dict[str, Any]:
-        """
-        Retrieve the configuration block for the current site.
+        """Return the configuration block for the given site.
 
-        Lookup order:
-          1. If a site-specific entry exists under ``config["sites"]``, return it.
-          2. Otherwise, if ``config["sites"]["common"]`` exists, return it.
-          3. Else return an empty dict.
+        Args:
+            site: The site name.
 
-        :return: Site-specific mapping, common mapping, or ``{}``.
+        Returns:
+            A dictionary representing the site's configuration, or an empty
+            dict if missing or invalid.
         """
         sites_cfg = self._config.get("sites") or {}
-        v = sites_cfg.get(site)
-        if isinstance(v, dict):
-            return v
-        return sites_cfg.get("common") or {}
-
-    @staticmethod
-    def _has_key(d: Mapping[str, Any] | None, key: str) -> bool:
-        """
-        Check whether a mapping contains a key.
-
-        :param d: Mapping to inspect.
-        :param key: Key to look up.
-        :return: ``True`` if ``d`` is a Mapping and contains key; otherwise ``False``.
-        """
-        return isinstance(d, Mapping) and (key in d)
-
-    def _pick(self, key: str, default: T, *sources: Mapping[str, Any]) -> T:
-        """
-        Resolve ``key`` from the provided ``sources`` in order of precedence.
-
-        :param key: Configuration key to resolve.
-        :param default: Fallback value if ``key`` is absent in all sources.
-        :param sources: One or more mappings to check, in order of precedence.
-        :return: The first present value for ``key``, otherwise ``default``.
-        """
-        for src in sources:
-            if self._has_key(src, key):
-                return src[key]  # type: ignore[no-any-return]
-        return default
+        value = sites_cfg.get(site)
+        return value if isinstance(value, dict) else {}
 
     @staticmethod
     def _dict_to_book_cfg(data: dict[str, Any]) -> BookConfig:
-        """
-        Convert a raw dict into a :class:`novel_downloader.models.BookConfig`
-        with normalized types (all IDs coerced to strings).
+        """Convert a raw dict into a BookConfig with normalized types.
 
-        :param data: A dict that must contain at least "book_id".
-        :return: Normalized :class:`BookConfig` mapping.
-        :raises ValueError: If ``"book_id"`` is missing.
+        All IDs are coerced to strings.
+
+        Args:
+            data: A mapping that must contain at least ``"book_id"``.
+
+        Returns:
+            A normalized BookConfig instance.
+
+        Raises:
+            ValueError: If ``"book_id"`` is missing.
         """
         if "book_id" not in data:
             raise ValueError("Missing required field 'book_id'")
@@ -356,8 +387,7 @@ class ConfigAdapter:
 
         ignore_ids: frozenset[str] = frozenset()
         if "ignore_ids" in data:
-            with contextlib.suppress(Exception):
-                ignore_ids = frozenset(str(x) for x in data["ignore_ids"])
+            ignore_ids = frozenset(str(x) for x in data["ignore_ids"])
 
         return BookConfig(
             book_id=book_id,
@@ -368,15 +398,21 @@ class ConfigAdapter:
 
     @staticmethod
     def _dict_to_ocr_cfg(data: dict[str, Any]) -> OCRConfig:
-        """
-        Convert a raw ``font_ocr`` dict into a :class:`OCRConfig`.
+        """Convert a raw font_ocr dict into an OCRConfig.
+
+        Args:
+            data: The raw OCR configuration mapping.
+
+        Returns:
+            An OCRConfig instance with normalized values.
         """
         if not isinstance(data, dict):
             return OCRConfig()
 
         ishape = data.get("input_shape")
         if isinstance(ishape, list):
-            ishape = tuple(ishape)  # [C, H, W] -> (C, H, W)
+            # [C, H, W] -> (C, H, W)
+            ishape = tuple(ishape)
 
         return OCRConfig(
             model_name=data.get("model_name"),
@@ -390,8 +426,13 @@ class ConfigAdapter:
 
     @staticmethod
     def _to_processor_cfgs(data: list[dict[str, Any]]) -> list[ProcessorConfig]:
-        """
-        Convert a list of raw processor table dicts into ProcessorConfig objects.
+        """Convert a list of raw processor table dicts into ProcessorConfig objects.
+
+        Args:
+            data: A list of raw processor configuration mappings.
+
+        Returns:
+            A list of ProcessorConfig objects.
         """
         if not isinstance(data, list):
             return []
@@ -406,28 +447,8 @@ class ConfigAdapter:
                 continue
 
             overwrite = bool(row.get("overwrite", False))
-            # pass everything else as options
+            # Pass everything else as options.
             opts = {k: v for k, v in row.items() if k not in ("name", "overwrite")}
             result.append(ProcessorConfig(name=name, overwrite=overwrite, options=opts))
 
-        return result
-
-    @staticmethod
-    def _convert_fmt_dict(fmt_dict: dict[str, bool]) -> list[str]:
-        """
-        Convert legacy `make_xxx = true` format to ['xxx', ...] list.
-        """
-        import warnings
-
-        warnings.warn(
-            "The legacy output.formats configuration (make_xxx = true) "
-            "will be removed. Please migrate to formats = ['txt', 'epub'] format.",
-            category=UserWarning,
-            stacklevel=2,
-        )
-
-        result = []
-        for key, value in fmt_dict.items():
-            if value and key.startswith("make_"):
-                result.append(key.removeprefix("make_"))
         return result

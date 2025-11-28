@@ -240,7 +240,7 @@ class FetcherConfig:
     request_interval: float = 2.0
     retry_times: int = 3
     backoff_factor: float = 2.0
-    timeout: float = 30.0
+    timeout: float = 10.0
     max_connections: int = 10
     max_rps: float = 1000.0
     user_agent: str | None = None

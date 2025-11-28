@@ -3,7 +3,7 @@
 novel_downloader
 ----------------
 
-Core package for the Novel Downloader project.
+A toolkit for downloading and processing novels.
 """
 
 __version__ = "3.1.1"

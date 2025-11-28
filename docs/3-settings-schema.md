@@ -37,7 +37,7 @@
 | `backend`            | `str`   | `"aiohttp"`       | 全局 HTTP 请求后端, 可选 `"aiohttp"`, `"httpx"`, `"curl_cffi"` |
 | `retry_times`        | int     | 3                 | 请求失败重试次数                             |
 | `backoff_factor`     | float   | 2.0               | 重试的退避因子 (每次重试等待时间将按倍数增加, 如 `2s`, `4s`, `8s`) |
-| `timeout`            | float   | 30.0              | 单次请求超时 (秒)                            |
+| `timeout`            | float   | 10.0              | 单次请求超时 (秒)                            |
 | `max_connections`    | int     | 10                | 最大并发连接数                               |
 | `max_rps`            | float   | 1000.0            | 全局 RPS 上限 (requests per second)         |
 | `request_interval`   | float   | 0.5               | **同一本书**章节请求的间隔 (秒)               |
@@ -162,7 +162,7 @@ OCR 功能依赖 `PaddleOCR` 及其模型, 请参考安装指南:
 [general]
 retry_times = 3
 backoff_factor = 2.0
-timeout = 30.0
+timeout = 10.0
 max_connections = 10
 max_rps = 1.0
 request_interval = 0.5

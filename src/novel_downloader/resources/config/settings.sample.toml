@@ -11,7 +11,7 @@ max_rps = 1000.0                   # 最大请求速率 (requests per second)
 
 retry_times = 3                    # 请求失败重试次数
 backoff_factor = 2.0
-timeout = 30.0                     # 请求加载超时时间 (秒)
+timeout = 10.0                     # 请求加载超时时间 (秒)
 storage_batch_size = 1
 
 cache_book_info = true             # 是否启用 book_info 缓存

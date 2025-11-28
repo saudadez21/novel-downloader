@@ -5,7 +5,9 @@
 [![CI](https://github.com/saudadez21/novel-downloader/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/saudadez21/novel-downloader/actions/workflows/ci.yml)
 [![Hits-of-Code](https://hitsofcode.com/github/saudadez21/novel-downloader?branch=main&label=Hits-of-Code)](https://hitsofcode.com/github/saudadez21/novel-downloader/view?branch=main&label=Hits-of-Code)
 
-异步小说下载工具 / 库。支持断点续爬、广告过滤、多格式导出, 并提供 CLI 与 Web 图形界面。
+异步、可扩展的小说下载与处理工具包。
+
+支持断点续爬、多格式导出、文本处理流水线, 并提供 CLI 与可选 Web 界面。
 
 > 运行要求: **Python 3.11+** (开发环境: Python 3.13)
 
@@ -237,21 +239,6 @@ pip install .
 * **站点结构变更**: 若目标站点页面结构更新或章节抓取异常, 欢迎提 Issue 或提交 PR
 * **登录支持范围**: 登录功能受站点策略与接口限制, 部分场景需要手动配置 Cookie 或进行账号绑定
 * **请求频率**: 请合理设置抓取间隔, 避免触发风控或导致 IP 限制
-
----
-
-## 文档导航
-
-* [安装](docs/1-installation.md)
-* [配置](docs/2-configuration.md)
-* [settings.toml 配置说明](docs/3-settings-schema.md)
-* [支持站点列表](docs/4-supported-sites.md)
-* [CLI 使用示例](docs/5-cli-usage-examples.md)
-* [WEB 使用示例](docs/6-web-usage-examples.md)
-* [复制 Cookies](docs/copy-cookies.md)
-* [文件保存](docs/file-saving.md)
-* [模块与接口文档](docs/api.md)
-* [TODO](docs/todo.md)
 
 ---
 
