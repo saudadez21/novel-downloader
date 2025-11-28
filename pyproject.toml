@@ -1,6 +1,6 @@
 [project]
 name = "novel-downloader"
-description = "A command-line tool for downloading Chinese web novels from Qidian and similar platforms."
+description = "A toolkit for downloading and processing novels."
 authors = [
     { name = "Saudade Z", email = "saudadez217@gmail.com" }
 ]

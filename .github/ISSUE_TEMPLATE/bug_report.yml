@@ -21,6 +21,16 @@ body:
         - label: I have searched existing issues / 我已搜索现有 Issue
           required: true
 
+  - type: input
+    id: site
+    attributes:
+      label: Site (optional) / 站点 (可选)
+      description: |
+        The site where the issue occurred, if applicable.
+
+        如果问题与特定站点有关，请填写站点 key 或 URL (可选)
+      placeholder: "e.g. qidian / sfacg / https://example.com/book/123"
+
   - type: textarea
     id: description
     attributes:
@@ -55,24 +65,45 @@ body:
     validations:
       required: true
 
-  - type: dropdown
-    id: environment_os
+  - type: textarea
+    id: config
     attributes:
-      label: Environment / 运行环境
-      options:
-        - Linux
-        - macOS
-        - Windows
-    validations:
-      required: true
+      label: Config / 配置文件 (config.toml)
+      description: |
+        Paste your full `config.toml` or the modified portion.
+
+        请粘贴完整的 `config.toml` 内容或你修改过的部分。
+      placeholder: |
+        ```toml
+        # Example:
+        # [general]
+        # workers = 4
+        # request_interval = 0.5
+
+        # Paste your config.toml here
+        ```
+
+  - type: input
+    id: python_version
+    attributes:
+      label: Python Version / Python 版本
+      description: |
+        Provide your Python version (run `python --version`)
+
+        请填写你的 Python 版本 (运行 `python --version` 获取)
+      placeholder: "e.g. Python 3.12.2"
 
   - type: input
     id: version
     attributes:
-      label: Version / 软件版本
-      description: Provide your NovelKit version. / 请填写你使用的 NovelKit 版本。
-    validations:
-      required: true
+      label: Package version / 软件版本
+      description: |
+        Provide your Novel Downloader version.
+        You can run `novel-cli -v` to check the version.
+
+        请填写你使用的 Novel Downloader 版本。
+        可运行 `novel-cli -v` 查看版本。
+      placeholder: "e.g. NovelDownloader v3.1.4"
 
   - type: textarea
     id: logs

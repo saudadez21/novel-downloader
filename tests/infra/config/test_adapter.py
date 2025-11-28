@@ -1,7 +1,3 @@
-import os
-import warnings
-from pathlib import Path
-
 import pytest
 
 from novel_downloader.infra.config.adapter import ConfigAdapter
@@ -16,348 +12,486 @@ from novel_downloader.schemas import (
 )
 
 
-def make_adapter(cfg):
-    return ConfigAdapter(cfg)
-
-
-def test_get_fetcher_config_priorities():
-    cfg = {
-        "general": {"timeout": 99},
-        "sites": {"siteA": {"timeout": 7, "max_connections": 20}},
-    }
-    adapter = make_adapter(cfg)
-    fc = adapter.get_fetcher_config("siteA")
-
-    assert isinstance(fc, FetcherConfig)
-    # site overrides general
-    assert fc.timeout == 7
-    # general fallback
-    assert fc.backoff_factor == 2.0
-    # default fallback
-    assert fc.request_interval == 0.5
-
-
-def test_get_parser_config_fontocr_override():
-    cfg = {
+@pytest.fixture
+def sample_config(tmp_path) -> dict:
+    """Construct a representative configuration mapping for tests."""
+    return {
         "general": {
-            "font_ocr": {"enable_ocr": True, "batch_size": 64},
+            "cache_dir": str(tmp_path / "cache"),
+            "raw_data_dir": str(tmp_path / "raw"),
+            "output_dir": str(tmp_path / "downloads"),
+            "request_interval": 1.0,
+            "workers": 8,
+            "max_connections": 20,
+            "max_rps": 500.0,
+            "retry_times": 5,
+            "backoff_factor": 3.0,
+            "timeout": 10.0,
+            "storage_batch_size": 2,
+            "cache_chapter": False,
+            "cache_book_info": False,
+            "fetch_inaccessible": True,
+            "login_required": False,
+            "locale_style": "traditional",
+            "backend": "httpx",
+            "impersonate": "general-imp",
+            "verify_ssl": False,
+            "http2": False,
+            "proxy": "http://general-proxy",
+            "proxy_user": "g-user",
+            "proxy_pass": "g-pass",
+            "trust_env": True,
+            "user_agent": "general-UA",
+            "headers": {"X-Header": "general"},
+            "parser": {
+                "enable_ocr": False,
+                "batch_size": 16,
+                "remove_watermark": False,
+                "cut_mode": "none",
+                "model_name": "general-model",
+                "input_shape": [3, 32, 320],
+                "precision": "fp32",
+                "cpu_threads": 4,
+                "device": "cpu",
+            },
+            "debug": {
+                "save_html": True,
+                "log_level": "DEBUG",
+                "log_dir": str(tmp_path / "logs"),
+            },
+            "output": {
+                "render_missing_chapter": False,
+                "append_timestamp": False,
+                "filename_template": "{title}",
+                "include_picture": False,
+                "formats": ["epub"],
+            },
+            "processors": [
+                {"name": "normalize", "overwrite": False, "foo": 1},
+                {"name": "cleanup", "overwrite": True},
+            ],
         },
-        "sites": {"s1": {"font_ocr": {"batch_size": 128}}},
-    }
-    adapter = make_adapter(cfg)
-    pc = adapter.get_parser_config("s1")
-
-    assert isinstance(pc, ParserConfig)
-    assert pc.enable_ocr is True
-    assert pc.batch_size == 128  # site overrides general
-
-
-def test_get_parser_config_input_shape_to_tuple():
-    cfg = {"general": {"font_ocr": {"input_shape": [1, 32, 32]}}}
-    adapter = make_adapter(cfg)
-    pc = adapter.get_parser_config("unknown")
-
-    assert pc.ocr_cfg.input_shape == (1, 32, 32)
-
-
-def test_get_client_config_basic():
-    cfg = {
-        "general": {
-            "debug": {"save_html": True},
-            "raw_data_dir": "raw",
-            "output_dir": "out",
-            "cache_dir": "cache",
+        "sites": {
+            "example": {
+                "request_interval": 2.0,
+                "timeout": 5.0,
+                "max_rps": 800.0,
+                "user_agent": "site-UA",
+                "verify_ssl": True,
+                "cache_book_info": True,
+                "cache_chapter": True,
+                # login info
+                "username": " user ",
+                "password": "",
+                "cookies": " cookie=1 ",
+                "login_required": True,
+                "parser": {
+                    "enable_ocr": True,
+                    "batch_size": 8,
+                    "remove_watermark": True,
+                    "cut_mode": "line",
+                    "use_truncation": False,
+                    "model_name": "site-model",
+                    "precision": "int8",
+                },
+                "output": {
+                    "render_missing_chapter": True,
+                    "append_timestamp": True,
+                    "filename_template": "{title}-{site}",
+                    "include_picture": True,
+                    "split_mode": "volume",
+                    "formats": ["epub", "mobi"],
+                },
+                "processors": [
+                    {"name": "site-only", "overwrite": False, "bar": 2},
+                ],
+                "book_ids": [
+                    "123",
+                    456,
+                    {
+                        "book_id": "789",
+                        "start_id": 1,
+                        "end_id": 2,
+                        "ignore_ids": [3, 4],
+                    },
+                ],
+            },
+            "no_site_specific": {
+                # use general
+            },
         },
-        "sites": {"a": {"workers": 10}},
-    }
-    adapter = make_adapter(cfg)
-    cc = adapter.get_client_config("a")
-
-    assert isinstance(cc, ClientConfig)
-    assert cc.workers == 10
-    assert cc.save_html is True
-
-
-def test_get_exporter_config():
-    cfg = {
-        "sites": {"s1": {"split_mode": "chapter"}},
-        "output": {
-            "append_timestamp": False,
-            "filename_template": "{id}",
-            "include_picture": False,
-        },
-    }
-    adapter = make_adapter(cfg)
-    ec = adapter.get_exporter_config("s1")
-
-    assert isinstance(ec, ExporterConfig)
-    assert ec.append_timestamp is False
-    assert ec.split_mode == "chapter"
-
-
-def test_get_login_config_strip():
-    cfg = {
-        "sites": {"x": {"username": "  user  ", "password": " pass ", "cookies": "  "}}
-    }
-    adapter = make_adapter(cfg)
-    out = adapter.get_login_config("x")
-
-    assert out == {"username": "user", "password": "pass"}
-
-
-def test_get_login_required_fallback():
-    cfg = {"general": {"login_required": True}, "sites": {"s1": {}}}
-    adapter = make_adapter(cfg)
-    assert adapter.get_login_required("s1") is True
-
-    cfg = {
-        "general": {"login_required": False},
-        "sites": {"s1": {"login_required": True}},
-    }
-    adapter = make_adapter(cfg)
-    assert adapter.get_login_required("s1") is True
-
-
-def test_get_export_fmt_list():
-    cfg = {"sites": {"s": {"formats": ["txt", "epub"]}}}
-    adapter = make_adapter(cfg)
-    assert adapter.get_export_fmt("s") == ["txt", "epub"]
-
-
-def test_get_export_fmt_dict_warns():
-    cfg = {"output": {"formats": {"make_txt": True, "make_epub": False}}}
-    adapter = make_adapter(cfg)
-
-    with warnings.catch_warnings(record=True) as w:
-        result = adapter.get_export_fmt("unknown")
-
-    assert any("legacy" in str(wi.message) for wi in w)
-    assert result == ["txt"]
-
-
-def test_get_export_fmt_empty():
-    adapter = make_adapter({})
-
-    with warnings.catch_warnings(record=True) as _w:
-        result = adapter.get_export_fmt("none")
-
-    assert result == []
-
-
-def test_get_export_fmt_invalid_type_returns_empty():
-    cfg = {"output": {"formats": "not-a-list-or-dict"}}
-    adapter = ConfigAdapter(cfg)
-
-    fmt = adapter.get_export_fmt("any")
-    assert fmt == []
-
-
-def test_get_plugins_config():
-    cfg = {
         "plugins": {
             "enable_local_plugins": True,
-            "local_plugins_path": "/tmp",
+            "local_plugins_path": str(tmp_path / "plugins"),
             "override_builtins": True,
+        },
+    }
+
+
+@pytest.fixture
+def adapter(sample_config) -> ConfigAdapter:
+    return ConfigAdapter(sample_config)
+
+
+def test_get_config_returns_shallow_copy(adapter, sample_config):
+    cfg = adapter.get_config()
+    assert cfg == sample_config
+    assert cfg is not sample_config
+
+
+# ---------------------------------------------------------------------------
+# get_fetcher_config
+# ---------------------------------------------------------------------------
+
+
+def test_get_fetcher_config_site_overrides_general(adapter, sample_config):
+    fetcher = adapter.get_fetcher_config("example")
+    assert isinstance(fetcher, FetcherConfig)
+
+    assert fetcher.request_interval == 2.0  # site
+    assert fetcher.timeout == 5.0  # site
+    assert fetcher.max_rps == 800.0  # site
+
+    assert fetcher.retry_times == 5
+    assert fetcher.max_connections == 20
+    assert fetcher.backend == "httpx"
+    assert fetcher.locale_style == "traditional"
+
+    assert fetcher.cache_dir == sample_config["general"]["cache_dir"]
+
+    assert fetcher.verify_ssl is True
+    assert fetcher.http2 is False
+    assert fetcher.user_agent == "site-UA"
+
+
+def test_get_fetcher_config_defaults_when_missing(tmp_path):
+    adapter = ConfigAdapter({"general": {}, "sites": {"s": {}}})
+    fetcher = adapter.get_fetcher_config("s")
+
+    assert fetcher.request_interval == 0.5
+    assert fetcher.retry_times == 3
+    assert fetcher.backoff_factor == 2.0
+    assert fetcher.cache_dir == "./novel_cache"
+    assert fetcher.backend == "aiohttp"
+    assert fetcher.locale_style == "simplified"
+
+
+# ---------------------------------------------------------------------------
+# get_parser_config
+# ---------------------------------------------------------------------------
+
+
+def test_get_parser_config_merging_and_ocr(adapter, sample_config):
+    parser_cfg = adapter.get_parser_config("example")
+    assert isinstance(parser_cfg, ParserConfig)
+
+    general_cache_dir = sample_config["general"]["cache_dir"]
+    assert parser_cfg.cache_dir == general_cache_dir
+
+    assert parser_cfg.use_truncation is False
+
+    assert parser_cfg.enable_ocr is True
+    assert parser_cfg.batch_size == 8
+    assert parser_cfg.remove_watermark is True
+    assert parser_cfg.cut_mode == "line"
+
+    ocr_cfg = parser_cfg.ocr_cfg
+    assert isinstance(ocr_cfg, OCRConfig)
+    assert ocr_cfg.model_name == "site-model"
+    assert ocr_cfg.precision == "int8"
+    assert ocr_cfg.cpu_threads == 4
+    assert ocr_cfg.input_shape == (3, 32, 320)
+
+
+# ---------------------------------------------------------------------------
+# get_client_config
+# ---------------------------------------------------------------------------
+
+
+def test_get_client_config_merging(adapter, sample_config):
+    client_cfg = adapter.get_client_config("example")
+    assert isinstance(client_cfg, ClientConfig)
+
+    assert client_cfg.request_interval == 2.0
+    assert client_cfg.retry_times == 5
+
+    assert client_cfg.raw_data_dir == sample_config["general"]["raw_data_dir"]
+    assert client_cfg.cache_dir == sample_config["general"]["cache_dir"]
+    assert client_cfg.output_dir == sample_config["general"]["output_dir"]
+    assert client_cfg.workers == 8
+
+    assert client_cfg.save_html is True
+
+    assert client_cfg.cache_book_info is True
+    assert client_cfg.cache_chapter is True
+    assert client_cfg.fetch_inaccessible is True
+    assert client_cfg.storage_batch_size == 2
+
+    assert isinstance(client_cfg.fetcher_cfg, FetcherConfig)
+    assert isinstance(client_cfg.parser_cfg, ParserConfig)
+
+
+# ---------------------------------------------------------------------------
+# get_exporter_config
+# ---------------------------------------------------------------------------
+
+
+def test_get_exporter_config_merging(adapter):
+    exporter_cfg = adapter.get_exporter_config("example")
+    assert isinstance(exporter_cfg, ExporterConfig)
+
+    # out = {**general.output, **site.output}
+    assert exporter_cfg.render_missing_chapter is True
+    assert exporter_cfg.append_timestamp is True
+    assert exporter_cfg.filename_template == "{title}-{site}"
+    assert exporter_cfg.include_picture is True
+
+    assert exporter_cfg.split_mode == "volume"
+
+
+# ---------------------------------------------------------------------------
+# login-related
+# ---------------------------------------------------------------------------
+
+
+def test_get_login_config_trims_and_filters(adapter):
+    login_cfg = adapter.get_login_config("example")
+    # password is empty
+    assert login_cfg == {
+        "username": "user",
+        "cookies": "cookie=1",
+    }
+
+
+def test_get_login_required_site_overrides_general(adapter):
+    # general.login_required=False, site.login_required=True
+    assert adapter.get_login_required("example") is True
+    assert adapter.get_login_required("no_site_specific") is False
+
+
+# ---------------------------------------------------------------------------
+# export formats
+# ---------------------------------------------------------------------------
+
+
+def test_get_export_fmt_site_overrides_general(adapter):
+    fmts = adapter.get_export_fmt("example")
+    assert fmts == ["epub", "mobi"]
+
+    fmts2 = adapter.get_export_fmt("no_site_specific")
+    assert fmts2 == ["epub"]
+
+
+# ---------------------------------------------------------------------------
+# plugins config
+# ---------------------------------------------------------------------------
+
+
+def test_get_plugins_config(adapter, sample_config):
+    plugins_cfg = adapter.get_plugins_config()
+    assert plugins_cfg == {
+        "enable_local_plugins": True,
+        "local_plugins_path": sample_config["plugins"]["local_plugins_path"],
+        "override_builtins": True,
+    }
+
+
+def test_get_plugins_config_defaults_when_missing():
+    adapter = ConfigAdapter({})
+    plugins_cfg = adapter.get_plugins_config()
+    assert plugins_cfg == {
+        "enable_local_plugins": False,
+        "local_plugins_path": "",
+        "override_builtins": False,
+    }
+
+
+# ---------------------------------------------------------------------------
+# processors
+# ---------------------------------------------------------------------------
+
+
+def test_get_processor_configs_site_overrides_general(adapter):
+    procs = adapter.get_processor_configs("example")
+    assert len(procs) == 1
+    p = procs[0]
+    assert isinstance(p, ProcessorConfig)
+    assert p.name == "site-only"
+    assert p.overwrite is False
+    assert p.options == {"bar": 2}
+
+
+def test_get_processor_configs_falls_back_to_general(adapter):
+    procs = adapter.get_processor_configs("no_site_specific")
+    assert len(procs) == 2
+    names = [p.name for p in procs]
+    assert names == ["normalize", "cleanup"]
+
+
+# ---------------------------------------------------------------------------
+# book ids
+# ---------------------------------------------------------------------------
+
+
+def test_get_book_ids_normalization(adapter):
+    books = adapter.get_book_ids("example")
+    assert len(books) == 3
+    assert all(isinstance(b, BookConfig) for b in books)
+
+    b1, b2, b3 = books
+
+    assert b1.book_id == "123"
+    assert b1.start_id is None
+    assert b1.end_id is None
+    assert b1.ignore_ids == frozenset()
+
+    assert b2.book_id == "456"
+    assert b2.start_id is None
+    assert b2.end_id is None
+    assert b2.ignore_ids == frozenset()
+
+    assert b3.book_id == "789"
+    assert b3.start_id == "1"
+    assert b3.end_id == "2"
+    assert b3.ignore_ids == frozenset({"3", "4"})
+
+
+def test_get_book_ids_invalid_shape_raises():
+    adapter = ConfigAdapter({"sites": {"bad": {"book_ids": 3.14}}})
+    with pytest.raises(ValueError):
+        adapter.get_book_ids("bad")
+
+
+# ---------------------------------------------------------------------------
+# logging and dirs
+# ---------------------------------------------------------------------------
+
+
+def test_get_log_level(adapter):
+    assert adapter.get_log_level() == "DEBUG"
+
+    adapter2 = ConfigAdapter({})
+    assert adapter2.get_log_level() == "INFO"
+
+
+def test_get_log_and_data_dirs(tmp_path):
+    cfg = {
+        "general": {
+            "debug": {"log_dir": str(tmp_path / "logs")},
+            "cache_dir": str(tmp_path / "cache"),
+            "raw_data_dir": str(tmp_path / "raw"),
+            "output_dir": str(tmp_path / "out"),
         }
     }
-    adapter = make_adapter(cfg)
-
-    out = adapter.get_plugins_config()
-    assert out["enable_local_plugins"] is True
-    assert out["local_plugins_path"] == "/tmp"
-
-
-def test_get_processor_configs_site_overrides():
-    cfg = {
-        "sites": {
-            "s": {
-                "processors": [
-                    {"name": "clean", "overwrite": True, "x": 1},
-                ]
-            }
-        },
-        "plugins": {"processors": [{"name": "global", "overwrite": False}]},
-    }
-    adapter = make_adapter(cfg)
-    procs = adapter.get_processor_configs("s")
-
-    assert len(procs) == 1
-    assert isinstance(procs[0], ProcessorConfig)
-    assert procs[0].name == "clean"
-    assert procs[0].overwrite is True
-    assert procs[0].options["x"] == 1
-
-
-def test_get_processor_configs_global():
-    cfg = {"general": {"processors": [{"name": "global"}]}}
-    adapter = make_adapter(cfg)
-    procs = adapter.get_processor_configs("x")
-
-    assert len(procs) == 1
-    assert procs[0].name == "global"
-
-
-def test_get_book_ids_scalar():
-    adapter = make_adapter({"sites": {"s": {"book_ids": "123"}}})
-    result = adapter.get_book_ids("s")
-    assert result == [BookConfig(book_id="123")]
-
-
-def test_get_book_ids_dict():
-    adapter = make_adapter({"sites": {"s": {"book_ids": {"book_id": 123}}}})
-    result = adapter.get_book_ids("s")
-    assert result == [BookConfig(book_id="123")]
-
-
-def test_get_book_ids_list_mixed():
-    adapter = make_adapter({"sites": {"s": {"book_ids": ["1", 2, {"book_id": 3}]}}})
-    result = adapter.get_book_ids("s")
-    assert [cfg.book_id for cfg in result] == ["1", "2", "3"]
-
-
-def test_get_book_ids_invalid_raises():
-    adapter = make_adapter({"sites": {"s": {"book_ids": object()}}})
-    with pytest.raises(ValueError):
-        adapter.get_book_ids("s")
-
-
-def test_get_book_ids_invalid_item():
-    adapter = make_adapter({"sites": {"s": {"book_ids": [None]}}})
-    with pytest.raises(ValueError):
-        adapter.get_book_ids("s")
-
-
-def test_get_config():
-    cfg = {"general": {"x": 1}, "sites": {"s1": {}}}
     adapter = ConfigAdapter(cfg)
-    assert adapter.get_config() == cfg
+
+    assert adapter.get_log_dir() == (tmp_path / "logs").resolve()
+    assert adapter.get_cache_dir() == (tmp_path / "cache").resolve()
+    assert adapter.get_raw_data_dir() == (tmp_path / "raw").resolve()
+    assert adapter.get_output_dir() == (tmp_path / "out").resolve()
 
 
-def test_get_log_level_specific():
-    cfg = {"general": {"debug": {"log_level": "ERROR"}}}
-    adapter = ConfigAdapter(cfg)
-    assert adapter.get_log_level() == "ERROR"
+def test_get_dirs_defaults_when_missing(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
 
-
-def test_get_log_level_debug_no_level():
-    cfg = {"general": {"debug": {}}}
-    adapter = ConfigAdapter(cfg)
-    assert adapter.get_log_level() == "INFO"
-
-
-def test_get_log_level_no_debug():
-    cfg = {"general": {}}
-    adapter = ConfigAdapter(cfg)
-    assert adapter.get_log_level() == "INFO"
-
-
-def test_get_log_level_no_general():
     adapter = ConfigAdapter({})
-    assert adapter.get_log_level() == "INFO"
+    assert adapter.get_cache_dir().name == "novel_cache"
+    assert adapter.get_raw_data_dir().name == "raw_data"
+    assert adapter.get_output_dir().name == "downloads"
+    assert adapter.get_log_dir().name == "logs"
+    assert adapter.get_cache_dir().is_absolute()
 
 
-def test_dict_to_book_cfg_basic():
-    out = ConfigAdapter._dict_to_book_cfg({"book_id": 1})
-    assert out.book_id == "1"
+# ---------------------------------------------------------------------------
+# _gen_cfg / _site_cfg
+# ---------------------------------------------------------------------------
 
 
-def test_dict_to_book_cfg_missing():
+def test_gen_and_site_cfg_graceful_on_invalid():
+    adapter = ConfigAdapter(
+        {
+            "general": [],
+            "sites": {"x": "not-dict"},
+        }
+    )
+
+    assert adapter._gen_cfg() == {}
+    assert adapter._site_cfg("x") == {}
+    assert adapter._site_cfg("y") == {}
+
+
+# ---------------------------------------------------------------------------
+# _dict_to_book_cfg
+# ---------------------------------------------------------------------------
+
+
+def test_dict_to_book_cfg_success():
+    data = {
+        "book_id": 123,
+        "start_id": 1,
+        "end_id": 2,
+        "ignore_ids": [3, "4"],
+    }
+    cfg = ConfigAdapter._dict_to_book_cfg(data)
+    assert isinstance(cfg, BookConfig)
+    assert cfg.book_id == "123"
+    assert cfg.start_id == "1"
+    assert cfg.end_id == "2"
+    assert cfg.ignore_ids == frozenset({"3", "4"})
+
+
+def test_dict_to_book_cfg_missing_book_id():
     with pytest.raises(ValueError):
         ConfigAdapter._dict_to_book_cfg({})
 
 
-def test_dict_to_book_cfg_ignore_ids():
-    out = ConfigAdapter._dict_to_book_cfg({"book_id": 1, "ignore_ids": ["1", 2, "3"]})
-    assert out.ignore_ids == frozenset({"1", "2", "3"})
+# ---------------------------------------------------------------------------
+# _dict_to_ocr_cfg
+# ---------------------------------------------------------------------------
 
 
-def test_dict_to_ocr_cfg_basic():
-    out = ConfigAdapter._dict_to_ocr_cfg({"precision": "fp16"})
-    assert isinstance(out, OCRConfig)
-    assert out.precision == "fp16"
+def test_dict_to_ocr_cfg_normalization():
+    raw = {
+        "model_name": "m",
+        "model_dir": "/tmp/model",
+        "input_shape": [1, 2, 3],
+        "device": "cuda",
+        "precision": "fp16",
+        "cpu_threads": 8,
+        "enable_hpi": True,
+    }
+    cfg = ConfigAdapter._dict_to_ocr_cfg(raw)
+    assert isinstance(cfg, OCRConfig)
+    assert cfg.model_name == "m"
+    assert cfg.model_dir == "/tmp/model"
+    assert cfg.input_shape == (1, 2, 3)
+    assert cfg.device == "cuda"
+    assert cfg.precision == "fp16"
+    assert cfg.cpu_threads == 8
+    assert cfg.enable_hpi is True
 
 
-def test_dict_to_ocr_cfg_not_dict():
-    out = ConfigAdapter._dict_to_ocr_cfg("xx")
-    assert isinstance(out, OCRConfig)
+def test_dict_to_ocr_cfg_non_dict_returns_default():
+    cfg = ConfigAdapter._dict_to_ocr_cfg("not-dict")
+    assert isinstance(cfg, OCRConfig)
 
 
-def test_to_processor_cfgs_non_list_returns_empty():
-    result = ConfigAdapter._to_processor_cfgs("not-a-list")
-    assert result == []
+# ---------------------------------------------------------------------------
+# _to_processor_cfgs
+# ---------------------------------------------------------------------------
 
 
-def test_to_processor_cfgs_skip_non_dict():
-    data = [
-        {"name": "valid"},
-        "not-a-dict",  # should trigger continue
-        123,  # should also trigger continue
+def test_to_processor_cfgs_filters_and_normalizes():
+    rows = [
+        {"name": "  A  ", "overwrite": True, "k": 1},
+        {"name": ""},  # filtered
+        {"not_name": "x"},  # filtered
+        "not-dict",  # filtered
     ]
-
-    result = ConfigAdapter._to_processor_cfgs(data)
-    assert len(result) == 1
-    assert result[0].name == "valid"
-
-
-def test_to_processor_cfgs_skip_empty_name():
-    data = [
-        {"name": ""},  # should skip
-        {"name": "   "},  # should skip (strip -> "")
-        {"other": "x"},  # no name -> skip
-        {"name": "clean", "x": 1},  # valid one
-    ]
-
-    result = ConfigAdapter._to_processor_cfgs(data)
-    assert len(result) == 1
-    assert result[0].name == "clean"
-    assert result[0].options == {"x": 1}
-
-
-def test_convert_fmt_dict_warns():
-    with warnings.catch_warnings(record=True) as w:
-        result = ConfigAdapter._convert_fmt_dict({"make_txt": True, "make_x": False})
-
-    assert result == ["txt"]
-    assert any("legacy" in str(wi.message) for wi in w)
-
-
-def test_get_log_dir_specific(tmp_path):
-    cfg = {"general": {"debug": {"log_dir": str(tmp_path / "mylogs")}}}
-    adapter = ConfigAdapter(cfg)
-    out = adapter.get_log_dir()
-
-    assert isinstance(out, Path)
-    assert out == (tmp_path / "mylogs").resolve()
-
-
-def test_get_log_dir_default(tmp_path, monkeypatch):
-    # change cwd so "./logs" is predictable
-    monkeypatch.chdir(tmp_path)
-
-    adapter = ConfigAdapter({"general": {}})
-    result = adapter.get_log_dir()
-
-    assert result == (tmp_path / "logs").resolve()
-
-
-def test_get_log_dir_expand_user(monkeypatch, tmp_path):
-    user_logs = tmp_path / "expanded_logs"
-
-    if os.name == "nt":  # Windows
-        monkeypatch.setenv("USERPROFILE", str(tmp_path))
-    else:  # Linux/macOS
-        monkeypatch.setenv("HOME", str(tmp_path))
-
-    cfg = {"general": {"debug": {"log_dir": "~/expanded_logs"}}}
-    adapter = ConfigAdapter(cfg)
-    out = adapter.get_log_dir()
-
-    assert out == user_logs.resolve()
-
-
-def test_get_log_dir_invalid_type_fallback():
-    cfg = {"general": {"debug": {"log_dir": 123}}}
-    adapter = ConfigAdapter(cfg)
-
-    with pytest.raises(TypeError):
-        adapter.get_log_dir()
+    procs = ConfigAdapter._to_processor_cfgs(rows)
+    assert len(procs) == 1
+    p = procs[0]
+    assert isinstance(p, ProcessorConfig)
+    assert p.name == "a"  # lower + strip
+    assert p.overwrite is True
+    assert p.options == {"k": 1}
