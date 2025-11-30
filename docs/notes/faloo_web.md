@@ -19,11 +19,11 @@ date: 2025-11-17
 
 例如, 字符 `吧` 在被添加干扰边框后, 会渲染为:
 
-<img src="/assets/images/faloo/sample_1.png" width="270" style="image-rendering: pixelated;" />
+<img src="../../assets/images/faloo/sample_1.png" width="270" style="image-rendering: pixelated;" />
 
 然而, 该方案有时会出现渲染错位的问题, 导致边框覆盖到文字主体, 从而影响正常阅读, 例如:
 
-<img src="/assets/images/faloo/sample_2.png" width="270" style="image-rendering: pixelated;" />
+<img src="../../assets/images/faloo/sample_2.png" width="270" style="image-rendering: pixelated;" />
 
 ---
 
@@ -40,31 +40,31 @@ date: 2025-11-17
 
 最右侧方框示例:
 
-<img src="/assets/images/faloo/sample_1.png" width="270" style="image-rendering: pixelated;" />
+<img src="../../assets/images/faloo/sample_1.png" width="270" style="image-rendering: pixelated;" />
 
 最左侧方框示例:
 
-<img src="/assets/images/faloo/sample_3.png" width="270" style="image-rendering: pixelated;" />
+<img src="../../assets/images/faloo/sample_3.png" width="270" style="image-rendering: pixelated;" />
 
 可以看到, 在同为 18 × 18 像素的前提下, 左侧方框的最右侧多出了 2 列与左侧边框同色的像素, 用于与右侧方框重叠。
 
 在某些排版或渲染条件下, 边框可能会「压到」字符笔画内部, 例如:
 
-<img src="/assets/images/faloo/sample_4.png" width="270" style="image-rendering: pixelated;" />
+<img src="../../assets/images/faloo/sample_4.png" width="270" style="image-rendering: pixelated;" />
 
 以及与相邻方框叠加的情况:
 
-<img src="/assets/images/faloo/sample_5.png" width="270" style="image-rendering: pixelated;" />
+<img src="../../assets/images/faloo/sample_5.png" width="270" style="image-rendering: pixelated;" />
 
 另外, 不同行的方框在颜色选取上可能略有差异。
 
 例如, 在上述错位的示例中, 左侧边框的颜色与最开始示例中的边框颜色明显不同; 类似地, 还存在如下对比示例:
 
-<img src="/assets/images/faloo/sample_6.png" width="270" style="image-rendering: pixelated;" />
+<img src="../../assets/images/faloo/sample_6.png" width="270" style="image-rendering: pixelated;" />
 
 以及:
 
-<img src="/assets/images/faloo/sample_7.png" width="270" style="image-rendering: pixelated;" />
+<img src="../../assets/images/faloo/sample_7.png" width="270" style="image-rendering: pixelated;" />
 
 ---
 
@@ -350,11 +350,11 @@ def main() -> None:
 
 原图:
 
-<img src="/assets/images/faloo/sample_8.png" width="290" style="image-rendering: pixelated;" />
+<img src="../../assets/images/faloo/sample_8.png" width="290" style="image-rendering: pixelated;" />
 
 处理后:
 
-<img src="/assets/images/faloo/sample_8_cleaned.png" width="290" style="image-rendering: pixelated;" />
+<img src="../../assets/images/faloo/sample_8_cleaned.png" width="290" style="image-rendering: pixelated;" />
 
 可以看到:
 

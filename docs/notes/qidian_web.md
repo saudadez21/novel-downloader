@@ -188,51 +188,159 @@ async function decrypt(enContent, cuChapterId, fkp, fuid) {
 
 ### 1. CSS 级混淆分析
 
-字体显示顺序通常被 CSS 人为打乱, 结合 HTML 标签、属性与样式渲染可恢复原始内容。示例策略包括:
+在页面中, 字符的真实呈现顺序被 CSS 规则刻意打乱。
 
-* `font-size: 0`: 该元素不可见, 应跳过；
-* `scaleX(-1)`: 镜像翻转, 对内容无影响, 仅作为重建参考；
-* `::before` / `::after`: 在元素前后插入特定字符（如 `content: '遇'`）；
-* `content: attr(...)`: 插入指定属性值；
-* `order`: 用于重排段落或字符顺序, 需结合样式解析还原。
+通过分析 HTML 标签、属性以及相关伪元素样式, 可以重建文本的原始内容。常见的混淆策略包括:
+
+* `font-size: 0`: 元素内容不可见, 应在解析时忽略
+* `scaleX(-1)`: 对字符进行水平镜像, 不影响实际语义, 仅需在重建时还原为正常方向
+* `::before` / `::after`: 通过伪元素插入特定字符 (如 `content: '遇'`)
+* `content: attr(...)`: 将自定义属性中的内容注入渲染流
+* `order`: 配合 Flex 布局重排节点顺序, 需依据样式指令恢复文本原序
+
+**示例 CSS**:
+
+```css
+.sy-0 { font-size: 0; }
+ya1 { order: 1; }
+yf4 { order: 2; }
+y7r { order: 3; }
+yjq { order: 4; }
+yq3 { order: 5; }
+y87 { order: 6; }
+ypy { order: 7; }
+ylx { order: 8; }
+yfc { order: 9; }
+ypl { order: 10; }
+y3x { order: 11; }
+ys5 { order: 12; }
+y0v { order: 13; }
+ywp { order: 14; }
+y1p { order: 15; }
+.p1 ya1::after { content: '这'; }
+.p1 yf4::after { content: '儿'; }
+.p1 y7r::before { content: attr(ywda); }
+.p1 yjq::after { content: '真'; }
+.p1 yjq::first-letter { font-size: 0; }
+.p1 yq3::before { content: attr(ygmh); }
+.p1 y87::after { content: '一'; }
+.p1 ypy::before { content: attr(ya0u); }
+.p1 ylx::before { content: attr(yn2e); }
+.p1 yfc::after { content: '丽'; }
+.p1 ypl::before { content: attr(ylxl); }
+.p1 y3x::before { content: attr(y5jn); }
+.p1 ys5::after { content: '间'; }
+.p1 y0v::before { content: attr(ythw); }
+```
+
+**示例 HTML**:
+
+```html
+<p class="p1"><ylx yigi="也" yn2e="美"></ylx><ypl ylxl="的" yxry="开"></ypl><y3x y5jn="乡" ylyh="为"></y3x><yjq>种</yjq><y7r y6ak="学" ywda="可"></y7r><yfc></yfc><yq3 yiiv="国" ygmh="是"></yq3><ys5></ys5><yf4></yf4><ypy ya0u="个" yquq="要"></ypy><ya1></ya1><y87></y87><y0v ythw="！" yg84="了"></y0v></p>
+<p>在整个英格兰境<y class="sy-0">隐藏</y>内，我不相<y class="sy-0">测试</y>信我竟能找<y class="sy-0">藏字</y>到这样一个能与尘<y class="sy-0">藏字</y>世<y class="sy-0">藏字</y>的喧嚣完全隔绝的地<y class="sy-0">测试</y><y class="sy-0">藏字</y>方，<y class="sy-0">藏字</y>一个厌世者的<y class="sy-0">乱码</y>理想的<y class="sy-0">测试</y>天堂。</p>
+```
+
+**渲染效果示例**:
+
+<style>
+.sy-0 { font-size: 0; }
+ya1 { order: 1; }
+yf4 { order: 2; }
+y7r { order: 3; }
+yjq { order: 4; }
+yq3 { order: 5; }
+y87 { order: 6; }
+ypy { order: 7; }
+ylx { order: 8; }
+yfc { order: 9; }
+ypl { order: 10; }
+y3x { order: 11; }
+ys5 { order: 12; }
+y0v { order: 13; }
+ywp { order: 14; }
+y1p { order: 15; }
+.p1 { display: flex; }
+.p1 ya1::after { content: '这'; }
+.p1 yf4::after { content: '儿'; }
+.p1 y7r::before { content: attr(ywda); }
+.p1 yjq::after { content: '真'; }
+.p1 yjq::first-letter { font-size: 0; }
+.p1 yq3::before { content: attr(ygmh); }
+.p1 y87::after { content: '一'; }
+.p1 ypy::before { content: attr(ya0u); }
+.p1 ylx::before { content: attr(yn2e); }
+.p1 yfc::after { content: '丽'; }
+.p1 ypl::before { content: attr(ylxl); }
+.p1 y3x::before { content: attr(y5jn); }
+.p1 ys5::after { content: '间'; }
+.p1 y0v::before { content: attr(ythw); }
+</style>
+
+<p class="p1"><ylx yigi="也" yn2e="美"></ylx><ypl ylxl="的" yxry="开"></ypl><y3x y5jn="乡" ylyh="为"></y3x><yjq>种</yjq><y7r y6ak="学" ywda="可"></y7r><yfc></yfc><yq3 yiiv="国" ygmh="是"></yq3><ys5></ys5><yf4></yf4><ypy ya0u="个" yquq="要"></ypy><ya1></ya1><y87></y87><y0v ythw="！" yg84="了"></y0v></p>
+<p>在整个英格兰境<y class="sy-0">隐藏</y>内，我不相<y class="sy-0">测试</y>信我竟能找<y class="sy-0">藏字</y>到这样一个能与尘<y class="sy-0">藏字</y>世<y class="sy-0">藏字</y>的喧嚣完全隔绝的地<y class="sy-0">测试</y><y class="sy-0">藏字</y>方，<y class="sy-0">藏字</y>一个厌世者的<y class="sy-0">乱码</y>理想的<y class="sy-0">测试</y>天堂。</p>
 
 ### 2. 字体文件加密
 
-每章节使用两种加密字体:
+每个章节会加载两类加密字体, 用于隐藏真实字符编码:
 
-* `randomFont_str`: 每章节唯一, 字体编码动态变更；
-* `fixedFontWoff2_url`: 请求时从字体 "池" 中随机分配一份字体文件, 可能会在多个章节间复用。
+* `randomFont_str` (章节级动态字体): 每章唯一, 字体内部编码随机变换
+* `fixedFontWoff2_url` (字体池随机分发): 从服务器维护的字体池中随机返回一份字体文件, 同一字体可能被多个章节重复使用, 字体池会周期性轮换更新
 
-页面 CSS 示例:
+典型的 CSS 引用示例:
 
 ```css
 font-family: LIIBFYOT, HTEMPCHB, 'SourceHanSansSC-Regular', 'SourceHanSansCN-Regular', ...
 ```
 
-其中 `LIIBFYOT` 和 `HTEMPCHB` 为加密字体名称。由于真实字符并未直接展示, 需要通过以下手段还原真实内容。
+其中 `LIIBFYOT` 和 `HTEMPCHB` 即为加密字体, 由于页面使用的字体未直接暴露真实字形与原文字符之间的对应关系, 因此需要构建映射才能恢复正文内容。
 
 #### 字体还原思路与映射建立
 
-**初期阶段**
+> 字体由 [svg2ttf](https://github.com/fontello/svg2ttf) 生成, 即使对应同一字符, 不同版本字形仍存在细微差异。
+>
+> 因此, 最可行的方式是通过 OCR 自动识别字形并建立映射。
 
-* 使用类似字形的公开字体 (如 `SourceHanSans`) 进行模型微调；
-* 基于章节中的可见字符构建图像样本；
-* 利用 OCR (光学字符识别) 进行逐字识别 (单字图像, 无上下文)；
-* 若识别结果合理, 则可初步还原正文。
+**初期还原阶段**
 
-**自动构建字体映射**
+在缺乏历史映射数据的阶段, 可采用 OCR 的方式恢复章节文本:
 
-* 根据实际观察, 大多数章节在发布时间 **约一个月后** 退回为 "纯文本加密" 形式, 仅需解密正文即可获取明文 HTML。
-* 在此状态下, 若作者未修改就可以精确还原整章内容, 进一步与历史的加密版本进行比对, 从而建立 "字符形状 -> 字符" 之间的稳定映射关系。
-* 随着时间积累, 此映射数据集将逐渐完善, 可以进一步微调模型
+* 使用字形结构相似的公开字体 (如 `SourceHanSans`) 对模型进行轻量微调
+* 从页面中导出所有可见字符, 生成逐字图像样本
+* 使用 OCR 进行逐字识别 (单字识别, 无上下文)
+* 若模型识别结果稳定且逻辑合理, 可初步得到章节的明文内容
+
+**自动化建立持久字体映射**
+
+实际观察表明:
+
+* 大部分章节在发布 **约一个月后** 会回退为 **纯文本加密** (不再使用混淆字体)
+* 在这一状态下, 服务器返回的 HTML 已基本等价于纯文本, 只需解密正文即可获得准确明文
+
+在这种情况下, 可以进行高质量比对:
+
+* 获取同一章节的 **纯文本版本** (回退后)
+* 与其历史的 **加密字体版本** 对齐比对
+* 由此精确建立字形与真实字符之间的映射
+
+随着时间积累, 映射库会越来越完整, 从而有效覆盖绝大部分字体池和章节字体, 为模型进一步微调提供高质量训练数据
 
 **识别增强与误差控制**
 
-* 当前识别流程基于逐字图像生成与无上下文识别, 可能存在少量误差
-* 可考虑以 "多字联动识别" 为改进方向, 提高上下文信息对字符识别的约束力
-* 当前实现因复杂度未进一步深入
+当前识别流程以 **单字图像 + 无上下文 OCR** 为主，因此可能出现:
 
-如有更优的实现方式或改进建议, 欢迎通过 Issue 提出或进行补充。
+* 相似字形混淆
+* 少量识别误差
+* 字形退化带来的不稳定性
+
+可行的优化方向包括:
+
+* 加入上下文约束: 基于语言模型的 "多字联动识别", 减少歧义
+* 概率式输出整句校准: 使用 NLP 语言模型对多候选结果进行纠错
+* 字形聚类与历史映射复用: 对相似字形自动聚类, 提高映射复用率
+
+由于工程复杂度较高, 目前实现仍保持在较简洁的结构
+
+> 如有更优的实现方式或改进建议, 欢迎通过 Issue 提出或进行补充。
 
 ## 五、章节重复内容的异常与修复方法
 
