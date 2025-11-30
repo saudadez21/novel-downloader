@@ -89,7 +89,7 @@ novel-cli config init
 
 ### 2. 命令行 (CLI)
 
-![cli_download](./docs/images/cli_download.gif)
+![cli_download](./docs/assets/images/cli_download.gif)
 
 常用示例:
 

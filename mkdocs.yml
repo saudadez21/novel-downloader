@@ -1,0 +1,109 @@
+site_name: NovelDownloader
+site_description: "NovelDownloader: A toolkit for downloading and processing novels."
+site_author: "Saudade Z"
+repo_name: "NovelDownloader"
+repo_url: "https://github.com/saudadez21/novel-downloader"
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  logo: assets/logo.svg
+  favicon: assets/logo.svg
+  features:
+    - navigation.tabs
+    - navigation.top
+    - navigation.sections
+    - navigation.indexes
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+    - content.action.edit
+    - toc.follow
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+
+plugins:
+  - search
+  - tags
+  - privacy:
+      assets: false
+      links_attr_map:
+        target: _blank
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            show_root_heading: true
+            show_root_full_path: false
+            show_signature: true
+            show_source: true
+            separate_signature: true
+            merge_init_into_class: true
+
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+  - attr_list
+  - md_in_html
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.details
+  - pymdownx.magiclink
+  - pymdownx.tasklist
+  - pymdownx.snippets
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+
+nav:
+  - Home: index.md
+  - Guide:
+    - Install: guide/installation.md
+    - Configuration: guide/configuration.md
+    - Settings Reference: guide/settings-reference.md
+    - Processors Reference: guide/processors-reference.md
+    - CLI Usage: guide/cli-examples.md
+    - Web Usage: guide/web-examples.md
+    - File Saving: guide/file-saving.md
+    - Copy Cookies: guide/copy-cookies.md
+
+  - Supported Sites:
+    - Overview: supported-sites/index.md
+    - Tags: supported-sites/tags.md
+
+  - Reference:
+    - API Examples: reference/api-examples.md
+    - Plugins: reference/plugins.md
+
+  - Notes:
+    - AES Notes: notes/aes.md
+    - Duokan EPUB Notes: notes/duokan_epub.md
+    - Faloo Web Notes: notes/faloo_web.md
+    - Linovelib Notes: notes/linovelib.md
+    - JS IIFE Parsing Notes: notes/parse_js_iife.md
+    - Qidian App Notes: notes/qidian_app.md
+    - Qidian Web Notes: notes/qidian_web.md
+    - Xiguashuwu Notes: notes/xiguashuwu.md
+
+  - Misc:
+    - TODO: misc/todo.md
+
+not_in_nav: |
+  supported-sites/site-details/*
+
+exclude_docs: |
+  /data/

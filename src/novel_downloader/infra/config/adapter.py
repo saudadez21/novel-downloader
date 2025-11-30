@@ -398,7 +398,7 @@ class ConfigAdapter:
 
     @staticmethod
     def _dict_to_ocr_cfg(data: dict[str, Any]) -> OCRConfig:
-        """Convert a raw font_ocr dict into an OCRConfig.
+        """Convert a raw config dict into an OCRConfig.
 
         Args:
             data: The raw OCR configuration mapping.

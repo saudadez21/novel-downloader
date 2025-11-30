@@ -67,6 +67,11 @@ all = [
     "curl_cffi",
 ]
 
+docs = [
+    "mkdocs-material",
+    "mkdocstrings",
+    "mkdocstrings-python",
+]
 tests = [
     "brotli",
     "numpy",

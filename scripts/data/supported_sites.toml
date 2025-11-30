@@ -1,0 +1,3914 @@
+[sites.qidian]
+name = "起点中文网"
+homepage = "https://www.qidian.com"
+alt_domains = []
+site_status = "active"   # active / unstable / archived
+
+description = """
+热门小说网站，提供玄幻小说、武侠小说、原创小说、网游小说、都市小说、言情小说、青春小说、科幻小说等首发小说。
+"""
+
+languages = ["zh-CN"]
+tags = ["原创", "男性向", "阅文"]
+
+[sites.qidian.supports]
+volumes = "yes"  # yes / no / partial / external
+images  = "no"
+login   = "yes"
+search  = "yes"
+
+[[sites.qidian.url_examples]]
+title = "Book URL"
+url = "https://www.qidian.com/book/1010868264/"
+book_id = "1010868264"
+hidden = false
+
+[[sites.qidian.url_examples]]
+title = "Chapter URL"
+url = "https://www.qidian.com/chapter/1010868264/405976997/"
+book_id = "1010868264"
+chapter_id = "405976997"
+hidden = false
+
+[[sites.qidian.notes]]
+title = "登录要求 (Login Requirement)"
+content = """
+* 免费章节可直接阅读
+* **订阅 / VIP 章节需要有效 Cookie 才能下载**
+"""
+
+[[sites.qidian.notes]]
+title = "VIP 章节说明"
+content = """
+!!! warning "VIP 章节需要 Node.js"
+    起点的 VIP 章节内容为加密格式, 需要额外工具才能解密。
+
+    下载器在处理 VIP 章节时会调用 Node.js, 因此系统中需要提前安装:
+
+    [Download Node.js](https://nodejs.org/en/download)
+
+    若未安装 Node.js, 则 VIP 章节无法正常解析。
+"""
+
+[[sites.qidian.notes]]
+title = "其它说明"
+content = """
+* 若章节出现重复内容，可在 `settings.toml` -> `[sites.qidian]` 中设置 `use_truncation = true`
+* 新章节可能出现字体混淆，可开启 `enable_ocr`
+"""
+
+[sites.qqbook]
+name = "QQ 阅读"
+homepage = "https://book.qq.com/"
+alt_domains = []
+site_status = "active"
+description = """
+热门小说网站,提供玄幻小说、武侠小说、原创小说、网游小说、都市小说、言情小说、青春小说、科幻小说等首发小说。
+"""
+languages = ["zh-CN"]
+tags = ["原创", "男性向", "女性向", "阅文"]
+
+[sites.qqbook.supports]
+volumes = "no"
+images = "no"
+login = "yes"
+search = "external"
+
+[[sites.qqbook.url_examples]]
+title = "Book URL"
+url = "https://book.qq.com/book-detail/41089201"
+book_id = "41089201"
+hidden = false
+
+[[sites.qqbook.url_examples]]
+title = "Chapter URL"
+url = "https://book.qq.com/book-read/41089201/1"
+book_id = "41089201"
+chapter_id = "1"
+hidden = false
+
+[[sites.qqbook.notes]]
+title = "登录要求 (Login Requirement)"
+content = """
+* 免费章节可直接阅读
+* **订阅 / VIP 章节需要有效 Cookie 才能下载**
+"""
+
+[[sites.qqbook.notes]]
+title = "VIP 章节说明"
+content = """
+!!! warning "VIP 章节需要 Node.js"
+    QQ 阅读的 VIP 章节内容为加密格式, 需要额外工具才能解密。
+
+    下载器在处理 VIP 章节时会调用 Node.js, 因此系统中需要提前安装:
+
+    [Download Node.js](https://nodejs.org/en/download)
+
+    若未安装 Node.js, 则 VIP 章节无法正常解析。
+"""
+
+[[sites.qqbook.notes]]
+title = "其它说明"
+content = """
+* VIP 章节可能出现字体混淆，可开启 `enable_ocr`
+"""
+
+[sites.n17k]
+name = "17K小说网"
+homepage = "https://www.17k.com/"
+alt_domains = []
+site_status = "active"
+description = """
+17K小说网 创建于2006年，原名一起看小说网，是中文在线旗下集创作、阅读于一体的在线阅读网站。
+
+提供玄幻奇幻、都市言情、武侠仙侠、青春校园、穿越架空、惊悚悬疑、历史军事、爆笑同人、经典文学、二次元等在线阅读以及免费下载。
+"""
+
+languages = ["zh-CN"]
+tags = ["原创", "男性向", "女性向"]
+
+[sites.n17k.supports]
+volumes = "yes"
+images = "no"
+login = "partial"
+search = "external"
+
+[[sites.n17k.url_examples]]
+title = "Book URL"
+url = "https://www.17k.com/book/3631088.html"
+book_id = "3631088"
+hidden = false
+
+[[sites.n17k.url_examples]]
+title = "TOC URL"
+url = "https://www.17k.com/list/3348757.html"
+book_id = "3348757"
+hidden = false
+
+[[sites.n17k.url_examples]]
+title = "Chapter URL"
+url = "https://www.17k.com/chapter/3631088/49406153.html"
+book_id = "3631088"
+chapter_id = "49406153"
+hidden = false
+
+[[sites.n17k.notes]]
+title = "登录要求 (Login Requirement)"
+content = """
+* 免费章节可直接阅读
+* **VIP 章节需要有效 Cookie 才能下载**
+"""
+
+[sites.fanqienovel]
+name = "番茄小说网"
+homepage = "https://fanqienovel.com/"
+alt_domains = []
+site_status = "active"
+description = """
+番茄小说是抖音旗下免费阅读产品，拥有海量正版小说资源，支持听书畅读，提供书荒广场、优质书圈社区，推广优秀原创网络小说文学，全方位满足读者需求。
+
+番茄小说网提供玄幻小说,武侠小说,原创小说,网游小说,都市小说,言情小说,青春小说,历史小说,军事小说,网游小说,科幻小说,恐怖小说
+"""
+
+languages = ["zh-CN"]
+tags = ["原创", "免费", "男性向", "女性向", "抖音"]
+
+[sites.fanqienovel.supports]
+volumes = "yes"
+images = "no"
+login = "partial"
+search = "external"
+
+[[sites.fanqienovel.url_examples]]
+title = "Book URL"
+url = "https://fanqienovel.com/page/7276384138653862966"
+book_id = "7276384138653862966"
+hidden = false
+
+[[sites.fanqienovel.url_examples]]
+title = "Chapter URL"
+url = "https://fanqienovel.com/reader/7276663560427471412"
+chapter_id = "7276663560427471412"
+hidden = false
+
+[[sites.fanqienovel.url_examples]]
+title = "Chapter URL"
+url = "https://fanqienovel.com/reader/7276663560427471412?enter_from=page"
+chapter_id = "7276663560427471412"
+hidden = true
+
+[sites.faloo]
+name = "飞卢小说网"
+homepage = "https://b.faloo.com/"
+alt_domains = []
+site_status = "active"
+description = """
+提供都市小说、玄幻小说、穿越小说、言情小说、同人小说等小说在线阅读与下载。大神小说齐聚飞卢,每日万字更新。
+"""
+
+languages = ["zh-CN"]
+tags = ["原创", "男性向"]
+
+[sites.faloo.supports]
+volumes = "no"
+images = "yes"
+login = "yes"
+search = "external"
+
+[[sites.faloo.url_examples]]
+title = "Book URL"
+url = "https://b.faloo.com/1482723.html"
+book_id = "1482723"
+hidden = false
+
+[[sites.faloo.url_examples]]
+title = "Chapter URL"
+url = "https://b.faloo.com/1482723_1.html"
+book_id = "1482723"
+chapter_id = "1"
+hidden = false
+
+[[sites.faloo.notes]]
+title = "登录要求 (Login Requirement)"
+content = """
+* 免费章节可直接阅读
+* **VIP 章节需要有效 Cookie 才能下载**
+"""
+
+[sites.ruochu]
+name = "若初文学网"
+homepage = "https://www.ruochu.com/"
+alt_domains = []
+site_status = "active"
+description = """
+提供都市小说，总裁小说，纯爱小说，架空小说，职场小说，青春小说，修真小说等网络小说
+"""
+
+languages = ["zh-CN"]
+tags = ["原创", "女性向"]
+
+[sites.ruochu.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "no"
+
+[[sites.ruochu.url_examples]]
+title = "Book URL"
+url = "https://www.ruochu.com/book/158713"
+book_id = "158713"
+hidden = false
+
+[[sites.ruochu.url_examples]]
+title = "TOC URL"
+url = "https://www.ruochu.com/chapter/158713"
+book_id = "158713"
+hidden = false
+
+[[sites.ruochu.url_examples]]
+title = "Chapter URL"
+url = "https://www.ruochu.com/book/158713/13869103"
+book_id = "158713"
+chapter_id = "13869103"
+hidden = false
+
+[[sites.ruochu.notes]]
+title = "登录要求 (Login Requirement)"
+content = """
+* 免费章节可直接阅读
+* **VIP 章节需要有效 Cookie 才能下载**
+"""
+
+[sites.ciweimao]
+name = "刺猬猫"
+homepage = "https://www.ciweimao.com/"
+alt_domains = []
+site_status = "active"
+description = """
+提供全本二次元穿越，娘化百合，各种萌化后宫小说在线阅读，综漫小说，动漫小说，火影小说，海贼小说，动漫同人
+"""
+
+languages = ["zh-CN"]
+tags = ["二次元", "同人二创", "原创"]
+
+[sites.ciweimao.supports]
+volumes = "yes"
+images = "yes"
+login = "yes"
+search = "external"
+
+[[sites.ciweimao.url_examples]]
+title = "Book URL"
+url = "https://www.ciweimao.com/book/100011781"
+book_id = "100011781"
+hidden = false
+
+[[sites.ciweimao.url_examples]]
+title = "TOC URL"
+url = "https://www.ciweimao.com/chapter-list/100011781/book_detail"
+book_id = "100011781"
+hidden = false
+
+[[sites.ciweimao.url_examples]]
+title = "Chapter URL"
+url = "https://www.ciweimao.com/chapter/100257072"
+chapter_id = "100257072"
+hidden = false
+
+[[sites.ciweimao.url_examples]]
+title = "TOC URL"
+url = "https://www.ciweimao.com/chapter-list/100011781?arr_reverse=1"
+book_id = "100011781"
+hidden = true
+
+[[sites.ciweimao.notes]]
+title = "登录要求 (Login Requirement)"
+content = """
+* 免费章节可直接阅读
+* **VIP 章节需要有效 Cookie 才能下载**
+"""
+
+[[sites.ciweimao.notes]]
+title = "其它说明"
+content = """
+* VIP 章节以图片形式返回, 可通过开启 `enable_ocr` 参数配合 OCR 识别为文本。
+* 因站点登录限制, 下载过程中如果在浏览器里登录会导致 Cookie 中途失效
+"""
+
+[sites.ciyuanji]
+name = "次元姬"
+homepage = "https://www.ciyuanji.com/"
+alt_domains = []
+site_status = "active"
+description = """
+火文科技旗下次元姬二次元轻小说平台
+
+这里有丰富的二次元原创小说，有着浓郁的二次元氛围，在这里可以看小说,聊天,互动,创作,用二次元小说创造新世界。
+"""
+
+languages = ["zh-CN"]
+tags = ["二次元", "轻小说", "原创"]
+[sites.ciyuanji.supports]
+volumes = "yes"
+images = "yes"
+login = "yes"
+search = "yes"
+
+[[sites.ciyuanji.url_examples]]
+title = "Book URL"
+url = "https://www.ciyuanji.com/b_d_12030.html"
+book_id = "12030"
+hidden = false
+
+[[sites.ciyuanji.url_examples]]
+title = "Chapter URL"
+url = "https://www.ciyuanji.com/chapter/12030_3046684.html"
+book_id = "12030"
+chapter_id = "3046684"
+hidden = false
+
+[[sites.ciyuanji.notes]]
+title = "登录要求 (Login Requirement)"
+content = """
+* 免费章节可直接阅读
+* **VIP 章节需要有效 Cookie 才能下载**
+"""
+
+[[sites.ciyuanji.notes]]
+title = "其它说明"
+content = """
+* 若请求间隔过短, 服务器可能返回上一次请求的页面内容 (缓存或防爬机制导致)
+* 建议在请求之间设置合理的延迟
+"""
+
+[sites.sfacg]
+name = "SF轻小说"
+homepage = "https://m.sfacg.com"
+alt_domains = []
+site_status = "active"
+description = """
+提供日本轻小说,国产轻小说,动漫小说
+"""
+
+languages = ["zh-CN"]
+tags = ["轻小说", "原创"]
+
+[sites.sfacg.supports]
+volumes = "yes"
+images = "yes"
+login = "yes"
+search = "external"
+
+[[sites.sfacg.url_examples]]
+title = "Book URL"
+url = "https://m.sfacg.com/b/456123/"
+book_id = "456123"
+hidden = false
+
+[[sites.sfacg.url_examples]]
+title = "TOC URL"
+url = "https://m.sfacg.com/i/456123/"
+book_id = "456123"
+hidden = false
+
+[[sites.sfacg.url_examples]]
+title = "Chapter URL"
+url = "https://m.sfacg.com/c/5417665/"
+chapter_id = "5417665"
+hidden = false
+
+[[sites.sfacg.notes]]
+title = "登录要求 (Login Requirement)"
+content = """
+* 免费章节可直接阅读
+* **VIP 章节需要有效 Cookie 才能下载**
+"""
+
+[[sites.sfacg.notes]]
+title = "其它说明"
+content = """
+* VIP 章节以图片形式返回, 可通过开启 `enable_ocr` 参数配合 OCR 识别为文本。
+* OCR 识别结果并非完全可靠, 准确率大约在 **80%+**, 可能存在错误或缺字。
+* OCR 运算在 CPU 环境下较为耗时, 解析 VIP 章节速度会明显变慢, 建议在具备 GPU 的环境中运行。
+"""
+
+[sites.linovel]
+name = "轻之文库"
+homepage = "https://www.linovel.net/"
+alt_domains = []
+site_status = "active"
+description = """
+中国的轻小说文库。让我们在二次元的世界里一同创作有趣的故事！
+"""
+
+languages = ["zh-CN"]
+tags = ["轻小说", "原创"]
+
+[sites.linovel.supports]
+volumes = "yes"
+images = "yes"
+login = "partial"
+search = "yes"
+
+[[sites.linovel.url_examples]]
+title = "Book URL"
+url = "https://www.linovel.net/book/101752.html"
+book_id = "101752"
+hidden = false
+
+[[sites.linovel.url_examples]]
+title = "TOC URL"
+url = "https://www.linovel.net/book/101752.html#catalog"
+book_id = "101752"
+hidden = true
+
+[[sites.linovel.url_examples]]
+title = "Chapter URL"
+url = "https://www.linovel.net/book/101752/16996.html"
+book_id = "101752"
+chapter_id = "16996"
+hidden = false
+
+[[sites.linovel.notes]]
+title = "已知问题"
+content = """
+* 图片资源可能偶尔无法正常加载或失效
+"""
+
+[sites.n37yq]
+name = "三七轻小说"
+homepage = "https://www.37yq.com/"
+alt_domains = []
+site_status = "unstable"
+description = ""
+
+languages = ["zh-CN"]
+tags = ["轻小说", "转载站"]
+
+[sites.n37yq.supports]
+volumes = "yes"
+images = "yes"
+login = "partial"
+search = "yes"
+
+[[sites.n37yq.url_examples]]
+title = "Book URL"
+url = "https://www.37yq.com/lightnovel/2362.html"
+book_id = "2362"
+hidden = false
+
+[[sites.n37yq.url_examples]]
+title = "TOC URL"
+url = "https://www.37yq.com/lightnovel/2362/catalog"
+book_id = "2362"
+hidden = false
+
+[[sites.n37yq.url_examples]]
+title = "Chapter URL"
+url = "https://www.37yq.com/lightnovel/2362/92560.html"
+book_id = "2362"
+chapter_id = "92560"
+hidden = false
+
+[sites.linovelib]
+name = "哔哩轻小说"
+homepage = "https://www.linovelib.com/"
+alt_domains = []
+site_status = "active"
+description = """
+收录最全更新最快的轻小说文库，动漫sf轻小说网站
+"""
+
+languages = ["zh-CN"]
+tags = ["轻小说", "转载站"]
+
+[sites.linovelib.supports]
+volumes = "yes"
+images = "yes"
+login = "partial"
+search = "external"
+
+[[sites.linovelib.url_examples]]
+title = "Book URL"
+url = "https://www.linovelib.com/novel/2727.html"
+book_id = "2727"
+hidden = false
+
+[[sites.linovelib.url_examples]]
+title = "TOC URL"
+url = "https://www.linovelib.com/novel/2727/catalog"
+book_id = "2727"
+hidden = false
+
+[[sites.linovelib.url_examples]]
+title = "Volume URL"
+url = "https://www.linovelib.com/novel/2727/vol_296755.html"
+book_id = "2727"
+hidden = false
+
+[[sites.linovelib.url_examples]]
+title = "Chapter URL"
+url = "https://www.linovelib.com/novel/2727/296757.html"
+book_id = "2727"
+chapter_id = "296757"
+hidden = false
+
+[[sites.linovelib.notes]]
+title = "其它说明"
+content = """
+* 请求过于频繁可能触发限制, 导致封禁或限流 (推荐请求间隔大于 2 秒)
+"""
+
+[sites.wenku8]
+name = "轻小说文库"
+homepage = "https://www.wenku8.net/"
+alt_domains = [
+    "https://www.wenku8.cc",
+    "https://www.wenku8.com",
+]
+site_status = "active"
+description = """
+收录最全更新最快的动漫sf轻小说网站
+"""
+
+languages = ["zh-CN"]
+tags = ["轻小说", "转载站"]
+[sites.wenku8.supports]
+volumes = "yes"
+images = "yes"
+login = "yes"
+search = "external"
+
+[[sites.wenku8.url_examples]]
+title = "Book URL"
+url = "https://www.wenku8.net/book/2835.htm"
+book_id = "2835"
+hidden = false
+
+[[sites.wenku8.url_examples]]
+title = "TOC URL"
+url = "https://www.wenku8.net/novel/2/2835/index.htm"
+book_id = "2835"
+hidden = false
+
+[[sites.wenku8.url_examples]]
+title = "Chapter URL"
+url = "https://www.wenku8.net/novel/2/2835/113354.htm"
+book_id = "2835"
+chapter_id = "113354"
+hidden = false
+
+[[sites.wenku8.url_examples]]
+title = "Book TOC URL"
+url = "https://www.wenku8.net/novel/2/2835/index.htm"
+book_id = "2835"
+hidden = false
+
+[[sites.wenku8.notes]]
+title = "其它说明"
+content = """
+* 该站点使用 `Cloudflare` 防护机制, 当出现 403 响应时, 可尝试将后端切换为 `curl_cffi` 并配置 `impersonate = "chrome136"`
+* 切换后通常可正常访问, 但当 `request_interval < 3.0` 时, 仍可能再次触发 403
+"""
+
+[sites.esjzone]
+name = "ESJ Zone"
+homepage = "https://www.esjzone.cc"
+alt_domains = []
+site_status = "active"
+description = "轻小说网站"
+
+languages = ["zh-CN"]
+tags = ["轻小说", "转载站", "翻译", "NSFW"]
+
+[sites.esjzone.supports]
+volumes = "yes"
+images = "yes"
+login = "yes"
+search = "yes"
+
+[[sites.esjzone.url_examples]]
+title = "Book URL"
+url = "https://www.esjzone.cc/detail/1660702902.html"
+book_id = "1660702902"
+hidden = false
+
+[[sites.esjzone.url_examples]]
+title = "Chapter URL"
+url = "https://www.esjzone.cc/forum/1660702902/294593.html"
+book_id = "1660702902"
+chapter_id = "294593"
+hidden = false
+
+[[sites.esjzone.notes]]
+title = "其它说明"
+content = """
+* 未完成登录验证时, 部分页面会自动重定向至「論壇」页面导致内容加载失败。
+* 若章节设有访问密码, 请先在网页端输入并解锁后, 再开始下载。
+"""
+
+[sites.shencou]
+name = "神凑轻小说"
+homepage = "https://www.shencou.com/"
+alt_domains = []
+site_status = "active"
+description = """
+提供电击文库|富士见库|角川文库|MF文库J|FAMI通文等文库请小说
+"""
+
+languages = ["zh-CN"]
+tags = ["轻小说", "转载站"]
+
+[sites.shencou.supports]
+volumes = "yes"
+images = "yes"
+login = "partial"
+search = "external"
+
+[[sites.shencou.url_examples]]
+title = "Book URL"
+url = "https://www.shencou.com/books/read_3540.html"
+book_id = "3540"
+hidden = false
+
+[[sites.shencou.url_examples]]
+title = "TOC URL"
+url = "https://www.shencou.com/read/3/3540/index.html"
+book_id = "3540"
+hidden = false
+
+[[sites.shencou.url_examples]]
+title = "Chapter URL"
+url = "https://www.shencou.com/read/3/3540/156328.html"
+book_id = "3540"
+chapter_id = "156328"
+hidden = false
+
+[[sites.shencou.url_examples]]
+title = "Book URL"
+url = "https://www.shencou.com/books/read_1.html"
+book_id = "1"
+hidden = true
+
+[[sites.shencou.url_examples]]
+title = "TOC URL"
+url = "https://www.shencou.com/read/0/695/index.html"
+book_id = "695"
+hidden = true
+
+[[sites.shencou.notes]]
+title = "已知问题"
+content = """
+* 图片资源可能无法正常加载或失效
+* 目录页中仍保留了一些已删除章节的重复条目, 却未同步删除
+"""
+
+[sites.lnovel]
+name = "轻小说百科"
+homepage = "https://lnovel.org/"
+alt_domains = []
+site_status = "active"
+description = "轻小说中文百科全书"
+
+languages = ["zh-CN", "zh-TW"]
+tags = ["轻小说", "转载站"]
+
+[sites.lnovel.supports]
+volumes = "yes"
+images = "yes"
+login = "partial"
+search = "external"
+
+[[sites.lnovel.url_examples]]
+title = "Book URL"
+url = "https://lnovel.org/books-3638"
+book_id = "3638"
+hidden = false
+
+[[sites.lnovel.url_examples]]
+title = "Chapter URL"
+url = "https://lnovel.org/chapters-138730"
+chapter_id = "138730"
+hidden = false
+
+[[sites.lnovel.url_examples]]
+title = "Book URL"
+url = "https://lnovel.tw/books-986"
+book_id = "986"
+hidden = true
+
+[[sites.lnovel.url_examples]]
+title = "Chapter URL"
+url = "https://lnovel.tw/chapters-64989"
+chapter_id = "64989"
+hidden = true
+
+[sites.n8novel]
+name = "无限轻小说"
+homepage = "https://www.8novel.com/"
+alt_domains = []
+site_status = "active"
+description = """
+玄幻小說，言情小說，穿越小說，都市小說，仙俠小說，武俠小說，現代言情小說，古代言情小說，靈異小說，遊戲小說，歷史小說，懸疑小說，科幻小說，競技體育小說，軍事小說，青春小說
+"""
+
+languages = ["zh-TW"]
+tags = ["轻小说", "转载站"]
+
+[sites.n8novel.supports]
+volumes = "yes"
+images = "yes"
+login = "partial"
+search = "yes"
+
+[[sites.n8novel.url_examples]]
+title = "Book URL"
+url = "https://www.8novel.com/novelbooks/3365/"
+book_id = "3365"
+hidden = false
+
+[[sites.n8novel.url_examples]]
+title = "Chapter URL"
+url = "https://article.8novel.com/read/3365/?106235"
+book_id = "3365"
+chapter_id = "106235"
+hidden = false
+
+[[sites.n8novel.url_examples]]
+title = "Chapter URL"
+url = "https://article.8novel.com/read/3365/"
+book_id = "3365"
+hidden = true
+
+[[sites.n8novel.url_examples]]
+title = "Chapter URL"
+url = "https://article.8novel.com/read/3365/?106235_2"
+book_id = "3365"
+chapter_id = "106235"
+hidden = true
+
+[sites.kadokado]
+name = "KadoKado"
+homepage = "https://www.kadokado.com.tw/"
+alt_domains = []
+site_status = "active"
+description = """
+KadoKado 角角者是台灣角川營運的小說網站APP、原創小說平台。入間人間、非天夜翔、水泉等作家小說線上看。
+
+提供免費小說、讀角券、章節付費等閱讀模式。
+"""
+
+languages = ["zh-TW"]
+tags = ["轻小说", "原创", "NSFW"]
+
+[sites.kadokado.supports]
+volumes = "yes"
+images = "yes"
+login = "yes"
+search = "yes"
+
+[[sites.kadokado.url_examples]]
+title = "Book URL"
+url = "https://www.kadokado.com.tw/book/1"
+book_id = "1"
+hidden = false
+
+[[sites.kadokado.url_examples]]
+title = "Chapter URL"
+url = "https://www.kadokado.com.tw/chapter/3796?titleId=1&ownerId=1"
+book_id = "1"
+chapter_id = "3796"
+hidden = false
+
+[sites.shaoniandream]
+name = "少年梦"
+homepage = "https://www.shaoniandream.com/"
+alt_domains = []
+site_status = "active"
+description = """
+小众精品呈现，独特阅读体验。在这里，你能找到那些被大众忽视的宝藏小说。
+
+无论是神秘的冒险，还是深度的情感，每一部作品都经过精心挑选，只为满足你对独特故事的渴望。
+
+在这里，你能找到那些与众不同的小说，它们或许不像大众流行作品那样广为人知，但每一部都蕴含着无尽的魅力和深度！
+"""
+
+languages = ["zh-CN"]
+tags = ["轻小说", "二次元"]
+
+[sites.shaoniandream.supports]
+volumes = "yes"
+images = "yes"
+login = "partial"
+search = "external"
+
+[[sites.shaoniandream.url_examples]]
+title = "Book URL"
+url = "https://www.shaoniandream.com/book_detail/754"
+book_id = "754"
+hidden = false
+
+[[sites.shaoniandream.url_examples]]
+title = "Chapter URL"
+url = "https://www.shaoniandream.com/readchapter/97973"
+chapter_id = "97973"
+hidden = false
+
+[sites.yodu]
+name = "有度中文网"
+homepage = "https://www.yodu.org/"
+alt_domains = []
+site_status = "active"
+description = """
+网站收录了经典精品图书、网络小说、轻小说
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "轻小说", "经典图书"]
+
+[sites.yodu.supports]
+volumes = "yes"
+images = "external"
+login = "partial"
+search = "yes"
+
+[[sites.yodu.url_examples]]
+title = "Book URL"
+url = "https://www.yodu.org/book/18862/"
+book_id = "18862"
+hidden = false
+
+[[sites.yodu.url_examples]]
+title = "Chapter URL"
+url = "https://www.yodu.org/book/18862/4662939.html"
+book_id = "18862"
+chapter_id = "4662939"
+hidden = false
+
+[[sites.yodu.notes]]
+title = "已知问题"
+content = """
+* 图片资源可能无法加载 (404)
+"""
+
+[sites.guidaye]
+name = "名著阅读"
+homepage = "https://b.guidaye.com/"
+alt_domains = []
+site_status = "active"
+description = """
+名著阅读网提供中国古典小说、古典诗词、古典名著、中国古代文学故事、国学经典等各种中国传统文化著作在线阅读欣赏。
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "经典图书"]
+
+[sites.guidaye.supports]
+volumes = "no"
+images = "no"
+login = "no"
+search = "external"
+
+[[sites.guidaye.url_examples]]
+title = "Book URL"
+url = "https://b.guidaye.com/kongbu/654/"
+book_id = "kongbu-654"
+hidden = false
+
+[[sites.guidaye.url_examples]]
+title = "Chapter URL"
+url = "https://b.guidaye.com/kongbu/654/170737.html"
+book_id = "kongbu-654"
+chapter_id = "170737"
+hidden = false
+
+[sites.dushu]
+name = "读书"
+homepage = "https://www.dushu.com/"
+alt_domains = []
+site_status = "active"
+description = """
+全民阅读门户，专业中文图书搜索引擎,在线读书,提供各类免费电子书及图书导购服务
+"""
+
+languages = ["zh-CN"]
+tags = ["经典图书"]
+
+[sites.dushu.supports]
+volumes = "yes"
+images = "no"
+login = "partial"
+search = "external"
+
+[[sites.dushu.url_examples]]
+title = "Book URL"
+url = "https://www.dushu.com/showbook/138752/"
+book_id = "138752"
+hidden = false
+
+[[sites.dushu.url_examples]]
+title = "Chapter URL"
+url = "https://www.dushu.com/showbook/138752/1982168.html"
+book_id = "138752"
+chapter_id = "1982168"
+hidden = false
+
+[sites.kunnu]
+name = "鲲弩小说"
+homepage = "https://www.kunnu.com/"
+alt_domains = []
+site_status = "active"
+description = """
+一個簡約小說線上閱讀網站，希望隨時隨地帶給您美妙閱讀時光。
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "经典图书"]
+
+[sites.kunnu.supports]
+volumes = "yes"
+images = "no"
+login = "no"
+search = "no"
+
+[[sites.kunnu.url_examples]]
+title = "Book URL"
+url = "https://www.kunnu.com/guichui/"
+book_id = "guichui"
+hidden = false
+
+[[sites.kunnu.url_examples]]
+title = "Chapter URL"
+url = "https://www.kunnu.com/guichui/27427.htm"
+book_id = "guichui"
+chapter_id = "27427"
+hidden = false
+
+[sites.westnovel]
+name = "西方奇幻小说网"
+homepage = "https://www.westnovel.com/"
+alt_domains = []
+site_status = "active"
+description = """
+提供国外经典奇幻类、魔幻类、魔法类、骑士类、游戏改编类小说合集免费在线阅读！
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "经典图书"]
+
+[sites.westnovel.supports]
+volumes = "no"
+images = "no"
+login = "no"
+search = "external"
+
+[[sites.westnovel.url_examples]]
+title = "Book URL"
+url = "https://www.westnovel.com/ksl/sq/"
+book_id = "ksl-sq"
+hidden = false
+
+[[sites.westnovel.url_examples]]
+title = "Chapter URL"
+url = "https://www.westnovel.com/ksl/sq/140072.html"
+book_id = "ksl-sq"
+chapter_id = "140072"
+hidden = false
+
+[sites.westnovel_sub]
+name = "西方奇幻小说网子站点"
+homepage = "https://www.westnovel.com/q/"
+alt_domains = []
+site_status = "active"
+description = """
+本站提供最新最全的日本动漫轻小说在线阅读。
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "轻小说"]
+
+[sites.westnovel_sub.supports]
+volumes = "no"
+images = "no"
+login = "no"
+search = "external"
+
+[[sites.westnovel_sub.url_examples]]
+title = "Book URL"
+url = "https://www.westnovel.com/q/list/725.html"
+book_id = "q-list-725"
+hidden = false
+
+[[sites.westnovel_sub.url_examples]]
+title = "Chapter URL"
+url = "https://www.westnovel.com/q/showinfo-2-40238-0.html"
+chapter_id = "2-40238-0"
+hidden = false
+
+[sites.tianyabooks]
+name = "天涯书库"
+homepage = "https://www.tianyabooks.com/"
+alt_domains = []
+site_status = "active"
+description = """
+收录全球华人文学,世界文学,校园小说,都市小说,网络小说,恐怖惊悚小说,推理小说,科幻小说,玄幻小说,武侠小说,言情小说,作家文集等.
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "经典图书"]
+
+[sites.tianyabooks.supports]
+volumes = "yes"
+images = "no"
+login = "no"
+search = "external"
+
+[[sites.tianyabooks.url_examples]]
+title = "Book URL"
+url = "https://www.tianyabooks.com/net/changshengjie/"
+book_id = "net-changshengjie"
+hidden = false
+
+[[sites.tianyabooks.url_examples]]
+title = "Chapter URL"
+url = "https://www.tianyabooks.com/net/changshengjie/59453.html"
+book_id = "net-changshengjie"
+chapter_id = "59453"
+hidden = false
+
+[[sites.tianyabooks.url_examples]]
+title = "Book URL"
+url = "https://www.tianyabooks.com/bl_novels/beinan66/#"
+book_id = "bl_novels-beinan66"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Chapter URL"
+url = "https://www.tianyabooks.com/bl_novels/beinan66/220198.html"
+book_id = "bl_novels-beinan66"
+chapter_id = "220198"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Book URL"
+url = "https://www.tianyabooks.com/book/092501/"
+book_id = "book-092501"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Chapter URL"
+url = "https://www.tianyabooks.com/book/092501/2534.html"
+book_id = "book-092501"
+chapter_id = "2534"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Book URL"
+url = "https://www.tianyabooks.com/chuanyue/anxitwang/#"
+book_id = "chuanyue-anxitwang"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Chapter URL"
+url = "https://www.tianyabooks.com/chuanyue/anxitwang/145966.html"
+book_id = "chuanyue-anxitwang"
+chapter_id = "145966"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Book URL"
+url = "https://www.tianyabooks.com/cn/abaalai/"
+book_id = "cn-abaalai"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Chapter URL"
+url = "https://www.tianyabooks.com/cn/abaalai/98482.html"
+book_id = "cn-abaalai"
+chapter_id = "98482"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Book URL"
+url = "https://www.tianyabooks.com/dushi/180tcqjihua/#"
+book_id = "dushi-180tcqjihua"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Chapter URL"
+url = "https://www.tianyabooks.com/dushi/180tcqjihua/81940.html"
+book_id = "dushi-180tcqjihua"
+chapter_id = "81940"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Book URL"
+url = "https://www.tianyabooks.com/fantasy/SongOfFireAndIce6/#gsc.tab=0"
+book_id = "fantasy-SongOfFireAndIce6"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Chapter URL"
+url = "https://www.tianyabooks.com/fantasy/SongOfFireAndIce6/11201.html"
+book_id = "fantasy-SongOfFireAndIce6"
+chapter_id = "11201"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Book URL"
+url = "https://www.tianyabooks.com/games/mmhqduo593/#"
+book_id = "games-mmhqduo593"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Chapter URL"
+url = "https://www.tianyabooks.com/games/mmhqduo593/222639.html"
+book_id = "games-mmhqduo593"
+chapter_id = "222639"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Book URL"
+url = "https://www.tianyabooks.com/gongdou/achuan42/#"
+book_id = "gongdou-achuan42"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Chapter URL"
+url = "https://www.tianyabooks.com/gongdou/achuan42/228724.html"
+book_id = "gongdou-achuan42"
+chapter_id = "228724"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Book URL"
+url = "https://www.tianyabooks.com/hist/amthjishi/#"
+book_id = "hist-amthjishi"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Chapter URL"
+url = "https://www.tianyabooks.com/hist/amthjishi/185281.html"
+book_id = "hist-amthjishi"
+chapter_id = "185281"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Book URL"
+url = "https://www.tianyabooks.com/horror/7gxiongjian/#"
+book_id = "horror-7gxiongjian"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Chapter URL"
+url = "https://www.tianyabooks.com/horror/7gxiongjian/43252.html"
+book_id = "horror-7gxiongjian"
+chapter_id = "43252"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Book URL"
+url = "https://www.tianyabooks.com/lianzai/jmchangjian/#gsc.tab=0"
+book_id = "lianzai-jmchangjian"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Chapter URL"
+url = "https://www.tianyabooks.com/lianzai/jmchangjian/24502.html"
+book_id = "lianzai-jmchangjian"
+chapter_id = "24502"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Book URL"
+url = "https://www.tianyabooks.com/net/3gdzdz/"
+book_id = "net-3gdzdz"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Chapter URL"
+url = "https://www.tianyabooks.com/net/3gdzdz/46909.html"
+book_id = "net-3gdzdz"
+chapter_id = "46909"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Book URL"
+url = "https://www.tianyabooks.com/noble/Judy35/#"
+book_id = "noble-Judy35"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Chapter URL"
+url = "https://www.tianyabooks.com/noble/Judy35/210196.html"
+book_id = "noble-Judy35"
+chapter_id = "210196"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Book URL"
+url = "https://www.tianyabooks.com/period/b0zhmrrumi/#"
+book_id = "period-b0zhmrrumi"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Chapter URL"
+url = "https://www.tianyabooks.com/period/b0zhmrrumi/192324.html"
+book_id = "period-b0zhmrrumi"
+chapter_id = "192324"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Book URL"
+url = "https://www.tianyabooks.com/romance/11ctghfei/#"
+book_id = "romance-11ctghfei"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Chapter URL"
+url = "https://www.tianyabooks.com/romance/11ctghfei/25927.html"
+book_id = "romance-11ctghfei"
+chapter_id = "25927"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Book URL"
+url = "https://www.tianyabooks.com/sf/HungerGames1/"
+book_id = "sf-HungerGames1"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Chapter URL"
+url = "https://www.tianyabooks.com/sf/HungerGames1/103772.html"
+book_id = "sf-HungerGames1"
+chapter_id = "103772"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Book URL"
+url = "https://www.tianyabooks.com/spy/Agatha01/"
+book_id = "spy-Agatha01"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Chapter URL"
+url = "https://www.tianyabooks.com/spy/Agatha01/69144.html"
+book_id = "spy-Agatha01"
+chapter_id = "69144"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Book URL"
+url = "https://www.tianyabooks.com/world/Calvino10/"
+book_id = "world-Calvino10"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Chapter URL"
+url = "https://www.tianyabooks.com/world/Calvino10/84034.html"
+book_id = "world-Calvino10"
+chapter_id = "84034"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Book URL"
+url = "https://www.tianyabooks.com/wuxia/dingmo38/#"
+book_id = "wuxia-dingmo38"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Chapter URL"
+url = "https://www.tianyabooks.com/wuxia/dingmo38/159040.html"
+book_id = "wuxia-dingmo38"
+chapter_id = "159040"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Book URL"
+url = "https://www.tianyabooks.com/xiuzhen/bwqdxsddzle/#"
+book_id = "xiuzhen-bwqdxsddzle"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Chapter URL"
+url = "https://www.tianyabooks.com/xiuzhen/bwqdxsddzle/190351.html"
+book_id = "xiuzhen-bwqdxsddzle"
+chapter_id = "190351"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Book URL"
+url = "https://www.tianyabooks.com/xyqc/Judy34/#"
+book_id = "xyqc-Judy34"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Chapter URL"
+url = "https://www.tianyabooks.com/xyqc/Judy34/210136.html"
+book_id = "xyqc-Judy34"
+chapter_id = "210136"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Book URL"
+url = "https://www.tianyabooks.com/xzxy/bkb94/#"
+book_id = "xzxy-bkb94"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Chapter URL"
+url = "https://www.tianyabooks.com/xzxy/bkb94/214469.html"
+book_id = "xzxy-bkb94"
+chapter_id = "214469"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Book URL"
+url = "https://www.tianyabooks.com/yulequan/beinan68/#"
+book_id = "yulequan-beinan68"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Chapter URL"
+url = "https://www.tianyabooks.com/yulequan/beinan68/220430.html"
+book_id = "yulequan-beinan68"
+chapter_id = "220430"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Book URL"
+url = "https://www.tianyabooks.com/zhichang/Judy41/#"
+book_id = "zhichang-Judy41"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Chapter URL"
+url = "https://www.tianyabooks.com/zhichang/Judy41/210602.html"
+book_id = "zhichang-Judy41"
+chapter_id = "210602"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Book URL"
+url = "https://www.tianyabooks.com/zhongtian/blscghfuren/#"
+book_id = "zhongtian-blscghfuren"
+hidden = true
+
+[[sites.tianyabooks.url_examples]]
+title = "Chapter URL"
+url = "https://www.tianyabooks.com/zhongtian/blscghfuren/192178.html"
+book_id = "zhongtian-blscghfuren"
+chapter_id = "192178"
+hidden = true
+
+[sites.hetushu]
+name = "和图书"
+homepage = "https://www.hetushu.com/index.php"
+alt_domains = []
+site_status = "active"
+description = """
+和图书是一个提供各种热门电子书,书籍,小说免费在线阅读的网站，我们致力于为在线阅读提供良好的阅读体验
+"""
+
+languages = ["zh-CN", "zh-TW"]
+tags = ["转载站"]
+
+[sites.hetushu.supports]
+volumes = "yes"
+images = "no"
+login = "no"
+search = "yes"
+
+[[sites.hetushu.url_examples]]
+title = "Book URL"
+url = "https://www.hetubook.com/book/5763/index.html"
+book_id = "5763"
+hidden = true
+
+[[sites.hetushu.url_examples]]
+title = "Chapter URL"
+url = "https://www.hetubook.com/book/5763/4327466.html"
+book_id = "5763"
+chapter_id = "4327466"
+hidden = true
+
+[[sites.hetushu.url_examples]]
+title = "Book URL"
+url = "https://www.hetushu.com/book/5763/index.html"
+book_id = "5763"
+hidden = false
+
+[[sites.hetushu.url_examples]]
+title = "Chapter URL"
+url = "https://www.hetushu.com/book/5763/4327466.html"
+book_id = "5763"
+chapter_id = "4327466"
+hidden = false
+
+[sites.pilibook]
+name = "霹雳书屋"
+homepage = "https://www.pilibook.net/"
+alt_domains = []
+site_status = "active"
+description = """
+霹雳书屋是一个完本小说免费阅读网站，为您提供男性向网文，女性向言情，文学作品，耽美纯爱，百合小说，轻小说等各类完本小说在线阅读。
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "男性向", "女性向", "轻小说"]
+
+[sites.pilibook.supports]
+volumes = "yes"
+images = "no"
+login = "no"
+search = "external"
+
+[[sites.pilibook.url_examples]]
+title = "Book URL"
+url = "https://www.pilibook.net/5/16098/info.html"
+book_id = "5-16098"
+hidden = false
+
+[[sites.pilibook.url_examples]]
+title = "TOC URL"
+url = "https://www.pilibook.net/5/16098/menu/1.html"
+book_id = "5-16098"
+hidden = false
+
+[[sites.pilibook.url_examples]]
+title = "Chapter URL"
+url = "https://www.pilibook.net/5/16098/read/4249983.html"
+book_id = "5-16098"
+chapter_id = "4249983"
+hidden = false
+
+[sites.n23qb]
+name = "铅笔小说"
+homepage = "https://www.23qb.com"
+alt_domains = []
+site_status = "active"
+description = """
+铅笔小说网提供网络小说线在看，做最好的免费小说阅读网!
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "轻小说", "网络小说"]
+
+[sites.n23qb.supports]
+volumes = "yes"
+images = "no"
+login = "partial"
+search = "yes"
+
+[[sites.n23qb.url_examples]]
+title = "Book URL"
+url = "https://www.23qb.com/book/12282/"
+book_id = "12282"
+hidden = false
+
+[[sites.n23qb.url_examples]]
+title = "TOC URL"
+url = "https://www.23qb.com/book/12282/catalog"
+book_id = "12282"
+hidden = false
+
+[[sites.n23qb.url_examples]]
+title = "Chapter URL"
+url = "https://www.23qb.com/book/12282/7908999.html"
+book_id = "12282"
+chapter_id = "7908999"
+hidden = false
+
+[sites.piaotia]
+name = "飘天文学网"
+homepage = "https://www.piaotia.com/"
+alt_domains = []
+site_status = "active"
+description = """
+飘天文学提供网络小说在线阅读，做最好的免费小说阅读网!
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "网络小说"]
+
+[sites.piaotia.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "yes"
+
+[[sites.piaotia.url_examples]]
+title = "Book URL"
+url = "https://www.piaotia.com/bookinfo/1/1705.html"
+book_id = "1-1705"
+hidden = false
+
+[[sites.piaotia.url_examples]]
+title = "TOC URL"
+url = "https://www.piaotia.com/html/1/1705/"
+book_id = "1-1705"
+hidden = false
+
+[[sites.piaotia.url_examples]]
+title = "Chapter URL"
+url = "https://www.piaotia.com/html/1/1705/762992.html"
+book_id = "1-1705"
+chapter_id = "762992"
+hidden = false
+
+[sites.n71ge]
+name = "新吾爱文学"
+homepage = "https://www.71ge.com/"
+alt_domains = []
+site_status = "active"
+description = ""
+
+languages = ["zh-CN"]
+tags = ["转载站"]
+
+[sites.n71ge.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "yes"
+
+[[sites.n71ge.url_examples]]
+title = "Book URL"
+url = "https://www.71ge.com/65_65536/"
+book_id = "65_65536"
+hidden = false
+
+[[sites.n71ge.url_examples]]
+title = "Chapter URL"
+url = "https://www.71ge.com/65_65536/1.html"
+book_id = "65_65536"
+chapter_id = "1"
+hidden = false
+
+[sites.jpxs123]
+name = "精品小说网"
+homepage = "https://www.jpxs123.com/"
+alt_domains = []
+site_status = "active"
+description = ""
+
+languages = ["zh-CN"]
+tags = ["转载站"]
+
+[sites.jpxs123.supports]
+volumes = "no"
+images = "no"
+login = "no"
+search = "yes"
+
+[[sites.jpxs123.url_examples]]
+title = "Book URL"
+url = "https://www.jpxs123.com/xh/zhetian.html"
+book_id = "xh-zhetian"
+hidden = false
+
+[[sites.jpxs123.url_examples]]
+title = "Chapter URL"
+url = "https://www.jpxs123.com/xh/zhetian/1.html"
+book_id = "xh-zhetian"
+chapter_id = "1"
+hidden = false
+
+[[sites.jpxs123.notes]]
+title = "其它说明"
+content = """
+* 该站点直接提供 txt 下载。
+"""
+
+[sites.ttkan]
+name = "天天看小说"
+homepage = "https://www.ttkan.co/"
+alt_domains = []
+site_status = "active"
+description = """
+玄幻小說，言情小說，穿越小說，都市小說，仙俠小說，武俠小說，現代言情小說，古代言情小說，靈異小說，遊戲小說，歷史小說，懸疑小說，科幻小說，競技體育小說，軍事小說，青春小說
+"""
+
+languages = ["zh-CN", "zh-TW"]
+tags = ["转载站"]
+
+[sites.ttkan.supports]
+volumes = "no"
+images = "no"
+login = "no"
+search = "yes"
+
+[[sites.ttkan.url_examples]]
+title = "Book URL"
+url = "https://www.ttkan.co/novel/chapters/shengxu-chendong"
+book_id = "shengxu-chendong"
+hidden = false
+
+[[sites.ttkan.url_examples]]
+title = "Chapter URL"
+url = "https://www.wa01.com/novel/pagea/shengxu-chendong_1.html"
+book_id = "shengxu-chendong"
+chapter_id = "1"
+hidden = false
+
+[[sites.ttkan.url_examples]]
+title = "Book URL"
+url = "https://cn.ttkan.co/novel/chapters/shengxu-chendonge"
+book_id = "shengxu-chendong"
+hidden = true
+
+[[sites.ttkan.url_examples]]
+title = "Book URL"
+url = "https://tw.ttkan.co/novel/chapters/shengxu-chendong"
+book_id = "shengxu-chendong"
+hidden = true
+
+[sites.ixdzs8]
+name = "爱下电子书"
+homepage = "https://ixdzs8.com/"
+alt_domains = []
+site_status = "active"
+description = """
+爱下电子书提供热门排行榜，分类榜单小说的在线阅读，一起享受极致阅读乐趣。
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站"]
+
+[sites.ixdzs8.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "yes"
+
+[[sites.ixdzs8.url_examples]]
+title = "Book URL"
+url = "https://ixdzs8.com/read/38804/"
+book_id = "38804"
+hidden = false
+
+[[sites.ixdzs8.url_examples]]
+title = "Chapter URL"
+url = "https://ixdzs8.com/read/38804/p1.html"
+book_id = "38804"
+chapter_id = "p1"
+hidden = false
+
+[sites.dxmwx]
+name = "大熊猫文学网"
+homepage = "https://www.dxmwx.org/"
+alt_domains = []
+site_status = "active"
+description = """
+提供玄幻小说,武侠小说,网游小说,言情小说,穿越小说,历史军事小说,YY小说,小说最新章节免费阅读！
+"""
+
+languages = ["zh-CN", "zh-TW"]
+tags = ["转载站"]
+
+[sites.dxmwx.supports]
+volumes = "no"
+images = "no"
+login = "no"
+search = "yes"
+
+[[sites.dxmwx.url_examples]]
+title = "Book URL"
+url = "https://www.dxmwx.org/book/55598.html"
+book_id = "55598"
+hidden = false
+
+[[sites.dxmwx.url_examples]]
+title = "TOC URL"
+url = "https://www.dxmwx.org/chapter/55598.html"
+book_id = "55598"
+hidden = false
+
+[[sites.dxmwx.url_examples]]
+title = "Chapter URL"
+url = "https://www.dxmwx.org/read/55598_47170737.html"
+book_id = "55598"
+chapter_id = "47170737"
+hidden = false
+
+[[sites.dxmwx.url_examples]]
+title = "Book URL"
+url = "https://tw.dxmwx.org/book/55598.html"
+book_id = "55598"
+hidden = true
+
+[sites.i25zw]
+name = "25中文网"
+homepage = "https://www.i25zw.com/"
+alt_domains = []
+site_status = "active"
+description = """
+25中文网提供最新最热网络小说，无弹窗小说阅读,最新章节阅读，全文阅读，无错小说阅读
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站"]
+
+[sites.i25zw.supports]
+volumes = "no"
+images = "no"
+login = "no"
+search = "yes"
+
+[[sites.i25zw.url_examples]]
+title = "Book URL"
+url = "https://www.i25zw.com/book/64371.html"
+book_id = "64371"
+hidden = false
+
+[[sites.i25zw.url_examples]]
+title = "TOC URL"
+url = "https://www.i25zw.com/64371/"
+book_id = "64371"
+hidden = false
+
+[[sites.i25zw.url_examples]]
+title = "Chapter URL"
+url = "https://www.i25zw.com/64371/153149757.html"
+book_id = "64371"
+chapter_id = "153149757"
+hidden = false
+
+[sites.n69shuba]
+name = "69书吧"
+homepage = "https://www.69shuba.com/"
+alt_domains = []
+site_status = "active"
+description = """
+69书吧提供最新最热网络小说，无弹窗小说阅读,最新章节阅读，全文阅读，无错小说阅读
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站"]
+
+[sites.n69shuba.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "external"
+
+[[sites.n69shuba.url_examples]]
+title = "Book URL"
+url = "https://www.69shuba.com/book/88724.htm"
+book_id = "88724"
+hidden = false
+
+[[sites.n69shuba.url_examples]]
+title = "TOC URL"
+url = "https://www.69shuba.com/book/90442/"
+book_id = "90442"
+hidden = false
+
+[[sites.n69shuba.url_examples]]
+title = "Chapter URL"
+url = "https://www.69shuba.com/txt/88724/39943182"
+book_id = "88724"
+chapter_id = "39943182"
+hidden = false
+
+[[sites.n69shuba.notes]]
+title = "其它说明"
+content = """
+* 该站点使用 `Cloudflare` 防护机制, 当出现 403 响应时, 可尝试将后端切换为 `curl_cffi` 并配置 `impersonate = "chrome136"`
+* 切换后通常可正常访问, 但当 `request_interval < 3.0` 时, 仍可能再次触发 403
+"""
+
+[sites.twkan]
+name = "台灣小說網"
+homepage = "https://twkan.com/"
+alt_domains = []
+site_status = "active"
+description = """
+台灣小說網免費提供玄幻小說,言情小說,都市小說,網遊小說,軍事小說等各類最新熱門網路小說。
+"""
+
+languages = ["zh-TW"]
+tags = ["转载站"]
+
+[sites.twkan.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "external"
+
+[[sites.twkan.url_examples]]
+title = "Book URL"
+url = "https://twkan.com/book/78813.html"
+book_id = "78813"
+hidden = false
+
+[[sites.twkan.url_examples]]
+title = "TOC URL"
+url = "https://twkan.com/book/78813/index.html"
+book_id = "78813"
+hidden = false
+
+[[sites.twkan.url_examples]]
+title = "Chapter URL"
+url = "https://twkan.com/txt/78813/47726772"
+book_id = "78813"
+chapter_id = "47726772"
+hidden = false
+
+[[sites.twkan.notes]]
+title = "其它说明"
+content = """
+* 该站点使用 `Cloudflare` 防护机制, 当出现 403 响应时, 可尝试将后端切换为 `curl_cffi` 并配置 `impersonate = "chrome136"`
+* 切换后通常可正常访问, 但当 `request_interval < 3.0` 时, 仍可能再次触发 403
+"""
+
+[sites.n101kanshu]
+name = "101看书"
+homepage = "https://101kanshu.com/"
+alt_domains = []
+site_status = "active"
+description = """
+101看書免費提供最新熱門小說免費無彈窗無亂序全文閱讀。
+"""
+
+languages = ["zh-TW"]
+tags = ["转载站"]
+
+[sites.n101kanshu.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "yes"
+
+[[sites.n101kanshu.url_examples]]
+title = "Book URL"
+url = "https://101kanshu.com/book/7994.html"
+book_id = "7994"
+hidden = false
+
+[[sites.n101kanshu.url_examples]]
+title = "TOC URL"
+url = "https://101kanshu.com/book/7994/index.html"
+book_id = "7994"
+hidden = false
+
+[[sites.n101kanshu.url_examples]]
+title = "Chapter URL"
+url = "https://101kanshu.com/txt/7994/9137080.html"
+book_id = "7994"
+chapter_id = "9137080"
+hidden = false
+
+[sites.laoyaoxs]
+name = "老幺小说网"
+homepage = "https://www.laoyaoxs.org/"
+alt_domains = []
+site_status = "unstable"
+description = ""
+
+languages = ["zh-CN"]
+tags = ["转载站"]
+
+[sites.laoyaoxs.supports]
+volumes = "no"
+images = "no"
+login = "no"
+search = "yes"
+
+[[sites.laoyaoxs.url_examples]]
+title = "Book URL"
+url = "https://www.laoyaoxs.org/info/7359.html"
+book_id = "7359"
+hidden = false
+
+[[sites.laoyaoxs.url_examples]]
+title = "TOC URL"
+url = "https://www.laoyaoxs.org/list/7359/"
+book_id = "7359"
+hidden = false
+
+[[sites.laoyaoxs.url_examples]]
+title = "Chapter URL"
+url = "https://www.laoyaoxs.org/list/7359/21385.html"
+book_id = "7359"
+chapter_id = "21385"
+hidden = false
+
+[sites.quanben5]
+name = "全本小说网"
+homepage = "https://quanben5.com/"
+alt_domains = []
+site_status = "active"
+description = """
+提供免费全本小说阅读网站，包含言情小说、玄幻小说、都市小说、历史小说、玄幻小说等小说阅读网站。
+"""
+
+languages = ["zh-CN", "zh-TW"]
+tags = ["转载站"]
+
+[sites.quanben5.supports]
+volumes = "no"
+images = "no"
+login = "no"
+search = "yes"
+
+[[sites.quanben5.url_examples]]
+title = "Book URL"
+url = "https://quanben5.com/n/doushentianxia/"
+book_id = "doushentianxia"
+hidden = false
+
+[[sites.quanben5.url_examples]]
+title = "TOC URL"
+url = "https://quanben5.com/n/doushentianxia/xiaoshuo.html"
+book_id = "doushentianxia"
+hidden = false
+
+[[sites.quanben5.url_examples]]
+title = "Chapter URL"
+url = "https://quanben5.com/n/doushentianxia/13685.html"
+book_id = "doushentianxia"
+chapter_id = "13685"
+hidden = false
+
+[[sites.quanben5.url_examples]]
+title = "Book URL"
+url = "https://big5.quanben5.com/n/doushentianxia/"
+book_id = "doushentianxia"
+hidden = true
+
+[sites.shu111]
+name = "书林文学"
+homepage = "http://shu111.com"
+alt_domains = []
+site_status = "active"
+description = """
+提供玄幻小说、都市小说、穿越小说、网游小说、武侠仙侠、历史军事、修真同人等全本小说免费阅读
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站"]
+
+[sites.shu111.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "no"
+
+[[sites.shu111.url_examples]]
+title = "Book URL"
+url = "http://www.shu111.com/book/282944.html"
+book_id = "282944"
+hidden = false
+
+[[sites.shu111.url_examples]]
+title = "Chapter URL"
+url = "http://www.shu111.com/book/282944/96171674.html"
+book_id = "282944"
+chapter_id = "96171674"
+hidden = false
+
+[[sites.shu111.url_examples]]
+title = "Book URL"
+url = "https://www.shu111.com/book/282944.html"
+book_id = "282944"
+hidden = true
+
+[[sites.shu111.url_examples]]
+title = "Chapter URL"
+url = "https://www.shu111.com/book/282944/96171674.html"
+book_id = "282944"
+chapter_id = "96171674"
+hidden = true
+
+[[sites.shu111.notes]]
+title = "其它说明"
+content = """
+* 网站加载速度较慢
+"""
+
+[sites.wxsck]
+name = "万相书城"
+homepage = "https://wxsck.com/"
+alt_domains = ["https://www.wxscs.com/index.html"]
+site_status = "active"
+description = """
+天地间，有万相。 而我李洛，终将成为这万相之王。
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站"]
+
+[sites.wxsck.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "no"
+
+[[sites.wxsck.url_examples]]
+title = "Book URL"
+url = "https://wxsck.com/book/20297/"
+book_id = "20297"
+hidden = false
+
+[[sites.wxsck.url_examples]]
+title = "Chapter URL"
+url = "https://wxsck.com/book/20297/6660334.html"
+book_id = "20297"
+chapter_id = "6660334"
+hidden = false
+
+[[sites.wxsck.url_examples]]
+title = "Book URL"
+url = "https://www.wxscs.com/book/20297/"
+book_id = "20297"
+hidden = true
+
+[[sites.wxsck.url_examples]]
+title = "Chapter URL"
+url = "https://www.wxscs.com/book/20297/6660334.html"
+book_id = "20297"
+chapter_id = "6660334"
+hidden = true
+
+[sites.bixiange]
+name = "笔仙阁"
+homepage = "https://m.bixiange.me/"
+alt_domains = []
+site_status = "active"
+description = """
+笔仙阁提供免费的手机小说,小说在线阅读,txt小说下载,不放任何弹窗。
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站"]
+
+[sites.bixiange.supports]
+volumes = "no"
+images = "no"
+login = "no"
+search = "yes"
+
+[[sites.bixiange.url_examples]]
+title = "Book URL"
+url = "https://m.bixiange.me/wxxz/20921/"
+book_id = "wxxz-20921"
+hidden = false
+
+[[sites.bixiange.url_examples]]
+title = "Chapter URL"
+url = "https://m.bixiange.me/wxxz/20921/index/1.html"
+book_id = "wxxz-20921"
+chapter_id = "1"
+hidden = false
+
+[[sites.bixiange.url_examples]]
+title = "Book URL"
+url = "https://m.bixiange.me/dsyq/22747/"
+book_id = "dsyq-22747"
+hidden = true
+
+[[sites.bixiange.url_examples]]
+title = "Chapter URL"
+url = "https://m.bixiange.me/dsyq/22747/index/1.html"
+book_id = "dsyq-22747"
+chapter_id = "1"
+hidden = true
+
+[[sites.bixiange.url_examples]]
+title = "Book URL"
+url = "https://m.bixiange.me/xhqh/22745/"
+book_id = "xhqh-22745"
+hidden = true
+
+[[sites.bixiange.url_examples]]
+title = "Chapter URL"
+url = "https://m.bixiange.me/xhqh/22745/index/1.html"
+book_id = "xhqh-22745"
+chapter_id = "1"
+hidden = true
+
+[[sites.bixiange.url_examples]]
+title = "Book URL"
+url = "https://m.bixiange.me/cyjk/22746.html"
+book_id = "cyjk-22746"
+hidden = true
+
+[[sites.bixiange.url_examples]]
+title = "Chapter URL"
+url = "https://m.bixiange.me/cyjk/22746/1.html"
+book_id = "cyjk-22746"
+chapter_id = "1"
+hidden = true
+
+[[sites.bixiange.url_examples]]
+title = "Book URL"
+url = "https://m.bixiange.me/khjj/22192.html"
+book_id = "khjj-22192"
+hidden = true
+
+[[sites.bixiange.url_examples]]
+title = "Chapter URL"
+url = "https://m.bixiange.me/khjj/22192/1.html"
+book_id = "khjj-22192"
+chapter_id = "1"
+hidden = true
+
+[[sites.bixiange.url_examples]]
+title = "Book URL"
+url = "https://m.bixiange.me/ghxy/22685/"
+book_id = "ghxy-22685"
+hidden = true
+
+[[sites.bixiange.url_examples]]
+title = "Chapter URL"
+url = "https://m.bixiange.me/ghxy/22685/index/1.html"
+book_id = "ghxy-22685"
+chapter_id = "1"
+hidden = true
+
+[[sites.bixiange.url_examples]]
+title = "Book URL"
+url = "https://m.bixiange.me/jsls/22152/"
+book_id = "jsls-22152"
+hidden = true
+
+[[sites.bixiange.url_examples]]
+title = "Chapter URL"
+url = "https://m.bixiange.me/jsls/22152/index/1.html"
+book_id = "jsls-22152"
+chapter_id = "1"
+hidden = true
+
+[[sites.bixiange.url_examples]]
+title = "Book URL"
+url = "https://m.bixiange.me/guanchang/14186.html"
+book_id = "guanchang-14186"
+hidden = true
+
+[[sites.bixiange.url_examples]]
+title = "Chapter URL"
+url = "https://m.bixiange.me/guanchang/14186/1.html"
+book_id = "guanchang-14186"
+chapter_id = "1"
+hidden = true
+
+[[sites.bixiange.url_examples]]
+title = "Book URL"
+url = "https://m.bixiange.me/xtfq/15358/"
+book_id = "xtfq-15358"
+hidden = true
+
+[[sites.bixiange.url_examples]]
+title = "Chapter URL"
+url = "https://m.bixiange.me/xtfq/15358/index/1.html"
+book_id = "xtfq-15358"
+chapter_id = "1"
+hidden = true
+
+[[sites.bixiange.url_examples]]
+title = "Book URL"
+url = "https://m.bixiange.me/dmtr/20765/"
+book_id = "dmtr-20765"
+hidden = true
+
+[[sites.bixiange.url_examples]]
+title = "Chapter URL"
+url = "https://m.bixiange.me/dmtr/20765/index/1.html"
+book_id = "dmtr-20765"
+chapter_id = "1"
+hidden = true
+
+[[sites.bixiange.url_examples]]
+title = "Book URL"
+url = "https://m.bixiange.me/trxs/22315/"
+book_id = "trxs-22315"
+hidden = true
+
+[[sites.bixiange.url_examples]]
+title = "Chapter URL"
+url = "https://m.bixiange.me/trxs/22315/index/1.html"
+book_id = "trxs-22315"
+chapter_id = "1"
+hidden = true
+
+[[sites.bixiange.url_examples]]
+title = "Book URL"
+url = "https://m.bixiange.me/jqxs/13513/"
+book_id = "jqxs-13513"
+hidden = true
+
+[[sites.bixiange.url_examples]]
+title = "Chapter URL"
+url = "https://m.bixiange.me/jqxs/13513/index/1.html"
+book_id = "jqxs-13513"
+chapter_id = "1"
+hidden = true
+
+[[sites.bixiange.notes]]
+title = "其它说明"
+content = """
+* 该站点直接提供 txt 下载。
+"""
+
+[sites.b520]
+name = "笔趣阁"
+homepage = "http://www.b520.cc"
+alt_domains = []
+site_status = "active"
+description = """
+新笔趣阁网站收录了当前最火热的网络小说
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "笔趣阁"]
+
+[sites.b520.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "yes"
+
+[[sites.b520.url_examples]]
+title = "Book URL"
+url = "http://www.b520.cc/8_8187/"
+book_id = "8_8187"
+hidden = false
+
+[[sites.b520.url_examples]]
+title = "Chapter URL"
+url = "http://www.b520.cc/8_8187/3899831.html"
+book_id = "8_8187"
+chapter_id = "3899831"
+hidden = false
+
+[sites.biquge345]
+name = "笔趣阁"
+homepage = "https://www.biquge345.com/"
+alt_domains = []
+site_status = "active"
+description = ""
+
+languages = ["zh-CN"]
+tags = ["转载站", "笔趣阁"]
+
+[sites.biquge345.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "yes"
+
+[[sites.biquge345.url_examples]]
+title = "Book URL"
+url = "https://www.biquge345.com/book/321301/"
+book_id = "321301"
+hidden = false
+
+[[sites.biquge345.url_examples]]
+title = "Chapter URL"
+url = "https://www.biquge345.com/chapter/321301/37740966.html"
+book_id = "321301"
+chapter_id = "37740966"
+hidden = false
+
+[sites.shuhaige]
+name = "书海阁小说网"
+homepage = "https://www.shuhaige.net/"
+alt_domains = []
+site_status = "active"
+description = """
+免费提供高质量的小说最新章节 (无弹窗小说网)。
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "笔趣阁"]
+
+[sites.shuhaige.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "yes"
+
+[[sites.shuhaige.url_examples]]
+title = "Book URL"
+url = "https://www.shuhaige.net/199178/"
+book_id = "199178"
+hidden = false
+
+[[sites.shuhaige.url_examples]]
+title = "Chapter URL"
+url = "https://www.shuhaige.net/199178/86580492.html"
+book_id = "199178"
+chapter_id = "86580492"
+hidden = false
+
+[sites.xshbook]
+name = "小说虎"
+homepage = "https://www.xshbook.com/"
+alt_domains = []
+site_status = "active"
+description = """
+小说虎用心为书友提供最好的阅读体验，总想给看书的网友提供最好的小说免费阅读。
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "笔趣阁"]
+
+[sites.xshbook.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "yes"
+
+[[sites.xshbook.url_examples]]
+title = "Book URL"
+url = "https://www.xshbook.com/95139/95139418/"
+book_id = "95139-95139418"
+hidden = false
+
+[[sites.xshbook.url_examples]]
+title = "Chapter URL"
+url = "https://www.xshbook.com/95139/95139418/407988281.html"
+book_id = "95139-95139418"
+chapter_id = "407988281"
+hidden = false
+
+[sites.n23ddw]
+name = "顶点小说网"
+homepage = "https://www.23ddw.net/"
+alt_domains = []
+site_status = "active"
+description = """
+收录了当前最火热的网络小说，免费提供高质量的小说最新章节
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "笔趣阁"]
+
+[sites.n23ddw.supports]
+volumes = "no"
+images = "no"
+login = "no"
+search = "yes"
+
+[[sites.n23ddw.url_examples]]
+title = "Book URL"
+url = "https://www.23ddw.net/du/80/80892/"
+book_id = "80-80892"
+hidden = false
+
+[[sites.n23ddw.url_examples]]
+title = "Chapter URL"
+url = "https://www.23ddw.net/du/80/80892/13055110.html"
+book_id = "80-80892"
+chapter_id = "13055110"
+hidden = false
+
+[sites.n69hao]
+name = "69书吧"
+homepage = "https://www.69hao.com/"
+alt_domains = ["https://www.69hsw.com/"]
+site_status = "active"
+description = """
+收录了当前最火热的网络小说，免费提供高质量的小说最新章节
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "笔趣阁"]
+
+[sites.n69hao.supports]
+volumes = "no"
+images = "no"
+login = "no"
+search = "external"
+
+[[sites.n69hao.url_examples]]
+title = "Book URL"
+url = "https://www.69hao.com/48/"
+book_id = "48"
+hidden = false
+
+[[sites.n69hao.url_examples]]
+title = "Chapter URL"
+url = "https://www.69hao.com/48/38642.html"
+book_id = "48"
+chapter_id = "38642"
+hidden = false
+
+[sites.yibige]
+name = "一笔阁"
+homepage = "https://www.yibige.org/"
+alt_domains = []
+site_status = "active"
+description = """
+收录最热门的好看小说，小说更新速度快，主打玄幻、科幻、言情、仙侠、魔法、穿越、架空历史、武侠
+"""
+
+languages = ["zh-CN", "zh-TW"]
+tags = ["转载站", "笔趣阁"]
+
+[sites.yibige.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "external"
+
+[[sites.yibige.url_examples]]
+title = "Book URL"
+url = "https://www.yibige.org/6238/"
+book_id = "6238"
+hidden = false
+
+[[sites.yibige.url_examples]]
+title = "TOC URL"
+url = "https://www.yibige.org/6238/index.html"
+book_id = "6238"
+hidden = false
+
+[[sites.yibige.url_examples]]
+title = "Chapter URL"
+url = "https://www.yibige.org/6238/1.html"
+book_id = "6238"
+chapter_id = "1"
+hidden = false
+
+[[sites.yibige.url_examples]]
+title = "Book URL"
+url = "https://tw.yibige.org/6238/"
+book_id = "6238"
+hidden = true
+
+[[sites.yibige.url_examples]]
+title = "Book URL"
+url = "https://hk.yibige.org/6238/"
+book_id = "6238"
+hidden = true
+
+[sites.lewenn]
+name = "乐文小说网"
+homepage = "https://www.lewenn.net/"
+alt_domains = []
+site_status = "active"
+description = """
+免费在线小说阅读网站，无弹窗无广告。
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "笔趣阁"]
+
+[sites.lewenn.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "no"
+
+[[sites.lewenn.url_examples]]
+title = "Book URL"
+url = "https://www.lewenn.net/lw1/"
+book_id = "lw1"
+hidden = false
+
+[[sites.lewenn.url_examples]]
+title = "Chapter URL"
+url = "https://www.lewenn.net/lw1/30038546.html"
+book_id = "lw1"
+chapter_id = "30038546"
+hidden = false
+
+[[sites.lewenn.notes]]
+title = "其它说明"
+content = """
+* 该站点的搜索结果是 `3A小说网` 的...
+"""
+
+[sites.blqudu]
+name = "笔趣读"
+homepage = "https://www.blqudu.cc/"
+alt_domains = []
+site_status = "active"
+description = """
+免费在线小说阅读网站，无弹窗无广告。
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "笔趣阁"]
+
+[sites.blqudu.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "no"
+
+[[sites.blqudu.url_examples]]
+title = "Book URL"
+url = "https://www.blqudu.cc/137_137144/"
+book_id = "137_137144"
+hidden = false
+
+[[sites.blqudu.url_examples]]
+title = "Chapter URL"
+url = "https://www.biqudv.cc/137_137144/628955328.html"
+book_id = "137_137144"
+chapter_id = "628955328"
+hidden = false
+
+[[sites.blqudu.notes]]
+title = "其它说明"
+content = """
+* 大部分书籍的最后几章都不完整
+"""
+
+[sites.mangg_com]
+name = "追书网"
+homepage = "https://www.mangg.com/"
+alt_domains = []
+site_status = "active"
+description = """
+收录了当前最火热的网络小说，免费提供高质量的小说最新章节
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "笔趣阁"]
+
+[sites.mangg_com.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "no"
+
+[[sites.mangg_com.url_examples]]
+title = "Book URL"
+url = "https://www.mangg.com/id57715/"
+book_id = "id57715"
+hidden = false
+
+[[sites.mangg_com.url_examples]]
+title = "Chapter URL"
+url = "https://www.mangg.com/id57715/632689.html"
+book_id = "id57715"
+chapter_id = "632689"
+hidden = false
+
+[sites.mangg_net]
+name = "追书网"
+homepage = "https://www.mangg.net/"
+alt_domains = []
+site_status = "active"
+description = """
+收录了当前最火热的免费小说，免费提供高质量的小说最新章节
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "笔趣阁"]
+
+[sites.mangg_net.supports]
+volumes = "no"
+images = "no"
+login = "no"
+search = "yes"
+
+[[sites.mangg_net.url_examples]]
+title = "Book URL"
+url = "https://www.mangg.net/id26581/"
+book_id = "id26581"
+hidden = false
+
+[[sites.mangg_net.url_examples]]
+title = "TOC URL"
+url = "https://www.mangg.net/id26581/index_2.html"
+book_id = "id26581"
+hidden = true
+
+[[sites.mangg_net.url_examples]]
+title = "Chapter URL"
+url = "https://www.mangg.net/id26581/1159408.html"
+book_id = "id26581"
+chapter_id = "1159408"
+hidden = false
+
+[sites.fsshu]
+name = "笔趣阁"
+homepage = "https://www.fsshu.com/"
+alt_domains = []
+site_status = "active"
+description = """
+收录了当前最火热的免费小说，免费提供高质量的小说最新章节
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "笔趣阁"]
+
+[sites.fsshu.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "yes"
+
+[[sites.fsshu.url_examples]]
+title = "Book URL"
+url = "https://www.fsshu.com/biquge/0_139/"
+book_id = "0_139"
+hidden = false
+
+[[sites.fsshu.url_examples]]
+title = "Chapter URL"
+url = "https://www.fsshu.com/biquge/0_139/c40381.html"
+book_id = "0_139"
+chapter_id = "c40381"
+hidden = false
+
+[sites.biquge5]
+name = "笔趣阁"
+homepage = "https://www.biquge5.com/"
+alt_domains = []
+site_status = "active"
+description = """
+收录了当前最火热的免费小说，免费提供高质量的小说最新章节
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "笔趣阁"]
+
+[sites.biquge5.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "yes"
+
+[[sites.biquge5.url_examples]]
+title = "Book URL"
+url = "https://www.biquge5.com/9_9194/"
+book_id = "9_9194"
+hidden = false
+
+[[sites.biquge5.url_examples]]
+title = "Chapter URL"
+url = "https://www.biquge5.com/9_9194/737908.html"
+book_id = "9_9194"
+chapter_id = "737908"
+hidden = false
+
+[sites.biquguo]
+name = "笔趣阁小说网"
+homepage = "https://www.biquguo.com/"
+alt_domains = []
+site_status = "active"
+description = """
+收录了当前最火热的免费小说，免费提供高质量的小说最新章节
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "笔趣阁"]
+
+[sites.biquguo.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "yes"
+
+[[sites.biquguo.url_examples]]
+title = "Book URL"
+url = "https://www.biquguo.com/0/352/"
+book_id = "0-352"
+hidden = false
+
+[[sites.biquguo.url_examples]]
+title = "Chapter URL"
+url = "https://www.biquguo.com/0/352/377618.html"
+book_id = "0-352"
+chapter_id = "377618"
+hidden = false
+
+[sites.ciluke]
+name = "思路客"
+homepage = "https://www.ciluke.com/"
+alt_domains = []
+site_status = "active"
+description = """
+收录了当前最火热的免费小说，免费提供高质量的小说最新章节
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "笔趣阁"]
+
+[sites.ciluke.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "yes"
+
+[[sites.ciluke.url_examples]]
+title = "Book URL"
+url = "https://www.ciluke.com/19/19747/"
+book_id = "19-19747"
+hidden = false
+
+[[sites.ciluke.url_examples]]
+title = "Chapter URL"
+url = "https://www.ciluke.com/19/19747/316194.html"
+book_id = "19-19747"
+chapter_id = "316194"
+hidden = false
+
+[sites.ktshu]
+name = "八一中文网"
+homepage = "https://www.ktshu.cc/"
+alt_domains = []
+site_status = "active"
+description = """
+收录了当前最火热的免费小说，免费提供高质量的小说最新章节
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "笔趣阁"]
+
+[sites.ktshu.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "yes"
+
+[[sites.ktshu.url_examples]]
+title = "Book URL"
+url = "https://www.ktshu.cc/book/47244/"
+book_id = "47244"
+hidden = false
+
+[[sites.ktshu.url_examples]]
+title = "Chapter URL"
+url = "https://www.ktshu.cc/book/47244/418953.html"
+book_id = "47244"
+chapter_id = "418953"
+hidden = false
+
+[sites.n37yue]
+name = "37阅读网"
+homepage = "https://www.37yue.com/"
+alt_domains = []
+site_status = "active"
+description = """
+收录了当前最火热的免费小说，免费提供高质量的小说最新章节
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "笔趣阁"]
+
+[sites.n37yue.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "yes"
+
+[[sites.n37yue.url_examples]]
+title = "Book URL"
+url = "https://www.37yue.com/0/180/"
+book_id = "0-180"
+hidden = false
+
+[[sites.n37yue.url_examples]]
+title = "Chapter URL"
+url = "https://www.37yue.com/0/180/164267.html"
+book_id = "0-180"
+chapter_id = "164267"
+hidden = false
+
+[sites.bxwx9]
+name = "笔下文学网"
+homepage = "https://www.bxwx9.org/"
+alt_domains = []
+site_status = "active"
+description = """
+收录了当前最火热的免费小说，免费提供高质量的小说最新章节
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "笔趣阁"]
+
+[sites.bxwx9.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "yes"
+
+[[sites.bxwx9.url_examples]]
+title = "Book URL"
+url = "https://www.bxwx9.org/b/48/48453/"
+book_id = "48-48453"
+hidden = false
+
+[[sites.bxwx9.url_examples]]
+title = "Chapter URL"
+url = "https://www.bxwx9.org/b/48/48453/175908.html"
+book_id = "48-48453"
+chapter_id = "175908"
+hidden = false
+
+[sites.lvsewx]
+name = "绿色小说网"
+homepage = "https://www.lvsewx.cc/"
+alt_domains = []
+site_status = "active"
+description = """
+提供小说在线阅读，小说TXT下载，网站没有弹窗广告页面简洁。
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "笔趣阁"]
+
+[sites.lvsewx.supports]
+volumes = "no"
+images = "no"
+login = "no"
+search = "no"
+
+[[sites.lvsewx.url_examples]]
+title = "Book URL"
+url = "https://www.lvsewx.cc/ebook/20645.html"
+book_id = "20645"
+hidden = false
+
+[[sites.lvsewx.url_examples]]
+title = "Chapter URL"
+url = "https://www.lvscwx.cc/books/20/20645/7237914.html"
+book_id = "20645"
+chapter_id = "7237914"
+hidden = false
+
+[[sites.lvsewx.url_examples]]
+title = "Chapter URL"
+url = "https://www.lvscwx.cc/books/20/20645/558875637.html"
+book_id = "20645"
+chapter_id = "558875637"
+hidden = true
+
+[[sites.lvsewx.url_examples]]
+title = "Book URL"
+url = "https://www.lvsewx.cc/ebook/2527.html"
+book_id = "2527"
+hidden = true
+
+[[sites.lvsewx.url_examples]]
+title = "Chapter URL"
+url = "https://www.lvscwx.cc/books/2/2527/21204730.html"
+book_id = "2527"
+chapter_id = "21204730"
+hidden = true
+
+[[sites.lvsewx.url_examples]]
+title = "Chapter URL"
+url = "https://www.lvscwx.cc/books/2/2527/44184579.html"
+book_id = "2527"
+chapter_id = "44184579"
+hidden = true
+
+[[sites.lvsewx.url_examples]]
+title = "Book URL"
+url = "https://www.lvsewx.cc/ebook/56447362.html"
+book_id = "56447362"
+hidden = true
+
+[[sites.lvsewx.url_examples]]
+title = "Chapter URL"
+url = "https://www.lvscwx.cc/books/56447/56447362/509977888.html"
+book_id = "56447362"
+chapter_id = "509977888"
+hidden = true
+
+[[sites.lvsewx.url_examples]]
+title = "Chapter URL"
+url = "https://www.lvscwx.cc/books/56447/56447362/680168970.html"
+book_id = "56447362"
+chapter_id = "680168970"
+hidden = true
+
+[sites.shauthor]
+name = "大众文学"
+homepage = "https://m.shauthor.com/"
+alt_domains = []
+site_status = "active"
+description = """
+收录了当前最火热的网络小说，免费提供高质量的小说最新章节
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "笔趣阁"]
+
+[sites.shauthor.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "external"
+
+[[sites.shauthor.url_examples]]
+title = "Book URL"
+url = "https://m.shauthor.com/info_s5o/"
+book_id = "s5o"
+hidden = false
+
+[[sites.shauthor.url_examples]]
+title = "Chapter URL"
+url = "https://m.shauthor.com/read_s5o/jjhl0.html"
+book_id = "s5o"
+chapter_id = "jjhl0"
+hidden = false
+
+[[sites.shauthor.url_examples]]
+title = "Book URL"
+url = "https://m.shauthor.com/info_s5o/#"
+book_id = "s5o"
+hidden = true
+
+[[sites.shauthor.url_examples]]
+title = "Chapter URL"
+url = "https://m.shauthor.com/read_s5o/jjhl1_2.html"
+book_id = "s5o"
+chapter_id = "jjhl0"
+hidden = true
+
+[sites.yamibo]
+name = "百合会"
+homepage = "https://www.yamibo.com/site/novel"
+alt_domains = []
+site_status = "active"
+description = ""
+
+languages = ["zh-CN"]
+tags = ["同人二创", "原创"]
+
+[sites.yamibo.supports]
+volumes = "yes"
+images = "no"
+login = "yes"
+search = "external"
+
+[[sites.yamibo.url_examples]]
+title = "Book URL"
+url = "https://www.yamibo.com/novel/262117"
+book_id = "262117"
+hidden = false
+
+[[sites.yamibo.url_examples]]
+title = "Chapter URL"
+url = "https://www.yamibo.com/novel/view-chapter?id=38772952"
+chapter_id = "38772952"
+hidden = false
+
+[sites.zhenhunxiaoshuo]
+name = "镇魂小说网"
+homepage = "https://www.zhenhunxiaoshuo.com/"
+alt_domains = []
+site_status = "active"
+description = """
+大神级耽美小说作者Priest作品，本站提供镇魂小说全文免费在线阅读，包括轮回晷、山河锥、功德笔、前因大荒、镇魂灯、结局、番外。
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站"]
+
+[sites.zhenhunxiaoshuo.supports]
+volumes = "no"
+images = "no"
+login = "no"
+search = "external"
+
+[[sites.zhenhunxiaoshuo.url_examples]]
+title = "Book URL"
+url = "https://www.zhenhunxiaoshuo.com/modaozushi/"
+book_id = "modaozushi"
+hidden = false
+
+[[sites.zhenhunxiaoshuo.url_examples]]
+title = "Chapter URL"
+url = "https://www.zhenhunxiaoshuo.com/5419.html"
+chapter_id = "5419"
+hidden = false
+
+[sites.tongrenquan]
+name = "同人圈"
+homepage = "https://www.tongrenquan.org/"
+alt_domains = []
+site_status = "active"
+description = """
+同人圈提供热门好看的同人小说在线阅读和下载,是同人爱好者的家园
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "同人二创"]
+
+[sites.tongrenquan.supports]
+volumes = "no"
+images = "no"
+login = "no"
+search = "yes"
+
+[[sites.tongrenquan.url_examples]]
+title = "Book URL"
+url = "https://www.tongrenquan.org/tongren/7548.html"
+book_id = "7548"
+hidden = false
+
+[[sites.tongrenquan.url_examples]]
+title = "Chapter URL"
+url = "https://www.tongrenquan.org/tongren/7548/1.html"
+book_id = "7548"
+chapter_id = "1"
+hidden = false
+
+[sites.tongrenshe]
+name = "同人社"
+homepage = "https://tongrenshe.cc/"
+alt_domains = []
+site_status = "active"
+description = """
+同人社,同人爱好者创作和交流的圈子
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "同人二创"]
+
+[sites.tongrenshe.supports]
+volumes = "no"
+images = "no"
+login = "no"
+search = "yes"
+
+[[sites.tongrenshe.url_examples]]
+title = "Book URL"
+url = "https://tongrenshe.cc/tongren/8899.html"
+book_id = "8899"
+hidden = false
+
+[[sites.tongrenshe.url_examples]]
+title = "Chapter URL"
+url = "https://tongrenshe.cc/tongren/8899/1.html"
+book_id = "8899"
+chapter_id = "1"
+hidden = false
+
+[[sites.tongrenshe.notes]]
+title = "其它说明"
+content = """
+* 该站点直接提供 txt 下载。
+"""
+
+[sites.trxs]
+name = "同人小说网"
+homepage = "https://www.trxs.cc/"
+alt_domains = []
+site_status = "active"
+description = """
+同人小说网提供热门好看最新的同人小说在线阅读和下载,经典全本同人小说免费阅读和下载！
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "同人二创"]
+
+[sites.trxs.supports]
+volumes = "no"
+images = "no"
+login = "no"
+search = "yes"
+
+[[sites.trxs.url_examples]]
+title = "Book URL"
+url = "https://www.trxs.cc/tongren/6201.html"
+book_id = "6201"
+hidden = false
+
+[[sites.trxs.url_examples]]
+title = "Chapter URL"
+url = "https://www.trxs.cc/tongren/6201/1.html"
+book_id = "6201"
+chapter_id = "1"
+hidden = false
+
+[sites.qbtr]
+name = "全本同人小说"
+homepage = "https://www.qbtr.cc/"
+alt_domains = []
+site_status = "active"
+description = """
+全本同人小说网提供热门好看最新的同人小说在线阅读和下载,经典全本同人小说免费阅读和下载！
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站", "同人二创"]
+
+[sites.qbtr.supports]
+volumes = "no"
+images = "no"
+login = "no"
+search = "yes"
+
+[[sites.qbtr.url_examples]]
+title = "Book URL"
+url = "https://www.qbtr.cc/tongren/8978.html"
+book_id = "tongren-8978"
+hidden = false
+
+[[sites.qbtr.url_examples]]
+title = "Chapter URL"
+url = "https://www.qbtr.cc/tongren/8978/1.html"
+book_id = "tongren-8978"
+chapter_id = "1"
+hidden = false
+
+[[sites.qbtr.url_examples]]
+title = "Book URL"
+url = "https://www.qbtr.cc/changgui/9089.html"
+book_id = "changgui-9089"
+hidden = true
+
+[[sites.qbtr.url_examples]]
+title = "Chapter URL"
+url = "https://www.qbtr.cc/changgui/9089/1.html"
+book_id = "changgui-9089"
+chapter_id = "1"
+hidden = true
+
+[[sites.qbtr.notes]]
+title = "其它说明"
+content = """
+* 该站点直接提供 txt 下载。
+"""
+
+[sites.czbooks]
+name = "小说狂人"
+homepage = "https://czbooks.net/"
+alt_domains = []
+site_status = "active"
+description = ""
+
+languages = ["zh-TW"]
+tags = ["成人向", "NSFW"]
+
+[sites.czbooks.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "yes"
+
+[[sites.czbooks.url_examples]]
+title = "Book URL"
+url = "https://czbooks.net/n/dr4p0k7"
+book_id = "dr4p0k7"
+hidden = false
+
+[[sites.czbooks.url_examples]]
+title = "Chapter URL"
+url = "https://czbooks.net/n/dr4p0k7/drgkg7hgh?chapterNumber=0"
+book_id = "dr4p0k7"
+chapter_id = "drgkg7hgh"
+hidden = false
+
+[sites.xiguashuwu]
+name = "西瓜书屋"
+homepage = "https://www.xiguashuwu.com/"
+alt_domains = []
+site_status = "active"
+description = ""
+
+languages = ["zh-CN"]
+tags = ["转载站", "成人向", "NSFW"]
+
+[sites.xiguashuwu.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "yes"
+
+[[sites.xiguashuwu.url_examples]]
+title = "Book URL"
+url = "https://www.xiguashuwu.com/book/1234/iszip/1/"
+book_id = "1234"
+hidden = false
+
+[[sites.xiguashuwu.url_examples]]
+title = "TOC URL"
+url = "https://www.xiguashuwu.com/book/1234/catalog/"
+book_id = "1234"
+hidden = false
+
+[[sites.xiguashuwu.url_examples]]
+title = "Chapter URL"
+url = "https://www.xiguashuwu.com/book/1234/482.html"
+book_id = "1234"
+chapter_id = "482"
+hidden = false
+
+[[sites.xiguashuwu.url_examples]]
+title = "TOC URL"
+url = "https://www.xiguashuwu.com/book/1234/catalog/1.html"
+book_id = "1234"
+hidden = true
+
+[[sites.xiguashuwu.url_examples]]
+title = "Chapter URL"
+url = "https://www.xiguashuwu.com/book/1234/482_2.html"
+book_id = "1234"
+chapter_id = "482"
+hidden = true
+
+[sites.alicesw]
+name = "爱丽丝书屋"
+homepage = "https://www.alicesw.com/"
+alt_domains = []
+site_status = "active"
+description = ""
+
+languages = ["zh-CN"]
+tags = ["转载站", "成人向", "NSFW"]
+
+[sites.alicesw.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "yes"
+
+[[sites.alicesw.url_examples]]
+title = "Book URL"
+url = "https://www.alicesw.com/novel/46857.html"
+book_id = "46857"
+hidden = false
+
+[[sites.alicesw.url_examples]]
+title = "TOC URL"
+url = "https://www.alicesw.com/other/chapters/id/46857.html"
+book_id = "46857"
+hidden = false
+
+[[sites.alicesw.url_examples]]
+title = "Chapter URL"
+url = "https://www.alicesw.com/book/48247/563ed665333ad.html"
+chapter_id = "48247-563ed665333ad"
+hidden = false
+
+[sites.haiwaishubao]
+name = "海外书包"
+homepage = "https://www.haiwaishubao.com/"
+alt_domains = []
+site_status = "active"
+description = ""
+
+languages = ["zh-CN"]
+tags = ["转载站", "成人向", "NSFW"]
+
+[sites.haiwaishubao.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "yes"
+
+[[sites.haiwaishubao.url_examples]]
+title = "Book URL"
+url = "https://www.haiwaishubao.com/book/102659/"
+book_id = "102659"
+hidden = false
+
+[[sites.haiwaishubao.url_examples]]
+title = "TOC URL"
+url = "https://www.haiwaishubao.com/index/102659/"
+book_id = "102659"
+hidden = false
+
+[[sites.haiwaishubao.url_examples]]
+title = "Chapter URL"
+url = "https://www.haiwaishubao.com/book/102659/5335635.html"
+book_id = "102659"
+chapter_id = "5335635"
+hidden = false
+
+[[sites.haiwaishubao.url_examples]]
+title = "TOC URL"
+url = "https://www.haiwaishubao.com/index/102659/2/"
+book_id = "102659"
+hidden = true
+
+[[sites.haiwaishubao.url_examples]]
+title = "Chapter URL"
+url = "https://www.haiwaishubao.com/book/102659/5335635_2.html"
+book_id = "102659"
+chapter_id = "5335635"
+hidden = true
+
+[sites.hongxiuzhao]
+name = "红袖招"
+homepage = "https://hongxiuzhao.net/"
+alt_domains = []
+site_status = "active"
+description = ""
+
+languages = ["zh-CN"]
+tags = ["成人向", "NSFW"]
+
+[sites.hongxiuzhao.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "external"
+
+[[sites.hongxiuzhao.url_examples]]
+title = "Book URL"
+url = "https://hongxiuzhao.net/ZG6rmWO.html"
+book_id = "ZG6rmWO"
+hidden = false
+
+[[sites.hongxiuzhao.url_examples]]
+title = "Chapter URL"
+url = "https://hongxiuzhao.net/aBKBVz6a.html"
+chapter_id = "aBKBVz6a"
+hidden = false
+
+[sites.uaa]
+name = "有爱爱"
+homepage = "https://www.uaa.com/"
+alt_domains = []
+site_status = "active"
+description = ""
+
+languages = ["zh-CN"]
+tags = ["成人向", "NSFW"]
+
+[sites.uaa.supports]
+volumes = "yes"
+images = "no"
+login = "yes"
+search = "external"
+
+[[sites.uaa.url_examples]]
+title = "Book URL"
+url = "https://www.uaa.com/novel/intro?id=11304099"
+book_id = "11304099"
+hidden = false
+
+[[sites.uaa.url_examples]]
+title = "Chapter URL"
+url = "https://www.uaa.com/novel/chapter?id=234639"
+chapter_id = "234639"
+hidden = false
+
+[sites.mjyhb]
+name = "三五中文"
+homepage = "https://m.mjyhb.com/"
+alt_domains = []
+site_status = "active"
+description = ""
+
+languages = ["zh-CN"]
+tags = ["转载站", "成人向", "NSFW"]
+
+[sites.mjyhb.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "external"
+
+[[sites.mjyhb.url_examples]]
+title = "Book URL"
+url = "https://m.mjyhb.com/info_3119/"
+book_id = "3119"
+hidden = false
+
+[[sites.mjyhb.url_examples]]
+title = "Chapter URL"
+url = "https://m.mjyhb.com/read_3119/62d0d.html"
+book_id = "3119"
+chapter_id = "62d0d"
+hidden = false
+
+[[sites.mjyhb.url_examples]]
+title = "Book URL"
+url = "https://m.mjyhb.com/info_3119/#"
+book_id = "3119"
+hidden = true
+
+[[sites.mjyhb.url_examples]]
+title = "Chapter URL"
+url = "https://m.mjyhb.com/read_3119/62d0d_2.html"
+book_id = "3119"
+chapter_id = "62d0d"
+hidden = false
+
+[sites.aaatxt]
+name = "3A电子书"
+homepage = "http://www.aaatxt.com/"
+alt_domains = []
+site_status = "archived"
+description = ""
+
+languages = ["zh-CN"]
+tags = ["转载站", "成人向", "NSFW"]
+
+[sites.aaatxt.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "yes"
+
+[[sites.aaatxt.url_examples]]
+title = "Book URL"
+url = "http://www.aaatxt.com/shu/24514.html"
+book_id = "24514"
+hidden = false
+
+[[sites.aaatxt.url_examples]]
+title = "Chapter URL"
+url = "http://www.aaatxt.com/yuedu/24514_1.html"
+book_id = "24514"
+chapter_id = "24514_1"
+hidden = false
+
+[[sites.aaatxt.notes]]
+title = "其它说明"
+content = """
+* 该站点直接提供 txt 下载。
+"""
+
+[sites.n8tsw]
+name = "笔趣阁"
+homepage = "https://www.8tsw.com/"
+alt_domains = []
+site_status = "archived"
+description = ""
+
+languages = ["zh-CN"]
+tags = ["转载站", "笔趣阁"]
+
+[sites.n8tsw.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "external"
+
+[[sites.n8tsw.url_examples]]
+title = "Book URL"
+url = "https://www.8tsw.com/0_1/"
+book_id = "0_1"
+hidden = false
+
+[[sites.n8tsw.url_examples]]
+title = "Chapter URL"
+url = "https://www.8tsw.com/0_1/1.html"
+book_id = "0_1"
+chapter_id = "1"
+hidden = false
+
+[sites.biquyuedu]
+name = "精彩小说"
+homepage = "https://biquyuedu.com/"
+alt_domains = []
+site_status = "archived"
+description = """
+精彩小说网，免费小说阅读网站，提供在线阅读以及免费下载。
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站"]
+
+[sites.biquyuedu.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "no"
+
+[[sites.biquyuedu.url_examples]]
+title = "Book URL"
+url = "https://biquyuedu.com/novel/GDr1I1.html"
+book_id = "GDr1I1"
+hidden = false
+
+[[sites.biquyuedu.url_examples]]
+title = "Chapter URL"
+url = "https://biquyuedu.com/novel/GDr1I1/1.html"
+book_id = "GDr1I1"
+chapter_id = "1"
+hidden = false
+
+[sites.deqixs]
+name = "得奇小说网"
+homepage = "https://www.deqixs.com/"
+alt_domains = []
+site_status = "archived"
+description = ""
+
+languages = ["zh-CN"]
+tags = ["转载站"]
+
+[sites.deqixs.supports]
+volumes = "no"
+images = "no"
+login = "no"
+search = "yes"
+
+[[sites.deqixs.url_examples]]
+title = "Book URL"
+url = "https://www.deqixs.com/xiaoshuo/2026/"
+book_id = "2026"
+hidden = false
+
+[[sites.deqixs.url_examples]]
+title = "Chapter URL"
+url = "https://www.deqixs.com/xiaoshuo/2026/1969933.html"
+book_id = "2026"
+chapter_id = "1969933"
+hidden = false
+
+[[sites.deqixs.notes]]
+title = "其它说明"
+content = """
+* 该站点直接提供 txt 下载。
+* 每章节分页过多, 每页内容较少, 推荐适当降低请求间隔
+"""
+
+[sites.xiaoshuoge]
+name = "小说屋"
+homepage = "http://www.xiaoshuoge.info/"
+alt_domains = []
+site_status = "archived"
+description = ""
+
+languages = ["zh-CN"]
+tags = ["转载站"]
+
+[sites.xiaoshuoge.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "yes"
+
+[[sites.xiaoshuoge.url_examples]]
+title = "Book URL"
+url = "http://www.xiaoshuoge.info/html/987/987654/"
+book_id = "987-987654"
+hidden = false
+
+[[sites.xiaoshuoge.url_examples]]
+title = "Chapter URL"
+url = "http://www.xiaoshuoge.info/html/987/987654/123456789.html"
+book_id = "987-987654"
+chapter_id = "123456789"
+hidden = false
+
+[sites.xs63b]
+name = "小说路上"
+homepage = "https://m.xs63b.com/"
+alt_domains = []
+site_status = "archived"
+description = ""
+
+languages = ["zh-CN"]
+tags = ["转载站"]
+
+[sites.xs63b.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "yes"
+
+[[sites.xs63b.url_examples]]
+title = "Book URL"
+url = "https://m.xs63b.com/xuanhuan/aoshijiuzhongtian/"
+book_id = "xuanhuan-aoshijiuzhongtian"
+hidden = false
+
+[[sites.xs63b.url_examples]]
+title = "Chapter URL"
+url = "https://m.xs63b.com/xuanhuan/aoshijiuzhongtian/8748062.html"
+book_id = "xuanhuan-aoshijiuzhongtian"
+chapter_id = "8748062"
+hidden = false
+
+[[sites.xs63b.notes]]
+title = "其它说明"
+content = """
+* 桌面端页面部分章节缺页, 移动端正常
+"""
+
+[sites.wanbengo]
+name = "完本神站"
+homepage = "https://www.wanbengo.com/"
+alt_domains = []
+site_status = "archived"
+description = """
+提供优质网络小说阅读，免费小说、完本小说在线阅读，热门言情小说、玄幻小说、仙侠小说、武侠小说、穿越小说、都市小说免费在线阅读。
+"""
+
+languages = ["zh-CN"]
+tags = ["转载站"]
+
+[sites.wanbengo.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "yes"
+
+[[sites.wanbengo.url_examples]]
+title = "Book URL"
+url = "https://www.wanbengo.com/1/"
+book_id = "1"
+hidden = false
+
+[[sites.wanbengo.url_examples]]
+title = "Chapter URL"
+url = "https://www.wanbengo.com/1/2.html"
+book_id = "1"
+chapter_id = "2"
+hidden = false
+
+[[sites.wanbengo.notes]]
+title = "归档原因"
+content = """
+页面内容存在严重质量问题, 包括但不限于:
+
+* 乱码过多: 例如 `?i~n￠j^i?a` 或多段连续无意义字符, 导致正文可读性极差
+* 结构混乱: HTML 标签嵌套不规范, 正文段落交错混乱
+* 来源异常: 文本中混入大量 HTML 实体, 以及明显来自其他小说网站的段落
+"""
+
+[sites.n69yue]
+name = "69阅读"
+homepage = "https://www.69yue.top/index.html"
+alt_domains = []
+site_status = "archived"
+description = ""
+
+languages = ["zh-CN"]
+tags = ["转载站"]
+
+[sites.n69yue.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "yes"
+
+[[sites.n69yue.url_examples]]
+title = "Book URL"
+url = "https://www.69yue.top/articlecategroy/15yu.html"
+book_id = "15yu"
+hidden = false
+
+[[sites.n69yue.url_examples]]
+title = "TOC URL"
+url = "https://www.69yue.top/mulu.html?pid=15yu"
+book_id = "15yu"
+hidden = false
+
+[[sites.n69yue.url_examples]]
+title = "Chapter URL"
+url = "https://www.69yue.top/article/15185363014257741.html"
+chapter_id = "15185363014257741"
+hidden = false
+
+[sites.syosetu]
+name = "小説家になろう / 小説を読もう！"
+homepage = "https://syosetu.com/"
+alt_domains = ["https://ncode.syosetu.com/", "https://yomou.syosetu.com/"]
+site_status = "active"
+description = """
+日本最大級のWeb小説投稿サイト。作品数100万以上、完全無料で閲覧可能。
+
+異世界、ファンタジー、恋愛、SF、ミステリーなど幅広いジャンルの投稿作品を掲載。
+"""
+
+languages = ["ja"]
+tags = ["原创", "免费", "轻小说"]
+
+[sites.syosetu.supports]
+volumes = "yes"
+images = "yes"
+login = "partial"
+search = "external"
+
+[[sites.syosetu.url_examples]]
+title = "Book URL"
+url = "https://ncode.syosetu.com/n9584gd/"
+book_id = "n9584gd"
+hidden = false
+
+[[sites.syosetu.url_examples]]
+title = "Chapter URL"
+url = "https://ncode.syosetu.com/n9584gd/1/"
+book_id = "n9584gd"
+chapter_id = "1"
+hidden = false
+
+[sites.syosetu18]
+name = "小説家になろう 18禁区 (ムーンライト / ノクターン)"
+homepage = "https://novel18.syosetu.com/"
+alt_domains = ["https://mnlt.syosetu.com/", "https://noc.syosetu.com/"]
+site_status = "active"
+description = """
+小説家になろうの18禁エリア。ムーンライト（女性向け）とノクターン（男性向け）
+
+の両方を含み、官能系・成人向けの作品を多数掲載。
+"""
+
+languages = ["ja"]
+tags = ["原创", "免费", "成人向", "NSFW"]
+
+[sites.syosetu18.supports]
+volumes = "yes"
+images = "yes"
+login = "partial"
+search = "external"
+
+[[sites.syosetu18.url_examples]]
+title = "Moonlight Book URL"
+url = "https://novel18.syosetu.com/n2976io/"
+book_id = "n2976io"
+hidden = false
+
+[[sites.syosetu18.url_examples]]
+title = "Moonlight Chapter URL"
+url = "https://novel18.syosetu.com/n2976io/1/"
+book_id = "n2976io"
+chapter_id = "1"
+hidden = false
+
+[[sites.syosetu18.url_examples]]
+title = "Nocturne Book URL"
+url = "https://novel18.syosetu.com/n8543hb/"
+book_id = "n8543hb"
+hidden = false
+
+[[sites.syosetu18.url_examples]]
+title = "Nocturne Chapter URL"
+url = "https://novel18.syosetu.com/n8543hb/1/"
+book_id = "n8543hb"
+chapter_id = "1"
+hidden = false
+
+[sites.syosetu_org]
+name = "ハーメルン"
+homepage = "https://syosetu.org/"
+alt_domains = []
+site_status = "active"
+description = """
+二次創作中心のWeb小説投稿サイト。アニメ・漫画などのFanFictionが多数。
+"""
+
+languages = ["ja"]
+tags = ["原创", "免费", "同人二创", "转载站"]
+
+[sites.syosetu_org.supports]
+volumes = "yes"
+images = "no"
+login = "partial"
+search = "external"
+
+[[sites.syosetu_org.url_examples]]
+title = "Book URL"
+url = "https://syosetu.org/novel/292891/"
+book_id = "292891"
+hidden = false
+
+[[sites.syosetu_org.url_examples]]
+title = "Chapter URL"
+url = "https://syosetu.org/novel/292891/1.html"
+book_id = "292891"
+chapter_id = "1"
+hidden = false
+
+[sites.akatsuki_novels]
+name = "暁 ～小説投稿サイト～"
+homepage = "https://www.akatsuki-novels.com/"
+alt_domains = []
+site_status = "active"
+description = """
+二次創作・オリジナル作品の投稿サイト。FF・SS形式が多い。
+"""
+
+languages = ["ja"]
+tags = ["原创", "免费", "同人二创"]
+
+[sites.akatsuki_novels.supports]
+volumes = "no"
+images = "no"
+login = "partial"
+search = "external"
+
+[[sites.akatsuki_novels.url_examples]]
+title = "Book URL"
+url = "https://www.akatsuki-novels.com/stories/index/novel_id~103"
+book_id = "103"
+hidden = false
+
+[[sites.akatsuki_novels.url_examples]]
+title = "Chapter URL"
+url = "https://www.akatsuki-novels.com/stories/view/163722/novel_id~103"
+book_id = "103"
+chapter_id = "163722"
+hidden = false
+
+[sites.alphapolis]
+name = "アルファポリス"
+homepage = "https://www.alphapolis.co.jp/"
+alt_domains = []
+site_status = "active"
+description = """
+小説・漫画の投稿＆閲覧サイト。ライトノベル・異世界・恋愛系の人気作品が多数。
+"""
+
+languages = ["ja"]
+tags = ["原创", "免费", "轻小说"]
+
+[sites.alphapolis.supports]
+volumes = "yes"
+images = "no"
+login = "partial"
+search = "external"
+
+[[sites.alphapolis.url_examples]]
+title = "Book URL"
+url = "https://www.alphapolis.co.jp/novel/547686423/112003230"
+book_id = "547686423-112003230"
+hidden = false
+
+[[sites.alphapolis.url_examples]]
+title = "Chapter URL"
+url = "https://www.alphapolis.co.jp/novel/547686423/112003230/episode/10322710"
+book_id = "547686423-112003230"
+chapter_id = "10322710"
+hidden = false
+
+[sites.novelpia]
+name = "ノベルピア"
+homepage = "https://novelpia.jp/"
+alt_domains = []
+site_status = "active"
+description = """
+人気WEB小説が読み放題の投稿サイト。一般向けから刺激的な作品まで幅広く掲載。
+"""
+
+languages = ["ja"]
+tags = ["原创", "免费", "轻小说", "成人向", "NSFW"]
+
+[sites.novelpia.supports]
+volumes = "no"
+images = "yes"
+login = "partial"
+search = "external"
+
+[[sites.novelpia.url_examples]]
+title = "Book URL"
+url = "https://novelpia.jp/novel/2393"
+book_id = "2393"
+hidden = false
+
+[[sites.novelpia.url_examples]]
+title = "Chapter URL"
+url = "https://novelpia.jp/viewer/51118"
+chapter_id = "51118"
+hidden = false
+
+[[sites.novelpia.url_examples]]
+title = "Book URL"
+url = "https://novelpia.jp/novel/2393?sid=main5"
+book_id = "2393"
+hidden = true
+
+[[sites.novelpia.url_examples]]
+title = "Book URL"
+url = "https://novelpia.jp/novel/2749"
+book_id = "2749"
+hidden = true

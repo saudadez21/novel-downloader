@@ -1,3 +1,8 @@
+---
+title: Linovelib Web Analysis Notes
+date: 2025-10-06
+---
+
 # 哔哩轻小说 (linovelib) 分析笔记
 
 创建日期: 2025/05/25
@@ -8,7 +13,7 @@
 
 ### 一、`pctheme.js` 的正则替换映射
 
-`pctheme.js` 中包含形如 "链式 `replace(new RegExp(…) , '…')`" 的批量替换，约 100 对。
+`pctheme.js` 中包含形如 "链式 `replace(new RegExp(...) , '...')`" 的批量替换，约 100 对。
 
 例如:
 
@@ -247,7 +252,7 @@ if __name__ == "__main__":
     image.show()
 ```
 
-![font_sample](../images/linovelib_read_font_sample.png)
+![font_sample](../assets/images/linovelib_read_font_sample.png)
 
 观察可见:
 
@@ -382,7 +387,8 @@ print(f"共提取到 {len(read_chars)} 个字符")
 
 经优化后，预估耗时由约 8 小时降至约 1 分钟 (环境相关)。
 
-核心脚本:
+<details>
+<summary>核心脚本 (点击展开)</summary>
 
 ```python
 #!/usr/bin/env python3
@@ -633,13 +639,15 @@ if __name__ == "__main__":
     Path("unmatched_from_ttx.json").write_text(json.dumps(unmatched, ensure_ascii=False, indent=2), encoding="utf-8")
 ```
 
+</details>
+
 **匹配结果与验证**
 
 经过完整比对后，初步得到 **3513** 对映射关系，并有 **93** 项未找到对应字形。
 
 随后将这 **93 项** 分别通过 HTML 对照方式，用 `read.ttf` 与原字体 (`MI LANTING.ttf`) 同时渲染同一段字符，人工对比结果如下:
 
-* 其中 **122 项** 实际上是正常可见字符 (并非混淆映射目标)
+* 其中 **91 项** 实际上是正常可见字符 (并非混淆映射目标)
 * 仅有 **2 项** 确认为真实的映射缺口
 
 这两项缺口手动补全如下:
