@@ -60,7 +60,7 @@
 pip install -U novel-downloader
 ```
 
-如需启用字体解密 / 图片转文字 (`enable_ocr`), 请参见: [安装](docs/1-installation.md)
+如需启用字体解密 / 图片转文字 (`enable_ocr`), 请参见: [安装](docs/guide/installation.md)
 
 ---
 
@@ -85,11 +85,11 @@ novel-cli config init
 
 生成 `settings.toml` 后可编辑 `request_interval`、`book_ids` 等参数。
 
-详见: [settings.toml 配置说明](docs/3-settings-schema.md)
+详见: [settings.toml 配置说明](docs/guide/settings-reference.md)
 
 ### 2. 命令行 (CLI)
 
-![cli_download](./docs/assets/images/cli_download.gif)
+![cli_download](docs/assets/images/cli_download.gif)
 
 常用示例:
 
@@ -111,8 +111,8 @@ novel-cli --help
 novel-cli download --help
 ```
 
-* 支持站点见: [支持站点列表](docs/4-supported-sites.md)
-* 更多示例见: [CLI 使用示例](docs/5-cli-usage-examples.md)
+* 支持站点见: [支持站点列表](docs/supported-sites/index.md)
+* 更多示例见: [CLI 使用示例](docs/guide/cli-examples.md)
 * 运行中可使用 `CTRL+C` 取消任务
 
 ### 3. 图形界面 (Web GUI)
@@ -145,8 +145,8 @@ novel-web --listen public
 
 #### 3.3 更多资料
 
-* 支持站点见: [支持站点列表](docs/4-supported-sites.md)
-* 更多示例见: [WEB 使用示例](docs/6-web-usage-examples.md)
+* 支持站点见: [支持站点列表](docs/supported-sites/index.md)
+* 更多示例见: [WEB 使用示例](docs/guide/web-examples.md)
 
 ### 4. 编程接口 (Programmatic API)
 
@@ -189,7 +189,7 @@ if __name__ == "__main__":
 
 处理顺序可配置, 并可生成中间产物用于导出
 
-> 详细配置示例见: [processors 配置](./docs/3-settings-schema.md#processors-配置)
+> 详细配置示例见: [processors 配置](docs/guide/processors-reference.md)
 
 ---
 
@@ -205,7 +205,7 @@ if __name__ == "__main__":
 novel-cli download --site ciweimao 123456
 ```
 
-> 详见: [插件系统文档](./docs/plugins.md)
+> 详见: [插件系统文档](docs/reference/plugins.md)
 
 ---
 
@@ -229,8 +229,8 @@ pip install .
 ## 常见问题 / 排错
 
 * **网站结构变更导致解析失败**: 请更新至最新版或按站点文档自定义适配。
-* **需要登录的站点**: 参考 [复制 Cookies](docs/copy-cookies.md)。
-* **导出文件位置**: 见 [文件保存](docs/file-saving.md#downloads)。
+* **需要登录的站点**: 参考 [复制 Cookies](docs/guide/copy-cookies.md)。
+* **导出文件位置**: 见 [文件保存](docs/guide/file-saving.md)。
 
 ---
 
