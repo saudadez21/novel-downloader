@@ -1,0 +1,2240 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="NovelDownloader: A toolkit for downloading and processing novels.">
+      
+      
+        <meta name="author" content="Saudade Z">
+      
+      
+      
+        <link rel="prev" href="../qidian_app/">
+      
+      
+        <link rel="next" href="../xiguashuwu/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/logo.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+    
+    
+      
+        <title>Qidian Web Analysis Notes - NovelDownloader</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.618322db.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#web" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="NovelDownloader" class="md-header__button md-logo" aria-label="NovelDownloader" data-md-component="logo">
+      
+  <img src="../../assets/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            NovelDownloader
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Qidian Web Analysis Notes
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_1">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/saudadez21/novel-downloader" title="Go to repository" class="md-source" data-md-component="source" target="_blank" rel="noopener">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    NovelDownloader
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guide/installation/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../supported-sites/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Supported Sites
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/api-examples/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../aes/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Notes
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../misc/todo/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Misc
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="NovelDownloader" class="md-nav__button md-logo" aria-label="NovelDownloader" data-md-component="logo">
+      
+  <img src="../../assets/logo.svg" alt="logo">
+
+    </a>
+    NovelDownloader
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/saudadez21/novel-downloader" title="Go to repository" class="md-source" data-md-component="source" target="_blank" rel="noopener">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    NovelDownloader
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/settings-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/processors-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Processors Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/cli-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/web-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Web Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/file-saving/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File Saving
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/copy-cookies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Copy Cookies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../supported-sites/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Supported Sites
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Supported Sites
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../supported-sites/tags/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tags
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/api-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/plugins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Plugins
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notes
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Notes
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../aes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AES Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../duokan_epub/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Duokan EPUB Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faloo_web/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Faloo Web Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../linovelib/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linovelib Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parse_js_iife/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JS IIFE Parsing Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../qidian_app/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Qidian App Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Qidian Web Notes
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Qidian Web Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        一、反调试
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="一、反调试">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        规避方式 (仅供研究学习)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="规避方式 (仅供研究学习)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-devtools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        方法 1: 在 DevTools 中手动禁用断点
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        方法 2: 屏蔽断点相关脚本文件的加载
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-hook-debugger" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        方法 3: hook 掉 debugger 的构造函数
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cookies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        二、Cookies 参数分析
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        三、章节内容解析
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="三、章节内容解析">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        数据结构与字段说明
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        加密判断逻辑
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        解密逻辑分析
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        四、字体加密内容复原方案
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="四、字体加密内容复原方案">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-css" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. CSS 级混淆分析
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 字体文件加密
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. 字体文件加密">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        字体还原思路与映射建立
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        五、章节重复内容的异常与修复方法
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="五、章节重复内容的异常与修复方法">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        表现形式
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        示例
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        修复方法
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="修复方法">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        策略说明
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../xiguashuwu/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Xiguashuwu Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Misc
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Misc
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misc/todo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TODO
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        一、反调试
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="一、反调试">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        规避方式 (仅供研究学习)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="规避方式 (仅供研究学习)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-devtools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        方法 1: 在 DevTools 中手动禁用断点
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        方法 2: 屏蔽断点相关脚本文件的加载
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-hook-debugger" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        方法 3: hook 掉 debugger 的构造函数
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cookies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        二、Cookies 参数分析
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        三、章节内容解析
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="三、章节内容解析">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        数据结构与字段说明
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        加密判断逻辑
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        解密逻辑分析
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        四、字体加密内容复原方案
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="四、字体加密内容复原方案">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-css" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. CSS 级混淆分析
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 字体文件加密
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. 字体文件加密">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        字体还原思路与映射建立
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        五、章节重复内容的异常与修复方法
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="五、章节重复内容的异常与修复方法">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        表现形式
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        示例
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        修复方法
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="修复方法">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        策略说明
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/saudadez21/novel-downloader/edit/main/docs/notes/qidian_web.md" title="Edit this page" class="md-content__button md-icon" rel="edit noopener" target="_blank">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="web">起点小说 Web 端分析笔记<a class="headerlink" href="#web" title="Permanent link">&para;</a></h1>
+<p>创建日期: 2025/06/07</p>
+<h2 id="_1">一、反调试<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p>网站实现了基于 JavaScript 的调试陷阱 (debugger trap) 作为反调试手段。</p>
+<p>当浏览器开发者工具 (DevTools) 被打开时, 脚本中的 debugger 语句会被触发, 导致执行自动暂停, 干扰正常调试过程。</p>
+<p>示例代码:</p>
+<div class="highlight"><pre><span></span><code><span class="p">(</span><span class="kd">function</span><span class="w"> </span><span class="nx">anonymous</span><span class="p">(</span>
+<span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="k">debugger</span>
+<span class="p">})</span>
+</code></pre></div>
+<h3 id="_2">规避方式 (仅供研究学习)<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<blockquote>
+<p>请合理使用调试工具应遵守相关法律法规及道德准则, 不得用于任何形式的恶意行为。</p>
+</blockquote>
+<h4 id="1-devtools">方法 1: 在 DevTools 中手动禁用断点<a class="headerlink" href="#1-devtools" title="Permanent link">&para;</a></h4>
+<p>可通过开发者工具 <code>Sources</code> 面板中的 <code>Deactivate breakpoints</code> 功能 (快捷键 <code>Ctrl + F8</code>) 来全局禁用所有断点。然后通过 <code>F8</code> (Resume script execution) 继续。</p>
+<blockquote>
+<p>注意: 该方法会同时使你手动设置的断点失效</p>
+</blockquote>
+<h4 id="2">方法 2: 屏蔽断点相关脚本文件的加载<a class="headerlink" href="#2" title="Permanent link">&para;</a></h4>
+<p>可借助浏览器插件对关键 JavaScript 文件进行请求重定向, 阻止其加载。</p>
+<p>例如使用插件 <a href="https://chromewebstore.google.com/detail/requestly-opensource-web/mdnleldcmiljblolnjhpnblkcekpdkpa" target="_blank" rel="noopener">Requestly: OpenSource Web Development Toolkit</a>, 创建重定向规则, 将包含 <code>probev3.js</code> 的请求 URL 都指向一个不可访问或不存在的地址, 例如 <code>http://192.168.0.102:8080/probev3.js</code>。</p>
+<blockquote>
+<p>提示: 目标文件不需要真实存在, 只需确保其无法被正常加载即可实现拦截效果。</p>
+</blockquote>
+<h4 id="3-hook-debugger">方法 3: hook 掉 debugger 的构造函数<a class="headerlink" href="#3-hook-debugger" title="Permanent link">&para;</a></h4>
+<h2 id="cookies">二、Cookies 参数分析<a class="headerlink" href="#cookies" title="Permanent link">&para;</a></h2>
+<p>在处理相关请求参数时, 参考了已有的分析成果, 结合实际测试后发现可直接复用其逻辑进行构造与使用。</p>
+<p>参考资料:</p>
+<ul>
+<li><a href="https://www.52pojie.cn/thread-1916130-1-1.html" target="_blank" rel="noopener">某蜂窝w_tsfp参数分析-kylin1020-吾爱破解</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/693729324" target="_blank" rel="noopener">某蜂窝w_tsfp参数分析-kylin1020-知乎</a></li>
+</ul>
+<p>技术要点小结:</p>
+<ul>
+<li>参数 <code>w_tsfp</code> 使用了 RC4 加密算法</li>
+<li>每次请求时, 前端会基于当前时间戳动态生成原始数据</li>
+<li>随后使用固定的密钥 (key) 对其进行 RC4 加密, 生成新的加密字符串</li>
+<li>该加密结果作为 <code>w_tsfp</code> 值, 附加至请求的 Cookie 中, 实现验证机制</li>
+</ul>
+<h2 id="_3">三、章节内容解析<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<p>在请求小说章节时, 页面中的主要数据通常嵌入在以下标签中:</p>
+<div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">script</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;vite-plugin-ssr_pageContext&quot;</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;application/json&quot;</span><span class="p">&gt;...&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</code></pre></div>
+<p>该标签内包含完整的 SSR (Server-Side Rendering) 上下文数据, JavaScript 运行时会基于该 JSON 内容进行页面渲染。因此, 在解析页面时可以直接提取并解析其中的 JSON 数据。</p>
+<p>示例代码:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">lxml</span><span class="w"> </span><span class="kn">import</span> <span class="n">html</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">find_ssr_page_context</span><span class="p">(</span><span class="n">html_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract SSR JSON from &lt;script id=&quot;vite-plugin-ssr_pageContext&quot;&gt;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">html_str</span><span class="p">)</span>
+        <span class="n">script</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s1">&#39;//script[@id=&quot;vite-plugin-ssr_pageContext&quot;]/text()&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">script</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">script</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+            <span class="k">return</span> <span class="n">data</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">return</span> <span class="p">{}</span>
+</code></pre></div>
+<h3 id="_4">数据结构与字段说明<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<p>其中的 <code>content</code> 字段为章节正文的 HTML 内容, 其他相关字段如下:</p>
+<div class="highlight"><pre><span></span><code><span class="n">page_context</span> <span class="o">=</span> <span class="n">ssr_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;pageContext&quot;</span><span class="p">,</span> <span class="p">{})</span>
+<span class="n">page_props</span> <span class="o">=</span> <span class="n">page_context</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;pageProps&quot;</span><span class="p">,</span> <span class="p">{})</span>
+<span class="n">page_data</span> <span class="o">=</span> <span class="n">page_props</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;pageData&quot;</span><span class="p">,</span> <span class="p">{})</span>
+<span class="n">chapter_info</span> <span class="o">=</span> <span class="n">page_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;chapterInfo&quot;</span><span class="p">,</span> <span class="p">{})</span>
+
+<span class="c1"># 正文 HTML</span>
+<span class="n">raw_html</span> <span class="o">=</span> <span class="n">chapter_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+<span class="c1"># 解密相关字段</span>
+<span class="n">chapter_id</span> <span class="o">=</span> <span class="n">chapter_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;chapterId&quot;</span><span class="p">,</span> <span class="n">chapter_id</span><span class="p">)</span>
+<span class="n">fkp</span> <span class="o">=</span> <span class="n">chapter_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;fkp&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="n">fuid</span> <span class="o">=</span> <span class="n">cookie</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ywguid&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>  <span class="c1"># 登录后的 cookie 中包含的身份标识</span>
+
+<span class="c1"># 字体混淆及样式相关</span>
+<span class="n">css_str</span> <span class="o">=</span> <span class="n">chapter_info</span><span class="p">[</span><span class="s2">&quot;css&quot;</span><span class="p">]</span>
+<span class="n">randomFont_str</span> <span class="o">=</span> <span class="n">chapter_info</span><span class="p">[</span><span class="s2">&quot;randomFont&quot;</span><span class="p">]</span>
+<span class="n">fixedFontWoff2_url</span> <span class="o">=</span> <span class="n">chapter_info</span><span class="p">[</span><span class="s2">&quot;fixedFontWoff2&quot;</span><span class="p">]</span>
+
+<span class="c1"># 状态标识</span>
+<span class="n">is_buy</span> <span class="o">=</span> <span class="n">chapter_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;isBuy&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">vip_flag</span> <span class="o">=</span> <span class="n">chapter_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;vipStatus&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">fens_flag</span> <span class="o">=</span> <span class="n">chapter_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;fEnS&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">ces_flag</span> <span class="o">=</span> <span class="n">chapter_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cES&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="_5">加密判断逻辑<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<p>章节内容的可读性取决于以下几个状态位的组合:</p>
+<ul>
+<li><code>vip_flag == 0</code> 且 <code>fens_flag == 0</code>: 内容未加密, 可直接解析并提取 <code>&lt;p&gt;</code> 标签段落。</li>
+<li><code>vip_flag == 1</code> 且 <code>fens_flag == 1</code>: 内容经过加密, 需通过特定方式解密后提取段落。</li>
+<li><code>ces_flag == 2</code>: 开启字体加密, 解密流程除正文外还需处理字体映射关系。</li>
+</ul>
+<blockquote>
+<p>注: 上述标识位也可统一用 <code>!= 0</code> 进行判断</p>
+</blockquote>
+<hr />
+<h3 id="_6">解密逻辑分析<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<p>通过浏览器断点调试可发现, 解密核心逻辑集中于 <code>4819793b.qeooxh.js</code> 中, 主要由 <code>chunk-476a3f3b.js</code> 内以下函数调用:</p>
+<div class="highlight"><pre><span></span><code><span class="kd">function</span><span class="w"> </span><span class="nx">initFock</span><span class="p">(</span><span class="nx">userKey</span><span class="p">,</span><span class="w"> </span><span class="nx">fkp</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nb">window</span><span class="p">.</span><span class="nx">Fock</span><span class="p">)</span>
+<span class="w">        </span><span class="k">throw</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="s2">&quot;missing Fock&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="nb">window</span><span class="p">.</span><span class="nx">Fock</span><span class="p">.</span><span class="nx">initialize</span><span class="p">(),</span>
+<span class="w">    </span><span class="nb">window</span><span class="p">.</span><span class="nx">Fock</span><span class="p">.</span><span class="nx">setupUserKey</span><span class="p">(</span><span class="nx">userKey</span><span class="p">),</span>
+<span class="w">    </span><span class="nx">fkp</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">eval</span><span class="p">(</span><span class="nx">atob</span><span class="p">(</span><span class="nx">fkp</span><span class="p">))</span>
+<span class="p">}</span>
+<span class="kd">function</span><span class="w"> </span><span class="nx">unlockFock</span><span class="p">(</span><span class="nx">e</span><span class="p">,</span><span class="w"> </span><span class="nx">t</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Promise</span><span class="p">((</span><span class="kd">function</span><span class="p">(</span><span class="nx">n</span><span class="p">,</span><span class="w"> </span><span class="nx">o</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="kd">var</span><span class="w"> </span><span class="nx">r</span><span class="p">;</span>
+<span class="w">            </span><span class="kc">null</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">window</span><span class="p">.</span><span class="nx">Fock</span><span class="p">)</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="ow">void</span><span class="w"> </span><span class="mf">0</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="nx">r</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">unlock</span><span class="p">(</span><span class="nx">e</span><span class="p">,</span><span class="w"> </span><span class="nx">t</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">,</span><span class="w"> </span><span class="nx">t</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="mf">0</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="nx">e</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="nx">n</span><span class="p">(</span><span class="nx">t</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="nx">o</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="s2">&quot;F:e:u: &quot;</span><span class="p">.</span><span class="nx">concat</span><span class="p">(</span><span class="nx">e</span><span class="p">)))</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="p">))</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="nx">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">o</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="p">))</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>使用流程如下:</p>
+<div class="highlight"><pre><span></span><code><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">decrypt</span><span class="p">(</span><span class="nx">enContent</span><span class="p">,</span><span class="w"> </span><span class="nx">cuChapterId</span><span class="p">,</span><span class="w"> </span><span class="nx">fkp</span><span class="p">,</span><span class="w"> </span><span class="nx">fuid</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">Fock</span><span class="p">.</span><span class="nx">initialize</span><span class="p">();</span>
+<span class="w">  </span><span class="nx">Fock</span><span class="p">.</span><span class="nx">setupUserKey</span><span class="p">(</span><span class="nx">fuid</span><span class="p">);</span>
+<span class="w">  </span><span class="nb">eval</span><span class="p">(</span><span class="nx">atob</span><span class="p">(</span><span class="nx">fkp</span><span class="p">));</span>
+
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Promise</span><span class="p">((</span><span class="nx">resolve</span><span class="p">,</span><span class="w"> </span><span class="nx">reject</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">Fock</span><span class="p">.</span><span class="nx">unlock</span><span class="p">(</span><span class="nx">enContent</span><span class="p">,</span><span class="w"> </span><span class="nx">cuChapterId</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="nx">code</span><span class="p">,</span><span class="w"> </span><span class="nx">decrypted</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">code</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="mf">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">resolve</span><span class="p">(</span><span class="nx">decrypted</span><span class="p">);</span>
+<span class="w">      </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">reject</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="sb">`Fock.unlock failed, code=</span><span class="si">${</span><span class="nx">code</span><span class="si">}</span><span class="sb">`</span><span class="p">));</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="w">  </span><span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>部署时只需在 Node.js 环境中补充浏览器所需的环境对象, 即可模拟解密流程。</p>
+<hr />
+<h2 id="_7">四、字体加密内容复原方案<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<p>章节加密不仅体现在正文, 还包括字体及渲染顺序的混淆。主要策略分为两部分:</p>
+<h3 id="1-css">1. CSS 级混淆分析<a class="headerlink" href="#1-css" title="Permanent link">&para;</a></h3>
+<p>字体显示顺序通常被 CSS 人为打乱, 结合 HTML 标签、属性与样式渲染可恢复原始内容。示例策略包括:</p>
+<ul>
+<li><code>font-size: 0</code>: 该元素不可见, 应跳过；</li>
+<li><code>scaleX(-1)</code>: 镜像翻转, 对内容无影响, 仅作为重建参考；</li>
+<li><code>::before</code> / <code>::after</code>: 在元素前后插入特定字符（如 <code>content: '遇'</code>）；</li>
+<li><code>content: attr(...)</code>: 插入指定属性值；</li>
+<li><code>order</code>: 用于重排段落或字符顺序, 需结合样式解析还原。</li>
+</ul>
+<h3 id="2_1">2. 字体文件加密<a class="headerlink" href="#2_1" title="Permanent link">&para;</a></h3>
+<p>每章节使用两种加密字体:</p>
+<ul>
+<li><code>randomFont_str</code>: 每章节唯一, 字体编码动态变更；</li>
+<li><code>fixedFontWoff2_url</code>: 请求时从字体 "池" 中随机分配一份字体文件, 可能会在多个章节间复用。</li>
+</ul>
+<p>页面 CSS 示例:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">font-family</span><span class="o">:</span><span class="w"> </span><span class="nt">LIIBFYOT</span><span class="o">,</span><span class="w"> </span><span class="nt">HTEMPCHB</span><span class="o">,</span><span class="w"> </span><span class="s1">&#39;SourceHanSansSC-Regular&#39;</span><span class="o">,</span><span class="w"> </span><span class="s1">&#39;SourceHanSansCN-Regular&#39;</span><span class="o">,</span><span class="w"> </span><span class="o">...</span>
+</code></pre></div>
+<p>其中 <code>LIIBFYOT</code> 和 <code>HTEMPCHB</code> 为加密字体名称。由于真实字符并未直接展示, 需要通过以下手段还原真实内容。</p>
+<h4 id="_8">字体还原思路与映射建立<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h4>
+<p><strong>初期阶段</strong></p>
+<ul>
+<li>使用类似字形的公开字体 (如 <code>SourceHanSans</code>) 进行模型微调；</li>
+<li>基于章节中的可见字符构建图像样本；</li>
+<li>利用 OCR (光学字符识别) 进行逐字识别 (单字图像, 无上下文)；</li>
+<li>若识别结果合理, 则可初步还原正文。</li>
+</ul>
+<p><strong>自动构建字体映射</strong></p>
+<ul>
+<li>根据实际观察, 大多数章节在发布时间 <strong>约一个月后</strong> 退回为 "纯文本加密" 形式, 仅需解密正文即可获取明文 HTML。</li>
+<li>在此状态下, 若作者未修改就可以精确还原整章内容, 进一步与历史的加密版本进行比对, 从而建立 "字符形状 -&gt; 字符" 之间的稳定映射关系。</li>
+<li>随着时间积累, 此映射数据集将逐渐完善, 可以进一步微调模型</li>
+</ul>
+<p><strong>识别增强与误差控制</strong></p>
+<ul>
+<li>当前识别流程基于逐字图像生成与无上下文识别, 可能存在少量误差</li>
+<li>可考虑以 "多字联动识别" 为改进方向, 提高上下文信息对字符识别的约束力</li>
+<li>当前实现因复杂度未进一步深入</li>
+</ul>
+<p>如有更优的实现方式或改进建议, 欢迎通过 Issue 提出或进行补充。</p>
+<h2 id="_9">五、章节重复内容的异常与修复方法<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
+<p>在某些小说章节中, 存在<strong>正文段落被重复附加一份伪变形副本</strong>的情况。</p>
+<p>该副本内容与原段落高度相似, 但部分关键词被替换或语序被调整, 推测是网站在返回数据时出于防爬策略主动插入的扰动内容。</p>
+<h3 id="_10">表现形式<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<p>伪重复内容通常位于<strong>正文尾部</strong>, 其与前段内容极为接近, 常见的词汇变形包括但不限于:</p>
+<ul>
+<li><strong>人名替换</strong>：如 <code>张三</code> -&gt; <code>李四</code></li>
+<li><strong>人称替换</strong>：如 <code>我</code> -&gt; <code>你</code>、<code>他</code></li>
+<li><strong>属性词替换</strong>：如 <code>大</code> &lt;-&gt; <code>小</code>、<code>男</code> &lt;-&gt; <code>女</code></li>
+<li><strong>语序调整或轻微变形</strong>：如 <code>还没有</code> &lt;-&gt; <code>还有没</code></li>
+</ul>
+<h3 id="_11">示例<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<p>原始段落:</p>
+<div class="highlight"><pre><span></span><code>张三停在废弃的车站前。
+他望着远方沉思不语。
+风掠过铁轨，他大吃一惊。
+“我真的还没有准备好……”他低声说。
+身为江湖上赫赫有名的刀客，他从不轻言退却。
+</code></pre></div>
+<p>变为:</p>
+<div class="highlight"><pre><span></span><code>张三停在废弃的车站前。
+他望着远方沉思不语。
+风掠过铁轨，他大吃一惊。
+“我真的还没有准备好……”他低声说。
+身为江湖上赫赫有名的刀客，他从不轻言退却。
+婉儿站在废弃的车站边。
+她望着近方沉思不语。
+风掠过铁轨，她小吃一惊。
+“他真的还有没准备好……”她高声说。
+身为江湖上赫赫没名的刀客，她从不轻言退却。
+</code></pre></div>
+<h3 id="_12">修复方法<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
+<blockquote>
+<p>具体网站在渲染时是如何处理伪重复内容仍有待深入分析</p>
+</blockquote>
+<p>根据页面结构分析, 每个章节包含一个 <code>eFW</code> 字段。</p>
+<p>当该字段值为 <code>1</code> 时, 章节正文会插入一段结构相似但细节略有变动的<strong>伪内容块</strong>, 通常紧随原文后追加, 形成 "重复但扰动" 的双段结构。</p>
+<p>因此, 采用了以下<strong>截断策略</strong>进行初步修复:</p>
+<h4 id="_13">策略说明<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h4>
+<ul>
+<li>检查章节的 <code>eFW</code> 字段是否为 <code>1</code></li>
+<li>若为真, 则对正文内容进行处理</li>
+<li>去除空白字符 (如空格、换行符)</li>
+<li>截取前半部分字符作为原始正文</li>
+<li>该策略假设原始内容在前, 伪内容在后</li>
+</ul>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.top", "navigation.sections", "navigation.indexes", "search.highlight", "search.suggest", "content.code.copy", "content.action.edit", "toc.follow"], "search": "../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

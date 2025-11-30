@@ -1,0 +1,2396 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="NovelDownloader: A toolkit for downloading and processing novels.">
+      
+      
+        <meta name="author" content="Saudade Z">
+      
+      
+      
+        <link rel="prev" href="../api-examples/">
+      
+      
+        <link rel="next" href="../../notes/aes/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/logo.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+    
+    
+      
+        <title>Plugins - NovelDownloader</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.618322db.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#plugins" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="NovelDownloader" class="md-header__button md-logo" aria-label="NovelDownloader" data-md-component="logo">
+      
+  <img src="../../assets/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            NovelDownloader
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Plugins
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_1">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/saudadez21/novel-downloader" title="Go to repository" class="md-source" data-md-component="source" target="_blank" rel="noopener">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    NovelDownloader
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guide/installation/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../supported-sites/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Supported Sites
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../api-examples/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../notes/aes/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Notes
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../misc/todo/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Misc
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="NovelDownloader" class="md-nav__button md-logo" aria-label="NovelDownloader" data-md-component="logo">
+      
+  <img src="../../assets/logo.svg" alt="logo">
+
+    </a>
+    NovelDownloader
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/saudadez21/novel-downloader" title="Go to repository" class="md-source" data-md-component="source" target="_blank" rel="noopener">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    NovelDownloader
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/settings-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/processors-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Processors Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/cli-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/web-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Web Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/file-saving/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File Saving
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/copy-cookies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Copy Cookies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../supported-sites/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Supported Sites
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Supported Sites
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../supported-sites/tags/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tags
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Plugins
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Plugins
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#plugins" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        插件系统 (Plugins)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="插件系统 (Plugins)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#settingstoml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        在 settings.toml 中启用
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录结构
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        扩展一个站点
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="扩展一个站点">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-fetcher" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Fetcher (抓取)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Fetcher (抓取)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fetcher" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fetcher 协议 (精简)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basefetcher-url" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        继承 BaseFetcher (自定义 URL 的简单站点)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genericfetcher-url" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        继承 GenericFetcher (模板 URL / 分页内置支持)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-parser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Parser (解析)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Parser (解析)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parser 协议 (精简)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        解析示例
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-searcher" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Searcher (可选)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Searcher (可选)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#searcher" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Searcher 示例
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#processors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        扩展文本处理器 (Processors)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        注册机制
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="注册机制">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 关键名如何确定
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 搜索/加载顺序与覆盖关系
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. 获取与回退策略
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notes
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Notes
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/aes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AES Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/duokan_epub/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Duokan EPUB Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/faloo_web/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Faloo Web Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/linovelib/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linovelib Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/parse_js_iife/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JS IIFE Parsing Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/qidian_app/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Qidian App Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/qidian_web/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Qidian Web Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/xiguashuwu/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Xiguashuwu Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Misc
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Misc
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misc/todo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TODO
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#plugins" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        插件系统 (Plugins)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="插件系统 (Plugins)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#settingstoml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        在 settings.toml 中启用
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        目录结构
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        扩展一个站点
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="扩展一个站点">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-fetcher" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Fetcher (抓取)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Fetcher (抓取)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fetcher" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fetcher 协议 (精简)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basefetcher-url" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        继承 BaseFetcher (自定义 URL 的简单站点)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genericfetcher-url" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        继承 GenericFetcher (模板 URL / 分页内置支持)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-parser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Parser (解析)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Parser (解析)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parser 协议 (精简)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        解析示例
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-searcher" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Searcher (可选)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Searcher (可选)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#searcher" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Searcher 示例
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#processors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        扩展文本处理器 (Processors)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        注册机制
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="注册机制">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 关键名如何确定
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 搜索/加载顺序与覆盖关系
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. 获取与回退策略
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/saudadez21/novel-downloader/edit/main/docs/reference/plugins.md" title="Edit this page" class="md-content__button md-icon" rel="edit noopener" target="_blank">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+  <h1>Plugins</h1>
+
+<h2 id="plugins">插件系统 (Plugins)<a class="headerlink" href="#plugins" title="Permanent link">&para;</a></h2>
+<p>支持通过插件扩展 (或覆盖) 新的<strong>站点</strong>、<strong>文本处理器 (processors)</strong>、<strong>客户端 (clients)</strong>。</p>
+<p>插件可放在本地目录中启用, 也可选择是否覆盖内置实现。</p>
+<h3 id="settingstoml">在 <code>settings.toml</code> 中启用<a class="headerlink" href="#settingstoml" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">[plugins]</span>
+<span class="c1"># 是否启用本地插件目录</span>
+<span class="n">enable_local_plugins</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="c1"># 是否允许本地插件覆盖内置实现</span>
+<span class="n">override_builtins</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
+<span class="c1"># 本地插件路径 (可选)</span>
+<span class="n">local_plugins_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;./novel_plugins&quot;</span>
+</code></pre></div>
+<h3 id="_1">目录结构<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>.
+├─ settings.toml
+└─ novel_plugins
+   ├─ sites
+   │  └─ ciweimao            # 示例: 站点键 (site_key), 即 --site 的值
+   │     ├─ fetcher.py       # 必需: 实现会话类 (如 CiweimaoFetcher)
+   │     ├─ parser.py        # 必需: 实现解析类 (如 CiweimaoParser)
+   │     ├─ searcher.py      # 可选: 用于站内搜索
+   │     └─ client.py        # 可选: 不提供则使用通用 CommonClient
+   └─ processors
+      └─ processor_a.py      # 自定义文本处理器, 名称在 settings.toml 的 processors.name 中引用
+</code></pre></div>
+<blockquote>
+<p><code>sites/&lt;site_key&gt;/</code> 中的 <code>&lt;site_key&gt;</code> 即命令行 <code>--site</code> 的值, 例如:</p>
+<p><code>novel-cli download --site ciweimao 123456</code></p>
+</blockquote>
+<hr />
+<h3 id="_2">扩展一个站点<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<p>一个站点通常包含两个必要组件: <strong>Fetcher</strong> (抓取页面) 与 <strong>Parser</strong> (解析页面)</p>
+<p>可选组件: <strong>Searcher</strong> (站内搜索) 、<strong>Client</strong> (覆盖默认下载/导出流程)</p>
+<h4 id="1-fetcher">1. Fetcher (抓取)<a class="headerlink" href="#1-fetcher" title="Permanent link">&para;</a></h4>
+<ul>
+<li>职责: 登录、抓取 <strong>书籍信息页</strong> 与 <strong>章节页</strong> (可能为多页)</li>
+<li>建议继承: <code>BaseFetcher</code> 或更高层的 <code>GenericFetcher</code></li>
+<li>注册: 使用装饰器 <code>@registrar.register_fetcher()</code></li>
+</ul>
+<h5 id="fetcher">Fetcher 协议 (精简)<a class="headerlink" href="#fetcher" title="Permanent link">&para;</a></h5>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">FetcherProtocol</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+    <span class="n">site_name</span><span class="p">:</span> <span class="nb">str</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">login</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">username</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">password</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">cookies</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">attempt</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span> <span class="o">...</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_book_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">book_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span> <span class="o">...</span>
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_chapter_content</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">book_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">chapter_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span> <span class="o">...</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_logged_in</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span> <span class="o">...</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">login_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">LoginField</span><span class="p">]:</span> <span class="o">...</span>
+</code></pre></div>
+<p>需要登录的站点可提供交互字段:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LoginField</span><span class="p">:</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">label</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="s2">&quot;password&quot;</span><span class="p">,</span> <span class="s2">&quot;cookie&quot;</span><span class="p">]</span>
+    <span class="n">required</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">default</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">placeholder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+</code></pre></div>
+<h5 id="basefetcher-url">继承 <code>BaseFetcher</code> (自定义 URL 的简单站点)<a class="headerlink" href="#basefetcher-url" title="Permanent link">&para;</a></h5>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">novel_downloader.plugins.base.fetcher</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseFetcher</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">novel_downloader.plugins.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">registrar</span>
+
+<span class="nd">@registrar</span><span class="o">.</span><span class="n">register_fetcher</span><span class="p">()</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">B520Fetcher</span><span class="p">(</span><span class="n">BaseFetcher</span><span class="p">):</span>
+    <span class="n">site_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;b520&quot;</span>
+
+    <span class="n">BOOK_INFO_URL</span> <span class="o">=</span> <span class="s2">&quot;http://www.b520.cc/</span><span class="si">{book_id}</span><span class="s2">/&quot;</span>
+    <span class="n">CHAPTER_URL</span>   <span class="o">=</span> <span class="s2">&quot;http://www.b520.cc/</span><span class="si">{book_id}</span><span class="s2">/</span><span class="si">{chapter_id}</span><span class="s2">.html&quot;</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_book_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">book_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">BOOK_INFO_URL</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">book_id</span><span class="o">=</span><span class="n">book_id</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Referer&quot;</span><span class="p">:</span> <span class="s2">&quot;http://www.b520.cc/&quot;</span><span class="p">})]</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">fetch_chapter_content</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">book_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">chapter_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CHAPTER_URL</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">book_id</span><span class="o">=</span><span class="n">book_id</span><span class="p">,</span> <span class="n">chapter_id</span><span class="o">=</span><span class="n">chapter_id</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Referer&quot;</span><span class="p">:</span> <span class="s2">&quot;http://www.b520.cc/&quot;</span><span class="p">},</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;gbk&quot;</span><span class="p">)]</span>
+</code></pre></div>
+<h5 id="genericfetcher-url">继承 <code>GenericFetcher</code> (模板 URL / 分页内置支持)<a class="headerlink" href="#genericfetcher-url" title="Permanent link">&para;</a></h5>
+<p><strong>单页信息 + 单页章节</strong></p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">novel_downloader.plugins.base.fetcher</span><span class="w"> </span><span class="kn">import</span> <span class="n">GenericFetcher</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">novel_downloader.plugins.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">registrar</span>
+
+<span class="nd">@registrar</span><span class="o">.</span><span class="n">register_fetcher</span><span class="p">()</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BiquyueduFetcher</span><span class="p">(</span><span class="n">GenericFetcher</span><span class="p">):</span>
+    <span class="n">site_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;biquyuedu&quot;</span>
+    <span class="n">BOOK_INFO_URL</span> <span class="o">=</span> <span class="s2">&quot;https://biquyuedu.com/novel/</span><span class="si">{book_id}</span><span class="s2">.html&quot;</span>
+    <span class="n">CHAPTER_URL</span>   <span class="o">=</span> <span class="s2">&quot;https://biquyuedu.com/novel/</span><span class="si">{book_id}</span><span class="s2">/</span><span class="si">{chapter_id}</span><span class="s2">.html&quot;</span>
+</code></pre></div>
+<p><strong>信息/章节为多页</strong></p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">novel_downloader.plugins.base.fetcher</span><span class="w"> </span><span class="kn">import</span> <span class="n">GenericFetcher</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">novel_downloader.plugins.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">registrar</span>
+
+<span class="nd">@registrar</span><span class="o">.</span><span class="n">register_fetcher</span><span class="p">()</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Biquge5Fetcher</span><span class="p">(</span><span class="n">GenericFetcher</span><span class="p">):</span>
+    <span class="n">site_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;biquge5&quot;</span>
+    <span class="n">BASE_URL</span> <span class="o">=</span> <span class="s2">&quot;https://www.biquge5.com&quot;</span>
+
+    <span class="n">USE_PAGINATED_INFO</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">USE_PAGINATED_CHAPTER</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">relative_info_url</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">book_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;/</span><span class="si">{</span><span class="n">book_id</span><span class="si">}</span><span class="s2">/index_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">.html&quot;</span> <span class="k">if</span> <span class="n">idx</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;/</span><span class="si">{</span><span class="n">book_id</span><span class="si">}</span><span class="s2">/&quot;</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">relative_chapter_url</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">book_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">chapter_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;/</span><span class="si">{</span><span class="n">book_id</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">chapter_id</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">.html&quot;</span> <span class="k">if</span> <span class="n">idx</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;/</span><span class="si">{</span><span class="n">book_id</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">chapter_id</span><span class="si">}</span><span class="s2">.html&quot;</span>
+</code></pre></div>
+<p><strong>信息页和目录页分离</strong></p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">novel_downloader.plugins.base.fetcher</span><span class="w"> </span><span class="kn">import</span> <span class="n">GenericFetcher</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">novel_downloader.plugins.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">registrar</span>
+
+<span class="nd">@registrar</span><span class="o">.</span><span class="n">register_fetcher</span><span class="p">()</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">I25zwFetcher</span><span class="p">(</span><span class="n">GenericFetcher</span><span class="p">):</span>
+    <span class="n">site_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;i25zw&quot;</span>
+
+    <span class="n">HAS_SEPARATE_CATALOG</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">BOOK_INFO_URL</span>    <span class="o">=</span> <span class="s2">&quot;https://www.i25zw.com/book/</span><span class="si">{book_id}</span><span class="s2">.html&quot;</span>
+    <span class="n">BOOK_CATALOG_URL</span> <span class="o">=</span> <span class="s2">&quot;https://www.i25zw.com/</span><span class="si">{book_id}</span><span class="s2">/&quot;</span>
+    <span class="n">CHAPTER_URL</span>      <span class="o">=</span> <span class="s2">&quot;https://www.i25zw.com/</span><span class="si">{book_id}</span><span class="s2">/</span><span class="si">{chapter_id}</span><span class="s2">.html&quot;</span>
+</code></pre></div>
+<blockquote>
+<p><code>GenericFetcher</code> 还提供分页钩子 <code>should_continue_pagination(...)</code>、相对路径拼接等通用逻辑, 便于快速适配。</p>
+</blockquote>
+<hr />
+<h4 id="2-parser">2. Parser (解析)<a class="headerlink" href="#2-parser" title="Permanent link">&para;</a></h4>
+<ul>
+<li>职责: 将原始 HTML 列表解析为<strong>书籍元信息</strong> (含卷/章列表) 与<strong>章节正文</strong></li>
+<li>建议继承: <code>BaseParser</code></li>
+<li>注册: <code>@registrar.register_parser()</code></li>
+</ul>
+<h5 id="parser">Parser 协议 (精简)<a class="headerlink" href="#parser" title="Permanent link">&para;</a></h5>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ParserProtocol</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parse_book_info</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">raw_pages</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BookInfoDict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parse_chapter_content</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">raw_pages</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">chapter_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ChapterDict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
+</code></pre></div>
+<p><strong>数据结构:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ChapterDict</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">content</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">extra</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ChapterInfoDict</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">url</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">chapterId</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">accessible</span><span class="p">:</span> <span class="n">NotRequired</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">VolumeInfoDict</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+    <span class="n">volume_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">chapters</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ChapterInfoDict</span><span class="p">]</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">BookInfoDict</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+    <span class="n">book_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">author</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">cover_url</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">update_time</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">summary</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">extra</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+    <span class="n">volumes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">VolumeInfoDict</span><span class="p">]</span>
+    <span class="n">tags</span><span class="p">:</span> <span class="n">NotRequired</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
+    <span class="n">word_count</span><span class="p">:</span> <span class="n">NotRequired</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">serial_status</span><span class="p">:</span> <span class="n">NotRequired</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">summary_brief</span><span class="p">:</span> <span class="n">NotRequired</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+</code></pre></div>
+<h5 id="_3">解析示例<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h5>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lxml</span><span class="w"> </span><span class="kn">import</span> <span class="n">html</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">novel_downloader.plugins.base.parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseParser</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">novel_downloader.plugins.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">registrar</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">novel_downloader.schemas</span><span class="w"> </span><span class="kn">import</span> <span class="n">BookInfoDict</span><span class="p">,</span> <span class="n">ChapterDict</span><span class="p">,</span> <span class="n">ChapterInfoDict</span><span class="p">,</span> <span class="n">VolumeInfoDict</span>
+
+<span class="nd">@registrar</span><span class="o">.</span><span class="n">register_parser</span><span class="p">()</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AaatxtParser</span><span class="p">(</span><span class="n">BaseParser</span><span class="p">):</span>
+    <span class="n">site_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;aaatxt&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">parse_book_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_pages</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BookInfoDict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">raw_pages</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">raw_pages</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">book_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_str</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s2">&quot;//div[@class=&#39;xiazai&#39;]/h1/text()&quot;</span><span class="p">))</span>
+        <span class="n">author</span>    <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_str</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s2">&quot;//span[@id=&#39;author&#39;]/a/text()&quot;</span><span class="p">))</span>
+        <span class="n">cover_url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_str</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s2">&quot;//div[@id=&#39;txtbook&#39;]//div[@class=&#39;fm&#39;]//img/@src&quot;</span><span class="p">))</span>
+        <span class="n">update_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_str</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s2">&quot;//div[@id=&#39;txtbook&#39;]//li[contains(text(), &#39;上传日期&#39;)]/text()&quot;</span><span class="p">),</span>
+                                      <span class="n">replaces</span><span class="o">=</span><span class="p">[(</span><span class="s2">&quot;上传日期:&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)])</span>
+        <span class="n">summary</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_str</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s2">&quot;//div[@id=&#39;jj&#39;]//p/text()&quot;</span><span class="p">))</span>
+        <span class="n">download_url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_str</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s2">&quot;//div[@id=&#39;down&#39;]//li[@class=&#39;bd&#39;]//a/@href&quot;</span><span class="p">))</span>
+
+        <span class="n">chapters</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ChapterInfoDict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">tree</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s2">&quot;//div[@id=&#39;ml&#39;]//ol/li/a&quot;</span><span class="p">):</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;href&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">chapter_id</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.html&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">text_content</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">chapters</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">title</span><span class="p">,</span> <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span> <span class="s2">&quot;chapterId&quot;</span><span class="p">:</span> <span class="n">chapter_id</span><span class="p">})</span>
+
+        <span class="n">volumes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">VolumeInfoDict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;volume_name&quot;</span><span class="p">:</span> <span class="s2">&quot;正文&quot;</span><span class="p">,</span> <span class="s2">&quot;chapters&quot;</span><span class="p">:</span> <span class="n">chapters</span><span class="p">}]</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;book_name&quot;</span><span class="p">:</span> <span class="n">book_name</span><span class="p">,</span>
+            <span class="s2">&quot;author&quot;</span><span class="p">:</span> <span class="n">author</span><span class="p">,</span>
+            <span class="s2">&quot;cover_url&quot;</span><span class="p">:</span> <span class="n">cover_url</span><span class="p">,</span>
+            <span class="s2">&quot;update_time&quot;</span><span class="p">:</span> <span class="n">update_time</span><span class="p">,</span>
+            <span class="s2">&quot;summary&quot;</span><span class="p">:</span> <span class="n">summary</span><span class="p">,</span>
+            <span class="s2">&quot;volumes&quot;</span><span class="p">:</span> <span class="n">volumes</span><span class="p">,</span>
+            <span class="s2">&quot;extra&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;download_url&quot;</span><span class="p">:</span> <span class="n">download_url</span><span class="p">},</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">parse_chapter_content</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_pages</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">chapter_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ChapterDict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">raw_pages</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">raw_pages</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">raw_title</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_str</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s2">&quot;//div[@id=&#39;content&#39;]//h1/text()&quot;</span><span class="p">))</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="n">raw_title</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="n">paragraphs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">txt</span> <span class="ow">in</span> <span class="n">tree</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s2">&quot;//div[@class=&#39;chapter&#39;]//text()&quot;</span><span class="p">):</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">txt</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_ad_line</span><span class="p">(</span><span class="n">txt</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="n">paragraphs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">paragraphs</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">content</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">paragraphs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">chapter_id</span><span class="p">,</span> <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">title</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="n">content</span><span class="p">,</span> <span class="s2">&quot;extra&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;site&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">site_name</span><span class="p">}}</span>
+</code></pre></div>
+<hr />
+<h4 id="3-searcher">3. Searcher (可选)<a class="headerlink" href="#3-searcher" title="Permanent link">&para;</a></h4>
+<ul>
+<li>职责: 站内搜索, 返回 <code>SearchResult</code> 列表</li>
+<li>继承: <code>BaseSearcher</code></li>
+<li>注册: <code>@registrar.register_searcher()</code></li>
+</ul>
+<h5 id="searcher">Searcher 示例<a class="headerlink" href="#searcher" title="Permanent link">&para;</a></h5>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">lxml</span><span class="w"> </span><span class="kn">import</span> <span class="n">html</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">novel_downloader.plugins.base.searcher</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSearcher</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">novel_downloader.plugins.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">registrar</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">novel_downloader.schemas</span><span class="w"> </span><span class="kn">import</span> <span class="n">SearchResult</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="nd">@registrar</span><span class="o">.</span><span class="n">register_searcher</span><span class="p">()</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">B520Searcher</span><span class="p">(</span><span class="n">BaseSearcher</span><span class="p">):</span>
+    <span class="n">site_name</span> <span class="o">=</span> <span class="s2">&quot;b520&quot;</span>
+    <span class="n">priority</span>  <span class="o">=</span> <span class="mi">30</span>
+    <span class="n">BASE_URL</span>  <span class="o">=</span> <span class="s2">&quot;http://www.b520.cc/&quot;</span>
+    <span class="n">SEARCH_URL</span> <span class="o">=</span> <span class="s2">&quot;http://www.b520.cc/modules/article/search.php&quot;</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_fetch_html</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keyword</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SEARCH_URL</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;searchkey&quot;</span><span class="p">:</span> <span class="n">keyword</span><span class="p">},</span>
+                                      <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Referer&quot;</span><span class="p">:</span> <span class="s2">&quot;http://www.b520.cc/&quot;</span><span class="p">})</span> <span class="k">as</span> <span class="n">resp</span><span class="p">:</span>
+                <span class="n">resp</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+                <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_to_str</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to fetch HTML for keyword &#39;</span><span class="si">%s</span><span class="s2">&#39; from &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">keyword</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">SEARCH_URL</span><span class="p">)</span>
+            <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_parse_html</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">html_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">SearchResult</span><span class="p">]:</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">html_str</span><span class="p">)</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s1">&#39;//table[@class=&quot;grid&quot;]//tr[position()&gt;1]&#39;</span><span class="p">)</span>
+        <span class="n">results</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">SearchResult</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">rows</span><span class="p">):</span>
+            <span class="n">href</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_str</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s2">&quot;.//td[1]/a[1]/@href&quot;</span><span class="p">))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">href</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">idx</span> <span class="o">&gt;=</span> <span class="n">limit</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="n">book_id</span> <span class="o">=</span> <span class="n">href</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">book_url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_abs_url</span><span class="p">(</span><span class="n">href</span><span class="p">)</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_str</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s2">&quot;.//td[1]/a[1]/text()&quot;</span><span class="p">))</span>
+            <span class="n">latest_chapter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_str</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s2">&quot;.//td[2]/a[1]/text()&quot;</span><span class="p">))</span> <span class="ow">or</span> <span class="s2">&quot;-&quot;</span>
+            <span class="n">author</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_str</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s2">&quot;.//td[3]//text()&quot;</span><span class="p">))</span>
+            <span class="n">word_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_str</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s2">&quot;.//td[4]//text()&quot;</span><span class="p">))</span>
+            <span class="n">update_date</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_first_str</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">xpath</span><span class="p">(</span><span class="s2">&quot;.//td[5]//text()&quot;</span><span class="p">))</span>
+
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SearchResult</span><span class="p">(</span>
+                <span class="n">site</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">site_name</span><span class="p">,</span>
+                <span class="n">book_id</span><span class="o">=</span><span class="n">book_id</span><span class="p">,</span>
+                <span class="n">book_url</span><span class="o">=</span><span class="n">book_url</span><span class="p">,</span>
+                <span class="n">cover_url</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+                <span class="n">author</span><span class="o">=</span><span class="n">author</span><span class="p">,</span>
+                <span class="n">latest_chapter</span><span class="o">=</span><span class="n">latest_chapter</span><span class="p">,</span>
+                <span class="n">update_date</span><span class="o">=</span><span class="n">update_date</span><span class="p">,</span>
+                <span class="n">word_count</span><span class="o">=</span><span class="n">word_count</span><span class="p">,</span>
+                <span class="n">priority</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">priority</span> <span class="o">+</span> <span class="n">idx</span><span class="p">,</span>
+            <span class="p">))</span>
+        <span class="k">return</span> <span class="n">results</span>
+</code></pre></div>
+<hr />
+<h3 id="processors">扩展文本处理器 (Processors)<a class="headerlink" href="#processors" title="Permanent link">&para;</a></h3>
+<ul>
+<li>职责: 在导出前对 <strong>书籍元信息</strong> 与 <strong>章节</strong> 进行变换</li>
+<li>协议: <code>ProcessorProtocol</code></li>
+<li>注册: <code>@registrar.register_processor()</code></li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ProcessorProtocol</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process_book_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">book_info</span><span class="p">:</span> <span class="n">BookInfoDict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BookInfoDict</span><span class="p">:</span> <span class="o">...</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process_chapter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chapter</span><span class="p">:</span> <span class="n">ChapterDict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ChapterDict</span><span class="p">:</span> <span class="o">...</span>
+</code></pre></div>
+<p><strong>配置传入规则</strong></p>
+<p>在 <code>settings.toml</code> 中:</p>
+<div class="highlight"><pre><span></span><code><span class="k">[[plugins.processors]]</span>
+<span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;cleaner&quot;</span>
+<span class="n">overwrite</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
+<span class="n">config_1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">config_2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span>
+<span class="n">config_3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;three&quot;</span>
+</code></pre></div>
+<p>则处理器构造器 <code>__init__(config)</code> 收到:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;config_1&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;config_2&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;config_3&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;three&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<blockquote>
+<p>现有内置处理器文档: 见 <code>docs/3-settings-schema.md#processors-配置</code>
+包括 <code>cleaner</code> (正则/替换) 、<code>zh_convert</code> (OpenCC 简繁转换) 、<code>corrector</code> (pycorrector 纠错, 效果因模型而异)。</p>
+</blockquote>
+<hr />
+<h3 id="_4">注册机制<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<p>插件通过<strong>装饰器注册</strong>, 导入模块时自动完成登记, 无需手动导表/清单:</p>
+<ul>
+<li>站点会话：<code>@registrar.register_fetcher()</code></li>
+<li>站点解析器：<code>@registrar.register_parser()</code></li>
+<li>站点搜索器：<code>@registrar.register_searcher()</code></li>
+<li>站点客户端：<code>@registrar.get_client()</code></li>
+<li>文本处理器：<code>@registrar.register_processor()</code></li>
+</ul>
+<h4 id="1">1. 关键名如何确定<a class="headerlink" href="#1" title="Permanent link">&para;</a></h4>
+<p>注册器会根据插件模块的路径自动推导出唯一键名 (key), 用来在运行时定位插件。</p>
+<p><strong>站点类插件 (Fetcher / Parser / Client / Searcher)</strong></p>
+<p>键名来源于模块路径中的:</p>
+<div class="highlight"><pre><span></span><code>sites.&lt;site_key&gt;.&lt;kind&gt;
+</code></pre></div>
+<p>例如以下结构:</p>
+<div class="highlight"><pre><span></span><code>novel_plugins/
+└── sites/
+    └── ciweimao/
+        ├── fetcher.py
+        ├── parser.py
+        └── searcher.py
+</code></pre></div>
+<p>对应的站点键名为:</p>
+<div class="highlight"><pre><span></span><code>ciweimao
+</code></pre></div>
+<p>命令行即可直接使用该键:</p>
+<div class="highlight"><pre><span></span><code>novel-cli<span class="w"> </span>download<span class="w"> </span>--site<span class="w"> </span>ciweimao<span class="w"> </span><span class="m">123456</span>
+</code></pre></div>
+<blockquote>
+<p>站点键名始终自动转换为小写; 若以数字开头, 请加前缀 <code>n</code> (如 <code>123abc</code> -&gt; <code>n123abc</code>)</p>
+</blockquote>
+<p><strong>文本处理器 (Processor)</strong></p>
+<p>键名来源于模块路径中 <code>processors.</code> 之后的部分。</p>
+<p>例如模块:</p>
+<div class="highlight"><pre><span></span><code>novel_downloader.plugins.processors.cleaner
+</code></pre></div>
+<p>自动推导键名:</p>
+<div class="highlight"><pre><span></span><code>cleaner
+</code></pre></div>
+<p>在配置文件中可直接引用:</p>
+<div class="highlight"><pre><span></span><code><span class="k">[[plugins.processors]]</span>
+<span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;cleaner&quot;</span>
+</code></pre></div>
+<p>如果处理器使用了子包，例如:</p>
+<div class="highlight"><pre><span></span><code>novel_plugins/processors/text/zh_convert.py
+</code></pre></div>
+<p>则键名为:</p>
+<div class="highlight"><pre><span></span><code>text.zh_convert
+</code></pre></div>
+<h4 id="2">2. 搜索/加载顺序与覆盖关系<a class="headerlink" href="#2" title="Permanent link">&para;</a></h4>
+<p>注册表会按 "命名空间" 顺序尝试导入模块 (懒加载):</p>
+<ol>
+<li>内置命名空间: <code>novel_downloader.plugins</code></li>
+<li>(可选) 本地命名空间: 默认 <code>novel_plugins</code>, 由 <code>settings.toml</code> 中 <code>[plugins]</code> 控制</li>
+</ol>
+<p>配置文件里:</p>
+<ul>
+<li><code>enable_local_plugins = true</code> 开启本地插件</li>
+<li><code>local_plugins_path = "./novel_plugins"</code> 指定目录</li>
+<li><code>override_builtins = true</code> 时, 本地命名空间将<strong>排在内置之前</strong>, 可覆盖同名实现</li>
+</ul>
+<blockquote>
+<p>站点模块的动态导入路径: <code>{namespace}.sites.&lt;site_key&gt;.&lt;kind&gt;</code></p>
+<p>处理器模块的动态导入路径: <code>{namespace}.processors.&lt;name&gt;</code></p>
+</blockquote>
+<hr />
+<h4 id="3">3. 获取与回退策略<a class="headerlink" href="#3" title="Permanent link">&para;</a></h4>
+<ul>
+<li><code>get_client(site)</code>: 未找到站点专属实现时, 自动回退到 <strong>通用实现</strong> (<code>CommonClient</code>)</li>
+<li><code>get_fetcher(site)</code> / <code>get_parser(site)</code>: 未找到会抛 <code>ValueError("Unsupported site")</code></li>
+<li><code>get_processor(name)</code>: 未找到会抛 <code>ValueError("Unsupported processor")</code></li>
+<li><code>get_searcher_class(site)</code>: 未找到会抛 <code>ValueError("Unsupported site")</code></li>
+<li><code>get_searcher_classes()</code>: 在未指定站点时, 会尝试加载所有已知站点的 <code>searcher</code> 模块并返回可用列表</li>
+</ul>
+<blockquote>
+<p>所有注册均在<strong>模块被导入时</strong>生效, 请确保插件文件能被 Python 导入 (路径正确、无语法错误)</p>
+</blockquote>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.top", "navigation.sections", "navigation.indexes", "search.highlight", "search.suggest", "content.code.copy", "content.action.edit", "toc.follow"], "search": "../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

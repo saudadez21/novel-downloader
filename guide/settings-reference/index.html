@@ -1,0 +1,2399 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="NovelDownloader: A toolkit for downloading and processing novels.">
+      
+      
+        <meta name="author" content="Saudade Z">
+      
+      
+      
+        <link rel="prev" href="../configuration/">
+      
+      
+        <link rel="next" href="../processors-reference/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/logo.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+    
+    
+      
+        <title>Settings Reference - NovelDownloader</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.618322db.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#settingstoml" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="NovelDownloader" class="md-header__button md-logo" aria-label="NovelDownloader" data-md-component="logo">
+      
+  <img src="../../assets/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            NovelDownloader
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Settings Reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_1">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/saudadez21/novel-downloader" title="Go to repository" class="md-source" data-md-component="source" target="_blank" rel="noopener">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    NovelDownloader
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../installation/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../supported-sites/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Supported Sites
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/api-examples/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../notes/aes/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Notes
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../misc/todo/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Misc
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="NovelDownloader" class="md-nav__button md-logo" aria-label="NovelDownloader" data-md-component="logo">
+      
+  <img src="../../assets/logo.svg" alt="logo">
+
+    </a>
+    NovelDownloader
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/saudadez21/novel-downloader" title="Go to repository" class="md-source" data-md-component="source" target="_blank" rel="noopener">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    NovelDownloader
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings Reference
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#settingstoml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        settings.toml 配置说明
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="settings.toml 配置说明">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#general" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        general 配置
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="general 配置">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        主配置项
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parser 子节
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        output 子节
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        调试子节
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        示例配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sites 配置
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="sites 配置">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        通用键
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#book_ids" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        book_ids 字段说明
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        示例配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plugins" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        plugins 配置
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="plugins 配置">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        主配置项
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        示例配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../processors-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Processors Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../web-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Web Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../file-saving/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File Saving
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../copy-cookies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Copy Cookies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../supported-sites/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Supported Sites
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Supported Sites
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../supported-sites/tags/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tags
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/api-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/plugins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Plugins
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notes
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Notes
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/aes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AES Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/duokan_epub/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Duokan EPUB Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/faloo_web/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Faloo Web Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/linovelib/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linovelib Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/parse_js_iife/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JS IIFE Parsing Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/qidian_app/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Qidian App Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/qidian_web/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Qidian Web Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/xiguashuwu/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Xiguashuwu Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Misc
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Misc
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misc/todo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TODO
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#settingstoml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        settings.toml 配置说明
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="settings.toml 配置说明">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#general" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        general 配置
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="general 配置">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        主配置项
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parser 子节
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        output 子节
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        调试子节
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        示例配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sites 配置
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="sites 配置">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        通用键
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#book_ids" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        book_ids 字段说明
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        示例配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plugins" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        plugins 配置
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="plugins 配置">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        主配置项
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        示例配置
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/saudadez21/novel-downloader/edit/main/docs/guide/settings-reference.md" title="Edit this page" class="md-content__button md-icon" rel="edit noopener" target="_blank">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+  <h1>Settings Reference</h1>
+
+<h2 id="settingstoml"><code>settings.toml</code> 配置说明<a class="headerlink" href="#settingstoml" title="Permanent link">&para;</a></h2>
+<h3 id="general">general 配置<a class="headerlink" href="#general" title="Permanent link">&para;</a></h3>
+<p>全局运行时设置, 面向下载 / 并发 / 速率限制 / 目录与存储的通用开关</p>
+<h4 id="_1">主配置项<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>参数名</th>
+<th>类型</th>
+<th>默认值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>raw_data_dir</code></td>
+<td><code>str</code></td>
+<td><code>"./raw_data"</code></td>
+<td>书籍数据存放目录</td>
+</tr>
+<tr>
+<td><code>output_dir</code></td>
+<td><code>str</code></td>
+<td><code>"./downloads"</code></td>
+<td>最终导出文件目录</td>
+</tr>
+<tr>
+<td><code>cache_dir</code></td>
+<td><code>str</code></td>
+<td><code>"./novel_cache"</code></td>
+<td>本地缓存目录 (字体 / 图片等)</td>
+</tr>
+<tr>
+<td><code>request_interval</code></td>
+<td><code>float</code></td>
+<td>0.5</td>
+<td><strong>同一本书</strong>章节请求的间隔 (秒)</td>
+</tr>
+<tr>
+<td><code>workers</code></td>
+<td><code>int</code></td>
+<td>4</td>
+<td>下载任务协程数量</td>
+</tr>
+<tr>
+<td><code>max_connections</code></td>
+<td><code>int</code></td>
+<td>10</td>
+<td>最大并发连接数</td>
+</tr>
+<tr>
+<td><code>max_rps</code></td>
+<td><code>float</code></td>
+<td>1000.0</td>
+<td>全局 RPS 上限 (requests per second)</td>
+</tr>
+<tr>
+<td><code>retry_times</code></td>
+<td><code>int</code></td>
+<td>3</td>
+<td>请求失败重试次数</td>
+</tr>
+<tr>
+<td><code>backoff_factor</code></td>
+<td><code>float</code></td>
+<td>2.0</td>
+<td>重试的退避因子 (每次重试等待时间将按倍数增加, 如 <code>2s</code>, <code>4s</code>, <code>8s</code>)</td>
+</tr>
+<tr>
+<td><code>timeout</code></td>
+<td><code>float</code></td>
+<td>10.0</td>
+<td>单次请求超时 (秒)</td>
+</tr>
+<tr>
+<td><code>storage_batch_size</code></td>
+<td><code>int</code></td>
+<td>1</td>
+<td><code>sqlite</code> 每批提交的章节数 (提高写入性能)</td>
+</tr>
+<tr>
+<td><code>cache_book_info</code></td>
+<td><code>bool</code></td>
+<td><code>true</code></td>
+<td>是否启用 book_info 缓存</td>
+</tr>
+<tr>
+<td><code>cache_chapter</code></td>
+<td><code>bool</code></td>
+<td><code>true</code></td>
+<td>是否启用章节缓存</td>
+</tr>
+<tr>
+<td><code>fetch_inaccessible</code></td>
+<td><code>bool</code></td>
+<td><code>false</code></td>
+<td>是否尝试获取未订阅章节</td>
+</tr>
+<tr>
+<td><code>backend</code></td>
+<td><code>str</code></td>
+<td><code>"aiohttp"</code></td>
+<td>全局 HTTP 请求后端, 可选 <code>"aiohttp"</code>, <code>"httpx"</code>, <code>"curl_cffi"</code></td>
+</tr>
+<tr>
+<td><code>http2</code></td>
+<td><code>bool</code></td>
+<td><code>true</code></td>
+<td>仅对 <code>httpx</code> 生效, 启用 HTTP/2 支持</td>
+</tr>
+<tr>
+<td><code>impersonate</code></td>
+<td><code>str/None</code></td>
+<td><code>None</code></td>
+<td>仅对 <code>curl_cffi</code> 生效, 启用浏览器指纹仿真模式</td>
+</tr>
+</tbody>
+</table>
+<p><strong>站点压力与 503</strong></p>
+<p>部分站点对高频访问敏感 (例如 &gt;= 5 RPS), 可能返回 <code>503 Service Temporarily Unavailable</code>。</p>
+<p>建议适当<strong>降低</strong> <code>max_rps</code> 或<strong>增大</strong> <code>request_interval</code>; 工具支持断点续爬, 已完成的数据不会重复抓取。</p>
+<p><strong>HTTP 请求后端</strong></p>
+<p>程序支持可插拔式 HTTP 后端, 可在 <code>[general]</code> 中通过 <code>backend</code> 参数进行切换:</p>
+<table>
+<thead>
+<tr>
+<th>后端名称</th>
+<th>说明</th>
+<th>依赖安装</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>aiohttp</code></td>
+<td>默认后端, 基于 <code>aiohttp</code> 的异步 HTTP 客户端</td>
+<td>-</td>
+</tr>
+<tr>
+<td><code>httpx</code></td>
+<td>现代异步 HTTP 客户端, 支持 HTTP/1.1 与 HTTP/2</td>
+<td><code>pip install httpx[http2]</code></td>
+</tr>
+<tr>
+<td><code>curl_cffi</code></td>
+<td>基于 <code>libcurl</code> 的实现, 支持浏览器仿真 (<code>impersonate</code>)</td>
+<td><code>pip install curl_cffi</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>扩展参数</strong></p>
+<ul>
+<li><code>http2</code>: 仅对 <code>httpx</code> 生效, 启用 HTTP/2 支持 (默认 <code>true</code>)</li>
+<li><code>impersonate</code>: 仅对 <code>curl_cffi</code> 生效, 启用浏览器指纹仿真, 可设为 <code>"chrome136"</code>, <code>"chrome"</code> 等</li>
+</ul>
+<p>更多信息请参考各项目文档:</p>
+<ul>
+<li><a href="https://github.com/encode/httpx" target="_blank" rel="noopener"><code>httpx</code></a></li>
+<li><a href="https://github.com/lexiforest/curl_cffi" target="_blank" rel="noopener"><code>curl_cffi</code></a></li>
+</ul>
+</blockquote>
+<p><strong>兼容性与 Cloudflare 行为说明</strong></p>
+<p>由于各 HTTP 客户端在协议实现与 TLS 指纹上的差异, 部分站点在使用默认的 <code>aiohttp</code> 后端时, 可能会触发 <strong>Cloudflare 反爬虫或访问验证机制</strong>, 从而导致连接被拦截或返回 <code>403</code>/<code>5xx</code> 状态码。</p>
+<p>若遇到此类情况, 建议切换至以下后端之一:</p>
+<ul>
+<li><strong><code>httpx</code> (启用 <code>http2 = true</code>)</strong>: 通过 HTTP/2 可获得更接近现代浏览器的网络特征, 对部分启用 Cloudflare 的站点有更好的兼容性</li>
+<li><strong><code>curl_cffi</code> (启用 <code>impersonate</code>)</strong>: 通过模拟浏览器 TLS 指纹和请求头, 可显著提升被 Cloudflare 或其他 WAF 拦截的站点的访问成功率</li>
+</ul>
+<p>需要注意的是, 不同站点的后端表现可能存在差异。例如:</p>
+<ul>
+<li>某些站点仅在 <code>aiohttp</code> 或 <code>httpx</code> 的 HTTP/1.1 模式下可正常访问, 而在启用 <code>http2 = true</code> 时反而会触发 Cloudflare 或导致连接失败</li>
+<li>另一些站点则恰好相反, 只有在启用 HTTP/2 或使用 <code>curl_cffi</code> 的浏览器仿真模式下才能成功建立连接</li>
+</ul>
+<p>因此, 在遇到访问异常 (如 403、TLS 握手失败、Cloudflare 验证循环等) 时, 建议根据具体站点情况灵活调整后端和相关参数。</p>
+<h4 id="parser">parser 子节<a class="headerlink" href="#parser" title="Permanent link">&para;</a></h4>
+<p>该配置用于处理 <strong>混淆字体解码</strong> 与 <strong>图片章节 OCR 识别</strong>, 并控制图片章节的 <strong>去水印</strong>。</p>
+<table>
+<thead>
+<tr>
+<th>参数名</th>
+<th>类型</th>
+<th>默认值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>enable_ocr</code></td>
+<td><code>bool</code></td>
+<td>false</td>
+<td>是否启用本地 OCR, 用于识别混淆字体或图片章节文本</td>
+</tr>
+<tr>
+<td><code>batch_size</code></td>
+<td><code>int</code></td>
+<td>32</td>
+<td>OCR 模型推理时的批处理大小</td>
+</tr>
+<tr>
+<td><code>remove_watermark</code></td>
+<td><code>bool</code></td>
+<td>false</td>
+<td>是否尝试对图片章节进行去水印 (部分站点支持)</td>
+</tr>
+<tr>
+<td><code>model_name</code></td>
+<td><code>str/None</code></td>
+<td>None</td>
+<td>OCR 模型名称, 如果设置为 <code>None</code>, 则使用 <code>PP-OCRv5_server_rec</code></td>
+</tr>
+<tr>
+<td><code>model_dir</code></td>
+<td><code>str/None</code></td>
+<td>None</td>
+<td>OCR 模型存储路径</td>
+</tr>
+<tr>
+<td><code>input_shape</code></td>
+<td><code>tuple/None</code></td>
+<td>None</td>
+<td>OCR 模型输入图像尺寸, 格式为 (C, H, W)</td>
+</tr>
+<tr>
+<td><code>device</code></td>
+<td><code>str/None</code></td>
+<td>None</td>
+<td>用于推理的设备, 例如: "cpu"、"gpu"、"npu"、"gpu:0"、"gpu:0,1"</td>
+</tr>
+<tr>
+<td><code>cpu_threads</code></td>
+<td><code>int</code></td>
+<td>10</td>
+<td>在 CPU 上推理时使用的线程数量</td>
+</tr>
+<tr>
+<td><code>enable_hpi</code></td>
+<td><code>bool</code></td>
+<td>false</td>
+<td>是否启用高性能推理</td>
+</tr>
+</tbody>
+</table>
+<p>功能说明:</p>
+<p><strong>混淆字体章节</strong></p>
+<ul>
+<li>若未开启解析或解析失败, 程序将在导出 EPUB/HTML 时自动嵌入对应字体文件, 确保显示正常</li>
+</ul>
+<p>依赖说明:</p>
+<p>若启用了 <code>enable_ocr</code>, 需安装额外的图像处理依赖</p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>novel-downloader<span class="o">[</span>image-utils<span class="o">]</span>
+</code></pre></div>
+<p>OCR 功能依赖 <code>PaddleOCR</code> 及其模型, 请参考安装指南:</p>
+<ul>
+<li><a href="../installation/">安装说明</a></li>
+</ul>
+<p><code>PaddleOCR</code> 配置参考官方文档:</p>
+<ul>
+<li><a href="https://www.paddleocr.ai/main/version3.x/module_usage/text_recognition.html#_4" target="_blank" rel="noopener">PaddleOCR 文档</a></li>
+</ul>
+<h4 id="output">output 子节<a class="headerlink" href="#output" title="Permanent link">&para;</a></h4>
+<p>控制导出格式, 文件命名与 EPUB 细节</p>
+<table>
+<thead>
+<tr>
+<th>参数名</th>
+<th>类型</th>
+<th>默认值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>formats</code></td>
+<td><code>list[str]</code></td>
+<td><code>[]</code></td>
+<td>输出格式</td>
+</tr>
+<tr>
+<td><code>render_missing_chapter</code></td>
+<td><code>bool</code></td>
+<td><code>true</code></td>
+<td>是否在导出时为缺失章节插入占位内容</td>
+</tr>
+<tr>
+<td><code>append_timestamp</code></td>
+<td><code>bool</code></td>
+<td><code>true</code></td>
+<td>输出文件名是否追加时间戳</td>
+</tr>
+<tr>
+<td><code>filename_template</code></td>
+<td><code>str</code></td>
+<td><code>"{title}_{author}"</code></td>
+<td>文件名模板</td>
+</tr>
+<tr>
+<td><code>include_picture</code></td>
+<td><code>bool</code></td>
+<td><code>true</code></td>
+<td>是否嵌入章节中的图片 (可能增加文件体积)</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_2">调试子节<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>参数名</th>
+<th>类型</th>
+<th>默认值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>debug.save_html</code></td>
+<td><code>bool</code></td>
+<td><code>false</code></td>
+<td>是否保存抓取到的原始 HTML 到磁盘</td>
+</tr>
+<tr>
+<td><code>debug.log_level</code></td>
+<td><code>str</code></td>
+<td><code>"INFO"</code></td>
+<td>日志级别: DEBUG, INFO, WARNING, ERROR</td>
+</tr>
+<tr>
+<td><code>debug.log_dir</code></td>
+<td><code>str</code></td>
+<td><code>"./logs"</code></td>
+<td>运行日志存放目录</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_3">示例配置<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="k">[general]</span>
+<span class="n">retry_times</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span>
+<span class="n">backoff_factor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">2.0</span>
+<span class="n">timeout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">10.0</span>
+<span class="n">max_connections</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span>
+<span class="n">max_rps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span>
+<span class="n">request_interval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5</span>
+<span class="n">raw_data_dir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;./raw_data&quot;</span>
+<span class="n">output_dir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;./downloads&quot;</span>
+<span class="n">cache_dir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;./novel_cache&quot;</span>
+<span class="n">workers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span>
+<span class="n">cache_book_info</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">cache_chapter</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">storage_batch_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span>
+
+<span class="k">[general.output]</span>
+<span class="n">formats</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;txt&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;epub&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;html&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+<span class="n">include_picture</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+
+<span class="k">[general.parser]</span>
+<span class="n">enable_ocr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
+<span class="n">batch_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">32</span>
+<span class="n">remove_watermark</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+
+<span class="n">model_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;PP-OCRv5_mobile_rec&quot;</span>
+</code></pre></div>
+<hr />
+<h3 id="sites">sites 配置<a class="headerlink" href="#sites" title="Permanent link">&para;</a></h3>
+<p>站点级设置 (如 <code>qidian</code>, <code>b520</code>, ...), <strong>站点级会覆盖全局行为</strong>, 每个站点配置位于 <code>[sites.&lt;site&gt;]</code> 下</p>
+<h4 id="_4">通用键<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>参数名</th>
+<th>类型</th>
+<th>默认值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>book_ids</code></td>
+<td><code>list&lt;str&gt;</code> / <code>list&lt;dict&gt;</code></td>
+<td>-</td>
+<td>小说 ID 列表</td>
+</tr>
+<tr>
+<td><code>login_required</code></td>
+<td><code>bool</code></td>
+<td>false</td>
+<td>是否需要登录才能访问</td>
+</tr>
+</tbody>
+</table>
+<h4 id="book_ids"><code>book_ids</code> 字段说明<a class="headerlink" href="#book_ids" title="Permanent link">&para;</a></h4>
+<p><code>book_ids</code> 字段支持以下两种格式:</p>
+<p>1) 简单列表</p>
+<div class="highlight"><pre><span></span><code><span class="k">[sites.</span><span class="err">&lt;</span><span class="k">site</span><span class="err">&gt;</span><span class="k">]</span>
+<span class="n">book_ids</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="s2">&quot;1010868264&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;1020304050&quot;</span>
+<span class="p">]</span>
+</code></pre></div>
+<p>2) 结构化 (支持范围与忽略列表)</p>
+<div class="highlight"><pre><span></span><code><span class="k">[sites.</span><span class="err">&lt;</span><span class="k">site</span><span class="err">&gt;</span><span class="k">]</span>
+<span class="n">login_required</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+
+<span class="k">[[sites.</span><span class="err">&lt;</span><span class="k">site</span><span class="err">&gt;</span><span class="k">.book_ids]]</span>
+<span class="n">book_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;1030412702&quot;</span>
+<span class="n">start_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;833888839&quot;</span>
+<span class="n">end_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;921312343&quot;</span>
+<span class="n">ignore_ids</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;1234563&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;43212314&quot;</span><span class="p">]</span>
+
+<span class="k">[[sites.</span><span class="err">&lt;</span><span class="k">site</span><span class="err">&gt;</span><span class="k">.book_ids]]</span>
+<span class="n">book_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;1111111111&quot;</span><span class="w">   </span><span class="c1"># 其他字段可省略</span>
+</code></pre></div>
+<p><strong>结构化字段说明</strong></p>
+<table>
+<thead>
+<tr>
+<th>字段名</th>
+<th>类型</th>
+<th>必需</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>book_id</code></td>
+<td><code>str</code></td>
+<td>是</td>
+<td>小说的唯一标识 ID</td>
+</tr>
+<tr>
+<td><code>start_id</code></td>
+<td><code>str</code></td>
+<td>否</td>
+<td>起始章节 ID (含起)</td>
+</tr>
+<tr>
+<td><code>end_id</code></td>
+<td><code>str</code></td>
+<td>否</td>
+<td>结束章节 ID (含止)</td>
+</tr>
+<tr>
+<td><code>ignore_ids</code></td>
+<td><code>list[str]</code></td>
+<td>否</td>
+<td>需要跳过的章节 ID</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_5">示例配置<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h4>
+<p><strong>简单格式</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">[sites.qidian]</span>
+<span class="n">book_ids</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="s2">&quot;1010868264&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;1012584111&quot;</span>
+<span class="p">]</span>
+<span class="n">login_required</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">use_truncation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+</code></pre></div>
+<p><strong>结构化格式</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">[sites.qidian]</span>
+<span class="n">login_required</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+
+<span class="k">[[sites.qidian.book_ids]]</span>
+<span class="n">book_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;1010868264&quot;</span>
+<span class="n">start_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;434742822&quot;</span>
+<span class="n">end_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;528536599&quot;</span>
+<span class="n">ignore_ids</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;507161874&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;516065132&quot;</span><span class="p">]</span>
+
+<span class="k">[[sites.qidian.book_ids]]</span>
+<span class="n">book_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;1012584111&quot;</span>
+</code></pre></div>
+<p><strong>站点覆盖全局行为</strong></p>
+<p>站点配置可以覆盖全局配置。</p>
+<p>如下例中, 全局的 <code>request_interval = 0.5</code> 会被 <code>sites.qidian</code> 中的 <code>request_interval = 2.0</code> 覆盖:</p>
+<div class="highlight"><pre><span></span><code><span class="k">[general]</span>
+<span class="n">timeout</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">10.0</span>
+<span class="n">request_interval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5</span>
+
+<span class="k">[sites.qidian]</span>
+<span class="n">login_required</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">request_interval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">2.0</span><span class="w">  </span><span class="c1"># 覆盖全局的 0.5</span>
+</code></pre></div>
+<hr />
+<h3 id="plugins">plugins 配置<a class="headerlink" href="#plugins" title="Permanent link">&para;</a></h3>
+<p>插件系统相关设置, 用于开启/覆盖内置实现。</p>
+<h4 id="_6">主配置项<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>参数名</th>
+<th>类型</th>
+<th>默认值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>enable_local_plugins</code></td>
+<td><code>bool</code></td>
+<td><code>false</code></td>
+<td>是否启用本地插件目录 (扫描并加载本地插件)</td>
+</tr>
+<tr>
+<td><code>override_builtins</code></td>
+<td><code>bool</code></td>
+<td><code>false</code></td>
+<td>是否允许本地插件<strong>覆盖</strong>同名的内置实现 (如同名站点/处理器/导出器)</td>
+</tr>
+<tr>
+<td><code>local_plugins_path</code></td>
+<td><code>str</code></td>
+<td><code>"./novel_plugins"</code></td>
+<td>本地插件目录路径; 仅在 <code>enable_local_plugins = true</code> 时生效</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>更多插件编写说明 (自定义站点、处理器、导出器), 见: <a href="../../reference/plugins/">插件系统文档</a></p>
+</blockquote>
+<h4 id="_7">示例配置<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="k">[plugins]</span>
+<span class="c1"># 是否启用本地插件目录</span>
+<span class="n">enable_local_plugins</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
+<span class="c1"># 是否允许本地插件覆盖内置实现</span>
+<span class="n">override_builtins</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
+<span class="c1"># 本地插件路径 (可选)</span>
+<span class="n">local_plugins_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;./novel_plugins&quot;</span>
+
+<span class="k">[[plugins.processors]]</span>
+<span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;cleaner&quot;</span>
+<span class="n">overwrite</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
+<span class="n">remove_invisible</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+
+<span class="n">title_removes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;path/to/title-remove.json&quot;</span>
+<span class="n">title_replace</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;path/to/title-replace.json&quot;</span>
+
+<span class="n">content_removes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;path/to/content-remove.json&quot;</span>
+<span class="n">content_replace</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;path/to/content-replace.json&quot;</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.top", "navigation.sections", "navigation.indexes", "search.highlight", "search.suggest", "content.code.copy", "content.action.edit", "toc.follow"], "search": "../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

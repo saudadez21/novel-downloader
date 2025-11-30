@@ -1,0 +1,2169 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="NovelDownloader: A toolkit for downloading and processing novels.">
+      
+      
+        <meta name="author" content="Saudade Z">
+      
+      
+      
+        <link rel="prev" href="../processors-reference/">
+      
+      
+        <link rel="next" href="../web-examples/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/logo.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+    
+    
+      
+        <title>CLI Usage - NovelDownloader</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.618322db.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#cli" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="NovelDownloader" class="md-header__button md-logo" aria-label="NovelDownloader" data-md-component="logo">
+      
+  <img src="../../assets/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            NovelDownloader
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              CLI Usage
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_1">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/saudadez21/novel-downloader" title="Go to repository" class="md-source" data-md-component="source" target="_blank" rel="noopener">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    NovelDownloader
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../installation/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../supported-sites/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Supported Sites
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/api-examples/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../notes/aes/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Notes
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../misc/todo/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Misc
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="NovelDownloader" class="md-nav__button md-logo" aria-label="NovelDownloader" data-md-component="logo">
+      
+  <img src="../../assets/logo.svg" alt="logo">
+
+    </a>
+    NovelDownloader
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/saudadez21/novel-downloader" title="Go to repository" class="md-source" data-md-component="source" target="_blank" rel="noopener">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    NovelDownloader
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../processors-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Processors Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Usage
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI 使用示例
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CLI 使用示例">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        快速开始
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        登录/鉴权
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        全局用法与帮助
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        子命令总览
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="子命令总览">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-download" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. download 子命令
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-search" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. search 子命令
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-export" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. export 子命令
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. config 子命令
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-clean" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. clean 子命令
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#51-clean-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 clean state 子命令
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-clean-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 clean logs 子命令
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-clean-cache" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 clean cache 子命令
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-clean-book" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 clean book 子命令
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        附录 A: 术语与约定
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../web-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Web Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../file-saving/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File Saving
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../copy-cookies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Copy Cookies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../supported-sites/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Supported Sites
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Supported Sites
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../supported-sites/tags/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tags
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/api-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/plugins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Plugins
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notes
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Notes
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/aes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AES Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/duokan_epub/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Duokan EPUB Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/faloo_web/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Faloo Web Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/linovelib/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linovelib Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/parse_js_iife/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JS IIFE Parsing Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/qidian_app/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Qidian App Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/qidian_web/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Qidian Web Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notes/xiguashuwu/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Xiguashuwu Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Misc
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Misc
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misc/todo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TODO
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI 使用示例
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="CLI 使用示例">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        快速开始
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        登录/鉴权
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        全局用法与帮助
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        子命令总览
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="子命令总览">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-download" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. download 子命令
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-search" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. search 子命令
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-export" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. export 子命令
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. config 子命令
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-clean" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. clean 子命令
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#51-clean-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 clean state 子命令
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-clean-logs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 clean logs 子命令
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-clean-cache" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 clean cache 子命令
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-clean-book" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 clean book 子命令
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        附录 A: 术语与约定
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/saudadez21/novel-downloader/edit/main/docs/guide/cli-examples.md" title="Edit this page" class="md-content__button md-icon" rel="edit noopener" target="_blank">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+  <h1>CLI Usage</h1>
+
+<h2 id="cli">CLI 使用示例<a class="headerlink" href="#cli" title="Permanent link">&para;</a></h2>
+<p>支持的站点列表详见: <a href="../../supported-sites/">站点支持文档</a></p>
+<h3 id="_1">快速开始<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># 根据 URL 下载书籍</span>
+novel-cli<span class="w"> </span>download<span class="w"> </span>https://www.hetushu.com/book/5763/index.html
+
+<span class="c1"># 指定站点下载 (例如 b520)</span>
+novel-cli<span class="w"> </span>download<span class="w"> </span>--site<span class="w"> </span>b520<span class="w"> </span>8_8187
+
+<span class="c1"># 导出为 EPUB</span>
+novel-cli<span class="w"> </span><span class="nb">export</span><span class="w"> </span>--format<span class="w"> </span>epub<span class="w"> </span><span class="m">88888</span>
+</code></pre></div>
+<hr />
+<h3 id="_2">登录/鉴权<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<p>当配置启用 <code>login_required: true</code> 时, CLI 会检测登录状态; 若未登录, 将提示在命令行输入当前站点的有效 Cookie 或账号信息。</p>
+<hr />
+<h3 id="_3">全局用法与帮助<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>novel-cli COMMAND [ARGS]...
+
+Options:
+  --help    显示此帮助信息并退出
+</code></pre></div>
+<blockquote>
+<p>所有子命令均支持 <code>--help</code> 查看对应帮助文本。</p>
+</blockquote>
+<hr />
+<h3 id="_4">子命令总览<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>Commands:
+  download    下载小说
+  search      搜索小说
+  export      导出已下载的小说
+  config      管理配置与语言
+  clean       清理缓存与配置
+</code></pre></div>
+<hr />
+<h4 id="1-download">1. download 子命令<a class="headerlink" href="#1-download" title="Permanent link">&para;</a></h4>
+<p>下载完整小说, 支持三种方式:</p>
+<ol>
+<li><strong>直接传入 URL</strong></li>
+<li><strong>指定站点 + 书籍 ID</strong></li>
+<li><strong>省略参数, 从配置文件读取 ID</strong></li>
+</ol>
+<p><strong>Synopsis</strong></p>
+<div class="highlight"><pre><span></span><code>novel-cli<span class="w"> </span>download<span class="w"> </span><span class="o">[</span>-h<span class="o">]</span><span class="w"> </span><span class="o">[</span>--site<span class="w"> </span>SITE<span class="o">]</span><span class="w"> </span><span class="o">[</span>--config<span class="w"> </span>CONFIG<span class="o">]</span><span class="w"> </span><span class="o">[</span>--start<span class="w"> </span>START<span class="o">]</span><span class="w"> </span><span class="o">[</span>--end<span class="w"> </span>END<span class="o">]</span><span class="w"> </span><span class="o">[</span>--no-export<span class="o">]</span><span class="w"> </span><span class="o">[</span>book_ids<span class="w"> </span><span class="p">|</span><span class="w"> </span>url<span class="o">]</span>
+</code></pre></div>
+<p><strong>Options</strong></p>
+<ul>
+<li><code>book_ids | url</code>:<ul>
+<li>输入书籍 ID (配合 <code>--site</code> 使用)</li>
+<li>输入书籍/章节 URL (自动解析站点与书籍 ID)</li>
+<li>省略时将从配置文件读取 <code>book_ids</code></li>
+</ul>
+</li>
+<li><code>--site SITE</code>: 站点键 (如 <code>qidian</code>, <code>b520</code>, ...), 若直接传入 URL, 可省略</li>
+<li><code>--start START</code>: 起始章节<strong>唯一 ID</strong> (仅用于第一个 <code>book_id</code>)</li>
+<li><code>--end</code>: 结束章节<strong>唯一 ID</strong>, <strong>包含</strong> (仅用于第一个 <code>book_id</code>)</li>
+<li><code>--no-export</code>: 仅下载, 不进行导出。启用后将跳过导出步骤</li>
+</ul>
+<blockquote>
+<p><code>--start</code> / <code>--end</code> 用于临时下载部分章节, 仅影响<strong>第一个</strong>命令行提供的 <code>book_id</code>。</p>
+<p><code>--start</code> 和 <code>--end</code> 接收<strong>章节唯一 ID</strong>, 并非 "第几章" 的序号。</p>
+<p>需要复杂范围/忽略章节等, 请在配置文件使用结构化 <code>book_ids</code>; 参见 <a href="../settings-reference/">配置文件说明</a>。</p>
+</blockquote>
+<p><strong>Examples</strong></p>
+<p><img alt="cli_download" src="../../assets/images/cli_download.gif" /></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 方式一: 直接通过 URL 启动下载</span>
+novel-cli<span class="w"> </span>download<span class="w"> </span>https://www.hetushu.com/book/5763/index.html
+
+<span class="c1"># 方式二: 指定站点 + 书籍 ID</span>
+novel-cli<span class="w"> </span>download<span class="w"> </span>--site<span class="w"> </span>b520<span class="w"> </span>8_8187
+novel-cli<span class="w"> </span>download<span class="w"> </span>--site<span class="w"> </span>n23qb<span class="w"> </span><span class="m">12282</span>
+novel-cli<span class="w"> </span>download<span class="w"> </span>--site<span class="w"> </span>qidian<span class="w"> </span><span class="m">1010868264</span>
+
+<span class="c1"># 只下载部分章节</span>
+novel-cli<span class="w"> </span>download<span class="w"> </span>--site<span class="w"> </span>qidian<span class="w"> </span><span class="m">1010868264</span><span class="w"> </span>--start<span class="w"> </span><span class="m">402902546</span><span class="w"> </span>--end<span class="w"> </span><span class="m">406807540</span>
+
+<span class="c1"># 仅下载, 跳过导出步骤</span>
+novel-cli<span class="w"> </span>download<span class="w"> </span>--no-export<span class="w"> </span>--site<span class="w"> </span>qidian<span class="w"> </span><span class="m">1010868264</span>
+
+<span class="c1"># 方式三: 从配置文件中读取 ID</span>
+novel-cli<span class="w"> </span>download<span class="w"> </span>--site<span class="w"> </span>n23qb
+</code></pre></div>
+<hr />
+<h4 id="2-search">2. search 子命令<a class="headerlink" href="#2-search" title="Permanent link">&para;</a></h4>
+<p>按关键字搜索小说</p>
+<p><strong>Synopsis</strong></p>
+<div class="highlight"><pre><span></span><code>novel-cli<span class="w"> </span>search<span class="w"> </span><span class="o">[</span>-h<span class="o">]</span><span class="w"> </span><span class="o">[</span>--site<span class="w"> </span>SITE<span class="o">]</span><span class="w"> </span><span class="o">[</span>--config<span class="w"> </span>CONFIG<span class="o">]</span><span class="w"> </span><span class="o">[</span>--limit<span class="w"> </span>N<span class="o">]</span><span class="w"> </span><span class="o">[</span>--site-limit<span class="w"> </span>M<span class="o">]</span><span class="w"> </span>keyword
+</code></pre></div>
+<p><strong>Options</strong></p>
+<ul>
+<li><code>keyword</code>: 搜索关键字</li>
+<li><code>--site SITE</code>, <code>-s SITE</code>: 指定搜索站点, 可多次使用以指定多个站点, 不指定则搜索全部支持站点</li>
+<li><code>--limit N</code>: 总体结果上限 (最小 1), 默认为 <code>200</code></li>
+<li><code>--site-limit M</code>: 单站点结果上限 (最小 1), 默认为 <code>10</code></li>
+</ul>
+<p><strong>Examples</strong></p>
+<p><img alt="cli_search" src="../../assets/images/cli_search_santi.gif" /></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 搜索所有站点 (默认全部)</span>
+novel-cli<span class="w"> </span>search<span class="w"> </span>三体
+
+<span class="c1"># 指定单个站点 (如 b520)</span>
+novel-cli<span class="w"> </span>search<span class="w"> </span>--site<span class="w"> </span>b520<span class="w"> </span>三体
+
+<span class="c1"># 搜索 b520, 返回最多 5 条结果</span>
+novel-cli<span class="w"> </span>search<span class="w"> </span>--site<span class="w"> </span>b520<span class="w"> </span>--limit<span class="w"> </span><span class="m">5</span><span class="w"> </span>三体
+
+<span class="c1"># 总体返回最多 20 条, 每站点最多 5 条</span>
+novel-cli<span class="w"> </span>search<span class="w"> </span>--limit<span class="w"> </span><span class="m">20</span><span class="w"> </span>--site-limit<span class="w"> </span><span class="m">5</span><span class="w"> </span>三体
+
+<span class="c1"># 指定多个站点 (b520 和 n23qb)</span>
+novel-cli<span class="w"> </span>search<span class="w"> </span>-s<span class="w"> </span>b520<span class="w"> </span>-s<span class="w"> </span>n23qb<span class="w"> </span>三体
+</code></pre></div>
+<hr />
+<h4 id="3-export">3. export 子命令<a class="headerlink" href="#3-export" title="Permanent link">&para;</a></h4>
+<p>导出已下载的小说为指定格式</p>
+<p><strong>Synopsis</strong></p>
+<div class="highlight"><pre><span></span><code>novel-cli<span class="w"> </span><span class="nb">export</span><span class="w"> </span><span class="o">[</span>-h<span class="o">]</span><span class="w"> </span><span class="o">[</span>--format<span class="w"> </span>FORMAT<span class="o">]</span><span class="w"> </span><span class="o">[</span>--site<span class="w"> </span>SITE<span class="o">]</span><span class="w"> </span><span class="o">[</span>--config<span class="w"> </span>CONFIG<span class="o">]</span><span class="w"> </span><span class="o">[</span>book_id<span class="w"> </span>...<span class="o">]</span>
+</code></pre></div>
+<p><strong>Options</strong></p>
+<ul>
+<li><code>book_ids</code>: 要导出的一个或多个书籍 ID (可选; 若省略则会交互式选择)</li>
+<li><code>--format FORMAT</code>: 导出格式: <code>txt</code> / <code>epub</code>, 默认使用配置文件设定</li>
+<li><code>--site SITE</code>: 站点键 (如 <code>b520</code>, <code>qidian</code>, ...), (可选; 若省略则会交互式选择)</li>
+<li><code>--config CONFIG</code>: 指定配置文件路径 (可选)</li>
+<li><code>--start</code>: 起始章节 ID, 仅应用于第一本书</li>
+<li><code>--end</code>: 结束章节 ID, 仅应用于第一本书</li>
+</ul>
+<p><strong>Examples</strong></p>
+<p><img alt="cli_search" src="../../assets/images/cli_export.gif" /></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 指定导出格式为 EPUB</span>
+novel-cli<span class="w"> </span><span class="nb">export</span><span class="w"> </span>--format<span class="w"> </span>epub
+
+<span class="c1"># 指定站点来源并导出多本书</span>
+novel-cli<span class="w"> </span><span class="nb">export</span><span class="w"> </span>--site<span class="w"> </span>b520<span class="w"> </span><span class="m">12345</span><span class="w"> </span><span class="m">23456</span>
+
+<span class="c1"># 省略 site 和 book_ids, 进入交互模式选择站点和书籍</span>
+novel-cli<span class="w"> </span><span class="nb">export</span>
+</code></pre></div>
+<blockquote>
+<p>提示: 未指定 <code>--site</code> 或 <code>book_id</code> 时, 将进入交互模式, 从已有下载的站点和书籍中进行选择。</p>
+</blockquote>
+<hr />
+<h4 id="4-config">4. config 子命令<a class="headerlink" href="#4-config" title="Permanent link">&para;</a></h4>
+<p>初始化和管理下载器设置, 包括切换语言等</p>
+<p><strong>Synopsis</strong></p>
+<div class="highlight"><pre><span></span><code>novel-cli<span class="w"> </span>config<span class="w"> </span>COMMAND<span class="w"> </span><span class="o">[</span>ARGS<span class="o">]</span>...
+</code></pre></div>
+<p><strong>Subcommands</strong></p>
+<ul>
+<li><code>init [--force]</code>: 在当前目录初始化默认配置文件 (<code>./settings.toml</code>); <code>--force</code> 覆盖已存在文件</li>
+<li><code>set-lang LANG</code>: 切换 CLI 语言 (<code>zh_CN</code> / <code>en_US</code>)</li>
+</ul>
+<p><strong>Examples</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 切换界面语言为英文</span>
+novel-cli<span class="w"> </span>config<span class="w"> </span>set-lang<span class="w"> </span>en_US
+
+<span class="c1"># 初始化默认配置到当前目录</span>
+novel-cli<span class="w"> </span>config<span class="w"> </span>init
+
+<span class="c1"># 强制覆盖已存在的配置文件</span>
+novel-cli<span class="w"> </span>config<span class="w"> </span>init<span class="w"> </span>--force
+</code></pre></div>
+<hr />
+<h4 id="5-clean">5. clean 子命令<a class="headerlink" href="#5-clean" title="Permanent link">&para;</a></h4>
+<p>用于清理应用运行过程中产生的<strong>内部状态 / 日志 / 站点缓存 / 书籍原始数据</strong>。</p>
+<p>清理后, 下次运行会自动重新生成对应资源 (如重新抓取 metadata / 章节 / 媒体等)。</p>
+<p><code>clean</code> 包含 4 个子命令:</p>
+<ul>
+<li><code>state</code>: 清理内部状态文件 (运行时状态、临时信息)</li>
+<li><code>logs</code>: 清理应用日志文件</li>
+<li><code>cache</code>: 清理站点级缓存 (字体/共享资源等, 按站点目录划分)</li>
+<li><code>book</code>: 清理书籍原始缓存数据 (章节 SQLite / metadata / media / 或整书目录)</li>
+</ul>
+<p><strong>Synopsis</strong></p>
+<div class="highlight"><pre><span></span><code>novel-cli<span class="w"> </span>clean<span class="w"> </span><span class="o">[</span>-h<span class="o">]</span><span class="w"> </span><span class="o">{</span>state,logs,cache,book<span class="o">}</span><span class="w"> </span>...
+</code></pre></div>
+<p><strong>Examples</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 查看 clean 总帮助</span>
+novel-cli<span class="w"> </span>clean<span class="w"> </span>--help
+</code></pre></div>
+<hr />
+<h4 id="51-clean-state">5.1 clean state 子命令<a class="headerlink" href="#51-clean-state" title="Permanent link">&para;</a></h4>
+<p>清理内部状态文件 (例如运行时记录、临时信息)</p>
+<p><strong>Synopsis</strong></p>
+<div class="highlight"><pre><span></span><code>novel-cli<span class="w"> </span>clean<span class="w"> </span>state<span class="w"> </span><span class="o">[</span>-h<span class="o">]</span><span class="w"> </span><span class="o">[</span>-y<span class="o">]</span>
+</code></pre></div>
+<p><strong>Options</strong></p>
+<ul>
+<li><code>-y, --yes</code>: 跳过确认提示, 直接执行</li>
+</ul>
+<p><strong>Examples</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 清理内部状态</span>
+novel-cli<span class="w"> </span>clean<span class="w"> </span>state
+
+<span class="c1"># 强制清理 (跳过确认)</span>
+novel-cli<span class="w"> </span>clean<span class="w"> </span>state<span class="w"> </span>--yes
+</code></pre></div>
+<hr />
+<h4 id="52-clean-logs">5.2 clean logs 子命令<a class="headerlink" href="#52-clean-logs" title="Permanent link">&para;</a></h4>
+<p>清理应用生成的日志文件。</p>
+<p><strong>Synopsis</strong></p>
+<div class="highlight"><pre><span></span><code>novel-cli<span class="w"> </span>clean<span class="w"> </span>logs<span class="w"> </span><span class="o">[</span>-h<span class="o">]</span><span class="w"> </span><span class="o">[</span>--config<span class="w"> </span>CONFIG<span class="o">]</span><span class="w"> </span><span class="o">[</span>-y<span class="o">]</span><span class="w"> </span><span class="o">[</span>--dry-run<span class="o">]</span>
+</code></pre></div>
+<p><strong>Options</strong></p>
+<ul>
+<li><code>--config CONFIG</code>: 配置文件路径</li>
+<li><code>-y, --yes</code>: 跳过确认提示</li>
+<li><code>--dry-run</code>: 仅显示将被删除的日志文件, 不实际删除</li>
+</ul>
+<p><strong>Examples</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 试运行: 查看将要删除的日志文件</span>
+novel-cli<span class="w"> </span>clean<span class="w"> </span>logs<span class="w"> </span>--dry-run
+
+<span class="c1"># 清理日志</span>
+novel-cli<span class="w"> </span>clean<span class="w"> </span>logs
+
+<span class="c1"># 强制清理日志 (跳过确认)</span>
+novel-cli<span class="w"> </span>clean<span class="w"> </span>logs<span class="w"> </span>-y
+
+<span class="c1"># 指定配置文件位置</span>
+novel-cli<span class="w"> </span>clean<span class="w"> </span>logs<span class="w"> </span>--config<span class="w"> </span>./settings.toml
+</code></pre></div>
+<hr />
+<h4 id="53-clean-cache">5.3 clean cache 子命令<a class="headerlink" href="#53-clean-cache" title="Permanent link">&para;</a></h4>
+<p>清理站点级缓存目录, 缓存目录结构为:</p>
+<div class="highlight"><pre><span></span><code>&lt;cache_dir&gt;/&lt;site_key&gt;/
+</code></pre></div>
+<p>例如站点共享字体或解析缓存等。</p>
+<p><strong>Synopsis</strong></p>
+<div class="highlight"><pre><span></span><code>novel-cli<span class="w"> </span>clean<span class="w"> </span>cache<span class="w"> </span><span class="o">[</span>-h<span class="o">]</span><span class="w"> </span><span class="o">[</span>--config<span class="w"> </span>CONFIG<span class="o">]</span><span class="w"> </span><span class="o">[</span>--site<span class="w"> </span>SITE<span class="o">]</span><span class="w"> </span><span class="o">[</span>-y<span class="o">]</span>
+</code></pre></div>
+<p><strong>Options</strong></p>
+<ul>
+<li><code>--config CONFIG</code>: 配置文件路径</li>
+<li><code>--site SITE</code>: 站点键值 (如 <code>qidian</code>, <code>b520</code>), 省略时清理全部站点缓存</li>
+<li><code>-y, --yes</code>: 跳过确认提示</li>
+</ul>
+<p><strong>Examples</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 清理指定站点缓存</span>
+novel-cli<span class="w"> </span>clean<span class="w"> </span>cache<span class="w"> </span>--site<span class="w"> </span>qidian
+
+<span class="c1"># 清理全部站点缓存 (删除整个 cache_dir)</span>
+novel-cli<span class="w"> </span>clean<span class="w"> </span>cache
+
+<span class="c1"># 跳过确认提示</span>
+novel-cli<span class="w"> </span>clean<span class="w"> </span>cache<span class="w"> </span>--site<span class="w"> </span>b520<span class="w"> </span>-y
+
+<span class="c1"># 指定配置文件</span>
+novel-cli<span class="w"> </span>clean<span class="w"> </span>cache<span class="w"> </span>--config<span class="w"> </span>./settings.toml
+</code></pre></div>
+<hr />
+<h4 id="54-clean-book">5.4 clean book 子命令<a class="headerlink" href="#54-clean-book" title="Permanent link">&para;</a></h4>
+<p>清理一本或多本书的原始缓存数据, 数据目录结构为:</p>
+<div class="highlight"><pre><span></span><code>&lt;raw_data_dir&gt;/&lt;site_key&gt;/&lt;book_id&gt;/
+</code></pre></div>
+<p>默认会删除章节 SQLite 数据 (可按 <code>--start/--end</code> 限定范围)</p>
+<p>可按需指定是否删除 media 或整书目录。</p>
+<p><strong>Synopsis</strong></p>
+<div class="highlight"><pre><span></span><code>novel-cli<span class="w"> </span>clean<span class="w"> </span>book<span class="w"> </span><span class="o">[</span>-h<span class="o">]</span>
+<span class="w">    </span><span class="o">[</span>--site<span class="w"> </span>SITE<span class="o">]</span><span class="w"> </span><span class="o">[</span>--config<span class="w"> </span>CONFIG<span class="o">]</span>
+<span class="w">    </span><span class="o">[</span>--start<span class="w"> </span>START<span class="o">]</span><span class="w"> </span><span class="o">[</span>--end<span class="w"> </span>END<span class="o">]</span>
+<span class="w">    </span><span class="o">[</span>--stage<span class="w"> </span>STAGE<span class="o">]</span>
+<span class="w">    </span><span class="o">[</span>--no-chapters<span class="o">]</span><span class="w"> </span><span class="o">[</span>--metadata<span class="o">]</span><span class="w"> </span><span class="o">[</span>--media<span class="o">]</span><span class="w"> </span><span class="o">[</span>--all<span class="o">]</span>
+<span class="w">    </span><span class="o">[</span>-y<span class="o">]</span>
+<span class="w">    </span><span class="o">[</span>book_ids<span class="w"> </span>...<span class="o">]</span>
+</code></pre></div>
+<p><strong>Options</strong></p>
+<ul>
+<li><code>book_ids</code>: 一个或多个书籍 ID</li>
+<li><code>--site SITE</code>: 站点键值</li>
+<li><code>--config CONFIG</code>: 配置文件路径</li>
+<li><code>--start START</code>: 起始章节 ID (仅对第一本书生效)</li>
+<li><code>--end END</code>: 结束章节 ID (仅对第一本书生效, <strong>包含 end</strong>)</li>
+<li><code>--stage STAGE</code>: 清理阶段 (如 <code>raw</code>, <code>cleaned</code>), 默认 <code>raw</code></li>
+<li><code>--no-chapters</code>: 不删除章节数据 (SQLite 不动)</li>
+<li><code>--metadata</code>: 删除 metadata JSON</li>
+<li><code>--media</code>: 删除媒体资源目录 (图片等)</li>
+<li><code>--all</code>: 删除该书<strong>全部原始数据目录</strong> (忽略其他清理选项), 若同时省略 <code>book_ids</code>, 则清理指定站点/全部站点的整站 raw_data</li>
+<li><code>-y, --yes</code>: 跳过确认提示</li>
+</ul>
+<p><strong>Examples</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 默认清理</span>
+novel-cli<span class="w"> </span>clean<span class="w"> </span>book<span class="w"> </span>--site<span class="w"> </span>qidian<span class="w"> </span><span class="m">1010868264</span>
+
+<span class="c1"># 清理指定范围章节 (仅第一本书生效)</span>
+novel-cli<span class="w"> </span>clean<span class="w"> </span>book<span class="w"> </span>--site<span class="w"> </span>qidian<span class="w"> </span><span class="m">1010868264</span><span class="w"> </span>--start<span class="w"> </span><span class="m">402902546</span><span class="w"> </span>--end<span class="w"> </span><span class="m">406807540</span>
+
+<span class="c1"># 只清理 metadata, 不清章节</span>
+novel-cli<span class="w"> </span>clean<span class="w"> </span>book<span class="w"> </span>--site<span class="w"> </span>qidian<span class="w"> </span><span class="m">1010868264</span><span class="w"> </span>--no-chapters<span class="w"> </span>--metadata
+
+<span class="c1"># 清理 media (图片等)</span>
+novel-cli<span class="w"> </span>clean<span class="w"> </span>book<span class="w"> </span>--site<span class="w"> </span>qidian<span class="w"> </span><span class="m">1010868264</span><span class="w"> </span>--media
+
+<span class="c1"># 删除整本书所有原始数据 (直接删目录)</span>
+novel-cli<span class="w"> </span>clean<span class="w"> </span>book<span class="w"> </span>--site<span class="w"> </span>qidian<span class="w"> </span><span class="m">1010868264</span><span class="w"> </span>--all
+
+<span class="c1"># 删除指定站点全部 raw_data (省略 book_ids 且 --all)</span>
+novel-cli<span class="w"> </span>clean<span class="w"> </span>book<span class="w"> </span>--site<span class="w"> </span>qidian<span class="w"> </span>--all
+
+<span class="c1"># 删除全部站点 raw_data (省略 site 且 --all)</span>
+novel-cli<span class="w"> </span>clean<span class="w"> </span>book<span class="w"> </span>--all
+
+<span class="c1"># 跳过确认提示</span>
+novel-cli<span class="w"> </span>clean<span class="w"> </span>book<span class="w"> </span>--site<span class="w"> </span>qidian<span class="w"> </span><span class="m">1010868264</span><span class="w"> </span>--all<span class="w"> </span>-y
+</code></pre></div>
+<blockquote>
+<p>提示: <code>--start/--end</code> 接收<strong>章节唯一 ID</strong>, 并非 "第几章" 的序号</p>
+</blockquote>
+<hr />
+<h3 id="a">附录 A: 术语与约定<a class="headerlink" href="#a" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>SITE (站点键)</strong>: 在命令中用于指明站点的短名称 (如 <code>qidian</code>, <code>b520</code>, <code>n23qb</code>) 。</li>
+<li><strong>章节唯一 ID</strong>: 站点侧用于标识章节的 ID, <strong>不是</strong>连续的 "第 N 章" 序号; 在 <code>--start</code>/<code>--end</code> 中应传入此 ID。</li>
+<li><strong>配置文件路径</strong>: 若未显式传入 <code>--config</code>, CLI 会按「配置优先级」自动解析。</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.top", "navigation.sections", "navigation.indexes", "search.highlight", "search.suggest", "content.code.copy", "content.action.edit", "toc.follow"], "search": "../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

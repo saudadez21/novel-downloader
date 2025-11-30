@@ -1,0 +1,4646 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="NovelDownloader: A toolkit for downloading and processing novels.">
+      
+      
+        <meta name="author" content="Saudade Z">
+      
+      
+      
+        <link rel="prev" href="../../reference/plugins/">
+      
+      
+        <link rel="next" href="../duokan_epub/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/logo.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+    
+    
+      
+        <title>AES Notes - NovelDownloader</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.618322db.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#advanced-encryption-standard-aes" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="NovelDownloader" class="md-header__button md-logo" aria-label="NovelDownloader" data-md-component="logo">
+      
+  <img src="../../assets/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            NovelDownloader
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              AES Notes
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-hidden="true"  type="radio" name="__palette" id="__palette_1">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/saudadez21/novel-downloader" title="Go to repository" class="md-source" data-md-component="source" target="_blank" rel="noopener">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    NovelDownloader
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guide/installation/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../supported-sites/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Supported Sites
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/api-examples/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Notes
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../misc/todo/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Misc
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="NovelDownloader" class="md-nav__button md-logo" aria-label="NovelDownloader" data-md-component="logo">
+      
+  <img src="../../assets/logo.svg" alt="logo">
+
+    </a>
+    NovelDownloader
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/saudadez21/novel-downloader" title="Go to repository" class="md-source" data-md-component="source" target="_blank" rel="noopener">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    NovelDownloader
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Install
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/settings-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Settings Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/processors-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Processors Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/cli-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/web-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Web Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/file-saving/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    File Saving
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/copy-cookies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Copy Cookies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../supported-sites/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Supported Sites
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Supported Sites
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../supported-sites/tags/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tags
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/api-examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/plugins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Plugins
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Notes
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Notes
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AES Notes
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AES Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        引言
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        定义
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="定义">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        术语与缩略语表
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        算法参数、符号和函数
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        符号与约定
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="符号与约定">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        输入与输出
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bytes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        字节 (Bytes)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arrays-of-bytes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        字节数组 (Arrays of Bytes)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        状态 (The State)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-state-as-an-array-of-columns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        作为列数组的状态 (The State as an Array of Columns)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        数学预备知识
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="数学预备知识">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#addition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        加法 (Addition)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiplication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        乘法 (Multiplication)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiplicative-inverse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        乘法逆元 (Multiplicative Inverse)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#distributive-law" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        分配律 (Distributive Law)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="分配律 (Distributive Law)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#x-multiplication-by-x" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        乘以 \(x\) (Multiplication by \(x\))
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mathrmgf28-polynomials-with-coefficients-in-mathrmgf28" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        系数属于 \(\mathrm{GF}(2^8)\) 的多项式 (Polynomials with Coefficients in \(\mathrm{GF}(2^8)\))
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#addition_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        多项式加法 (Addition)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiplication_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        多项式乘法 (Multiplication)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="多项式乘法 (Multiplication)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 多项式展开
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-x4-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 模 \(x^4 + 1\) 约简
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#matrix-representation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        矩阵表示 (Matrix Representation)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AES 中使用的特殊多项式
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#algorithm-specification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        算法规范 (Algorithm Specification)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="算法规范 (Algorithm Specification)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#round-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        轮函数 (Round Function)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cipher" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        密码 (Cipher)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="密码 (Cipher)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#subbytes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SubBytes() 变换
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shiftrows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ShiftRows() 变换
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ShiftRows() 变换">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mixcolumns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MixColumns() 变换
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#addroundkey" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AddRoundKey() 变换
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-expansion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        密钥扩展 (Key Expansion)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="密钥扩展 (Key Expansion)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        输出规模
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        关键辅助函数
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fig-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        生成规则（见 Fig. 11 伪代码）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inverse-cipher" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        逆向加密 (Inverse Cipher)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="逆向加密 (Inverse Cipher)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#invshiftrows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InvShiftRows() 变换
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#invsubbytes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InvSubBytes() 变换
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#invmixcolumns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InvMixColumns() 变换
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#addroundkey_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AddRoundKey() 逆变换
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#equivalent-inverse-cipher" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        等效逆向加密 (Equivalent Inverse Cipher)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="等效逆向加密 (Equivalent Inverse Cipher)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-commutativity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        性质 1. 可交换性 (Commutativity)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-linearity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        性质 2. 线性性 (Linearity)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        等效逆向加密构造方法
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../duokan_epub/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Duokan EPUB Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faloo_web/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Faloo Web Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../linovelib/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Linovelib Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parse_js_iife/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    JS IIFE Parsing Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../qidian_app/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Qidian App Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../qidian_web/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Qidian Web Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../xiguashuwu/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Xiguashuwu Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Misc
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Misc
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../misc/todo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TODO
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        引言
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        定义
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="定义">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        术语与缩略语表
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        算法参数、符号和函数
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        符号与约定
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="符号与约定">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        输入与输出
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bytes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        字节 (Bytes)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arrays-of-bytes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        字节数组 (Arrays of Bytes)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        状态 (The State)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-state-as-an-array-of-columns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        作为列数组的状态 (The State as an Array of Columns)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        数学预备知识
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="数学预备知识">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#addition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        加法 (Addition)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiplication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        乘法 (Multiplication)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiplicative-inverse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        乘法逆元 (Multiplicative Inverse)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#distributive-law" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        分配律 (Distributive Law)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="分配律 (Distributive Law)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#x-multiplication-by-x" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        乘以 \(x\) (Multiplication by \(x\))
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mathrmgf28-polynomials-with-coefficients-in-mathrmgf28" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        系数属于 \(\mathrm{GF}(2^8)\) 的多项式 (Polynomials with Coefficients in \(\mathrm{GF}(2^8)\))
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#addition_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        多项式加法 (Addition)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiplication_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        多项式乘法 (Multiplication)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="多项式乘法 (Multiplication)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 多项式展开
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-x4-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 模 \(x^4 + 1\) 约简
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#matrix-representation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        矩阵表示 (Matrix Representation)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AES 中使用的特殊多项式
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#algorithm-specification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        算法规范 (Algorithm Specification)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="算法规范 (Algorithm Specification)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#round-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        轮函数 (Round Function)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cipher" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        密码 (Cipher)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="密码 (Cipher)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#subbytes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SubBytes() 变换
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shiftrows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ShiftRows() 变换
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ShiftRows() 变换">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mixcolumns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MixColumns() 变换
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#addroundkey" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AddRoundKey() 变换
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-expansion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        密钥扩展 (Key Expansion)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="密钥扩展 (Key Expansion)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        输出规模
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        关键辅助函数
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fig-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        生成规则（见 Fig. 11 伪代码）
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inverse-cipher" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        逆向加密 (Inverse Cipher)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="逆向加密 (Inverse Cipher)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#invshiftrows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InvShiftRows() 变换
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#invsubbytes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InvSubBytes() 变换
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#invmixcolumns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        InvMixColumns() 变换
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#addroundkey_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AddRoundKey() 逆变换
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#equivalent-inverse-cipher" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        等效逆向加密 (Equivalent Inverse Cipher)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="等效逆向加密 (Equivalent Inverse Cipher)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-commutativity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        性质 1. 可交换性 (Commutativity)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-linearity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        性质 2. 线性性 (Linearity)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        等效逆向加密构造方法
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/saudadez21/novel-downloader/edit/main/docs/notes/aes.md" title="Edit this page" class="md-content__button md-icon" rel="edit noopener" target="_blank">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="advanced-encryption-standard-aes">ADVANCED ENCRYPTION STANDARD (AES) 学习笔记<a class="headerlink" href="#advanced-encryption-standard-aes" title="Permanent link">&para;</a></h1>
+<p>日期: 2025/08/01</p>
+<p>Reference:</p>
+<ul>
+<li><a href="https://crypto.stackexchange.com/questions/44672/different-ways-algorithms-for-implementing-aes" target="_blank" rel="noopener">Different ways/algorithms for implementing AES</a></li>
+<li><a href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf" target="_blank" rel="noopener">Federal Information Processing Standards (FIPS) Publication 197</a></li>
+</ul>
+<hr />
+<h2 id="_1">引言<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p>高级加密标准 (Advanced Encryption Standard, AES) 是一种对称分组加密算法 (symmetric block-cipher algorithm)，由美国国家标准与技术研究院 (NIST) 在 FIPS 197 标准中正式定义与发布。</p>
+<p>AES 基于 Rijndael 密码 (Rijndael cipher)，该算法以 128 位 (bits) 的数据分组进行运算，并支持 <code>128</code>、<code>192</code> 或 <code>256</code> 位的密钥长度 (key size)。</p>
+<p>虽然 Rijndael 算法本身可灵活配置其他分组大小与密钥长度，但 AES 标准化版本仅采用这三种 "口味" -- 通常称为 <code>AES-128</code>、<code>AES-192</code> 和 <code>AES-256</code>。</p>
+<h2 id="_2">定义<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h3 id="_3">术语与缩略语表<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>术语</th>
+<th>定义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AES</code></td>
+<td>高级加密标准 (Advanced Encryption Standard)</td>
+</tr>
+<tr>
+<td><code>仿射变换</code> (Affine Transformation)</td>
+<td>一种变换，由矩阵乘法后接向量加法组成。</td>
+</tr>
+<tr>
+<td><code>数组</code> (Array)</td>
+<td>一组按顺序排列的相同实体 (例如：字节数组)。</td>
+</tr>
+<tr>
+<td><code>位</code> (Bit)</td>
+<td>取值为 0 或 1 的二进制数字。</td>
+</tr>
+<tr>
+<td><code>分组</code> (Block)</td>
+<td>构成输入、输出、状态 (State) 和轮密钥 (Round Key) 的二进制位序列。序列的长度即其包含的位数。分组也可解释为字节数组。</td>
+</tr>
+<tr>
+<td><code>字节</code> (Byte)</td>
+<td>由 8 位组成的集合，可作为单个实体或 8 个独立位的数组处理。</td>
+</tr>
+<tr>
+<td><code>密码</code> (Cipher)</td>
+<td>一系列将明文 (Plaintext) 转换为密文 (Ciphertext) 的变换，使用密码密钥 (Cipher Key)。</td>
+</tr>
+<tr>
+<td><code>密码密钥</code> (Cipher Key)</td>
+<td>由密钥扩展 (Key Expansion) 过程生成一组轮密钥 (Round Keys) 所用的秘密加密密钥；通常表示为一个 4x<code>Nk</code> 的字节数组。</td>
+</tr>
+<tr>
+<td><code>密文</code> (Ciphertext)</td>
+<td>从密码 (Cipher) 输出或作为逆密码 (Inverse Cipher) 输入的数据。</td>
+</tr>
+<tr>
+<td><code>逆密码</code> (Inverse Cipher)</td>
+<td>一系列将密文转换为明文的变换，使用密码密钥 (Cipher Key)。</td>
+</tr>
+<tr>
+<td><code>密钥扩展</code> (Key Expansion)</td>
+<td>从密码密钥生成一系列轮密钥的过程。</td>
+</tr>
+<tr>
+<td><code>明文</code> (Plaintext)</td>
+<td>输入到密码或从逆密码输出的数据。</td>
+</tr>
+<tr>
+<td><code>Rijndael</code></td>
+<td>本高级加密标准 (AES) 中指定的加密算法。</td>
+</tr>
+<tr>
+<td><code>轮密钥</code> (Round Key)</td>
+<td>由密码密钥通过密钥扩展生成的值；在密码和逆密码中应用于状态 (State)。</td>
+</tr>
+<tr>
+<td><code>状态</code> (State)</td>
+<td>中间加密结果，通常表示为一个 4x<code>Nb</code> 的字节数组。</td>
+</tr>
+<tr>
+<td><code>S 盒</code> (S-box)</td>
+<td>在字节替代 (byte-substitution) 变换以及密钥扩展过程中使用的非线性替代表。</td>
+</tr>
+<tr>
+<td><code>字</code> (Word)</td>
+<td>由 32 位组成的集合，可作为单个实体或 4 个字节的数组处理。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_4">算法参数、符号和函数<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>符号</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AddRoundKey()</code></td>
+<td>在密码和逆密码中，将轮密钥 (Round Key) 通过异或 (XOR) 运算添加到状态 (State) 的变换。(轮密钥长度 = 状态大小: 当 <code>Nb</code> = 4 时为 128 位 / 16 字节)</td>
+</tr>
+<tr>
+<td><code>InvMixColumns()</code></td>
+<td>逆密码中的变换，是 <code>MixColumns()</code> 的逆运算。</td>
+</tr>
+<tr>
+<td><code>InvShiftRows()</code></td>
+<td>逆密码中的变换，是 <code>ShiftRows()</code> 的逆运算。</td>
+</tr>
+<tr>
+<td><code>InvSubBytes()</code></td>
+<td>逆密码中的变换，是 <code>SubBytes()</code> 的逆运算。</td>
+</tr>
+<tr>
+<td><code>K</code></td>
+<td>密码密钥 (Cipher Key)。</td>
+</tr>
+<tr>
+<td><code>MixColumns()</code></td>
+<td>密码中的变换，将状态 (State) 的所有列分别混合以生成新的列，列与列之间互不影响。</td>
+</tr>
+<tr>
+<td><code>Nb</code></td>
+<td>构成状态的列数 (32-bit words)。在标准中，<code>Nb</code> = 4。</td>
+</tr>
+<tr>
+<td><code>Nk</code></td>
+<td>构成密码密钥的 32 位字数。在标准中，<code>Nk</code> = 4、6 或 8。</td>
+</tr>
+<tr>
+<td><code>Nr</code></td>
+<td>轮数 (number of rounds)，是 <code>Nk</code> 和 <code>Nb</code> 的函数。在标准中，<code>Nr</code> = 10、12 或 14。</td>
+</tr>
+<tr>
+<td><code>Rcon[]</code></td>
+<td>在密钥扩展中使用的轮常数字数组 (Round constant word array)。</td>
+</tr>
+<tr>
+<td><code>RotWord()</code></td>
+<td>密钥扩展函数，对一个四字节 (four-byte) 字进行循环移位 (cyclic permutation)。</td>
+</tr>
+<tr>
+<td><code>ShiftRows()</code></td>
+<td>密码中的变换，将状态的最后三行按不同偏移量循环移位。</td>
+</tr>
+<tr>
+<td><code>SubBytes()</code></td>
+<td>密码中的变换，对状态中每个字节独立应用 S 盒 (S-box)。</td>
+</tr>
+<tr>
+<td><code>SubWord()</code></td>
+<td>密钥扩展函数，对四字节字的每个字节应用 S 盒 (S-box)。</td>
+</tr>
+<tr>
+<td><code>XOR</code></td>
+<td>异或 (Exclusive-OR) 运算。</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\oplus\)</span></td>
+<td>另一种表示异或 (Exclusive-OR) 运算的符号。</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\otimes\)</span></td>
+<td>多项式乘法 (degree &lt; 4) 模 <span class="arithmatex">\(x^4 + 1\)</span>。</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\cdot\)</span></td>
+<td>有限域乘法 (finite-field multiplication)。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_5">符号与约定<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<h3 id="_6">输入与输出<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<p>AES 算法的输入与输出均由一个 128 位 (bits) 的二进制序列组成（每个位的取值为 0 或 1）。这些序列有时称为<strong>分组</strong> (blocks)，其所包含的位数被称为<strong>长度</strong> (length)。AES 的<strong>密码密钥</strong> (Cipher Key) 是一个长度为 128、192 或 256 位的序列，标准不允许使用其他输入、输出或密钥长度。</p>
+<p>在这些序列中，位的编号从 0 开始，直到序列长度减 1（即分组长度或密钥长度减 1）。附加在位上的数字 <span class="arithmatex">\(i\)</span> 被称为该位的<strong>索引</strong> (index)，其取值范围因分组长度或密钥长度不同而有所区别：
+<span class="arithmatex">\(0 \leq i &lt; 128\)</span>、<span class="arithmatex">\(0 \leq i &lt; 192\)</span> 或 <span class="arithmatex">\(0 \leq i &lt; 256\)</span>。</p>
+<h3 id="bytes">字节 (Bytes)<a class="headerlink" href="#bytes" title="Permanent link">&para;</a></h3>
+<p>AES 算法的基本处理单元是<strong>字节</strong> (byte)，即由 8 个比特组成并作为整体处理的序列。第 3.1 节中描述的输入、输出与密钥位序列，均以<strong>字节数组</strong> (byte array) 的形式处理。这些字节数组是通过将二进制序列按顺序划分为连续的 8 位分组而得到的。</p>
+<p>对于一个用符号 <code>a</code> 表示的输入、输出或密码密钥，字节数组中的每个字节可以用两种方式引用：<span class="arithmatex">\(a_n\)</span> 或 <code>a[n]</code>，其中 <span class="arithmatex">\(n\)</span> 的取值范围为：</p>
+<ul>
+<li>密钥长度 = 128 位，<span class="arithmatex">\(0 \leq n &lt; 16\)</span>；分组长度 = 128 位，<span class="arithmatex">\(0 \leq n &lt; 16\)</span>；</li>
+<li>密钥长度 = 192 位，<span class="arithmatex">\(0 \leq n &lt; 24\)</span>；</li>
+<li>密钥长度 = 256 位，<span class="arithmatex">\(0 \leq n &lt; 32\)</span>。</li>
+</ul>
+<p>在 AES 中，所有字节值均以花括号包裹的形式表示：<span class="arithmatex">\(\{b_7, b_6, b_5, b_4, b_3, b_2, b_1, b_0\}\)</span>，其中 <span class="arithmatex">\(b_i \in \{0, 1\}\)</span>，并按从高位到低位排列。字节也可解释为<strong>有限域元素</strong> (finite field elements)，其<strong>多项式表示</strong> (polynomial representation) 为：</p>
+<div class="arithmatex">\[
+b_7 x^7 + b_6 x^6 + b_5 x^5 + b_4 x^4 + b_3 x^3 + b_2 x^2 + b_1 x^1 + b_0 = \sum_{i=0}^{7} b_{i} x^{i}
+\]</div>
+<p>例如，<span class="arithmatex">\(\{01100011\}\)</span> 表示有限域元素 <span class="arithmatex">\(x^6 + x^5 + x + 1\)</span>。</p>
+<p>为了简化表示，也可以使用<strong>十六进制表示法</strong> (hexadecimal notation)，即每 4 个比特为一组，由一个十六进制字符表示，如下表所示。</p>
+<table>
+<thead>
+<tr>
+<th>位模式 (Bit Pattern)</th>
+<th>字符 (Character)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0000</code></td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>0001</code></td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>0010</code></td>
+<td><code>2</code></td>
+</tr>
+<tr>
+<td><code>0011</code></td>
+<td><code>3</code></td>
+</tr>
+<tr>
+<td><code>0100</code></td>
+<td><code>4</code></td>
+</tr>
+<tr>
+<td><code>0101</code></td>
+<td><code>5</code></td>
+</tr>
+<tr>
+<td><code>0110</code></td>
+<td><code>6</code></td>
+</tr>
+<tr>
+<td><code>0111</code></td>
+<td><code>7</code></td>
+</tr>
+<tr>
+<td><code>1000</code></td>
+<td><code>8</code></td>
+</tr>
+<tr>
+<td><code>1001</code></td>
+<td><code>9</code></td>
+</tr>
+<tr>
+<td><code>1010</code></td>
+<td><code>a</code></td>
+</tr>
+<tr>
+<td><code>1011</code></td>
+<td><code>b</code></td>
+</tr>
+<tr>
+<td><code>1100</code></td>
+<td><code>c</code></td>
+</tr>
+<tr>
+<td><code>1101</code></td>
+<td><code>d</code></td>
+</tr>
+<tr>
+<td><code>1110</code></td>
+<td><code>e</code></td>
+</tr>
+<tr>
+<td><code>1111</code></td>
+<td><code>f</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>图 1.</strong> 位模式的十六进制表示 (Hexadecimal representation of bit patterns)</p>
+<p>因此，元素 <span class="arithmatex">\(\{01100011\}\)</span> 可以简写为 <span class="arithmatex">\(\{63\}\)</span>，其中左侧字符对应字节的高位 4 位。</p>
+<p>在某些有限域运算中，可能会涉及一个附加位 (<span class="arithmatex">\(b_8\)</span>)，位于 8 位字节的左侧。当存在该额外位时，其会以单独的字节 <span class="arithmatex">\(\{01\}\)</span> 放在该字节之前。例如，一个 9 位的序列可表示为 <span class="arithmatex">\(\{01\}\{1b\}\)</span>。</p>
+<h3 id="arrays-of-bytes">字节数组 (Arrays of Bytes)<a class="headerlink" href="#arrays-of-bytes" title="Permanent link">&para;</a></h3>
+<p>在 AES 中，<strong>字节数组</strong> (array of bytes) 按以下形式表示：</p>
+<div class="arithmatex">\[
+a_{0} \; a_{1} \; a_{2} \; \dots \; a_{15}
+\]</div>
+<p>这些字节的排列顺序及字节内的位顺序，源自一个 128 位输入序列 (128-bit input sequence)：</p>
+<div class="arithmatex">\[
+input_{0} \; input_{1} \; input_{2} \; \dots \; input_{126} \; input_{127}
+\]</div>
+<p>对应关系为：</p>
+<div class="arithmatex">\[
+\begin{aligned}
+a_{0} &amp;= \{ input_{0}, \; input_{1}, \dots, \; input_{7} \}; \\
+a_{0} &amp;= \{ input_{8}, \; input_{9}, \dots, \; input_{15} \}; \\
+\vdots \\
+a_{15} &amp;= \{ input_{120}, \; input_{121}, \dots, \; input_{127} \}; \\
+\end{aligned}
+\]</div>
+<p>这一模式可推广至更长的输入序列（例如 192 位和 256 位密钥）。一般情况下：</p>
+<div class="arithmatex">\[
+a_{n} = \{ input_{8n}, \; input_{8n+1}, \dots, \; input_{8n+7} \}
+\]</div>
+<p>结合第 3.2 节与第 3.3 节，图 2 展示了字节与位的编号方式。</p>
+<table>
+<thead>
+<tr>
+<th>输入位序列 (Input bit sequence)</th>
+<th>字节编号 (Byte number)</th>
+<th>字节内位编号 (Bit numbers in bytes)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0</code></td>
+<td><code>0</code></td>
+<td><code>7</code></td>
+</tr>
+<tr>
+<td><code>1</code></td>
+<td></td>
+<td><code>6</code></td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td></td>
+<td><code>5</code></td>
+</tr>
+<tr>
+<td><code>3</code></td>
+<td></td>
+<td><code>4</code></td>
+</tr>
+<tr>
+<td><code>4</code></td>
+<td></td>
+<td><code>3</code></td>
+</tr>
+<tr>
+<td><code>5</code></td>
+<td></td>
+<td><code>2</code></td>
+</tr>
+<tr>
+<td><code>6</code></td>
+<td></td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>7</code></td>
+<td></td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>8</code></td>
+<td><code>1</code></td>
+<td><code>7</code></td>
+</tr>
+<tr>
+<td><code>9</code></td>
+<td></td>
+<td><code>6</code></td>
+</tr>
+<tr>
+<td><code>10</code></td>
+<td></td>
+<td><code>5</code></td>
+</tr>
+<tr>
+<td><code>11</code></td>
+<td></td>
+<td><code>4</code></td>
+</tr>
+<tr>
+<td><code>12</code></td>
+<td></td>
+<td><code>3</code></td>
+</tr>
+<tr>
+<td><code>13</code></td>
+<td></td>
+<td><code>2</code></td>
+</tr>
+<tr>
+<td><code>14</code></td>
+<td></td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>15</code></td>
+<td></td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>16</code></td>
+<td><code>2</code></td>
+<td><code>7</code></td>
+</tr>
+<tr>
+<td><code>17</code></td>
+<td></td>
+<td><code>6</code></td>
+</tr>
+<tr>
+<td><code>18</code></td>
+<td></td>
+<td><code>5</code></td>
+</tr>
+<tr>
+<td><code>19</code></td>
+<td></td>
+<td><code>4</code></td>
+</tr>
+<tr>
+<td><code>20</code></td>
+<td></td>
+<td><code>3</code></td>
+</tr>
+<tr>
+<td><code>21</code></td>
+<td></td>
+<td><code>2</code></td>
+</tr>
+<tr>
+<td><code>22</code></td>
+<td></td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>23</code></td>
+<td></td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\cdots\)</span></td>
+<td><span class="arithmatex">\(\cdots\)</span></td>
+<td><span class="arithmatex">\(\cdots\)</span></td>
+</tr>
+</tbody>
+</table>
+<p><strong>图 2.</strong> 字节与位的索引 (Indices for bytes and bits)</p>
+<h3 id="the-state">状态 (The State)<a class="headerlink" href="#the-state" title="Permanent link">&para;</a></h3>
+<p>AES 的核心运算在一个称为<strong>状态</strong> (State) 的二维字节数组上进行。该状态由 4 行字节构成，每行包含 <span class="arithmatex">\(Nb\)</span> 个字节，其中：</p>
+<div class="arithmatex">\[
+Nb = \frac{\text{block length}}{32}
+\]</div>
+<p>在标准 AES 中，分组长度为 128 位，因此 <span class="arithmatex">\(Nb = 4\)</span>。</p>
+<p>若用符号 <span class="arithmatex">\(s\)</span> 表示状态数组，则其每个字节由两个索引唯一定位：
+* 行索引 <span class="arithmatex">\(r\)</span>：<span class="arithmatex">\(0 \leq r &lt; 4\)</span>
+* 列索引 <span class="arithmatex">\(c\)</span>：<span class="arithmatex">\(0 \leq c &lt; Nb\)</span></p>
+<p>因此，状态中的单个字节可表示为 <span class="arithmatex">\(s_{r,c}\)</span> 或 <code>s[r,c]</code>。</p>
+<p>在<strong>密码</strong> (Cipher) 和<strong>逆密码</strong> (Inverse Cipher) 的初始阶段，输入字节数组 <span class="arithmatex">\(in_{0}, in_{1}, \dots, in_{15}\)</span> 会按列优先顺序填入状态数组，如图 3 所示。加解密运算完成后，状态数组中的数据再以相同规则输出到字节数组 <span class="arithmatex">\(out_{0}, out_{1}, \dots, out_{15}\)</span>。</p>
+<div style="display: flex; justify-content: space-around; align-items: center; gap: 20px;">
+
+  <!-- Input Bytes -->
+  <div>
+    <p><strong>Input Bytes</strong></p>
+    <table border="1">
+      <tr><td>in₀</td><td>in₄</td><td>in₈</td><td>in₁₂</td></tr>
+      <tr><td>in₁</td><td>in₅</td><td>in₉</td><td>in₁₃</td></tr>
+      <tr><td>in₂</td><td>in₆</td><td>in₁₀</td><td>in₁₄</td></tr>
+      <tr><td>in₃</td><td>in₇</td><td>in₁₁</td><td>in₁₅</td></tr>
+    </table>
+  </div>
+
+  <!-- Arrow -->
+  <div style="font-size: 24px;">&#8594;</div>
+
+  <!-- State Array Table -->
+  <div>
+    <p><strong>State Array</strong></p>
+    <table>
+      <tr><td>S₀,₀</td><td>S₀,₁</td><td>S₀,₂</td><td>S₀,₃</td></tr>
+      <tr><td>S₁,₀</td><td>S₁,₁</td><td>S₁,₂</td><td>S₁,₃</td></tr>
+      <tr><td>S₂,₀</td><td>S₂,₁</td><td>S₂,₂</td><td>S₂,₃</td></tr>
+      <tr><td>S₃,₀</td><td>S₃,₁</td><td>S₃,₂</td><td>S₃,₃</td></tr>
+    </table>
+  </div>
+
+  <!-- Arrow -->
+  <div style="font-size: 24px;">&#8594;</div>
+
+  <!-- Output Bytes Table -->
+  <div>
+    <p><strong>Output Bytes</strong></p>
+    <table>
+      <tr><td>out₀</td><td>out₄</td><td>out₈</td><td>out₁₂</td></tr>
+      <tr><td>out₁</td><td>out₅</td><td>out₉</td><td>out₁₃</td></tr>
+      <tr><td>out₂</td><td>out₆</td><td>out₁₀</td><td>out₁₄</td></tr>
+      <tr><td>out₃</td><td>out₇</td><td>out₁₁</td><td>out₁₅</td></tr>
+    </table>
+  </div>
+
+</div>
+
+<p><strong>图 3.</strong> 状态数组输入与输出 (State array input and output)</p>
+<p>在加密或解密开始阶段：</p>
+<div class="arithmatex">\[
+s[r, c] = in[r + 4c] \quad \quad \text{for $0 \leq r &lt; 4$ and $0 \leq c &lt; Nb$}
+\]</div>
+<p>在运算结束阶段：</p>
+<div class="arithmatex">\[
+out[r + 4c] = s[r, c] \quad \quad \text{for $0 \leq r &lt; 4$ and $0 \leq c &lt; Nb$}
+\]</div>
+<h3 id="the-state-as-an-array-of-columns">作为列数组的状态 (The State as an Array of Columns)<a class="headerlink" href="#the-state-as-an-array-of-columns" title="Permanent link">&para;</a></h3>
+<p>在 AES 中，<strong>状态数组</strong> (State array) 的每一列由 4 个字节组成，这 4 个字节按列顺序排列，构成一个 32 位字 (32-bit word)。
+在该 32 位字中，行索引 <span class="arithmatex">\(r\)</span>（<span class="arithmatex">\(0 \leq r &lt; 4\)</span>）用于标识字内的各个字节位置，而列索引 <span class="arithmatex">\(c\)</span>（<span class="arithmatex">\(0 \leq c &lt; Nb\)</span>）则用来标识该列在整个状态中的位置。</p>
+<p>这样，状态数组可以被重新解释为一个由 <span class="arithmatex">\(Nb\)</span> 个 32 位字构成的一维数组：</p>
+<div class="arithmatex">\[
+\{ w_{0}, \; w_{1}, \; \dots, \; w_{Nb-1} \}
+\]</div>
+<p>其中，<span class="arithmatex">\(w_c\)</span> 表示状态数组中第 <span class="arithmatex">\(c\)</span> 列的所有字节，按照从上到下（行 0 到行 3）的顺序拼接而成。</p>
+<p><strong>例如</strong>，对于图 3 中的标准 AES 情况（<span class="arithmatex">\(Nb = 4\)</span>），状态可等价表示为：</p>
+<div class="arithmatex">\[
+\begin{aligned}
+w_{0} &amp;= S_{0, 0} \; S_{1, 0} \; S_{2, 0} \; S_{3, 0} \\
+w_{1} &amp;= S_{0, 1} \; S_{1, 1} \; S_{2, 1} \; S_{3, 1} \\
+w_{2} &amp;= S_{0, 2} \; S_{1, 2} \; S_{2, 2} \; S_{3, 2} \\
+w_{3} &amp;= S_{0, 3} \; S_{1, 3} \; S_{2, 3} \; S_{3, 3}
+\end{aligned}
+\]</div>
+<p>在这种表示方式下，许多 AES 变换（例如 <strong>列混合</strong> (MixColumns) 和 <strong>轮密钥加</strong> (AddRoundKey)）可以直接作用于这些 32 位字，从而简化描述与实现。</p>
+<h2 id="_7">数学预备知识<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<p>在 AES 算法中，所有字节均按照第 3.2 节所述的方法，解释为<strong>有限域元素</strong> (finite field elements)，并在有限域 <span class="arithmatex">\(\mathrm{GF}(2^8)\)</span> 上进行运算。有限域中的加法与乘法规则与普通整数运算不同。本节介绍实现第 5 节所需的基本数学概念。</p>
+<h3 id="addition">加法 (Addition)<a class="headerlink" href="#addition" title="Permanent link">&para;</a></h3>
+<p>在 <span class="arithmatex">\(\mathrm{GF}(2^8)\)</span> 中，加法是通过多项式表示中对应系数的<strong>模 2 加法</strong>实现的。换言之，加法运算等价于逐位的<strong>异或运算</strong> (XOR operation, 记作 <span class="arithmatex">\(\oplus\)</span>)：</p>
+<div class="arithmatex">\[
+1 \oplus 1 = 0,\quad
+1 \oplus 0 = 1,\quad
+0 \oplus 0 = 0
+\]</div>
+<p>因此：
+* <strong>加法</strong> 与 <strong>减法</strong> 在有限域中是相同的运算。
+* 字节加法可理解为对应位的模 2 加法。</p>
+<p>对于字节 <span class="arithmatex">\(\{a_{7}a_{6}a_{5}a_{4}a_{3}a_{2}a_{1}a_{0}\}\)</span> 与 <span class="arithmatex">\(\{b_{7}b_{6}b_{5}b_{4}b_{3}b_{2}b_{1}b_{0}\}\)</span>，其和 <span class="arithmatex">\(\{c_{7}c_{6}c_{5}c_{4}c_{3}c_{2}c_{1}c_{0}\}\)</span> 满足：</p>
+<div class="arithmatex">\[
+c_i = a_i \oplus b_i \quad (0 \leq i \leq 7)
+\]</div>
+<p>例如，下列三种表示方式等价：</p>
+<div class="arithmatex">\[
+\begin{aligned}
+(x^6 + x^4 + x^2 + x + 1) + (x^7 + x + 1) = x^7 + x^6 + x^4 + x^2 &amp;\quad\quad\text{(polynomial notation)} \\
+\{01010111\} \oplus \{10000011\} = \{11010100\} &amp;\quad\quad\text{(binary notation)} \\
+\{57\} \oplus \{83\} = \{d4\} &amp;\quad\quad\text{(hexadecimal notation)} \\
+\end{aligned}
+\]</div>
+<h3 id="multiplication">乘法 (Multiplication)<a class="headerlink" href="#multiplication" title="Permanent link">&para;</a></h3>
+<p>在多项式表示中，<span class="arithmatex">\(\mathrm{GF}(2^8)\)</span> 中的乘法（记作 <span class="arithmatex">\(\cdot\)</span>）指二进制多项式的乘法，然后对一个<strong>不可约多项式</strong> (irreducible polynomial) 取模。AES 选用的不可约多项式为：</p>
+<div class="arithmatex">\[
+m(x) = x^8 + x^4 + x^3 + x + 1
+\tag{4.1}
+\]</div>
+<p>其十六进制形式为 <span class="arithmatex">\(\{01\}\{1b\}\)</span>。</p>
+<p><strong>示例：</strong></p>
+<p>计算 <span class="arithmatex">\(\{57\} \cdot \{83\}\)</span>：</p>
+<ol>
+<li>多项式展开：</li>
+</ol>
+<div class="arithmatex">\[
+(x^6 + x^4 + x^2 + x + 1)(x^7 + x + 1)
+= x^{13} + x^{11} + x^9 + x^8 + x^7 + x^6 + x^5 + x^4 + x^3 + 1
+\]</div>
+<ol>
+<li>对 <span class="arithmatex">\(m(x)\)</span> 取模：</li>
+</ol>
+<div class="arithmatex">\[
+x^{13} + x^{11} + x^9 + x^8 + x^7 + x^6 + x^5 + x^4 + x^3 + 1
+\;\bmod\;(x^8 + x^4 + x^3 + x + 1)
+= x^7 + x^6 + 1
+\]</div>
+<ol>
+<li>转换为字节：
+$$
+{57} \cdot {83} = {c1}
+$$</li>
+</ol>
+<blockquote>
+<p>对 <span class="arithmatex">\(m(x)\)</span> 取模保证结果是次数小于 8 的二进制多项式，因此可以用一个字节表示。与加法不同，字节层面没有直接的按位规则实现乘法。</p>
+</blockquote>
+<p>该乘法满足<strong>结合律</strong> (associative law)，且 <span class="arithmatex">\(\{01\}\)</span> 为<strong>乘法单位元</strong> (multiplicative identity)。</p>
+<h3 id="multiplicative-inverse">乘法逆元 (Multiplicative Inverse)<a class="headerlink" href="#multiplicative-inverse" title="Permanent link">&para;</a></h3>
+<p>对于次数小于 8 的非零二进制多项式 <span class="arithmatex">\(b(x)\)</span>，其乘法逆元 <span class="arithmatex">\(b^{-1}(x)\)</span> 可通过<strong>扩展欧几里得算法</strong> (extended Euclidean algorithm) 求得：</p>
+<p>找到多项式 <span class="arithmatex">\(a(x)\)</span> 与 <span class="arithmatex">\(c(x)\)</span> 使得：</p>
+<div class="arithmatex">\[
+b(x)\,a(x) + m(x)\,c(x) = 1
+\tag{4.2}
+\]</div>
+<p>因此：</p>
+<div class="arithmatex">\[
+a(x)\,\cdot\,b(x)\;\bmod\;m(x) = 1
+\]</div>
+<p>这意味着：</p>
+<div class="arithmatex">\[
+b^{-1}(x) = a(x) \bmod m(x)
+\tag{4.3}
+\]</div>
+<h3 id="distributive-law">分配律 (Distributive Law)<a class="headerlink" href="#distributive-law" title="Permanent link">&para;</a></h3>
+<p>有限域运算 (任意 <span class="arithmatex">\(a(x), b(x), c(x)\)</span>) 满足：</p>
+<div class="arithmatex">\[
+a(x)\,\cdot\,(b(x) + c(x)) = a(x)\,\cdot\,b(x) + a(x)\,\cdot\,c(x)
+\]</div>
+<p>这意味着以 <span class="arithmatex">\(\oplus\)</span> 作为加法、上述定义的乘法作为乘法，256 个可能的字节值形成有限域 <span class="arithmatex">\(\mathrm{GF}(2^8)\)</span>。</p>
+<h4 id="x-multiplication-by-x">乘以 <span class="arithmatex">\(x\)</span> (Multiplication by <span class="arithmatex">\(x\)</span>)<a class="headerlink" href="#x-multiplication-by-x" title="Permanent link">&para;</a></h4>
+<p>若 <span class="arithmatex">\(b(x)\)</span> 按式 (3.1) 定义，则：</p>
+<div class="arithmatex">\[
+x \cdot b(x) = b_7x^8 + b_6x^7 + b_5x^6 + b_4x^5 + b_3x^4 + b_2x^3 + b_1x^2 + b_0x
+\tag{4.4}
+\]</div>
+<p>根据 (4.1) 定义的 <span class="arithmatex">\(m(x)\)</span>：
+* 若 <span class="arithmatex">\(b_7 = 0\)</span>，结果已是次数小于 8 的多项式。
+* 若 <span class="arithmatex">\(b_7 = 1\)</span>，需减去（即异或）<span class="arithmatex">\(m(x)\)</span> 进行约简。</p>
+<p>在字节层面，这相当于：
+1. 左移一位 (left shift)；
+2. 若原最高位 <span class="arithmatex">\(b_7 = 1\)</span>，则与 <span class="arithmatex">\(\{1b\}\)</span> 异或。</p>
+<p>该运算记作 <code>xtime()</code>。</p>
+<p>乘以 <span class="arithmatex">\(x\)</span> 的高次幂可以通过多次应用 <code>xtime()</code> 来实现。通过对中间结果进行加法，还可以实现乘以任意常数的运算。</p>
+<p><strong>扩展示例：</strong></p>
+<p>计算 <span class="arithmatex">\(\{57\} \cdot \{13\}\)</span></p>
+<ol>
+<li>逐次倍增：</li>
+</ol>
+<div class="arithmatex">\[
+\begin{aligned}
+\{57\} \cdot \{02\} &amp;= xtime(\{57\}) = \{ae\} \\
+\{57\} \cdot \{04\} &amp;= xtime(\{ae\}) = \{47\} \\
+\{57\} \cdot \{08\} &amp;= xtime(\{47\}) = \{8e\} \\
+\{57\} \cdot \{10\} &amp;= xtime(\{8e\}) = \{07\} \\
+\end{aligned}
+\]</div>
+<ol>
+<li>按二进制拆解 <span class="arithmatex">\(\{13\} = \{01\} \oplus \{02\} \oplus \{10\}\)</span>：</li>
+</ol>
+<div class="arithmatex">\[
+\begin{aligned}
+\{57\} \cdot \{13\} &amp;= \{57\} \cdot (\{01\} \oplus \{02\} \oplus \{10\}) \\
+&amp;= \{57\} \oplus \{ae\} \oplus \{07\} \\
+&amp;= \{fe\}
+\end{aligned}
+\]</div>
+<h3 id="mathrmgf28-polynomials-with-coefficients-in-mathrmgf28">系数属于 <span class="arithmatex">\(\mathrm{GF}(2^8)\)</span> 的多项式 (Polynomials with Coefficients in <span class="arithmatex">\(\mathrm{GF}(2^8)\)</span>)<a class="headerlink" href="#mathrmgf28-polynomials-with-coefficients-in-mathrmgf28" title="Permanent link">&para;</a></h3>
+<p>在 AES 中，还需要处理一种特殊的<strong>四项多项式</strong> (four-term polynomial)，其系数本身是有限域 <span class="arithmatex">\(\mathrm{GF}(2^8)\)</span> 的元素（即字节 bytes）：</p>
+<div class="arithmatex">\[
+a(x) = a_3 x^3 + a_2 x^2 + a_1 x + a_0
+\tag{4.5}
+\]</div>
+<p>为了便于表示，这种多项式可写作一个<strong>字</strong> (word)：</p>
+<div class="arithmatex">\[
+[a_0, a_1, a_2, a_3]
+\]</div>
+<blockquote>
+<p>注意：
+这种多项式与定义有限域元素时的多项式不同，尽管它们都使用相同的不定元 <span class="arithmatex">\(x\)</span>:</p>
+<ul>
+<li>在有限域定义中，多项式的系数是 <strong>位</strong> (bits)，并使用不可约多项式 <span class="arithmatex">\(m(x) = x^8 + x^4 + x^3 + x + 1\)</span> 进行约简。</li>
+<li>在本节中，多项式的系数是 <strong>字节</strong> (bytes)，并使用不同的约简多项式 <span class="arithmatex">\(x^4 + 1\)</span>。</li>
+</ul>
+<p>两者需通过上下文加以区分。</p>
+</blockquote>
+<h3 id="addition_1">多项式加法 (Addition)<a class="headerlink" href="#addition_1" title="Permanent link">&para;</a></h3>
+<p>设：</p>
+<div class="arithmatex">\[
+b(x) = b_3 x^3 + b_2 x^2 + b_1 x + b_0
+\tag{4.6}
+\]</div>
+<p>加法运算是对相同幂次项的系数做有限域加法，即字节级的异或运算 (XOR)。这意味着对整个字进行异或即可完成加法。</p>
+<p>根据 (4.5) 和 (4.6)：</p>
+<div class="arithmatex">\[
+a(x) + b(x) = (a_3 \oplus b_3)x^3 + (a_2 \oplus b_2)x^2 + (a_1 \oplus b_1)x + (a_0 \oplus b_0)
+\tag{4.7}
+\]</div>
+<h3 id="multiplication_1">多项式乘法 (Multiplication)<a class="headerlink" href="#multiplication_1" title="Permanent link">&para;</a></h3>
+<p>多项式乘法分为两步：</p>
+<h4 id="1">1. 多项式展开<a class="headerlink" href="#1" title="Permanent link">&para;</a></h4>
+<p>先直接相乘并收集同类项：</p>
+<div class="arithmatex">\[
+c(x) = c_6 x^6 + c_5 x^5 + c_4 x^4 + c_3 x^3 + c_2 x^2 + c_1 x + c_0
+\tag{4.8}
+\]</div>
+<p>其中系数计算为：</p>
+<div class="arithmatex">\[
+\begin{aligned}
+c_0 &amp;= a_0\cdot b_0, \\
+c_1 &amp;= a_1\cdot b_0 \;\oplus\; a_0\cdot b_1, \\
+c_2 &amp;= a_2\cdot b_0 \;\oplus\; a_1\cdot b_1 \;\oplus\; a_0\cdot b_2, \\
+c_3 &amp;= a_3\cdot b_0 \;\oplus\; a_2\cdot b_1 \;\oplus\; a_1\cdot b_2 \;\oplus\; a_0\cdot b_3, \\
+c_4 &amp;= a_3\cdot b_1 \;\oplus\; a_2\cdot b_2 \;\oplus\; a_1\cdot b_3, \\
+c_5 &amp;= a_3\cdot b_2 \;\oplus\; a_2\cdot b_3, \\
+c_6 &amp;= a_3\cdot b_3
+\end{aligned}
+\tag{4.9}
+\]</div>
+<h4 id="2-x4-1">2. 模 <span class="arithmatex">\(x^4 + 1\)</span> 约简<a class="headerlink" href="#2-x4-1" title="Permanent link">&para;</a></h4>
+<p>由于 AES 中使用的四项多项式次数不超过 3，需要对 <span class="arithmatex">\(c(x)\)</span> 按 <span class="arithmatex">\(x^4 + 1\)</span> 取模：</p>
+<div class="arithmatex">\[
+x^i \bmod (x^4 + 1) = x^{\,i \bmod 4}
+\tag{4.10}
+\]</div>
+<p>最终得到模乘积 (modular product)：</p>
+<div class="arithmatex">\[
+d(x) = d_3 x^3 + d_2 x^2 + d_1 x + d_0
+\tag{4.11}
+\]</div>
+<p>其中：</p>
+<div class="arithmatex">\[
+\begin{aligned}
+d_0 &amp;= (a_0\cdot b_0) \;\oplus\; (a_3\cdot b_1) \;\oplus\; (a_2\cdot b_2) \;\oplus\; (a_1\cdot b_3), \\
+d_1 &amp;= (a_1\cdot b_0) \;\oplus\; (a_0\cdot b_1) \;\oplus\; (a_3\cdot b_2) \;\oplus\; (a_2\cdot b_3), \\
+d_2 &amp;= (a_2\cdot b_0) \;\oplus\; (a_1\cdot b_1) \;\oplus\; (a_0\cdot b_2) \;\oplus\; (a_3\cdot b_3), \\
+d_3 &amp;= (a_3\cdot b_0) \;\oplus\; (a_2\cdot b_1) \;\oplus\; (a_1\cdot b_2) \;\oplus\; (a_0\cdot b_3)
+\end{aligned}
+\tag{4.12}
+\]</div>
+<h3 id="matrix-representation">矩阵表示 (Matrix Representation)<a class="headerlink" href="#matrix-representation" title="Permanent link">&para;</a></h3>
+<p>当 <span class="arithmatex">\(a(x)\)</span> 固定时，式 (4.11) 的运算可用矩阵乘法表示为：</p>
+<div class="arithmatex">\[
+\begin{bmatrix}
+d_0 \\ d_1 \\ d_2 \\ d_3
+\end{bmatrix}
+=
+\begin{bmatrix}
+a_0 &amp; a_3 &amp; a_2 &amp; a_1 \\
+a_1 &amp; a_0 &amp; a_3 &amp; a_2 \\
+a_2 &amp; a_1 &amp; a_0 &amp; a_3 \\
+a_3 &amp; a_2 &amp; a_1 &amp; a_0
+\end{bmatrix}
+\begin{bmatrix}b_0 \\ b_1 \\ b_2 \\ b_3\end{bmatrix}
+\tag{4.13}
+\]</div>
+<h3 id="aes">AES 中使用的特殊多项式<a class="headerlink" href="#aes" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>列混合</strong> (MixColumns) 使用的固定多项式：</li>
+</ol>
+<div class="arithmatex">\[
+a(x) = \{03\}x^3 + \{01\}x^2 + \{01\}x + \{02\}
+\tag{4.14}
+\]</div>
+<p>其逆多项式为：</p>
+<div class="arithmatex">\[
+a^{-1}(x) = \{0b\}x^3 + \{0d\}x^2 + \{09\}x + \{0e\}
+\tag{4.15}
+\]</div>
+<ol>
+<li><strong>轮密钥扩展</strong> (Key Expansion) 中 <code>RotWord()</code> 使用的多项式：</li>
+</ol>
+<div class="arithmatex">\[
+a_0 = a_1 = a_2 = \{00\}, \quad a_3 = \{01\} \quad \Rightarrow \quad a(x) = x^3
+\]</div>
+<blockquote>
+<p>由 (4.13) 可见，该多项式的作用是将字节循环左移，即：</p>
+</blockquote>
+<div class="arithmatex">\[
+[b_0, b_1, b_2, b_3] \mapsto [b_1, b_2, b_3, b_0]
+\]</div>
+<h2 id="algorithm-specification">算法规范 (Algorithm Specification)<a class="headerlink" href="#algorithm-specification" title="Permanent link">&para;</a></h2>
+<p>在 AES 算法中，<strong>输入分组</strong> (input block)、<strong>输出分组</strong> (output block) 与<strong>状态</strong> (State) 的长度固定为 <strong>128 位</strong>。</p>
+<p>用 <span class="arithmatex">\(Nb = 4\)</span> 表示状态中 32 位字 (32-bit words) 的数量，即<strong>列的数量</strong>。</p>
+<p>AES 的<strong>密码密钥</strong> (Cipher Key) <span class="arithmatex">\(K\)</span> 可以是 <strong>128 位、192 位或 256 位</strong>。</p>
+<p>用 <span class="arithmatex">\(Nk = 4, 6, 8\)</span> 表示密钥中 32 位字的数量（同样是列的数量）。</p>
+<p><strong>轮数</strong> (rounds) <span class="arithmatex">\(Nr\)</span> 取决于密钥长度:</p>
+<ul>
+<li><span class="arithmatex">\(Nk = 4\)</span> (AES-128) <span class="arithmatex">\(\Rightarrow Nr = 10\)</span></li>
+<li><span class="arithmatex">\(Nk = 6\)</span> (AES-192) <span class="arithmatex">\(\Rightarrow Nr = 12\)</span></li>
+<li><span class="arithmatex">\(Nk = 8\)</span> (AES-256) <span class="arithmatex">\(\Rightarrow Nr = 14\)</span></li>
+</ul>
+<p>符合标准的<strong>密钥–分组–轮数</strong> (Key–Block–Round) 组合如下表所示（见图 4）。</p>
+<p>有关密钥长度、分组大小与轮数的实现细节，参见第 6.3 节。</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>密钥长度 (<span class="arithmatex">\(Nk\)</span> 字)</th>
+<th>分组大小 (<span class="arithmatex">\(Nb\)</span> 字)</th>
+<th>轮数 (<span class="arithmatex">\(Nr\)</span>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AES-128</strong></td>
+<td>4</td>
+<td>4</td>
+<td>10</td>
+</tr>
+<tr>
+<td><strong>AES-192</strong></td>
+<td>6</td>
+<td>4</td>
+<td>12</td>
+</tr>
+<tr>
+<td><strong>AES-256</strong></td>
+<td>8</td>
+<td>4</td>
+<td>14</td>
+</tr>
+</tbody>
+</table>
+<p><strong>图 4.</strong> 密钥-分组-轮数组合 (Key-Block-Round Combinations)</p>
+<h3 id="round-function">轮函数 (Round Function)<a class="headerlink" href="#round-function" title="Permanent link">&para;</a></h3>
+<p>AES 的加密 (Cipher) 与解密 (Inverse Cipher) 过程，均基于一系列轮 (round) 的迭代运算。</p>
+<p>每一轮由以下四个<strong>面向字节的变换</strong> (byte-oriented transformations) 组成：</p>
+<ol>
+<li>
+<p><strong>字节代换</strong> (SubBytes)
+   使用替代表 (S-box) 对状态中的每个字节进行非线性代换。</p>
+</li>
+<li>
+<p><strong>行移位</strong> (ShiftRows)
+   将状态数组中每一行的字节，按不同行号循环左移不同的偏移量。</p>
+</li>
+<li>
+<p><strong>列混合</strong> (MixColumns)
+   将状态数组中每列视为 <span class="arithmatex">\(\mathrm{GF}(2^8)\)</span> 上的多项式，并与固定多项式相乘，实现列内数据的混合。</p>
+</li>
+<li>
+<p><strong>轮密钥加</strong> (AddRoundKey)
+   将当前状态与本轮的轮密钥逐字节异或。</p>
+</li>
+</ol>
+<h3 id="cipher">密码 (Cipher)<a class="headerlink" href="#cipher" title="Permanent link">&para;</a></h3>
+<p><strong>流程概述：</strong></p>
+<ol>
+<li>输入数据按 <strong>Sec. 3.4</strong> 的规则复制到 <strong>状态数组</strong> (State) 中。</li>
+<li>执行一次 <strong>初始轮密钥加</strong> (Initial Round Key Addition)。</li>
+<li>状态经过 <span class="arithmatex">\(Nr\)</span> 轮变换：</li>
+<li><span class="arithmatex">\(Nr = 10\)</span>（AES-128）</li>
+<li><span class="arithmatex">\(Nr = 12\)</span>（AES-192）</li>
+<li><span class="arithmatex">\(Nr = 14\)</span>（AES-256）</li>
+<li>前 <span class="arithmatex">\(Nr - 1\)</span> 轮流程完全相同；最后一轮略有不同（省略 <code>MixColumns()</code>）。</li>
+<li>最终状态按 <strong>Sec. 3.4</strong> 规则复制到输出。</li>
+</ol>
+<p><strong>参数化方式：</strong></p>
+<p>轮函数由 <strong>密钥编排</strong> (Key Schedule) 参数化。</p>
+<p>密钥编排是一个一维四字节数组，通过 <strong>Sec. 5.2</strong> 的 <strong>密钥扩展</strong> (Key Expansion) 生成。</p>
+<p>在伪代码（见图 5）中，<code>w[]</code> 表示密钥编排数组。</p>
+<blockquote>
+<p>所有 <span class="arithmatex">\(Nr\)</span> 轮基本相同，唯一区别：<strong>最后一轮省略 <code>MixColumns()</code></strong>。</p>
+</blockquote>
+<div class="highlight"><pre><span></span><code>Cipher(byte in[4*Nb], byte out[4*Nb], word w[Nb*(Nr+1)])
+begin
+    byte state[4,Nb]
+    state = in
+    AddRoundKey(state, w[0, Nb-1])        // See Sec. 5.1.4
+    for round = 1 step 1 to Nr-1
+        SubBytes(state)                   // See Sec. 5.1.1
+        ShiftRows(state)                  // See Sec. 5.1.2
+        MixColumns(state)                 // See Sec. 5.1.3
+        AddRoundKey(state, w[round*Nb, (round+1)*Nb-1])
+    end for
+    SubBytes(state)
+    ShiftRows(state)
+    AddRoundKey(state, w[Nr*Nb, (Nr+1)*Nb-1])
+    out = state
+end
+</code></pre></div>
+<h4 id="subbytes"><code>SubBytes()</code> 变换<a class="headerlink" href="#subbytes" title="Permanent link">&para;</a></h4>
+<p><strong>作用：</strong></p>
+<p>非线性字节代换 (Non-linear Byte Substitution)，逐字节独立处理 State。</p>
+<p>每个字节通过 <strong>S-box</strong> 查表替换（见图 7），S-box 是可逆的 (invertible)。</p>
+<p><strong>构造方法：</strong></p>
+<ol>
+<li>在 <span class="arithmatex">\(\mathrm{GF}(2^8)\)</span> 中取 <strong>乘法逆元</strong> (Multiplicative Inverse)
+   （<span class="arithmatex">\(\{00\}\)</span> 映射为自身）。</li>
+<li>对结果应用 <strong>仿射变换</strong> (Affine Transformation)（GF(2) 上）：</li>
+</ol>
+<p>$$
+   b'<em 8="8" _i_4_bmod="(i+4)\bmod">i = b_i \oplus b</em> \oplus c_i
+   \tag{5.1}
+   $$} \oplus b_{(i+5)\bmod 8} \oplus b_{(i+6)\bmod 8} \oplus b_{(i+7)\bmod 8</p>
+<ul>
+<li><span class="arithmatex">\(0 \le i &lt; 8\)</span></li>
+<li><span class="arithmatex">\(b_i\)</span>：字节的第 <span class="arithmatex">\(i\)</span> 位</li>
+<li><span class="arithmatex">\(c_i\)</span>：常量字节 <span class="arithmatex">\(c = \{63\}\)</span>（即 <span class="arithmatex">\(\{01100011\}\)</span>）的第 <span class="arithmatex">\(i\)</span> 位</li>
+<li>撇号 (<span class="arithmatex">\('\)</span>) 表示更新后的值</li>
+</ul>
+<p>以矩阵形式表示时，S-box 的仿射变换可写为：</p>
+<div class="arithmatex">\[
+\begin{bmatrix}
+b'_0 \\ b'_1 \\ b'_2 \\ b'_3 \\ b'_4 \\ b'_5 \\ b'_6 \\ b'_7
+\end{bmatrix}
+=
+\begin{bmatrix}
+1 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 1 &amp; 1 \\
+1 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 1 \\
+1 &amp; 1 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 1 \\
+1 &amp; 1 &amp; 1 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 1 \\
+1 &amp; 1 &amp; 1 &amp; 1 &amp; 1 &amp; 0 &amp; 0 &amp; 0 \\
+0 &amp; 1 &amp; 1 &amp; 1 &amp; 1 &amp; 1 &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; 1 &amp; 1 &amp; 1 &amp; 1 &amp; 1 &amp; 0 \\
+0 &amp; 0 &amp; 0 &amp; 1 &amp; 1 &amp; 1 &amp; 1 &amp; 1 \\
+\end{bmatrix}
+\begin{bmatrix}
+b_0 \\ b_1 \\ b_2 \\ b_3 \\ b_4 \\ b_5 \\ b_6 \\ b_7
+\end{bmatrix}
++
+\begin{bmatrix}
+1 \\ 1 \\ 0 \\ 0 \\ 0 \\ 1 \\ 1 \\ 0
+\end{bmatrix}
+\tag{5.2}
+\]</div>
+<p>图 6 展示了 <code>SubBytes()</code> 变换对状态的作用：</p>
+<div class="highlight"><pre><span></span><code>flowchart LR
+curr[&quot;$$S_{r, c}$$&quot;] -- &quot;S-Box&quot; --&gt; next[&quot;$$S_{r, c}&#39;$$&quot;]
+</code></pre></div>
+<p><strong>图 6.</strong> <code>SubBytes()</code> 对状态中每个字节应用 S-box。</p>
+<p><strong>查表示例：</strong></p>
+<ul>
+<li>若 <span class="arithmatex">\(s_{1,1} = {53}\)</span></li>
+<li>S-box 表（图 7）中：行索引 '5'，列索引 '3' -&gt; <span class="arithmatex">\({ed}\)</span></li>
+<li>因此 <span class="arithmatex">\(s'_{1,1} = {ed}\)</span></li>
+</ul>
+<blockquote>
+<p><strong>S-box 表（十六进制）见图 7。</strong></p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>x\y</th>
+<th>0</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+<th>8</th>
+<th>9</th>
+<th>a</th>
+<th>b</th>
+<th>c</th>
+<th>d</th>
+<th>e</th>
+<th>f</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>0</strong></td>
+<td>63</td>
+<td>7c</td>
+<td>77</td>
+<td>7b</td>
+<td>f2</td>
+<td>6b</td>
+<td>6f</td>
+<td>c5</td>
+<td>30</td>
+<td>01</td>
+<td>67</td>
+<td>2b</td>
+<td>fe</td>
+<td>d7</td>
+<td>ab</td>
+<td>76</td>
+</tr>
+<tr>
+<td><strong>1</strong></td>
+<td>ca</td>
+<td>82</td>
+<td>c9</td>
+<td>7d</td>
+<td>fa</td>
+<td>59</td>
+<td>47</td>
+<td>f0</td>
+<td>ad</td>
+<td>d4</td>
+<td>a2</td>
+<td>af</td>
+<td>9c</td>
+<td>a4</td>
+<td>72</td>
+<td>c0</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td>b7</td>
+<td>fd</td>
+<td>93</td>
+<td>26</td>
+<td>36</td>
+<td>3f</td>
+<td>f7</td>
+<td>cc</td>
+<td>34</td>
+<td>a5</td>
+<td>e5</td>
+<td>f1</td>
+<td>71</td>
+<td>d8</td>
+<td>31</td>
+<td>15</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>04</td>
+<td>c7</td>
+<td>23</td>
+<td>c3</td>
+<td>18</td>
+<td>96</td>
+<td>05</td>
+<td>9a</td>
+<td>07</td>
+<td>12</td>
+<td>80</td>
+<td>e2</td>
+<td>eb</td>
+<td>27</td>
+<td>b2</td>
+<td>75</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>09</td>
+<td>83</td>
+<td>2c</td>
+<td>1a</td>
+<td>1b</td>
+<td>6e</td>
+<td>5a</td>
+<td>a0</td>
+<td>52</td>
+<td>3b</td>
+<td>d6</td>
+<td>b3</td>
+<td>29</td>
+<td>e3</td>
+<td>2f</td>
+<td>84</td>
+</tr>
+<tr>
+<td><strong>5</strong></td>
+<td>53</td>
+<td>d1</td>
+<td>00</td>
+<td>ed</td>
+<td>20</td>
+<td>fc</td>
+<td>b1</td>
+<td>5b</td>
+<td>6a</td>
+<td>cb</td>
+<td>be</td>
+<td>39</td>
+<td>4a</td>
+<td>4c</td>
+<td>58</td>
+<td>cf</td>
+</tr>
+<tr>
+<td><strong>6</strong></td>
+<td>d0</td>
+<td>ef</td>
+<td>aa</td>
+<td>fb</td>
+<td>43</td>
+<td>4d</td>
+<td>33</td>
+<td>85</td>
+<td>45</td>
+<td>f9</td>
+<td>02</td>
+<td>7f</td>
+<td>50</td>
+<td>3c</td>
+<td>9f</td>
+<td>a8</td>
+</tr>
+<tr>
+<td><strong>7</strong></td>
+<td>51</td>
+<td>a3</td>
+<td>40</td>
+<td>8f</td>
+<td>92</td>
+<td>9d</td>
+<td>38</td>
+<td>f5</td>
+<td>bc</td>
+<td>b6</td>
+<td>da</td>
+<td>21</td>
+<td>10</td>
+<td>ff</td>
+<td>f3</td>
+<td>d2</td>
+</tr>
+<tr>
+<td><strong>8</strong></td>
+<td>cd</td>
+<td>0c</td>
+<td>13</td>
+<td>ec</td>
+<td>5f</td>
+<td>97</td>
+<td>44</td>
+<td>17</td>
+<td>c4</td>
+<td>a7</td>
+<td>7e</td>
+<td>3d</td>
+<td>64</td>
+<td>5d</td>
+<td>19</td>
+<td>73</td>
+</tr>
+<tr>
+<td><strong>9</strong></td>
+<td>60</td>
+<td>81</td>
+<td>4f</td>
+<td>dc</td>
+<td>22</td>
+<td>2a</td>
+<td>90</td>
+<td>88</td>
+<td>46</td>
+<td>ee</td>
+<td>b8</td>
+<td>14</td>
+<td>de</td>
+<td>5e</td>
+<td>0b</td>
+<td>db</td>
+</tr>
+<tr>
+<td><strong>a</strong></td>
+<td>e0</td>
+<td>32</td>
+<td>3a</td>
+<td>0a</td>
+<td>49</td>
+<td>06</td>
+<td>24</td>
+<td>5c</td>
+<td>c2</td>
+<td>d3</td>
+<td>ac</td>
+<td>62</td>
+<td>91</td>
+<td>95</td>
+<td>e4</td>
+<td>79</td>
+</tr>
+<tr>
+<td><strong>b</strong></td>
+<td>e7</td>
+<td>c8</td>
+<td>37</td>
+<td>6d</td>
+<td>8d</td>
+<td>d5</td>
+<td>4e</td>
+<td>a9</td>
+<td>6c</td>
+<td>56</td>
+<td>f4</td>
+<td>ea</td>
+<td>65</td>
+<td>7a</td>
+<td>ae</td>
+<td>08</td>
+</tr>
+<tr>
+<td><strong>c</strong></td>
+<td>ba</td>
+<td>78</td>
+<td>25</td>
+<td>2e</td>
+<td>1c</td>
+<td>a6</td>
+<td>b4</td>
+<td>c6</td>
+<td>e8</td>
+<td>dd</td>
+<td>74</td>
+<td>1f</td>
+<td>4b</td>
+<td>bd</td>
+<td>8b</td>
+<td>8a</td>
+</tr>
+<tr>
+<td><strong>d</strong></td>
+<td>70</td>
+<td>3e</td>
+<td>b5</td>
+<td>66</td>
+<td>48</td>
+<td>03</td>
+<td>f6</td>
+<td>0e</td>
+<td>61</td>
+<td>35</td>
+<td>57</td>
+<td>b9</td>
+<td>86</td>
+<td>c1</td>
+<td>1d</td>
+<td>9e</td>
+</tr>
+<tr>
+<td><strong>e</strong></td>
+<td>e1</td>
+<td>f8</td>
+<td>98</td>
+<td>11</td>
+<td>69</td>
+<td>d9</td>
+<td>8e</td>
+<td>94</td>
+<td>9b</td>
+<td>1e</td>
+<td>87</td>
+<td>e9</td>
+<td>ce</td>
+<td>55</td>
+<td>28</td>
+<td>df</td>
+</tr>
+<tr>
+<td><strong>f</strong></td>
+<td>8c</td>
+<td>a1</td>
+<td>89</td>
+<td>0d</td>
+<td>bf</td>
+<td>e6</td>
+<td>42</td>
+<td>68</td>
+<td>41</td>
+<td>99</td>
+<td>2d</td>
+<td>0f</td>
+<td>b0</td>
+<td>54</td>
+<td>bb</td>
+<td>16</td>
+</tr>
+</tbody>
+</table>
+<p><strong>图 7.</strong> S-box：字节 <em>xy</em> 的替代值（十六进制格式）。</p>
+<h3 id="shiftrows"><code>ShiftRows()</code> 变换<a class="headerlink" href="#shiftrows" title="Permanent link">&para;</a></h3>
+<p><strong>作用：</strong></p>
+<p>按行循环移位 (Cyclic Shift) 状态数组中最后三行：</p>
+<ul>
+<li>第 0 行 (<span class="arithmatex">\(r=0\)</span>) 不移位</li>
+<li>第 1 行 左移 1 字节</li>
+<li>第 2 行 左移 2 字节</li>
+<li>第 3 行 左移 3 字节</li>
+</ul>
+<p><strong>公式：</strong></p>
+<div class="arithmatex">\[
+s'_{r,c} = s_{r,\,(c + \text{shift}(r,Nb)) \bmod Nb}
+\quad\text{for }0 &lt; r &lt; 4 \text{ and }0 \le c &lt; Nb
+\tag{5.3}
+\]</div>
+<p>其中移位值 <span class="arithmatex">\(\text{shift}(r,Nb)\)</span> 依赖于行号 <span class="arithmatex">\(r\)</span>，如下所示（回忆 <span class="arithmatex">\(Nb = 4\)</span>）：</p>
+<div class="arithmatex">\[
+\text{shift}(1,4) = 1;\quad \text{shift}(2,4) = 2;\quad \text{shift}(3,4) = 3
+\tag{5.4}
+\]</div>
+<p>这种操作会使得字节向该行的“低”位置（即该行中较小的 <span class="arithmatex">\(c\)</span> 值）移动，而原本处在“最低”位置的字节会循环到该行的“顶端”（即较大的 <span class="arithmatex">\(c\)</span> 值位置）。</p>
+<p>图 8 展示了 <code>ShiftRows()</code> 变换的效果。</p>
+<table>
+<thead>
+<tr>
+<th><span class="arithmatex">\(S_{r,0}\)</span></th>
+<th><span class="arithmatex">\(S_{r,1}\)</span></th>
+<th><span class="arithmatex">\(S_{r,2}\)</span></th>
+<th><span class="arithmatex">\(S_{r,3}\)</span></th>
+<th>-- ShiftRows() --&gt;</th>
+<th><span class="arithmatex">\(S_{r,0}'\)</span></th>
+<th><span class="arithmatex">\(S_{r,1}'\)</span></th>
+<th><span class="arithmatex">\(S_{r,2}'\)</span></th>
+<th><span class="arithmatex">\(S_{r,3}'\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(S_{0,0}\)</span></td>
+<td><span class="arithmatex">\(S_{0,1}\)</span></td>
+<td><span class="arithmatex">\(S_{0,2}\)</span></td>
+<td><span class="arithmatex">\(S_{0,3}\)</span></td>
+<td><span class="arithmatex">\(\rightarrow\)</span></td>
+<td><span class="arithmatex">\(S_{0,0}\)</span></td>
+<td><span class="arithmatex">\(S_{0,1}\)</span></td>
+<td><span class="arithmatex">\(S_{0,2}\)</span></td>
+<td><span class="arithmatex">\(S_{0,3}\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(S_{1,0}\)</span></td>
+<td><span class="arithmatex">\(S_{1,1}\)</span></td>
+<td><span class="arithmatex">\(S_{1,2}\)</span></td>
+<td><span class="arithmatex">\(S_{1,3}\)</span></td>
+<td><span class="arithmatex">\(\rightarrow\)</span></td>
+<td><span class="arithmatex">\(S_{1,1}\)</span></td>
+<td><span class="arithmatex">\(S_{1,2}\)</span></td>
+<td><span class="arithmatex">\(S_{1,3}\)</span></td>
+<td><span class="arithmatex">\(S_{1,0}\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(S_{2,0}\)</span></td>
+<td><span class="arithmatex">\(S_{2,1}\)</span></td>
+<td><span class="arithmatex">\(S_{2,2}\)</span></td>
+<td><span class="arithmatex">\(S_{2,3}\)</span></td>
+<td><span class="arithmatex">\(\rightarrow\)</span></td>
+<td><span class="arithmatex">\(S_{2,2}\)</span></td>
+<td><span class="arithmatex">\(S_{2,3}\)</span></td>
+<td><span class="arithmatex">\(S_{2,0}\)</span></td>
+<td><span class="arithmatex">\(S_{2,1}\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(S_{3,0}\)</span></td>
+<td><span class="arithmatex">\(S_{3,1}\)</span></td>
+<td><span class="arithmatex">\(S_{3,2}\)</span></td>
+<td><span class="arithmatex">\(S_{3,3}\)</span></td>
+<td><span class="arithmatex">\(\rightarrow\)</span></td>
+<td><span class="arithmatex">\(S_{3,3}\)</span></td>
+<td><span class="arithmatex">\(S_{3,0}\)</span></td>
+<td><span class="arithmatex">\(S_{3,1}\)</span></td>
+<td><span class="arithmatex">\(S_{3,2}\)</span></td>
+</tr>
+</tbody>
+</table>
+<p><strong>图 8.</strong> <code>ShiftRows()</code> 循环移位状态的最后三行字节。</p>
+<h4 id="mixcolumns"><code>MixColumns()</code> 变换<a class="headerlink" href="#mixcolumns" title="Permanent link">&para;</a></h4>
+<p><strong>作用：</strong></p>
+<p>逐列处理 State，将每列视为 <strong>Sec. 4.3</strong> 中的四项多项式，并在 <span class="arithmatex">\(\mathrm{GF}(2^8)\)</span> 上与固定多项式相乘（模 <span class="arithmatex">\(x^4 + 1\)</span>）。</p>
+<p>固定多项式：</p>
+<div class="arithmatex">\[
+a(x) = \{03\}x^3 + \{01\}x^2 + \{01\}x + \{02\}
+\tag{5.5}
+\]</div>
+<p><strong>矩阵形式：</strong></p>
+<div class="arithmatex">\[
+\begin{bmatrix}
+02 &amp; 03 &amp; 01 &amp; 01 \\
+01 &amp; 02 &amp; 03 &amp; 01 \\
+01 &amp; 01 &amp; 02 &amp; 03 \\
+03 &amp; 01 &amp; 01 &amp; 02
+\end{bmatrix}
+\begin{bmatrix}
+s_{0,c} \\ s_{1,c} \\ s_{2,c} \\ s_{3,c}
+\end{bmatrix}
+=
+\begin{bmatrix}
+s'_{0,c} \\ s'_{1,c} \\ s'_{2,c} \\ s'_{3,c}
+\end{bmatrix}
+\quad\text{for }0 \le c &lt; Nb
+\tag{5.6}
+\]</div>
+<p><strong>展开式：</strong></p>
+<div class="arithmatex">\[
+\begin{aligned}
+s'_{0,c} &amp;= (\{02\}\cdot s_{0,c}) \oplus (\{03\}\cdot s_{1,c}) \oplus s_{2,c} \oplus s_{3,c},\\
+s'_{1,c} &amp;= s_{0,c} \oplus (\{02\}\cdot s_{1,c}) \oplus (\{03\}\cdot s_{2,c}) \oplus s_{3,c},\\
+s'_{2,c} &amp;= s_{0,c} \oplus s_{1,c} \oplus (\{02\}\cdot s_{2,c}) \oplus (\{03\}\cdot s_{3,c}),\\
+s'_{3,c} &amp;= (\{03\}\cdot s_{0,c}) \oplus s_{1,c} \oplus s_{2,c} \oplus (\{02\}\cdot s_{3,c})
+\end{aligned}
+\]</div>
+<p>图 9 展示了 <code>MixColumns()</code> 变换的效果。</p>
+<table>
+<thead>
+<tr>
+<th>Before MixColumns()</th>
+<th></th>
+<th>After MixColumns()</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(S_{0,c}\)</span></td>
+<td>-- MixColumns() --&gt;</td>
+<td><span class="arithmatex">\(S'_{0,c}\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(S_{1,c}\)</span></td>
+<td></td>
+<td><span class="arithmatex">\(S'_{1,c}\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(S_{2,c}\)</span></td>
+<td></td>
+<td><span class="arithmatex">\(S'_{2,c}\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(S_{3,c}\)</span></td>
+<td></td>
+<td><span class="arithmatex">\(S'_{3,c}\)</span></td>
+</tr>
+</tbody>
+</table>
+<p><strong>图 9.</strong> <code>MixColumns()</code> 按列对 State 进行变换。</p>
+<h4 id="addroundkey"><code>AddRoundKey()</code> 变换<a class="headerlink" href="#addroundkey" title="Permanent link">&para;</a></h4>
+<p><strong>作用：</strong></p>
+<p>将当前轮的 <strong>轮密钥</strong> (Round Key) 与 <strong>State</strong> 逐字节异或 (bitwise XOR)，实现密钥加法。</p>
+<p><strong>计算规则：</strong></p>
+<p>每个轮密钥由 <strong>密钥扩展</strong> (Sec. 5.2) 生成的 <span class="arithmatex">\(Nb\)</span> 个 <strong>32 位字</strong> (words) 组成，这些字分别与 State 的各列对应相加（异或）：</p>
+<div class="arithmatex">\[
+\bigl[s'_{0,c},\;s'_{1,c},\;s'_{2,c},\;s'_{3,c}\bigr]
+=
+\bigl[s_{0,c},\;s_{1,c},\;s_{2,c},\;s_{3,c}\bigr]
+\;\oplus\;
+w_{\text{round}\cdot Nb + c}
+\quad
+\text{for }0 \le c &lt; Nb
+\tag{5.7}
+\]</div>
+<ul>
+<li><span class="arithmatex">\(w_i\)</span>：<strong>密钥扩展字</strong> (key schedule words)，定义见 Sec. 5.2</li>
+<li><span class="arithmatex">\(\text{round}\)</span>：轮数索引，取值 <span class="arithmatex">\(0 \le \text{round} \le Nr\)</span></li>
+</ul>
+<p><strong>执行时机：</strong></p>
+<ul>
+<li><strong>初始轮</strong> (<code>round = 0</code>)：在执行第一个轮函数前先进行一次 <code>AddRoundKey()</code>（见 Fig. 5）。</li>
+<li><strong>后续轮</strong> (<code>1 \le \text{round} \le Nr</code>)：每轮开始时执行一次 <code>AddRoundKey()</code>。</li>
+</ul>
+<h3 id="key-expansion">密钥扩展 (Key Expansion)<a class="headerlink" href="#key-expansion" title="Permanent link">&para;</a></h3>
+<p>AES 算法接收 <strong>加密密钥</strong> <span class="arithmatex">\(K\)</span> (Cipher Key)，并通过 <strong>密钥扩展</strong> (Key Expansion) 过程生成 <strong>密钥计划</strong> (Key Schedule)。</p>
+<h4 id="_8">输出规模<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h4>
+<p>密钥扩展共生成：</p>
+<div class="arithmatex">\[
+Nb \times (Nr + 1) \ \text{个字 (words)}
+\]</div>
+<ul>
+<li><strong>初始轮</strong>：需要 <span class="arithmatex">\(Nb\)</span> 个字</li>
+<li><strong>每一轮</strong>：需要 <span class="arithmatex">\(Nb\)</span> 个字作为<strong>轮密钥</strong></li>
+</ul>
+<p>生成结果是一个按顺序排列的 4 字节字数组：</p>
+<div class="arithmatex">\[
+[w_0, w_1, \dots, w_{Nb(Nr+1)-1}]
+\]</div>
+<h4 id="_9">关键辅助函数<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h4>
+<ul>
+<li>
+<p><strong><code>SubWord()</code></strong>
+  输入：一个 4 字节字
+  操作：对每个字节应用 <strong>S-box</strong> (Sec. 5.1.1, Fig. 7)
+  输出：S-box 处理后的 4 字节字</p>
+</li>
+<li>
+<p><strong><code>RotWord()</code></strong>
+  输入：<span class="arithmatex">\([a_0, a_1, a_2, a_3]\)</span>
+  操作：循环左移 → <span class="arithmatex">\([a_1, a_2, a_3, a_0]\)</span>
+  输出：移位后的字</p>
+</li>
+<li>
+<p><strong><code>Rcon[i]</code></strong>
+  轮常数 (Round Constant)
+  定义：<span class="arithmatex">\([x^{i-1}, \{00\}, \{00\}, \{00\}]\)</span>
+  其中：</p>
+</li>
+<li>
+<p><span class="arithmatex">\(x\)</span> 记为 <span class="arithmatex">\(\{02\}\)</span>（见 Sec. 4.2）</p>
+</li>
+<li><span class="arithmatex">\(x^{i-1}\)</span> 是 <span class="arithmatex">\(\mathrm{GF}(2^8)\)</span> 上的幂</li>
+<li><span class="arithmatex">\(i\)</span> 从 1 开始</li>
+</ul>
+<h4 id="fig-11">生成规则（见 Fig. 11 伪代码）<a class="headerlink" href="#fig-11" title="Permanent link">&para;</a></h4>
+<ol>
+<li><strong>前 <span class="arithmatex">\(Nk\)</span> 个字</strong>：直接从加密密钥 <span class="arithmatex">\(K\)</span> 填充。</li>
+<li>
+<p><strong>其余字</strong>：</p>
+</li>
+<li>
+<p><span class="arithmatex">\(w[i] = w[i - Nk] \ \oplus\ w[i - 1]\)</span></p>
+</li>
+<li>
+<p>如果 <span class="arithmatex">\(i \bmod Nk = 0\)</span>：</p>
+<ol>
+<li><span class="arithmatex">\(w[i-1] \xrightarrow{\text{RotWord()}}\)</span></li>
+<li>结果 <span class="arithmatex">\(\xrightarrow{\text{SubWord()}}\)</span></li>
+<li>再与 <span class="arithmatex">\(Rcon[i / Nk]\)</span> 异或</li>
+</ol>
+</li>
+<li>
+<p><strong>256 位密钥特殊情况 (<span class="arithmatex">\(Nk = 8\)</span>)</strong>：
+     如果 <span class="arithmatex">\(i \bmod Nk = 4\)</span>，则先对 <span class="arithmatex">\(w[i-1]\)</span> 执行 <code>SubWord()</code> 后再 XOR。</p>
+</li>
+</ol>
+<div class="highlight"><pre><span></span><code>KeyExpansion(byte key[4*Nk], word w[Nb*(Nr+1)], Nk)
+begin
+    word temp
+    i = 0
+    while (i &lt; Nk)
+        w[i] = word(key[4*i], key[4*i+1], key[4*i+2], key[4*i+3])
+        i = i+1
+    end while
+    i = Nk
+    while (i &lt; Nb * (Nr+1))
+        temp = w[i-1]
+        if (i mod Nk = 0)
+            temp = SubWord(RotWord(temp)) xor Rcon[i/Nk]
+        else if (Nk &gt; 6 and i mod Nk = 4)
+            temp = SubWord(temp)
+        end if
+        w[i] = w[i-Nk] xor temp
+        i = i + 1
+    end while
+end
+</code></pre></div>
+<blockquote>
+<p><strong>实现提示</strong>：
+实际实现时无需同时支持 <span class="arithmatex">\(Nk = 4, 6, 8\)</span> 的所有条件，这里的统一条件只是为了书写简洁。
+加密密钥的实现要求详见 Sec. 6.1。</p>
+</blockquote>
+<p><strong>Figure 11.</strong> 密钥扩展伪代码 (Pseudo Code for Key Expansion)。</p>
+<h3 id="inverse-cipher">逆向加密 (Inverse Cipher)<a class="headerlink" href="#inverse-cipher" title="Permanent link">&para;</a></h3>
+<p><strong>概述</strong></p>
+<p><code>Cipher</code> 变换（见 Sec. 5.1）可以按相反顺序反向执行，得到 <strong>逆向加密</strong> (Inverse Cipher)。</p>
+<p>该过程依次应用以下变换：</p>
+<ul>
+<li><code>InvShiftRows()</code></li>
+<li><code>InvSubBytes()</code></li>
+<li><code>InvMixColumns()</code></li>
+<li><code>AddRoundKey()</code>（自逆）</li>
+</ul>
+<p>逆向加密的伪代码见 <strong>Fig. 12</strong>，其中 <code>w[]</code> 为 <strong>Sec. 5.2</strong> 定义的密钥计划 (Key Schedule)。</p>
+<div class="highlight"><pre><span></span><code>InvCipher(byte in[4*Nb], byte out[4*Nb], word w[Nb*(Nr+1)])
+begin
+    byte state[4,Nb]
+    state = in
+    AddRoundKey(state, w[Nr*Nb, (Nr+1)*Nb-1]) // See Sec. 5.1.4
+    for round = Nr-1 step -1 downto 1
+        InvShiftRows(state)    // See Sec. 5.3.1
+        InvSubBytes(state)     // See Sec. 5.3.2
+        AddRoundKey(state, w[round*Nb, (round+1)*Nb-1])
+        InvMixColumns(state)   // See Sec. 5.3.3
+    end for
+    InvShiftRows(state)
+    InvSubBytes(state)
+    AddRoundKey(state, w[0, Nb-1])
+    out = state
+end
+</code></pre></div>
+<p><strong>Figure 12.</strong> 逆向加密伪代码 (Pseudo Code for the Inverse Cipher)。</p>
+<h4 id="invshiftrows"><code>InvShiftRows()</code> 变换<a class="headerlink" href="#invshiftrows" title="Permanent link">&para;</a></h4>
+<p><strong>定义</strong></p>
+<p><code>InvShiftRows()</code> 是 <code>ShiftRows()</code>（Sec. 5.1.2）的逆操作：</p>
+<ul>
+<li>状态数组 (State) 的后三行按不同字节数循环<strong>右移</strong>（加密时是左移）</li>
+<li>第一行 (<span class="arithmatex">\(r = 0\)</span>) 不移位</li>
+</ul>
+<p>移位量 = <span class="arithmatex">\(Nb - \text{shift}(r, Nb)\)</span>，其中 <span class="arithmatex">\(\text{shift}(r, Nb)\)</span> 定义见 (5.4)。</p>
+<p><strong>公式</strong>：</p>
+<div class="arithmatex">\[
+s'_{r,c} = s_{r,(c + \text{shift}(r,Nb)) \bmod Nb}
+\quad
+\text{for }0 &lt; r &lt; 4 \text{ and }0 \le c &lt; Nb
+\tag{5.8}
+\]</div>
+<p><strong>效果示例（Fig. 13）</strong>：</p>
+<table>
+<thead>
+<tr>
+<th><span class="arithmatex">\(S_{r,0}\)</span></th>
+<th><span class="arithmatex">\(S_{r,1}\)</span></th>
+<th><span class="arithmatex">\(S_{r,2}\)</span></th>
+<th><span class="arithmatex">\(S_{r,3}\)</span></th>
+<th>-- InvShiftRows() --&gt;</th>
+<th><span class="arithmatex">\(S_{r,0}'\)</span></th>
+<th><span class="arithmatex">\(S_{r,1}'\)</span></th>
+<th><span class="arithmatex">\(S_{r,2}'\)</span></th>
+<th><span class="arithmatex">\(S_{r,3}'\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(S_{0,0}\)</span></td>
+<td><span class="arithmatex">\(S_{0,1}\)</span></td>
+<td><span class="arithmatex">\(S_{0,2}\)</span></td>
+<td><span class="arithmatex">\(S_{0,3}\)</span></td>
+<td><span class="arithmatex">\(\rightarrow\)</span></td>
+<td><span class="arithmatex">\(S_{0,0}\)</span></td>
+<td><span class="arithmatex">\(S_{0,1}\)</span></td>
+<td><span class="arithmatex">\(S_{0,2}\)</span></td>
+<td><span class="arithmatex">\(S_{0,3}\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(S_{1,0}\)</span></td>
+<td><span class="arithmatex">\(S_{1,1}\)</span></td>
+<td><span class="arithmatex">\(S_{1,2}\)</span></td>
+<td><span class="arithmatex">\(S_{1,3}\)</span></td>
+<td><span class="arithmatex">\(\rightarrow\)</span></td>
+<td><span class="arithmatex">\(S_{1,3}\)</span></td>
+<td><span class="arithmatex">\(S_{1,0}\)</span></td>
+<td><span class="arithmatex">\(S_{1,1}\)</span></td>
+<td><span class="arithmatex">\(S_{1,2}\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(S_{2,0}\)</span></td>
+<td><span class="arithmatex">\(S_{2,1}\)</span></td>
+<td><span class="arithmatex">\(S_{2,2}\)</span></td>
+<td><span class="arithmatex">\(S_{2,3}\)</span></td>
+<td><span class="arithmatex">\(\rightarrow\)</span></td>
+<td><span class="arithmatex">\(S_{2,2}\)</span></td>
+<td><span class="arithmatex">\(S_{2,3}\)</span></td>
+<td><span class="arithmatex">\(S_{2,0}\)</span></td>
+<td><span class="arithmatex">\(S_{2,1}\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(S_{3,0}\)</span></td>
+<td><span class="arithmatex">\(S_{3,1}\)</span></td>
+<td><span class="arithmatex">\(S_{3,2}\)</span></td>
+<td><span class="arithmatex">\(S_{3,3}\)</span></td>
+<td><span class="arithmatex">\(\rightarrow\)</span></td>
+<td><span class="arithmatex">\(S_{3,1}\)</span></td>
+<td><span class="arithmatex">\(S_{3,2}\)</span></td>
+<td><span class="arithmatex">\(S_{3,3}\)</span></td>
+<td><span class="arithmatex">\(S_{3,0}\)</span></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Figure 13.</strong> <code>InvShiftRows()</code> 对状态数组的后三行进行循环右移。</p>
+<h4 id="invsubbytes"><code>InvSubBytes()</code> 变换<a class="headerlink" href="#invsubbytes" title="Permanent link">&para;</a></h4>
+<p><strong>定义</strong></p>
+<p><code>InvSubBytes()</code> 是 <code>SubBytes()</code>（Sec. 5.1.1）的逆操作：</p>
+<ul>
+<li>对 State 中每个字节应用 <strong>逆 S-box</strong> 查表替换</li>
+</ul>
+<p><strong>生成方法</strong>：</p>
+<ol>
+<li>应用 (5.1) 仿射变换的逆变换</li>
+<li>在 <span class="arithmatex">\(\mathrm{GF}(2^8)\)</span> 中求乘法逆元（<span class="arithmatex">\(\{00\}\)</span> 自映射）</li>
+</ol>
+<p>逆 S-box 表如 <strong>图 14</strong> 所示（十六进制格式）：</p>
+<table>
+<thead>
+<tr>
+<th>x\y</th>
+<th>0</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+<th>8</th>
+<th>9</th>
+<th>a</th>
+<th>b</th>
+<th>c</th>
+<th>d</th>
+<th>e</th>
+<th>f</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>52</td>
+<td>09</td>
+<td>6a</td>
+<td>d5</td>
+<td>30</td>
+<td>36</td>
+<td>a5</td>
+<td>38</td>
+<td>bf</td>
+<td>40</td>
+<td>a3</td>
+<td>9e</td>
+<td>81</td>
+<td>f3</td>
+<td>d7</td>
+<td>fb</td>
+</tr>
+<tr>
+<td>1</td>
+<td>7c</td>
+<td>e3</td>
+<td>39</td>
+<td>82</td>
+<td>9b</td>
+<td>2f</td>
+<td>ff</td>
+<td>87</td>
+<td>34</td>
+<td>8e</td>
+<td>43</td>
+<td>44</td>
+<td>c4</td>
+<td>de</td>
+<td>e9</td>
+<td>cb</td>
+</tr>
+<tr>
+<td>2</td>
+<td>54</td>
+<td>7b</td>
+<td>94</td>
+<td>32</td>
+<td>a6</td>
+<td>c2</td>
+<td>23</td>
+<td>3d</td>
+<td>ee</td>
+<td>4c</td>
+<td>95</td>
+<td>0b</td>
+<td>42</td>
+<td>fa</td>
+<td>c3</td>
+<td>4e</td>
+</tr>
+<tr>
+<td>3</td>
+<td>08</td>
+<td>2e</td>
+<td>a1</td>
+<td>66</td>
+<td>28</td>
+<td>d9</td>
+<td>24</td>
+<td>b2</td>
+<td>76</td>
+<td>5b</td>
+<td>a2</td>
+<td>49</td>
+<td>6d</td>
+<td>8b</td>
+<td>d1</td>
+<td>25</td>
+</tr>
+<tr>
+<td>4</td>
+<td>72</td>
+<td>f8</td>
+<td>f6</td>
+<td>64</td>
+<td>86</td>
+<td>68</td>
+<td>98</td>
+<td>16</td>
+<td>d4</td>
+<td>a4</td>
+<td>5c</td>
+<td>cc</td>
+<td>5d</td>
+<td>65</td>
+<td>b6</td>
+<td>92</td>
+</tr>
+<tr>
+<td>5</td>
+<td>6c</td>
+<td>70</td>
+<td>48</td>
+<td>50</td>
+<td>fd</td>
+<td>ed</td>
+<td>b9</td>
+<td>da</td>
+<td>5e</td>
+<td>15</td>
+<td>46</td>
+<td>57</td>
+<td>a7</td>
+<td>8d</td>
+<td>9d</td>
+<td>84</td>
+</tr>
+<tr>
+<td>6</td>
+<td>90</td>
+<td>d8</td>
+<td>ab</td>
+<td>00</td>
+<td>8c</td>
+<td>bc</td>
+<td>d3</td>
+<td>0a</td>
+<td>f7</td>
+<td>e4</td>
+<td>58</td>
+<td>05</td>
+<td>b8</td>
+<td>b3</td>
+<td>45</td>
+<td>06</td>
+</tr>
+<tr>
+<td>7</td>
+<td>d0</td>
+<td>2c</td>
+<td>1e</td>
+<td>8f</td>
+<td>ca</td>
+<td>3f</td>
+<td>0f</td>
+<td>02</td>
+<td>c1</td>
+<td>af</td>
+<td>bd</td>
+<td>03</td>
+<td>01</td>
+<td>13</td>
+<td>8a</td>
+<td>6b</td>
+</tr>
+<tr>
+<td>8</td>
+<td>3a</td>
+<td>91</td>
+<td>11</td>
+<td>41</td>
+<td>4f</td>
+<td>67</td>
+<td>dc</td>
+<td>ea</td>
+<td>97</td>
+<td>f2</td>
+<td>cf</td>
+<td>ce</td>
+<td>f0</td>
+<td>b4</td>
+<td>e6</td>
+<td>73</td>
+</tr>
+<tr>
+<td>9</td>
+<td>96</td>
+<td>ac</td>
+<td>74</td>
+<td>22</td>
+<td>e7</td>
+<td>ad</td>
+<td>35</td>
+<td>85</td>
+<td>e2</td>
+<td>f9</td>
+<td>37</td>
+<td>e8</td>
+<td>1c</td>
+<td>75</td>
+<td>df</td>
+<td>6e</td>
+</tr>
+<tr>
+<td>a</td>
+<td>47</td>
+<td>f1</td>
+<td>1a</td>
+<td>71</td>
+<td>1d</td>
+<td>29</td>
+<td>c5</td>
+<td>89</td>
+<td>6f</td>
+<td>b7</td>
+<td>62</td>
+<td>0e</td>
+<td>aa</td>
+<td>18</td>
+<td>be</td>
+<td>1b</td>
+</tr>
+<tr>
+<td>b</td>
+<td>fc</td>
+<td>56</td>
+<td>3e</td>
+<td>4b</td>
+<td>c6</td>
+<td>d2</td>
+<td>79</td>
+<td>20</td>
+<td>9a</td>
+<td>db</td>
+<td>c0</td>
+<td>fe</td>
+<td>78</td>
+<td>cd</td>
+<td>5a</td>
+<td>f4</td>
+</tr>
+<tr>
+<td>c</td>
+<td>1f</td>
+<td>dd</td>
+<td>a8</td>
+<td>33</td>
+<td>88</td>
+<td>07</td>
+<td>c7</td>
+<td>31</td>
+<td>b1</td>
+<td>12</td>
+<td>10</td>
+<td>59</td>
+<td>27</td>
+<td>80</td>
+<td>ec</td>
+<td>5f</td>
+</tr>
+<tr>
+<td>d</td>
+<td>60</td>
+<td>51</td>
+<td>7f</td>
+<td>a9</td>
+<td>19</td>
+<td>b5</td>
+<td>4a</td>
+<td>0d</td>
+<td>2d</td>
+<td>e5</td>
+<td>7a</td>
+<td>9f</td>
+<td>93</td>
+<td>c9</td>
+<td>9c</td>
+<td>ef</td>
+</tr>
+<tr>
+<td>e</td>
+<td>a0</td>
+<td>e0</td>
+<td>3b</td>
+<td>4d</td>
+<td>ae</td>
+<td>2a</td>
+<td>f5</td>
+<td>b0</td>
+<td>c8</td>
+<td>eb</td>
+<td>bb</td>
+<td>3c</td>
+<td>83</td>
+<td>53</td>
+<td>99</td>
+<td>61</td>
+</tr>
+<tr>
+<td>f</td>
+<td>17</td>
+<td>2b</td>
+<td>04</td>
+<td>7e</td>
+<td>ba</td>
+<td>77</td>
+<td>d6</td>
+<td>26</td>
+<td>e1</td>
+<td>69</td>
+<td>14</td>
+<td>63</td>
+<td>55</td>
+<td>21</td>
+<td>0c</td>
+<td>7d</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Figure 14.</strong> 逆 S-box：字节 <span class="arithmatex">\(xy\)</span> 的替换值（十六进制格式）。</p>
+<h4 id="invmixcolumns"><code>InvMixColumns()</code> 变换<a class="headerlink" href="#invmixcolumns" title="Permanent link">&para;</a></h4>
+<p><strong>定义</strong></p>
+<p><code>InvMixColumns()</code> 是 <code>MixColumns()</code>（Sec. 5.1.3）的逆操作：</p>
+<ul>
+<li>逐列处理 State</li>
+<li>将列视作 <span class="arithmatex">\(\mathrm{GF}(2^8)\)</span> 上的四项多项式（Sec. 4.3）</li>
+<li>与固定逆多项式 <span class="arithmatex">\(a^{-1}(x)\)</span> 在模 <span class="arithmatex">\(x^4 + 1\)</span> 意义下相乘</li>
+</ul>
+<p><strong>固定逆多项式</strong>：</p>
+<div class="arithmatex">\[
+a^{-1}(x) = \{0b\}x^3 + \{0d\}x^2 + \{09\}x + \{0e\}
+\tag{5.9}
+\]</div>
+<p><strong>矩阵形式</strong>：</p>
+<div class="arithmatex">\[
+s'(x) = a^{-1}(x)\,\tilde{\cdot}\,s(x):
+\]</div>
+<div class="arithmatex">\[
+\begin{bmatrix}
+0e &amp; 0b &amp; 0d &amp; 09 \\
+09 &amp; 0e &amp; 0b &amp; 0d \\
+0d &amp; 09 &amp; 0e &amp; 0b \\
+0b &amp; 0d &amp; 09 &amp; 0e
+\end{bmatrix}
+\begin{bmatrix}
+s_{0,c} \\ s_{1,c} \\ s_{2,c} \\ s_{3,c}
+\end{bmatrix}
+=
+\begin{bmatrix}
+s'_{0,c} \\ s'_{1,c} \\ s'_{2,c} \\ s'_{3,c}
+\end{bmatrix}
+\quad\text{for }0 \le c &lt; Nb
+\tag{5.10}
+\]</div>
+<p><strong>展开公式</strong>：</p>
+<div class="arithmatex">\[
+\begin{aligned}
+s'_{0,c} &amp;= (\{0e\}\cdot s_{0,c}) \oplus (\{0b\}\cdot s_{1,c}) \oplus (\{0d\}\cdot s_{2,c}) \oplus (\{09\}\cdot s_{3,c}),\\
+s'_{1,c} &amp;= (\{09\}\cdot s_{0,c}) \oplus (\{0e\}\cdot s_{1,c}) \oplus (\{0b\}\cdot s_{2,c}) \oplus (\{0d\}\cdot s_{3,c}),\\
+s'_{2,c} &amp;= (\{0d\}\cdot s_{0,c}) \oplus (\{09\}\cdot s_{1,c}) \oplus (\{0e\}\cdot s_{2,c}) \oplus (\{0b\}\cdot s_{3,c}),\\
+s'_{3,c} &amp;= (\{0b\}\cdot s_{0,c}) \oplus (\{0d\}\cdot s_{1,c}) \oplus (\{09\}\cdot s_{2,c}) \oplus (\{0e\}\cdot s_{3,c})
+\end{aligned}
+\]</div>
+<h4 id="addroundkey_1"><code>AddRoundKey()</code> 逆变换<a class="headerlink" href="#addroundkey_1" title="Permanent link">&para;</a></h4>
+<p><code>AddRoundKey()</code> 是<strong>自逆</strong>操作，因为它仅使用按位异或 (XOR)，即：
+$$
+(A \oplus K) \oplus K = A
+$$</p>
+<h3 id="equivalent-inverse-cipher">等效逆向加密 (Equivalent Inverse Cipher)<a class="headerlink" href="#equivalent-inverse-cipher" title="Permanent link">&para;</a></h3>
+<p><strong>概述</strong></p>
+<p><code>Inverse Cipher</code>（Sec. 5.3, Fig. 12）的变换顺序与 <code>Cipher</code> 不同，但两者使用相同的 <strong>密钥扩展</strong> (Key Schedule)。</p>
+<p>利用 AES 的两个关键性质，可以构造一种 <strong>等效逆向加密</strong> (Equivalent Inverse Cipher)，使其变换顺序与 <code>Cipher</code> 完全一致，仅将每步替换为对应的逆变换，从而提升实现效率。</p>
+<h4 id="1-commutativity">性质 1. 可交换性 (Commutativity)<a class="headerlink" href="#1-commutativity" title="Permanent link">&para;</a></h4>
+<p><code>SubBytes()</code> 与 <code>ShiftRows()</code> 在作用顺序上可互换：</p>
+<div class="arithmatex">\[
+\text{SubBytes()} \circ \text{ShiftRows()} \equiv \text{ShiftRows()} \circ \text{SubBytes()}
+\]</div>
+<p>同理，<code>InvSubBytes()</code> 与 <code>InvShiftRows()</code> 也可互换。</p>
+<h4 id="2-linearity">性质 2. 线性性 (Linearity)<a class="headerlink" href="#2-linearity" title="Permanent link">&para;</a></h4>
+<p>列混合 (<code>MixColumns()</code> / <code>InvMixColumns()</code>) 对列输入是线性的：</p>
+<div class="arithmatex">\[
+\text{InvMixColumns}(\text{state} \oplus \text{RoundKey})
+= \text{InvMixColumns}(\text{state}) \oplus \text{InvMixColumns}(\text{RoundKey})
+\]</div>
+<h4 id="_10">等效逆向加密构造方法<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h4>
+<ol>
+<li><strong>交换字节操作顺序</strong></li>
+</ol>
+<p>将 <code>InvSubBytes()</code> 与 <code>InvShiftRows()</code> 的顺序对调。</p>
+<ol>
+<li><strong>交换列混合与轮密钥添加顺序</strong></li>
+</ol>
+<p>将 <code>AddRoundKey()</code> 与 <code>InvMixColumns()</code> 的顺序对调。
+   对于 <span class="arithmatex">\(1 \le \text{round} \le Nr - 1\)</span> 的轮密钥，需先对其应用一次 <code>InvMixColumns()</code>。</p>
+<ol>
+<li>
+<p><strong>首末轮特殊处理</strong></p>
+</li>
+<li>
+<p><strong>首轮</strong>与<strong>末轮</strong>的 <span class="arithmatex">\(Nb\)</span> 个字不做 <code>InvMixColumns()</code> 处理。</p>
+</li>
+<li>其余轮使用经过 <code>InvMixColumns()</code> 处理后的轮密钥。</li>
+</ol>
+<p>这样得到的等效逆向加密结构与正向加密的流程完全一致，只是每个变换替换为其逆变换，并且使用经过调整的解密密钥调度 <code>dw[]</code>。</p>
+<div class="highlight"><pre><span></span><code>begin
+    byte state[4,Nb]
+    state = in
+    AddRoundKey(state, dw[Nr*Nb, (Nr+1)*Nb-1])
+    for round = Nr-1 step -1 downto 1
+        InvSubBytes(state)
+        InvShiftRows(state)
+        InvMixColumns(state)
+        AddRoundKey(state, dw[round*Nb, (round+1)*Nb-1])
+    end for
+    InvSubBytes(state)
+    InvShiftRows(state)
+    AddRoundKey(state, dw[0, Nb-1])
+    out = state
+end
+
+For the Equivalent Inverse Cipher, the following pseudo code is added at
+the end of the Key Expansion routine (Sec. 5.2):
+
+for i = 0 step 1 to (Nr+1)*Nb-1
+    dw[i] = w[i]
+end for
+
+for round = 1 step 1 to Nr-1
+    InvMixColumns(dw[round*Nb, (round+1)*Nb-1]) // note change of type
+end for
+</code></pre></div>
+<p><strong>注意</strong>：在这种结构中，<code>InvMixColumns()</code> 直接作用于轮密钥 (RoundKey)，而轮密钥是按字存储的（1D 数组），因此需要在调用 <code>InvMixColumns()</code> 前进行数据类型映射，将字数组视作字节矩阵。</p>
+<p><strong>Figure 15.</strong> 等效逆向加密的伪代码（<code>dw[]</code> 为经过 <code>InvMixColumns()</code> 调整后的解密密钥调度）。</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.top", "navigation.sections", "navigation.indexes", "search.highlight", "search.suggest", "content.code.copy", "content.action.edit", "toc.follow"], "search": "../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
