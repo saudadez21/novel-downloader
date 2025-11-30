@@ -2083,45 +2083,142 @@
 <h2 id="_7">四、字体加密内容复原方案<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
 <p>章节加密不仅体现在正文, 还包括字体及渲染顺序的混淆。主要策略分为两部分:</p>
 <h3 id="1-css">1. CSS 级混淆分析<a class="headerlink" href="#1-css" title="Permanent link">&para;</a></h3>
-<p>字体显示顺序通常被 CSS 人为打乱, 结合 HTML 标签、属性与样式渲染可恢复原始内容。示例策略包括:</p>
+<p>在页面中, 字符的真实呈现顺序被 CSS 规则刻意打乱。</p>
+<p>通过分析 HTML 标签、属性以及相关伪元素样式, 可以重建文本的原始内容。常见的混淆策略包括:</p>
 <ul>
-<li><code>font-size: 0</code>: 该元素不可见, 应跳过；</li>
-<li><code>scaleX(-1)</code>: 镜像翻转, 对内容无影响, 仅作为重建参考；</li>
-<li><code>::before</code> / <code>::after</code>: 在元素前后插入特定字符（如 <code>content: '遇'</code>）；</li>
-<li><code>content: attr(...)</code>: 插入指定属性值；</li>
-<li><code>order</code>: 用于重排段落或字符顺序, 需结合样式解析还原。</li>
+<li><code>font-size: 0</code>: 元素内容不可见, 应在解析时忽略</li>
+<li><code>scaleX(-1)</code>: 对字符进行水平镜像, 不影响实际语义, 仅需在重建时还原为正常方向</li>
+<li><code>::before</code> / <code>::after</code>: 通过伪元素插入特定字符 (如 <code>content: '遇'</code>)</li>
+<li><code>content: attr(...)</code>: 将自定义属性中的内容注入渲染流</li>
+<li><code>order</code>: 配合 Flex 布局重排节点顺序, 需依据样式指令恢复文本原序</li>
 </ul>
+<p><strong>示例 CSS</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="p">.</span><span class="nc">sy-0</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="nt">ya1</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">order</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="nt">yf4</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">order</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="nt">y7r</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">order</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="nt">yjq</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">order</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="nt">yq3</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">order</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="nt">y87</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">order</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="nt">ypy</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">order</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="nt">ylx</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">order</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="nt">yfc</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">order</span><span class="p">:</span><span class="w"> </span><span class="mi">9</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="nt">ypl</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">order</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="nt">y3x</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">order</span><span class="p">:</span><span class="w"> </span><span class="mi">11</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="nt">ys5</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">order</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="nt">y0v</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">order</span><span class="p">:</span><span class="w"> </span><span class="mi">13</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="nt">ywp</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">order</span><span class="p">:</span><span class="w"> </span><span class="mi">14</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="nt">y1p</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">order</span><span class="p">:</span><span class="w"> </span><span class="mi">15</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="p">.</span><span class="nc">p1</span><span class="w"> </span><span class="nt">ya1</span><span class="p">::</span><span class="nd">after</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">content</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;这&#39;</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="p">.</span><span class="nc">p1</span><span class="w"> </span><span class="nt">yf4</span><span class="p">::</span><span class="nd">after</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">content</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;儿&#39;</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="p">.</span><span class="nc">p1</span><span class="w"> </span><span class="nt">y7r</span><span class="p">::</span><span class="nd">before</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">content</span><span class="p">:</span><span class="w"> </span><span class="nb">attr</span><span class="p">(</span><span class="n">ywda</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="p">.</span><span class="nc">p1</span><span class="w"> </span><span class="nt">yjq</span><span class="p">::</span><span class="nd">after</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">content</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;真&#39;</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="p">.</span><span class="nc">p1</span><span class="w"> </span><span class="nt">yjq</span><span class="p">::</span><span class="nd">first-letter</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="p">.</span><span class="nc">p1</span><span class="w"> </span><span class="nt">yq3</span><span class="p">::</span><span class="nd">before</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">content</span><span class="p">:</span><span class="w"> </span><span class="nb">attr</span><span class="p">(</span><span class="n">ygmh</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="p">.</span><span class="nc">p1</span><span class="w"> </span><span class="nt">y87</span><span class="p">::</span><span class="nd">after</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">content</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;一&#39;</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="p">.</span><span class="nc">p1</span><span class="w"> </span><span class="nt">ypy</span><span class="p">::</span><span class="nd">before</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">content</span><span class="p">:</span><span class="w"> </span><span class="nb">attr</span><span class="p">(</span><span class="n">ya0u</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="p">.</span><span class="nc">p1</span><span class="w"> </span><span class="nt">ylx</span><span class="p">::</span><span class="nd">before</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">content</span><span class="p">:</span><span class="w"> </span><span class="nb">attr</span><span class="p">(</span><span class="n">yn2e</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="p">.</span><span class="nc">p1</span><span class="w"> </span><span class="nt">yfc</span><span class="p">::</span><span class="nd">after</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">content</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;丽&#39;</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="p">.</span><span class="nc">p1</span><span class="w"> </span><span class="nt">ypl</span><span class="p">::</span><span class="nd">before</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">content</span><span class="p">:</span><span class="w"> </span><span class="nb">attr</span><span class="p">(</span><span class="n">ylxl</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="p">.</span><span class="nc">p1</span><span class="w"> </span><span class="nt">y3x</span><span class="p">::</span><span class="nd">before</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">content</span><span class="p">:</span><span class="w"> </span><span class="nb">attr</span><span class="p">(</span><span class="n">y5jn</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="p">.</span><span class="nc">p1</span><span class="w"> </span><span class="nt">ys5</span><span class="p">::</span><span class="nd">after</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">content</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;间&#39;</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="p">.</span><span class="nc">p1</span><span class="w"> </span><span class="nt">y0v</span><span class="p">::</span><span class="nd">before</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">content</span><span class="p">:</span><span class="w"> </span><span class="nb">attr</span><span class="p">(</span><span class="n">ythw</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p><strong>示例 HTML</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">p</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;p1&quot;</span><span class="p">&gt;&lt;</span><span class="nt">ylx</span> <span class="na">yigi</span><span class="o">=</span><span class="s">&quot;也&quot;</span> <span class="na">yn2e</span><span class="o">=</span><span class="s">&quot;美&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">ylx</span><span class="p">&gt;&lt;</span><span class="nt">ypl</span> <span class="na">ylxl</span><span class="o">=</span><span class="s">&quot;的&quot;</span> <span class="na">yxry</span><span class="o">=</span><span class="s">&quot;开&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">ypl</span><span class="p">&gt;&lt;</span><span class="nt">y3x</span> <span class="na">y5jn</span><span class="o">=</span><span class="s">&quot;乡&quot;</span> <span class="na">ylyh</span><span class="o">=</span><span class="s">&quot;为&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">y3x</span><span class="p">&gt;&lt;</span><span class="nt">yjq</span><span class="p">&gt;</span>种<span class="p">&lt;/</span><span class="nt">yjq</span><span class="p">&gt;&lt;</span><span class="nt">y7r</span> <span class="na">y6ak</span><span class="o">=</span><span class="s">&quot;学&quot;</span> <span class="na">ywda</span><span class="o">=</span><span class="s">&quot;可&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">y7r</span><span class="p">&gt;&lt;</span><span class="nt">yfc</span><span class="p">&gt;&lt;/</span><span class="nt">yfc</span><span class="p">&gt;&lt;</span><span class="nt">yq3</span> <span class="na">yiiv</span><span class="o">=</span><span class="s">&quot;国&quot;</span> <span class="na">ygmh</span><span class="o">=</span><span class="s">&quot;是&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">yq3</span><span class="p">&gt;&lt;</span><span class="nt">ys5</span><span class="p">&gt;&lt;/</span><span class="nt">ys5</span><span class="p">&gt;&lt;</span><span class="nt">yf4</span><span class="p">&gt;&lt;/</span><span class="nt">yf4</span><span class="p">&gt;&lt;</span><span class="nt">ypy</span> <span class="na">ya0u</span><span class="o">=</span><span class="s">&quot;个&quot;</span> <span class="na">yquq</span><span class="o">=</span><span class="s">&quot;要&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">ypy</span><span class="p">&gt;&lt;</span><span class="nt">ya1</span><span class="p">&gt;&lt;/</span><span class="nt">ya1</span><span class="p">&gt;&lt;</span><span class="nt">y87</span><span class="p">&gt;&lt;/</span><span class="nt">y87</span><span class="p">&gt;&lt;</span><span class="nt">y0v</span> <span class="na">ythw</span><span class="o">=</span><span class="s">&quot;！&quot;</span> <span class="na">yg84</span><span class="o">=</span><span class="s">&quot;了&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">y0v</span><span class="p">&gt;&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>在整个英格兰境<span class="p">&lt;</span><span class="nt">y</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;sy-0&quot;</span><span class="p">&gt;</span>隐藏<span class="p">&lt;/</span><span class="nt">y</span><span class="p">&gt;</span>内，我不相<span class="p">&lt;</span><span class="nt">y</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;sy-0&quot;</span><span class="p">&gt;</span>测试<span class="p">&lt;/</span><span class="nt">y</span><span class="p">&gt;</span>信我竟能找<span class="p">&lt;</span><span class="nt">y</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;sy-0&quot;</span><span class="p">&gt;</span>藏字<span class="p">&lt;/</span><span class="nt">y</span><span class="p">&gt;</span>到这样一个能与尘<span class="p">&lt;</span><span class="nt">y</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;sy-0&quot;</span><span class="p">&gt;</span>藏字<span class="p">&lt;/</span><span class="nt">y</span><span class="p">&gt;</span>世<span class="p">&lt;</span><span class="nt">y</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;sy-0&quot;</span><span class="p">&gt;</span>藏字<span class="p">&lt;/</span><span class="nt">y</span><span class="p">&gt;</span>的喧嚣完全隔绝的地<span class="p">&lt;</span><span class="nt">y</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;sy-0&quot;</span><span class="p">&gt;</span>测试<span class="p">&lt;/</span><span class="nt">y</span><span class="p">&gt;&lt;</span><span class="nt">y</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;sy-0&quot;</span><span class="p">&gt;</span>藏字<span class="p">&lt;/</span><span class="nt">y</span><span class="p">&gt;</span>方，<span class="p">&lt;</span><span class="nt">y</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;sy-0&quot;</span><span class="p">&gt;</span>藏字<span class="p">&lt;/</span><span class="nt">y</span><span class="p">&gt;</span>一个厌世者的<span class="p">&lt;</span><span class="nt">y</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;sy-0&quot;</span><span class="p">&gt;</span>乱码<span class="p">&lt;/</span><span class="nt">y</span><span class="p">&gt;</span>理想的<span class="p">&lt;</span><span class="nt">y</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;sy-0&quot;</span><span class="p">&gt;</span>测试<span class="p">&lt;/</span><span class="nt">y</span><span class="p">&gt;</span>天堂。<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+</code></pre></div>
+<p><strong>渲染效果示例</strong>:</p>
+<style>
+.sy-0 { font-size: 0; }
+ya1 { order: 1; }
+yf4 { order: 2; }
+y7r { order: 3; }
+yjq { order: 4; }
+yq3 { order: 5; }
+y87 { order: 6; }
+ypy { order: 7; }
+ylx { order: 8; }
+yfc { order: 9; }
+ypl { order: 10; }
+y3x { order: 11; }
+ys5 { order: 12; }
+y0v { order: 13; }
+ywp { order: 14; }
+y1p { order: 15; }
+.p1 { display: flex; }
+.p1 ya1::after { content: '这'; }
+.p1 yf4::after { content: '儿'; }
+.p1 y7r::before { content: attr(ywda); }
+.p1 yjq::after { content: '真'; }
+.p1 yjq::first-letter { font-size: 0; }
+.p1 yq3::before { content: attr(ygmh); }
+.p1 y87::after { content: '一'; }
+.p1 ypy::before { content: attr(ya0u); }
+.p1 ylx::before { content: attr(yn2e); }
+.p1 yfc::after { content: '丽'; }
+.p1 ypl::before { content: attr(ylxl); }
+.p1 y3x::before { content: attr(y5jn); }
+.p1 ys5::after { content: '间'; }
+.p1 y0v::before { content: attr(ythw); }
+</style>
+
+<p class="p1"><ylx yigi="也" yn2e="美"></ylx><ypl ylxl="的" yxry="开"></ypl><y3x y5jn="乡" ylyh="为"></y3x><yjq>种</yjq><y7r y6ak="学" ywda="可"></y7r><yfc></yfc><yq3 yiiv="国" ygmh="是"></yq3><ys5></ys5><yf4></yf4><ypy ya0u="个" yquq="要"></ypy><ya1></ya1><y87></y87><y0v ythw="！" yg84="了"></y0v></p>
+<p>在整个英格兰境<y class="sy-0">隐藏</y>内，我不相<y class="sy-0">测试</y>信我竟能找<y class="sy-0">藏字</y>到这样一个能与尘<y class="sy-0">藏字</y>世<y class="sy-0">藏字</y>的喧嚣完全隔绝的地<y class="sy-0">测试</y><y class="sy-0">藏字</y>方，<y class="sy-0">藏字</y>一个厌世者的<y class="sy-0">乱码</y>理想的<y class="sy-0">测试</y>天堂。</p>
+
 <h3 id="2_1">2. 字体文件加密<a class="headerlink" href="#2_1" title="Permanent link">&para;</a></h3>
-<p>每章节使用两种加密字体:</p>
+<p>每个章节会加载两类加密字体, 用于隐藏真实字符编码:</p>
 <ul>
-<li><code>randomFont_str</code>: 每章节唯一, 字体编码动态变更；</li>
-<li><code>fixedFontWoff2_url</code>: 请求时从字体 "池" 中随机分配一份字体文件, 可能会在多个章节间复用。</li>
+<li><code>randomFont_str</code> (章节级动态字体): 每章唯一, 字体内部编码随机变换</li>
+<li><code>fixedFontWoff2_url</code> (字体池随机分发): 从服务器维护的字体池中随机返回一份字体文件, 同一字体可能被多个章节重复使用, 字体池会周期性轮换更新</li>
 </ul>
-<p>页面 CSS 示例:</p>
+<p>典型的 CSS 引用示例:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">font-family</span><span class="o">:</span><span class="w"> </span><span class="nt">LIIBFYOT</span><span class="o">,</span><span class="w"> </span><span class="nt">HTEMPCHB</span><span class="o">,</span><span class="w"> </span><span class="s1">&#39;SourceHanSansSC-Regular&#39;</span><span class="o">,</span><span class="w"> </span><span class="s1">&#39;SourceHanSansCN-Regular&#39;</span><span class="o">,</span><span class="w"> </span><span class="o">...</span>
 </code></pre></div>
-<p>其中 <code>LIIBFYOT</code> 和 <code>HTEMPCHB</code> 为加密字体名称。由于真实字符并未直接展示, 需要通过以下手段还原真实内容。</p>
+<p>其中 <code>LIIBFYOT</code> 和 <code>HTEMPCHB</code> 即为加密字体, 由于页面使用的字体未直接暴露真实字形与原文字符之间的对应关系, 因此需要构建映射才能恢复正文内容。</p>
 <h4 id="_8">字体还原思路与映射建立<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h4>
-<p><strong>初期阶段</strong></p>
+<blockquote>
+<p>字体由 <a href="https://github.com/fontello/svg2ttf" target="_blank" rel="noopener">svg2ttf</a> 生成, 即使对应同一字符, 不同版本字形仍存在细微差异。</p>
+<p>因此, 最可行的方式是通过 OCR 自动识别字形并建立映射。</p>
+</blockquote>
+<p><strong>初期还原阶段</strong></p>
+<p>在缺乏历史映射数据的阶段, 可采用 OCR 的方式恢复章节文本:</p>
 <ul>
-<li>使用类似字形的公开字体 (如 <code>SourceHanSans</code>) 进行模型微调；</li>
-<li>基于章节中的可见字符构建图像样本；</li>
-<li>利用 OCR (光学字符识别) 进行逐字识别 (单字图像, 无上下文)；</li>
-<li>若识别结果合理, 则可初步还原正文。</li>
+<li>使用字形结构相似的公开字体 (如 <code>SourceHanSans</code>) 对模型进行轻量微调</li>
+<li>从页面中导出所有可见字符, 生成逐字图像样本</li>
+<li>使用 OCR 进行逐字识别 (单字识别, 无上下文)</li>
+<li>若模型识别结果稳定且逻辑合理, 可初步得到章节的明文内容</li>
 </ul>
-<p><strong>自动构建字体映射</strong></p>
+<p><strong>自动化建立持久字体映射</strong></p>
+<p>实际观察表明:</p>
 <ul>
-<li>根据实际观察, 大多数章节在发布时间 <strong>约一个月后</strong> 退回为 "纯文本加密" 形式, 仅需解密正文即可获取明文 HTML。</li>
-<li>在此状态下, 若作者未修改就可以精确还原整章内容, 进一步与历史的加密版本进行比对, 从而建立 "字符形状 -&gt; 字符" 之间的稳定映射关系。</li>
-<li>随着时间积累, 此映射数据集将逐渐完善, 可以进一步微调模型</li>
+<li>大部分章节在发布 <strong>约一个月后</strong> 会回退为 <strong>纯文本加密</strong> (不再使用混淆字体)</li>
+<li>在这一状态下, 服务器返回的 HTML 已基本等价于纯文本, 只需解密正文即可获得准确明文</li>
 </ul>
+<p>在这种情况下, 可以进行高质量比对:</p>
+<ul>
+<li>获取同一章节的 <strong>纯文本版本</strong> (回退后)</li>
+<li>与其历史的 <strong>加密字体版本</strong> 对齐比对</li>
+<li>由此精确建立字形与真实字符之间的映射</li>
+</ul>
+<p>随着时间积累, 映射库会越来越完整, 从而有效覆盖绝大部分字体池和章节字体, 为模型进一步微调提供高质量训练数据</p>
 <p><strong>识别增强与误差控制</strong></p>
+<p>当前识别流程以 <strong>单字图像 + 无上下文 OCR</strong> 为主，因此可能出现:</p>
 <ul>
-<li>当前识别流程基于逐字图像生成与无上下文识别, 可能存在少量误差</li>
-<li>可考虑以 "多字联动识别" 为改进方向, 提高上下文信息对字符识别的约束力</li>
-<li>当前实现因复杂度未进一步深入</li>
+<li>相似字形混淆</li>
+<li>少量识别误差</li>
+<li>字形退化带来的不稳定性</li>
 </ul>
+<p>可行的优化方向包括:</p>
+<ul>
+<li>加入上下文约束: 基于语言模型的 "多字联动识别", 减少歧义</li>
+<li>概率式输出整句校准: 使用 NLP 语言模型对多候选结果进行纠错</li>
+<li>字形聚类与历史映射复用: 对相似字形自动聚类, 提高映射复用率</li>
+</ul>
+<p>由于工程复杂度较高, 目前实现仍保持在较简洁的结构</p>
+<blockquote>
 <p>如有更优的实现方式或改进建议, 欢迎通过 Issue 提出或进行补充。</p>
+</blockquote>
 <h2 id="_9">五、章节重复内容的异常与修复方法<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
 <p>在某些小说章节中, 存在<strong>正文段落被重复附加一份伪变形副本</strong>的情况。</p>
 <p>该副本内容与原段落高度相似, 但部分关键词被替换或语序被调整, 推测是网站在返回数据时出于防爬策略主动插入的扰动内容。</p>

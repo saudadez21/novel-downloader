@@ -1624,9 +1624,9 @@
 <li>对部分正文区域绘制干扰识别的边框</li>
 </ul>
 <p>例如, 字符 <code>吧</code> 在被添加干扰边框后, 会渲染为:</p>
-<p><img src="/assets/images/faloo/sample_1.png" width="270" style="image-rendering: pixelated;" /></p>
+<p><img src="../../assets/images/faloo/sample_1.png" width="270" style="image-rendering: pixelated;" /></p>
 <p>然而, 该方案有时会出现渲染错位的问题, 导致边框覆盖到文字主体, 从而影响正常阅读, 例如:</p>
-<p><img src="/assets/images/faloo/sample_2.png" width="270" style="image-rendering: pixelated;" /></p>
+<p><img src="../../assets/images/faloo/sample_2.png" width="270" style="image-rendering: pixelated;" /></p>
 <hr />
 <h2 id="_2">二、方框形态分析<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
 <p>干扰方框在视觉上通常表现为「三边框住的矩形轮廓」, 即只有上边、左边和下边三条边。</p>
@@ -1638,19 +1638,19 @@
 <li>在每行最右侧, 由于没有后续方框来补齐右边界, 最终视觉效果通常是「一排完整方框 + 1 个三边框住的矩形轮廓」</li>
 </ul>
 <p>最右侧方框示例:</p>
-<p><img src="/assets/images/faloo/sample_1.png" width="270" style="image-rendering: pixelated;" /></p>
+<p><img src="../../assets/images/faloo/sample_1.png" width="270" style="image-rendering: pixelated;" /></p>
 <p>最左侧方框示例:</p>
-<p><img src="/assets/images/faloo/sample_3.png" width="270" style="image-rendering: pixelated;" /></p>
+<p><img src="../../assets/images/faloo/sample_3.png" width="270" style="image-rendering: pixelated;" /></p>
 <p>可以看到, 在同为 18 × 18 像素的前提下, 左侧方框的最右侧多出了 2 列与左侧边框同色的像素, 用于与右侧方框重叠。</p>
 <p>在某些排版或渲染条件下, 边框可能会「压到」字符笔画内部, 例如:</p>
-<p><img src="/assets/images/faloo/sample_4.png" width="270" style="image-rendering: pixelated;" /></p>
+<p><img src="../../assets/images/faloo/sample_4.png" width="270" style="image-rendering: pixelated;" /></p>
 <p>以及与相邻方框叠加的情况:</p>
-<p><img src="/assets/images/faloo/sample_5.png" width="270" style="image-rendering: pixelated;" /></p>
+<p><img src="../../assets/images/faloo/sample_5.png" width="270" style="image-rendering: pixelated;" /></p>
 <p>另外, 不同行的方框在颜色选取上可能略有差异。</p>
 <p>例如, 在上述错位的示例中, 左侧边框的颜色与最开始示例中的边框颜色明显不同; 类似地, 还存在如下对比示例:</p>
-<p><img src="/assets/images/faloo/sample_6.png" width="270" style="image-rendering: pixelated;" /></p>
+<p><img src="../../assets/images/faloo/sample_6.png" width="270" style="image-rendering: pixelated;" /></p>
 <p>以及:</p>
-<p><img src="/assets/images/faloo/sample_7.png" width="270" style="image-rendering: pixelated;" /></p>
+<p><img src="../../assets/images/faloo/sample_7.png" width="270" style="image-rendering: pixelated;" /></p>
 <hr />
 <h2 id="_3">三、方框识别<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <p>结合上述形态特征, 可以将单个方框大致抽象为如下结构:</p>
@@ -1882,9 +1882,9 @@ mean = 0.036 s
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saved to </span><span class="si">{</span><span class="n">out_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p>原图:</p>
-<p><img src="/assets/images/faloo/sample_8.png" width="290" style="image-rendering: pixelated;" /></p>
+<p><img src="../../assets/images/faloo/sample_8.png" width="290" style="image-rendering: pixelated;" /></p>
 <p>处理后:</p>
-<p><img src="/assets/images/faloo/sample_8_cleaned.png" width="290" style="image-rendering: pixelated;" /></p>
+<p><img src="../../assets/images/faloo/sample_8_cleaned.png" width="290" style="image-rendering: pixelated;" /></p>
 <p>可以看到:</p>
 <ul>
 <li>第一个 <code>不</code> 字的竖笔画被削去一半</li>
