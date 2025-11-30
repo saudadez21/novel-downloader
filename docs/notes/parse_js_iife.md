@@ -1,6 +1,13 @@
+---
+title: JavaScript IIFE Parsing Notes
+date: 2025-09-28
+---
+
 # JavaScript 标准 IIFE 解析笔记
 
-> 用 Python 解析“标准形态”的 JavaScript IIFE 返回对象
+> 使用 Python 解析 "标准形态" 的 JavaScript IIFE 返回对象
+>
+> Standard-form JavaScript IIFE extraction and parsing using Python.
 
 日期: 2025/09/28
 
@@ -84,7 +91,8 @@
    * 将**标识符值**若命中 `mapping`，替换为对应 JSON 字面量; 否则原样保留
 4. 得到合法 JSON 字符串后，使用 `json.loads` 解析为 Python 对象。
 
-**实现 (核心片段)**
+<details>
+<summary>核心片段 (点击展开)</summary>
 
 ```python
 import json
@@ -299,6 +307,8 @@ def parse_iife(iife: str) -> dict:
     return json.loads(json_text)
 ```
 
+</details>
+
 **优点**
 
 * 纯 Python，直观
@@ -375,7 +385,8 @@ def parse_with_node(iife: str, node_script="iife_eval.js"):
    * 标识符若命中 `mapping`，替换为对应 Python 值
    * 字面量通过 `parse_js_token` 转为 Python 类型
 
-**实现 (核心片段)**
+<details>
+<summary>核心片段 (点击展开)</summary>
 
 ```python
 import json
@@ -622,6 +633,8 @@ def parse_iife_direct(iife: str) -> dict[str, Any]:
     result, _ = parse_js_value(tokens, 0, mapping)
     return result
 ```
+
+</details>
 
 **优点**
 

@@ -1,8 +1,14 @@
+---
+title: AES Notes
+date: 2025-08-01
+---
+
 # ADVANCED ENCRYPTION STANDARD (AES) 学习笔记
 
 日期: 2025/08/01
 
 Reference:
+
 - [Different ways/algorithms for implementing AES](https://crypto.stackexchange.com/questions/44672/different-ways-algorithms-for-implementing-aes)
 - [Federal Information Processing Standards (FIPS) Publication 197](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf)
 
@@ -186,7 +192,7 @@ $$
 AES 的核心运算在一个称为**状态** (State) 的二维字节数组上进行。该状态由 4 行字节构成，每行包含 $Nb$ 个字节，其中：
 
 $$
-Nb = \frac{\text{分组长度 (block length)}}{32}
+Nb = \frac{\text{block length}}{32}
 $$
 
 在标准 AES 中，分组长度为 128 位，因此 $Nb = 4$。
@@ -451,9 +457,11 @@ $$
 $$
 
 > 注意：
-> 这种多项式与定义有限域元素时的多项式不同，尽管它们都使用相同的不定元 $x$：
+> 这种多项式与定义有限域元素时的多项式不同，尽管它们都使用相同的不定元 $x$:
+>
 > - 在有限域定义中，多项式的系数是 **位** (bits)，并使用不可约多项式 $m(x) = x^8 + x^4 + x^3 + x + 1$ 进行约简。
 > - 在本节中，多项式的系数是 **字节** (bytes)，并使用不同的约简多项式 $x^4 + 1$。
+>
 > 两者需通过上下文加以区分。
 
 ### 多项式加法 (Addition)
@@ -587,7 +595,8 @@ AES 的**密码密钥** (Cipher Key) $K$ 可以是 **128 位、192 位或 256 �
 
 用 $Nk = 4, 6, 8$ 表示密钥中 32 位字的数量（同样是列的数量）。
 
-**轮数** (rounds) $Nr$ 取决于密钥长度：
+**轮数** (rounds) $Nr$ 取决于密钥长度:
+
 - $Nk = 4$ (AES-128) $\Rightarrow Nr = 10$
 - $Nk = 6$ (AES-192) $\Rightarrow Nr = 12$
 - $Nk = 8$ (AES-256) $\Rightarrow Nr = 14$
@@ -857,7 +866,6 @@ $$
 
 每个轮密钥由 **密钥扩展** (Sec. 5.2) 生成的 $Nb$ 个 **32 位字** (words) 组成，这些字分别与 State 的各列对应相加（异或）：
 
-
 $$
 \bigl[s'_{0,c},\;s'_{1,c},\;s'_{2,c},\;s'_{3,c}\bigr]
 =
@@ -873,6 +881,7 @@ $$
 - $\text{round}$：轮数索引，取值 $0 \le \text{round} \le Nr$
 
 **执行时机：**
+
 - **初始轮** (`round = 0`)：在执行第一个轮函数前先进行一次 `AddRoundKey()`（见 Fig. 5）。
 - **后续轮** (`1 \le \text{round} \le Nr`)：每轮开始时执行一次 `AddRoundKey()`。
 
@@ -883,13 +892,16 @@ AES 算法接收 **加密密钥** $K$ (Cipher Key)，并通过 **密钥扩展** 
 #### 输出规模
 
 密钥扩展共生成：
+
 $$
 Nb \times (Nr + 1) \ \text{个字 (words)}
 $$
+
 - **初始轮**：需要 $Nb$ 个字
 - **每一轮**：需要 $Nb$ 个字作为**轮密钥**
 
 生成结果是一个按顺序排列的 4 字节字数组：
+
 $$
 [w_0, w_1, \dots, w_{Nb(Nr+1)-1}]
 $$
@@ -910,6 +922,7 @@ $$
   轮常数 (Round Constant)
   定义：$[x^{i-1}, \{00\}, \{00\}, \{00\}]$
   其中：
+
   - $x$ 记为 $\{02\}$（见 Sec. 4.2）
   - $x^{i-1}$ 是 $\mathrm{GF}(2^8)$ 上的幂
   - $i$ 从 1 开始
@@ -918,11 +931,14 @@ $$
 
 1. **前 $Nk$ 个字**：直接从加密密钥 $K$ 填充。
 2. **其余字**：
+
    - $w[i] = w[i - Nk] \ \oplus\ w[i - 1]$
    - 如果 $i \bmod Nk = 0$：
+
      1. $w[i-1] \xrightarrow{\text{RotWord()}}$
      2. 结果 $\xrightarrow{\text{SubWord()}}$
      3. 再与 $Rcon[i / Nk]$ 异或
+
    - **256 位密钥特殊情况 ($Nk = 8$)**：
      如果 $i \bmod Nk = 4$，则先对 $w[i-1]$ 执行 `SubWord()` 后再 XOR。
 
@@ -1147,13 +1163,16 @@ $$
 #### 等效逆向加密构造方法
 
 1. **交换字节操作顺序**
+
    将 `InvSubBytes()` 与 `InvShiftRows()` 的顺序对调。
 
 2. **交换列混合与轮密钥添加顺序**
+
    将 `AddRoundKey()` 与 `InvMixColumns()` 的顺序对调。
    对于 $1 \le \text{round} \le Nr - 1$ 的轮密钥，需先对其应用一次 `InvMixColumns()`。
 
 3. **首末轮特殊处理**
+
    - **首轮**与**末轮**的 $Nb$ 个字不做 `InvMixColumns()` 处理。
    - 其余轮使用经过 `InvMixColumns()` 处理后的轮密钥。
 

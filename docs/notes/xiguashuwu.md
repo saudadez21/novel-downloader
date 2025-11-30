@@ -1,3 +1,8 @@
+---
+title: Xiguashuwu Web Analysis Notes
+date: 2025-08-01
+---
+
 # 西瓜书屋 (xiguashuwu) 分析笔记
 
 创建日期: 2025/08/01
