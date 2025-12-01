@@ -43,7 +43,7 @@ pip install -U novel-downloader
 Install with Web UI support:
 
 ```bash
-pip install novelkit[web-ui]
+pip install novel-downloader[web-ui]
 ```
 
 For all optional features (Web UI, OCR, image-to-text, extra backends, exporters, etc.), refer to the [Full Installation Guide](https://saudadez21.github.io/novel-downloader/guide/installation/).
@@ -53,11 +53,14 @@ For all optional features (Web UI, OCR, image-to-text, extra backends, exporters
 ## Quick Start (CLI)
 
 ```bash
+# Set preferred interface language
+novel-cli config set-lang en_US
+
 # Download a novel
-novelkit download https://www.example.com/book/123/
+novel-cli download https://www.example.com/book/123/
 
 # Using site + book ID
-novelkit download --site n23qb 12282
+novel-cli download --site n23qb 12282
 ```
 
 More examples: [CLI Examples](https://saudadez21.github.io/novel-downloader/guide/cli-examples/)

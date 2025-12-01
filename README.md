@@ -43,7 +43,7 @@ pip install -U novel-downloader
 如需启用 Web GUI:
 
 ```bash
-pip install novelkit[web-ui]
+pip install novel-downloader[web-ui]
 ```
 
 如需启用其它可选功能 (Web UI、图片转文字、额外后端等), 请参见: [安装指南](https://saudadez21.github.io/novel-downloader/guide/installation/)
@@ -54,10 +54,10 @@ pip install novelkit[web-ui]
 
 ```bash
 # 下载一本小说
-novelkit download https://www.example.com/book/123/
+novel-cli download https://www.example.com/book/123/
 
 # 使用站点 + 书籍 ID
-novelkit download --site n23qb 12282
+novel-cli download --site n23qb 12282
 ```
 
 更多示例见: [CLI 使用示例](https://saudadez21.github.io/novel-downloader/guide/cli-examples/)
