@@ -380,7 +380,7 @@ class ProcessorProtocol(Protocol):
 在 `settings.toml` 中:
 
 ```toml
-[[plugins.processors]]
+[[general.processors]]
 name = "cleaner"
 overwrite = false
 config_1 = true
@@ -469,7 +469,7 @@ cleaner
 在配置文件中可直接引用:
 
 ```toml
-[[plugins.processors]]
+[[general.processors]]
 name = "cleaner"
 ```
 

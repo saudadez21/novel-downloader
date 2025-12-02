@@ -28,7 +28,7 @@
 假设配置中写入:
 
 ```toml
-[[plugins.processors]]
+[[general.processors]]
 name = "cleaner"
 remove_invisible = true
 title_removes = "title-remove.json"
