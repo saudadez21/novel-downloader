@@ -284,15 +284,4 @@ enable_local_plugins = false
 override_builtins = false
 # 本地插件路径 (可选)
 local_plugins_path = "./novel_plugins"
-
-[[plugins.processors]]
-name = "cleaner"
-overwrite = false
-remove_invisible = true
-
-title_removes = "path/to/title-remove.json"
-title_replace = "path/to/title-replace.json"
-
-content_removes = "path/to/content-remove.json"
-content_replace = "path/to/content-replace.json"
 ```

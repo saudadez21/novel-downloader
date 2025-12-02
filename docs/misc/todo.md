@@ -97,7 +97,7 @@ Parser 中已对常见第三方网站广告进行基础过滤, 需要继续排�
 
 计划扩展 `ProcessorProtocol`，新增翻译类处理器，用于在导出流程中对章节内容进行翻译。
 
-#### 在线翻译服务
+**在线翻译服务**
 
 * [有道翻译](https://www.youdao.com/)
 * [有道翻译 API](https://fanyi.youdao.com/openapi/)
@@ -109,7 +109,7 @@ Parser 中已对常见第三方网站广告进行基础过滤, 需要继续排�
 * [DeepL API](https://www.deepl.com/en/pro-api)
     * Python 库: [deepl](https://github.com/DeepLcom/deepl-python)
 
-#### 大模型 API 翻译
+**大模型 API 翻译**
 
 * OpenAI GPT 系列
 * Anthropic Claude
@@ -117,11 +117,11 @@ Parser 中已对常见第三方网站广告进行基础过滤, 需要继续排�
 * Google Gemini
 * 支持自定义 prompt 与目标语言
 
-#### 自建 / 本地翻译模型
+**自建 / 本地翻译模型**
 
 基于 `HuggingFace` / `Transformers` / `llama.cpp` / `Ollama` / `vLLM` 等框架。
 
-##### 可选模型
+可选模型:
 
 * [MarianMT](https://huggingface.co/docs/transformers/en/model_doc/marian)
 * [M2M-100](https://huggingface.co/docs/transformers/en/model_doc/m2m_100)
@@ -131,21 +131,21 @@ Parser 中已对常见第三方网站广告进行基础过滤, 需要继续排�
 * [aya-expanse-32b](https://huggingface.co/CohereLabs/aya-expanse-32b)
 * [Seed-X-7B](https://github.com/ByteDance-Seed/Seed-X-7B)
 
-#### 配置示例
+**配置示例**
 
 ```toml
-[[plugins.processors]]
+[[general.processors]]
 name = "translator.google"
 source = "zh"
 target = "en"
 
-[[plugins.processors]]
+[[general.processors]]
 name = "translator.deepl"
 api_key = "YOUR_KEY"
 source = "en"
 target = "fr"
 
-[[plugins.processors]]
+[[general.processors]]
 name = "translator.hf"
 model_path = "/models/Sakura-13B"
 system_prompt = "你是一个轻小说翻译模型，可以忠实翻译为简体中文。"

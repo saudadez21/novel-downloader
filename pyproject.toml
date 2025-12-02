@@ -125,7 +125,7 @@ novel-cli = "novel_downloader.apps.cli.main:cli_main"
 novel-web = "novel_downloader.apps.web.main:web_main"
 
 [project.urls]
-Homepage = "https://github.com/saudadez21/novel-downloader"
+Homepage = "https://saudadez21.github.io/novel-downloader/"
 Source = "https://github.com/saudadez21/novel-downloader"
 Issues = "https://github.com/saudadez21/novel-downloader/issues"
 
