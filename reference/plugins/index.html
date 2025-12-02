@@ -2230,7 +2230,7 @@
 </code></pre></div>
 <p><strong>配置传入规则</strong></p>
 <p>在 <code>settings.toml</code> 中:</p>
-<div class="highlight"><pre><span></span><code><span class="k">[[plugins.processors]]</span>
+<div class="highlight"><pre><span></span><code><span class="k">[[general.processors]]</span>
 <span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;cleaner&quot;</span>
 <span class="n">overwrite</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
 <span class="n">config_1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
@@ -2290,7 +2290,7 @@
 <div class="highlight"><pre><span></span><code>cleaner
 </code></pre></div>
 <p>在配置文件中可直接引用:</p>
-<div class="highlight"><pre><span></span><code><span class="k">[[plugins.processors]]</span>
+<div class="highlight"><pre><span></span><code><span class="k">[[general.processors]]</span>
 <span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;cleaner&quot;</span>
 </code></pre></div>
 <p>如果处理器使用了子包，例如:</p>
